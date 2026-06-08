@@ -8,11 +8,11 @@ import psycopg
 import psycopg_pool
 from loguru import logger
 from psycopg.abc import Params, QueryNoTemplate
-from psycopg.errors import DeadlockDetected, LockNotAvailable, QueryCanceled
 from psycopg_pool.abc import ACT
 
 from constants import DEFAULT_MIN_DATE
 from db_utils import get_connection_string
+from last_updated import LastUpdatedBatch, LastUpdatedQueue
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
@@ -35,6 +35,7 @@ class PostgresLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
+        last_updated_queue: LastUpdatedQueue | None,
     ) -> bool:
         return anyio.run(
             self._async_load,
@@ -45,6 +46,7 @@ class PostgresLoader:
             progress,
             load_type,
             load_mode,
+            last_updated_queue,
         )
 
     async def _async_load(
@@ -56,6 +58,7 @@ class PostgresLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
+        last_updated_queue: LastUpdatedQueue | None,
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
@@ -81,6 +84,7 @@ class PostgresLoader:
                 progress,
                 load_type,
                 load_mode,
+                last_updated_queue,
             ).load()
 
 
@@ -95,10 +99,12 @@ class BatchLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
+        last_updated_queue: LastUpdatedQueue | None,
     ) -> None:
         self.pool = pool
         self.fetch_results = fetch_results
         self.model = model
+        self.last_updated_queue = last_updated_queue
         self.table = model.table()
         # trim the schema from the table name to create the temp table
         # (temp tables can't be created with an explicit schema set)
@@ -148,7 +154,7 @@ class BatchLoader:
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.insert_batch_timer = Timer("insert_batch", model, partition)
         self.sort_batch_timer = Timer("sort_batch", model, partition)
-        self.last_updated_timer = Timer("last_updated", model, partition)
+        self.last_updated_queue_timer = Timer("last_updated_queue", model, partition)
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
@@ -207,15 +213,12 @@ class BatchLoader:
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-                # TODO: Replace this with a background queue to be able to process this.
-                # if self.load_type == LoadType.INCREMENTAL
-                #   and self.model.last_updated_date_table():
-                #     self.last_updated_timer.start()
-                #     full_temp_table = await self._setup_temp_table(cur, self.partition.name)
-                #     await self._copy_data(cur, full_temp_table, results)
-                #     await self._last_updated(cur, full_temp_table, timestamp)
-                #     await conn.commit()
-                #     self.last_updated_timer.stop()
+                if self.last_updated_queue is not None and self.model.last_updated_date_table():
+                    self.last_updated_queue_timer.start()
+                    self.last_updated_queue.put(
+                        LastUpdatedBatch.from_result_set(results, self.partition, timestamp)
+                    )
+                    self.last_updated_queue_timer.stop()
 
                 await self._calculate_load_progress(cur, results)
             self.full_batch_timer.stop()
@@ -373,42 +376,6 @@ class BatchLoader:
             ''',  # type: ignore
             {"timestamp": timestamp},
         )
-
-    async def _last_updated(
-        self, cur: psycopg.AsyncCursor, temp_tablename: str, timestamp: datetime
-    ) -> None:
-        key = self.model.last_updated_timestamp_col()
-
-        try:
-            # We want to immediately terminate the transaction if there is already a lock on
-            # the table so that we avoid extraneous waits because if there is a lock this table
-            # is being updated concurrently and that existing update will have the same result
-            await cur.execute("SET LOCAL statement_timeout=3000")
-            await cur.execute(
-                f"""
-                WITH current_ts AS (
-                    SELECT {key}
-                    FROM {self.model.last_updated_date_table()}
-                    WHERE {key} IN (
-                        SELECT {key} FROM {temp_tablename}
-                    )
-                    ORDER BY {key}
-                    FOR UPDATE SKIP LOCKED
-                )
-                UPDATE {self.model.last_updated_date_table()} u
-                SET {self.last_updated_set_clause}
-                FROM current_ts t
-                WHERE u.{key} = t.{key};
-                """,  # type: ignore
-                {"timestamp": timestamp},
-            )
-        except (DeadlockDetected, LockNotAvailable, QueryCanceled) as ex:
-            logger.warning(
-                "%s-%s: deadlock/lock/statement timeout updating update timestamp, ignoring: %s",
-                self.table,
-                self.partition.name,
-                ex,
-            )
 
     async def _copy_data(
         self, cur: psycopg.AsyncCursor, temp_tablename: str, data: Sequence[T]

@@ -8,6 +8,7 @@ from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
+from last_updated import LastUpdatedQueue
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, should_track_load_progress
 from model.base_model import (
@@ -42,6 +43,7 @@ def extract_and_load(
     job_start: datetime,
     load_type: LoadType,
     partition: LoadPartition | None = None,
+    last_updated_queue: LastUpdatedQueue | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if source == Source.SNOWFLAKE:
@@ -72,7 +74,16 @@ def extract_and_load(
                 logger.info("no previous progress for {} - {}", cls.table(), partition.name)
 
             data_iter = data_extractor.extract_idr_data(progress, job_start, source)
-            res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
+            res = loader.load(
+                data_iter,
+                cls,
+                job_start,
+                partition,
+                progress,
+                load_type,
+                load_mode,
+                last_updated_queue,
+            )
             data_extractor.close()
             return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours

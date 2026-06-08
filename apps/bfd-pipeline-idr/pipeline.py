@@ -1,3 +1,5 @@
+import atexit
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
@@ -11,6 +13,7 @@ from loguru._logger import Logger  # Not ideal, but Logger fails to be imported 
 import pipeline_nodes
 from db_utils import get_connection_string
 from extractor import PostgresExecutor, SnowflakeExecutor
+from last_updated import LastUpdatedQueue, start_last_updated_worker
 from load_events import (
     IdrJobLoadEvent,
     get_eligible_events,
@@ -22,7 +25,6 @@ from load_events import (
 )
 from load_partition import LoadType
 from load_synthetic import load_from_csv
-from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from settings import (
@@ -145,6 +147,14 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: L
             unreported_jobs | {event.job_type for event in idr_job_events}
         )
 
+    last_updated_worker, last_updated_queue = (
+        start_last_updated_worker(load_mode, root_logger)
+        if load_type == LoadType.INCREMENTAL
+        else (None, None)
+    )
+    if last_updated_worker and last_updated_queue:
+        atexit.register(lambda: _cleanup_on_exit(last_updated_worker, last_updated_queue))
+
     try:
         hamilton_driver.execute(  # type: ignore
             final_vars=["collect_stage4"],
@@ -153,6 +163,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: L
                 "load_mode": load_mode,
                 "start_time": start_time,
                 "tables_to_load": tables_to_load,
+                "last_updated_queue": last_updated_queue,
                 "source": source,
             },
         )
@@ -179,6 +190,13 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: L
             )
 
         logger.complete()
+
+
+def _cleanup_on_exit(
+    last_updated_worker: multiprocessing.Process, last_updated_queue: LastUpdatedQueue
+) -> None:
+    last_updated_queue.put(None)
+    last_updated_worker.join()
 
 
 def resolve_test_date(load_mode: LoadMode) -> datetime:

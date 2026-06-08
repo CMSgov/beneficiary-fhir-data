@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from typing import Any
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
@@ -67,7 +68,7 @@ _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 _LOAD_ALL_TABLES = {"all"}
 
 
-def filter_tables(
+def _filter_tables(
     tables: list[type[IdrBaseModel]], tables_to_load: set[str] | None
 ) -> list[type[IdrBaseModel]]:
     return [
@@ -125,7 +126,7 @@ def stage2_inputs(
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            filter_tables(
+            _filter_tables(
                 [
                     *_CLAIM_AUX_TABLES,
                     *_BENE_AUX_TABLES,
@@ -138,7 +139,7 @@ def stage2_inputs(
         )
     else:
         yield from _gen_partitioned_node_inputs(
-            filter_tables([*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES], tables_to_load), load_type
+            _filter_tables([*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES], tables_to_load), load_type
         )
 
 
@@ -153,6 +154,12 @@ def do_stage2(
     start_time: datetime,
     load_type: LoadType,
     source: Source,
+    # Hamilton gets the type hint of each function and actually tries to validate the incoming
+    # object against the type hint. This does not work for the LastUpdatedQueue type alias nor
+    # does it work when specifying the underlying, aliased Queue-type. It is simply not worth the
+    # effort to do this more correctly, so we workaround it with Any
+    # TODO: Fix this to use the right type if Hamilton ever supports it
+    last_updated_queue: Any | None,  # noqa: ANN401
 ) -> bool:
     model_type, partition = stage2_inputs
     return extract_and_load(
@@ -162,6 +169,7 @@ def do_stage2(
         load_mode=load_mode,
         load_type=load_type,
         source=source,
+        last_updated_queue=last_updated_queue,
     )
 
 
@@ -178,7 +186,7 @@ def stage3_inputs(
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
         yield from _gen_partitioned_node_inputs(
-            filter_tables(_CLAIM_TABLES, tables_to_load), load_type
+            _filter_tables(_CLAIM_TABLES, tables_to_load), load_type
         )
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
@@ -190,6 +198,7 @@ def do_stage3(
     start_time: datetime,
     load_type: LoadType,
     source: Source,
+    last_updated_queue: Any | None,  # noqa: ANN401
 ) -> bool:
     model_type, partition = stage3_inputs
     return extract_and_load(
@@ -199,6 +208,7 @@ def do_stage3(
         load_mode=load_mode,
         load_type=load_type,
         source=source,
+        last_updated_queue=last_updated_queue,
     )
 
 
@@ -215,7 +225,7 @@ def stage4_inputs(
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
         yield from _gen_partitioned_node_inputs(
-            filter_tables(_BENE_TABLES, tables_to_load), load_type
+            _filter_tables(_BENE_TABLES, tables_to_load), load_type
         )
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
@@ -227,6 +237,7 @@ def do_stage4(
     load_mode: LoadMode,
     start_time: datetime,
     source: Source,
+    last_updated_queue: Any | None,  # noqa: ANN401
 ) -> bool:
     model_type, partition = stage4_inputs
     if load_type == LoadType.INCREMENTAL:
@@ -237,6 +248,7 @@ def do_stage4(
             load_mode=load_mode,
             load_type=load_type,
             source=source,
+            last_updated_queue=last_updated_queue,
         )
 
     return False
