@@ -136,7 +136,7 @@ public class EobHandler {
    * @param claimUniqueIds claim IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
-   * @param options SAMHSA filter mode
+   * @param options claim filter options
    * @return bundle
    */
   public Bundle searchById(
