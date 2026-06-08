@@ -7,6 +7,7 @@ from typing import cast
 from uuid import uuid4
 
 import psycopg
+from loguru._logger import Logger
 from psycopg import Connection, sql
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
@@ -19,6 +20,7 @@ from extractor import PostgresExecutor
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
+from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
@@ -50,8 +52,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType, root_logger: Logger) -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, root_logger)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
@@ -84,7 +86,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, root_logger)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -352,7 +354,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
         advance_time(ss_clm_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, root_logger)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
         # in source_load_events nor has it been 24 hours since the last load of NCH data
@@ -390,7 +392,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
         advance_time(nch_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, root_logger)
 
         # Check for the NCH claim in the v3 idr schema
         cur = conn.execute(
@@ -451,7 +453,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
         advance_time(ss_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, root_logger)
 
         # Check for the SS claim in the v3 idr schema
         cur = conn.execute(
@@ -491,6 +493,8 @@ def test_pipeline() -> None:
     # connect. This forces sequential execution of each test case and ensures only a single
     # container is ever started, avoiding the issue in CI
     # TODO: Don't do this, find a way to make parameterized tests work in CI
+    root_logger = configure_logger()
+
     with (
         PostgresContainer("postgres:16", driver="") as postgres,
         # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
@@ -542,4 +546,4 @@ def test_pipeline() -> None:
             os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
             os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
 
-            _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+            _do_test_pipeline(cast(Connection[DictRow], conn), load_type, root_logger)
