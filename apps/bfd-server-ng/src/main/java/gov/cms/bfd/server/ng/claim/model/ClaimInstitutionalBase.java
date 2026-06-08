@@ -86,7 +86,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
     var eob = super.toFhir(options, claimState);
 
-    addClaimItems(eob);
+    addClaimItems(eob, options);
     addDiagnoses(eob);
     addProviders(eob);
     applyOutcomeOverride(eob);
@@ -113,8 +113,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .toList();
   }
 
-  private void addClaimItems(ExplanationOfBenefit eob) {
-    var options = ClaimFilterOptions.builder().build();
+  private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
 
     getItems()
         .forEach(

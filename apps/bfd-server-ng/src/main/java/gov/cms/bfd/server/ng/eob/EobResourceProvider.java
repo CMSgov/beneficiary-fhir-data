@@ -61,7 +61,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
-    Optional<Boolean> includeTaxNumbers =
+    var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
@@ -105,7 +105,7 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
-    Optional<Boolean> includeTaxNumbers =
+    var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
@@ -150,7 +150,7 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
-    Optional<Boolean> includeTaxNumbers =
+    var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
