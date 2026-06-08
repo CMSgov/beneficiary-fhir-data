@@ -86,7 +86,7 @@ async def _handle_batch(
 
 
 def _queue_reader(
-    batch_queue: Queue[LastUpdatedBatch | None],
+    batch_queue: LastUpdatedQueue,
     send_stream: MemoryObjectSendStream[LastUpdatedBatch | None],
 ) -> None:
     while True:
@@ -98,7 +98,7 @@ def _queue_reader(
 
 
 async def _run_bridge(
-    batch_queue: Queue[LastUpdatedBatch | None],
+    batch_queue: LastUpdatedQueue,
     send_stream: MemoryObjectSendStream[LastUpdatedBatch | None],
 ) -> None:
     async with send_stream:
@@ -106,7 +106,7 @@ async def _run_bridge(
 
 
 async def _worker_main(
-    batch_queue: Queue[LastUpdatedBatch | None], start_queue: Queue[int], load_mode: LoadMode
+    batch_queue: LastUpdatedQueue, start_queue: Queue[int], load_mode: LoadMode
 ) -> None:
     max_concurrency = 20 if load_mode != LoadMode.LOCAL else 1
     send_stream, receive_stream = anyio.create_memory_object_stream[LastUpdatedBatch | None](
@@ -142,7 +142,7 @@ async def _worker_main(
 
 
 def _worker_start_async(
-    batch_queue: Queue[LastUpdatedBatch | None],
+    batch_queue: LastUpdatedQueue,
     start_queue: Queue[int],
     load_mode: LoadMode,
     root_logger: Logger,
