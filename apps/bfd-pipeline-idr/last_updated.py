@@ -20,6 +20,7 @@ from psycopg_pool.abc import ACT
 from db_utils import get_connection_string
 from load_partition import LoadPartition
 from model.base_model import DbType, IdrBaseModel, LoadMode, T
+from settings import PER_BATCH_MAX_CONNECTIONS, PER_BATCH_MIN_CONNECTIONS
 from timer import Timer
 
 type LastUpdatedQueue = Queue[LastUpdatedBatch | None]
@@ -108,18 +109,17 @@ async def _run_bridge(
 async def _worker_main(
     batch_queue: LastUpdatedQueue, start_queue: Queue[int], load_mode: LoadMode
 ) -> None:
-    max_concurrency = 20 if load_mode != LoadMode.LOCAL else 1
     send_stream, receive_stream = anyio.create_memory_object_stream[LastUpdatedBatch | None](
-        max_concurrency
+        PER_BATCH_MAX_CONNECTIONS
     )
-    limiter = anyio.CapacityLimiter(max_concurrency)
+    limiter = anyio.CapacityLimiter(PER_BATCH_MAX_CONNECTIONS)
 
     async with (
         anyio.create_task_group() as tg,
         psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=max_concurrency,
-            max_size=max_concurrency,
+            min_size=PER_BATCH_MIN_CONNECTIONS,
+            max_size=PER_BATCH_MAX_CONNECTIONS,
             timeout=600,  # See loader.py for explanation on timeout length
         ) as pool,
     ):
@@ -128,7 +128,9 @@ async def _worker_main(
         tg.start_soon(_run_bridge, batch_queue, send_stream)
 
         start_queue.put(_WORKER_START_SIGNAL)
-        logger.info("last_updated worker setup with max concurrency of {}", max_concurrency)
+        logger.info(
+            "last_updated worker setup with max concurrency of {}", PER_BATCH_MAX_CONNECTIONS
+        )
 
         async with receive_stream:
             async for batch in receive_stream:
