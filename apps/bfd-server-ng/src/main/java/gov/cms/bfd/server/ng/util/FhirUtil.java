@@ -137,7 +137,7 @@ public class FhirUtil {
 
   /**
    * Returns a bundle updated with previous and next links. This method assumes you have at least
-   * one addition item in your bundle than the limit to know to add the updated next link
+   * one additional item in your bundle than the limit to know to add the updated next link
    *
    * @param requestDetails current request
    * @param offset current offset
