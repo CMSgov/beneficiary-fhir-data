@@ -58,10 +58,6 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
-
-    if (searchStyle == SearchStyleEnum.POST) {
-      expectFhir().scenario(searchStyle.name() + "_duplicate").toMatchSnapshot(eobBundle);
-    }
   }
 
   @ParameterizedTest
@@ -168,19 +164,19 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                       select max(bfd_claim_updated_ts)
-                       from (
-                           select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
-                           union all
-                           select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
-                           union all
-                           select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
-                           union all
-                           select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
-                           union all
-                           select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
-                       ) all_claims
-                    """)
+                                       select max(bfd_claim_updated_ts)
+                                       from (
+                                           select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
+                                           union all
+                                           select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
+                                           union all
+                                           select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
+                                           union all
+                                           select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
+                                           union all
+                                           select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                                       ) all_claims
+                                    """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
                 .getSingleResult();
     ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
@@ -220,10 +216,10 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createQuery(
                     """
-                    SELECT billablePeriod.claimThroughDate
-                    FROM ClaimInstitutionalNch c
-                    WHERE c.claimUniqueId = :id
-                    """,
+                                    SELECT billablePeriod.claimThroughDate
+                                    FROM ClaimInstitutionalNch c
+                                    WHERE c.claimUniqueId = :id
+                                    """,
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
@@ -496,9 +492,9 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                    SELECT COUNT(*) FROM idr.beneficiary
-                    WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
-                    """,
+                                    SELECT COUNT(*) FROM idr.beneficiary
+                                    WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
+                                    """,
                     Integer.class)
                 .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
                 .getResultList()
@@ -598,12 +594,12 @@ class EobSearchIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 """
-                SELECT c
-                FROM ClaimProfessionalNch c
-                JOIN FETCH c.beneficiary b
-                JOIN FETCH c.claimItems cl
-                WHERE c.claimUniqueId = :claimId
-                """,
+                            SELECT c
+                            FROM ClaimProfessionalNch c
+                            JOIN FETCH c.beneficiary b
+                            JOIN FETCH c.claimItems cl
+                            WHERE c.claimUniqueId = :claimId
+                            """,
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
