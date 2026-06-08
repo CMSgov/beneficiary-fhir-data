@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -83,10 +83,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {}
 
   @Override
-  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
-    var eob = super.toFhir(securityStatus);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
 
-    addClaimItems(eob);
+    addClaimItems(eob, options);
     addDiagnoses(eob);
     addProviders(eob);
     applyOutcomeOverride(eob);
@@ -113,11 +113,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .toList();
   }
 
-  private void addClaimItems(ExplanationOfBenefit eob) {
+  private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+
     getItems()
         .forEach(
             item -> {
-              var claimLine = item.getClaimLine().toFhirItemComponent();
+              var claimLine = item.getClaimLine().toFhirItemComponent(options);
               var claimContext = getClaimTypeCode().toContext();
 
               claimLine.ifPresent(eob::addItem);

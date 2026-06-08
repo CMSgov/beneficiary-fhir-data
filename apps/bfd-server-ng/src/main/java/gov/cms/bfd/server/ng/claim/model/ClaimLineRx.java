@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Column;
@@ -34,7 +35,8 @@ public class ClaimLineRx implements ClaimLineBase {
   }
 
   @Override
-  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      ClaimFilterOptions options) {
 
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(1);
