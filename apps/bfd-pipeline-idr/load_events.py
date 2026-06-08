@@ -17,7 +17,7 @@ from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
-from loader import get_connection_string
+from db_utils import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
 from model.idr_beneficiary import IdrBeneficiary

@@ -8,6 +8,7 @@ from hamilton import driver  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
+from db_utils import get_connection_string
 from extractor import PostgresExecutor, SnowflakeExecutor
 from load_events import (
     IdrJobLoadEvent,

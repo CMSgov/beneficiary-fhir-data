@@ -38,8 +38,8 @@ from constants import (
     IDR_CONTRACT_PBP_NUM_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
+from db_utils import get_connection_string
 from extractor import CsvFile, DbExecutor, PostgresExecutor, SnowflakeExecutor
-from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
 

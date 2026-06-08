@@ -12,6 +12,7 @@ from psycopg.errors import DeadlockDetected, LockNotAvailable, QueryCanceled
 from psycopg_pool.abc import ACT
 
 from constants import DEFAULT_MIN_DATE
+from db_utils import get_connection_string
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
@@ -19,25 +20,11 @@ from settings import (
     PER_BATCH_CONCURRENT_ROWS,
     PER_BATCH_MAX_CONNECTIONS,
     PER_BATCH_MIN_CONNECTIONS,
-    bfd_db_endpoint,
-    bfd_db_name,
-    bfd_db_password,
-    bfd_db_port,
-    bfd_db_username,
     force_load_progress,
 )
 from timer import Timer
 
 logger = logging.getLogger(__name__)
-
-
-def get_connection_string(load_mode: LoadMode) -> str:
-    if load_mode == LoadMode.LOCAL:
-        return "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
-
-    return f"host={bfd_db_endpoint()} port={bfd_db_port()} dbname={bfd_db_name()} \
-        user={bfd_db_username()} password={bfd_db_password()}"
-
 
 class PostgresLoader:
     def load(
