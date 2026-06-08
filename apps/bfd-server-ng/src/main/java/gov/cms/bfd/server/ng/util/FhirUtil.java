@@ -3,8 +3,6 @@ package gov.cms.bfd.server.ng.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -14,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /** FHIR-related utility methods. */
 public class FhirUtil {
@@ -173,30 +172,17 @@ public class FhirUtil {
   }
 
   private static String buildLinkURL(RequestDetails requestDetails, Integer offset) {
-    String baseUrl = requestDetails.getCompleteUrl();
-    String[] urlParts = baseUrl.split("\\?", 2);
-    String path = urlParts[0];
+    var uriBuilder = UriComponentsBuilder.fromUriString(requestDetails.getCompleteUrl());
 
-    List<String> retainedParams = new ArrayList<>();
-    if (urlParts.length == 2 && !urlParts[1].isBlank()) {
-      for (String param : urlParts[1].split("&")) {
-        if (param.isBlank()) {
-          continue;
-        }
-        String key = param.split("=", 2)[0];
-        if (!OFFSET_PARAM.equals(key) && !START_INDEX_PARAM.equals(key)) {
-          retainedParams.add(param);
-        }
-      }
-    }
+    // Remove offset and startIndex parameters
+    uriBuilder.replaceQueryParam(OFFSET_PARAM);
+    uriBuilder.replaceQueryParam(START_INDEX_PARAM);
 
+    // Add the new offset if it's not 0
     if (offset != 0) {
-      retainedParams.add(OFFSET_PARAM + "=" + offset);
+      uriBuilder.queryParam(OFFSET_PARAM, offset);
     }
 
-    if (retainedParams.isEmpty()) {
-      return path;
-    }
-    return path + "?" + String.join("&", retainedParams);
+    return uriBuilder.build().toUriString();
   }
 }
