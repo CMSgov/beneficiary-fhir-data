@@ -15,6 +15,7 @@ dependencies = [
     "usaddress>=0.5.16",
     "unidecode>=1.4.0",
     "click>=8.3.3",
+    "anyio",
 ]
 
 [dependency-groups]

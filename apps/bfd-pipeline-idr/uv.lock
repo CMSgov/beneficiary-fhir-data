@@ -17,6 +17,18 @@ wheels = [
 ]
 
 [[package]]
+name = "anyio"
+version = "4.13.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "idna" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/19/14/2c5dd9f512b66549ae92767a9c7b330ae88e1932ca57876909410251fe13/anyio-4.13.0.tar.gz", hash = "sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc", size = 231622, upload-time = "2026-03-24T12:59:09.671Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/42/e921fccf5015463e32a3cf6ee7f980a6ed0f395ceeaa45060b61d86486c2/anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708", size = 114353, upload-time = "2026-03-24T12:59:08.246Z" },
+]
+
+[[package]]
 name = "apache-hamilton"
 version = "1.90.0"
 source = { registry = "https://pypi.org/simple" }
@@ -44,6 +56,7 @@ name = "bfd-pipeline-idr"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "anyio" },
     { name = "click" },
     { name = "cryptography" },
     { name = "psycopg", extra = ["binary", "pool"] },
@@ -67,6 +80,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anyio" },
     { name = "click", specifier = ">=8.3.3" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
