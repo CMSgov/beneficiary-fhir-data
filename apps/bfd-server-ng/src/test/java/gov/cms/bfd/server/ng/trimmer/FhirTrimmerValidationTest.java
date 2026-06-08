@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.validation.FhirValidator;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -160,7 +159,7 @@ class FhirTrimmerValidationTest {
     var finalThroughput = (totalIterations * 1000.0) / totalMillis;
 
     System.out.println("=================== LOAD TEST RESULTS ===================");
-    System.out.println("Total Time: " + watch.toString());
+    System.out.println("Total Time: " + watch);
     System.out.printf("Throughput: %.2f Bundles per second%n", finalThroughput);
     System.out.printf("Avg Latency: %.2f ms per Bundle%n", ((double) totalMillis / totalIterations));
     System.out.println("=========================================================");
