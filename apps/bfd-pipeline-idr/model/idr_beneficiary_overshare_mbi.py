@@ -4,7 +4,7 @@ from typing import Annotated, override
 from constants import IDR_BENE_HISTORY_TABLE, IDR_BENE_XREF_TABLE
 from load_partition import LoadPartition
 from model.base_model import (
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     IdrBaseModel,
     ModelType,
     Source,
@@ -12,7 +12,7 @@ from model.base_model import (
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY_ORDER: 0}]
 
     @override
     @staticmethod
