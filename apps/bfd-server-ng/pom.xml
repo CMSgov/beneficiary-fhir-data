@@ -192,6 +192,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-caching-caffeine</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
             <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -268,12 +273,6 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-java21</artifactId>
             <version>${micrometer.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
