@@ -16,6 +16,7 @@ dependencies = [
     "unidecode>=1.4.0",
     "click>=8.3.3",
     "anyio",
+    "loguru"
 ]
 
 [dependency-groups]
@@ -26,6 +27,9 @@ dev = [
     "testcontainers>=4.13.3",
     "pyright>=1.1.407",
 ]
+
+[tool.uv.sources]
+loguru = { git = "https://github.com/Delgan/loguru" }
 
 # [[tool.mypy.overrides]]
 # module = ["testcontainers.*"]

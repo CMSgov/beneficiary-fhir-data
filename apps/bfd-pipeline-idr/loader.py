@@ -1,5 +1,4 @@
 import itertools
-import logging
 import operator
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
@@ -7,6 +6,7 @@ from datetime import UTC, date, datetime
 import anyio
 import psycopg
 import psycopg_pool
+from loguru import logger
 from psycopg.abc import Params, QueryNoTemplate
 from psycopg.errors import DeadlockDetected, LockNotAvailable, QueryCanceled
 from psycopg_pool.abc import ACT
@@ -24,7 +24,6 @@ from settings import (
 )
 from timer import Timer
 
-logger = logging.getLogger(__name__)
 
 class PostgresLoader:
     def load(
@@ -181,7 +180,7 @@ class BatchLoader:
             self.full_batch_timer.start()
             data_loaded = True
             logger.info(
-                "%s-%s: loading next %s results concurrently %d row(s) at a time",
+                "{}-{}: loading next {} results concurrently {} row(s) at a time",
                 self.table,
                 self.partition.name,
                 len(results),
@@ -226,7 +225,7 @@ class BatchLoader:
             await conn.commit()
 
         self.full_load_timer.stop()
-        logger.info("%s-%s: loaded %s rows", self.table, self.partition.name, num_rows)
+        logger.info("{}-{}: loaded {} rows", self.table, self.partition.name, num_rows)
         return data_loaded
 
     async def _load_batch_part(

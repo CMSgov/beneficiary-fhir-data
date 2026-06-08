@@ -4,7 +4,6 @@ from datetime import datetime
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
 from load_partition import LoadPartition, LoadType
-from logger_config import configure_logger
 from model.base_model import (
     IdrBaseModel,
     LoadMode,
@@ -36,7 +35,6 @@ from pipeline_utils import extract_and_load
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
-configure_logger()
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,

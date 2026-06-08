@@ -1,4 +1,3 @@
-import logging
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
@@ -6,6 +5,8 @@ import click
 import psycopg  # type: ignore
 from hamilton import driver  # type: ignore
 from hamilton.execution import executors  # type: ignore
+from loguru import logger
+from loguru._logger import Logger  # Not ideal, but Logger fails to be imported directly from loguru
 
 import pipeline_nodes
 from db_utils import get_connection_string
@@ -31,17 +32,23 @@ from settings import (
     bfd_test_date,
 )
 
-logger = logging.getLogger(__name__)
-
 
 class MultiProcessingExecutor(executors.PoolExecutor):
-    def __init__(self, max_tasks: int, max_tasks_per_child: int | None) -> None:
+    def __init__(
+        self,
+        max_tasks: int,
+        max_tasks_per_child: int | None,
+        root_logger: Logger,
+    ) -> None:
         self.max_tasks_per_child = max_tasks_per_child
+        self.root_logger = root_logger
         super().__init__(max_tasks)
 
     def create_pool(self) -> ProcessPoolExecutor:
         return ProcessPoolExecutor(
-            max_workers=self.max_tasks, max_tasks_per_child=self.max_tasks_per_child
+            max_workers=self.max_tasks,
+            max_tasks_per_child=self.max_tasks_per_child,
+            initializer=self.root_logger.reinstall,
         )
 
 
@@ -72,6 +79,13 @@ class MultiProcessingExecutor(executors.PoolExecutor):
 )
 @click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
 def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: str | None) -> None:
+    # Required to have loguru logging consistently configured across Hamilton nodes and
+    # last_updated worker
+    multiprocessing.set_start_method("spawn")
+    # Setup the root logger _once_ and then pass it to the ProcessPoolExecutor and last_updated
+    # worker process
+    root_logger = configure_logger()
+
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
@@ -79,13 +93,13 @@ def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: st
             else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
             seed_from,
         )
-    run(source, load_mode, load_type)
+    run(source, load_mode, load_type, root_logger)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
+def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: Logger) -> None:
     logger.info("load start")
 
-    logger.info("load_type %s", load_type)
+    logger.info("load_type {}", load_type)
     # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
     # processes in the pool will be reused indefinitely if max_tasks_per_child is not specified.
     # Setting this parameter will cause old processes to be recycled, allowing resources used by
@@ -98,10 +112,18 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_modules(pipeline_nodes)
         .with_local_executor(
-            MultiProcessingExecutor(max_tasks=MAX_TASKS, max_tasks_per_child=max_tasks_per_child)
+            MultiProcessingExecutor(
+                max_tasks=MAX_TASKS,
+                max_tasks_per_child=max_tasks_per_child,
+                root_logger=root_logger,
+            )
         )
         .with_remote_executor(
-            MultiProcessingExecutor(max_tasks=MAX_TASKS, max_tasks_per_child=max_tasks_per_child)
+            MultiProcessingExecutor(
+                max_tasks=MAX_TASKS,
+                max_tasks_per_child=max_tasks_per_child,
+                root_logger=root_logger,
+            )
         )
         .build()
     )
@@ -137,7 +159,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     except Exception:
         if idr_job_events:
             logger.error(
-                "%d IDR job load events failed to be fully processed: %s",
+                "{} IDR job load events failed to be fully processed: {}",
                 len(idr_job_events),
                 ", ".join(str(event.id) for event in idr_job_events),
             )
@@ -146,15 +168,17 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
                 events=idr_job_events,
                 failure_time=resolve_test_date(load_mode),
             )
-        logger.exception("Unrecoverable exception raised during pipeline load")
+        logger.opt(exception=True).error("Unrecoverable exception raised during pipeline load:")
         raise
+    finally:
+        if idr_job_events:
+            update_completion_times(
+                load_mode=load_mode,
+                events=idr_job_events,
+                completion_time=resolve_test_date(load_mode),
+            )
 
-    if idr_job_events:
-        update_completion_times(
-            load_mode=load_mode,
-            events=idr_job_events,
-            completion_time=resolve_test_date(load_mode),
-        )
+        logger.complete()
 
 
 def resolve_test_date(load_mode: LoadMode) -> datetime:
@@ -166,5 +190,4 @@ def resolve_test_date(load_mode: LoadMode) -> datetime:
 
 
 if __name__ == "__main__":
-    configure_logger()
     main()

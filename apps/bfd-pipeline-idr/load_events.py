@@ -1,5 +1,4 @@
 import functools
-import logging
 import re
 import typing
 from collections.abc import Callable, Iterable
@@ -10,6 +9,7 @@ from typing import Annotated
 from uuid import UUID
 
 import psycopg
+from loguru import logger
 from psycopg import Cursor, sql
 from psycopg.rows import DictRow, dict_row
 from pydantic.config import ConfigDict
@@ -18,7 +18,6 @@ from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from db_utils import get_connection_string
-from logger_config import configure_logger
 from model.base_model import LoadMode
 from model.idr_beneficiary import IdrBeneficiary
 from model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
@@ -43,9 +42,6 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from pydantic_utils import fields
-
-configure_logger()
-logger = logging.getLogger(__name__)
 
 LOAD_EVENTS_TABLE = "source_load_events"
 _PART_D_TABLES = {
@@ -166,11 +162,11 @@ def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJo
                 AND {fields(IdrJobLoadEvent).failure_time:i} IS NULL
             """
         logger.info(
-            "Retrieving eligible load events; query: %s", _clean_query_str(get_events_query)
+            "Retrieving eligible load events; query: {}", _clean_query_str(get_events_query)
         )
         results = curs.execute(get_events_query)
         load_events = TypeAdapter(list[IdrJobLoadEvent]).validate_python(results, by_alias=True)
-        logger.info("Retrieved %d event(s)", len(load_events))
+        logger.info("Retrieved {} event(s)", len(load_events))
 
         return load_events
 
@@ -190,7 +186,7 @@ def get_unreported_jobs(
             """
         grace_period_hours = int(grace_period.total_seconds() / 60 / 60)
         logger.info(
-            "Retrieving job types reported in the last %d hour(s); query: %s",
+            "Retrieving job types reported in the last {} hour(s); query: {}",
             grace_period_hours,
             _clean_query_str(get_jobs_query),
         )
@@ -204,13 +200,13 @@ def get_unreported_jobs(
         unreported_jobs = set(IdrJobType).difference(reported_jobs)
         if len(unreported_jobs) > 0:
             logger.warning(
-                "%d jobs were not reported as having completed in the last %d hour(s)",
+                "{} jobs were not reported as having completed in the last {} hour(s)",
                 len(unreported_jobs),
                 grace_period_hours,
             )
         else:
             logger.info(
-                "No jobs reported as incomplete in the last %d hour(s)",
+                "No jobs reported as incomplete in the last {} hour(s)",
                 grace_period_hours,
             )
 
@@ -229,13 +225,14 @@ def _update_time_column(
             WHERE {fields(IdrJobLoadEvent).id:i} = ANY({[event.id for event in events]})
             RETURNING *;
             """
-        logger.info("Updating %s for %d event(s)...", time_column, len(events))
-        logger.debug("Query: %s", _clean_query_str(update_jobs_query))
+        logger.info("Updating {} for {} event(s)...", time_column, len(events))
+        logger.opt(lazy=True).debug("Query: {}", lambda: _clean_query_str(update_jobs_query))
         updated_rows = list(curs.execute(update_jobs_query))
-        logger.info("Updated %d event(s) successfully", len(updated_rows))
-        if logger.getEffectiveLevel() == logging.DEBUG:
-            updated_events = TypeAdapter(list[IdrJobLoadEvent]).validate_python(updated_rows)
-            logger.debug("Updated rows: %s", updated_events)
+        logger.info("Updated {} event(s) successfully", len(updated_rows))
+        logger.opt(lazy=True).debug(
+            "Updated rows: {}",
+            lambda: TypeAdapter(list[IdrJobLoadEvent]).validate_python(updated_rows),
+        )
 
     _connect_and_do(load_mode, _do)
 

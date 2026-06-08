@@ -1,5 +1,4 @@
 import csv
-import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from collections.abc import Iterator
@@ -12,6 +11,7 @@ import psycopg
 import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from loguru import logger
 from psycopg.rows import dict_row
 from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
@@ -40,8 +40,6 @@ from settings import (
     MIN_BATCH_COMPLETION_DATE,
 )
 from timer import Timer
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -121,7 +119,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 [x for x in [batch_id_col, *self.cls.ordered_pkeys()] if x is not None]
             )  # Use an OrderedDict as an ordered set because there is no ordered set in stdlib
         )
-        logger.info("extracting %s", self.cls.table())
+        logger.info("extracting {}", self.cls.table())
         order_by = f"ORDER BY {', '.join([batch_timestamp_clause, *additional_order_by])}"
         if progress is None:
             # No saved progress, process the whole table from the beginning

@@ -19,7 +19,6 @@ from extractor import PostgresExecutor
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
-from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
@@ -27,8 +26,6 @@ from pydantic_utils import fields
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
-
-configure_logger()
 
 
 def _run_migrator(postgres: PostgresContainer) -> None:
