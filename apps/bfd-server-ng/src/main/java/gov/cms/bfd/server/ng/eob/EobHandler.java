@@ -55,7 +55,7 @@ public class EobHandler {
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
-   * @param options SAMHSA filter mode
+   * @param options claim filter options
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
@@ -67,46 +67,44 @@ public class EobHandler {
    * Search for claims data by bene.
    *
    * @param criteria filter criteria
-   * @param options SAMHSA filter mode and other claim filter options
+   * @param options claim filter options
    * @return bundle
    */
   public Bundle searchByBene(ClaimSearchCriteria criteria, ClaimFilterOptions options) {
 
-    return metricTimer.recordMetric(
-        "application.eob.handler.search_by_bene",
-        () -> {
-          var beneSk = criteria.beneSk();
-          var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
-          // Don't return data for historical beneSks
-          if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
-            return new Bundle();
-          }
+    var beneSk = criteria.beneSk();
+    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+      return new Bundle();
+    }
 
-          var repositoryCriteria =
-              new ClaimSearchCriteria(
-                  beneXrefSk.get(),
-                  criteria.claimThroughDate(),
-                  criteria.lastUpdated(),
-                  criteria.limit(),
-                  criteria.offset(),
-                  criteria.tagCriteria(),
-                  criteria.claimTypeCodes(),
-                  criteria.sources());
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
+            beneXrefSk.get(),
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
 
-          var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-          var filteredClaims =
-              filterSamhsaClaims(claims, options.getSamhsaFilterMode())
-                  .skip(repositoryCriteria.resolveOffset())
-                  .limit(repositoryCriteria.resolveLimit())
-                  .map(claim -> transformToFhir(claim, options));
+    var filteredClaims =
+        metricTimer.recordMetric(
+            "application.eob.handler.search_by_bene",
+            () ->
+                filterSamhsaClaims(claims, options.getSamhsaFilterMode())
+                    .skip(repositoryCriteria.resolveOffset())
+                    .limit(repositoryCriteria.resolveLimit())
+                    .map(claim -> transformToFhir(claim, options)),
+            _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
 
-          var bundle =
-              FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-          recordResultSize(bundle, options.getSamhsaFilterMode());
-          return bundle;
-        },
-        _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
+    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    recordResultSize(bundle, options.getSamhsaFilterMode());
+    return bundle;
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
@@ -165,7 +163,7 @@ public class EobHandler {
    * mode.
    *
    * @param claim the claim
-   * @param options samhsa and new filtering options for claim building
+   * @param options claim filter options
    * @return the transformed EOB
    */
   private ExplanationOfBenefit transformToFhir(ClaimBase claim, ClaimFilterOptions options) {
