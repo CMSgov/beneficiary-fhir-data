@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -53,11 +53,11 @@ public class ClaimRx extends ClaimBase {
 
   /** {@inheritDoc} */
   @Override
-  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
-    var eob = super.toFhir(securityStatus);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
 
     addPartDInsurer(eob);
-    addClaimLineItem(eob);
+    addClaimLineItem(eob, options);
     addServiceProvider(eob);
     addSupportingInfo(eob);
     addPrescribingProviderCareTeam(eob);
@@ -77,8 +77,8 @@ public class ClaimRx extends ClaimBase {
             });
   }
 
-  private void addClaimLineItem(ExplanationOfBenefit eob) {
-    getClaimItems().getClaimLine().toFhirItemComponent().ifPresent(eob::addItem);
+  private void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+    getClaimItems().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
   }
 
   private void addServiceProvider(ExplanationOfBenefit eob) {

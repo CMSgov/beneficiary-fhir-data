@@ -75,6 +75,48 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
+  @Test
+  void eobSearchByIdProfessionalClaimDoesNotIncludeTaxNumberByDefault() {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_PROFESSIONAL))
+            .execute();
+
+    assertEquals(1, eobBundle.getEntry().size());
+    assertFalse(hasTaxNumberExtension(getEobFromBundle(eobBundle).getFirst()));
+  }
+
+  @Test
+  void eobSearchByIdProfessionalClaimIncludesTaxNumberWhenHeaderTrue() {
+    var eobBundle =
+        searchBundleWithIncludeTaxNumbersHeader("true")
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_PROFESSIONAL))
+            .execute();
+
+    assertEquals(1, eobBundle.getEntry().size());
+    assertTrue(hasTaxNumberExtension(getEobFromBundle(eobBundle).getFirst()));
+  }
+
+  @Test
+  void eobSearchByIdProfessionalClaimDoesNotIncludeTaxNumberWhenHeaderFalse() {
+    var eobBundle =
+        searchBundleWithIncludeTaxNumbersHeader("false")
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_PROFESSIONAL))
+            .execute();
+
+    assertEquals(1, eobBundle.getEntry().size());
+    assertFalse(hasTaxNumberExtension(getEobFromBundle(eobBundle).getFirst()));
+  }
+
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByIdMultipleDuplicate(SearchStyleEnum searchStyle) {
@@ -164,19 +206,19 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                                       select max(bfd_claim_updated_ts)
-                                       from (
-                                           select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
-                                       ) all_claims
-                                    """)
+                  select max(bfd_claim_updated_ts)
+                  from (
+                      select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                  ) all_claims
+                  """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
                 .getSingleResult();
     ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
@@ -216,10 +258,10 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createQuery(
                     """
-                                    SELECT billablePeriod.claimThroughDate
-                                    FROM ClaimInstitutionalNch c
-                                    WHERE c.claimUniqueId = :id
-                                    """,
+                SELECT billablePeriod.claimThroughDate
+                FROM ClaimInstitutionalNch c
+                WHERE c.claimUniqueId = :id
+                """,
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
@@ -492,9 +534,9 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                                    SELECT COUNT(*) FROM idr.beneficiary
-                                    WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
-                                    """,
+                SELECT COUNT(*) FROM idr.beneficiary
+                WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
+                """,
                     Integer.class)
                 .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
                 .getResultList()

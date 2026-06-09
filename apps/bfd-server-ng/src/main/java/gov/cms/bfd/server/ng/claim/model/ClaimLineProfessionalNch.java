@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -117,8 +118,8 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   }
 
   @Override
-  protected List<Extension> getFhirExtensions() {
-    var extensions = new ArrayList<>(super.getFhirExtensions());
+  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
+    var extensions = new ArrayList<>(super.getFhirExtensions(options));
     extensions.addAll(claimLineProfessionalNchExtensions.toFhir());
     return extensions;
   }

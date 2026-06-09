@@ -122,6 +122,12 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
           List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE),
           List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE2));
 
+  private static final ClaimFilterOptions foundIncludeOptions =
+      ClaimFilterOptions.builder()
+          .samhsaFilterMode(SamhsaFilterMode.INCLUDE)
+          .includeTaxNumber(false)
+          .build();
+
   @Autowired private EobHandler eobHandler;
 
   private IQuery<Bundle> searchBundle(long patient, SamhsaCertType samhsaCertType) {
@@ -145,8 +151,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         .where(new TokenClientParam(ExplanationOfBenefit.SP_PATIENT).exactly().identifier(patient));
   }
 
-  private List<ExplanationOfBenefit> getClaimsByBene(
-      long beneSk, SamhsaFilterMode samhsaFilterMode) {
+  private List<ExplanationOfBenefit> getClaimsByBene(long beneSk, ClaimFilterOptions options) {
     var criteria =
         new ClaimSearchCriteria(
             beneSk,
@@ -157,14 +162,12 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             Collections.emptyList(),
             List.of(),
             Collections.emptyList());
-    var claims = eobHandler.searchByBene(criteria, samhsaFilterMode, Optional.empty());
+    var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
   }
 
-  private List<Long> getClaimIdsByBene(long beneSk, SamhsaFilterMode samhsaFilterMode) {
-    return getClaimsByBene(beneSk, samhsaFilterMode).stream()
-        .map(c -> Long.parseLong(c.getId()))
-        .toList();
+  private List<Long> getClaimIdsByBene(long beneSk, ClaimFilterOptions options) {
+    return getClaimsByBene(beneSk, options).stream().map(c -> Long.parseLong(c.getId())).toList();
   }
 
   @Test
@@ -221,21 +224,27 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));
 
     // Ensure listed claims are valid
-    var foundClaimIds = getClaimIdsByBene(beneSk, SamhsaFilterMode.INCLUDE);
+    var foundClaimIds = getClaimIdsByBene(beneSk, foundIncludeOptions);
     for (var claimId :
         Stream.concat(samhsaClaimIds.stream(), nonSamhsaClaimIds.stream()).toList()) {
       assertTrue(foundClaimIds.contains(claimId));
     }
 
     var foundSamhsaClaims =
-        getClaimsByBene(beneSk, SamhsaFilterMode.INCLUDE).stream()
+        getClaimsByBene(beneSk, foundIncludeOptions).stream()
             .filter(c -> samhsaClaimIds.contains(Long.parseLong(c.getIdPart())))
             .toList();
     assertFalse(foundSamhsaClaims.isEmpty());
     // All claims marked as SAMHSA should contain at least one valid code.
     assertTrue(allClaimsContainSamhsaCode(foundSamhsaClaims, false));
 
-    var foundClaimIdsNoSamhsa = getClaimIdsByBene(beneSk, SamhsaFilterMode.EXCLUDE);
+    var foundExcludeOptions =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(SamhsaFilterMode.EXCLUDE)
+            .includeTaxNumber(false)
+            .build();
+
+    var foundClaimIdsNoSamhsa = getClaimIdsByBene(beneSk, foundExcludeOptions);
     // Ensure non-SAMHSA claims don't contain SAMHSA claim IDs
     for (var claimId : samhsaClaimIds) {
       assertFalse(foundClaimIdsNoSamhsa.contains(claimId));
@@ -347,7 +356,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureDiagnosis(long claimId, String code, String system) {
-    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
+
+    var eob = eobHandler.find(claimId, foundIncludeOptions).get();
     var icdDiagnosis =
         eob.getDiagnosis().stream()
             .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
@@ -372,7 +382,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureProcedure(long claimId, String code, String system) {
-    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
+
+    var eob = eobHandler.find(claimId, foundIncludeOptions).get();
     var icdProcedure =
         eob.getProcedure().stream()
             .flatMap(p -> p.getProcedureCodeableConcept().getCoding().stream())
@@ -392,7 +403,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureHcpcs(long claimId, String code, String system) {
-    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
+
+    var eob = eobHandler.find(claimId, foundIncludeOptions).get();
     var hcpcs =
         eob.getItem().stream()
             .flatMap(i -> i.getProductOrService().getCoding().stream())
@@ -414,7 +426,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureDrg(long claimId, String code, String system) {
-    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
+    var eob = eobHandler.find(claimId, foundIncludeOptions).get();
     var drg =
         eob.getSupportingInfo().stream()
             .flatMap(i -> i.getCode().getCoding().stream())
