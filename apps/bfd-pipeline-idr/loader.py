@@ -7,11 +7,13 @@ import anyio
 import psycopg
 import psycopg_pool
 from loguru import logger
+from psycopg import sql
 from psycopg.abc import Params, QueryNoTemplate
+from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
 from constants import DEFAULT_MIN_DATE
-from db_utils import get_connection_string
+from db_utils import get_connection_string, to_pg_integer
 from last_updated import LastUpdatedBatch, LastUpdatedQueue
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, LoadMode, T
@@ -213,7 +215,14 @@ class BatchLoader:
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-                if self.last_updated_queue is not None and self.model.last_updated_date_table():
+                if (
+                    self.last_updated_queue is not None
+                    and self.model.last_updated_date_table()
+                    # This clause ensures that tables like idr.beneficiary or any of the claims
+                    # tables do not unnecessarily submit additional last updated updates to the
+                    # queue since the upsert already sets their last updated columns
+                    and self.model.last_updated_date_table() != self.model.table()
+                ):
                     self.last_updated_queue_timer.start()
                     self.last_updated_queue.put(
                         LastUpdatedBatch.from_result_set(results, self.partition, timestamp)
@@ -234,15 +243,32 @@ class BatchLoader:
     async def _load_batch_part(
         self, batch_num: int, batch_part: Sequence[T], timestamp: datetime
     ) -> None:
-        async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-            full_temp_table = await self._setup_temp_table(
-                cur, f"{self.partition.name}_{batch_num}"
-            )
+        async with self.pool.connection() as conn:
+            max_attempts = 15
+            for attempt in range(max_attempts):
+                try:
+                    async with conn.cursor(binary=True) as cur:
+                        full_temp_table = await self._setup_temp_table(
+                            cur, f"{self.partition.name}_{batch_num}"
+                        )
 
-            await self._copy_data(cur, full_temp_table, batch_part)
+                        await self._copy_data(cur, full_temp_table, batch_part)
 
-            # Upsert into the main table
-            await self._upsert(cur, full_temp_table, timestamp)
+                        if self.last_updated_queue and (
+                            timestamp_pkey_col := self.model.last_updated_timestamp_col()
+                        ):
+                            await self._advisory_locks(cur, batch_part, timestamp_pkey_col)
+
+                        # Upsert into the main table
+                        await self._upsert(cur, full_temp_table, timestamp)
+                        break
+                except DeadlockDetected, InFailedSqlTransaction:
+                    await conn.rollback()
+
+                    if attempt == max_attempts - 1:
+                        raise
+
+                    await anyio.sleep(0.01)
 
             await conn.commit()
 
@@ -356,6 +382,23 @@ class BatchLoader:
         if self.enable_load_progress:
             await cur.execute(query, params)  # type: ignore
             await cur.connection.commit()
+
+    async def _advisory_locks(
+        self, cur: psycopg.AsyncCursor, data: Sequence[T], timestamp_pkey_col: str
+    ) -> None:
+        # The pg_advisory_xact_lock accepts only "integer" types, not even bigint. Hence,
+        # to_integer and hash
+        model_hash = to_pg_integer(hash(self.model.last_updated_date_table()))
+        await cur.execute(
+            sql.SQL("\n").join(
+                sql.SQL("SELECT pg_advisory_xact_lock({}, {});").format(
+                    model_hash, to_pg_integer(hash(getattr(x, timestamp_pkey_col)))
+                )
+                for x in data
+            ),
+            prepare=False,
+            binary=False,
+        )
 
     async def _upsert(
         self, cur: psycopg.AsyncCursor, temp_tablename: str, timestamp: datetime

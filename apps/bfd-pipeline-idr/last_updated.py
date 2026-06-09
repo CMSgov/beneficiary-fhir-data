@@ -1,7 +1,10 @@
+import os
 from collections import OrderedDict
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from itertools import batched, chain
+from math import ceil
 from multiprocessing import Manager, Process
 from queue import Queue
 
@@ -13,9 +16,10 @@ from anyio.streams.memory import MemoryObjectSendStream
 from loguru import logger
 from loguru._logger import Logger
 from psycopg import sql
+from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
-from db_utils import get_connection_string
+from db_utils import get_connection_string, to_pg_integer
 from load_partition import LoadPartition
 from model.base_model import DbType, IdrBaseModel, LoadMode, T
 from settings import PER_BATCH_MAX_CONNECTIONS, PER_BATCH_MIN_CONNECTIONS
@@ -25,6 +29,8 @@ type LastUpdatedQueue = Queue[LastUpdatedBatch | None]
 
 
 _WORKER_START_SIGNAL = 0
+_MAX_LAST_UPDATED_CHUNKS_PER_BATCH = 100
+_MINIMUM_LAST_UPDATED_CHUNK_SIZE = 100
 
 
 @dataclass
@@ -56,32 +62,83 @@ class LastUpdatedBatch:
 
 async def _handle_batch(
     batch: LastUpdatedBatch,
-    key: str,
+    key_col: str,
     pool: psycopg_pool.AsyncConnectionPool[ACT],
     limiter: anyio.CapacityLimiter,
+    send_stream: MemoryObjectSendStream[LastUpdatedBatch | None],
 ) -> None:
-    async with limiter, pool.connection() as conn, conn.cursor() as cur:
-        logger.info(
-            "Executing last_updated for {}-{} with {} key(s)",
-            batch.model.table(),
-            batch.partition.name,
-            len(batch.keys),
-        )
-        last_updated_set_clause = sql.SQL(", ").join(
-            t"{col:i} = {batch.timestamp}" for col in batch.model.last_updated_date_column()
-        )
-        schema, table = batch.model.last_updated_date_table().split(".", 1)
-        full_table = sql.Identifier(schema, table)
+    num_keys = len(batch.keys)
+    keys_per_chunk = ceil(num_keys / _MINIMUM_LAST_UPDATED_CHUNK_SIZE)
+    num_chunks = min(keys_per_chunk, _MAX_LAST_UPDATED_CHUNKS_PER_BATCH)
+    chunk_size = max(keys_per_chunk, _MINIMUM_LAST_UPDATED_CHUNK_SIZE)
+    logger.info(
+        "Executing last_updated for {}-{} with {} key(s) in {} chunk(s) of {} key(s) each",
+        batch.model.table(),
+        batch.partition.name,
+        num_keys,
+        num_chunks,
+        chunk_size,
+    )
+    last_updated_set_clause = sql.SQL(", ").join(
+        t"{col:i} = {batch.timestamp}" for col in batch.model.last_updated_date_column()
+    )
+    schema, table = batch.model.last_updated_date_table().split(".", 1)
+    full_table = sql.Identifier(schema, table)
+    model_hash = to_pg_integer(hash(batch.model.last_updated_date_table()))
+    chunks = {
+        idx: list(chunk) for idx, chunk in enumerate(batched(batch.keys, chunk_size, strict=False))
+    }
+    chunk_results: dict[int, bool] = {}
+
+    async def update_chunk(chunk_id: int) -> None:
+        async with pool.connection() as conn, conn.cursor() as cur:
+            try:
+                await cur.execute(
+                    sql.SQL("\n").join(
+                        sql.SQL("SELECT pg_advisory_xact_lock({}, {});").format(
+                            model_hash, to_pg_integer(hash(x))
+                        )
+                        for x in chunks[chunk_id]
+                    ),
+                    prepare=False,
+                    binary=False,
+                )
+                await cur.execute(
+                    t"""
+                    UPDATE {full_table:i} u
+                    SET {last_updated_set_clause:q}
+                    WHERE u.{key_col:i} = ANY({chunks[chunk_id]});
+                    """,
+                )
+                chunk_results[chunk_id] = True
+            except DeadlockDetected, InFailedSqlTransaction:
+                await conn.rollback()
+                chunk_results[chunk_id] = False
+
+    async with limiter:
         last_updated_timer = Timer("last_updated_bg", batch.model, batch.partition)
         last_updated_timer.start()
-        await cur.execute(
-            t"""
-            UPDATE {full_table:i} u
-            SET {last_updated_set_clause:q}
-            WHERE u.{key:i} = ANY({batch.keys});
-            """,
-        )
+        async with anyio.create_task_group() as tg:
+            for chunk_id in chunks:
+                tg.start_soon(update_chunk, chunk_id)
         last_updated_timer.stop()
+
+        failed_chunks = [k for k, v in chunk_results.items() if not v]
+        if failed_chunks:
+            logger.warning(
+                "{} key chunks failed to be updated for {}-{}, resubmitting them to queue",
+                len(failed_chunks),
+                batch.model.table(),
+                batch.partition.name,
+            )
+            await send_stream.send(
+                LastUpdatedBatch(
+                    batch.model,
+                    batch.partition,
+                    sorted(chain.from_iterable(chunks[id] for id in failed_chunks)),
+                    batch.timestamp,
+                )
+            )
 
 
 def _queue_reader(
@@ -138,7 +195,7 @@ async def _worker_main(
                 if batch.model.last_updated_date_table() and (
                     key := batch.model.last_updated_timestamp_col()
                 ):
-                    tg.start_soon(_handle_batch, batch, key, pool, limiter)
+                    tg.start_soon(_handle_batch, batch, key, pool, limiter, send_stream)
 
 
 def _worker_start_async(
@@ -148,7 +205,11 @@ def _worker_start_async(
     root_logger: Logger,
 ) -> None:
     root_logger.reinstall()
-    anyio.run(_worker_main, batch_queue, start_queue, load_mode)
+    try:
+        anyio.run(_worker_main, batch_queue, start_queue, load_mode)
+    except Exception:
+        logger.opt(exception=True).error("last_updated worker process died:")
+        os._exit(1)  # Force an exit because the pipeline should stop if the background worker does
 
 
 def start_last_updated_worker(
