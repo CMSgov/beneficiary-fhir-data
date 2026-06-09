@@ -23,8 +23,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -35,7 +35,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
 | <a name="input_log_router_repository_override"></a> [log\_router\_repository\_override](#input\_log\_router\_repository\_override) | Overrides the ECR repository for the log\_router container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_log_router_version_override"></a> [log\_router\_version\_override](#input\_log\_router\_version\_override) | Overrides the version for log\_router container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
@@ -53,7 +53,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_bucket_s3logs"></a> [bucket\_s3logs](#module\_bucket\_s3logs) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
@@ -66,7 +66,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_acm_certificate.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
 | [aws_appautoscaling_policy.server_track_cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_policy) | resource |
 | [aws_appautoscaling_target.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target) | resource |

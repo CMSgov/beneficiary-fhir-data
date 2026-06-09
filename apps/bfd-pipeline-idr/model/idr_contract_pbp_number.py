@@ -10,8 +10,7 @@ from model.base_model import (
     ALIAS_CNTRCT_SGMT,
     ALIAS_PBP_NUM,
     BATCH_ID,
-    DERIVED,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     IdrBaseModel,
     ModelType,
     Source,
@@ -20,7 +19,7 @@ from model.base_model import (
 
 
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_default_string)]
@@ -29,7 +28,6 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sgmt_num: Annotated[
         str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
     ]
-    bfd_contract_version_rank: Annotated[int, {DERIVED: True}]
 
     @override
     @staticmethod
@@ -52,10 +50,6 @@ class IdrContractPbpNumber(IdrBaseModel):
         pbp_num = ALIAS_PBP_NUM
         # We need to include obsolete records since some bene_mapd records are tied to
         # obsolete pbp_sks.
-        # Additionally, some contracts are marked obsolete and no non-obsolete record
-        # is created, so we have to use RANK to get the latest version of each contract.
-        # Then, these can be queried by searching for rows where
-        # bfd_contract_version_rank = 1
         return f"""
             WITH sgmt as (
                 SELECT
@@ -65,11 +59,8 @@ class IdrContractPbpNumber(IdrBaseModel):
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
-            SELECT 
-                {{COLUMNS}},
-                ROW_NUMBER() OVER (
-                    PARTITION BY cntrct_num, cntrct_pbp_num 
-                    ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
+            SELECT
+                {{COLUMNS}}
             FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk

@@ -340,7 +340,11 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
 
         for s3_record in s3_event_records:
             s3_event_time = s3_record.eventTime.astimezone(UTC)
-            s3_object_key = unquote_plus(s3_record.s3.object.key)
+            s3_object = s3_record.s3.object
+            if s3_object is None:
+                raise ValueError("S3 Object in event record is None")
+
+            s3_object_key = unquote_plus(s3_object.key)
             s3_event_name = s3_record.eventName
             s3_event_type = S3EventType.from_event_name(s3_event_name)
 

@@ -57,7 +57,7 @@ public class GlobalExceptionController implements ErrorController {
     logBuilder
         .setMessage(responseMessage)
         .addKeyValue(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certificateAlias.orElse(null))
-        .addKeyValue(logKey(MDC_PREFIX, URI_KEY), originalUri)
+        .addKeyValue(logKey(MDC_PREFIX, HTTP_ACCESS_REQUEST_URI), originalUri)
         .addKeyValue(logKey(MDC_PREFIX, REQUEST_ID_KEY), request.getRequestId())
         .addKeyValue(logKey(MDC_PREFIX, REMOTE_ADDRESS_KEY), request.getRemoteAddr())
         .log();

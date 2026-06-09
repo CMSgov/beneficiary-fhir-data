@@ -1,12 +1,15 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -45,10 +48,30 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
+
+  @Embedded
+  @AttributeOverride(
+      name = "benefitEnhancement1Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_1_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement2Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_2_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement3Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_3_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement4Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_4_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement5Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_5_cd"))
+  private BenefitEnhancementCodes lineBenefitEnhancementCodes;
+
   @Embedded private ClaimLineProfessionalExtensions extensions;
 
   @Override
-  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      ClaimFilterOptions options) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -68,7 +91,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
-    getFhirExtensions().forEach(line::addExtension);
+    getFhirExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -81,15 +104,19 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
+    var trackingSupportingInfo =
+        trackingNumber.map(
+            number ->
+                supportingInfoFactory
+                    .createSupportingInfo()
+                    .setCategory(
+                        BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                    .setValue(new StringType(number)));
+
     return Stream.of(
-            trackingNumber.map(
-                number ->
-                    supportingInfoFactory
-                        .createSupportingInfo()
-                        .setCategory(
-                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                        .setValue(new StringType(number))))
-        .flatMap(Optional::stream)
+            trackingSupportingInfo.stream().toList(),
+            lineBenefitEnhancementCodes.toFhir(supportingInfoFactory))
+        .flatMap(Collection::stream)
         .toList();
   }
 
@@ -97,7 +124,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
 
-  protected List<Extension> getFhirExtensions() {
-    return getExtensions().toFhir();
+  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
+    return getExtensions().toFhir(options);
   }
 }

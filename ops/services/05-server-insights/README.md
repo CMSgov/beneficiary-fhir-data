@@ -27,7 +27,8 @@ Terraform has no built-in resource for defining these views, and while there _ar
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -38,7 +39,7 @@ Terraform has no built-in resource for defining these views, and while there _ar
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
 | <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
@@ -51,7 +52,7 @@ Terraform has no built-in resource for defining these views, and while there _ar
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_database"></a> [database](#module\_database) | ../../../insights/terraform/modules/database | n/a |
 | <a name="module_glue_table_api_requests"></a> [glue\_table\_api\_requests](#module\_glue\_table\_api\_requests) | ../../../insights/terraform/modules/table | n/a |
 | <a name="module_lambda_trigger_crawler"></a> [lambda\_trigger\_crawler](#module\_lambda\_trigger\_crawler) | ../../terraform-modules/general/trigger-glue-crawler | n/a |
@@ -65,7 +66,7 @@ Terraform has no built-in resource for defining these views, and while there _ar
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_subscription_filter.cloudwatch_access_log_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_cloudwatch_log_subscription_filter.ecs_access_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_glue_crawler.glue_crawler_api_requests](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_crawler) | resource |

@@ -10,7 +10,7 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -22,14 +22,14 @@ from model.base_model import (
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
     bene_dual_type_cd: str
     geo_usps_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: str
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 2}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[

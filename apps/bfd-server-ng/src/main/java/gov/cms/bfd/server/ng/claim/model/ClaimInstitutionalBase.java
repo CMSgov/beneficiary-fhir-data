@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Shared base for institutional claim types (NCH and Shared Systems variants). */
 @MappedSuperclass
 @Getter
+@SuppressWarnings("java:S6539")
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Column(name = "clm_cntrctr_num")
@@ -39,6 +40,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
+  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
 
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
@@ -82,10 +84,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {}
 
   @Override
-  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
-    var eob = super.toFhir(securityStatus);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
 
-    addClaimItems(eob);
+    addClaimItems(eob, options);
     addDiagnoses(eob);
     addProviders(eob);
     applyOutcomeOverride(eob);
@@ -112,11 +114,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .toList();
   }
 
-  private void addClaimItems(ExplanationOfBenefit eob) {
+  private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+
     getItems()
         .forEach(
             item -> {
-              var claimLine = item.getClaimLine().toFhirItemComponent();
+              var claimLine = item.getClaimLine().toFhirItemComponent(options);
               var claimContext = getClaimTypeCode().toContext();
 
               claimLine.ifPresent(eob::addItem);
@@ -173,9 +176,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
     var sharedInitialSupportingInfo =
         Stream.of(
-                getTypeOfBillCode().toFhir(supportingInfoFactory).stream(),
-                buildSubclassSupportingInfo().stream())
-            .flatMap(s -> s)
+                getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
+                buildSubclassSupportingInfo(),
+                benefitEnhancementCodes.toFhir(supportingInfoFactory))
+            .flatMap(Collection::stream)
             .toList();
 
     // Handle claim related condition codes after BFD-4523

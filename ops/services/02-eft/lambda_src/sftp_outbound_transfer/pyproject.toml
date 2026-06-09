@@ -2,7 +2,7 @@
 name = "sftp-outbound-transfer"
 version = "1.0.0"
 requires-python = ">=3.13"
-dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
+dependencies = ["aws-lambda-powertools[all]>=3.19.0", "paramiko>=4.0.0", "boto3>=1.40.11", "pydantic>=2.11.7"]
 
 [dependency-groups]
 dev = ["pytest", "pyright", "ruff", "boto3-stubs[sns,ssm]"]

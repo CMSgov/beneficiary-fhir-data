@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.eob;
 
 import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
@@ -54,13 +55,11 @@ public class EobHandler {
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param options claim filter options
    * @return an Optional containing the ExplanationOfBenefit if found
    */
-  public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
-    var eobs =
-        searchByIdsInner(
-            List.of(fhirId), new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+  public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
+    var eobs = searchByIdsInner(List.of(fhirId), new DateTimeRange(), new DateTimeRange(), options);
     return eobs.stream().findFirst();
   }
 
@@ -68,46 +67,44 @@ public class EobHandler {
    * Search for claims data by bene.
    *
    * @param criteria filter criteria
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param options claim filter options
    * @return bundle
    */
-  public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
+  public Bundle searchByBene(ClaimSearchCriteria criteria, ClaimFilterOptions options) {
 
-    return metricTimer.recordMetric(
-        "application.eob.handler.search_by_bene",
-        () -> {
-          var beneSk = criteria.beneSk();
-          var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
-          // Don't return data for historical beneSks
-          if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
-            return new Bundle();
-          }
+    var beneSk = criteria.beneSk();
+    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+      return new Bundle();
+    }
 
-          var repositoryCriteria =
-              new ClaimSearchCriteria(
-                  beneXrefSk.get(),
-                  criteria.claimThroughDate(),
-                  criteria.lastUpdated(),
-                  criteria.limit(),
-                  criteria.offset(),
-                  criteria.tagCriteria(),
-                  criteria.claimTypeCodes(),
-                  criteria.sources());
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
+            beneXrefSk.get(),
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
 
-          var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-          var filteredClaims =
-              filterSamhsaClaims(claims, samhsaFilterMode)
-                  .skip(repositoryCriteria.resolveOffset())
-                  .limit(repositoryCriteria.resolveLimit())
-                  .map(claim -> transformToFhir(claim, samhsaFilterMode));
+    var filteredClaims =
+        metricTimer.recordMetric(
+            "application.eob.handler.search_by_bene",
+            () ->
+                filterSamhsaClaims(claims, options.getSamhsaFilterMode())
+                    .skip(repositoryCriteria.resolveOffset())
+                    .limit(repositoryCriteria.resolveLimit())
+                    .map(claim -> transformToFhir(claim, options)),
+            _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
 
-          var bundle =
-              FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-          recordResultSize(bundle, samhsaFilterMode);
-          return bundle;
-        },
-        _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
+    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    recordResultSize(bundle, options.getSamhsaFilterMode());
+    return bundle;
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
@@ -137,15 +134,15 @@ public class EobHandler {
    * @param claimUniqueIds claim IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param options claim filter options
    * @return bundle
    */
   public Bundle searchById(
       List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
-      SamhsaFilterMode samhsaFilterMode) {
-    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, samhsaFilterMode);
+      ClaimFilterOptions options) {
+    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, options);
     return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
@@ -153,11 +150,11 @@ public class EobHandler {
       List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
-      SamhsaFilterMode samhsaFilterMode) {
+      ClaimFilterOptions options) {
     var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
 
-    return filterSamhsaClaims(claims, samhsaFilterMode)
-        .map(claim -> transformToFhir(claim, samhsaFilterMode))
+    return filterSamhsaClaims(claims, options.getSamhsaFilterMode())
+        .map(claim -> transformToFhir(claim, options))
         .toList();
   }
 
@@ -166,12 +163,12 @@ public class EobHandler {
    * mode.
    *
    * @param claim the claim
-   * @param samhsaFilterMode filter mode (only samhsa/exclude claims/include)
+   * @param options claim filter options
    * @return the transformed EOB
    */
-  private ExplanationOfBenefit transformToFhir(ClaimBase claim, SamhsaFilterMode samhsaFilterMode) {
+  private ExplanationOfBenefit transformToFhir(ClaimBase claim, ClaimFilterOptions options) {
     var isSamhsa =
-        switch (samhsaFilterMode) {
+        switch (options.getSamhsaFilterMode()) {
           case ONLY_SAMHSA -> true;
           case EXCLUDE -> false;
           case INCLUDE -> claimHasSamhsa(claim);
@@ -180,7 +177,9 @@ public class EobHandler {
     var securityStatus =
         isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
-    return claim.toFhir(securityStatus);
+    var claimState = ClaimState.builder().securityStatus(securityStatus).build();
+
+    return claim.toFhir(options, claimState);
   }
 
   private boolean isCodeSamhsa(

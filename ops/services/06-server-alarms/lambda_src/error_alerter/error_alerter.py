@@ -4,10 +4,10 @@ import logging
 import os
 import sys
 import time
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any, TypedDict
 from urllib.error import URLError
-from urllib.parse import quote_plus
 from urllib.request import Request, urlopen
 
 import boto3
@@ -48,6 +48,14 @@ fields @message
 | sort @timestamp desc
 """.strip()
 
+# Special escape sequences for cloudwatch query URLs
+S1 = "$257E"
+S2 = "$2528"
+S3 = "$2527"
+S4 = "$2529"
+
+type CwValue = str | list[str] | int | bool
+
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
     field: str
@@ -59,9 +67,8 @@ logger = logging.getLogger()
 try:
     logs_client = boto3.client("logs", config=BOTO_CONFIG)  # type: ignore
 except Exception:
-    logger.error(
+    logger.exception(
         "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
-        exc_info=True,
     )
     sys.exit(0)
 
@@ -74,36 +81,59 @@ def __get_value_by_key(cell_key: str, row_list: list[LogInsightsQueryResultTypeD
     )["value"]
 
 
-def __escape_log_insights_url_str(unescaped_str: str) -> str:
-    return quote_plus(unescaped_str).replace("%", "*")
+def __escape(input_str: str) -> str:
+    for char in input_str:
+        if char.isalpha() or char.isdigit() or char in ["-", "."]:
+            continue
+        char_hex = f"*{ord(char):02x}"
+        input_str = input_str.replace(char, char_hex)
+    return input_str
 
 
-def __gen_log_insights_url(
-    start_time: datetime, end_time: datetime, editor_string: str, source_log_group: str
+def __get_cw_param(cw_value: CwValue) -> str:
+    suffix = f"{S1}{S3}"
+    match cw_value:
+        case str():
+            cw_value = __escape(cw_value)
+        case list():
+            for i in range(len(cw_value)):
+                cw_value[i] = __escape(cw_value[i])
+            cw_value = "".join([f"{S1}{S3}{n}" for n in cw_value])
+            suffix = f"{S1}{S2}"
+        case bool() | int():
+            cw_value = str(cw_value).lower()
+            suffix = S1
+
+    return f"{suffix}{cw_value}"
+
+
+def __gen_log_insights_url(cw_params: Mapping[str, CwValue]) -> str:
+    config_items = [f"{key}{__get_cw_param(cw_params[key])}" for key in cw_params]
+    config_str = f"{S1}{S2}{S1.join(config_items)}{S4}{S4}"
+    query = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{config_str}"
+    return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{query}"
+
+
+# Implementation based on https://stackoverflow.com/questions/68429312/generate-aws-logs-insights-url-with-query-and-search-creteria
+def __generate_cloudwatch_url(
+    log_groups: list[str], query: str, start_time: datetime, end_time: datetime
 ) -> str:
-    # Log Insights uses a _strange_ escape and query string scheme that fully and properly
-    # implementing would be too much effort. Instead, some shortcuts are made here with the
-    # assumption that these URLs will have _very_ little variation in what data is used to generate
-    # them.
-
-    url_prefix = f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#logsV2:logs-insights$3FqueryDetail$3D~"
-    start_time_iso = (
-        f"{__escape_log_insights_url_str(start_time.isoformat(timespec='seconds'))}.000Z"
-    )
-    end_time_iso = f"{__escape_log_insights_url_str(end_time.isoformat(timespec='seconds'))}.000Z"
-    editor_string = __escape_log_insights_url_str(editor_string)
-    query_params = {
-        "end": end_time_iso,
-        "start": start_time_iso,
-        "timeType": "ABSOLUTE",
+    params = {
+        "start": __format_time(start_time),
+        "end": __format_time(end_time),
+        # "unit": "seconds", # Not necessary for absolute time, keeping it here in case
+        #                      we want to re-use this for relative time in the future though
+        "timeType": "ABSOLUTE",  # IF RELATIVE, end = 0 and start is negative seconds
         "tz": "UTC",
-        "editorString": editor_string,
+        "editorString": query,
+        "isLiveTail": False,
+        "source": log_groups,
     }
-    # For whatever reason, '=' is escaped as "~'"
-    query_param_fragments = [f"{k}~'{v}" for k, v in query_params.items()]
-    query_params_str = f"({'~'.join(query_param_fragments)}~source~(~'{__escape_log_insights_url_str(source_log_group)}))"
+    return __gen_log_insights_url(params)
 
-    return f"{url_prefix}{query_params_str}"
+
+def __format_time(time: datetime) -> str:
+    return time.replace(tzinfo=None).isoformat(timespec="seconds") + ".000Z"
 
 
 def handler(event: dict[str, str], context: Any):
@@ -134,10 +164,9 @@ def handler(event: dict[str, str], context: Any):
             queryString=LOG_INSIGHTS_NOTIF_QUERY,
         )
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             "An unrecoverable error occurred when trying to query for 500s in %s:",
             ACCESS_JSON_LOG_GROUP,
-            exc_info=True,
         )
         return
 
@@ -152,9 +181,9 @@ def handler(event: dict[str, str], context: Any):
             time.sleep(1)
             response = logs_client.get_query_results(queryId=start_query_response["queryId"])
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             'Retrieving results for query ID "%s" has failed due to an unrecoverable error:',
-            exc_info=True,
+            start_query_response["queryId"],
         )
         return
 
@@ -213,9 +242,10 @@ def handler(event: dict[str, str], context: Any):
 
     per_partner_tables: dict[str, str] = {}
     for partner, op_counts in partner_to_errors.items():
-        longest_op_chars_count = max(len(x) for x in op_counts.keys())
+        longest_op_chars_count = max(len(x) for x in op_counts)
         longest_err_chars_count = max(len(str(x)) for x in op_counts.values())
-        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}} {'Error Count':<{longest_err_chars_count}}\n"
+        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}}"
+        "{'Error Count':<{longest_err_chars_count}}\n"
         for op, count in op_counts.items():
             table_block_str += (
                 f"{op:<{longest_op_chars_count}} {count:<{longest_err_chars_count}}\n"
@@ -224,17 +254,17 @@ def handler(event: dict[str, str], context: Any):
 
         per_partner_tables[partner] = table_block_str
 
-    log_insights_access_json_url = __gen_log_insights_url(
+    log_insights_access_json_url = __generate_cloudwatch_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY,
-        source_log_group=ACCESS_JSON_LOG_GROUP,
+        query=LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY,
+        log_groups=[ACCESS_JSON_LOG_GROUP],
     )
-    log_insights_messages_json_errors_url = __gen_log_insights_url(
+    log_insights_messages_json_errors_url = __generate_cloudwatch_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
-        source_log_group=MESSAGES_JSON_LOG_GROUP,
+        query=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
+        log_groups=[MESSAGES_JSON_LOG_GROUP],
     )
     slack_message = {
         "blocks": [
@@ -298,10 +328,7 @@ def handler(event: dict[str, str], context: Any):
                 else:
                     logger.error("%s response received from Slack", response.status)
         except URLError:
-            logger.error(
-                "An unrecoverable error occurred attempting to post Slack message: ",
-                exc_info=True,
-            )
+            logger.exception("An unrecoverable error occurred attempting to post Slack message: ")
     else:
         logger.info("No Slack webhook defined, logging Slack message instead")
         logger.info(slack_message)

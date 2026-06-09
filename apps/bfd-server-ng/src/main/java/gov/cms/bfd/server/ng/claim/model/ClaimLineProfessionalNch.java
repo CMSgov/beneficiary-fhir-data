@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -10,6 +11,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -26,6 +28,27 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
   @Embedded private RenderingProviderSsaStateCode renderingProviderSsaStateCode;
+
+  @Embedded
+  @AttributeOverride(
+      name = "pbpBenefitEnhancementIndicator",
+      column = @Column(name = "clm_line_ngaco_pbpmt_sw"))
+  @AttributeOverride(
+      name = "postDischargeHomeVisitBenefitEnhancementIndicator",
+      column = @Column(name = "clm_line_ngaco_pdschrg_hcbs_sw"))
+  @AttributeOverride(
+      name = "snf3DayWaiverEnhancement",
+      column = @Column(name = "clm_line_ngaco_snf_wvr_sw"))
+  @AttributeOverride(
+      name = "telehealthBenefitEnhancementIndicator",
+      column = @Column(name = "clm_line_ngaco_tlhlth_sw"))
+  @AttributeOverride(
+      name = "aipbpBenefitEnhancementIndicator",
+      column = @Column(name = "clm_line_ngaco_cptatn_sw"))
+  @AttributeOverride(
+      name = "careManagementHomeVisitsEnhancement",
+      column = @Column(name = "clm_line_aco_care_mgmt_hcbs_sw"))
+  private NchBenefitEnhancementSwitches lineNchBenefitEnhancementSwitches;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
@@ -86,15 +109,17 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.concat(
-            super.toFhirSupportingInfo(supportingInfoFactory).stream(),
-            renderingProviderSsaStateCode.toFhir(supportingInfoFactory).stream())
+    return Stream.of(
+            super.toFhirSupportingInfo(supportingInfoFactory),
+            renderingProviderSsaStateCode.toFhir(supportingInfoFactory).stream().toList(),
+            lineNchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
+        .flatMap(Collection::stream)
         .toList();
   }
 
   @Override
-  protected List<Extension> getFhirExtensions() {
-    var extensions = new ArrayList<>(super.getFhirExtensions());
+  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
+    var extensions = new ArrayList<>(super.getFhirExtensions(options));
     extensions.addAll(claimLineProfessionalNchExtensions.toFhir());
     return extensions;
   }

@@ -20,6 +20,12 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
   private static final String SAMHSA_FILTERED_LOG_MESSAGE = "SAMHSA claim filtered";
   private final EobHandler eobHandler;
 
+  private static final ClaimFilterOptions excludeOptions =
+      ClaimFilterOptions.builder()
+          .samhsaFilterMode(SamhsaFilterMode.EXCLUDE)
+          .includeTaxNumber(false)
+          .build();
+
   /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test
   void testSamhsaClaimLogging() {
@@ -29,7 +35,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
         List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
         new DateTimeRange(),
         new DateTimeRange(),
-        SamhsaFilterMode.EXCLUDE);
+        excludeOptions);
 
     var samhsaLogs =
         events.stream()
@@ -53,10 +59,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        List.of(CLAIM_ID_WITH_NO_SAMHSA),
-        new DateTimeRange(),
-        new DateTimeRange(),
-        SamhsaFilterMode.EXCLUDE);
+        List.of(CLAIM_ID_WITH_NO_SAMHSA), new DateTimeRange(), new DateTimeRange(), excludeOptions);
 
     var samhsaLogs =
         events.stream()

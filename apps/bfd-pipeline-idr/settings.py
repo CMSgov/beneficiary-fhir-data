@@ -79,6 +79,18 @@ INCREMENTAL_IDR_JOB_GRACE_PERIOD = timedelta(
 """Amount of time to tolerate no new incoming IDR Job Events for a given IDR Job type
 before simply loading the relevant tables. Defaults to 24 hours."""
 
+PER_BATCH_CONCURRENT_ROWS = int(getenv("IDR_PER_BATCH_CONCURRENT_ROWS", "1000"))
+"""Number of rows per batch to concurrently load into the database at once. Defaults to 1000."""
+
+PER_BATCH_MIN_CONNECTIONS = int(getenv("IDR_PER_BATCH_MIN_CONNECTIONS", "20"))
+"""Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
+Defaults to 20."""
+
+PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
+"""Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
+Defaults to 20."""
+
+
 # IDR credentials, these are pulled from SSM in prod.
 # You likely don't want to touch these otherwise.
 IDR_PRIVATE_KEY = getenv("IDR_PRIVATE_KEY", "")

@@ -13,7 +13,7 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -25,16 +25,16 @@ from model.base_model import (
 
 
 class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     cntrct_pbp_sk: int
-    bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
-    bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
-    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_cntrct_num: Annotated[str, {PRIMARY_KEY_ORDER: 1}]
+    bene_pbp_num: Annotated[str, {PRIMARY_KEY_ORDER: 2}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 3}]
     bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_prcsr_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_bank_id_num: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 4}]
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
