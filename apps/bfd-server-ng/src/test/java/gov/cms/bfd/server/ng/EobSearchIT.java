@@ -636,12 +636,12 @@ class EobSearchIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 """
-                            SELECT c
-                            FROM ClaimProfessionalNch c
-                            JOIN FETCH c.beneficiary b
-                            JOIN FETCH c.claimItems cl
-                            WHERE c.claimUniqueId = :claimId
-                            """,
+                        SELECT c
+                        FROM ClaimProfessionalNch c
+                        JOIN FETCH c.beneficiary b
+                        JOIN FETCH c.claimItems cl
+                        WHERE c.claimUniqueId = :claimId
+                        """,
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
