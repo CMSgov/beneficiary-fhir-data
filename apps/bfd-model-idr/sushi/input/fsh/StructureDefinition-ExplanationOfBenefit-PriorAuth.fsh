@@ -1,0 +1,23 @@
+Logical: ExplanationOfBenefit-PriorAuth
+Id: ExplanationOfBenefit-PriorAuth
+* ^url = "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-PriorAuth"
+* ^status = #draft
+* ^type = "ExplanationOfBenefit-PriorAuth"
+* . ^label = "Explanation of Benefit Prior Authorization Resource for IDR. Ignore in DD Generation"
+* lastUpdated 0..1 string "Last Updated Time" "This field represents the last time that an ExplanationOfBenefit was updated."
+* beneficiarySk 1..1 string "Beneficiary Source Key" "Beneficiary Source Key"
+* derivedOutcome 0..1 string "Derived Outcome" "Derived outcome code."
+* CLM_TYPE 1..1 string "Claim Type" "Claim Type"
+* UTN 1..1 string "Unique Tracking Number" "Unique Tracking Number"
+* ICN_DCN 0..1 string "Internal Control Number / DCN" "Internal Control Number / DCN"
+* UTN_VALID_ST_DT 0..1 string "UTN Valid Start Date" "UTN Valid Start Date"
+* UTN_VALID_EN_DT 0..1 string "UTN Valid End Date" "UTN Valid End Date"
+* MAC_ID 0..1 string "MAC ID" "MAC ID"
+* TOB 0..1 string "Type of Bill" "Type of Bill"
+* NPI 0..1 string "NPI" "NPI"
+* NAME 0..1 string "Name" "Name"
+* CMS_CERT 0..1 string "CMS Certification Number" "CMS Certification Number"
+* providerList 0..* Provider "Provider List"
+  * ^type.targetProfile = "http://hl7.org/fhir/StructureDefinition/Provider"
+* priorAuthItem 0..* LineItemComponent "Prior Auth Item List"
+  * ^type.targetProfile = "http://hl7.org/fhir/StructureDefinition/LineItemComponent"

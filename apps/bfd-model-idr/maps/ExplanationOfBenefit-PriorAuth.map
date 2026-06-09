@@ -20,6 +20,12 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     
     src -> tgt.status = "active" "Set status";
     src -> tgt.use = "preauthorization" "Set use code";
+    src.derivedOutcome as paOutcome -> tgt.outcome = paOutcome "Add outcome";
+
+    src -> tgt.patient = create('Reference') as tgtReference then {
+      src.beneficiarySk as beneSk -> tgtReference.reference = append("Patient/", beneSk) "Concatenate patient id";
+    } "Add patient reference";
+
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" "Add profile";
@@ -27,74 +33,262 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       src -> tgtMeta.source = "CWF" "Add source";
     } "Create metadata";
 
-
-
-
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
       //CodeSystem -> CLM_TYPE_CD
       //Two types -  1: PDEX, 2: CMS-specific. use concept map
       src.CLM_TYPE as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PriorAuthType','coding') "translate code";
-      //TODO: define codesystem.
-      /*
-        Claim Types:
-        Valid Claim Types - Blank, B, D, I, O, H, C
-        Blank - Space
-        Part B - B
-        DME - D
-        Inpatient - I
-        Outpatient - O
-        Home Health - H
-        Hospice - C
-    */
+      //No blanks here since 2023. 
       src.CLM_TYPE as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE', typeCd) "Add claim type code";
     } "Create type";
 
-    //UTN - Universal Tracking Number
-    //SEGMENT COUNT
-    //Current_segment (line item)
-    //UTN_VALID_ST_DT - start date of validity - populated
-    //UTN_VALID_EN_DT - end date of validity - populated
-    //PA_IND - chars, what does this actually mean?
-    // HCPCS_OR_CPT_OR_HIPPS - HCPCS/CPT code
+    //UTN - Unique Tracking Number, not actually unique though. 
+    src.UTN as utn -> tgt.identifier = create('Identifier') as tgtIdentifier then {
+      src -> tgt.system = "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number" "Add UTN";
+      src -> tgt.value = utn "Add UTN";
+    } "Add UTN";
+
+    //ICN_DCN - Internal Control Number /DCN. ONLY type = B
+    src.CLM_TYPE as typeCd where (typeCd = "B") -> tgt.identifier = create('Identifier') as tgtIdentifier then {
+      src -> tgt.system = "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN" "Add system";
+      src.ICN_DCN as dcn -> tgt.value = dcn "Add value";
+    } "Add ICN_DCN for Part B only";
+    
+
+    src.UTN_VALID_ST_DT as utnStartDate -> tgt.preAuthRefPeriod = create('Period') as period then {
+      utnStartDate -> period.start = utnStartDate "Add start date";
+      src.UTN_VALID_EN_DT as utnEndDate -> period.end = utnEndDate "Add end date";
+    } "Add preAuthRefPeriod";
+
+
+    //ATT_PHY_NPI - Attending Physician NPI -> populated infrequently. 15172/1376490 are prac 
+    //ORDER_REFER_NPI - yes populated -> per line. 4903 / 1101955 are orgs. -> basically always practitioner. 
+    //RENDER_NPI - yes populated -> per line -> can be org or practitioner, few practitioners
+    //The PA data is kind of interesting. For now, we're going to populate a careTeam with the list of unique ones. 
+    src.providerList as pList where pList.careTeamType.exists() and pList.PRVDR_SK.exists() -> tgt.careTeam = create('BackboneElement') as tgtCareTeam then {
+      pList.careTeamType as careTeamType -> tgtCareTeam.role = create('CodeableConcept') as tgtCC then {
+        careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
+      } "Add care team types";
+      pList.careTeamSequenceNumber as seqNum -> tgtCareTeam.sequence = seqNum "Set sequence";
+      //In contrast to prior approaches, we'll populate both Organizations and Practitioners inline.
+      src -> tgtCareTeam.provider = create('Reference') as tgtReference then {
+          pList.PRVDR_SK as npi -> tgtReference.identifier = create('Identifier') as tgtId then {
+            src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203", "NPI") "Set type";
+            src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "Set System";
+            npi -> tgtId.value = npi "Set NPI";
+          } "Add identifier when NPI";
+          //See augment_sample_resources for how this is constructed. It will be blank in some instances. 
+          pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
+          pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
+          pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
+
+        } "Add reference to EOB";
+    } "Add CareTeam providers";
+    
+    src.priorAuthItem as paItem -> tgt.item = create('BackboneElement') as tgtItem then {
+      //Current_segment (line item)
+      paItem.CURRENT_SEGMENT as sequenceNumber -> tgtItem.sequence = sequenceNumber "Add sequence number";
+
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(0,1).convertsToInteger()) -> tgtItem.productOrService = cc("http://www.ama-assn.org/go/cpt", itemCode) "Add item code";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(0,1).convertsToInteger().not()) -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", itemCode) "Add item code";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(1,2).convertsToInteger().not()) -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", itemCode) "Add item code";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()!=5) -> tgtItem.productOrService = cc("http://terminology.hl7.org/CodeSystem/data-absent-reason","not-applicable") "add DAR";
+
+      paItem.PRICE_MOD1 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
+      paItem.PRICE_MOD2 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
+      
+      paItem.PLACE_OF_SERV as posCode -> tgtItem.location = cc("https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set", posCode) "Add place of service";
+
+      //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever. 
+      paItem.REV_CODE_1 as revenueCode -> tgtItem.revenue = create('CodeableConcept') as tgtRevenue then {
+        src.REV_CODE_1 as revCtrCode -> tgt.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",revCtrCode) "Add coding";
+        src.REV_CODE_1 as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "https://www.nubc.org/CodeSystem/RevenueCodes" "set system";
+            src -> tgtCoding.code = revCtrCode "set rev center code";
+        } "Add revenue center coding";
+      } "Add revenue";
+
+    //Per segment remaining fields:
+    paItem.PA_DT_ADDED as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADtAdded(val, ext) "Add PA_DT_ADDED";
+    paItem.PA_DT_UPDATED as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADtUpdated(val, ext) "Add PA_DT_UPDATED";
+    paItem.PA_DECISION as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADecision(val, ext) "Add PA_DECISION";
+    paItem.PA_REQ_SUB_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPAReqSubDt(val, ext) "Add PA_REQ_SUB_DT";
+    paItem.PA_REQ_REC_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPAReqRecDt(val, ext) "Add PA_REQ_REC_DT";
+    paItem.PA_DECISION_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADecisionDt(val, ext) "Add PA_DECISION_DT";
+    paItem.PA_DECISION_EXP_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADecisionExpDt(val, ext) "Add PA_DECISION_EXP_DT";
+    paItem.SERVICE_CNTS as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addServiceCnts(val, ext) "Add SERVICE_CNTS";
+    paItem.SVC_RENDER_ST as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addSvcRenderSt(val, ext) "Add SVC_RENDER_ST";
+    paItem.MR_COUNT_IND as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountInd(val, ext) "Add MR_COUNT_IND";
+    paItem.MR_COUNT_ST_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountStDt(val, ext) "Add MR_COUNT_ST_DT";
+    paItem.MR_COUNT_END_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountEndDt(val, ext) "Add MR_COUNT_END_DT";
+
+    } "Add items";
+
+    //SupportingInfo
+    src.MAC_ID as macID -> tgt.supportingInfo = create('BackboneElement') as tgtSupportingInfo then {
+      src -> tgtSupportingInfo.sequence = 1 "Add sequence";
+      src -> tgtSupportingInfo.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CNTRCTR_NUM") "Add Coding";
+      } "Add category";
+      macID -> tgtSupportingInfo.code = cc("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM", macID) "Add code";
+    } "Add supportingInfo";
+
+    //Type of Bill. Not always populated, so it's added at the end to have a hard-coded sequence
+    src.TOB as typeOfBill where (typeOfBill != "") -> tgt.supportingInfo = create('BackboneElement') as tgtSupportingInfo then {
+      src -> tgtSupportingInfo.sequence = 2 "Add sequence";
+      src -> tgtSupportingInfo.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      } "Add category";
+      typeOfbill -> tgtSupportingInfo.code = cc("https://www.nubc.org/CodeSystem/TypeOfBill", typeOfbill) "Add code";
+    } "Add TOB";
+
+    src.NPI as npiNum -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", npiNum) "Add reference to NPI";
+    src.NPI as npiNum -> tgt.contained = create('Organization') as tgtOrg then createPriorAuthOrg(src, tgtOrg) "Add Organization";
+
+    //Empty fields (for now)
+    //The following fields are in the PRAUC file, but are not currently active / used.
+    //We can re-visit them if new PA programs are added. Some may be per-segment, some may be per-request.
+    //Thus, we should wait until then to decide. Notes on each field accompany them. 
     //ICD_PROC_IND - ICD Proc Indicator -> always empty
     //ICD_PROC_CODE - ICD Procedure code -> always empty
-    //MAC_ID - mac id, should be able to re-use clm_cntrctr_num
-    //PA_filler - not inclined to use this
-    //ICN_DCN - Internal Control Number /DCN. see if it matches up with clm cntl num?
-    //PA_DT_ADDED - date added -> per segment? -> yes. 
-    //PA_DT_UPDATED - date updated in CWF -> per segment? -> yes.  
-    //SERVICE_CNTS - "Number of Services" -> PER segment
-    //PA_DECISION - A P N
-    //PA_REQ_SUB_DT - "submitted date".. to whom? 
-    //PA_REQ_REC_DT - "received" date.. by whom?
-    //PA_DECISION_DT - decision date
-    //PA_DECISION_EXP_DT - decision expiration date
-    //ORDER_REFER_NPI - yes populated
-    //RENDER_NPI - yes populated
-    //OPERATE_NPI - not populated since 2024-01-01
-    //SVC_RENDER_ST - Rendering service state - populated
-    // PRICE_MOD1 - Price Modifier 1
-    // PRICE_MOD2 - Price Modifier 2 -> both populated
-    //PLACE_OF_SERV - populated?  -> yes
-
-
-    // ICD_DIAG_IND_1 / ICD_DIAG_CODE_1 - indicator / diagnosis code - able to group? ever different? 
+    //ICD procedure code will remain unmapped until we see them populated.
+    //SEGMENT COUNT - not useful, can count item.
+    //ICD_DIAG_IND_1 / ICD_DIAG_CODE_1 - indicator / diagnosis code - able to group? ever different? 
     //assume diag ind = 0, none with 9, also not populated 
     //not populated after 2022?
-
-    //NPI - Facility NPI on the PA
-    // NAME - Facility Name
-    //CMS_CERT - CCN (CMS certification number)
-    //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever.
-    //COND_CODE_1 to COND_CODE_4 -> all empty 
-    //OCCUR_CODE_1 to OCCUR_CODE_4 -> all empty
-    //TOB
-    //MR_COUNT_IND - MR Count Indicator - what is this?? medical review count indicator
-    //MR_COUNT_ST_DT - medical review count start date
-    //MR_COUNT_END_DT - 
-    // ATT_PHY_NPI - Attending Physician NPI -> populated infrequently. 
+    //COND_CODE_1 to COND_CODE_4 -> all empty -> Not mapped for now
+    //OCCUR_CODE_1 to OCCUR_CODE_4 -> all empty -> Not mapped for now
+    //PA_IND - Not considered valuable outside CMS, not mapped
+    //OPERATE_NPI - not populated since 2024-01-01 -> per line -> in practice not used. Do not populate.
 
 
+}
 
+group addPADtAdded(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addPADtUpdated(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addPADecision(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addPAReqSubDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addPAReqRecDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addPADecisionDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addPADecisionExpDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addServiceCnts(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS" "Add extension url";
+    src as val -> tgt.value = cast(val, "decimal") "set value";
+}
+
+group addSvcRenderSt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://www.usps.com" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addMRCountInd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND" "Add extension url";
+    src as val -> tgt.value = cast(val, "decimal") "set value";
+}
+
+group addMRCountStDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+group addMRCountEndDt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT" "Add extension url";
+    src as val -> tgt.value = cast(val, 'date') "set value";
+}
+
+
+group createPriorAuthOrg(source src: ExplanationOfBenefitPA, target tgt: Organization){
+  src.NPI as npi -> tgt.id = npi "Set org id";
+  src.NPI as npi -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+    src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+    npi -> tgtId.value = npi "set NPI";
+  } "Create NPI identifier";
+
+  src.NPI as npi -> tgt.meta = create('Meta') as tgtMeta then {
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
+  } "Set Org metadata";
+  src -> tgt.active = "true" "set org status";
+  
+  src.NAME as orgName -> tgt.name = orgName;
+  
+  src.CMS_CERT as ccn -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
+    ccn -> tgtId.value = ccn "set ccn";
+  } "Add CCN num";
+}
+
+group createOrg(source src: Provider, target tgt: Organization){
+  src -> tgt.id = "BILLING-ID" "set id when no npi present";
+  src.PRVDR_SK as npi -> tgt.id = npi "Set org id";
+
+  src.PRVDR_SK as npi -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+    src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+    npi -> tgtId.value = npi "set NPI";
+  } "Create NPI identifier";
+
+  src.PRVDR_SK as sk -> tgt.meta = create('Meta') as tgtMeta then {
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
+  } "Set Org metadata";
+  src -> tgt.active = "true" "set org status";
+  
+  src.PRVDR_LAST_OR_LGL_NAME as orgName -> tgt.name = orgName;
+
+}
+
+group createPractitioner(source src: Provider, target tgt: Practitioner){
+  src -> tgt.id = "BILLING-ID" "set billing ID";
+  src.PRVDR_SK as npi -> tgt.id = npi "Set id";
+  src -> tgt.meta = create('Meta') as tgtMeta then {
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0" "Set profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" "Set profile";
+  } "Set practitioner metadata";
+
+  src -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+    src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+    src.PRVDR_SK as npi -> tgtId.value = npi "set NPI";
+  } "Create NPI identifier";
+
+  src.PRVDR_LAST_OR_LGL_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
+    familyName -> tgtName.family = familyName "set family name";
+  } "Add name";
 
 }

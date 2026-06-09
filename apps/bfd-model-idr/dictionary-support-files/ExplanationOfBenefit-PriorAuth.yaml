@@ -1,0 +1,186 @@
+- inputPath: ExplanationOfBenefit-PriorAuth.lastUpdated
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.meta.lastUpdated
+- inputPath: ExplanationOfBenefit-PriorAuth.beneficiarySk
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.patient.reference.substring(8)
+- inputPath: ExplanationOfBenefit-PriorAuth.derivedOutcome
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.outcome
+- inputPath: ExplanationOfBenefit-PriorAuth.CLM_TYPE
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.type.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE').code
+- inputPath: ExplanationOfBenefit-PriorAuth.UTN
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.identifier.where(system='https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number').value
+- inputPath: ExplanationOfBenefit-PriorAuth.ICN_DCN
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.identifier.where(system='https://bluebutton.cms.gov/identifiers/PA-ICN-DCN').value
+- inputPath: ExplanationOfBenefit-PriorAuth.UTN_VALID_ST_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.preAuthRefPeriod.start
+- inputPath: ExplanationOfBenefit-PriorAuth.UTN_VALID_EN_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.preAuthRefPeriod.end
+- inputPath: ExplanationOfBenefit-PriorAuth.MAC_ID
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_CNTRCTR_NUM').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM').code
+- inputPath: ExplanationOfBenefit-PriorAuth.TOB
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://terminology.hl7.org/CodeSystem/claiminformationcategory' and code='info').exists() and code.coding.system='https://www.nubc.org/CodeSystem/TypeOfBill').code.coding.code
+- inputPath: ExplanationOfBenefit-PriorAuth.NPI
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+- inputPath: ExplanationOfBenefit-PriorAuth.NAME
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).name
+- inputPath: ExplanationOfBenefit-PriorAuth.CMS_CERT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://terminology.hl7.org/NamingSystem/CCN').value
+- inputPath: LineItemComponent.CURRENT_SEGMENT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.sequence
+- inputPath: LineItemComponent.HCPCS_OR_CPT_OR_HIPPS
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.productOrService.coding.code
+- inputPath: LineItemComponent.PRICE_MOD1
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.modifier.coding.code
+- inputPath: LineItemComponent.PRICE_MOD2
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.modifier.coding.code
+- inputPath: LineItemComponent.PLACE_OF_SERV
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.location.coding.code
+- inputPath: LineItemComponent.REV_CODE_1
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.revenue.coding.code
+- inputPath: LineItemComponent.PA_DT_ADDED
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED').value
+- inputPath: LineItemComponent.PA_DT_UPDATED
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED').value
+- inputPath: LineItemComponent.PA_DECISION
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION').value.code
+- inputPath: LineItemComponent.PA_REQ_SUB_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT').value
+- inputPath: LineItemComponent.PA_REQ_REC_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT').value
+- inputPath: LineItemComponent.PA_DECISION_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT').value
+- inputPath: LineItemComponent.PA_DECISION_EXP_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT').value
+- inputPath: LineItemComponent.SERVICE_CNTS
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS').value
+- inputPath: LineItemComponent.SVC_RENDER_ST
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST').value.code
+- inputPath: LineItemComponent.MR_COUNT_IND
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND').value
+- inputPath: LineItemComponent.MR_COUNT_ST_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT').value
+- inputPath: LineItemComponent.MR_COUNT_END_DT
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT').value
