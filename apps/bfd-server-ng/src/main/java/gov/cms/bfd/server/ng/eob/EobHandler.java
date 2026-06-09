@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.eob;
 
 import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
@@ -69,9 +70,13 @@ public class EobHandler {
    *
    * @param criteria filter criteria
    * @param samhsaFilterMode SAMHSA filter mode
+   * @param requestDetails Hapi FHIR request details
    * @return bundle
    */
-  public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
+  public Bundle searchByBene(
+      ClaimSearchCriteria criteria,
+      SamhsaFilterMode samhsaFilterMode,
+      Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
@@ -100,11 +105,22 @@ public class EobHandler {
                 filterSamhsaClaims(claims, samhsaFilterMode)
                     .skip(repositoryCriteria.resolveOffset())
                     // we need to do this to know if we need include a link down stream
-                    .limit(repositoryCriteria.resolveLimit() + 1L)
+                    // any method of counting will consume the stream, so we do this to allow the
+                    // down stream counting to see there is more than the limit without needing to
+                    // materialize the entire list in memory here which could be very large and
+                    // impact performance
+                    .limit(repositoryCriteria.resolveLimit(true))
                     .map(claim -> transformToFhir(claim, samhsaFilterMode)),
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
 
-    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    var bundle =
+        FhirUtil.bundleOrDefault(
+            filteredClaims,
+            loadProgressRepository::lastUpdated,
+            requestDetails,
+            // we want the raw limit
+            Optional.of(repositoryCriteria.resolveLimit(false)),
+            Optional.of(repositoryCriteria.resolveOffset()));
     recordResultSize(bundle, samhsaFilterMode);
     return bundle;
   }
@@ -121,12 +137,21 @@ public class EobHandler {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
-    var claimStream =
-        claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var claimStream = claims.parallelStream();
     return switch (samhsaFilterMode) {
-      case INCLUDE -> claimStream;
-      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+      case INCLUDE -> claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      // it is faster to filter unordered so if we are filtering we should do it unordered first
+      // before the id ordering
+      case ONLY_SAMHSA ->
+          claimStream
+              .unordered()
+              .filter(this::claimHasSamhsa)
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      case EXCLUDE ->
+          claimStream
+              .unordered()
+              .filter(claim -> !claimHasSamhsa(claim))
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     };
   }
 

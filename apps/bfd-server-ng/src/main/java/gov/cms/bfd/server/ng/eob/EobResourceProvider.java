@@ -15,7 +15,6 @@ import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
-import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -107,10 +106,10 @@ public class EobResourceProvider implements IResourceProvider {
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
 
-    var bundle =
-        eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
-
-    return FhirUtil.applyBundleLinks(requestDetails, criteria.offset(), criteria.limit(), bundle);
+    return eobHandler.searchByBene(
+        criteria,
+        getFilterModeForRequest(request, samhsaSearchIntent),
+        Optional.of(requestDetails));
   }
 
   /**

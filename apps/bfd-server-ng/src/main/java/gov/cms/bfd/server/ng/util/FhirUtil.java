@@ -3,9 +3,11 @@ package gov.cms.bfd.server.ng.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -55,6 +57,32 @@ public class FhirUtil {
 
   /**
    * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * adds previous link if an offset exists add a next link if the stream contains at least one more
+   * than the limit empty.
+   *
+   * @param resources resources
+   * @param batchLastUpdated last updated
+   * @param requestDetails request details
+   * @param limit record count
+   * @param offset start index
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      Stream<? extends Resource> resources,
+      Supplier<ZonedDateTime> batchLastUpdated,
+      Optional<RequestDetails> requestDetails,
+      Optional<Integer> limit,
+      Optional<Integer> offset) {
+    var bundle = getBundle(resources, requestDetails, limit, offset);
+
+    if (bundle.getEntry().isEmpty()) {
+      return defaultBundle(batchLastUpdated);
+    }
+    return bundle;
+  }
+
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
    * empty.
    *
    * @param resources resources
@@ -63,12 +91,32 @@ public class FhirUtil {
    */
   public static Bundle bundleOrDefault(
       Stream<? extends Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
-    var bundle = getBundle(resources);
+    return bundleOrDefault(
+        resources, batchLastUpdated, Optional.empty(), Optional.empty(), Optional.empty());
+  }
 
-    if (bundle.getEntry().isEmpty()) {
-      return defaultBundle(batchLastUpdated);
-    }
-    return bundle;
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resource resource
+   * @param batchLastUpdated last updated
+   * @param requestDetails request details
+   * @param limit record count
+   * @param offset start index
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      Optional<Resource> resource,
+      Supplier<ZonedDateTime> batchLastUpdated,
+      Optional<RequestDetails> requestDetails,
+      Optional<Integer> limit,
+      Optional<Integer> offset) {
+    return resource
+        .map(
+            value ->
+                bundleOrDefault(Stream.of(value), batchLastUpdated, requestDetails, limit, offset))
+        .orElseGet(() -> defaultBundle(batchLastUpdated));
   }
 
   /**
@@ -81,9 +129,8 @@ public class FhirUtil {
    */
   public static Bundle bundleOrDefault(
       Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
-    return resource
-        .map(value -> bundleOrDefault(Stream.of(value), batchLastUpdated))
-        .orElseGet(() -> defaultBundle(batchLastUpdated));
+    return bundleOrDefault(
+        resource, batchLastUpdated, Optional.empty(), Optional.empty(), Optional.empty());
   }
 
   /**
@@ -117,9 +164,37 @@ public class FhirUtil {
     return bundle;
   }
 
-  private static Bundle getBundle(Stream<? extends Resource> resources) {
-    return new Bundle()
-        .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
+  private static Bundle getBundle(
+      Stream<? extends Resource> resources,
+      Optional<RequestDetails> requestDetails,
+      Optional<Integer> limit,
+      Optional<Integer> offset) {
+
+    record Page(List<Bundle.BundleEntryComponent> items, boolean hasMore) {}
+
+    var page =
+        resources
+            .map(r -> new Bundle.BundleEntryComponent().setResource(r))
+            .collect(
+                Collectors.teeing(
+                    Collectors.toList(),
+                    Collectors.counting(),
+                    // collecting and counting to see if we do have a next
+                    // limits the stream to only return the requested limit
+                    (list, count) ->
+                        new Page(
+                            limit.isPresent() && count > limit.get().longValue()
+                                ? list.subList(0, limit.get())
+                                : list,
+                            limit.isPresent() && count > limit.get().longValue())));
+
+    var bundle = new Bundle().setEntry(page.items());
+
+    // if we do not have a request we cannot build the links
+    requestDetails.ifPresent(
+        details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit));
+
+    return bundle;
   }
 
   /**
@@ -134,25 +209,14 @@ public class FhirUtil {
     return bundle;
   }
 
-  /**
-   * Returns a bundle updated with previous and next links. This method assumes you have at least
-   * one additional item in your bundle than the limit to know to add the updated next link
-   *
-   * @param requestDetails current request
-   * @param offset current offset
-   * @param limit requested limit
-   * @param bundle bundle
-   * @return bundle
-   */
-  public static Bundle applyBundleLinks(
+  private static void applyBundleLinks(
+      Bundle bundle,
       RequestDetails requestDetails,
+      boolean hasMore,
       Optional<Integer> offset,
-      Optional<Integer> limit,
-      Bundle bundle) {
+      Optional<Integer> limit) {
     // check if a link is needed
-    if (limit.isPresent() && limit.get() < bundle.getEntry().size()) {
-      // remove the extra entry that let us know we had next
-      bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
+    if (hasMore) {
       var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
       bundle
           .addLink()
@@ -168,7 +232,6 @@ public class FhirUtil {
           .setRelation(Constants.LINK_PREVIOUS)
           .setUrl(buildLinkURL(requestDetails, previousOffset));
     }
-    return bundle;
   }
 
   private static String buildLinkURL(RequestDetails requestDetails, Integer offset) {
