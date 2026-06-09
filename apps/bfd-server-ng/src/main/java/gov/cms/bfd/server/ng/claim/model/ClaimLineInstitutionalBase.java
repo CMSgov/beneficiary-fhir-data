@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
@@ -79,7 +80,8 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   @Override
-  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      ClaimFilterOptions options) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }

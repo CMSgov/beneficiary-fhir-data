@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.input;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
@@ -452,5 +453,27 @@ public class FhirInputConverter {
                 new InvalidRequestException(
                     "Unknown source. Supported sources are: "
                         + Arrays.toString(MetaSourceSk.values())));
+  }
+
+  /**
+   * Parses a boolean header from a RequestDetails object.
+   *
+   * @param requestDetails requestDetails object from call
+   * @param headerName name of header to parse
+   * @return Optional containing the parsed boolean value if a single header is present,
+   *     Optional.empty() if the header is not present
+   */
+  public static Optional<Boolean> parseBooleanHeader(
+      RequestDetails requestDetails, String headerName) {
+    var headerValues = requestDetails.getHeaders(headerName);
+
+    if (headerValues == null || headerValues.isEmpty()) {
+      return Optional.empty();
+    } else if (headerValues.size() > 1) {
+      // Multiple headers with the same name is not valid input, throw an error
+      throw new InvalidRequestException("Multiple values supplied for header: " + headerName);
+    } else {
+      return Optional.of(Boolean.parseBoolean(headerValues.getFirst()));
+    }
   }
 }
