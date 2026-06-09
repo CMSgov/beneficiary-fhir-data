@@ -23,7 +23,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.2'
+          go-version: '1.22'
       
       - name: Install SCC
         run: go install github.com/boyter/scc/v3@latest
