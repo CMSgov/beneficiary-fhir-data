@@ -26,7 +26,12 @@ public class MetricsConfiguration {
 
   /** List of metric names that are allowed to be published to Cloudwatch by Micrometer. */
   public static final Set<String> MICROMETER_ALLOWED_METRIC_PREFIX_NAMES =
-      Set.of("application.", "jvm.threads.virtual.", "executor.");
+      Set.of(
+          "application.",
+          "jvm.threads.virtual.",
+          "executor.",
+          "http-requests.latency.",
+          "http-requests.count.");
 
   /**
    * Configures Micrometer to support @MeterTag annotations with SPEL expressions.
