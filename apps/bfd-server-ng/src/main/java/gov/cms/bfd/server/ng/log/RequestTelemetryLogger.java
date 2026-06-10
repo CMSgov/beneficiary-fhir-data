@@ -186,19 +186,19 @@ public class RequestTelemetryLogger {
       metricRecorder.recordDuration(
           OVERALL_REQUEST_LATENCY_METRIC, duration, TimeUnit.MILLISECONDS);
 
-      var uri = getMdcValue(HTTP_ACCESS_REQUEST_URI);
+      var resourceRequested =
+          getMdcValue(RESOURCE_REQUESTED)
+              .orElseGet(
+                  () -> request.getRequestURI().contains("/metadata") ? "metadata" : "unknown");
       var certificateAlias = getMdcValue(CERTIFICATE_ALIAS);
 
-      if (uri.isPresent() && certificateAlias.isPresent()) {
-        var resourceEndpoint =
-            uri.get().startsWith("/v3/fhir/") ? uri.get().substring(9).split("/", 2)[0] : "unknown";
-
+      if (certificateAlias.isPresent()) {
         metricRecorder.recordDuration(
             REQUEST_LATENCY_BY_PARTNER_METRIC,
             duration,
             TimeUnit.MILLISECONDS,
             ENDPOINT,
-            resourceEndpoint,
+            resourceRequested,
             CLIENT,
             certificateAlias.get());
         metricRecorder.incrementCounter(
@@ -208,9 +208,9 @@ public class RequestTelemetryLogger {
             CLIENT,
             certificateAlias.get(),
             ENDPOINT,
-            resourceEndpoint);
+            resourceRequested);
         metricRecorder.incrementCounter(
-            OVERALL_REQUEST_COUNT_PER_ENDPOINT_METRIC, ENDPOINT, resourceEndpoint);
+            OVERALL_REQUEST_COUNT_PER_ENDPOINT_METRIC, ENDPOINT, resourceRequested);
       }
     }
 
