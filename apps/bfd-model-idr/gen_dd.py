@@ -23,6 +23,7 @@ sample_sources = {
     "Patient": "out/Patient.json",
     "ExplanationOfBenefit": "out/ExplanationOfBenefit.json",
     "ExplanationOfBenefit-Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
+    "ExplanationOfBenefit-PriorAuth": "out/ExplanationOfBenefit-PriorAuth.json",
     "Coverage": "out/Coverage-FFS.json",
 }
 sample_sources_by_profile = {
@@ -39,6 +40,7 @@ sample_sources_by_profile = {
     "Carrier": "out/ExplanationOfBenefit-Carrier.json",
     "DME": "out/ExplanationOfBenefit-DME.json",
     "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
+    "PriorAuth": "out/ExplanationOfBenefit-PriorAuth.json",
     "Patient": "out/Patient.json",
     "Audit": "out/AuditEvent.json",
 }
@@ -71,7 +73,17 @@ for walk_info in os.walk(structure_def_folder):
 
 
 coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
-claim_profiles = ["HHA", "Hospice", "SNF", "DME", "Carrier", "Inpatient", "Outpatient", "Pharmacy"]
+claim_profiles = [
+    "HHA",
+    "Hospice",
+    "SNF",
+    "DME",
+    "Carrier",
+    "Inpatient",
+    "Outpatient",
+    "Pharmacy",
+    "PriorAuth",
+]
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
     for file_name in files:
