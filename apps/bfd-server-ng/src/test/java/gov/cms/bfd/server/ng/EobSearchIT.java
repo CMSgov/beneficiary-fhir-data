@@ -136,19 +136,14 @@ class EobSearchIT extends IntegrationTestBase {
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByIdMultipleAndSource(SearchStyleEnum searchStyle) {
     var eobBundle =
-            searchBundle()
-                    .where(
-                            new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
-                                    .exactly()
-                                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX)
-                    )
-                    .where(
-                            new TokenClientParam(SOURCE)
-                                    .exactly()
-                                    .codes(DDPS_SOURCE)
-                    )
-                    .usingStyle(searchStyle)
-                    .execute();
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX))
+            .where(new TokenClientParam(SOURCE).exactly().codes(DDPS_SOURCE))
+            .usingStyle(searchStyle)
+            .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
