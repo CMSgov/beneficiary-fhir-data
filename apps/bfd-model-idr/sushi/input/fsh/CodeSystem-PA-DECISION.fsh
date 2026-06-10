@@ -6,6 +6,6 @@ Description: "The domain of prior authorization decision codes."
 * ^status = #active
 * ^content = #complete
 
-* #A "Approved"
-* #P "Partial"
-* #N "Denied"
+* #A "Affirmed"
+* #P "Pending"
+* #N "Non-affirmed"
