@@ -190,3 +190,10 @@
   sources:
     - CWF
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT').value
+- inputPath: LineItemComponent.RRB_EXCL_IND
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: iif(ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND').value = true, 'Y', ' ')
+

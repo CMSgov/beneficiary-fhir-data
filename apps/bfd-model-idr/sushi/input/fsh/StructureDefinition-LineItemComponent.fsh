@@ -73,6 +73,7 @@ Id: LineItemComponent
 * MR_COUNT_IND 0..1 string "MR Count Indicator" "MR Count Indicator"
 * MR_COUNT_ST_DT 0..1 string "MR Count Start Date" "MR Count Start Date"
 * MR_COUNT_END_DT 0..1 string "MR Count End Date" "MR Count End Date"
+* RRB_EXCL_IND 0..1 string "RRB Exclusion Indicator" "RRB Exclusion Indicator"
 * CLM_LINE_PLRO_AMT 0..1 string "Patient Liability Reduction Other Paid Amount" "The Patient Liability Reduction Other paid amount for the line item."
 * CLM_LINE_RX_NUM 0..1 string "RX Number" "THE PHARMACYS INTERNAL INVOICE NUMBER ON PHARMACEUTICAL CLAIMS."
 * CLM_RPTD_MFTR_DSCNT_AMT 0..1 string "Gap Discount Amount" "The reported manufacturer discount amount for the line item."

@@ -135,6 +135,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     paItem.MR_COUNT_IND as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountInd(val, ext) "Add MR_COUNT_IND";
     paItem.MR_COUNT_ST_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountStDt(val, ext) "Add MR_COUNT_ST_DT";
     paItem.MR_COUNT_END_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addMRCountEndDt(val, ext) "Add MR_COUNT_END_DT";
+    paItem.RRB_EXCL_IND as val where (val = "Y") -> tgtItem.extension = create('Extension') as ext then addRRBExclInd(val, ext) "Add RRB_EXCL_IND";
 
     } "Add items";
 
@@ -247,6 +248,12 @@ group addMRCountEndDt(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT" "Add extension url";
     src as val -> tgt.value = cast(val, 'date') "set value";
 }
+
+group addRRBExclInd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND" "Add extension url";
+    src -> tgt.value = true "set value";
+}
+
 
 
 group createPriorAuthOrg(source src: ExplanationOfBenefitPA, target tgt: Organization){
