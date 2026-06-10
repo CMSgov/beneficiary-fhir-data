@@ -8,6 +8,9 @@ import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -38,6 +41,8 @@ public class IntegrationTestBase {
   @Autowired protected EntityManager entityManager;
   @Autowired protected Configuration configuration;
   @Autowired protected DynamoDbClient dynamoDbClient;
+
+  public static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
@@ -294,5 +299,30 @@ public class IntegrationTestBase {
                 assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
               });
     }
+  }
+
+  public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {
+    final var fhirClient = getFhirClient();
+    final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue(INCLUDE_TAX_NUMBERS, headerValue);
+    fhirClient.registerInterceptor(headersInterceptor);
+
+    return fhirClient.read().resource(ExplanationOfBenefit.class);
+  }
+
+  public boolean hasTaxNumberExtension(ExplanationOfBenefit eob) {
+    return eob.getItem().stream()
+        .flatMap(item -> item.getExtension().stream())
+        .anyMatch(
+            extension -> SystemUrls.EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL.equals(extension.getUrl()));
+  }
+
+  public IQuery<Bundle> searchBundleWithIncludeTaxNumbersHeader(String headerValue) {
+    final var fhirClient = getFhirClient();
+    final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue(INCLUDE_TAX_NUMBERS, headerValue);
+    fhirClient.registerInterceptor(headersInterceptor);
+
+    return fhirClient.search().forResource(ExplanationOfBenefit.class).returnBundle(Bundle.class);
   }
 }
