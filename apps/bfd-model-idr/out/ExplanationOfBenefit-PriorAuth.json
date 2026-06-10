@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-06-09T12:00:00Z",
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
     "source" : "CWF",
     "profile" : ["http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization"],
     "tag" : [{
@@ -12,7 +12,7 @@
   },
   "contained" : [{
     "resourceType" : "Organization",
-    "id" : "1942241146",
+    "id" : "1485156206",
     "meta" : {
       "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
@@ -26,14 +26,14 @@
         }]
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1942241146"
+      "value" : "1485156206"
     },
     {
       "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-      "value" : "CCN1234"
+      "value" : "39T14"
     }],
     "active" : true,
-    "name" : "Prior Auth Medical Center"
+    "name" : "WAL-PART PHARMACY"
   },
   {
     "resourceType" : "Organization",
@@ -47,44 +47,40 @@
   }],
   "identifier" : [{
     "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
-    "value" : "UTN123456789"
-  },
-  {
-    "system" : "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN",
-    "value" : "DCN123456789"
+    "value" : "-GFJCTZG6DZ9JJ"
   }],
   "status" : "active",
   "type" : {
     "coding" : [{
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
-      "code" : "professional"
+      "code" : "institutional"
     },
     {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE",
-      "code" : "B",
-      "display" : "Part B"
+      "code" : "C",
+      "display" : "Hospice"
     }]
   },
   "use" : "preauthorization",
   "patient" : {
-    "reference" : "Patient/123456789"
+    "reference" : "Patient/-484096863"
   },
-  "created" : "2026-01-05",
+  "created" : "2022-12-30",
   "insurer" : {
     "reference" : "#insurer-org"
   },
   "provider" : {
-    "reference" : "#1942241146"
+    "reference" : "#1485156206"
   },
   "outcome" : "complete",
   "preAuthRefPeriod" : [{
-    "start" : "2026-01-01",
-    "end" : "2026-12-31"
+    "start" : "2023-01-09",
+    "end" : "2024-01-09"
   }],
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
-      "type" : "Organization",
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -94,15 +90,15 @@
           }]
         },
         "system" : "http://hl7.org/fhir/sid/us-npi",
-        "value" : "9876543210"
+        "value" : "1889084665"
       },
-      "display" : "Billing Provider Org"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
+        "code" : "referring",
+        "display" : "Referring"
       }]
     }
   },
@@ -119,15 +115,65 @@
           }]
         },
         "system" : "http://hl7.org/fhir/sid/us-npi",
-        "value" : "1234567890"
+        "value" : "1789884016"
       },
-      "display" : "Dr. Attending Practitioner"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
         "code" : "attending",
         "display" : "Attending"
+      }]
+    }
+  },
+  {
+    "sequence" : 3,
+    "provider" : {
+      "type" : "Practitioner",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "2429403993"
+      },
+      "display" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "operating",
+        "display" : "Operating"
+      }]
+    }
+  },
+  {
+    "sequence" : 4,
+    "provider" : {
+      "type" : "Practitioner",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1360490035"
+      },
+      "display" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
       }]
     }
   }],
@@ -148,8 +194,8 @@
     "code" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
-        "code" : "00234",
-        "display" : "\"ARKANSAS, LOUISIANA, AND MISSISSIPPI (PART A ROLL UP NUMBER)\""
+        "code" : "07101",
+        "display" : "ARKANSAS - NOVITAS SOLUTIONS, INC (EFF. 8/20/2012)"
       }]
     }
   },
@@ -165,198 +211,83 @@
     "code" : {
       "coding" : [{
         "system" : "https://www.nubc.org/CodeSystem/TypeOfBill",
-        "code" : "111"
+        "code" : "32X"
       }]
     }
   }],
   "insurance" : [{
     "focal" : true,
     "coverage" : {
-      "display" : "Part B"
+      "display" : "Part A"
     }
   }],
   "item" : [{
     "extension" : [{
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-      "valueDate" : "2026-01-02"
+      "valueDate" : "2022-12-30"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-      "valueDate" : "2026-01-03"
+      "valueDate" : "2022-12-30"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
-        "code" : "A"
+        "code" : "N"
       }
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-      "valueDate" : "2026-01-01"
+      "valueDate" : "2022-12-31"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-      "valueDate" : "2026-01-01"
+      "valueDate" : "2022-12-30"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-      "valueDate" : "2026-01-02"
+      "valueDate" : "2022-12-31"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-      "valueDate" : "2026-12-31"
+      "valueDate" : "2023-12-31"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 5
+      "valueDecimal" : 1
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
       "valueCoding" : {
         "system" : "https://www.usps.com",
-        "code" : "MD"
+        "code" : "FL"
       }
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 123
+      "valueDecimal" : 29
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-      "valueDate" : "2026-01-02"
+      "valueDate" : "2023-01-12"
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-      "valueDate" : "2026-12-31"
+      "valueDate" : "2024-01-12"
     }],
     "sequence" : 1,
-    "revenue" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
-        "code" : "0300",
-        "display" : "LABORATORY - GENERAL CLASSIFICATION"
-      },
-      {
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes",
-        "code" : "0300"
-      }]
-    },
     "productOrService" : {
       "coding" : [{
-        "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213"
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0151"
       }]
     },
     "modifier" : [{
       "coding" : [{
         "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-        "code" : "25"
+        "code" : "NU"
       }]
-    },
-    {
-      "coding" : [{
-        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-        "code" : "TC"
-      }]
-    }],
-    "locationCodeableConcept" : {
-      "coding" : [{
-        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
-        "code" : "11"
-      }]
-    }
-  },
-  {
-    "extension" : [{
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-      "valueDate" : "2026-01-02"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-      "valueDate" : "2026-01-05"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
-        "code" : "A"
-      }
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-      "valueDate" : "2026-01-01"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-      "valueDate" : "2026-01-01"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-      "valueDate" : "2026-01-02"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-      "valueDate" : "2026-12-31"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 5
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
-      "valueCoding" : {
-        "system" : "https://www.usps.com",
-        "code" : "MD"
-      }
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 123
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-      "valueDate" : "2026-01-02"
-    },
-    {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-      "valueDate" : "2026-12-31"
-    }],
-    "sequence" : 2,
-    "revenue" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
-        "code" : "0300",
-        "display" : "LABORATORY - GENERAL CLASSIFICATION"
-      },
-      {
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes",
-        "code" : "0300"
-      }]
-    },
-    "productOrService" : {
-      "coding" : [{
-        "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99214"
-      }]
-    },
-    "modifier" : [{
-      "coding" : [{
-        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-        "code" : "25"
-      }]
-    },
-    {
-      "coding" : [{
-        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-        "code" : "TC"
-      }]
-    }],
-    "locationCodeableConcept" : {
-      "coding" : [{
-        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
-        "code" : "11"
-      }]
-    }
+    }]
   }]
 }
