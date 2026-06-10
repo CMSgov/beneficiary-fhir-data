@@ -184,10 +184,7 @@ public class FhirUtil {
                     (list, count) ->
                         new Page(
                             trimEntriesToLimit(list, count, limit),
-                            determineHasMore(count, limit)
-                        )
-                )
-            );
+                            determineHasMore(count, limit))));
 
     var bundle = new Bundle().setEntry(page.items());
 
@@ -198,14 +195,15 @@ public class FhirUtil {
     return bundle;
   }
 
-  private static List<Bundle.BundleEntryComponent> trimEntriesToLimit(List<Bundle.BundleEntryComponent> entries,long count,Optional<Integer> limit){
-    if(limit.isPresent() && count > limit.get().longValue()) {
+  private static List<Bundle.BundleEntryComponent> trimEntriesToLimit(
+      List<Bundle.BundleEntryComponent> entries, long count, Optional<Integer> limit) {
+    if (limit.isPresent() && count > limit.get().longValue()) {
       return entries.subList(0, limit.get());
     }
     return entries;
   }
 
-  private static boolean determineHasMore(long count,Optional<Integer> limit){
+  private static boolean determineHasMore(long count, Optional<Integer> limit) {
     return limit.isPresent() && count > limit.get().longValue();
   }
 
