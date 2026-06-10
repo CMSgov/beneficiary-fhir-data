@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.trimmer;
+package gov.cms.bfd.server.ng.fhirtrimmer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.trimmer;
+package gov.cms.bfd.server.ng.fhirtrimmer;
 
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;

@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.trimmer;
+package gov.cms.bfd.server.ng.fhirtrimmer;
 
 import java.util.List;
 import java.util.Map;
