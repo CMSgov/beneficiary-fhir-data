@@ -5,6 +5,7 @@ Id: ExplanationOfBenefit-PriorAuth
 * ^type = "ExplanationOfBenefit-PriorAuth"
 * . ^label = "Explanation of Benefit Prior Authorization Resource for IDR. Ignore in DD Generation"
 * lastUpdated 0..1 string "Last Updated Time" "This field represents the last time that an ExplanationOfBenefit was updated."
+* createdDate 0..1 string "Created Date" "EOB created date."
 * beneficiarySk 1..1 string "Beneficiary Source Key" "Beneficiary Source Key"
 * derivedOutcome 0..1 string "Derived Outcome" "Derived outcome code."
 * CLM_TYPE 1..1 string "Claim Type" "Claim Type"

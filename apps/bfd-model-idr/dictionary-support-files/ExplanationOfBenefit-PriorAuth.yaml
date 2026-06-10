@@ -4,6 +4,12 @@
   sources:
     - CWF
   fhirPath: ExplanationOfBenefit.meta.lastUpdated
+- inputPath: ExplanationOfBenefit-PriorAuth.createdDate
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.created
 - inputPath: ExplanationOfBenefit-PriorAuth.beneficiarySk
   appliesTo:
     - PriorAuth

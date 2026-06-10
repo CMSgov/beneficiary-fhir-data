@@ -577,3 +577,16 @@ conceptmap "PriorAuthType" {
   s:"C" == t:"institutional"
   
 }
+
+conceptmap "PriorAuthInsuranceType" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"B" == t:"Part B"
+  s:"D" == t:"Part B"
+  s:"I" == t:"Part A"
+  s:"O" == t:"Part B"
+  s:"H" == t:"Part A"
+  s:"C" == t:"Part A"
+  
+}

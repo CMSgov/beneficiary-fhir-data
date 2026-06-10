@@ -110,4 +110,11 @@ uv run compile_resources.py \
     -m maps/AuditEvent.map \
     -i sample-data/BFDAuditLog-Sample.json \
     -o out/AuditEvent.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/BFDAuditLog 
+    -r https://bfd.cms.gov/MappingLanguage/Maps/BFDAuditLog
+
+uv run compile_resources.py \
+    -m maps/ExplanationOfBenefit-PriorAuth.map \
+    -i sample-data/PriorAuth-Sample.json \
+    -o out/ExplanationOfBenefit-PriorAuth.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-PriorAuth \
+    --test

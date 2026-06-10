@@ -41,16 +41,26 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       src.CLM_TYPE as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE', typeCd) "Add claim type code";
     } "Create type";
 
+    src -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.focal = true "Add focal";
+      src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
+        src.CLM_TYPE as typeCd -> tgtReference.display = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PriorAuthInsuranceType','code') "Add coverage type";
+      } "Add reference for coverage";
+    } "Add insurance coverage";
+
+    //ExplanationOfBenefit.created should be the highest value of PA_DT_UPDATED.
+    src.createdDate as createdDate -> tgt.created = createdDate "Add created date";
+
     //UTN - Unique Tracking Number, not actually unique though. 
     src.UTN as utn -> tgt.identifier = create('Identifier') as tgtIdentifier then {
-      src -> tgt.system = "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number" "Add UTN";
-      src -> tgt.value = utn "Add UTN";
+      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number" "Add UTN";
+      src -> tgtIdentifier.value = utn "Add UTN";
     } "Add UTN";
 
     //ICN_DCN - Internal Control Number /DCN. ONLY type = B
     src.CLM_TYPE as typeCd where (typeCd = "B") -> tgt.identifier = create('Identifier') as tgtIdentifier then {
-      src -> tgt.system = "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN" "Add system";
-      src.ICN_DCN as dcn -> tgt.value = dcn "Add value";
+      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN" "Add system";
+      src.ICN_DCN as dcn -> tgtIdentifier.value = dcn "Add value";
     } "Add ICN_DCN for Part B only";
     
 
@@ -96,14 +106,19 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       paItem.PRICE_MOD1 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
       paItem.PRICE_MOD2 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
       
-      paItem.PLACE_OF_SERV as posCode -> tgtItem.location = cc("https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set", posCode) "Add place of service";
+      paItem.PLACE_OF_SERV as posCode -> tgtItem.location = create('CodeableConcept') as tgtCC then {
+        paItem -> tgtCC.coding = create('Coding') as tgtCoding then {
+          paItem -> tgtCoding.system = "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set" "Add system";
+          posCode -> tgtCoding.code = posCode "Add system and code";
+        } "Add coding";
+      } "Add place of service";
 
       //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever. 
       paItem.REV_CODE_1 as revenueCode -> tgtItem.revenue = create('CodeableConcept') as tgtRevenue then {
-        src.REV_CODE_1 as revCtrCode -> tgt.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",revCtrCode) "Add coding";
-        src.REV_CODE_1 as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://www.nubc.org/CodeSystem/RevenueCodes" "set system";
-            src -> tgtCoding.code = revCtrCode "set rev center code";
+        revenueCode -> tgtRevenue.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD", revenueCode) "Add coding";
+        revenueCode -> tgtRevenue.coding = create('Coding') as tgtCoding then {
+            revenueCode -> tgtCoding.system = "https://www.nubc.org/CodeSystem/RevenueCodes" "set system";
+            revenueCode -> tgtCoding.code = revenueCode "set rev center code";
         } "Add revenue center coding";
       } "Add revenue";
 
@@ -139,11 +154,14 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       src -> tgtSupportingInfo.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
       } "Add category";
-      typeOfbill -> tgtSupportingInfo.code = cc("https://www.nubc.org/CodeSystem/TypeOfBill", typeOfbill) "Add code";
+      typeOfBill -> tgtSupportingInfo.code = cc("https://www.nubc.org/CodeSystem/TypeOfBill", typeOfBill) "Add code";
     } "Add TOB";
 
     src.NPI as npiNum -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", npiNum) "Add reference to NPI";
     src.NPI as npiNum -> tgt.contained = create('Organization') as tgtOrg then createPriorAuthOrg(src, tgtOrg) "Add Organization";
+
+    src -> tgt.contained = create('Organization') as tgtOrg then createInsurerOrg(src, tgtOrg) "Create insurer org.";
+    src -> tgt.insurer = create('Reference') as tgtOrgRef, tgtOrgRef.reference = "#insurer-org" "Set reference to contained insurer org";
 
     //Empty fields (for now)
     //The following fields are in the PRAUC file, but are not currently active / used.
@@ -291,4 +309,14 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
     familyName -> tgtName.family = familyName "set family name";
   } "Add name";
 
+}
+
+group createInsurerOrg(source src: ExplanationOfBenefitPA, target tgtOrg: Organization){
+  src -> tgtOrg.id = "insurer-org" "Set org id";
+  src -> tgtOrg.meta = create('Meta') as tgtMeta then {
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
+  } "Set organization metadata";
+  src -> tgtOrg.active = "true" "set org status";
+  src -> tgtOrg.name = "Centers for Medicare & Medicaid Services" "set org name";
 }
