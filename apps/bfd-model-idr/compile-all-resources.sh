@@ -114,7 +114,7 @@ uv run compile_resources.py \
 
 uv run compile_resources.py \
     -m maps/ExplanationOfBenefit-PriorAuth.map \
-    -i sample-data/PriorAuth-Sample.json \
+    -i sample-data/EOB-PriorAuth-Sample.json \
     -o out/ExplanationOfBenefit-PriorAuth.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-PriorAuth \
     --test

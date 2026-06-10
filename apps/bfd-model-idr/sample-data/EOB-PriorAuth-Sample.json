@@ -1,0 +1,42 @@
+{
+  "resourceType": "ExplanationOfBenefit-PriorAuth",
+  "id": "pa-GFJCTZG6DZ9JJ",
+  "createdDate": "2022-12-30",
+  "derivedOutcome": "complete",
+  "beneficiarySk": "-484096863",
+  "CLM_TYPE": "C",
+  "UTN": "-GFJCTZG6DZ9JJ",
+  "ICN_DCN": "12113903153104",
+  "UTN_VALID_ST_DT": "2023-01-09",
+  "UTN_VALID_EN_DT": "2024-01-09",
+  "MAC_ID": "07101",
+  "TOB": "32X",
+  "NPI": "1485156206",
+  "NAME": "WAL-PART PHARMACY",
+  "CMS_CERT": "39T14",
+  "PRVDR_BLG_PRVDR_NPI_NUM": "1485156206",
+  "PRVDR_ATNDG_PRVDR_NPI_NUM": "1789884016",
+  "PRVDR_RFRG_PRVDR_NPI_NUM": "1889084665",
+  "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1360490035",
+  "PRVDR_OPRTG_PRVDR_NPI_NUM": "2429403993",
+  "CLM_BLG_PRVDR_OSCAR_NUM": "39T14",
+  "priorAuthItem": [
+    {
+      "CURRENT_SEGMENT": "1",
+      "HCPCS_OR_CPT_OR_HIPPS": "G0151",
+      "PRICE_MOD1": "NU",
+      "PA_DT_ADDED": "2022-12-30",
+      "PA_DT_UPDATED": "2022-12-30",
+      "PA_DECISION": "N",
+      "PA_REQ_SUB_DT": "2022-12-31",
+      "PA_REQ_REC_DT": "2022-12-30",
+      "PA_DECISION_DT": "2022-12-31",
+      "PA_DECISION_EXP_DT": "2023-12-31",
+      "SERVICE_CNTS": "1",
+      "SVC_RENDER_ST": "FL",
+      "MR_COUNT_IND": "29",
+      "MR_COUNT_ST_DT": "2023-01-12",
+      "MR_COUNT_END_DT": "2024-01-12"
+    }
+  ]
+}
