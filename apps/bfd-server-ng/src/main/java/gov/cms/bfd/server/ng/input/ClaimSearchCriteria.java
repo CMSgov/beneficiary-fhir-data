@@ -47,9 +47,8 @@ public record ClaimSearchCriteria(
 
   /**
    * Returns the limit or the default.
-   * @param extra extra to add for pagination checking
-   * than the requested limit
    *
+   * @param extra extra to add for pagination checking than the requested limit
    * @return limit
    */
   public Integer resolveLimitWithExtra(Integer extra) {
