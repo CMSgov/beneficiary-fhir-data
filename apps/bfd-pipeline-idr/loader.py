@@ -1,5 +1,6 @@
 import itertools
 import logging
+import operator
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
@@ -41,7 +42,7 @@ def get_connection_string(load_mode: LoadMode) -> str:
 class PostgresLoader:
     def load(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         job_start: datetime,
         partition: LoadPartition,
@@ -62,7 +63,7 @@ class PostgresLoader:
 
     async def _async_load(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         job_start: datetime,
         partition: LoadPartition,
@@ -72,8 +73,8 @@ class PostgresLoader:
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=PER_BATCH_MIN_CONNECTIONS if not LoadMode.LOCAL else 1,
-            max_size=PER_BATCH_MAX_CONNECTIONS if not LoadMode.LOCAL else 1,
+            min_size=PER_BATCH_MIN_CONNECTIONS,
+            max_size=PER_BATCH_MAX_CONNECTIONS,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
             # acquires a connection from either library's implementation of a pool showed that
             # the majority of the time spent was actually in acquiring a connection, _not_ the
@@ -100,7 +101,7 @@ class PostgresLoader:
 class BatchLoader:
     def __init__(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         pool: psycopg_pool.AsyncConnectionPool[ACT],
         job_start: datetime,
@@ -126,8 +127,9 @@ class BatchLoader:
         )
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
-        self.unique_keys_str = ", ".join(model.unique_key())
-        self.update_set = [v for v in self.insert_cols if v not in model.unique_key()]
+        self.ordered_pkeys = model.ordered_pkeys()
+        self.primary_keys_str = ", ".join(self.ordered_pkeys)
+        self.update_set = [v for v in self.insert_cols if v not in model.ordered_pkeys()]
         self.update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in self.update_set])
         self.where_clause = (
             f"WHERE ({', '.join(f't.{v}' for v in self.update_set)}) IS "
@@ -159,6 +161,7 @@ class BatchLoader:
         self.progress_start_timer = Timer("progress_start", model, partition)
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.insert_batch_timer = Timer("insert_batch", model, partition)
+        self.sort_batch_timer = Timer("sort_batch", model, partition)
         self.last_updated_timer = Timer("last_updated", model, partition)
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
@@ -199,6 +202,10 @@ class BatchLoader:
             )
             num_rows += len(results)
 
+            self.sort_batch_timer.start()
+            results.sort(key=operator.attrgetter(*self.ordered_pkeys))
+            self.sort_batch_timer.stop()
+
             self.insert_batch_timer.start()
             async with anyio.create_task_group() as tg:
                 for idx, part in enumerate(
@@ -211,7 +218,6 @@ class BatchLoader:
                         timestamp,
                         name=f"{self.table}-{self.partition.name}-{idx}",
                     )
-
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
@@ -317,9 +323,7 @@ class BatchLoader:
 
         return full_tablename
 
-    async def _calculate_load_progress(
-        self, cur: psycopg.AsyncCursor, results: Sequence[T]
-    ) -> None:
+    async def _calculate_load_progress(self, cur: psycopg.AsyncCursor, results: list[T]) -> None:
         last = results[len(results) - 1].model_dump()
         # Some tables that contain reference data (like contract info) may not have the
         # normal IDR timestamps.
@@ -379,7 +383,7 @@ class BatchLoader:
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
-            ON CONFLICT ({self.unique_keys_str}) {self.on_conflict_clause}
+            ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
             ''',  # type: ignore
             {"timestamp": timestamp},
         )

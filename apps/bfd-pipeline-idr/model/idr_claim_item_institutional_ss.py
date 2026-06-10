@@ -35,7 +35,7 @@ from model.base_model import (
     INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
@@ -53,9 +53,10 @@ from model.base_model import (
 
 class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
+        int,
+        {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True},
     ]
-    bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
+    bfd_row_id: Annotated[int, {PRIMARY_KEY_ORDER: 1, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int | None, {ALIAS: ALIAS_LINE}]
     clm_line_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]

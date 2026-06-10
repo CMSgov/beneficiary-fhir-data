@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -26,13 +28,18 @@ public class ClaimLineProfessionalExtensions {
   @Column(name = "clm_srvc_ddctbl_sw")
   private Optional<ClaimServiceDeductibleCode> serviceDeductibleCode;
 
-  List<Extension> toFhir() {
+  @Embedded ClaimTaxNumberCode claimTaxNumberCode;
+
+  List<Extension> toFhir(ClaimFilterOptions options) {
     return Stream.of(
             supplierTypeCode.map(ClaimSupplierTypeCode::toFhir),
             federalTypeOfServiceCode.map(ClaimFederalTypeOfServiceCode::toFhir),
             paymentCode.map(ClaimPaymentCode::toFhir),
             providerSpecialtyCode.map(ProviderSpecialtyCode::toFhirExtension),
-            serviceDeductibleCode.map(ClaimServiceDeductibleCode::toFhir))
+            serviceDeductibleCode.map(ClaimServiceDeductibleCode::toFhir),
+            options.isIncludeTaxNumber()
+                ? claimTaxNumberCode.toFhir()
+                : Optional.<Extension>empty())
         .flatMap(Optional::stream)
         .toList();
   }
