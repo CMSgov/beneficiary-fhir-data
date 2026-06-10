@@ -103,7 +103,7 @@ public class EobHandler {
             () ->
                 filterSamhsaClaims(claims, options.getSamhsaFilterMode())
                     .skip(repositoryCriteria.resolveOffset())
-                    .limit(repositoryCriteria.resolveLimit(true))
+                    .limit(repositoryCriteria.resolveLimitWithExtra(1))
                     .map(claim -> transformToFhir(claim, options)),
             _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
 
@@ -113,7 +113,7 @@ public class EobHandler {
             loadProgressRepository::lastUpdated,
             requestDetails,
             // we want the raw limit
-            Optional.of(repositoryCriteria.resolveLimit(false)),
+            Optional.of(repositoryCriteria.resolveLimit()),
             Optional.of(repositoryCriteria.resolveOffset()));
     recordResultSize(bundle, options.getSamhsaFilterMode());
     return bundle;

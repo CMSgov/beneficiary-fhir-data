@@ -42,17 +42,18 @@ public record ClaimSearchCriteria(
    * @return limit
    */
   public Integer resolveLimit() {
-    return resolveLimit(false);
+    return resolveLimitWithExtra(0);
   }
 
   /**
-   * Returns the limit or the default. @ param checkNext adds 1 to the list to know if there is more
+   * Returns the limit or the default.
+   * @param extra extra to add for pagination checking
    * than the requested limit
    *
    * @return limit
    */
-  public Integer resolveLimit(boolean checkNext) {
-    return limit.orElse(5000) + (checkNext ? 1 : 0);
+  public Integer resolveLimitWithExtra(Integer extra) {
+    return limit.orElse(5000) + (extra == null ? 0 : extra);
   }
 
   /**
