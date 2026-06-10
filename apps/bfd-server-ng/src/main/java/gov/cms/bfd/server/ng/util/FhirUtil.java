@@ -183,10 +183,11 @@ public class FhirUtil {
                     // limits the stream to only return the requested limit
                     (list, count) ->
                         new Page(
-                            limit.isPresent() && count > limit.get().longValue()
-                                ? list.subList(0, limit.get())
-                                : list,
-                            limit.isPresent() && count > limit.get().longValue())));
+                            trimEntriesToLimit(list, count, limit),
+                            determineHasMore(count, limit)
+                        )
+                )
+            );
 
     var bundle = new Bundle().setEntry(page.items());
 
@@ -195,6 +196,17 @@ public class FhirUtil {
         details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit));
 
     return bundle;
+  }
+
+  private static List<Bundle.BundleEntryComponent> trimEntriesToLimit(List<Bundle.BundleEntryComponent> entries,long count,Optional<Integer> limit){
+    if(limit.isPresent() && count > limit.get().longValue()) {
+      return entries.subList(0, limit.get());
+    }
+    return entries;
+  }
+
+  private static boolean determineHasMore(long count,Optional<Integer> limit){
+    return limit.isPresent() && count > limit.get().longValue();
   }
 
   /**

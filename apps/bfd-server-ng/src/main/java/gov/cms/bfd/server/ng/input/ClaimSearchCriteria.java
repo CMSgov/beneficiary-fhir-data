@@ -51,8 +51,8 @@ public record ClaimSearchCriteria(
    * @param extra extra to add for pagination checking than the requested limit
    * @return limit
    */
-  public Integer resolveLimitWithExtra(Integer extra) {
-    return limit.orElse(5000) + (extra == null ? 0 : extra);
+  public Integer resolveLimitWithExtra(int extra) {
+    return limit.orElse(5000) + extra;
   }
 
   /**
