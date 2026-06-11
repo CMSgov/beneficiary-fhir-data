@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
@@ -13,9 +15,9 @@ import java.util.List;
  */
 public record ClaimIdSearchCriteria(
     List<Long> claimUniqueIds,
-    DateTimeRange serviceDate,
-    DateTimeRange lastUpdated,
-    List<List<MetaSourceSk>> sources) {
+    @NotNull DateTimeRange serviceDate,
+    @NotNull DateTimeRange lastUpdated,
+    @NotNull List<List<MetaSourceSk>> sources) {
 
   /**
    * Returns whether a last updated date filter has been provided.
@@ -23,7 +25,7 @@ public record ClaimIdSearchCriteria(
    * @return boolean
    */
   public boolean hasServiceUpdated() {
-    return serviceDate() != null && serviceDate().hasBounds();
+    return serviceDate().hasBounds();
   }
 
   /**
@@ -32,7 +34,7 @@ public record ClaimIdSearchCriteria(
    * @return boolean
    */
   public boolean hasLastUpdated() {
-    return lastUpdated() != null && lastUpdated().hasBounds();
+    return lastUpdated().hasBounds();
   }
 
   /**
@@ -41,6 +43,6 @@ public record ClaimIdSearchCriteria(
    * @return boolean
    */
   public boolean hasSources() {
-    return sources != null && !sources.isEmpty();
+    return !sources.isEmpty();
   }
 }

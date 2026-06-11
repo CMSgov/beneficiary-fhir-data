@@ -96,11 +96,9 @@ public class ClaimRepository {
     }
     var paramBuilders =
         List.of(
-            new BillablePeriodFilterParam(
-                Optional.of(criteria.serviceDate()).orElse(new DateTimeRange())),
-            new LastUpdatedFilterParam(
-                Optional.of(criteria.lastUpdated()).orElse(new DateTimeRange())),
-            new SourceFilterParam(Optional.of(criteria.sources()).orElse(Collections.emptyList())));
+            new BillablePeriodFilterParam(criteria.serviceDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new SourceFilterParam(criteria.sources()));
 
     var professionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
