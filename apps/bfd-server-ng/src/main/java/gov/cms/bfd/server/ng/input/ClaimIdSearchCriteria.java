@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 /**
