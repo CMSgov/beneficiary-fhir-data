@@ -122,7 +122,7 @@ public class EobResourceProvider implements IResourceProvider {
             Optional.ofNullable(count),
             // we will support both offset and startIndex for now, but they can't be used together.
             // If both are provided, offset will take precedence
-            offset != null ? Optional.of(offset) : FhirInputConverter.toIntOptional(startIndex),
+            Optional.ofNullable(offset).or(() -> FhirInputConverter.toIntOptional(startIndex)),
             tagCriteria,
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
