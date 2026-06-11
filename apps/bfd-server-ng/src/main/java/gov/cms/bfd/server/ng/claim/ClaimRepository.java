@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -81,36 +81,30 @@ public class ClaimRepository {
   /**
    * Search for a claim by its ID.
    *
-   * @param claimUniqueIds claim IDs
-   * @param claimThroughDate claim through date
-   * @param lastUpdated last updated
+   * @param criteria is search criteria
    * @return claim
    */
   @Timed(value = "application.claim.search_by_id")
   public List<ClaimBase> findByIds(
-      List<Long> claimUniqueIds,
-      @MeterTag(
-              key = "hasClaimThroughDate",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange claimThroughDate,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdated) {
-    if (claimUniqueIds == null || claimUniqueIds.isEmpty()) {
+      @MeterTag(key = "hasServiceUpdated", expression = "hasServiceUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasSources", expression = "hasSources()")
+          ClaimIdSearchCriteria criteria) {
+    if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
       return Collections.emptyList();
     }
     var paramBuilders =
         List.of(
-            new BillablePeriodFilterParam(claimThroughDate),
-            new LastUpdatedFilterParam(lastUpdated));
+            new BillablePeriodFilterParam(criteria.serviceDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new SourceFilterParam(criteria.sources()));
 
     var professionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
             CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
             ClaimProfessionalSharedSystems.class,
             ClaimProfessionalSharedSystems.getSystemType(),
-            claimUniqueIds,
+            criteria.claimUniqueIds(),
             paramBuilders);
 
     var professionalNchClaims =
@@ -118,7 +112,7 @@ public class ClaimRepository {
             CLAIM_PROFESSIONAL_NCH,
             ClaimProfessionalNch.class,
             ClaimProfessionalNch.getSystemType(),
-            claimUniqueIds,
+            criteria.claimUniqueIds(),
             paramBuilders);
 
     var institutionalSharedSystemsClaims =
@@ -126,7 +120,7 @@ public class ClaimRepository {
             CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
             ClaimInstitutionalSharedSystems.class,
             ClaimInstitutionalSharedSystems.getSystemType(),
-            claimUniqueIds,
+            criteria.claimUniqueIds(),
             paramBuilders);
 
     var institutionalNchClaims =
@@ -134,12 +128,16 @@ public class ClaimRepository {
             CLAIM_INSTITUTIONAL_NCH,
             ClaimInstitutionalNch.class,
             ClaimInstitutionalNch.getSystemType(),
-            claimUniqueIds,
+            criteria.claimUniqueIds(),
             paramBuilders);
 
     var rxClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), claimUniqueIds, paramBuilders);
+            CLAIM_RX,
+            ClaimRx.class,
+            ClaimRx.getSystemType(),
+            criteria.claimUniqueIds(),
+            paramBuilders);
 
     // Wait for all queries
     CompletableFuture.allOf(

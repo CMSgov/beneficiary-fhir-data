@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -20,10 +21,7 @@ import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -59,7 +57,11 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
-    var eobs = searchByIdsInner(List.of(fhirId), new DateTimeRange(), new DateTimeRange(), options);
+    var eobs =
+        searchByIdsInner(
+            new ClaimIdSearchCriteria(
+                List.of(fhirId), new DateTimeRange(), new DateTimeRange(), Collections.emptyList()),
+            options);
     return eobs.stream().findFirst();
   }
 
@@ -131,27 +133,18 @@ public class EobHandler {
   /**
    * Search for claims data by claim ID.
    *
-   * @param claimUniqueIds claim IDs
-   * @param serviceDate service date
-   * @param lastUpdated last updated
+   * @param criteria id search criteria
    * @param options claim filter options
    * @return bundle
    */
-  public Bundle searchById(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      ClaimFilterOptions options) {
-    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, options);
+  public Bundle searchById(ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var eobs = searchByIdsInner(criteria, options);
     return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
   private List<ExplanationOfBenefit> searchByIdsInner(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      ClaimFilterOptions options) {
-    var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
+      ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var claims = claimRepository.findByIds(criteria);
 
     return filterSamhsaClaims(claims, options.getSamhsaFilterMode())
         .map(claim -> transformToFhir(claim, options))

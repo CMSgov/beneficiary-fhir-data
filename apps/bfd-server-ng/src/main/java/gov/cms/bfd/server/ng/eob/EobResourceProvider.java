@@ -8,16 +8,14 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
@@ -41,6 +39,7 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String START_INDEX = "startIndex";
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
+  private static final String SOURCE_QUERY_PARAM = "_source";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -139,6 +138,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param lastUpdated last updated
    * @param requestDetails request Details object
    * @param request HTTP request details
+   * @param source claim source to filter by
    * @return bundle
    */
   @Search
@@ -148,7 +148,8 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       final RequestDetails requestDetails,
-      final HttpServletRequest request) {
+      final HttpServletRequest request,
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
@@ -159,11 +160,14 @@ public class EobResourceProvider implements IResourceProvider {
             .includeTaxNumber(includeTaxNumbers.orElse(false))
             .build();
 
-    return eobHandler.searchById(
-        FhirInputConverter.toLongList(fhirIds),
-        FhirInputConverter.toDateTimeRange(serviceDate),
-        FhirInputConverter.toDateTimeRange(lastUpdated),
-        options);
+    var searchCriteria =
+        new ClaimIdSearchCriteria(
+            FhirInputConverter.toLongList(fhirIds),
+            FhirInputConverter.toDateTimeRange(serviceDate),
+            FhirInputConverter.toDateTimeRange(lastUpdated),
+            FhirInputConverter.parseSourceParameter(source));
+
+    return eobHandler.searchById(searchCriteria, options);
   }
 
   private SamhsaFilterMode getFilterModeForRequest(
