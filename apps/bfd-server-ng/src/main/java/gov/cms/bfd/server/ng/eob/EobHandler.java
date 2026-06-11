@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.eob;
 
 import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
@@ -70,9 +71,13 @@ public class EobHandler {
    *
    * @param criteria filter criteria
    * @param options claim filter options
+   * @param requestDetails Hapi FHIR request details
    * @return bundle
    */
-  public Bundle searchByBene(ClaimSearchCriteria criteria, ClaimFilterOptions options) {
+  public Bundle searchByBene(
+      ClaimSearchCriteria criteria,
+      ClaimFilterOptions options,
+      Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
@@ -100,11 +105,18 @@ public class EobHandler {
             () ->
                 filterSamhsaClaims(claims, options.getSamhsaFilterMode())
                     .skip(repositoryCriteria.resolveOffset())
-                    .limit(repositoryCriteria.resolveLimit())
+                    .limit(repositoryCriteria.resolveLimitWithExtra(1))
                     .map(claim -> transformToFhir(claim, options)),
             _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
 
-    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    var bundle =
+        FhirUtil.bundleOrDefault(
+            filteredClaims,
+            loadProgressRepository::lastUpdated,
+            requestDetails,
+            // we want the raw limit
+            Optional.of(repositoryCriteria.resolveLimit()),
+            Optional.of(repositoryCriteria.resolveOffset()));
     recordResultSize(bundle, options.getSamhsaFilterMode());
     return bundle;
   }
@@ -121,12 +133,21 @@ public class EobHandler {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
-    var claimStream =
-        claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var claimStream = claims.parallelStream();
     return switch (samhsaFilterMode) {
-      case INCLUDE -> claimStream;
-      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+      case INCLUDE -> claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      // it is faster to filter unordered so if we are filtering we should do it unordered first
+      // before the id ordering
+      case ONLY_SAMHSA ->
+          claimStream
+              .unordered()
+              .filter(this::claimHasSamhsa)
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      case EXCLUDE ->
+          claimStream
+              .unordered()
+              .filter(claim -> !claimHasSamhsa(claim))
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     };
   }
 
