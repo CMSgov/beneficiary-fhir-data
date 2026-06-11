@@ -311,7 +311,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"ExplanationOfBenefit\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"ExplanationOfBenefit\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"ExplanationOfBenefit\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
@@ -331,7 +331,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
@@ -351,7 +351,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"metadata\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"metadata\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"metadata\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
@@ -418,7 +418,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Coverage\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Coverage\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Coverage\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
@@ -437,7 +437,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$idi-match\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$idi-match\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient/$idi-match\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
@@ -457,7 +457,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$generate-insurance-card\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$generate-insurance-card\"', 'Average', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient/$generate-insurance-card\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",

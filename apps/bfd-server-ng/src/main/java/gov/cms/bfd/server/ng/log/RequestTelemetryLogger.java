@@ -10,12 +10,11 @@ import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,8 +135,12 @@ public class RequestTelemetryLogger {
    * @param requestDetails the request details
    */
   public void recordRequestDetails(RequestDetails requestDetails) {
-    putIfPresent(RESOURCE_REQUESTED, requestDetails.getResourceName());
-    putIfPresent(OPERATION, requestDetails.getOperation());
+    var resourceOperation =
+        Stream.of(requestDetails.getResourceName(), requestDetails.getOperation())
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining("/"));
+    putIfPresent(RESOURCE_OPERATION, resourceOperation);
+
     var operationType = requestDetails.getRestOperationType();
     putIfPresent(OPERATION_TYPE, operationType.getCode());
 
@@ -186,19 +189,16 @@ public class RequestTelemetryLogger {
       metricRecorder.recordDuration(
           OVERALL_REQUEST_LATENCY_METRIC, duration, TimeUnit.MILLISECONDS);
 
-      var resourceRequested =
-          getMdcValue(RESOURCE_REQUESTED)
-              .orElseGet(
-                  () -> request.getRequestURI().contains("/metadata") ? "metadata" : "unknown");
+      var resourceOperation = getMdcValue(RESOURCE_OPERATION);
       var certificateAlias = getMdcValue(CERTIFICATE_ALIAS);
 
-      if (certificateAlias.isPresent()) {
+      if (resourceOperation.isPresent() && certificateAlias.isPresent()) {
         metricRecorder.recordDuration(
             REQUEST_LATENCY_BY_PARTNER_METRIC,
             duration,
             TimeUnit.MILLISECONDS,
             ENDPOINT,
-            resourceRequested,
+            resourceOperation.get(),
             CLIENT,
             certificateAlias.get());
         metricRecorder.incrementCounter(
@@ -208,9 +208,9 @@ public class RequestTelemetryLogger {
             CLIENT,
             certificateAlias.get(),
             ENDPOINT,
-            resourceRequested);
+            resourceOperation.get());
         metricRecorder.incrementCounter(
-            OVERALL_REQUEST_COUNT_PER_ENDPOINT_METRIC, ENDPOINT, resourceRequested);
+            OVERALL_REQUEST_COUNT_PER_ENDPOINT_METRIC, ENDPOINT, resourceOperation.get());
       }
     }
 
