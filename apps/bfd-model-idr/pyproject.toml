@@ -18,7 +18,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.12.9",
-    "uv>=0.8.10",
+    "uv>=0.11.15",
     "pyright>=1.1.403",
     "debugpy>=1.8.19",
 ]

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.eob;
 
 import static gov.cms.bfd.server.ng.util.MetricRecorder.SAMHSA_FILTER_MODE;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
@@ -9,6 +10,7 @@ import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -18,10 +20,7 @@ import gov.cms.bfd.server.ng.util.MetricRecorder;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.micrometer.core.instrument.Tags;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -56,7 +55,11 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
-    var eobs = searchByIdsInner(List.of(fhirId), new DateTimeRange(), new DateTimeRange(), options);
+    var eobs =
+        searchByIdsInner(
+            new ClaimIdSearchCriteria(
+                List.of(fhirId), new DateTimeRange(), new DateTimeRange(), Collections.emptyList()),
+            options);
     return eobs.stream().findFirst();
   }
 
@@ -65,9 +68,13 @@ public class EobHandler {
    *
    * @param criteria filter criteria
    * @param options claim filter options
+   * @param requestDetails Hapi FHIR request details
    * @return bundle
    */
-  public Bundle searchByBene(ClaimSearchCriteria criteria, ClaimFilterOptions options) {
+  public Bundle searchByBene(
+      ClaimSearchCriteria criteria,
+      ClaimFilterOptions options,
+      Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
@@ -97,9 +104,15 @@ public class EobHandler {
               var filteredClaims =
                   filterSamhsaClaims(claims, samhsaFilterMode)
                       .skip(repositoryCriteria.resolveOffset())
-                      .limit(repositoryCriteria.resolveLimit())
+                      .limit(repositoryCriteria.resolveLimitWithExtra(1))
                       .map(claim -> transformToFhir(claim, options));
-              return FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+              return FhirUtil.bundleOrDefault(
+                  filteredClaims,
+                  loadProgressRepository::lastUpdated,
+                  requestDetails,
+                  // we want the raw limit
+                  Optional.of(repositoryCriteria.resolveLimit()),
+                  Optional.of(repositoryCriteria.resolveOffset()));
             },
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
     metricRecorder.recordDistribution(
@@ -115,39 +128,39 @@ public class EobHandler {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
-    var claimStream =
-        claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var claimStream = claims.parallelStream();
     return switch (samhsaFilterMode) {
-      case INCLUDE -> claimStream;
-      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+      case INCLUDE -> claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      // it is faster to filter unordered so if we are filtering we should do it unordered first
+      // before the id ordering
+      case ONLY_SAMHSA ->
+          claimStream
+              .unordered()
+              .filter(this::claimHasSamhsa)
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      case EXCLUDE ->
+          claimStream
+              .unordered()
+              .filter(claim -> !claimHasSamhsa(claim))
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     };
   }
 
   /**
    * Search for claims data by claim ID.
    *
-   * @param claimUniqueIds claim IDs
-   * @param serviceDate service date
-   * @param lastUpdated last updated
+   * @param criteria id search criteria
    * @param options claim filter options
    * @return bundle
    */
-  public Bundle searchById(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      ClaimFilterOptions options) {
-    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, options);
+  public Bundle searchById(ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var eobs = searchByIdsInner(criteria, options);
     return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
   private List<ExplanationOfBenefit> searchByIdsInner(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      ClaimFilterOptions options) {
-    var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
+      ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var claims = claimRepository.findByIds(criteria);
 
     return filterSamhsaClaims(claims, options.getSamhsaFilterMode())
         .map(claim -> transformToFhir(claim, options))

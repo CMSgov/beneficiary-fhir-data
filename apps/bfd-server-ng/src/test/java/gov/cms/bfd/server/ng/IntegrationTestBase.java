@@ -43,6 +43,8 @@ public class IntegrationTestBase {
   @Autowired protected DynamoDbClient dynamoDbClient;
 
   public static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
+  protected static final String SOURCE = "_source";
+  protected static final String DDPS_SOURCE = "DDPS";
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
