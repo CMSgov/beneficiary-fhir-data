@@ -192,12 +192,12 @@ class FhirTrimmerValidationTest {
     // PRINT COMPARISON REPORT
     // =========================================================================
     //    printResults("VALIDATION-BASED TRIMMER", totalIterations, validationWatch.getTime());
-    printResults("PROACTIVE (SKIP-VALIDATION) TRIMMER", totalIterations, proactiveWatch.getTime());
+    printResults(totalIterations, proactiveWatch.getTime());
   }
 
-  private void printResults(String label, int iterations, long totalMillis) {
+  private void printResults(int iterations, long totalMillis) {
     double throughput = (iterations * 1000.0) / totalMillis;
-    System.out.println("\n=================== " + label + " ===================");
+    System.out.println("\n=================== " + "PROACTIVE (SKIP-VALIDATION) TRIMMER" + " ===================");
     System.out.println("Total Time:  " + totalMillis + " ms");
     System.out.printf("Throughput:  %.2f Bundles per second%n", throughput);
     System.out.printf("Avg Latency: %.4f ms per Bundle%n", ((double) totalMillis / iterations));
