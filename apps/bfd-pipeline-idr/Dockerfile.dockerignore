@@ -44,5 +44,5 @@
 !settings.py
 !test_pipeline.py
 !timer.py
-!last_updated.py
+!batch_worker.py
 !db_utils.py

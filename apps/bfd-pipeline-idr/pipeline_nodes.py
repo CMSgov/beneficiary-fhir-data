@@ -1,9 +1,9 @@
 import random
 from datetime import datetime
-from typing import Any
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
+from batch_worker import LoadingBatchWorkerClient
 from load_partition import LoadPartition, LoadType
 from model.base_model import (
     IdrBaseModel,
@@ -108,7 +108,13 @@ def _gen_partitioned_node_inputs(
     return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
-def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType, source: Source) -> bool:
+def stage1(
+    load_mode: LoadMode,
+    start_time: datetime,
+    load_type: LoadType,
+    source: Source,
+    worker_client: LoadingBatchWorkerClient,
+) -> bool:
     return extract_and_load(
         cls=IdrBeneficiaryOvershareMbi,
         partition=None,
@@ -116,6 +122,7 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType, sourc
         load_mode=load_mode,
         load_type=load_type,
         source=source,
+        worker_client=worker_client,
     )
 
 
@@ -154,12 +161,7 @@ def do_stage2(
     start_time: datetime,
     load_type: LoadType,
     source: Source,
-    # Hamilton gets the type hint of each function and actually tries to validate the incoming
-    # object against the type hint. This does not work for the LastUpdatedQueue type alias nor
-    # does it work when specifying the underlying, aliased Queue-type. It is simply not worth the
-    # effort to do this more correctly, so we workaround it with Any
-    # TODO: Fix this to use the right type if Hamilton ever supports it
-    last_updated_queue: Any | None,  # noqa: ANN401
+    worker_client: LoadingBatchWorkerClient,
 ) -> bool:
     model_type, partition = stage2_inputs
     return extract_and_load(
@@ -169,7 +171,7 @@ def do_stage2(
         load_mode=load_mode,
         load_type=load_type,
         source=source,
-        last_updated_queue=last_updated_queue,
+        worker_client=worker_client,
     )
 
 
@@ -198,7 +200,7 @@ def do_stage3(
     start_time: datetime,
     load_type: LoadType,
     source: Source,
-    last_updated_queue: Any | None,  # noqa: ANN401
+    worker_client: LoadingBatchWorkerClient,
 ) -> bool:
     model_type, partition = stage3_inputs
     return extract_and_load(
@@ -208,7 +210,7 @@ def do_stage3(
         load_mode=load_mode,
         load_type=load_type,
         source=source,
-        last_updated_queue=last_updated_queue,
+        worker_client=worker_client,
     )
 
 
@@ -237,7 +239,7 @@ def do_stage4(
     load_mode: LoadMode,
     start_time: datetime,
     source: Source,
-    last_updated_queue: Any | None,  # noqa: ANN401
+    worker_client: LoadingBatchWorkerClient,
 ) -> bool:
     model_type, partition = stage4_inputs
     if load_type == LoadType.INCREMENTAL:
@@ -248,7 +250,7 @@ def do_stage4(
             load_mode=load_mode,
             load_type=load_type,
             source=source,
-            last_updated_queue=last_updated_queue,
+            worker_client=worker_client,
         )
 
     return False

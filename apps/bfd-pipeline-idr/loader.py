@@ -1,7 +1,8 @@
 import itertools
 import operator
 from collections.abc import Iterator, Sequence
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
+from typing import cast
 
 import anyio
 import psycopg
@@ -12,11 +13,11 @@ from psycopg.abc import Params, QueryNoTemplate
 from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
+from batch_worker import LoadingBatch, LoadingBatchWorkerClient
 from constants import DEFAULT_MIN_DATE
 from db_utils import get_connection_string, to_pg_integer
-from last_updated import LastUpdatedBatch, LastUpdatedQueue
 from load_partition import LoadPartition, LoadType
-from model.base_model import DbType, LoadMode, T
+from model.base_model import DbType, IdrBaseModel, LoadMode, T
 from model.load_progress import LoadProgress
 from settings import (
     PER_BATCH_CONCURRENT_ROWS,
@@ -37,7 +38,7 @@ class PostgresLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
-        last_updated_queue: LastUpdatedQueue | None,
+        worker_client: LoadingBatchWorkerClient,
     ) -> bool:
         return anyio.run(
             self._async_load,
@@ -48,7 +49,7 @@ class PostgresLoader:
             progress,
             load_type,
             load_mode,
-            last_updated_queue,
+            worker_client,
         )
 
     async def _async_load(
@@ -60,7 +61,7 @@ class PostgresLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
-        last_updated_queue: LastUpdatedQueue | None,
+        worker_client: LoadingBatchWorkerClient,
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
@@ -86,7 +87,7 @@ class PostgresLoader:
                 progress,
                 load_type,
                 load_mode,
-                last_updated_queue,
+                worker_client,
             ).load()
 
 
@@ -101,12 +102,12 @@ class BatchLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
         load_mode: LoadMode,
-        last_updated_queue: LastUpdatedQueue | None,
+        worker_client: LoadingBatchWorkerClient,
     ) -> None:
         self.pool = pool
         self.fetch_results = fetch_results
         self.model = model
-        self.last_updated_queue = last_updated_queue
+        self.worker_client = worker_client
         self.table = model.table()
         # trim the schema from the table name to create the temp table
         # (temp tables can't be created with an explicit schema set)
@@ -142,21 +143,14 @@ class BatchLoader:
                 f"{self.where_clause}"
             )
         )
-        self.last_updated_set_clause = ", ".join(
-            f"{col} = %(timestamp)s" for col in self.model.last_updated_date_column()
-        )
         self.timestamp_placeholders = ", ".join("%(timestamp)s" for _ in self.meta_keys)
 
-        self.batch_timestamp_cols = model.batch_timestamp_col(
-            progress is None or progress.is_historical()
-        )
         self.partition = partition
         self.progress = progress
         self.progress_start_timer = Timer("progress_start", model, partition)
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.insert_batch_timer = Timer("insert_batch", model, partition)
         self.sort_batch_timer = Timer("sort_batch", model, partition)
-        self.last_updated_queue_timer = Timer("last_updated_queue", model, partition)
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
@@ -214,23 +208,41 @@ class BatchLoader:
                     )
             self.insert_batch_timer.stop()
 
-            async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-                if (
-                    self.last_updated_queue is not None
-                    and self.model.last_updated_date_table()
-                    # This clause ensures that tables like idr.beneficiary or any of the claims
-                    # tables do not unnecessarily submit additional last updated updates to the
-                    # queue since the upsert already sets their last updated columns
-                    and self.model.last_updated_date_table() != self.model.table()
-                ):
-                    self.last_updated_queue_timer.start()
-                    self.last_updated_queue.put(
-                        LastUpdatedBatch.from_result_set(results, self.partition, timestamp)
+            if (
+                self.model.last_updated_date_table()
+                # This clause ensures that tables like idr.beneficiary or any of the claims
+                # tables do not unnecessarily submit additional last updated updates to the
+                # queue since the upsert already sets their last updated columns
+                and self.model.last_updated_date_table() != self.model.table()
+            ):
+                self.worker_client.do_last_updated(
+                    LoadingBatch(
+                        self.model,
+                        self.partition,
+                        self.progress,
+                        cast(list[IdrBaseModel], results),
+                        timestamp,
+                    ),
+                    self.enable_load_progress,
+                )
+            elif self.enable_load_progress:
+                self.worker_client.do_load_progress(
+                    LoadingBatch(
+                        self.model,
+                        self.partition,
+                        self.progress,
+                        cast(list[IdrBaseModel], results),
+                        timestamp,
                     )
-                    self.last_updated_queue_timer.stop()
+                )
 
-                await self._calculate_load_progress(cur, results)
+            # async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
+            #     await self._calculate_load_progress(cur, results)
             self.full_batch_timer.stop()
+
+        # Wait until the background worker signals that all pending loading tasks are completed
+        # for the current partition before marking it totally complete
+        self.worker_client.wait_until_done(self.model, self.partition)
 
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             await self._mark_batch_complete(cur)
@@ -254,7 +266,7 @@ class BatchLoader:
 
                         await self._copy_data(cur, full_temp_table, batch_part)
 
-                        if self.last_updated_queue and (
+                        if self.worker_client and (
                             timestamp_pkey_col := self.model.last_updated_timestamp_col()
                         ):
                             await self._advisory_locks(cur, batch_part, timestamp_pkey_col)
@@ -338,44 +350,6 @@ class BatchLoader:
 
         return full_tablename
 
-    async def _calculate_load_progress(self, cur: psycopg.AsyncCursor, results: list[T]) -> None:
-        last = results[len(results) - 1].model_dump()
-        # Some tables that contain reference data (like contract info) may not have the
-        # normal IDR timestamps.
-        # For now we won't support incremental refreshes for those tables
-        batch_timestamp_cols = self.model.batch_timestamp_col(
-            self.progress is None or self.progress.is_historical()
-        )
-        update_cols = self.model.update_timestamp_col()
-        if batch_timestamp_cols:
-            max_timestamp = max(
-                [
-                    _convert_date(last[col])
-                    for col in [*self.batch_timestamp_cols, *update_cols]
-                    if last[col] is not None
-                ]
-            )
-            batch_id_col = self.model.batch_id_col()
-            batch_id = last[batch_id_col] if batch_id_col else 0
-            await self._update_load_progress(
-                cur,
-                """
-                UPDATE idr.load_progress
-                SET
-                    last_ts = %(last_ts)s,
-                    last_id = %(last_id)s
-                WHERE
-                    table_name = %(table)s
-                    AND batch_partition = %(partition)s
-                """,
-                {
-                    "table": self.table,
-                    "partition": self.partition.name,
-                    "last_ts": max_timestamp,
-                    "last_id": batch_id,
-                },
-            )
-
     async def _update_load_progress(
         self, cur: psycopg.AsyncCursor, query: QueryNoTemplate, params: Params | None
     ) -> None:
@@ -450,12 +424,6 @@ def _remove_null_bytes(val: DbType) -> DbType:
     if type(val) is str:
         return val.replace("\x00", "")
     return val
-
-
-def _convert_date(date_field: date | datetime) -> datetime:
-    if type(date_field) is datetime:
-        return date_field.replace(tzinfo=UTC)
-    return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)
 
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:

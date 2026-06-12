@@ -6,9 +6,9 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
+from batch_worker import LoadingBatchWorkerClient
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
-from last_updated import LastUpdatedQueue
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, should_track_load_progress
 from model.base_model import (
@@ -42,8 +42,8 @@ def extract_and_load(
     load_mode: LoadMode,
     job_start: datetime,
     load_type: LoadType,
+    worker_client: LoadingBatchWorkerClient,
     partition: LoadPartition | None = None,
-    last_updated_queue: LastUpdatedQueue | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if source == Source.SNOWFLAKE:
@@ -82,7 +82,7 @@ def extract_and_load(
                 progress,
                 load_type,
                 load_mode,
-                last_updated_queue,
+                worker_client,
             )
             data_extractor.close()
             return res
