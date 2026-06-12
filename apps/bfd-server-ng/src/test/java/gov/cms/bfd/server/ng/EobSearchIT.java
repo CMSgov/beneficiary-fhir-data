@@ -646,6 +646,75 @@ class EobSearchIT extends IntegrationTestBase {
     }
   }
 
+  public static Stream<Arguments> provideOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(
+                    Arguments.of("complete", OUTCOME_COMPLETE, true, searchStyle),
+                    Arguments.of("partial", OUTCOME_PARTIAL, true, searchStyle),
+                    Arguments.of("queued", OUTCOME_QUEUED, false, searchStyle),
+                    Arguments.of("error", OUTCOME_ERROR, false, searchStyle)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideOutcomeScenarios")
+  void eobSearchByOutcome(
+      String scenarioName,
+      String outcome,
+      boolean shouldReturnResults,
+      SearchStyleEnum searchStyle) {
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var outcomeParam = new TokenClientParam(OUTCOME).exactly().identifier(outcome);
+
+    var eobBundle =
+        searchBundle().where(patientParam).and(outcomeParam).usingStyle(searchStyle).execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    if (shouldReturnResults) {
+      assertFalse(eobs.isEmpty(), "Should find EOBs for outcome " + scenarioName);
+
+      assertTrue(
+          eobs.stream().allMatch(eob -> outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
+          "All returned EOBs should have outcome " + scenarioName);
+    } else {
+      assertEquals(0, eobs.size(), scenarioName + " should have no hits");
+    }
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByOutcomeCompleteOrPartial(SearchStyleEnum searchStyle) {
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var outcomeParam =
+        new TokenClientParam(OUTCOME).exactly().codes(OUTCOME_COMPLETE, OUTCOME_PARTIAL);
+
+    var eobBundle =
+        searchBundle().where(patientParam).and(outcomeParam).usingStyle(searchStyle).execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    assertFalse(eobs.isEmpty(), "Should find EOBs for complete or partial outcomes");
+
+    assertTrue(
+        eobs.stream()
+            .allMatch(
+                eob -> {
+                  var outcome = eob.getOutcome().toCode();
+                  return OUTCOME_COMPLETE.equals(outcome) || OUTCOME_PARTIAL.equals(outcome);
+                }),
+        "All returned EOBs should have outcome complete or partial");
+  }
+
   @Test
   void eobSearchNonLatestProfessionalIsNotReturned() {
     var claims =

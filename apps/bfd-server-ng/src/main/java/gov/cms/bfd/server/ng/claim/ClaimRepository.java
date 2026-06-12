@@ -170,6 +170,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimSearchCriteria criteria) {
 
@@ -179,6 +180,7 @@ public class ClaimRepository {
             new LastUpdatedFilterParam(criteria.lastUpdated()),
             new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
             new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
     var futures =

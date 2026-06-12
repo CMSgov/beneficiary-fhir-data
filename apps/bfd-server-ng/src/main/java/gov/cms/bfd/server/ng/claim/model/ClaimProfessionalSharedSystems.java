@@ -60,6 +60,9 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemProfessionalSharedSystems> claimItems;
 
+  @Column(name = "clm_pd_stus_cd")
+  private String claimPaidStatusCode;
+
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
    * date, provider assignment switch, and clinical trial number.
@@ -122,19 +125,29 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   }
 
   /**
-   * For PAC claims, the outcome is driven by the audit-trail status code, audit-status code, and
-   * the meta source sk rather than the default claim-type outcome.
+   * For PAC claims, outcome was historically based on audit-trail status information. Claims now
+   * use CLM_PD_STUS_CD to determine outcome. Explicit partial cases are included to document the CLM_PD_STUS_CD outcome mapping.
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var auditTrailStatusCode =
-        claimAuditTrailStatusCode.flatMap(
-            status ->
-                ClaimAuditTrailStatusCode.tryFromCode(
-                    getMetaSourceSk(), status, claimAuditTrailLocationCode));
-    auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
+    var outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+
+    if (claimPaidStatusCode != null) {
+
+      switch (claimPaidStatusCode.trim()) {
+        case "P", "1", "R", "2", "D", "Y":
+          outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
+          break;
+        case "~", "I", "S", "T":
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          break;
+        default:
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          break;
+      }
+    }
+
+    eob.setOutcome(outcome);
   }
 
   @Override

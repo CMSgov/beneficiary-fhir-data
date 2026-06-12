@@ -3888,7 +3888,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
-      "outcome" : "queued",
+      "outcome" : "partial",
       "patient" : {
         "reference" : "Patient/412457726"
       },

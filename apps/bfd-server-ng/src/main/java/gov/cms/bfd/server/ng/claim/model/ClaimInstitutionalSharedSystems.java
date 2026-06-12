@@ -51,6 +51,9 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
 
+  @Column(name = "clm_pd_stus_cd")
+  private String claimPaidStatusCode;
+
   @Override
   Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
@@ -85,16 +88,30 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
     return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
 
+  /**
+   * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit trail
+   * logic. Explicit partial cases are included to document the CLM_PD_STUS_CD outcome mapping.
+   */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var auditTrailStatusCode =
-        claimAuditTrailStatusCode.flatMap(
-            status ->
-                ClaimAuditTrailStatusCode.tryFromCode(
-                    getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA));
-    auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
+    var outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+
+    if (claimPaidStatusCode != null) {
+
+      switch (claimPaidStatusCode.trim()) {
+        case "P", "1", "R", "2", "D", "Y":
+          outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
+          break;
+        case "~", "I", "S", "T":
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          break;
+        default:
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          break;
+      }
+    }
+
+    eob.setOutcome(outcome);
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */

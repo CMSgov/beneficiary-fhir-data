@@ -35,6 +35,7 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
   private static final String SOURCE_QUERY_PARAM = "_source";
+  private static final String OUTCOME = "outcome";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -79,6 +80,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param offset offset
    * @param tag tags to filter by
    * @param type claim type to filter by
+   * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
    * @param request HTTP request details
@@ -96,6 +98,7 @@ public class EobResourceProvider implements IResourceProvider {
       @Offset final Integer offset,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
+      @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
       final HttpServletRequest request,
@@ -105,6 +108,7 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
+    var outcomeCriteria = FhirInputConverter.parseOutcomeParameter(outcome);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
     var options =
@@ -124,6 +128,7 @@ public class EobResourceProvider implements IResourceProvider {
             Optional.ofNullable(offset).or(() -> FhirInputConverter.toIntOptional(startIndex)),
             tagCriteria,
             claimTypeCodes,
+            outcomeCriteria,
             FhirInputConverter.parseSourceParameter(source));
 
     return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
