@@ -252,7 +252,8 @@ public class IntegrationTestBase {
       Integer scenarioIndex,
       String clientId,
       String clientName,
-      String clientIp) {}
+      String clientIp,
+      String timestamp) {}
 
   protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(
       Long beneSk, String testClientId) {
@@ -275,8 +276,9 @@ public class IntegrationTestBase {
               var clientId = item.get("clientId").s();
               var clientName = item.get("clientName").s();
               var clientIP = item.get("clientIp").s();
+              var timestamp = item.get("timestamp").s();
               return new PatientMatchTestAuditRecord(
-                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP);
+                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP, timestamp);
             })
         .toList();
   }

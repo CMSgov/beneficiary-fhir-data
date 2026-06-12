@@ -239,6 +239,11 @@
             <artifactId>dynamodb</artifactId>
         </dependency>
         <dependency>
+            <!-- Used for object mapping between DynamoDB items and Java models -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb-enhanced</artifactId>
+        </dependency>
+        <dependency>
             <!-- Used to interact with AWS' DynamoDB service -->
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cloudwatch</artifactId>

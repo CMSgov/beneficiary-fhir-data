@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
@@ -26,6 +27,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -179,13 +181,16 @@ public class IntegrationTestConfiguration {
   }
 
   @Bean
+  public AuditEventRepository auditEventRepository(
+      DynamoDbEnhancedClient enhancedClient, Configuration configuration) {
+    return new AuditEventRepository(enhancedClient, configuration.getPatientMatchAuditTableName());
+  }
+
+  @Bean
   @Primary
-  public AuditLogger testAuditLogger(
-      DynamoDbClient testDynamoDbClient, Configuration configuration, ObjectMapper objectMapper) {
+  public AuditLogger testAuditLogger(AuditEventRepository repository, ObjectMapper objectMapper) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
-    var dynamoLogger =
-        new DynamoDbAuditLogger(
-            testDynamoDbClient, objectMapper, configuration.getPatientMatchAuditTableName());
+    var dynamoLogger = new DynamoDbAuditLogger(repository, objectMapper);
 
     return auditRecord -> {
       logStreamLogger.log(auditRecord);

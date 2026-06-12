@@ -4,12 +4,16 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.common.base.CharMatcher;
+import gov.cms.bfd.server.ng.audit.AuditEventId;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -539,6 +543,110 @@ class PatientMatchIT extends IntegrationTestBase {
             .returnResourceType(Bundle.class);
 
     assertThrows(InvalidRequestException.class, res::execute);
+  }
+
+  private IQuery<Bundle> searchAuditBundle() {
+    return getFhirClient().search().forResource(AuditEvent.class).returnBundle(Bundle.class);
+  }
+
+  @Test
+  void testAuditEventByBene() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var testClientId = UUID.randomUUID().toString();
+    searchBundleWithUniqueClientIds(patient, testClientId);
+    searchBundleWithUniqueClientIds(patient, testClientId);
+
+    var bundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_ENTITY)
+                    .exactly()
+                    .identifier("Patient/-300428640"))
+            .usingStyle(SearchStyleEnum.GET)
+            .execute();
+    bundle
+        .getEntry()
+        .forEach(
+            e ->
+                assertEquals(
+                    "Patient/-300428640",
+                    ((AuditEvent) e.getResource())
+                        .getEntity()
+                        .getFirst()
+                        .getWhat()
+                        .getReference()));
+  }
+
+  @Test
+  void testAuditEventByIds() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var testClientId = UUID.randomUUID().toString();
+    searchBundleWithUniqueClientIds(patient, testClientId);
+    searchBundleWithUniqueClientIds(patient, testClientId);
+
+    var auditRecords = getAuditRecordFromDynamo(-300428640L, testClientId);
+
+    List<String> auditIds =
+        auditRecords.stream()
+            .map(
+                r ->
+                    AuditEventId.fromDynamoTimestamp(r.matchedBeneSk(), r.timestamp())
+                        .getIdAsString())
+            .toList();
+    var bundle =
+        searchAuditBundle()
+            .where(new TokenClientParam(AuditEvent.SP_RES_ID).exactly().codes(auditIds))
+            .usingStyle(SearchStyleEnum.GET)
+            .execute();
+    assertEquals(2, bundle.getEntry().size());
+    assertEquals(
+        auditIds.getFirst(), bundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
+    assertEquals(
+        auditIds.getLast(), bundle.getEntry().getLast().getResource().getIdElement().getIdPart());
+  }
+
+  @Test
+  void testAuditEventById() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var testClientId = UUID.randomUUID().toString();
+    searchBundleWithUniqueClientIds(patient, testClientId);
+
+    var auditRecords = getAuditRecordFromDynamo(-300428640L, testClientId);
+
+    List<String> auditIds =
+        auditRecords.stream()
+            .map(
+                r ->
+                    AuditEventId.fromDynamoTimestamp(r.matchedBeneSk(), r.timestamp())
+                        .getIdAsString())
+            .toList();
+    var audit =
+        getFhirClient().read().resource(AuditEvent.class).withId(auditIds.getFirst()).execute();
+    assertEquals(auditIds.getFirst(), audit.getIdPart());
   }
 
   @BeforeAll

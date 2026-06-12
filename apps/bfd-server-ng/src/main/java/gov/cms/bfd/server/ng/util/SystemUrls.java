@@ -1082,4 +1082,21 @@ public class SystemUrls {
   /** Claim Provider Tax Number. */
   public static final String EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM";
+
+  /** Object Role code system URL. */
+  public static final String OBJECT_ROLE = "http://terminology.hl7.org/CodeSystem/object-role";
+
+  /** Resource Type code system URL. */
+  public static final String RESOURCE_TYPE = "http://hl7.org/fhir/resource-types";
+
+  /** Structure Definition URL for the FHIR AuditEvent resource. */
+  public static final String AUDIT_EVENT_STRUCTURE_DEF =
+      "http://hl7.org/fhir/StructureDefinition/AuditEvent";
+
+  /** Code System URL for the FHIR AuditEvent lifecycle codes. */
+  public static final String AUDIT_EVENT_LIFE_CYCLE_SYSTEM =
+      "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
+
+  /** Code System URN for AuditEvent subtype codes. */
+  public static final String AUDIT_EVENT_SUBTYPE_SYSTEM = "urn:cms:hte";
 }

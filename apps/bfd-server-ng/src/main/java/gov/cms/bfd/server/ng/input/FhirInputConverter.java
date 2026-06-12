@@ -87,6 +87,23 @@ public class FhirInputConverter {
   }
 
   /**
+   * Converts a {@link TokenAndListParam} to a list of {@link String}.
+   *
+   * @param ids FHIR IDs
+   * @return list of string values
+   */
+  public static List<String> toStringList(@Nullable TokenAndListParam ids) {
+    if (ids == null) {
+      throw new InvalidRequestException("ID is missing");
+    }
+    var idStrings = FhirTokenParameterParser.flatten(ids).map(TokenParam::getValue).toList();
+    if (idStrings.size() > 100) {
+      throw new InvalidRequestException("A maximum of 100 claim IDs may be requested at once.");
+    }
+    return idStrings;
+  }
+
+  /**
    * Converts a {@link TokenParam} to a {@link Long}.
    *
    * @param token FHIR token
@@ -136,6 +153,23 @@ public class FhirInputConverter {
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
+    } catch (ArithmeticException _) {
+      throw new InvalidRequestException("Numeric input was not in a valid format");
+    }
+  }
+
+  /**
+   * Converts an {@link NumberParam} to an optional int.
+   *
+   * @param numberParam number param
+   * @return long value
+   */
+  public static Optional<Long> toLongOptional(@Nullable NumberParam numberParam) {
+    if (numberParam == null || numberParam.getValue() == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(numberParam.getValue().longValueExact());
     } catch (ArithmeticException _) {
       throw new InvalidRequestException("Numeric input was not in a valid format");
     }
