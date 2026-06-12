@@ -241,11 +241,7 @@ class _LoadingBatchWorker(Process):
                                 )
 
                             case _WaitForPartitionComplete():
-                                task_funcs.append(
-                                    lambda task=task: anyio.to_thread.run_sync(
-                                        self._wait_for_completion, task
-                                    )
-                                )
+                                task_funcs.append(lambda task=task: self._wait_for_completion(task))
 
                             case _StopWorker():
                                 stop = True
@@ -295,19 +291,18 @@ class _LoadingBatchWorker(Process):
         self,
         task_send: MemoryObjectSendStream[_TaskSequence],
     ) -> None:
+        def blocking_queue_reader(
+            task_send: MemoryObjectSendStream[_TaskSequence],
+        ) -> None:
+            while True:
+                task = self.task_queue.get()  # blocks here — fine, it's a thread
+                anyio.from_thread.run(task_send.send, task)
+
+                if isinstance(task, _StopWorker):
+                    break
+
         async with task_send:
-            await anyio.to_thread.run_sync(self._queue_reader, task_send)
-
-    def _queue_reader(
-        self,
-        task_send: MemoryObjectSendStream[_TaskSequence],
-    ) -> None:
-        while True:
-            task = self.task_queue.get()  # blocks here — fine, it's a thread
-            anyio.from_thread.run(task_send.send, task)
-
-            if isinstance(task, _StopWorker):
-                break
+            await anyio.to_thread.run_sync(blocking_queue_reader, task_send)
 
     async def _do_last_updated(
         self,
@@ -419,24 +414,28 @@ class _LoadingBatchWorker(Process):
                 """)
             load_progress_bg_timer.stop()
 
-    def _wait_for_completion(self, task: _WaitForPartitionComplete) -> None:
-        while any(
-            task
-            for task in self._running_tasks
-            if isinstance(task, _LoadPartitionTask)
-            and task.partition.name == task.partition.name
-            and task.model == task.model
-        ):
-            anyio.from_thread.check_cancelled()
-            time.sleep(0.05)  # poll interval
+    async def _wait_for_completion(self, task: _WaitForPartitionComplete) -> None:
+        def blocking_check_tasks() -> None:
+            while any(
+                task
+                for task in self._running_tasks
+                if isinstance(task, _LoadPartitionTask)
+                and task.partition.name == task.partition.name
+                and task.model == task.model
+            ):
+                anyio.from_thread.check_cancelled()
+                time.sleep(0.05)  # poll interval
 
-        logger.debug(
-            "{}-{} has no tasks remaining, done event: {}",
-            task.model.table(),
-            task.partition.name,
-            task.done_event.__hash__(),
-        )
-        task.done_event.set()
+            logger.debug(
+                "{}-{} has no tasks remaining, done event: {}",
+                task.model.table(),
+                task.partition.name,
+                task.done_event.__hash__(),
+            )
+
+            task.done_event.set()
+
+        await anyio.to_thread.run_sync(blocking_check_tasks)
 
 
 class LoadingBatchWorkerClient:
