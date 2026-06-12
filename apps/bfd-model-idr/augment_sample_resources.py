@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import yaml
 from dataclasses import asdict, dataclass, field
@@ -14,6 +15,31 @@ df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 
 cond_sk_info_file = "sample-data/CLM_RLT_COND_SGNTR_MBR_POC.csv"
 cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str})
+
+synth_df = None
+synth_prvdr_file = "out/SYNTHETIC_PRVDR_HSTRY.csv"
+if os.path.exists(synth_prvdr_file):
+    try:
+        synth_df = pd.read_csv(synth_prvdr_file, dtype={"PRVDR_SK": str})
+    except Exception:
+        pass
+
+
+def lookup_provider_history(npi_num: str | int | None) -> dict | None:
+    if not npi_num:
+        return None
+    npi_str = str(npi_num).strip()
+    if not npi_str or npi_str == "None":
+        return None
+    matching_rows = df[df["PRVDR_SK"] == npi_str]
+    if not matching_rows.empty:
+        return json.loads(matching_rows.iloc[0].to_json())
+    if synth_df is not None:
+        matching_rows = synth_df[synth_df["PRVDR_SK"] == npi_str]
+        if not matching_rows.empty:
+            return json.loads(matching_rows.iloc[0].to_json())
+    return None
+
 
 cur_sample = sys.argv[1]
 cur_sample_data = {}
@@ -42,8 +68,11 @@ careteam_header_columns = {
 
 def load_profile_map():
     profile_map = {}
-    paths = [Path("dictionary-support-files/ExplanationOfBenefit.yaml"), 
-             Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml")]
+    paths = [
+        Path("dictionary-support-files/ExplanationOfBenefit.yaml"),
+        Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml"),
+        Path("dictionary-support-files/ExplanationOfBenefit-PriorAuth.yaml"),
+    ]
 
     for p in filter(Path.exists, paths):
         with p.open("r") as f:
@@ -257,6 +286,13 @@ populate_fields_except_na = [
 ]
 provider_list = []
 
+# we only use CLM_SRVC_PRVDR_GNRC_ID_NUM for part D events (we filter for PRVDR_SRVC_NPI_)
+if cur_sample_data.get("CLM_TYPE_CD") not in (1, 2, 3, 4):
+    billing_column = "PRVDR_BLG_PRVDR_NPI_NUM"
+else:
+    billing_column = "CLM_SRVC_PRVDR_GNRC_ID_NUM"
+
+
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
 # The reason being: it's possible to lose context on rendering vs ordering
@@ -270,16 +306,18 @@ def create_billing_and_service_provider(billing_col_name):
     if qualifier in ("01", None):
         # Only pull NPI data if it's an NPI
         npi_num = cur_sample_data.get(billing_col_name)
-        prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
-        provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-        provider_object.PRVDR_SK = npi_num
-        provider_object.PRVDR_LAST_OR_LGL_NAME = (
-            prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
-            if provider_object.NPI_TYPE == "2"
-            else prvdr_hstry_for_npi["PRVDR_LAST_NAME"]
-        )
-        if prvdr_hstry_for_npi.get("PRVDR_1ST_NAME"):
-            provider_object.PRVDR_1ST_NAME = prvdr_hstry_for_npi.get("PRVDR_1ST_NAME")
+        prvdr_hstry_for_npi = lookup_provider_history(npi_num)
+        if prvdr_hstry_for_npi:
+            provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+            provider_object.PRVDR_SK = npi_num
+            provider_object.PRVDR_LAST_OR_LGL_NAME = (
+                prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+                if provider_object.NPI_TYPE == "2"
+                else prvdr_hstry_for_npi["PRVDR_LAST_NAME"]
+            )
+            if prvdr_hstry_for_npi.get("PRVDR_1ST_NAME"):
+                provider_object.PRVDR_1ST_NAME = prvdr_hstry_for_npi.get("PRVDR_1ST_NAME")
+
         if cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM"):
             provider_object.PRVDR_OSCAR_NUM = cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM")
         if cur_sample_data.get("CLM_BLG_PRVDR_TAX_NUM"):
@@ -308,17 +346,20 @@ def create_careteam_provider(careteam_column):
     if qualifier in ("01", None):
         # Only pull NPI data if it's an NPI
         npi_num = cur_sample_data.get(careteam_column)
-        prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
-        provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-        provider_object.PRVDR_SK = npi_num
-        # set a default name using PRVDR_HSTRY if not available.
-        provider_object.PRVDR_CARETEAM_NAME = (
-            prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
-            if provider_object.NPI_TYPE == "2"
-            else prvdr_hstry_for_npi["PRVDR_LAST_NAME"]
-            + ", "
-            + prvdr_hstry_for_npi["PRVDR_1ST_NAME"]
-        )
+        prvdr_hstry_for_npi = lookup_provider_history(npi_num)
+        if prvdr_hstry_for_npi:
+            provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+            provider_object.PRVDR_SK = npi_num
+            # set a default name using PRVDR_HSTRY if not available.
+            provider_object.PRVDR_CARETEAM_NAME = (
+                prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+                if provider_object.NPI_TYPE == "2"
+                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
+            )
+        else:
+            provider_object.NPI_TYPE = "1"
+            provider_object.PRVDR_SK = npi_num
+            provider_object.PRVDR_CARETEAM_NAME = "Practitioner"
 
         provider_object.careTeamType = careteam_header_columns.get(careteam_column)
         if qualifier:
@@ -351,17 +392,18 @@ def create_rendering_line_provider(npi_num):
     provider_object = Provider(
         PRVDR_SK=npi_num, careTeamType="rendering", PRVDR_CARETEAM_NAME="N/A"
     )
-    prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
-    provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-    provider_object.PRVDR_CARETEAM_NAME = (
-        prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
-        if provider_object.NPI_TYPE == "2"
-        else prvdr_hstry_for_npi["PRVDR_LAST_NAME"] + ", " + prvdr_hstry_for_npi["PRVDR_1ST_NAME"]
-    )
+    prvdr_hstry_for_npi = lookup_provider_history(npi_num)
+    if prvdr_hstry_for_npi:
+        provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+        provider_object.PRVDR_CARETEAM_NAME = (
+            prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+            if provider_object.NPI_TYPE == "2"
+            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
+        )
     return provider_object
 
 # now we go through the line items!
-for line_item in cur_sample_data["lineItemComponents"]:
+for line_item in cur_sample_data.get("lineItemComponents", []):
     # we only care about PRVDR_RNDRNG_PRVDR_NPI_NUM
     cur_rendering_providers = [
         x.PRVDR_SK for x in provider_list if getattr(x, "careTeamType", None) == "rendering"

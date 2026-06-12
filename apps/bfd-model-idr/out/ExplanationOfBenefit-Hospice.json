@@ -407,7 +407,7 @@
     "code" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
-        "code" : "1",
+        "code" : "01",
         "display" : "DEBIT ACCEPTED"
       }]
     }

@@ -78,6 +78,20 @@ curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 
 As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies. 
 
+### Generating Sample JSON from Synthetic CSVs
+
+To generate or update sample data files from the generated synthetic CSVs (located in `out/`), you can use the sample generation scripts. This only exists for prior auth data for now - it will be expanded to other use cases gradually.
+
+#### Prior Authorization Sample Generator
+
+To generate a prior authorization JSON sample from the synthetic CSVs based on tracking number.
+
+```sh
+python generate_prior_auth_sample.py --utn=<utn-here>
+```
+
+This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
+
 ### Create FHIR files with synthetic data
 
 Requires Matchbox to be active.
