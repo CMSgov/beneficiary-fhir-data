@@ -88,6 +88,7 @@ public class EobHandler {
             criteria.offset(),
             criteria.tagCriteria(),
             criteria.claimTypeCodes(),
+            criteria.outcomes(),
             criteria.sources());
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);

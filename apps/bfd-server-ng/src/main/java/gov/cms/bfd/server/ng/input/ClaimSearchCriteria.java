@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
  * Represents the search criteria used to retrieve claims for a specific beneficiary.
@@ -15,6 +16,7 @@ import java.util.Optional;
  * @param offset start index
  * @param tagCriteria tagCriteria
  * @param claimTypeCodes claim type codes
+ * @param outcomes claim outcomes
  * @param sources claim sources
  */
 public record ClaimSearchCriteria(
@@ -25,6 +27,7 @@ public record ClaimSearchCriteria(
     Optional<Integer> offset,
     List<List<TagCriterion>> tagCriteria,
     List<ClaimTypeCode> claimTypeCodes,
+    List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
     List<List<MetaSourceSk>> sources) {
 
   /**
@@ -79,6 +82,15 @@ public record ClaimSearchCriteria(
    */
   public boolean hasClaimTypeCodes() {
     return !claimTypeCodes().isEmpty();
+  }
+
+  /**
+   * Returns whether outcome-based filtering has been provided.
+   *
+   * @return boolean
+   */
+  public boolean hasOutcomes() {
+    return !outcomes.isEmpty();
   }
 
   /**

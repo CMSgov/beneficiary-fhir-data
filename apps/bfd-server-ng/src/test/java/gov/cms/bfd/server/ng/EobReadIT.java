@@ -1,9 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -60,7 +57,7 @@ class EobReadIT extends IntegrationTestBase {
   void eobReadPhase2() {
     var eob = eobRead().withId(CLAIM_ID_PHASE_2).execute();
     assertFalse(eob.isEmpty());
-    assertEquals("QUEUED", eob.getOutcome().name());
+    assertEquals("PARTIAL", eob.getOutcome().name());
     expectFhir().toMatchSnapshot(eob);
   }
 
@@ -81,6 +78,7 @@ class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL)).execute();
     assertFalse(eob.isEmpty());
     assertFalse(hasTaxNumberExtension(eob));
+    assertEquals(ExplanationOfBenefit.RemittanceOutcome.PARTIAL, eob.getOutcome());
 
     assertTrue(
         eob.getMeta().getProfile().stream()

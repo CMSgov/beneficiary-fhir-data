@@ -41,6 +41,7 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String START_INDEX = "startIndex";
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
+  private static final String OUTCOME = "outcome";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -84,6 +85,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param startIndex start index
    * @param tag tags to filter by
    * @param type claim type to filter by
+   * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
    * @param requestDetails request details object
@@ -100,6 +102,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
+      @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
       final RequestDetails requestDetails,
@@ -109,6 +112,7 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
+    var outcomeCriteria = FhirInputConverter.parseOutcomeParameter(outcome);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
     var options =
@@ -126,6 +130,7 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toIntOptional(startIndex),
             tagCriteria,
             claimTypeCodes,
+            outcomeCriteria,
             FhirInputConverter.parseSourceParameter(source));
 
     return eobHandler.searchByBene(criteria, options);
