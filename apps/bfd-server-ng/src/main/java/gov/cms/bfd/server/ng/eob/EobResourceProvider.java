@@ -1,9 +1,18 @@
 package gov.cms.bfd.server.ng.eob;
 
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Offset;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
@@ -34,8 +43,8 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String START_INDEX = "startIndex";
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
-  private static final String SOURCE_QUERY_PARAM = "_source";
   private static final String OUTCOME = "outcome";
+  private static final String SOURCE_QUERY_PARAM = "_source";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
