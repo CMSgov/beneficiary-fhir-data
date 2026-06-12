@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.AttributeOverride;
@@ -69,7 +70,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineProfessionalExtensions extensions;
 
   @Override
-  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      ClaimFilterOptions options) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -89,7 +91,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
-    getFhirExtensions().forEach(line::addExtension);
+    getFhirExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -122,7 +124,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
 
-  protected List<Extension> getFhirExtensions() {
-    return getExtensions().toFhir();
+  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
+    return getExtensions().toFhir(options);
   }
 }

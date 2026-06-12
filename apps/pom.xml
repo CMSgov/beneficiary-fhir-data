@@ -157,7 +157,7 @@
         <mockito.version>5.16.0</mockito.version>
         <byte-buddy.version>1.17.2</byte-buddy.version>
         <rest-assured.version>5.5.1</rest-assured.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <snowflake.version>4.1.0</snowflake.version>
         <postgresql.version>42.7.11</postgresql.version>

@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 dependencies = ["boto3>=1.38.30"]
 
 [dependency-groups]
-dev = ["ruff", "uv"]
+dev = ["ruff", "uv>=0.11.15"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

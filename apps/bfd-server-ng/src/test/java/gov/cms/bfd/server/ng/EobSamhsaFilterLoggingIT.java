@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -20,16 +22,24 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
   private static final String SAMHSA_FILTERED_LOG_MESSAGE = "SAMHSA claim filtered";
   private final EobHandler eobHandler;
 
+  private static final ClaimFilterOptions excludeOptions =
+      ClaimFilterOptions.builder()
+          .samhsaFilterMode(SamhsaFilterMode.EXCLUDE)
+          .includeTaxNumber(false)
+          .build();
+
   /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test
   void testSamhsaClaimLogging() {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
-        new DateTimeRange(),
-        new DateTimeRange(),
-        SamhsaFilterMode.EXCLUDE);
+        new ClaimIdSearchCriteria(
+            List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
+            new DateTimeRange(),
+            new DateTimeRange(),
+            Collections.emptyList()),
+        excludeOptions);
 
     var samhsaLogs =
         events.stream()
@@ -53,10 +63,12 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        List.of(CLAIM_ID_WITH_NO_SAMHSA),
-        new DateTimeRange(),
-        new DateTimeRange(),
-        SamhsaFilterMode.EXCLUDE);
+        new ClaimIdSearchCriteria(
+            List.of(CLAIM_ID_WITH_NO_SAMHSA),
+            new DateTimeRange(),
+            new DateTimeRange(),
+            Collections.emptyList()),
+        excludeOptions);
 
     var samhsaLogs =
         events.stream()

@@ -564,3 +564,29 @@ prefix t = "https://hl7.org/fhir/string"
  s:"98" == t:"66"  
  s:"99" == t:"60"
 } 
+
+conceptmap "PriorAuthType" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
+
+  s:"B" == t:"professional"
+  s:"D" == t:"professional"
+  s:"I" == t:"institutional"
+  s:"O" == t:"institutional"
+  s:"H" == t:"institutional"
+  s:"C" == t:"institutional"
+  
+}
+
+conceptmap "PriorAuthInsuranceType" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"B" == t:"Part B"
+  s:"D" == t:"Part B"
+  s:"I" == t:"Part A"
+  s:"O" == t:"Part B"
+  s:"H" == t:"Part A"
+  s:"C" == t:"Part A"
+  
+}

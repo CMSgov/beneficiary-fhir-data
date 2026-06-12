@@ -65,3 +65,17 @@ StructureDefinition-C4DIC-Coverage
 StructureDefinition-C4DIC-Organization
 StructureDefinition-C4DIC-AdditionalCardInformation-extension
 
+# Da Vinci PDex
+[hl7.fhir.us.davinci-pdex#2.1.0]
+StructureDefinition-pdex-priorauthorization
+
+# Da Vinci PAS Extensions
+[hl7.fhir.us.davinci-pas#2.1.0]
+StructureDefinition-extension-itemAuthorizedProvider
+StructureDefinition-extension-itemTraceNumber
+StructureDefinition-extension-itemAuthorizedDetail
+StructureDefinition-extension-administrationReferenceNumber
+StructureDefinition-extension-authorizationNumber
+StructureDefinition-extension-itemPreAuthPeriod
+StructureDefinition-extension-itemPreAuthIssueDate
+

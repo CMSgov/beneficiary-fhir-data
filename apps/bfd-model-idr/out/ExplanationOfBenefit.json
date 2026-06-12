@@ -561,7 +561,7 @@
     "code" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
-        "code" : "1",
+        "code" : "01",
         "display" : "DEBIT ACCEPTED"
       }]
     }
@@ -916,7 +916,7 @@
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
         "code" : "10",
-        "display" : "PATIENT AND/OR SPOUSE IS EMPLOYED BUT NO EGHP COVERAGE EXISTS OR (EFF 9/93) OTHER EMPLOYER SPONSORED/PROVIDEDHEALTH INSURANCE COVERING PATIENT."
+        "display" : "PATIENT AND/OR SPOUSE IS EMPLOYED BUT NO EGHP COVERAGE EXISTS OR (EFF 9/93) OTHER EMPLOYER SPONSORED/PROVIDED HEALTH INSURANCE COVERING PATIENT."
       }]
     }
   },

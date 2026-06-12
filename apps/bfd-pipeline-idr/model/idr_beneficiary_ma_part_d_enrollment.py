@@ -13,7 +13,7 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -26,14 +26,14 @@ from model.base_model import (
 
 
 class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     cntrct_pbp_sk: int
     bene_pbp_num: str
-    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
     bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     bene_cntrct_num: str
     bene_cvrg_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY_ORDER: 2}]
     bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
