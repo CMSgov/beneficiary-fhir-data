@@ -139,11 +139,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
           break;
         case "~", "I", "S", "T":
-          outcome =
-              ExplanationOfBenefit.RemittanceOutcome
-                  .PARTIAL; // Explicit cases are included to document the CLM_PD_STUS_CD outcome
-                            // mapping even though default will handle these.
-
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
           break;
         default:
           outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;

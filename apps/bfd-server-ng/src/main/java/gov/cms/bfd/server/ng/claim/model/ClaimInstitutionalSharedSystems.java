@@ -98,6 +98,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
     var outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
 
     if (claimPaidStatusCode != null) {
+
       switch (claimPaidStatusCode.trim()) {
         case "P", "1", "R", "2", "D", "Y":
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
