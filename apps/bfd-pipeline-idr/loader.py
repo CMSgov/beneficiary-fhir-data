@@ -236,8 +236,6 @@ class BatchLoader:
                     )
                 )
 
-            # async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-            #     await self._calculate_load_progress(cur, results)
             self.full_batch_timer.stop()
 
         # Wait until the background worker signals that all pending loading tasks are completed
