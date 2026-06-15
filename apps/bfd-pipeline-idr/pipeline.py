@@ -7,7 +7,6 @@ import click
 import psycopg  # type: ignore
 from loguru import logger
 
-import pipeline_nodes
 from batch_worker import LoadingBatchWorkerManager
 from db_utils import get_connection_string
 from extractor import PostgresExecutor, SnowflakeExecutor
@@ -24,6 +23,7 @@ from load_partition import LoadType
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
 from model.base_model import LoadMode, Source
+from pipeline_stages import StagedIdrPipeline
 from settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
     MAX_TASKS,
@@ -94,8 +94,14 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     worker_manager = LoadingBatchWorkerManager(get_connection_string(load_mode))
     atexit.register(worker_manager.cleanup)
 
-    staged_pipeline = pipeline_nodes.StagedIdrPipeline(
-        MAX_TASKS, load_mode, start_time, load_type, source, worker_manager.client, tables_to_load
+    staged_pipeline = StagedIdrPipeline(
+        max_workers=MAX_TASKS,
+        load_mode=load_mode,
+        start_time=start_time,
+        load_type=load_type,
+        source=source,
+        worker_client=worker_manager.client,
+        tables_to_load=tables_to_load,
     )
 
     async def run_stages_and_worker() -> None:

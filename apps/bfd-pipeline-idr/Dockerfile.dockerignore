@@ -37,7 +37,7 @@
 !load_synthetic.py
 !loader.py
 !logger_config.py
-!pipeline_nodes.py
+!pipeline_stages.py
 !pipeline_utils.py
 !pipeline.py
 !pydantic_utils.py
