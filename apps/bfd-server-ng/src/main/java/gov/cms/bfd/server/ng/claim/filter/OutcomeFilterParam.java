@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Filters claims by outcome.
  *
- * @param outcomes claim outcomes
+ * @param outcomes EOB claim outcomes
  */
 public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes)
     implements DbFilterBuilder {

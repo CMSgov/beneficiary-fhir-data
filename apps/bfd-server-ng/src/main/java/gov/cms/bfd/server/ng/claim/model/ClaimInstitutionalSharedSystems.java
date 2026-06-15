@@ -97,13 +97,13 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
     var outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
 
     if (claimPaidStatusCode != null) {
-      // Explicit partial cases document the CLM_PD_STUS_CD outcome mapping.
+
       switch (claimPaidStatusCode.trim()) {
         case "P", "1", "R", "2", "D", "Y":
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
           break;
         case "~", "I", "S", "T":
-          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL; // Explicit cases are included to document the CLM_PD_STUS_CD outcome mapping even though default will handle these.
           break;
         default:
           outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
