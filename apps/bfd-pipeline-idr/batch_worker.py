@@ -498,7 +498,7 @@ class LoadingBatchWorkerManager:
     def client(self) -> LoadingBatchWorkerClient:
         return LoadingBatchWorkerClient(self._task_queue, self._manager.address)
 
-    async def start(self, task_status: TaskStatus | None = None) -> None:
+    async def start(self, stop: anyio.Event, task_status: TaskStatus | None = None) -> None:
         if self._worker is not None and self._worker.is_alive():
             return
 
@@ -525,7 +525,7 @@ class LoadingBatchWorkerManager:
             task_status.started()
 
         async def watch_queue() -> None:
-            while True:
+            while not stop.is_set():
                 if not errors_queue.empty():
                     errors = errors_queue.get()
                     raise errors

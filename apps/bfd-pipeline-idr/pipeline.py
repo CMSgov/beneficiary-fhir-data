@@ -104,13 +104,18 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
         tables_to_load=tables_to_load,
     )
 
-    async def run_stages_and_worker() -> None:
+    async def run_worker_and_stages() -> None:
+        stop_worker = anyio.Event()
         async with anyio.create_task_group() as tg:
-            await tg.start(worker_manager.start)
-            tg.start_soon(staged_pipeline.start)
+            await tg.start(worker_manager.start, stop_worker)
+            # We don't submit staged_pipeline.start to the task group because we want to set the
+            # stop signal for the background worker once it's complete. If we don't do it this way
+            # the pipeline process will run forever
+            await staged_pipeline.start()
+            stop_worker.set()
 
     try:
-        anyio.run(run_stages_and_worker)
+        anyio.run(run_worker_and_stages)
     except BaseException:
         if idr_job_events:
             logger.error(
