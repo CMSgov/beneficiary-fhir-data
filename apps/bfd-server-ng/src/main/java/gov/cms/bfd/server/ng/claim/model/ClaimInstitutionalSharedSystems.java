@@ -103,7 +103,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
           break;
         case "~", "I", "S", "T":
-          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL; // Explicit cases are included to document the CLM_PD_STUS_CD outcome mapping even though default will handle these.
           break;
         default:
           outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
