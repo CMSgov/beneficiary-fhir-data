@@ -318,7 +318,7 @@
     "code" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
-        "code" : "1",
+        "code" : "01",
         "display" : "DEBIT ACCEPTED"
       }]
     }
@@ -368,7 +368,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW",
-        "display" : "Provider Assignement Indicator"
+        "display" : "Provider Assignment Indicator"
       }]
     },
     "code" : {

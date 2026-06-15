@@ -80,7 +80,7 @@ dev = [
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "ruff", specifier = ">=0.14.6" },
     { name = "testcontainers", specifier = ">=4.13.3" },
-    { name = "uv", specifier = ">=0.9.11" },
+    { name = "uv", specifier = ">=0.11.15" },
 ]
 
 [[package]]

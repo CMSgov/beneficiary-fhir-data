@@ -29,7 +29,10 @@ export BFD_DB_ENDPOINT
 export IDR_MIN_CLAIM_NCH_TRANSACTION_DATE=2014-06-30
 export IDR_MIN_CLAIM_SS_TRANSACTION_DATE=2021-03-01
 export IDR_LOAD_TYPE=initial
-export IDR_PARTITION_TYPE=day
+# export IDR_PARTITION_TYPE=day
 export IDR_LATEST_CLAIMS=0
 export IDR_ENABLE_DATE_PARTITIONS=0
 export IDR_MAX_TASKS=100
+
+uv run pipeline.py --load-type incremental --load-mode prod --source snowflake
+# uv run python -m debugpy --listen 127.0.0.1:5678 --wait-for-client pipeline.py --load-type incremental --load-mode prod --source snowflake

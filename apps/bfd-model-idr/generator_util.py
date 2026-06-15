@@ -48,6 +48,7 @@ CLM_ANSI_SGNTR = "SYNTHETIC_CLM_ANSI_SGNTR"
 PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
 CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
+PRAUC = "SYNTHETIC_PRAUC"
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 AVAIL_CONTRACT_NUMS = [
     "Z0001",
@@ -193,6 +194,31 @@ def gen_multipart_id(field: str, parts: list[tuple[str, int]]) -> str:
 
 def gen_basic_id(field: str, length: int, allowed_chars: str = string.digits) -> str:
     return gen_multipart_id(field=field, parts=[(allowed_chars, length)])
+
+
+def calculate_npi_checksum(npi_9: str) -> str:
+    full_str = "80840" + npi_9
+    digits = [int(char) for char in full_str]
+    for i in range(len(digits)):
+        if (len(digits) - 1 - i) % 2 == 0:
+            val = digits[i] * 2
+            if val > 9:
+                val = val - 9
+            digits[i] = val
+    total = sum(digits)
+    check_digit = (10 - (total % 10)) % 10
+    return str(check_digit)
+
+
+def gen_npi_id(field: str) -> str:
+    def make_npi():
+        first_digit = random.choice(["1", "2"])
+        rest = "".join(random.choices(population=string.digits, k=8))
+        npi_9 = first_digit + rest
+        check_digit = calculate_npi_checksum(npi_9)
+        return npi_9 + check_digit
+
+    return __gen_id(field=field, gen_func=make_npi)
 
 
 def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:

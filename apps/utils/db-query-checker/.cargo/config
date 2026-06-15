@@ -1,4 +1,0 @@
-[build]
-
-# Have `cargo doc` include private items.
-rustdocflags = ["--document-private-items"]

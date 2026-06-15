@@ -2,12 +2,15 @@ package gov.cms.bfd.server.ng.eob;
 
 import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -19,10 +22,7 @@ import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -54,13 +54,15 @@ public class EobHandler {
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param options claim filter options
    * @return an Optional containing the ExplanationOfBenefit if found
    */
-  public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
+  public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
     var eobs =
         searchByIdsInner(
-            List.of(fhirId), new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+            new ClaimIdSearchCriteria(
+                List.of(fhirId), new DateTimeRange(), new DateTimeRange(), Collections.emptyList()),
+            options);
     return eobs.stream().findFirst();
   }
 
@@ -68,10 +70,14 @@ public class EobHandler {
    * Search for claims data by bene.
    *
    * @param criteria filter criteria
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param options claim filter options
+   * @param requestDetails Hapi FHIR request details
    * @return bundle
    */
-  public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
+  public Bundle searchByBene(
+      ClaimSearchCriteria criteria,
+      ClaimFilterOptions options,
+      Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
@@ -97,14 +103,21 @@ public class EobHandler {
         metricTimer.recordMetric(
             "application.eob.handler.search_by_bene",
             () ->
-                filterSamhsaClaims(claims, samhsaFilterMode)
+                filterSamhsaClaims(claims, options.getSamhsaFilterMode())
                     .skip(repositoryCriteria.resolveOffset())
-                    .limit(repositoryCriteria.resolveLimit())
-                    .map(claim -> transformToFhir(claim, samhsaFilterMode)),
-            _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
+                    .limit(repositoryCriteria.resolveLimitWithExtra(1))
+                    .map(claim -> transformToFhir(claim, options)),
+            _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
 
-    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-    recordResultSize(bundle, samhsaFilterMode);
+    var bundle =
+        FhirUtil.bundleOrDefault(
+            filteredClaims,
+            loadProgressRepository::lastUpdated,
+            requestDetails,
+            // we want the raw limit
+            Optional.of(repositoryCriteria.resolveLimit()),
+            Optional.of(repositoryCriteria.resolveOffset()));
+    recordResultSize(bundle, options.getSamhsaFilterMode());
     return bundle;
   }
 
@@ -120,42 +133,42 @@ public class EobHandler {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
-    var claimStream =
-        claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var claimStream = claims.parallelStream();
     return switch (samhsaFilterMode) {
-      case INCLUDE -> claimStream;
-      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+      case INCLUDE -> claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      // it is faster to filter unordered so if we are filtering we should do it unordered first
+      // before the id ordering
+      case ONLY_SAMHSA ->
+          claimStream
+              .unordered()
+              .filter(this::claimHasSamhsa)
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+      case EXCLUDE ->
+          claimStream
+              .unordered()
+              .filter(claim -> !claimHasSamhsa(claim))
+              .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     };
   }
 
   /**
    * Search for claims data by claim ID.
    *
-   * @param claimUniqueIds claim IDs
-   * @param serviceDate service date
-   * @param lastUpdated last updated
-   * @param samhsaFilterMode SAMHSA filter mode
+   * @param criteria id search criteria
+   * @param options claim filter options
    * @return bundle
    */
-  public Bundle searchById(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      SamhsaFilterMode samhsaFilterMode) {
-    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, samhsaFilterMode);
+  public Bundle searchById(ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var eobs = searchByIdsInner(criteria, options);
     return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
   private List<ExplanationOfBenefit> searchByIdsInner(
-      List<Long> claimUniqueIds,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      SamhsaFilterMode samhsaFilterMode) {
-    var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
+      ClaimIdSearchCriteria criteria, ClaimFilterOptions options) {
+    var claims = claimRepository.findByIds(criteria);
 
-    return filterSamhsaClaims(claims, samhsaFilterMode)
-        .map(claim -> transformToFhir(claim, samhsaFilterMode))
+    return filterSamhsaClaims(claims, options.getSamhsaFilterMode())
+        .map(claim -> transformToFhir(claim, options))
         .toList();
   }
 
@@ -164,12 +177,12 @@ public class EobHandler {
    * mode.
    *
    * @param claim the claim
-   * @param samhsaFilterMode filter mode (only samhsa/exclude claims/include)
+   * @param options claim filter options
    * @return the transformed EOB
    */
-  private ExplanationOfBenefit transformToFhir(ClaimBase claim, SamhsaFilterMode samhsaFilterMode) {
+  private ExplanationOfBenefit transformToFhir(ClaimBase claim, ClaimFilterOptions options) {
     var isSamhsa =
-        switch (samhsaFilterMode) {
+        switch (options.getSamhsaFilterMode()) {
           case ONLY_SAMHSA -> true;
           case EXCLUDE -> false;
           case INCLUDE -> claimHasSamhsa(claim);
@@ -178,7 +191,9 @@ public class EobHandler {
     var securityStatus =
         isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
-    return claim.toFhir(securityStatus);
+    var claimState = ClaimState.builder().securityStatus(securityStatus).build();
+
+    return claim.toFhir(options, claimState);
   }
 
   private boolean isCodeSamhsa(

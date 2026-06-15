@@ -1,0 +1,882 @@
+{
+  "resourceType" : "ExplanationOfBenefit",
+  "meta" : {
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
+    "source" : "CWF",
+    "profile" : ["http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization"],
+    "tag" : [{
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
+      "code" : "SharedSystem",
+      "display" : "Shared System"
+    }]
+  },
+  "contained" : [{
+    "resourceType" : "Organization",
+    "id" : "2560707830",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+    },
+    "identifier" : [{
+      "type" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "NPI",
+          "display" : "National provider identifier"
+        }]
+      },
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "2560707830"
+    },
+    {
+      "system" : "http://terminology.hl7.org/NamingSystem/CCN",
+      "value" : "39T14"
+    }],
+    "active" : true,
+    "name" : "HEALTHCARE CENTER"
+  },
+  {
+    "resourceType" : "Organization",
+    "id" : "insurer-org",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+    },
+    "active" : true,
+    "name" : "Centers for Medicare & Medicaid Services"
+  }],
+  "identifier" : [{
+    "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
+    "value" : "-9CKKWTEAH0AHP"
+  }],
+  "status" : "active",
+  "type" : {
+    "coding" : [{
+      "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+      "code" : "institutional"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE",
+      "code" : "C",
+      "display" : "Hospice"
+    }]
+  },
+  "use" : "preauthorization",
+  "patient" : {
+    "reference" : "Patient/-147748784"
+  },
+  "created" : "2020-09-07",
+  "insurer" : {
+    "reference" : "#insurer-org"
+  },
+  "provider" : {
+    "reference" : "#2560707830"
+  },
+  "outcome" : "partial",
+  "preAuthRefPeriod" : [{
+    "start" : "2020-09-17",
+    "end" : "2021-09-17"
+  }],
+  "careTeam" : [{
+    "sequence" : 1,
+    "provider" : {
+      "type" : "Practitioner",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1065725636"
+      },
+      "display" : "Indiana"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "referring",
+        "display" : "Referring"
+      }]
+    }
+  },
+  {
+    "sequence" : 2,
+    "provider" : {
+      "type" : "Practitioner",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "2601139399"
+      },
+      "display" : "Jones, Gromit"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "attending",
+        "display" : "Attending"
+      }]
+    }
+  },
+  {
+    "sequence" : 3,
+    "provider" : {
+      "type" : "Practitioner",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1248968152"
+      },
+      "display" : "Tiana"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "operating",
+        "display" : "Operating"
+      }]
+    }
+  },
+  {
+    "sequence" : 4,
+    "provider" : {
+      "type" : "Organization",
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1118124233"
+      },
+      "display" : "CBS Health Corporation"
+    },
+    "role" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
+      }]
+    }
+  }],
+  "supportingInfo" : [{
+    "sequence" : 1,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_CNTRCTR_NUM",
+        "display" : "Claim Contractor Number"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
+        "code" : "04111",
+        "display" : "COLORADO - NOVITAS SOLUTIONS, INC (EFF. 10/29/2012) (REPLACES FI #04101)"
+      }]
+    }
+  },
+  {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill",
+        "code" : "32X"
+      }]
+    }
+  }],
+  "insurance" : [{
+    "focal" : true,
+    "coverage" : {
+      "display" : "Part A"
+    }
+  }],
+  "item" : [{
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "P"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 13
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 43
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-08-19"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-08-19"
+    }],
+    "sequence" : 1,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0493"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "A"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 4
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 14
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-12"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-12"
+    }],
+    "sequence" : 2,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0162"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "A"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 1
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 94
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-06"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-06"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
+      "valueBoolean" : true
+    }],
+    "sequence" : 3,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0300"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "P"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 8
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 54
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-23"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-23"
+    }],
+    "sequence" : 4,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0151"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "P"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 9
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 45
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-08-31"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-08-31"
+    }],
+    "sequence" : 5,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0162"
+      }]
+    },
+    "locationCodeableConcept" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+        "code" : "41"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "P"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 15
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 58
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-25"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-25"
+    }],
+    "sequence" : 6,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0151"
+      }]
+    },
+    "modifier" : [{
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "RR"
+      }]
+    }],
+    "locationCodeableConcept" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+        "code" : "24"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "A"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 2
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 74
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-12"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-12"
+    }],
+    "sequence" : 7,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0496"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "N"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 8
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 85
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-08-22"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-08-22"
+    }],
+    "sequence" : 8,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0493"
+      }]
+    },
+    "locationCodeableConcept" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+        "code" : "11"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "P"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 14
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 11
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-09-12"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-09-12"
+    }],
+    "sequence" : 9,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0152"
+      }]
+    }
+  },
+  {
+    "extension" : [{
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION",
+        "code" : "A"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
+      "valueDate" : "2020-09-07"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
+      "valueDate" : "2020-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
+      "valueDate" : "2021-09-08"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
+      "valueDecimal" : 9
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
+      "valueCoding" : {
+        "system" : "https://www.usps.com",
+        "code" : "TX"
+      }
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
+      "valueDecimal" : 1
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
+      "valueDate" : "2020-08-24"
+    },
+    {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
+      "valueDate" : "2021-08-24"
+    }],
+    "sequence" : 10,
+    "productOrService" : {
+      "coding" : [{
+        "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "code" : "G0300"
+      }]
+    }
+  }]
+}

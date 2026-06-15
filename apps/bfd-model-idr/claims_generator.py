@@ -13,6 +13,7 @@ import field_constants as f
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
+from claims_priorauth import PriorAuthGeneratorUtil
 from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROFESSIONAL_CLAIM_TYPES
 from claims_util import four_part_key, match_line_num
 from generator_util import (
@@ -35,6 +36,7 @@ from generator_util import (
     CLM_VAL,
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
+    PRAUC,
     GeneratorUtil,
     RowAdapter,
     adapters_to_dicts,
@@ -566,6 +568,89 @@ class _ClaimsFile(StrEnum):
             f.META_LST_UPDT_SK,
         ],
     )
+    PRAUC = (
+        PRAUC,
+        [
+            f.MBI_NUM,
+            f.CAN,
+            f.EQUAT_BIC,
+            f.UTN,
+            f.SEGMENT_COUNT,
+            f.CURRENT_SEGMENT,
+            f.UTN_VALID_ST_DT,
+            f.UTN_VALID_EN_DT,
+            f.PA_IND,
+            f.CLM_TYPE,
+            f.HCPCS_OR_CPT_OR_HIPPS,
+            f.ICD_PROC_IND,
+            f.ICD_PROC_CODE,
+            f.MAC_ID,
+            f.PA_FILLER,
+            f.ICN_DCN,
+            f.PA_DT_ADDED,
+            f.PA_DT_UPDATED,
+            f.SERVICE_CNTS,
+            f.PA_DECISION,
+            f.PA_REQ_SUB_DT,
+            f.PA_REQ_REC_DT,
+            f.PA_DECISION_DT,
+            f.PA_DECISION_EXP_DT,
+            f.ORDER_REFER_NPI,
+            f.RENDER_NPI,
+            f.OPERATE_NPI,
+            f.SVC_RENDER_ST,
+            f.PRICE_MOD1,
+            f.PRICE_MOD2,
+            f.PLACE_OF_SERV,
+            f.ICD_DIAG_IND_1,
+            f.ICD_DIAG_CODE_1,
+            f.ICD_DIAG_IND_2,
+            f.ICD_DIAG_CODE_2,
+            f.ICD_DIAG_IND_3,
+            f.ICD_DIAG_CODE_3,
+            f.ICD_DIAG_IND_4,
+            f.ICD_DIAG_CODE_4,
+            f.ICD_DIAG_IND_5,
+            f.ICD_DIAG_CODE_5,
+            f.NPI,
+            f.NAME,
+            f.CMS_CERT,
+            f.REV_CODE_1,
+            f.REV_CODE_2,
+            f.REV_CODE_3,
+            f.REV_CODE_4,
+            f.REV_CODE_5,
+            f.REV_CODE_6,
+            f.REV_CODE_7,
+            f.REV_CODE_8,
+            f.REV_CODE_9,
+            f.REV_CODE_10,
+            f.REV_CODE_11,
+            f.REV_CODE_12,
+            f.REV_CODE_13,
+            f.REV_CODE_14,
+            f.REV_CODE_15,
+            f.REV_CODE_16,
+            f.REV_CODE_17,
+            f.REV_CODE_18,
+            f.REV_CODE_19,
+            f.REV_CODE_20,
+            f.COND_CODE_1,
+            f.COND_CODE_2,
+            f.COND_CODE_3,
+            f.COND_CODE_4,
+            f.OCCUR_CODE_1,
+            f.OCCUR_CODE_2,
+            f.OCCUR_CODE_3,
+            f.OCCUR_CODE_4,
+            f.TOB,
+            f.MR_COUNT_IND,
+            f.MR_COUNT_ST_DT,
+            f.MR_COUNT_END_DT,
+            f.ATT_PHY_NPI,
+            f.RRB_EXCL_IND,
+        ],
+    )
 
     def __init__(
         self,
@@ -725,6 +810,7 @@ def generate(
         CLM_RLT_COND_SGNTR_MBR: [],
         PRVDR_HSTRY: [],
         CNTRCT_PBP_NUM: [],
+        PRAUC: [],
     }
     load_file_dict(files=files, paths=list(paths))
     gen_utils.cntrct_pbp_num = [row.kv for row in files[CNTRCT_PBP_NUM]]
@@ -1084,10 +1170,14 @@ def generate(
                     clm_lines=clm_line_dcmtns,
                     clm_line_num=clm_line_num,
                 )
-                tracking_num = clm_line.get(f.CLM_LINE_PA_UNIQ_TRKNG_NUM) or (
-                    init_clm_line_dcmtn[f.CLM_LINE_PA_UNIQ_TRKNG_NUM]
-                    if init_clm_line_dcmtn
-                    else None
+                tracking_num = (
+                    clm_line.get(f.CLM_LINE_PA_UNIQ_TRKNG_NUM)
+                    or clm_line.get(f.CLM_LINE_PMD_UNIQ_TRKNG_NUM)
+                    or (
+                        init_clm_line_dcmtn[f.CLM_LINE_PA_UNIQ_TRKNG_NUM]
+                        if init_clm_line_dcmtn
+                        else None
+                    )
                 )
                 if tracking_num:
                     out_tables[CLM_LINE_DCMTN].append(
@@ -1166,6 +1256,19 @@ def generate(
                 out_tables[CLM_PRFNL].extend(clm_prfnls)
 
     print("Done generating synthetic claims data for provided BENE_SKs")
+
+    # Generate synthetic prior authorization data (SYNTHETIC_PRAUC)
+    print("Generating synthetic prior authorization data...")
+    pa_util = PriorAuthGeneratorUtil()
+    prauc_rows = pa_util.gen_prior_auths(
+        gen_utils=gen_utils,
+        files=files,
+        out_tables=out_tables,
+        generated_type_1_npis=generated_type_1_npis,
+        generated_type_2_npis=generated_type_2_npis,
+    )
+    out_tables[PRAUC].extend(prauc_rows)
+    print(f"Done generating synthetic prior authorization data.")
 
     _save_claims_data({_ClaimsFile(k): v for k, v in out_tables.items() if k in _ClaimsFile})
 

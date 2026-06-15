@@ -21,6 +21,7 @@ out/*
 !out/ExplanationOfBenefit-Carrier.json
 !out/ExplanationOfBenefit-DME.json
 !out/ExplanationOfBenefit-Pharmacy.json
+!out/ExplanationOfBenefit-PriorAuth.json
 sushi/fsh-generated/*
 validator_cli.jar
 ReferenceTables/source-to-target-mappings
