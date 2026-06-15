@@ -127,6 +127,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   /**
    * For PAC claims, outcome was historically based on audit-trail status information. Claims now
    * use CLM_PD_STUS_CD to determine outcome.
+   * "~","I","S","T" are included to document the correct mapping even though the default case will handle them.
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
@@ -138,11 +139,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
           break;
         case "~", "I", "S", "T":
-          outcome =
-              ExplanationOfBenefit.RemittanceOutcome
-                  .PARTIAL; // Explicit cases are included to document the CLM_PD_STUS_CD outcome
-                            // mapping even though default will handle these.
-
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
           break;
         default:
           outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;

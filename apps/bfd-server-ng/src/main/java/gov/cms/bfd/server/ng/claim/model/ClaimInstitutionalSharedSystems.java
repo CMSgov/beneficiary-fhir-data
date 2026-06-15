@@ -91,6 +91,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit trail
    * logic.
+   * "~","I","S","T" are included to document the correct mapping even though the default case will handle them.
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
@@ -103,10 +104,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
           outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
           break;
         case "~", "I", "S", "T":
-          outcome =
-              ExplanationOfBenefit.RemittanceOutcome
-                  .PARTIAL; // Explicit cases are included to document the CLM_PD_STUS_CD outcome
-                            // mapping even though default will handle these.
+          outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
           break;
         default:
           outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
