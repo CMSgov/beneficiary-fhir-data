@@ -90,8 +90,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit trail
-   * logic.
-   * "~","I","S","T" are included to document the correct mapping even though the default case will handle them.
+   * logic. "~","I","S","T" are included to document the correct mapping even though the default case will handle them.
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
