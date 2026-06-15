@@ -1,10 +1,8 @@
 import logging
 import os
 import sys
-from typing import cast
 
 from loguru import logger
-from loguru._logger import Logger
 
 
 class InterceptHandler(logging.Handler):
@@ -24,7 +22,7 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
-def configure_logger() -> Logger:
+def configure_logger() -> None:
     # Loguru requires that there be a single Logger configured at the very beginning of the
     # program. That Logger is then inherited by all processes such that each process has the same
     # configuration and "sink"
@@ -39,5 +37,3 @@ def configure_logger() -> Logger:
         enqueue=True,  # Ensures non-blocking and async+multiprocessing-safe
         diagnose=False,  # Ensures local variables are not logged for exceptions
     )
-    # loguru._logger.Logger IS a loguru.Logger but Pyright doesn't know that, so let's force it
-    return cast(Logger, logger)

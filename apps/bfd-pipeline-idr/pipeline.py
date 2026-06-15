@@ -59,13 +59,6 @@ from settings import (
 )
 @click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
 def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: str | None) -> None:
-    # Required to have loguru logging consistently configured across Hamilton nodes and
-    # last_updated worker
-    multiprocessing.set_start_method("spawn")
-    # Setup the root logger _once_ and then pass it to the ProcessPoolExecutor and last_updated
-    # worker process
-    _ = configure_logger()
-
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
@@ -146,4 +139,10 @@ def resolve_test_date(load_mode: LoadMode) -> datetime:
 
 
 if __name__ == "__main__":
+    # Required to have loguru logging consistently configured across Hamilton nodes and
+    # last_updated worker
+    multiprocessing.set_start_method("spawn")
+    # Setup the root logger _once_
+    configure_logger()
+
     main()
