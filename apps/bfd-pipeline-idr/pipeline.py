@@ -150,8 +150,8 @@ def resolve_test_date(load_mode: LoadMode) -> datetime:
 
 
 if __name__ == "__main__":
-    # Required to have loguru logging consistently configured across Hamilton nodes and
-    # last_updated worker
+    # Required to have loguru logging consistently configured across parallel pipeline nodes and
+    # batch worker
     multiprocessing.set_start_method("spawn")
     # Setup the root logger _once_
     configure_logger()
