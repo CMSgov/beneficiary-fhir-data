@@ -1,14 +1,11 @@
 import atexit
 import multiprocessing
-from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
+import anyio
 import click
 import psycopg  # type: ignore
-from hamilton import driver  # type: ignore
-from hamilton.execution import executors  # type: ignore
 from loguru import logger
-from loguru._logger import Logger  # Not ideal, but Logger fails to be imported directly from loguru
 
 import pipeline_nodes
 from batch_worker import LoadingBatchWorkerManager
@@ -33,25 +30,6 @@ from settings import (
     TABLES_TO_LOAD,
     bfd_test_date,
 )
-
-
-class MultiProcessingExecutor(executors.PoolExecutor):
-    def __init__(
-        self,
-        max_tasks: int,
-        max_tasks_per_child: int | None,
-        root_logger: Logger,
-    ) -> None:
-        self.max_tasks_per_child = max_tasks_per_child
-        self.root_logger = root_logger
-        super().__init__(max_tasks)
-
-    def create_pool(self) -> ProcessPoolExecutor:
-        return ProcessPoolExecutor(
-            max_workers=self.max_tasks,
-            max_tasks_per_child=self.max_tasks_per_child,
-            initializer=self.root_logger.reinstall,
-        )
 
 
 @click.command
@@ -86,7 +64,7 @@ def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: st
     multiprocessing.set_start_method("spawn")
     # Setup the root logger _once_ and then pass it to the ProcessPoolExecutor and last_updated
     # worker process
-    root_logger = configure_logger()
+    _ = configure_logger()
 
     if seed_from:
         load_from_csv(
@@ -95,42 +73,15 @@ def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: st
             else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
             seed_from,
         )
-    run(source, load_mode, load_type, root_logger)
+    run(source, load_mode, load_type)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: Logger) -> None:
+def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     logger.info("load start")
-
     logger.info("load_type {}", load_type)
-    # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
-    # processes in the pool will be reused indefinitely if max_tasks_per_child is not specified.
-    # Setting this parameter will cause old processes to be recycled, allowing resources used by
-    # these processes to be freed.
-    # This will allow memory usage to remain constant over time.
-    max_tasks_per_child = 1 if load_mode == LoadMode.PROD else None
-
-    hamilton_driver = (
-        driver.Builder()
-        .enable_dynamic_execution(allow_experimental_mode=True)
-        .with_modules(pipeline_nodes)
-        .with_local_executor(
-            MultiProcessingExecutor(
-                max_tasks=MAX_TASKS,
-                max_tasks_per_child=max_tasks_per_child,
-                root_logger=root_logger,
-            )
-        )
-        .with_remote_executor(
-            MultiProcessingExecutor(
-                max_tasks=MAX_TASKS,
-                max_tasks_per_child=max_tasks_per_child,
-                root_logger=root_logger,
-            )
-        )
-        .build()
-    )
 
     start_time = resolve_test_date(load_mode)
+
     tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
     idr_job_events: list[IdrJobLoadEvent] = []
     if load_type == LoadType.INCREMENTAL and not tables_to_load:
@@ -148,22 +99,20 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, root_logger: L
         )
 
     worker_manager = LoadingBatchWorkerManager(get_connection_string(load_mode))
-    worker_manager.start()
     atexit.register(worker_manager.cleanup)
 
+    staged_pipeline = pipeline_nodes.StagedIdrPipeline(
+        MAX_TASKS, load_mode, start_time, load_type, source, worker_manager.client, tables_to_load
+    )
+
+    async def run_stages_and_worker() -> None:
+        async with anyio.create_task_group() as tg:
+            await tg.start(worker_manager.start)
+            tg.start_soon(staged_pipeline.start)
+
     try:
-        hamilton_driver.execute(  # type: ignore
-            final_vars=["collect_stage4"],
-            inputs={
-                "load_type": load_type,
-                "load_mode": load_mode,
-                "start_time": start_time,
-                "tables_to_load": tables_to_load,
-                "worker_client": worker_manager.client,
-                "source": source,
-            },
-        )
-    except Exception:
+        anyio.run(run_stages_and_worker)
+    except BaseException:
         if idr_job_events:
             logger.error(
                 "{} IDR job load events failed to be fully processed: {}",

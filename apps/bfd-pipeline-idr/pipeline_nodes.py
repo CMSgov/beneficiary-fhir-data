@@ -1,7 +1,8 @@
+import itertools
 import random
+from collections.abc import Generator
 from datetime import datetime
-
-from hamilton.htypes import Collect, Parallelizable  # type: ignore
+from typing import Any
 
 from batch_worker import LoadingBatchWorkerClient
 from load_partition import LoadPartition, LoadType
@@ -32,6 +33,7 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
+from parallel_executor import ParallelStagesExecutor
 from pipeline_utils import extract_and_load
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
@@ -68,195 +70,124 @@ _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 _LOAD_ALL_TABLES = {"all"}
 
 
-def _filter_tables(
-    tables: list[type[IdrBaseModel]], tables_to_load: set[str] | None
-) -> list[type[IdrBaseModel]]:
-    return [
-        t
-        for t in tables
-        if tables_to_load is None
-        or tables_to_load == _LOAD_ALL_TABLES
-        or t.table() in tables_to_load
-    ]
+class StagedIdrPipeline:
+    def __init__(
+        self,
+        max_workers: int,
+        load_mode: LoadMode,
+        start_time: datetime,
+        load_type: LoadType,
+        source: Source,
+        worker_client: LoadingBatchWorkerClient,
+        tables_to_load: set[str] | None,
+    ) -> None:
+        self.load_mode = load_mode
+        self.start_time = start_time
+        self.load_type = load_type
+        self.source = source
+        self.worker_client = worker_client
+        self.tables_to_load = tables_to_load
+        self._executor: ParallelStagesExecutor | None = ParallelStagesExecutor(max_workers)
 
+    def __getstate__(self) -> object:
+        # __getstate__ and __setstate__ are used during pickling when passing objects around
+        # subprocesses. _executor is not a picklable object, and since generators retain references
+        # to self we need to ensure _executor is not pickled when the generators are executed in
+        # each stage
+        state = self.__dict__.copy()
+        del state["_executor"]
+        return state
 
-def _gen_partitioned_node_inputs(
-    model_types: list[type[IdrBaseModel]], load_type: LoadType
-) -> list[NodePartitionedModelInput]:
-    models_and_partitions = [
-        (
-            m,
-            [
-                partition
-                for partition_group in m.model_type().partitions
-                for partition in partition_group.generate_ranges(
-                    load_type, datetime.date(m.model_type().min_transaction_date)
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._executor = None
+
+    async def start(self) -> bool:
+        if not self._executor:
+            raise RuntimeError("Pipeline attempted to be started after pickling")
+
+        return all(
+            itertools.chain.from_iterable(
+                await self._executor.execute(
+                    self._wrapped_extract_and_load,
+                    [self._stage1(), self._stage2(), self._stage3(), self._stage4()],
                 )
-            ],
+            )
         )
-        for m in model_types
-    ]
-    models_with_partitions: list[NodePartitionedModelInput] = [
-        (m, p) for m, partitions in models_and_partitions if partitions for p in partitions
-    ]
-    models_without_partitions = [
-        (m, None) for m, partitions in models_and_partitions if not partitions
-    ]
-    res = models_with_partitions + models_without_partitions
-    # randomize to reduce contention on a single table
-    random.shuffle(res)
-    return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
+    def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
+        return [
+            t
+            for t in tables
+            if self.tables_to_load is None
+            or self.tables_to_load == _LOAD_ALL_TABLES
+            or t.table() in self.tables_to_load
+        ]
 
-def stage1(
-    load_mode: LoadMode,
-    start_time: datetime,
-    load_type: LoadType,
-    source: Source,
-    worker_client: LoadingBatchWorkerClient,
-) -> bool:
-    return extract_and_load(
-        cls=IdrBeneficiaryOvershareMbi,
-        partition=None,
-        job_start=start_time,
-        load_mode=load_mode,
-        load_type=load_type,
-        source=source,
-        worker_client=worker_client,
-    )
-
-
-def stage2_inputs(
-    load_type: LoadType,
-    tables_to_load: set[str] | None,
-    stage1: bool,  # noqa: ARG001
-) -> Parallelizable[NodePartitionedModelInput]:
-    if load_type == LoadType.INITIAL:
-        yield from _gen_partitioned_node_inputs(
-            _filter_tables(
+    def _gen_partitioned_node_inputs(
+        self, model_types: list[type[IdrBaseModel]]
+    ) -> list[NodePartitionedModelInput]:
+        models_and_partitions = [
+            (
+                m,
                 [
-                    *_CLAIM_AUX_TABLES,
-                    *_BENE_AUX_TABLES,
-                    *_CLAIM_TABLES,
-                    *_BENE_TABLES,
+                    partition
+                    for partition_group in m.model_type().partitions
+                    for partition in partition_group.generate_ranges(
+                        self.load_type, datetime.date(m.model_type().min_transaction_date)
+                    )
                 ],
-                tables_to_load,
-            ),
-            load_type,
-        )
-    else:
-        yield from _gen_partitioned_node_inputs(
-            _filter_tables([*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES], tables_to_load), load_type
-        )
+            )
+            for m in model_types
+        ]
+        models_with_partitions: list[NodePartitionedModelInput] = [
+            (m, p) for m, partitions in models_and_partitions if partitions for p in partitions
+        ]
+        models_without_partitions = [
+            (m, None) for m, partitions in models_and_partitions if not partitions
+        ]
+        res = models_with_partitions + models_without_partitions
+        # randomize to reduce contention on a single table
+        random.shuffle(res)
+        return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
-
-# NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle
-# serialization properly which is required. See notes about multiprocessing
-# here https://hamilton.apache.org/concepts/parallel-task/
-
-
-def do_stage2(
-    stage2_inputs: NodePartitionedModelInput,
-    load_mode: LoadMode,
-    start_time: datetime,
-    load_type: LoadType,
-    source: Source,
-    worker_client: LoadingBatchWorkerClient,
-) -> bool:
-    model_type, partition = stage2_inputs
-    return extract_and_load(
-        cls=model_type,
-        partition=partition,
-        job_start=start_time,
-        load_mode=load_mode,
-        load_type=load_type,
-        source=source,
-        worker_client=worker_client,
-    )
-
-
-def collect_stage2(
-    do_stage2: Collect[bool],
-) -> bool:
-    return all(do_stage2)
-
-
-def stage3_inputs(
-    load_type: LoadType,
-    tables_to_load: set[str] | None,
-    collect_stage2: bool,  # noqa: ARG001
-) -> Parallelizable[NodePartitionedModelInput]:
-    if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs(
-            _filter_tables(_CLAIM_TABLES, tables_to_load), load_type
-        )
-    else:
-        yield from _gen_partitioned_node_inputs([], load_type)
-
-
-def do_stage3(
-    stage3_inputs: NodePartitionedModelInput,
-    load_mode: LoadMode,
-    start_time: datetime,
-    load_type: LoadType,
-    source: Source,
-    worker_client: LoadingBatchWorkerClient,
-) -> bool:
-    model_type, partition = stage3_inputs
-    return extract_and_load(
-        cls=model_type,
-        partition=partition,
-        job_start=start_time,
-        load_mode=load_mode,
-        load_type=load_type,
-        source=source,
-        worker_client=worker_client,
-    )
-
-
-def collect_stage3(
-    do_stage3: Collect[bool],
-) -> bool:
-    return all(do_stage3)
-
-
-def stage4_inputs(
-    load_type: LoadType,
-    tables_to_load: set[str] | None,
-    collect_stage3: bool,  # noqa: ARG001
-) -> Parallelizable[NodePartitionedModelInput]:
-    if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs(
-            _filter_tables(_BENE_TABLES, tables_to_load), load_type
-        )
-    else:
-        yield from _gen_partitioned_node_inputs([], load_type)
-
-
-def do_stage4(
-    stage4_inputs: NodePartitionedModelInput,
-    load_type: LoadType,
-    load_mode: LoadMode,
-    start_time: datetime,
-    source: Source,
-    worker_client: LoadingBatchWorkerClient,
-) -> bool:
-    model_type, partition = stage4_inputs
-    if load_type == LoadType.INCREMENTAL:
+    def _wrapped_extract_and_load(self, model_and_partition: NodePartitionedModelInput) -> bool:
+        model, partition = model_and_partition
         return extract_and_load(
-            cls=model_type,
+            cls=model,
             partition=partition,
-            job_start=start_time,
-            load_mode=load_mode,
-            load_type=load_type,
-            source=source,
-            worker_client=worker_client,
+            job_start=self.start_time,
+            load_mode=self.load_mode,
+            load_type=self.load_type,
+            source=self.source,
+            worker_client=self.worker_client,
         )
 
-    return False
+    def _stage1(self) -> Generator[NodePartitionedModelInput]:
+        yield (IdrBeneficiaryOvershareMbi, None)
 
+    def _stage2(self) -> Generator[NodePartitionedModelInput]:
+        tables = self._filter_tables(
+            [
+                *_CLAIM_AUX_TABLES,
+                *_BENE_AUX_TABLES,
+                *_CLAIM_TABLES,
+                *_BENE_TABLES,
+            ]
+            if self.load_type == LoadType.INITIAL
+            else [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
+        )
 
-def collect_stage4(
-    do_stage4: Collect[bool],
-) -> bool:
-    return all(do_stage4)
+        yield from self._gen_partitioned_node_inputs(tables)
+
+    def _stage3(self) -> Generator[NodePartitionedModelInput]:
+        if self.load_type == LoadType.INITIAL:
+            yield from []
+
+        yield from self._gen_partitioned_node_inputs(self._filter_tables(_CLAIM_TABLES))
+
+    def _stage4(self) -> Generator[NodePartitionedModelInput]:
+        if self.load_type == LoadType.INITIAL:
+            yield from []
+
+        yield from self._gen_partitioned_node_inputs(self._filter_tables(_BENE_TABLES))

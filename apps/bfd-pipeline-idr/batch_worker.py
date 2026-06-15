@@ -1,7 +1,8 @@
 import os
 import random
+import signal
 import string
-import time
+import threading
 import uuid
 from collections import Counter, OrderedDict
 from collections.abc import Awaitable, Callable
@@ -13,12 +14,12 @@ from multiprocessing import Manager, Process
 from multiprocessing.managers import SyncManager
 from queue import Queue
 from threading import Event
-from typing import Any, cast
+from types import FrameType
+from typing import Any, Never, cast
 
 import anyio
-import anyio.from_thread
-import anyio.to_thread
 import psycopg_pool
+from anyio.abc import TaskStatus
 from anyio.streams.memory import MemoryObjectSendStream
 from loguru import logger
 from loguru._logger import Logger
@@ -30,6 +31,7 @@ from db_utils import to_pg_integer
 from load_partition import LoadPartition
 from model.base_model import DbType, IdrBaseModel
 from model.load_progress import LoadProgress
+from parallel_executor import ExternallyCanceled
 from settings import PER_BATCH_MAX_CONNECTIONS, PER_BATCH_MIN_CONNECTIONS
 from timer import Timer
 
@@ -163,20 +165,20 @@ class _StopWorker(_Task):
 
 
 class _LoadingBatchWorker(Process):
-    """A subprocess worker that pulls tasks from a shared queue."""
-
     def __init__(
         self,
         task_queue: Queue[_TaskSequence],
-        started_event: Event,
-        shutdown_event: Event,
+        errors_queue: Queue[BaseException],
+        started_signal: Event,
+        cancel_signal: Event,
         root_logger: Logger,
         conn_str: str,
     ) -> None:
         super().__init__()
         self.task_queue = task_queue
-        self.started_event = started_event
-        self.shutdown_event = shutdown_event
+        self.errors_queue = errors_queue
+        self.started_signal = started_signal
+        self._cancel_signal = cancel_signal
         self._logger = root_logger
         self._conn_str = conn_str
 
@@ -184,13 +186,23 @@ class _LoadingBatchWorker(Process):
 
     def run(self) -> None:
         self._logger.reinstall()
+
+        def _watch_for_parent_cancel(stop_signal: Event) -> None:
+            stop_signal.wait()
+            os.kill(os.getpid(), signal.SIGUSR1)
+
+        def sigusr1_handler(signum: int, frame: FrameType | None) -> Never:  # noqa: ARG001
+            raise ExternallyCanceled("Externally canceled, interrupting")
+
+        signal.signal(signal.SIGUSR1, sigusr1_handler)
+        threading.Thread(
+            target=lambda: _watch_for_parent_cancel(self._cancel_signal), daemon=True
+        ).start()
+
         try:
             anyio.run(self._worker_main)
-        except Exception:
-            logger.opt(exception=True).critical("LoadingBatchWorker process died:")
-            os._exit(
-                1
-            )  # Force an exit because the pipeline should stop if the background worker does
+        except BaseException as ex:
+            self.errors_queue.put(ex)
 
     async def _worker_main(self) -> None:
         task_send, task_receive = anyio.create_memory_object_stream[_TaskSequence](
@@ -212,7 +224,7 @@ class _LoadingBatchWorker(Process):
             tg.start_soon(self._run_queue_bridge, task_send)
 
             # Signal back to the manager that we're alive and ready
-            self.started_event.set()
+            self.started_signal.set()
             logger.info(
                 "LoadingBatchWorker setup with max concurrency of {}", PER_BATCH_MAX_CONNECTIONS
             )
@@ -291,18 +303,12 @@ class _LoadingBatchWorker(Process):
         self,
         task_send: MemoryObjectSendStream[_TaskSequence],
     ) -> None:
-        def blocking_queue_reader(
-            task_send: MemoryObjectSendStream[_TaskSequence],
-        ) -> None:
-            while True:
-                task = self.task_queue.get()  # blocks here — fine, it's a thread
-                anyio.from_thread.run(task_send.send, task)
-
-                if isinstance(task, _StopWorker):
-                    break
-
         async with task_send:
-            await anyio.to_thread.run_sync(blocking_queue_reader, task_send)
+            while True:
+                if not self.task_queue.empty():
+                    task = self.task_queue.get()
+                    await task_send.send(task)
+                await anyio.sleep(0)
 
     async def _do_last_updated(
         self,
@@ -415,27 +421,44 @@ class _LoadingBatchWorker(Process):
             load_progress_bg_timer.stop()
 
     async def _wait_for_completion(self, task: _WaitForPartitionComplete) -> None:
-        def blocking_check_tasks() -> None:
-            while any(
-                task
-                for task in self._running_tasks
-                if isinstance(task, _LoadPartitionTask)
-                and task.partition.name == task.partition.name
-                and task.model == task.model
-            ):
-                anyio.from_thread.check_cancelled()
-                time.sleep(0.05)  # poll interval
+        while any(
+            task
+            for task in self._running_tasks
+            if isinstance(task, _LoadPartitionTask)
+            and task.partition.name == task.partition.name
+            and task.model == task.model
+        ):
+            await anyio.sleep(0)
 
-            logger.debug(
-                "{}-{} has no tasks remaining, done event: {}",
-                task.model.table(),
-                task.partition.name,
-                task.done_event.__hash__(),
-            )
+        logger.debug(
+            "{}-{} has no tasks remaining, done event: {}",
+            task.model.table(),
+            task.partition.name,
+            task.done_event.__hash__(),
+        )
 
-            task.done_event.set()
-
-        await anyio.to_thread.run_sync(blocking_check_tasks)
+        task.done_event.set()
+        # def blocking_check_tasks() -> None:
+        #     while any(
+        #         task
+        #         for task in self._running_tasks
+        #         if isinstance(task, _LoadPartitionTask)
+        #         and task.partition.name == task.partition.name
+        #         and task.model == task.model
+        #     ):
+        #         anyio.from_thread.check_cancelled()
+        #         time.sleep(0.05)  # poll interval
+        #
+        #     logger.debug(
+        #         "{}-{} has no tasks remaining, done event: {}",
+        #         task.model.table(),
+        #         task.partition.name,
+        #         task.done_event.__hash__(),
+        #     )
+        #
+        #     task.done_event.set()
+        #
+        # await anyio.to_thread.run_sync(blocking_check_tasks)
 
 
 class LoadingBatchWorkerClient:
@@ -467,8 +490,7 @@ class LoadingBatchWorkerManager:
     def __init__(self, conn_str: str) -> None:
         self._manager = Manager()
         self._task_queue: Queue[_TaskSequence] = self._manager.Queue()
-        self._started_event: Event = self._manager.Event()
-        self._shutdown_event: Event = self._manager.Event()
+        self._started_signal: Event = self._manager.Event()
         self._worker: _LoadingBatchWorker | None = None
         self._conn_str = conn_str
 
@@ -476,41 +498,53 @@ class LoadingBatchWorkerManager:
     def client(self) -> LoadingBatchWorkerClient:
         return LoadingBatchWorkerClient(self._task_queue, self._manager.address)
 
-    def start(self) -> None:
-        """Spawn the worker process and wait until it signals readiness."""
+    async def start(self, task_status: TaskStatus | None = None) -> None:
         if self._worker is not None and self._worker.is_alive():
             return
 
-        self._started_event.clear()
-        self._shutdown_event.clear()
+        self._started_signal.clear()
+        errors_queue: Queue[BaseException] = self._manager.Queue()
+        cancel_signal = self._manager.Event()
 
         self._worker = _LoadingBatchWorker(
             task_queue=self._task_queue,
-            started_event=self._started_event,
-            shutdown_event=self._shutdown_event,
+            errors_queue=errors_queue,
+            started_signal=self._started_signal,
+            cancel_signal=cancel_signal,
             root_logger=cast(Logger, logger),
             conn_str=self._conn_str,
         )
         self._worker.start()
 
         # Block until the worker signals it has started
-        self._started_event.wait()
+        self._started_signal.wait()
 
         logger.info("LoadingBatchWorker signaled startup")
 
+        if task_status:
+            task_status.started()
+
+        async def watch_queue() -> None:
+            while True:
+                if not errors_queue.empty():
+                    errors = errors_queue.get()
+                    raise errors
+
+                await anyio.sleep(0)
+
+        async with anyio.create_task_group() as tg:
+            try:
+                tg.start_soon(watch_queue)
+            except anyio.get_cancelled_exc_class():
+                cancel_signal.set()
+                raise
+
     def cleanup(self, timeout: float = 5.0) -> None:
-        """Gracefully shut down the worker process and release resources."""
         if self._worker is None:
             return
 
-        # 1. Signal via the Event (fast path)
-        self._shutdown_event.set()
-
-        # 2. Also push a sentinel so the worker exits even if it's
-        #    blocked in queue.get() — two-pronged approach
         self._task_queue.put([_StopWorker()])
 
-        # 3. Join with timeout
         self._worker.join(timeout=timeout)
 
         if self._worker.is_alive():

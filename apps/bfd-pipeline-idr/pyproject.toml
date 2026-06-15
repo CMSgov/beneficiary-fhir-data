@@ -9,7 +9,6 @@ dependencies = [
     "psycopg[binary,pool]>=3.3.3",
     "snowflake-connector-python>=4.4.0",
     "snowflake-snowpark-python>=1.50.0",
-    "sf-hamilton>=1.89.0",
     "python-dateutil>=2.9.0",
     "pydantic>=2.13.3",
     "usaddress>=0.5.16",
