@@ -438,27 +438,6 @@ class _LoadingBatchWorker(Process):
         )
 
         task.done_event.set()
-        # def blocking_check_tasks() -> None:
-        #     while any(
-        #         task
-        #         for task in self._running_tasks
-        #         if isinstance(task, _LoadPartitionTask)
-        #         and task.partition.name == task.partition.name
-        #         and task.model == task.model
-        #     ):
-        #         anyio.from_thread.check_cancelled()
-        #         time.sleep(0.05)  # poll interval
-        #
-        #     logger.debug(
-        #         "{}-{} has no tasks remaining, done event: {}",
-        #         task.model.table(),
-        #         task.partition.name,
-        #         task.done_event.__hash__(),
-        #     )
-        #
-        #     task.done_event.set()
-        #
-        # await anyio.to_thread.run_sync(blocking_check_tasks)
 
 
 class LoadingBatchWorkerClient:
