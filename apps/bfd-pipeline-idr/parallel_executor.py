@@ -12,6 +12,9 @@ from typing import Never
 import anyio
 from loguru import logger
 
+type StageTask[T] = Callable[[], T]
+type Stage[T] = Generator[StageTask[T]]
+
 
 class ExternallyCanceled(Exception):
     pass
@@ -23,13 +26,12 @@ class ParallelStagesExecutor:
         self._manager = Manager()
 
     @staticmethod
-    def _wrap[T, R](
-        fn: Callable[[T], R],
-        item: T,
+    def _wrap[T](
+        task: StageTask[T],
         index: int,
         errors_queue: Queue[BaseException],
         cancel_signal: Event,
-    ) -> tuple[int, R | None]:
+    ) -> tuple[int, T | None]:
 
         def _watch_for_parent_cancel(cancel_signal: Event) -> None:
             cancel_signal.wait()
@@ -44,18 +46,17 @@ class ParallelStagesExecutor:
         ).start()
 
         try:
-            return (index, fn(item))
+            return (index, task())
         except BaseException as e:
             errors_queue.put(e)
             return (index, None)
 
-    async def _run_stage[T, R](
+    async def _run_stage[T](
         self,
-        fn: Callable[[T], R],
-        items: Generator[T],
+        stage: Stage[T],
         errors_queue: Queue[BaseException],
         pool: ProcessPoolExecutor,
-        results: dict[int, R | None],
+        results: dict[int, T | None],
     ) -> None:
         done = anyio.Event()
 
@@ -65,12 +66,10 @@ class ParallelStagesExecutor:
                 tg.start_soon(self._poll_errors, errors_queue, done)
 
                 async with anyio.create_task_group() as tg2:
-                    for idx, item in enumerate(items):
+                    for idx, task in enumerate(stage):
 
-                        async def _task(item: T = item, idx: int = idx) -> None:
-                            future = pool.submit(
-                                self._wrap, fn, item, idx, errors_queue, cancel_signal
-                            )
+                        async def _task(task: StageTask[T] = task, idx: int = idx) -> None:
+                            future = pool.submit(self._wrap, task, idx, errors_queue, cancel_signal)
                             idx_val, val = await self._wait_for_future_result(future)
                             results[idx_val] = val
 
@@ -85,18 +84,16 @@ class ParallelStagesExecutor:
         if not errors_queue.empty():
             raise errors_queue.get()
 
-    async def execute[T, R](
-        self, fn: Callable[[T], R], stages: list[Generator[T]]
-    ) -> list[list[R | None]]:
+    async def execute[T](self, stages: list[Stage[T]]) -> list[list[T | None]]:
         errors_queue: Queue[BaseException] = self._manager.Queue()
-        all_results: list[list[R | None]] = []
+        all_results: list[list[T | None]] = []
 
         with ProcessPoolExecutor(
             max_workers=self.max_workers, initializer=logger.reinstall
         ) as pool:
             for stage in stages:
-                results: dict[int, R | None] = {}
-                await self._run_stage(fn, stage, errors_queue, pool, results)
+                results: dict[int, T | None] = {}
+                await self._run_stage(stage, errors_queue, pool, results)
                 all_results.append([results[i] for i in range(len(results))])
 
         return all_results
@@ -109,7 +106,7 @@ class ParallelStagesExecutor:
             await anyio.sleep(0)
 
     @staticmethod
-    async def _wait_for_future_result[R](future: Future[R]) -> R:
+    async def _wait_for_future_result[T](future: Future[T]) -> T:
         while not future.done():
             await anyio.sleep(0)
 

@@ -1,6 +1,6 @@
+import functools
 import itertools
 import random
-from collections.abc import Generator
 from datetime import datetime
 from typing import Any
 
@@ -33,7 +33,7 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
-from parallel_executor import ParallelStagesExecutor
+from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import extract_and_load
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
@@ -109,10 +109,47 @@ class StagedIdrPipeline:
         return all(
             itertools.chain.from_iterable(
                 await self._executor.execute(
-                    self._wrapped_extract_and_load,
-                    [self._stage1(), self._stage2(), self._stage3(), self._stage4()],
+                    [
+                        self._stage1_do_bene_overshare_mbi(),
+                        self._stage2_do_claims_and_benes_tbls(),
+                        self._stage3_do_parent_claims_tbls(),
+                        self._stage4_do_beneficiary(),
+                    ],
                 )
             )
+        )
+
+    def _stage1_do_bene_overshare_mbi(self) -> Stage[bool]:
+        yield from self._extract_and_load_stage([(IdrBeneficiaryOvershareMbi, None)])
+
+    def _stage2_do_claims_and_benes_tbls(self) -> Stage[bool]:
+        tables = self._filter_tables(
+            [
+                *_CLAIM_AUX_TABLES,
+                *_BENE_AUX_TABLES,
+                *_CLAIM_TABLES,
+                *_BENE_TABLES,
+            ]
+            if self.load_type == LoadType.INITIAL
+            else [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
+        )
+
+        yield from self._extract_and_load_stage(self._gen_partitioned_node_inputs(tables))
+
+    def _stage3_do_parent_claims_tbls(self) -> Stage[bool]:
+        if self.load_type == LoadType.INITIAL:
+            yield from ()
+
+        yield from self._extract_and_load_stage(
+            self._gen_partitioned_node_inputs(self._filter_tables(_CLAIM_TABLES))
+        )
+
+    def _stage4_do_beneficiary(self) -> Stage[bool]:
+        if self.load_type == LoadType.INITIAL:
+            yield from ()
+
+        yield from self._extract_and_load_stage(
+            self._gen_partitioned_node_inputs(self._filter_tables(_BENE_TABLES))
         )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
@@ -151,43 +188,20 @@ class StagedIdrPipeline:
         random.shuffle(res)
         return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
-    def _wrapped_extract_and_load(self, model_and_partition: NodePartitionedModelInput) -> bool:
-        model, partition = model_and_partition
-        return extract_and_load(
-            cls=model,
-            partition=partition,
-            job_start=self.start_time,
-            load_mode=self.load_mode,
-            load_type=self.load_type,
-            source=self.source,
-            worker_client=self.worker_client,
-        )
-
-    def _stage1(self) -> Generator[NodePartitionedModelInput]:
-        yield (IdrBeneficiaryOvershareMbi, None)
-
-    def _stage2(self) -> Generator[NodePartitionedModelInput]:
-        tables = self._filter_tables(
-            [
-                *_CLAIM_AUX_TABLES,
-                *_BENE_AUX_TABLES,
-                *_CLAIM_TABLES,
-                *_BENE_TABLES,
-            ]
-            if self.load_type == LoadType.INITIAL
-            else [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
-        )
-
-        yield from self._gen_partitioned_node_inputs(tables)
-
-    def _stage3(self) -> Generator[NodePartitionedModelInput]:
-        if self.load_type == LoadType.INITIAL:
-            yield from []
-
-        yield from self._gen_partitioned_node_inputs(self._filter_tables(_CLAIM_TABLES))
-
-    def _stage4(self) -> Generator[NodePartitionedModelInput]:
-        if self.load_type == LoadType.INITIAL:
-            yield from []
-
-        yield from self._gen_partitioned_node_inputs(self._filter_tables(_BENE_TABLES))
+    def _extract_and_load_stage(
+        self, model_and_parts: list[NodePartitionedModelInput]
+    ) -> Stage[bool]:
+        for model, partition in model_and_parts:
+            # We use functools.partial to "close over" all of the necessary inputs to
+            # extract_and_load because a typical lambda is not pickleable. This partial function
+            # _is_ pickleable and so can be sent to the subprocess worker to be called
+            yield functools.partial(
+                extract_and_load,
+                partition=partition,
+                cls=model,
+                job_start=self.start_time,
+                load_mode=self.load_mode,
+                load_type=self.load_type,
+                source=self.source,
+                worker_client=self.worker_client,
+            )
