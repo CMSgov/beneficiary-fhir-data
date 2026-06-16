@@ -8,14 +8,13 @@ import anyio
 import psycopg
 import psycopg_pool
 from loguru import logger
-from psycopg import sql
 from psycopg.abc import Params, QueryNoTemplate
 from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
 from batch_worker import LoadingBatch, LoadingBatchWorkerClient
 from constants import DEFAULT_MIN_DATE
-from db_utils import get_connection_string, to_pg_integer
+from db_utils import get_connection_string
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, IdrBaseModel, LoadMode, T
 from model.load_progress import LoadProgress
@@ -264,11 +263,6 @@ class BatchLoader:
 
                         await self._copy_data(cur, full_temp_table, batch_part)
 
-                        if self.worker_client and (
-                            timestamp_pkey_col := self.model.last_updated_timestamp_col()
-                        ):
-                            await self._advisory_locks(cur, batch_part, timestamp_pkey_col)
-
                         # Upsert into the main table
                         await self._upsert(cur, full_temp_table, timestamp)
                         break
@@ -354,23 +348,6 @@ class BatchLoader:
         if self.enable_load_progress:
             await cur.execute(query, params)  # type: ignore
             await cur.connection.commit()
-
-    async def _advisory_locks(
-        self, cur: psycopg.AsyncCursor, data: Sequence[T], timestamp_pkey_col: str
-    ) -> None:
-        # The pg_advisory_xact_lock accepts only "integer" types, not even bigint. Hence,
-        # to_integer and hash
-        model_hash = to_pg_integer(hash(self.model.last_updated_date_table()))
-        await cur.execute(
-            sql.SQL("\n").join(
-                sql.SQL("SELECT pg_advisory_xact_lock({}, {});").format(
-                    model_hash, to_pg_integer(hash(getattr(x, timestamp_pkey_col)))
-                )
-                for x in data
-            ),
-            prepare=False,
-            binary=False,
-        )
 
     async def _upsert(
         self, cur: psycopg.AsyncCursor, temp_tablename: str, timestamp: datetime

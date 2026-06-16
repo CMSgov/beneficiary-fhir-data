@@ -27,7 +27,6 @@ from psycopg import sql
 from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
-from db_utils import to_pg_integer
 from load_partition import LoadPartition
 from model.base_model import DbType, IdrBaseModel
 from model.load_progress import LoadProgress
@@ -333,7 +332,6 @@ class _LoadingBatchWorker(Process):
         )
         schema, table = task.target_table.split(".", 1)
         full_table = sql.Identifier(schema, table)
-        model_hash = to_pg_integer(hash(task.target_table))
         chunks = {
             idx: list(chunk)
             for idx, chunk in enumerate(batched(task.keys, chunk_size, strict=False))
@@ -343,16 +341,6 @@ class _LoadingBatchWorker(Process):
         async def update_chunk(chunk_id: int) -> None:
             async with pool.connection() as conn, conn.cursor() as cur:
                 try:
-                    await cur.execute(
-                        sql.SQL("\n").join(
-                            sql.SQL("SELECT pg_advisory_xact_lock({}, {});").format(
-                                model_hash, to_pg_integer(hash(x))
-                            )
-                            for x in chunks[chunk_id]
-                        ),
-                        prepare=False,
-                        binary=False,
-                    )
                     await cur.execute(
                         t"""
                         UPDATE {full_table:i} u
