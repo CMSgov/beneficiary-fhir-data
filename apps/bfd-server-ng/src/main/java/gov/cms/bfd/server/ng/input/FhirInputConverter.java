@@ -159,23 +159,6 @@ public class FhirInputConverter {
   }
 
   /**
-   * Converts an {@link NumberParam} to an optional int.
-   *
-   * @param numberParam number param
-   * @return long value
-   */
-  public static Optional<Long> toLongOptional(@Nullable NumberParam numberParam) {
-    if (numberParam == null || numberParam.getValue() == null) {
-      return Optional.empty();
-    }
-    try {
-      return Optional.of(numberParam.getValue().longValueExact());
-    } catch (ArithmeticException _) {
-      throw new InvalidRequestException("Numeric input was not in a valid format");
-    }
-  }
-
-  /**
    * Converts a {@link ReferenceParam} to a numeric ID type.
    *
    * @param reference reference

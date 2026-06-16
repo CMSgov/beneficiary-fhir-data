@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.log;
 
-import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.audit.AuditEventBase;
