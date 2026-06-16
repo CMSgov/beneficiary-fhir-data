@@ -220,7 +220,8 @@ class _LoadingBatchWorker(Process):
         ):
             await pool.wait()
 
-            tg.start_soon(self._run_queue_bridge, task_send)
+            stop = anyio.Event()
+            tg.start_soon(self._run_queue_bridge, task_send, stop)
 
             # Signal back to the manager that we're alive and ready
             self.started_signal.set()
@@ -234,7 +235,6 @@ class _LoadingBatchWorker(Process):
                         continue
 
                     task_funcs: list[Callable[[], Awaitable[Any]]] = []
-                    stop = False
                     logger.info(
                         "Task sequence received: {}",
                         " -> ".join(type(x).__name__ for x in task_sequence),
@@ -255,13 +255,18 @@ class _LoadingBatchWorker(Process):
                                 task_funcs.append(lambda task=task: self._wait_for_completion(task))
 
                             case _StopWorker():
-                                stop = True
+                                stop.set()
+                                logger.info(
+                                    "{} received, {} shutting down",
+                                    _StopWorker.__name__,
+                                    _LoadingBatchWorker.__name__,
+                                )
                                 break
 
                             case _:
                                 pass
 
-                    if stop:
+                    if stop.is_set():
                         break
 
                     if task_funcs:
@@ -301,9 +306,10 @@ class _LoadingBatchWorker(Process):
     async def _run_queue_bridge(
         self,
         task_send: MemoryObjectSendStream[_TaskSequence],
+        stop: anyio.Event,
     ) -> None:
         async with task_send:
-            while True:
+            while not stop.is_set():
                 if not self.task_queue.empty():
                     task = self.task_queue.get()
                     await task_send.send(task)
