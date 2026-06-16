@@ -11,32 +11,36 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.Resource;
 
-/** Attempt number two skipping validation, much faster. Not workable though. */
 public class FhirTrimmer_SkipValidation {
 
   private static final Pattern NODE_PATTERN = Pattern.compile("^([a-zA-Z0-9]+)(?:\\[(\\d+)])?$");
+  private static final Pattern INDEX_PATTERN = Pattern.compile("\\[(\\d+)]");
   private final Map<String, List<String>> profilePathMap;
 
-  /**
-   * Constructor that takes the mapping for profile and elements to remove.
-   *
-   * @param profilePathMap the map for a profile and a list of paths to remove
-   */
   public FhirTrimmer_SkipValidation(Map<String, List<String>> profilePathMap) {
     this.profilePathMap = Objects.requireNonNull(profilePathMap, "Profile cache cannot be null");
   }
 
-  /**
-   * Second iteration of FhirTrim.
-   *
-   * @param resource The resource to trim
-   * @return The trimmed resource
-   */
   public IBaseResource trim(IBaseResource resource) {
+    if (resource == null) {
+      return null;
+    }
+
+    // 1. If it's a Bundle, recursively trim each nested resource within the entries
+    if (resource instanceof org.hl7.fhir.r4.model.Bundle bundle) {
+      if (bundle.hasEntry()) {
+        bundle.getEntry().stream()
+                .filter(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::hasResource)
+                .forEach(entry -> trim(entry.getResource()));
+      }
+      return bundle;
+    }
+
     if (!(resource instanceof Resource baseResource)) {
       return resource;
     }
 
+    // 2. Process single resources (or nested resources unpacked from the bundle)
     List<CanonicalType> profiles = baseResource.getMeta().getProfile();
 
     for (CanonicalType profile : profiles) {
@@ -44,7 +48,11 @@ public class FhirTrimmer_SkipValidation {
       List<String> pathsToRemove = this.profilePathMap.get(profileUrl);
 
       if (pathsToRemove != null) {
-        for (var path : pathsToRemove) {
+        List<String> sortedPaths = pathsToRemove.stream()
+                .sorted((a, b) -> padIndices(b).compareTo(padIndices(a)))
+                .toList();
+
+        for (var path : sortedPaths) {
           removeElement(baseResource, path);
         }
       }
@@ -53,19 +61,27 @@ public class FhirTrimmer_SkipValidation {
     return resource;
   }
 
+  /**
+   * Helper that zero-pads array indices so standard string sorting handles
+   * numbers natively (e.g., makes "[10]" sort as greater than "[2]").
+   */
+  private String padIndices(String path) {
+    Matcher m = INDEX_PATTERN.matcher(path);
+    StringBuilder sb = new StringBuilder();
+    while (m.find()) {
+      m.appendReplacement(sb, "[" + String.format("%08d", Integer.parseInt(m.group(1))) + "]");
+    }
+    m.appendTail(sb);
+    return sb.toString();
+  }
+
   private void removeElement(Base root, String fhirPath) {
     String[] parts = fhirPath.split("\\.");
     if (parts.length == 0) {
       return;
     }
 
-    int start;
-    if (parts[0].equals(root.fhirType())) {
-      start = 1;
-    } else {
-      start = 0;
-    }
-
+    int start = parts[0].equals(root.fhirType()) ? 1 : 0;
     var current = root;
 
     for (int i = start; i < parts.length - 1; i++) {
@@ -93,30 +109,20 @@ public class FhirTrimmer_SkipValidation {
     List<Base> values = property.getValues();
 
     if (delete) {
-      if (matcher.group(2) != null) { // element in array
+      if (matcher.group(2) != null) {
         int index = Integer.parseInt(matcher.group(2));
         if (index < values.size()) {
           parent.removeChild(name, values.get(index));
         }
-      } else { // regular element
+      } else {
         for (Base val : values) {
           parent.removeChild(name, val);
         }
       }
       return null;
     } else {
-      int index;
-      if (matcher.group(2) != null) {
-        index = Integer.parseInt(matcher.group(2));
-      } else {
-        index = 0;
-      }
-
-      if (index < values.size()) {
-        return values.get(index);
-      } else {
-        return null;
-      }
+      int index = (matcher.group(2) != null) ? Integer.parseInt(matcher.group(2)) : 0;
+      return (index < values.size()) ? values.get(index) : null;
     }
   }
 }
