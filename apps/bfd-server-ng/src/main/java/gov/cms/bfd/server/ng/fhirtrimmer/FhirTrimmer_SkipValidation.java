@@ -11,16 +11,28 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.Resource;
 
+/** FhirTrimmer concept that skips validation, version 2. */
 public class FhirTrimmer_SkipValidation {
 
   private static final Pattern NODE_PATTERN = Pattern.compile("^([a-zA-Z0-9]+)(?:\\[(\\d+)])?$");
   private static final Pattern INDEX_PATTERN = Pattern.compile("\\[(\\d+)]");
   private final Map<String, List<String>> profilePathMap;
 
+  /**
+   * Constructor, loads in a profile path map.
+   *
+   * @param profilePathMap a map of profiles to a list of FhirPaths to remove
+   */
   public FhirTrimmer_SkipValidation(Map<String, List<String>> profilePathMap) {
     this.profilePathMap = Objects.requireNonNull(profilePathMap, "Profile cache cannot be null");
   }
 
+  /**
+   * Where the magic happens.
+   *
+   * @param resource the resource to be trimmed
+   * @return the trimmed resource
+   */
   public IBaseResource trim(IBaseResource resource) {
     if (resource == null) {
       return null;
@@ -30,8 +42,8 @@ public class FhirTrimmer_SkipValidation {
     if (resource instanceof org.hl7.fhir.r4.model.Bundle bundle) {
       if (bundle.hasEntry()) {
         bundle.getEntry().stream()
-                .filter(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::hasResource)
-                .forEach(entry -> trim(entry.getResource()));
+            .filter(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::hasResource)
+            .forEach(entry -> trim(entry.getResource()));
       }
       return bundle;
     }
@@ -48,7 +60,8 @@ public class FhirTrimmer_SkipValidation {
       List<String> pathsToRemove = this.profilePathMap.get(profileUrl);
 
       if (pathsToRemove != null) {
-        List<String> sortedPaths = pathsToRemove.stream()
+        List<String> sortedPaths =
+            pathsToRemove.stream()
                 .sorted((a, b) -> padIndices(b).compareTo(padIndices(a)))
                 .toList();
 
@@ -61,10 +74,6 @@ public class FhirTrimmer_SkipValidation {
     return resource;
   }
 
-  /**
-   * Helper that zero-pads array indices so standard string sorting handles
-   * numbers natively (e.g., makes "[10]" sort as greater than "[2]").
-   */
   private String padIndices(String path) {
     Matcher m = INDEX_PATTERN.matcher(path);
     StringBuilder sb = new StringBuilder();

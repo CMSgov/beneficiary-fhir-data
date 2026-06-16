@@ -1,7 +1,11 @@
 package gov.cms.bfd.server.ng.fhirtrimmer;
 
+/** Enum for BasisProfile, used for mapping request profiles to filtering. */
 public enum BasisProfile {
-    BASIS,
-    REGULAR,
-    CMS,
+  /** Basis. */
+  BASIS,
+  /** Regular. */
+  REGULAR,
+  /** CMS. */
+  CMS,
 }
