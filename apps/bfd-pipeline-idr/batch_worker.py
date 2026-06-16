@@ -44,7 +44,7 @@ class LoadingBatch:
     partition: LoadPartition
     progress: LoadProgress | None
     all_rows: list[IdrBaseModel]
-    changed_rows: list[IdrBaseModel]
+    changed_keys: list[dict[str, DbType]]
     timestamp: datetime
 
 
@@ -83,7 +83,7 @@ class _DoLastUpdated(_LoadPartitionTask):
 
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _DoLastUpdated | None:
-        if not batch.changed_rows:
+        if not batch.changed_keys:
             logger.debug("changed_rows must not be empty")
             return None
 
@@ -98,9 +98,7 @@ class _DoLastUpdated(_LoadPartitionTask):
             target_table=target_table,
             target_table_key=target_table_key,
             partition=batch.partition,
-            keys=list(
-                OrderedDict.fromkeys(getattr(x, target_table_key) for x in batch.changed_rows)
-            ),
+            keys=list(OrderedDict.fromkeys(x[target_table_key] for x in batch.changed_keys)),
             timestamp=batch.timestamp,
         )
 

@@ -143,6 +143,17 @@ class BatchLoader:
                 f"{self.where_clause}"
             )
         )
+        # Used in _upsert so that relevant primary/last updated timestamp columns are returned for
+        # rows that are actually updated during the upsert so that last updated can be ran for
+        # just rows with changes during the load
+        self.updated_keys_returning_str = set(
+            col
+            for col in [
+                *self.model.ordered_pkeys(),
+                self.model.last_updated_timestamp_col(),
+            ]
+            if col
+        )
         self.timestamp_placeholders = ", ".join("%(timestamp)s" for _ in self.meta_keys)
 
         self.partition = partition
@@ -193,10 +204,11 @@ class BatchLoader:
             self.sort_batch_timer.stop()
 
             self.insert_batch_timer.start()
-            updated_rows: list[IdrBaseModel] = []
+            updated_keys: list[dict[str, DbType]] = []
 
-            async def _store_updates(
-                load_func: Callable[[], Awaitable[list[T]]], updated_rows: list[T] = updated_rows
+            async def _store_updated_keys(
+                load_func: Callable[[], Awaitable[list[dict[str, DbType]]]],
+                updated_rows: list[dict[str, DbType]] = updated_keys,
             ) -> None:
                 updated_rows.extend(await load_func())
 
@@ -207,22 +219,22 @@ class BatchLoader:
 
                     async def _wrap_batch_chunk(
                         idx: int = idx, chunk: Sequence[T] = chunk
-                    ) -> list[T]:
+                    ) -> list[dict[str, DbType]]:
                         return await self._load_batch_chunk(idx, chunk, timestamp)
 
                     tg.start_soon(
-                        _store_updates,
+                        _store_updated_keys,
                         _wrap_batch_chunk,
                         name=f"{self.table}-{self.partition.name}-{idx}",
                     )
+            self.insert_batch_timer.stop()
             logger.info(
                 "{}-{}: upserted {} new/changed row(s) out of {}",
                 self.table,
                 self.partition.name,
-                len(updated_rows),
+                len(updated_keys),
                 len(results),
             )
-            self.insert_batch_timer.stop()
 
             if (
                 self.model.last_updated_date_table()
@@ -237,7 +249,7 @@ class BatchLoader:
                         self.partition,
                         self.progress,
                         cast(list[IdrBaseModel], results),
-                        updated_rows,
+                        updated_keys,
                         timestamp,
                     ),
                     self.enable_load_progress,
@@ -249,7 +261,7 @@ class BatchLoader:
                         self.partition,
                         self.progress,
                         cast(list[IdrBaseModel], results),
-                        updated_rows,
+                        updated_keys,
                         timestamp,
                     )
                 )
@@ -270,7 +282,7 @@ class BatchLoader:
 
     async def _load_batch_chunk(
         self, batch_num: int, chunk: Sequence[T], timestamp: datetime
-    ) -> list[T]:
+    ) -> list[dict[str, DbType]]:
         async with self.pool.connection() as conn:
             max_attempts = 15
             for attempt in range(max_attempts):
@@ -283,7 +295,7 @@ class BatchLoader:
                         await self._copy_data(cur, full_temp_table, chunk)
 
                         # Upsert into the main table
-                        return await self._upsert(cur, full_temp_table, timestamp, chunk)
+                        return await self._upsert(cur, full_temp_table, timestamp)
                 except DeadlockDetected, InFailedSqlTransaction:
                     await conn.rollback()
 
@@ -374,8 +386,7 @@ class BatchLoader:
         cur: psycopg.AsyncCursor[DictRow],
         temp_tablename: str,
         timestamp: datetime,
-        chunk: Sequence[T],
-    ) -> list[T]:
+    ) -> list[dict[str, DbType]]:
         # Upsert into the main table
         if self.model.should_replace():
             # Delete before inserting since we've specified that the data should be
@@ -384,26 +395,18 @@ class BatchLoader:
             # so consumers won't see an empty table.
             await cur.execute(f"DELETE FROM {self.table}")  # type: ignore
         await cur.execute("SET LOCAL synchronous_commit TO OFF")
+
         await cur.execute(
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
             ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
-            RETURNING {", ".join(self.model.ordered_pkeys())}
+            RETURNING {self.updated_keys_returning_str}
             ''',  # type: ignore
             {"timestamp": timestamp},
         )
 
-        # We cannot type adapt (using TypeAdapter) the RETURNING (e.g. if we use RETURNING *) to
-        # get the list of updated rows out of the original rows because some non-optional columns
-        # are not inserted into the database. So, we just return the primary key values for
-        # each updated row and match against the original list to get the list of updated rows
-        updated_pkeys = await cur.fetchall()
-        return [
-            row
-            for row in chunk
-            if any(all(getattr(row, k) == v for k, v in pkey.items()) for pkey in updated_pkeys)
-        ]
+        return await cur.fetchall()
 
     async def _copy_data(
         self, cur: psycopg.AsyncCursor[Any], temp_tablename: str, data: Sequence[T]
