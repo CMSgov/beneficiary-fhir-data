@@ -76,7 +76,7 @@ class ParallelStagesExecutor:
                         tg2.start_soon(_task)
 
                 done.set()
-            except anyio.get_cancelled_exc_class():
+            except BaseException:
                 cancel_signal.set()
                 raise
 

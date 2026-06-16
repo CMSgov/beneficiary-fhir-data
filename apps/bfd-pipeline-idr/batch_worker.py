@@ -511,7 +511,7 @@ class LoadingBatchWorkerManager:
         async with anyio.create_task_group() as tg:
             try:
                 tg.start_soon(watch_queue)
-            except anyio.get_cancelled_exc_class():
+            except BaseException:
                 cancel_signal.set()
                 raise
 
