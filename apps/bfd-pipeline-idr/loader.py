@@ -279,7 +279,7 @@ class BatchLoader:
             await conn.commit()
 
         self.full_load_timer.stop()
-        logger.info("{}-{}: loaded {} rows", self.table, self.partition.name, num_rows)
+        logger.info("{}-{}: finished processing {} rows", self.table, self.partition.name, num_rows)
         return data_loaded
 
     async def _load_batch_chunk(
