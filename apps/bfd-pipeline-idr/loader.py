@@ -1,8 +1,8 @@
 import itertools
 import operator
-from collections.abc import Iterator, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Sequence
 from datetime import UTC, datetime
-from typing import Any, Awaitable, Callable, cast
+from typing import Any, cast
 
 import anyio
 import psycopg
@@ -12,7 +12,6 @@ from psycopg.abc import Params, QueryNoTemplate
 from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg.rows import DictRow, dict_row
 from psycopg_pool.abc import ACT
-from pydantic import TypeAdapter
 
 from batch_worker import LoadingBatch, LoadingBatchWorkerClient
 from constants import DEFAULT_MIN_DATE
@@ -202,16 +201,18 @@ class BatchLoader:
                 updated_rows.extend(await load_func())
 
             async with anyio.create_task_group() as tg:
-                for idx, part in enumerate(
+                for idx, chunk in enumerate(
                     itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
                 ):
 
-                    async def _wrap_batch_part(idx: int = idx, part: Sequence[T] = part) -> list[T]:
-                        return await self._load_batch_part(idx, part, timestamp)
+                    async def _wrap_batch_chunk(
+                        idx: int = idx, chunk: Sequence[T] = chunk
+                    ) -> list[T]:
+                        return await self._load_batch_chunk(idx, chunk, timestamp)
 
                     tg.start_soon(
                         _store_updates,
-                        _wrap_batch_part,
+                        _wrap_batch_chunk,
                         name=f"{self.table}-{self.partition.name}-{idx}",
                     )
             logger.info(
@@ -267,8 +268,8 @@ class BatchLoader:
         logger.info("{}-{}: loaded {} rows", self.table, self.partition.name, num_rows)
         return data_loaded
 
-    async def _load_batch_part(
-        self, batch_num: int, batch_part: Sequence[T], timestamp: datetime
+    async def _load_batch_chunk(
+        self, batch_num: int, chunk: Sequence[T], timestamp: datetime
     ) -> list[T]:
         async with self.pool.connection() as conn:
             max_attempts = 15
@@ -279,10 +280,10 @@ class BatchLoader:
                             cur, f"{self.partition.name}_{batch_num}"
                         )
 
-                        await self._copy_data(cur, full_temp_table, batch_part)
+                        await self._copy_data(cur, full_temp_table, chunk)
 
                         # Upsert into the main table
-                        return await self._upsert(cur, full_temp_table, timestamp)
+                        return await self._upsert(cur, full_temp_table, timestamp, chunk)
                 except DeadlockDetected, InFailedSqlTransaction:
                     await conn.rollback()
 
@@ -369,7 +370,11 @@ class BatchLoader:
             await cur.connection.commit()
 
     async def _upsert(
-        self, cur: psycopg.AsyncCursor[DictRow], temp_tablename: str, timestamp: datetime
+        self,
+        cur: psycopg.AsyncCursor[DictRow],
+        temp_tablename: str,
+        timestamp: datetime,
+        chunk: Sequence[T],
     ) -> list[T]:
         # Upsert into the main table
         if self.model.should_replace():
@@ -384,11 +389,21 @@ class BatchLoader:
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
             ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
-            RETURNING *
+            RETURNING {", ".join(self.model.ordered_pkeys())}
             ''',  # type: ignore
             {"timestamp": timestamp},
         )
-        return cast(list[T], TypeAdapter(list[self.model]).validate_python(await cur.fetchall()))
+
+        # We cannot type adapt (using TypeAdapter) the RETURNING (e.g. if we use RETURNING *) to
+        # get the list of updated rows out of the original rows because some non-optional columns
+        # are not inserted into the database. So, we just return the primary key values for
+        # each updated row and match against the original list to get the list of updated rows
+        updated_pkeys = await cur.fetchall()
+        return [
+            row
+            for row in chunk
+            if any(all(getattr(row, k) == v for k, v in pkey.items()) for pkey in updated_pkeys)
+        ]
 
     async def _copy_data(
         self, cur: psycopg.AsyncCursor[Any], temp_tablename: str, data: Sequence[T]
