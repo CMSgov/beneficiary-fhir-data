@@ -146,13 +146,15 @@ class BatchLoader:
         # Used in _upsert so that relevant primary/last updated timestamp columns are returned for
         # rows that are actually updated during the upsert so that last updated can be ran for
         # just rows with changes during the load
-        self.updated_keys_returning_str = set(
-            col
-            for col in [
-                *self.model.ordered_pkeys(),
-                self.model.last_updated_timestamp_col(),
-            ]
-            if col
+        self.updated_keys_returning_str = ", ".join(
+            set(
+                col
+                for col in [
+                    *self.model.ordered_pkeys(),
+                    self.model.last_updated_timestamp_col(),
+                ]
+                if col
+            )
         )
         self.timestamp_placeholders = ", ".join("%(timestamp)s" for _ in self.meta_keys)
 
