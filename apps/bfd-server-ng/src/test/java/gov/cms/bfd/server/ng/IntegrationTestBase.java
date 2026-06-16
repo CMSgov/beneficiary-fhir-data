@@ -264,6 +264,7 @@ public class IntegrationTestBase {
             .keyConditionExpression("matchedBeneSk = :beneSk")
             .expressionAttributeValues(
                 Map.of(":beneSk", AttributeValue.builder().n(beneSk.toString()).build()))
+            .scanIndexForward(false)
             .build();
 
     var response = dynamoDbClient.query(request);

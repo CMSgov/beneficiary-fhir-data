@@ -23,5 +23,7 @@ class AuditEventIdTest {
     assertThrows(IllegalArgumentException.class, () -> AuditEventId.parse("bad-id"));
     assertThrows(IllegalArgumentException.class, () -> AuditEventId.parse("123-not-a-timestamp"));
     assertThrows(IllegalArgumentException.class, () -> AuditEventId.parse("123-1718442007123"));
+    var invalidTimestampTokenId = new AuditEventId(123L, "00262238210907123456000");
+    assertThrows(IllegalArgumentException.class, invalidTimestampTokenId::toDynamoSortKey);
   }
 }

@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -586,6 +587,66 @@ class PatientMatchIT extends IntegrationTestBase {
   }
 
   @Test
+  void testAuditEventByBeneLimitOffset() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var testClientId = UUID.randomUUID().toString();
+    searchBundleWithUniqueClientIds(patient, testClientId);
+    searchBundleWithUniqueClientIds(patient, testClientId);
+
+    var auditRecords = getAuditRecordFromDynamo(-300428640L, testClientId);
+
+    var bundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_ENTITY)
+                    .exactly()
+                    .identifier("Patient/-300428640"))
+            .count(1)
+            .usingStyle(SearchStyleEnum.GET)
+            .execute();
+    assertEquals(1, bundle.getEntry().size());
+    assertEquals(
+        AuditEventId.fromDynamoTimestamp(
+                auditRecords.getFirst().matchedBeneSk(), auditRecords.getFirst().timestamp())
+            .getIdAsString(),
+        bundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
+
+    var next = bundle.getLink().stream().filter(l -> l.getRelation().equals("next")).findFirst();
+
+    assertTrue(next.isPresent());
+
+    var lastIndexId = next.get().getUrl().split("lastIndex=")[1];
+
+    assertEquals(1, bundle.getEntry().size());
+
+    var nextBundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_ENTITY)
+                    .exactly()
+                    .identifier("Patient/-300428640"))
+            .and(new TokenClientParam("lastIndex").exactly().code(lastIndexId))
+            .count(1)
+            .usingStyle(SearchStyleEnum.GET)
+            .execute();
+
+    assertEquals(1, nextBundle.getEntry().size());
+    assertEquals(
+        AuditEventId.fromDynamoTimestamp(
+                auditRecords.get(1).matchedBeneSk(), auditRecords.get(1).timestamp())
+            .getIdAsString(),
+        nextBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
+  }
+
+  @Test
   void testAuditEventByIds() {
     var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
     var patient =
@@ -646,6 +707,12 @@ class PatientMatchIT extends IntegrationTestBase {
     var audit =
         getFhirClient().read().resource(AuditEvent.class).withId(auditIds.getFirst()).execute();
     assertEquals(auditIds.getFirst(), audit.getIdPart());
+  }
+
+  @Test
+  void testAuditEventByIdInvalid() {
+    var res = getFhirClient().read().resource(AuditEvent.class).withId("bad_id");
+    assertThrows(ResourceNotFoundException.class, res::execute);
   }
 
   @BeforeAll
