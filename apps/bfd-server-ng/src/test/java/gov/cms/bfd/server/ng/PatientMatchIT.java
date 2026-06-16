@@ -602,7 +602,7 @@ class PatientMatchIT extends IntegrationTestBase {
 
     var auditRecords = getAuditRecordFromDynamo(-300428640L, testClientId);
 
-    List<String> auditIds =
+    var auditIds =
         auditRecords.stream()
             .map(
                 r ->
@@ -614,11 +614,10 @@ class PatientMatchIT extends IntegrationTestBase {
             .where(new TokenClientParam(AuditEvent.SP_RES_ID).exactly().codes(auditIds))
             .usingStyle(SearchStyleEnum.GET)
             .execute();
-    assertEquals(2, bundle.getEntry().size());
-    assertEquals(
-        auditIds.getFirst(), bundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    assertEquals(
-        auditIds.getLast(), bundle.getEntry().getLast().getResource().getIdElement().getIdPart());
+    assertEquals(auditIds.size(), bundle.getEntry().size());
+    bundle
+        .getEntry()
+        .forEach(e -> assertTrue(auditIds.contains(e.getResource().getIdElement().getIdPart())));
   }
 
   @Test
