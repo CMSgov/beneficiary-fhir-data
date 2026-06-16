@@ -43,7 +43,8 @@ class LoadingBatch:
     model: type[IdrBaseModel]
     partition: LoadPartition
     progress: LoadProgress | None
-    data: list[IdrBaseModel]
+    all_rows: list[IdrBaseModel]
+    changed_rows: list[IdrBaseModel]
     timestamp: datetime
 
 
@@ -82,8 +83,8 @@ class _DoLastUpdated(_LoadPartitionTask):
 
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _DoLastUpdated | None:
-        if not batch.data:
-            logger.debug("data must not be empty")
+        if not batch.changed_rows:
+            logger.debug("changed_rows must not be empty")
             return None
 
         target_table = batch.model.last_updated_date_table()
@@ -97,7 +98,9 @@ class _DoLastUpdated(_LoadPartitionTask):
             target_table=target_table,
             target_table_key=target_table_key,
             partition=batch.partition,
-            keys=list(OrderedDict.fromkeys(getattr(x, target_table_key) for x in batch.data)),
+            keys=list(
+                OrderedDict.fromkeys(getattr(x, target_table_key) for x in batch.changed_rows)
+            ),
             timestamp=batch.timestamp,
         )
 
@@ -110,11 +113,11 @@ class _UpdateLoadProgress(_LoadPartitionTask):
 
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _UpdateLoadProgress | None:
-        if not batch.data:
+        if not batch.all_rows:
             logger.debug("data must not be empty")
             return None
 
-        last = batch.data[len(batch.data) - 1]
+        last = batch.all_rows[len(batch.all_rows) - 1]
         # Some tables that contain reference data (like contract info) may not have the
         # normal IDR timestamps.
         # For now we won't support incremental refreshes for those tables
@@ -381,7 +384,7 @@ class _LoadingBatchWorker(Process):
                         task.partition.name,
                         task.target_table,
                         task.target_table_key,
-                        attempt,
+                        attempt - 1,
                         len(incomplete_chunks),
                     )
                 async with anyio.create_task_group() as tg:
