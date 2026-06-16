@@ -2,7 +2,6 @@ import functools
 import itertools
 import random
 from datetime import datetime
-from typing import Any
 
 from batch_worker import LoadingBatchWorkerClient
 from load_partition import LoadPartition, LoadType
@@ -87,25 +86,9 @@ class StagedIdrPipeline:
         self.source = source
         self.worker_client = worker_client
         self.tables_to_load = tables_to_load
-        self._executor: ParallelStagesExecutor | None = ParallelStagesExecutor(max_workers)
-
-    def __getstate__(self) -> object:
-        # __getstate__ and __setstate__ are used during pickling when passing objects around
-        # subprocesses. _executor is not a picklable object, and since generators retain references
-        # to self we need to ensure _executor is not pickled when the generators are executed in
-        # each stage
-        state = self.__dict__.copy()
-        del state["_executor"]
-        return state
-
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        self.__dict__.update(state)
-        self._executor = None
+        self._executor = ParallelStagesExecutor(max_workers)
 
     async def start(self) -> bool:
-        if not self._executor:
-            raise RuntimeError("Pipeline attempted to be started after pickling")
-
         return all(
             itertools.chain.from_iterable(
                 await self._executor.execute(
