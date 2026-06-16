@@ -5,9 +5,9 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** The FhirTrimmer (3rd attempt) that reads in the YAML like we're supposed to. */
-public class FhirTrimmer_Yaml {
+public class FhirTrimmerYaml {
 
-  private Map<String, List<String>> profileMap;
+  // private Map<String, List<String>> profileMap;
 
   /**
    * Constructor.
@@ -15,8 +15,8 @@ public class FhirTrimmer_Yaml {
    * @param profileMap the structure of profiles to whitelist or blacklist, depending on
    *     implementation
    */
-  public FhirTrimmer_Yaml(Map<String, List<String>> profileMap) {
-    this.profileMap = profileMap;
+  public FhirTrimmerYaml(Map<String, List<String>> profileMap) {
+    // this.profileMap = profileMap;
   }
 
   /**
@@ -26,7 +26,7 @@ public class FhirTrimmer_Yaml {
    * @param profile the haircut (profile) to give it
    * @return the trimmed resource
    */
-  public IBaseResource Trim(IBaseResource resource, String profile) {
+  public IBaseResource trim(IBaseResource resource, String profile) {
 
     return resource;
   }

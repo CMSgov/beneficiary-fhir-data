@@ -10,7 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 
 /** Old version of FhirTrimmer that used FhirValidator to validate, too slow for production. */
-public class FhirTrimmer_Validation {
+public class FhirTrimmerValidation {
 
   private static final Pattern NODE_PATTERN = Pattern.compile("^([a-zA-Z0-9]+)(?:\\[(\\d+)])?$");
 
@@ -24,7 +24,7 @@ public class FhirTrimmer_Validation {
    *
    * @param validator the FhirValidator instance
    */
-  public FhirTrimmer_Validation(FhirValidator validator) {
+  public FhirTrimmerValidation(FhirValidator validator) {
     this.validator = Objects.requireNonNull(validator, "FhirValidator cannot be null");
   }
 

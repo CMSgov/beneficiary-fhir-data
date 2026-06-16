@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.Resource;
 
 /** FhirTrimmer concept that skips validation, version 2. */
-public class FhirTrimmer_SkipValidation {
+public class FhirTrimmerSkipValidation {
 
   private static final Pattern NODE_PATTERN = Pattern.compile("^([a-zA-Z0-9]+)(?:\\[(\\d+)])?$");
   private static final Pattern INDEX_PATTERN = Pattern.compile("\\[(\\d+)]");
@@ -23,7 +23,7 @@ public class FhirTrimmer_SkipValidation {
    *
    * @param profilePathMap a map of profiles to a list of FhirPaths to remove
    */
-  public FhirTrimmer_SkipValidation(Map<String, List<String>> profilePathMap) {
+  public FhirTrimmerSkipValidation(Map<String, List<String>> profilePathMap) {
     this.profilePathMap = Objects.requireNonNull(profilePathMap, "Profile cache cannot be null");
   }
 
@@ -111,27 +111,33 @@ public class FhirTrimmer_SkipValidation {
 
     String name = matcher.group(1);
     Property property = parent.getChildByName(name);
+
     if (property == null || !property.hasValues()) {
       return null;
     }
 
     List<Base> values = property.getValues();
+    String indexGroup = matcher.group(2);
 
-    if (delete) {
-      if (matcher.group(2) != null) {
-        int index = Integer.parseInt(matcher.group(2));
-        if (index < values.size()) {
-          parent.removeChild(name, values.get(index));
-        }
-      } else {
-        for (Base val : values) {
-          parent.removeChild(name, val);
-        }
+    return delete
+            ? handleDeletion(parent, name, values, indexGroup)
+            : handleRetrieval(values, indexGroup);
+  }
+
+  private Base handleDeletion(Base parent, String name, List<Base> values, String indexGroup) {
+    if (indexGroup != null) {
+      int index = Integer.parseInt(indexGroup);
+      if (index < values.size()) {
+        parent.removeChild(name, values.get(index));
       }
-      return null;
     } else {
-      int index = (matcher.group(2) != null) ? Integer.parseInt(matcher.group(2)) : 0;
-      return (index < values.size()) ? values.get(index) : null;
+      values.forEach(value -> parent.removeChild(name, value));
     }
+    return null;
+  }
+
+  private Base handleRetrieval(List<Base> values, String indexGroup) {
+    int index = (indexGroup != null) ? Integer.parseInt(indexGroup) : 0;
+    return (index < values.size()) ? values.get(index) : null;
   }
 }

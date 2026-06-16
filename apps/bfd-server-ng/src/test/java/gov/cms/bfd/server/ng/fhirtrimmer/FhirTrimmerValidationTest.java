@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 class FhirTrimmerValidationTest {
 
   private FhirContext ctx;
-  private FhirTrimmer_Validation validationTrimmer;
-  private FhirTrimmer_SkipValidation skipValidationTrimmer;
+  private FhirTrimmerValidation validationTrimmer;
+  private FhirTrimmerSkipValidation skipValidationTrimmer;
 
   @BeforeEach
   void setUp() {
@@ -71,11 +71,11 @@ class FhirTrimmerValidationTest {
     var instanceValidator = new FhirInstanceValidator(supportChain);
     var validator = ctx.newValidator().registerValidatorModule(instanceValidator);
 
-    validationTrimmer = new FhirTrimmer_Validation(validator);
+    validationTrimmer = new FhirTrimmerValidation(validator);
 
     var profileCache =
         Map.of("http://example.com/StructureDefinition/StrictClaim", List.of("Claim.extension"));
-    skipValidationTrimmer = new FhirTrimmer_SkipValidation(profileCache);
+    skipValidationTrimmer = new FhirTrimmerSkipValidation(profileCache);
   }
 
   @Test
@@ -141,23 +141,22 @@ class FhirTrimmerValidationTest {
     // =========================================================================
     // PHASE 1: BENCHMARK VALIDATION TRIMMER
     // =========================================================================
-    //    System.out.println("Warming up Validation Trimmer JIT compiler...");
-    //    for (int i = 0; i < warmupIterations; i++) {
-    //      validationTrimmer.trim(createBloatedBundle(baseClaim));
-    //    }
-    //    System.gc();
-    //
-    //    System.out.println("Starting load test of " + totalIterations + " Bundles (Validation
-    // Trimmer)...");
-    //    var validationWatch = StopWatch.createStarted();
-    //    for (int i = 0; i < totalIterations; i++) {
-    //      validationWatch.suspend();
-    //      var targetBundle = createBloatedBundle(baseClaim);
-    //      validationWatch.resume();
-    //
-    //      validationTrimmer.trim(targetBundle);
-    //    }
-    //    validationWatch.stop();
+    System.out.println("Warming up Validation Trimmer JIT compiler...");
+    for (int i = 0; i < warmupIterations; i++) {
+      validationTrimmer.trim(createBloatedBundle(baseClaim));
+    }
+    System.gc();
+
+    System.out.println("Starting load test of " + totalIterations + " Bundles (Validation Trimmer)...");
+    var validationWatch = StopWatch.createStarted();
+    for (int i = 0; i < totalIterations; i++) {
+      validationWatch.suspend();
+      var targetBundle = createBloatedBundle(baseClaim);
+      validationWatch.resume();
+
+      validationTrimmer.trim(targetBundle);
+    }
+    validationWatch.stop();
 
     // =========================================================================
     // PHASE 2: BENCHMARK SKIP VALIDATION (PROACTIVE) TRIMMER
@@ -191,7 +190,7 @@ class FhirTrimmerValidationTest {
     // =========================================================================
     // PRINT COMPARISON REPORT
     // =========================================================================
-    //    printResults("VALIDATION-BASED TRIMMER", totalIterations, validationWatch.getTime());
+    printResults(totalIterations, validationWatch.getTime());
     printResults(totalIterations, proactiveWatch.getTime());
   }
 

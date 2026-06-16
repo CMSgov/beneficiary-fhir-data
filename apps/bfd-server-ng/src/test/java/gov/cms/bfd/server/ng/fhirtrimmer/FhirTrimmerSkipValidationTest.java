@@ -17,9 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class FhirTrimmerSkipValidationTest {
+class FhirTrimmerSkipValidationTest {
 
-  private FhirTrimmer_SkipValidation skipValidationTrimmer;
+  private FhirTrimmerSkipValidation skipValidationTrimmer;
   private Claim baseClaim;
 
   @BeforeEach
@@ -37,7 +37,7 @@ public class FhirTrimmerSkipValidationTest {
                 "Claim.careTeam", // Wipe entire arrays
                 "Claim.diagnosis"));
 
-    skipValidationTrimmer = new FhirTrimmer_SkipValidation(profileCache);
+    skipValidationTrimmer = new FhirTrimmerSkipValidation(profileCache);
 
     // Baseline minimal valid claim setup
     var validClaimJson =
