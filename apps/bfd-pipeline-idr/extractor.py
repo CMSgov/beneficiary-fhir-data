@@ -1,7 +1,7 @@
 import csv
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -94,11 +94,8 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
-    def extract_idr_data(
-        self, progress: LoadProgress | None, start_time: datetime, source: Source
-    ) -> Iterator[list[T]]:
+    def build_filter_columns(self, progress: LoadProgress | None) -> str:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.format_aliases(self.cls.batch_timestamp_col(is_historical))
@@ -108,7 +105,16 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         )
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
-        batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+        return self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+
+    def extract_idr_data(
+        self, progress: LoadProgress | None, start_time: datetime, source: Source
+    ) -> Iterator[Sequence[T]]:
+        fetch_query = self.get_query(start_time, source)
+
+        # We need to create batches using the most recent timestamp from all of the
+        # insert/update timestamps
+        batch_timestamp_clause = self.build_filter_columns(progress)
         min_transaction_date = self.cls.model_type().min_transaction_date
 
         batch_id_clause = ""
@@ -129,7 +135,9 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 )
                 .replace("{FILTER_OP}", ">=")
                 .replace("{LAST_TS}", "%(timestamp)s")
-                .replace("{ORDER_BY}", order_by),
+                .replace("{ORDER_BY}", order_by)
+                .replace("{TABLESAMPLE}", "")
+                .replace("{LIMIT}", ""),
                 {"timestamp": min_transaction_date},
             )
 
@@ -175,7 +183,9 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             )
             .replace("{FILTER_OP}", filter_op)
             .replace("{LAST_TS}", "%(timestamp)s")
-            .replace("{ORDER_BY}", order_by),
+            .replace("{ORDER_BY}", order_by)
+            .replace("{TABLESAMPLE}", "")
+            .replace("{LIMIT}", ""),
             {"timestamp": compare_timestamp},
         )
 
