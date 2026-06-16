@@ -239,7 +239,8 @@ class BatchLoader:
             )
 
             if (
-                self.model.last_updated_date_table()
+                self.load_type == LoadType.INCREMENTAL
+                and self.model.last_updated_date_table()
                 # This clause ensures that tables like idr.beneficiary or any of the claims
                 # tables do not unnecessarily submit additional last updated updates to the
                 # queue since the upsert already sets their last updated columns
