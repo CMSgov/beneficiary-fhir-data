@@ -23,15 +23,24 @@ def gen_enum(fsh_output_file: str, int_codes=False):
 
 def get_enum_val(concept, int_codes):
     code = concept["code"]
-    display = concept["display"].replace('"', "")
+    display = concept.get("display")
+    if display:
+        display = display.replace('"', "")
+        display_javadoc = f" - {display}"
+        display_val = f',"{display}'
+        punct = "" if display.endswith(".") else "."
+    else:
+        display_javadoc = ""
+        display_val = ""
+        punct = "."
     prefix = "_" if re.match("\\d", code[0]) else ""
     if int_codes:
         code_fmt = code
     else:
         code_fmt = f'"{code}"'
-    punct = "" if display.endswith(".") else "."
-    javadoc = html.escape(f"/**\n{code} - {display}{punct}\n*/", quote=False)
-    return f'{javadoc}\n{prefix}{code}({code_fmt},"{display}")'
+
+    javadoc = html.escape(f"/**\n{code}{display_javadoc}{punct}\n*/", quote=False)
+    return f"{javadoc}\n{prefix}{code}({code_fmt}{display_val})"
 
 
 if __name__ == "__main__":
