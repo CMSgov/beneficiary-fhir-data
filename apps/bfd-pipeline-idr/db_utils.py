@@ -6,5 +6,7 @@ def get_connection_string(load_mode: LoadMode) -> str:
     if load_mode == LoadMode.LOCAL:
         return "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
 
-    return f"host={bfd_db_endpoint()} port={bfd_db_port()} dbname={bfd_db_name()} \
-        user={bfd_db_username()} password={bfd_db_password()}"
+    return (
+        f"host={bfd_db_endpoint()} port={bfd_db_port()} dbname={bfd_db_name()} "
+        f"user={bfd_db_username()} password={bfd_db_password()}"
+    )
