@@ -417,11 +417,11 @@ class _LoadingBatchWorker(Process):
 
     async def _wait_for_completion(self, task: _WaitForPartitionComplete) -> None:
         while any(
-            task
-            for task in self._running_tasks
-            if isinstance(task, _LoadPartitionTask)
-            and task.partition.name == task.partition.name
-            and task.model == task.model
+            running
+            for running in self._running_tasks
+            if isinstance(running, _LoadPartitionTask)
+            and running.partition.name == task.partition.name
+            and running.model == task.model
         ):
             await anyio.sleep(0)
 
