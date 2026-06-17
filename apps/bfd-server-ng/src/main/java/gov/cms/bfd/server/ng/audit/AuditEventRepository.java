@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.ng.audit;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,7 +56,9 @@ public class AuditEventRepository {
       var key = Key.builder().partitionValue(id.beneId()).sortValue(id.toDynamoSortKey()).build();
       var item = getTable().getItem(key);
 
-      return item != null ? item.toFhir() : null;
+      return Optional.of(item)
+          .map(AuditEventBase::toFhir)
+          .orElseThrow(() -> new ResourceNotFoundException(id.getIdAsString()));
     } catch (DynamoDbException e) {
       throw new IllegalStateException("Failed to query audit event by id", e);
     }
