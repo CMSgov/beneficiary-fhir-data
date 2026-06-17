@@ -103,11 +103,10 @@ class ParallelStagesExecutor:
         while not done.is_set():
             if not errors_queue.empty():
                 raise errors_queue.get()
-            await anyio.sleep(0)
-
+            await anyio.sleep(0.01)
     @staticmethod
     async def _wait_for_future_result[T](future: Future[T]) -> T:
         while not future.done():
-            await anyio.sleep(0)
+            await anyio.sleep(0.01)
 
         return future.result()
