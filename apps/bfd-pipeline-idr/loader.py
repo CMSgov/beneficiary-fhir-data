@@ -241,36 +241,19 @@ class BatchLoader:
                 len(results),
             )
 
-            if (
-                self.load_type == LoadType.INCREMENTAL
-                and self.model.last_updated_date_table()
-                # This clause ensures that tables like idr.beneficiary or any of the claims
-                # tables do not unnecessarily submit additional last updated updates to the
-                # queue since the upsert already sets their last updated columns
-                and self.model.last_updated_date_table() != self.model.table()
-            ):
-                self.worker_client.do_last_updated(
-                    LoadingBatch(
-                        self.model,
-                        self.partition,
-                        self.progress,
-                        cast(list[IdrBaseModel], results),
-                        updated_keys,
-                        timestamp,
-                    ),
-                    self.enable_load_progress,
-                )
+            cur_batch = LoadingBatch(
+                batch_num,
+                self.model,
+                self.partition,
+                self.progress,
+                cast(list[IdrBaseModel], results),
+                updated_keys,
+                timestamp,
+            )
+            if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+                self.worker_client.do_last_updated(cur_batch, self.enable_load_progress)
             elif self.enable_load_progress:
-                self.worker_client.do_load_progress(
-                    LoadingBatch(
-                        self.model,
-                        self.partition,
-                        self.progress,
-                        cast(list[IdrBaseModel], results),
-                        updated_keys,
-                        timestamp,
-                    )
-                )
+                self.worker_client.do_load_progress(cur_batch)
 
             batch_num += 1
             self.full_batch_timer.stop()
