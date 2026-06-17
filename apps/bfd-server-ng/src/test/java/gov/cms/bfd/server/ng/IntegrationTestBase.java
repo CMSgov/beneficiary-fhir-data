@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
@@ -41,6 +42,7 @@ public class IntegrationTestBase {
   @Autowired protected EntityManager entityManager;
   @Autowired protected Configuration configuration;
   @Autowired protected DynamoDbClient dynamoDbClient;
+  @Autowired protected AuditEventRepository auditEventRepository;
 
   public static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
   protected static final String SOURCE = "_source";
@@ -329,5 +331,9 @@ public class IntegrationTestBase {
     fhirClient.registerInterceptor(headersInterceptor);
 
     return fhirClient.search().forResource(ExplanationOfBenefit.class).returnBundle(Bundle.class);
+  }
+
+  protected AuditEventRepository getAuditEventRepository() {
+    return auditEventRepository;
   }
 }

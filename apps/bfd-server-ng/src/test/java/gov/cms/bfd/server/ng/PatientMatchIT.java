@@ -14,6 +14,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.common.base.CharMatcher;
+import gov.cms.bfd.server.ng.audit.AuditEventBase;
 import gov.cms.bfd.server.ng.audit.AuditEventId;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
@@ -23,9 +24,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.*;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.model.*;
@@ -713,6 +716,92 @@ class PatientMatchIT extends IntegrationTestBase {
   void testAuditEventByIdInvalid() {
     var res = getFhirClient().read().resource(AuditEvent.class).withId("bad_id");
     assertThrows(ResourceNotFoundException.class, res::execute);
+  }
+
+  @Test
+  void testAuditEventByIdNotFound() {
+    var res =
+        getFhirClient().read().resource(AuditEvent.class).withId("999999999999-20260101000000000");
+    assertThrows(ResourceNotFoundException.class, res::execute);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void testAuditSnapGetById(SearchStyleEnum searchStyle) {
+    var auditRecord = getAuditEventBase(-300428641L, "2026-06-11T20:40:33.828277Z");
+    getAuditEventRepository().putAuditEvent(auditRecord);
+    var bundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_RES_ID)
+                    .exactly()
+                    .codes(
+                        AuditEventId.fromDynamoTimestamp(
+                                auditRecord.getMatchedBeneSk(), auditRecord.getTimestamp())
+                            .getIdAsString()))
+            .usingStyle(searchStyle)
+            .execute();
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(bundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void testAuditSnapByBene(SearchStyleEnum searchStyle) {
+    getAuditEventRepository()
+        .putAuditEvent(getAuditEventBase(-300428642L, "2026-06-12T20:40:33.828277Z"));
+    getAuditEventRepository()
+        .putAuditEvent(getAuditEventBase(-300428642L, "2026-06-12T20:42:33.828277Z"));
+    var bundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_ENTITY)
+                    .exactly()
+                    .identifier("Patient/-300428642"))
+            .count(1)
+            .usingStyle(searchStyle)
+            .execute();
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(bundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void testAuditSnapByBeneLastIndex(SearchStyleEnum searchStyle) {
+    getAuditEventRepository()
+        .putAuditEvent(getAuditEventBase(-300428643L, "2026-06-12T20:43:33.828277Z"));
+    getAuditEventRepository()
+        .putAuditEvent(getAuditEventBase(-300428643L, "2026-06-12T20:44:33.828277Z"));
+    var bundle =
+        searchAuditBundle()
+            .where(
+                new TokenClientParam(AuditEvent.SP_ENTITY)
+                    .exactly()
+                    .identifier("Patient/-300428643"))
+            .and(
+                new TokenClientParam("lastIndex")
+                    .exactly()
+                    .codes(
+                        AuditEventId.fromDynamoTimestamp(-300428643L, "2026-06-12T20:43:33.828277Z")
+                            .getIdAsString()))
+            .count(1)
+            .usingStyle(searchStyle)
+            .execute();
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(bundle);
+  }
+
+  private static @NotNull AuditEventBase getAuditEventBase(Long bene, String timestamp) {
+    var auditRecord = new AuditEventBase();
+    auditRecord.setMatchedBeneSk(bene);
+    auditRecord.setTimestamp(timestamp);
+    auditRecord.setBeneSksFound(Set.of(-300428641L));
+    auditRecord.setClientId("test-client-id");
+    auditRecord.setClientName("test-client-name");
+    auditRecord.setClientIp("127.0.0.1");
+    auditRecord.setCombinationsEvaluated(
+        "[{\"combination\":\"08\",\"matchType\":\"exact\",\"matchedRecords\":[{\"beneSk\": "
+            + bene
+            + ",\"effectiveTimestamp\":\"2020-04-26T03:44:34.223326Z\"}]}]");
+    auditRecord.setFinalDetermination("08");
+    return auditRecord;
   }
 
   @BeforeAll
