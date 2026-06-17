@@ -140,7 +140,7 @@ public class AuditEventBase {
    * @return maps to a FHIR AuditEvent resource for API response
    */
   public final AuditEvent toFhir() {
-    AuditEvent ae = new AuditEvent();
+    var ae = new AuditEvent();
     ae.setMeta(new Meta().addProfile(SystemUrls.AUDIT_EVENT_STRUCTURE_DEF));
     ae.setId(getAuditId().getIdAsString());
     ae.setRecorded(getTimestampDate());
