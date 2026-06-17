@@ -126,7 +126,7 @@ class BatchLoader:
         self.primary_keys_str = ", ".join(self.ordered_pkeys)
         self.update_set = [v for v in self.insert_cols if v not in model.ordered_pkeys()]
         self.update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in self.update_set])
-        self.where_clause = (
+        self.on_conflict_where_clause = (
             f"WHERE ({', '.join(f't.{v}' for v in self.update_set)}) IS "
             f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in self.update_set)})"
         )
@@ -140,7 +140,7 @@ class BatchLoader:
             if self.immutable or not self.update_set
             else (
                 f"DO UPDATE SET {self.update_set_str}, bfd_updated_ts=%(timestamp)s "
-                f"{self.where_clause}"
+                f"{self.on_conflict_where_clause}"
             )
         )
         # Used in _upsert so that relevant primary/last updated timestamp columns are returned for
