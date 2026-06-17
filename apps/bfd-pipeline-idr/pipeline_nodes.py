@@ -32,7 +32,11 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
+from model.idr_prior_auth import IdrPriorAuth
 from pipeline_utils import extract_and_load
+from settings import (
+    ENABLE_PRIOR_AUTH_INGESTION,
+)
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
@@ -66,6 +70,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidy,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
+_PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
 _LOAD_ALL_TABLES = {"all"}
 
 
@@ -125,23 +130,19 @@ def stage2_inputs(
     tables_to_load: set[str] | None,
     stage1: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
+    tables = [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
     if load_type == LoadType.INITIAL:
-        yield from _gen_partitioned_node_inputs(
-            filter_tables(
-                [
-                    *_CLAIM_AUX_TABLES,
-                    *_BENE_AUX_TABLES,
-                    *_CLAIM_TABLES,
-                    *_BENE_TABLES,
-                ],
-                tables_to_load,
-            ),
-            load_type,
-        )
-    else:
-        yield from _gen_partitioned_node_inputs(
-            filter_tables([*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES], tables_to_load), load_type
-        )
+        tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
+    if ENABLE_PRIOR_AUTH_INGESTION:
+        tables.append(*_PRIOR_AUTH_TABLES)
+
+    yield from _gen_partitioned_node_inputs(
+        filter_tables(
+            tables,
+            tables_to_load,
+        ),
+        load_type,
+    )
 
 
 # NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle

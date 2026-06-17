@@ -54,7 +54,7 @@ class CsvFile:
         return ",".join(self.cols)
 
     def full_table(self) -> str:
-        return f"{IDR_PREFIX}.{self.table}"
+        return f"{self.table}"
 
 
 # TODO: UP046 seems to cause issues with pyright

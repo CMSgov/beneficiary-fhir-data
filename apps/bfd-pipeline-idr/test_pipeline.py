@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
@@ -69,6 +70,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 24
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
+
+    cur = conn.execute("select * from idr.prior_auth")
+    assert cur.rowcount == 207
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -518,6 +522,14 @@ def test_pipeline() -> None:
                             || quote_ident(r.tablename)
                             || ' CASCADE';
                     END LOOP;
+
+                    FOR r IN (
+                        SELECT tablename FROM pg_tables WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
+                    ) LOOP
+                        EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.'
+                            || quote_ident(r.tablename)
+                            || ' CASCADE';
+                    END LOOP;
                 END $$;
                 """
             )
@@ -544,5 +556,6 @@ def test_pipeline() -> None:
             os.environ["BFD_TEST_DATE"] = "2023-04-02"
             os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
             os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
+            os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
 
             _do_test_pipeline(cast(Connection[DictRow], conn), load_type)

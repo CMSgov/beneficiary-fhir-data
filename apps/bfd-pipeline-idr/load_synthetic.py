@@ -36,6 +36,7 @@ from constants import (
     IDR_CLAIM_VAL_TABLE,
     IDR_CONTRACT_PBP_CONTACT_TABLE,
     IDR_CONTRACT_PBP_NUM_TABLE,
+    IDR_PRIOR_AUTH_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
 from extractor import CsvFile, DbExecutor, PostgresExecutor, SnowflakeExecutor
@@ -106,6 +107,10 @@ tables = [
         "csv_name": "SYNTHETIC_CNTRCT_PBP_CNTCT.csv",
         "table": IDR_CONTRACT_PBP_CONTACT_TABLE,
     },
+    {
+        "csv_name": "SYNTHETIC_PRAUC.csv",
+        "table": IDR_PRIOR_AUTH_TABLE,
+    },
 ]
 
 
@@ -140,7 +145,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE table_name ilike %(sql_table)s
+                    WHERE table_name like %(sql_table)s
                 """,
                 {"sql_table": sql_table},
             )
@@ -155,7 +160,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             # skip empty files since we won't have any valid columns
             # which causes the COPY command below to fail
             if cols:
-                extractor.copy(CsvFile(cols, sql_table, match))
+                extractor.copy(CsvFile(cols, full_table, match))
 
 
 if __name__ == "__main__":

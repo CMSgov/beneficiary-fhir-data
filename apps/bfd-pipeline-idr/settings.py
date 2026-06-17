@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from os import getenv
 
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
+MIN_PRIOR_AUTH_LOAD_DATE = "2024-01-01"
 
 
 def _parse_bool_default_false(var_name: str) -> bool:
@@ -39,6 +40,14 @@ MIN_CLAIM_SS_TRANSACTION_DATE = getenv("IDR_MIN_CLAIM_SS_TRANSACTION_DATE", MIN_
 """Minimum claim date to load for shared systems.
 Any claims created before this date will be skipped.
 Useful for partial loads with large amounts of data."""
+
+MIN_PRIOR_AUTH_TRANSACTION_DATE = getenv(
+    "IDR_MIN_PRIOR_AUTH_TRANSACTION_DATE", MIN_PRIOR_AUTH_LOAD_DATE
+)
+"""Minimum prior auth date to load."""
+
+ENABLE_PRIOR_AUTH_INGESTION = _parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+"""Enables prior auth ingestion."""
 
 PARTITION_TYPE = getenv("IDR_PARTITION_TYPE", "year").lower()
 """Partition type (year/month/day).
