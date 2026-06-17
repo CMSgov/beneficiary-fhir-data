@@ -121,7 +121,7 @@ class StagedIdrPipeline:
 
     def _stage3_do_parent_claims_tbls(self) -> Stage[bool]:
         if self.load_type == LoadType.INITIAL:
-            yield from ()
+            return
 
         yield from self._extract_and_load_stage(
             self._gen_partitioned_node_inputs(self._filter_tables(_CLAIM_TABLES))
