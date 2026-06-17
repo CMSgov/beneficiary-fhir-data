@@ -70,8 +70,8 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    prior_auth_ingestion_enabled = os.environ.get("IDR_ENABLE_PRIOR_AUTH")
-    if prior_auth_ingestion_enabled:
+    prior_auth_ingestion_enabled = os.environ.get("IDR_ENABLE_PRIOR_AUTH", "0")
+    if load_type == LoadType.INITIAL and prior_auth_ingestion_enabled:
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
         assert cur.rowcount == 207
         rows = cur.fetchmany(1)
