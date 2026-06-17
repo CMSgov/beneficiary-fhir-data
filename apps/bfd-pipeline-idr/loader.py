@@ -181,6 +181,7 @@ class BatchLoader:
 
         data_loaded = False
         num_rows = 0
+        batch_num = 1
         while True:
             self.idr_query_timer.start()
             # We unfortunately need to use a while true loop here since we need to wrap the
@@ -193,9 +194,10 @@ class BatchLoader:
             self.full_batch_timer.start()
             data_loaded = True
             logger.info(
-                "{}-{}: loading next {} results concurrently {} row(s) at a time",
+                "{}-{}-{}: loading next {} results concurrently {} row(s) at a time",
                 self.table,
                 self.partition.name,
+                batch_num,
                 len(results),
                 PER_BATCH_CONCURRENT_ROWS,
             )
@@ -231,9 +233,10 @@ class BatchLoader:
                     )
             self.insert_batch_timer.stop()
             logger.info(
-                "{}-{}: upserted {} new/changed row(s) out of {}",
+                "{}-{}-{}: upserted {} new/changed row(s) out of {}",
                 self.table,
                 self.partition.name,
+                batch_num,
                 len(updated_keys),
                 len(results),
             )
@@ -269,6 +272,7 @@ class BatchLoader:
                     )
                 )
 
+            batch_num += 1
             self.full_batch_timer.stop()
 
         # Wait until the background worker signals that all pending loading tasks are completed

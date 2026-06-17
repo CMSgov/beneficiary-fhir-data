@@ -41,6 +41,7 @@ _MINIMUM_LAST_UPDATED_CHUNK_SIZE = 100
 
 @dataclass
 class LoadingBatch:
+    batch_num: int
     model: type[IdrBaseModel]
     partition: LoadPartition
     progress: LoadProgress | None
