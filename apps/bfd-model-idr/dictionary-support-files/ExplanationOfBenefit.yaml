@@ -3108,7 +3108,7 @@
     - CCLF5.CLM_LINE_DGNS_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_DGNS_CD
-  fhirPath: ExplanationOfBenefit.item.diagnosisSequence
+  fhirPath: ExplanationOfBenefit.item.select(%root.diagnosis[diagnosisSequence-1].diagnosis.coding.code)
   notes: This refers to the diagnosis entry in the ExplanationOfBenefit.
   profiles:
     - Basis
