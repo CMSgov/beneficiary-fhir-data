@@ -84,6 +84,8 @@ class _DoLastUpdated(_LoadPartitionTask):
 
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _DoLastUpdated | None:
+        # _DoLastUpdated looks at the changed keys of the loading batch because we do not want to
+        # update parent table columns for rows that had no changes in their data
         if not batch.changed_keys:
             logger.debug("changed_rows must not be empty")
             return None
@@ -112,6 +114,9 @@ class _UpdateLoadProgress(_LoadPartitionTask):
 
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _UpdateLoadProgress | None:
+        # _UpdateLoadProgress looks at _all_ rows because the tracking is for us, and even though
+        # not all rows may have actually had relevant changes we still want to track that they've
+        # been processed
         if not batch.all_rows:
             logger.debug("data must not be empty")
             return None
