@@ -17,7 +17,7 @@ from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
 from snowflake.snowpark import Session
 
-from constants import DEFAULT_MIN_DATE, IDR_PREFIX
+from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
 from loader import get_connection_string
 from model.base_model import (

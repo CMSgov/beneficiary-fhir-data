@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
@@ -524,7 +523,8 @@ def test_pipeline() -> None:
                     END LOOP;
 
                     FOR r IN (
-                        SELECT tablename FROM pg_tables WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
+                        SELECT tablename FROM pg_tables 
+                        WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
                     ) LOOP
                         EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.'
                             || quote_ident(r.tablename)
