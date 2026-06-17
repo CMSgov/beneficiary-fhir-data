@@ -1,10 +1,11 @@
+import contextlib
 import os
 import signal
 import threading
 from collections.abc import Callable, Generator
 from concurrent.futures import Future, ProcessPoolExecutor
 from multiprocessing import Manager
-from queue import Queue
+from queue import Empty, Queue
 from threading import Event
 from types import FrameType
 from typing import Never
@@ -101,9 +102,10 @@ class ParallelStagesExecutor:
     @staticmethod
     async def _poll_errors(errors_queue: Queue[BaseException], done: anyio.Event) -> None:
         while not done.is_set():
-            if not errors_queue.empty():
-                raise errors_queue.get()
+            with contextlib.suppress(Empty):
+                raise errors_queue.get_nowait()
             await anyio.sleep(0.01)
+
     @staticmethod
     async def _wait_for_future_result[T](future: Future[T]) -> T:
         while not future.done():

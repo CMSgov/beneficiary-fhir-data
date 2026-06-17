@@ -1,3 +1,4 @@
+import contextlib
 import os
 import random
 import signal
@@ -12,7 +13,7 @@ from itertools import batched
 from math import ceil
 from multiprocessing import Manager, Process
 from multiprocessing.managers import SyncManager
-from queue import Queue
+from queue import Empty, Queue
 from threading import Event
 from types import FrameType
 from typing import Any, Never, cast
@@ -311,9 +312,8 @@ class _LoadingBatchWorker(Process):
     ) -> None:
         async with task_send:
             while not stop.is_set():
-                if not self.task_queue.empty():
-                    task = self.task_queue.get()
-                    await task_send.send(task)
+                with contextlib.suppress(Empty):
+                    await task_send.send(self.task_queue.get_nowait())
                 await anyio.sleep(0)
 
     async def _do_last_updated(
@@ -507,11 +507,11 @@ class LoadingBatchWorkerManager:
 
         async def watch_queue() -> None:
             while not stop.is_set():
-                if not errors_queue.empty():
-                    errors = errors_queue.get()
+                with contextlib.suppress(Empty):
+                    errors = errors_queue.get_nowait()
                     raise errors
 
-                await anyio.sleep(0)
+                await anyio.sleep(0.01)
 
         async with anyio.create_task_group() as tg:
             try:
