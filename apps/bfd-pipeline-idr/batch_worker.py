@@ -364,9 +364,16 @@ class _LoadingBatchWorker(Process):
             last_updated_timer = Timer("last_updated_bg", task.model, task.partition)
             last_updated_timer.start()
             attempt = 1
+            max_attempts = 15
             while incomplete_chunks := [
                 id for id, complete in chunks_complete.items() if not complete
             ]:
+                if attempt > max_attempts:
+                    raise RuntimeError(
+                        f"Last updated failed for {task.model.table()}-{task.partition.name} after "
+                        f"{max_attempts} attempts"
+                    )
+
                 logger.debug(
                     "Updating {} incomplete last_updated chunks for {}-{}, attempt #{}",
                     len(incomplete_chunks),
