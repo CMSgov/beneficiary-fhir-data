@@ -92,7 +92,7 @@ class _DoLastUpdated(_LoadPartitionTask):
         # batch
         keys: list[dict[str, DbType]] = (
             batch.changed_keys
-            if batch.batch_num == 1
+            if batch.batch_num > 1
             else [row.model_dump() for row in batch.all_rows]
         )
         if not keys:
