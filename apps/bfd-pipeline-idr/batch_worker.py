@@ -86,15 +86,23 @@ class _DoLastUpdated(_LoadPartitionTask):
     @classmethod
     def from_loading_batch(cls, batch: LoadingBatch) -> _DoLastUpdated | None:
         # _DoLastUpdated looks at the changed keys of the loading batch because we do not want to
-        # update parent table columns for rows that had no changes in their data
-        if not batch.changed_keys:
-            logger.debug("changed_rows must not be empty")
+        # update parent table columns for rows that had no changes in their data _unless_ it's the
+        # first batch of a partition's load in which case we do want to look at the full result
+        # list just in case the previous load failed and last updated didn't run for that last
+        # batch
+        keys: list[dict[str, DbType]] = (
+            batch.changed_keys
+            if batch.batch_num == 1
+            else [row.model_dump() for row in batch.all_rows]
+        )
+        if not keys:
+            logger.debug("keys must not be empty")
             return None
 
         target_table = batch.model.last_updated_date_table()
         target_table_key = batch.model.last_updated_timestamp_col()
         if not target_table_key or not target_table:
-            logger.warning("Model type of data does not support last updated")
+            logger.warning("Table {} does not support last updated", batch.model.table())
             return None
 
         return _DoLastUpdated(
@@ -102,7 +110,7 @@ class _DoLastUpdated(_LoadPartitionTask):
             target_table=target_table,
             target_table_key=target_table_key,
             partition=batch.partition,
-            keys=list(OrderedDict.fromkeys(x[target_table_key] for x in batch.changed_keys)),
+            keys=list(OrderedDict.fromkeys(x[target_table_key] for x in keys)),
             timestamp=batch.timestamp,
         )
 
@@ -341,10 +349,10 @@ class _LoadingBatchWorker(Process):
             chunk_size,
         )
         last_updated_set_clause = sql.SQL(", ").join(
-            t"{col:i} = {task.timestamp}" for col in task.model.last_updated_date_column()
+            t"{col:i} = s.bfd_updated_ts" for col in task.model.last_updated_date_column()
         )
-        schema, table = task.target_table.split(".", 1)
-        full_table = sql.Identifier(schema, table)
+        target_table = sql.Identifier(*task.target_table.split(".", 1))
+        source_table = sql.Identifier(*task.model.table().split(".", 1))
         chunks = {
             idx: list(chunk)
             for idx, chunk in enumerate(batched(task.keys, chunk_size, strict=False))
@@ -356,9 +364,11 @@ class _LoadingBatchWorker(Process):
                 try:
                     await cur.execute(
                         t"""
-                        UPDATE {full_table:i} u
+                        UPDATE {target_table:i} t
                         SET {last_updated_set_clause:q}
-                        WHERE u.{task.target_table_key:i} = ANY({chunks[chunk_id]});
+                        FROM {source_table:i} s
+                        WHERE t.{task.target_table_key:i} = ANY({chunks[chunk_id]})
+                            AND t.{task.target_table_key:i} = s.{task.target_table_key:i};
                         """,
                     )
                     chunks_complete[chunk_id] = True
