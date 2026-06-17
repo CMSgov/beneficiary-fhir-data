@@ -120,8 +120,8 @@ public class FhirTrimmerSkipValidation {
     String indexGroup = matcher.group(2);
 
     return delete
-            ? handleDeletion(parent, name, values, indexGroup)
-            : handleRetrieval(values, indexGroup);
+        ? handleDeletion(parent, name, values, indexGroup)
+        : handleRetrieval(values, indexGroup);
   }
 
   private Base handleDeletion(Base parent, String name, List<Base> values, String indexGroup) {

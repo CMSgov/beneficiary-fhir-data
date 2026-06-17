@@ -26,6 +26,7 @@ class FhirTrimmerValidationTest {
   private FhirContext ctx;
   private FhirTrimmerValidation validationTrimmer;
   private FhirTrimmerSkipValidation skipValidationTrimmer;
+  private FhirTrimmerFhirPath fhirPathTrimmer;
 
   @BeforeEach
   void setUp() {
@@ -76,6 +77,8 @@ class FhirTrimmerValidationTest {
     var profileCache =
         Map.of("http://example.com/StructureDefinition/StrictClaim", List.of("Claim.extension"));
     skipValidationTrimmer = new FhirTrimmerSkipValidation(profileCache);
+
+    fhirPathTrimmer = new FhirTrimmerFhirPath(Map.of("Basis", List.of("Claim.extension")), ctx);
   }
 
   @Test
@@ -116,82 +119,58 @@ class FhirTrimmerValidationTest {
 
   @Test
   @Disabled("Manual benchmark load test")
-  void reallyTestFhirTrimmers() {
+  void reallyTestFhirPathTrimmer() {
     var validClaimJson =
         """
-          {
-            "resourceType": "Claim",
-            "status": "active",
-            "type": { "coding": [ { "system": "http://terminology.hl7.org/CodeSystem/claim-type", "code": "institutional" } ] },
-            "use": "claim",
-            "patient": { "reference": "Patient/1" },
-            "created": "2026-06-05T00:00:00Z",
-            "provider": { "reference": "Organization/1" },
-            "priority": { "coding": [ { "code": "normal" } ] },
-            "insurance": [ { "sequence": 1, "focal": true, "coverage": { "reference": "Coverage/1" } } ]
-          }
-          """;
+            {
+              "resourceType": "Claim",
+              "status": "active",
+              "type": { "coding": [ { "system": "http://terminology.hl7.org/CodeSystem/claim-type", "code": "institutional" } ] },
+              "use": "claim",
+              "patient": { "reference": "Patient/1" },
+              "created": "2026-06-05T00:00:00Z",
+              "provider": { "reference": "Organization/1" },
+              "priority": { "coding": [ { "code": "normal" } ] },
+              "insurance": [ { "sequence": 1, "focal": true, "coverage": { "reference": "Coverage/1" } } ]
+            }
+            """;
 
     var baseClaim = ctx.newJsonParser().parseResource(Claim.class, validClaimJson);
     baseClaim.getMeta().addProfile("http://example.com/StructureDefinition/StrictClaim");
 
-    var totalIterations = 10000;
-    var warmupIterations = 1000;
+    var totalIterations = 1_000_000;
+    var warmupIterations = 10_000;
 
-    // =========================================================================
-    // PHASE 1: BENCHMARK VALIDATION TRIMMER
-    // =========================================================================
-    System.out.println("Warming up Validation Trimmer JIT compiler...");
+    System.out.println("Warming up FhirPath Trimmer JIT compiler...");
     for (int i = 0; i < warmupIterations; i++) {
-      validationTrimmer.trim(createBloatedBundle(baseClaim));
+      fhirPathTrimmer.trim(createBloatedBundle(baseClaim), "Basis");
     }
     System.gc();
-
-    System.out.println("Starting load test of " + totalIterations + " Bundles (Validation Trimmer)...");
-    var validationWatch = StopWatch.createStarted();
-    for (int i = 0; i < totalIterations; i++) {
-      validationWatch.suspend();
-      var targetBundle = createBloatedBundle(baseClaim);
-      validationWatch.resume();
-
-      validationTrimmer.trim(targetBundle);
-    }
-    validationWatch.stop();
-
-    // =========================================================================
-    // PHASE 2: BENCHMARK SKIP VALIDATION (PROACTIVE) TRIMMER
-    // =========================================================================
-    System.out.println("\nWarming up Proactive Trimmer JIT compiler...");
-    for (int i = 0; i < warmupIterations; i++) {
-      skipValidationTrimmer.trim(createBloatedBundle(baseClaim));
-    }
-    System.gc();
-
-    totalIterations = 1000000;
 
     System.out.println(
-        "Starting load test of " + totalIterations + " Bundles (Proactive Trimmer)...");
-    var proactiveWatch = StopWatch.createStarted();
+        "Starting load test of " + totalIterations + " Bundles (FhirPath Trimmer)...");
+    var watch = StopWatch.createStarted();
     for (int i = 0; i < totalIterations; i++) {
-      proactiveWatch.suspend();
+      watch.suspend();
       var targetBundle = createBloatedBundle(baseClaim);
-      proactiveWatch.resume();
+      watch.resume();
 
-      var returned = (Bundle) skipValidationTrimmer.trim(targetBundle);
+      var returned = (Bundle) fhirPathTrimmer.trim(targetBundle, "Basis");
 
-      proactiveWatch.suspend();
+      watch.suspend();
       assertTrue(
-          returned.getEntry().getFirst().getExtension().isEmpty(),
-          "Skip-validation trimmer failed");
-      proactiveWatch.resume();
-    }
-    proactiveWatch.stop();
+          ((Claim) returned.getEntry().getFirst().getResource()).getExtension().isEmpty(),
+          "FhirPath trimmer failed");
+      watch.resume();
 
-    // =========================================================================
-    // PRINT COMPARISON REPORT
-    // =========================================================================
-    printResults(totalIterations, validationWatch.getTime());
-    printResults(totalIterations, proactiveWatch.getTime());
+      if (i > 0 && i % (totalIterations / 5) == 0) {
+        double currentThroughput = (i * 1000.0) / watch.getTime();
+        System.out.printf("Processed %d bundles... Current rate: %.2f/sec%n", i, currentThroughput);
+      }
+    }
+    watch.stop();
+
+    printResults(totalIterations, watch.getTime());
   }
 
   private void printResults(int iterations, long totalMillis) {
