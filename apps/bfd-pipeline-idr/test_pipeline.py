@@ -70,8 +70,12 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    cur = conn.execute("select * from idr.prior_auth")
-    assert cur.rowcount == 207
+    prior_auth_ingestion_enabled = os.environ.get("IDR_ENABLE_PRIOR_AUTH")
+    if prior_auth_ingestion_enabled:
+        cur = conn.execute("select * from idr.prior_auth order by mbi_num")
+        assert cur.rowcount == 207
+        rows = cur.fetchmany(1)
+        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -556,6 +560,7 @@ def test_pipeline() -> None:
             os.environ["BFD_TEST_DATE"] = "2023-04-02"
             os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
             os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
-            os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
+            if load_type == LoadType.INITIAL:
+                os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
 
             _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
