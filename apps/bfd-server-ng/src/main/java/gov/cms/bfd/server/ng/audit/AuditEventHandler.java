@@ -69,6 +69,7 @@ public class AuditEventHandler {
           .setUrl(
               buildLinkURL(requestDetails, bundle.getEntry().getLast().getResource().getIdPart()));
     }
+    bundle.setTotal(bundle.getEntry().size());
   }
 
   private static String buildLinkURL(RequestDetails requestDetails, String lastIndex) {
