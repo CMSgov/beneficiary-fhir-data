@@ -84,7 +84,7 @@ public class AuditEventRepository {
           .lastIndex()
           .ifPresent(
               lastIndex -> {
-                AuditEventId id = AuditEventId.parse(lastIndex);
+                var id = AuditEventId.parse(lastIndex);
                 queryRequestBuilder.exclusiveStartKey(
                     Map.of(
                         "matchedBeneSk",

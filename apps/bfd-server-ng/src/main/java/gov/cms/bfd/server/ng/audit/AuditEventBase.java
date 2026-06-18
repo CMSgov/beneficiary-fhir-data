@@ -188,7 +188,7 @@ public class AuditEventBase {
                 Optional.ofNullable(getMatchAlgorithmVersion())
                     .orElse(CURRENT_MATCH_ALGORITHM_VERSION)));
 
-    AuditEvent.AuditEventAgentComponent agent = ae.addAgent();
+    var agent = ae.addAgent();
     agent.setName(getClientName());
     agent.setAltId(getClientName());
     agent.setRequestor(true);
