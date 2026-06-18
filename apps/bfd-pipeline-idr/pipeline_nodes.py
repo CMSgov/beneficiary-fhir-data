@@ -251,9 +251,9 @@ def collect_stage4(
 
 
 def stage5_inputs(
-        load_type: LoadType,
-        tables_to_load: set[str] | None,
-        collect_stage2: bool,  # noqa: ARG001
+    load_type: LoadType,
+    tables_to_load: set[str] | None,
+    collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
         yield from _gen_partitioned_node_inputs(
@@ -262,10 +262,10 @@ def stage5_inputs(
 
 
 def do_stage5(
-        stage5_inputs: NodePartitionedModelInput,
-        load_type: LoadType,
-        load_mode: LoadMode,
-        start_time: datetime,
+    stage5_inputs: NodePartitionedModelInput,
+    load_type: LoadType,
+    load_mode: LoadMode,
+    start_time: datetime,
 ) -> bool:
     if load_type == LoadType.INCREMENTAL:
         model_type, _ = stage5_inputs
@@ -278,6 +278,6 @@ def do_stage5(
 
 
 def collect_stage5(
-        do_stage5: Collect[bool],
+    do_stage5: Collect[bool],
 ) -> bool:
     return all(do_stage5)
