@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.coverage;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
+import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -39,7 +40,8 @@ public class CoverageHandler {
   public Optional<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
     var beneficiaryOpt =
         coverageRepository.searchBeneficiaryWithCoverage(
-            coverageCompositeId.beneSk(), new DateTimeRange());
+            new CoverageSearchCriteria(
+                coverageCompositeId.beneSk(), new DateTimeRange(), Optional.empty()));
 
     var benefitDate = dateUtil.nowAoe();
     return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId, benefitDate));
@@ -56,7 +58,8 @@ public class CoverageHandler {
   public Bundle searchByCoverageId(
       CoverageCompositeId parsedCoverageId, DateTimeRange lastUpdated) {
     var beneficiaryOpt =
-        coverageRepository.searchBeneficiaryWithCoverage(parsedCoverageId.beneSk(), lastUpdated);
+        coverageRepository.searchBeneficiaryWithCoverage(
+            new CoverageSearchCriteria(parsedCoverageId.beneSk(), lastUpdated, Optional.empty()));
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.defaultBundle(loadProgressRepository::lastUpdated);
     }
@@ -71,15 +74,14 @@ public class CoverageHandler {
    * Searches for all Coverage resources associated with a given beneficiary SK, optionally filtered
    * by _lastUpdated.
    *
-   * @param beneSk The beneficiary surrogate key.
-   * @param lastUpdated The date range for _lastUpdated filter.
+   * @param criteria Coverage Search Criteria.
    * @return A Bundle of Coverage resources.
    */
   @Timed("application.coverage.handler.search_by_beneficiary")
-  public Bundle searchByBeneficiary(Long beneSk, DateTimeRange lastUpdated) {
+  public Bundle searchByBeneficiary(CoverageSearchCriteria criteria) {
     var beneficiaryOpt =
         coverageRepository
-            .searchBeneficiaryWithCoverage(beneSk, lastUpdated)
+            .searchBeneficiaryWithCoverage(criteria)
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);
@@ -87,7 +89,10 @@ public class CoverageHandler {
     var beneficiary = beneficiaryOpt.get();
     var benefitDate = dateUtil.nowAoe();
     var coverages =
-        Arrays.stream(CoveragePart.values())
+        Arrays.stream(
+                criteria.coveragePart().isEmpty()
+                    ? CoveragePart.values()
+                    : new CoveragePart[] {criteria.coveragePart().get()})
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(

@@ -108,7 +108,7 @@ class CoverageSearchIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
     var coverage =
         coverageResourceProvider.searchByBeneficiary(
-            new ReferenceParam(BENE_ID_ALL_PARTS_WITH_XREF), new DateRangeParam());
+            new ReferenceParam(BENE_ID_ALL_PARTS_WITH_XREF), new DateRangeParam(), null);
     // This should increase when we map the other coverage types
     assertEquals(5, coverage.getEntry().size());
     assertEquals(1, queryCount(events));
