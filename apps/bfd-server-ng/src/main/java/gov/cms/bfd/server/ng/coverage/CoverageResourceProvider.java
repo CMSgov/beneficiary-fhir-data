@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -56,8 +57,8 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   public Bundle searchByLogicalId(
-      @RequiredParam(name = Coverage.SP_RES_ID) final IdType coverageId,
-      @OptionalParam(name = Coverage.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
+      @RequiredParam(name = IAnyResource.SP_RES_ID) final IdType coverageId,
+      @OptionalParam(name = IAnyResource.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
 
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
@@ -76,7 +77,7 @@ public class CoverageResourceProvider implements IResourceProvider {
   @Search
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY) final ReferenceParam beneficiaryParam,
-      @OptionalParam(name = Coverage.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated,
+      @OptionalParam(name = IAnyResource.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated,
       @OptionalParam(name = Coverage.SP_CLASS_VALUE) final String classValue) {
 
     var beneSk = FhirInputConverter.toLong(new IdType(beneficiaryParam.getValue()));
