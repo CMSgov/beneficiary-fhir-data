@@ -763,9 +763,8 @@ class PatientMatchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(bundle);
   }
 
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void testAuditSnapByBeneLastIndex(SearchStyleEnum searchStyle) {
+  @Test
+  void testAuditSnapByBeneLastIndex() {
     getAuditEventRepository()
         .putAuditEvent(getAuditEventBase(-300428643L, "2026-06-12T20:43:33.828277Z"));
     getAuditEventRepository()
@@ -776,16 +775,11 @@ class PatientMatchIT extends IntegrationTestBase {
                 new TokenClientParam(AuditEvent.SP_ENTITY)
                     .exactly()
                     .identifier("Patient/-300428643"))
-            .and(
-                new TokenClientParam("lastIndex")
-                    .exactly()
-                    .codes(
-                        AuditEventId.fromDynamoTimestamp(-300428643L, "2026-06-12T20:43:33.828277Z")
-                            .getIdAsString()))
             .count(1)
-            .usingStyle(searchStyle)
+            .usingStyle(SearchStyleEnum.GET)
             .execute();
-    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(bundle);
+    var nextBundle = getFhirClient().loadPage().next(bundle).execute();
+    expectFhir().scenario(SearchStyleEnum.GET.name()).toMatchSnapshot(nextBundle);
   }
 
   private static @NotNull AuditEventBase getAuditEventBase(Long bene, String timestamp) {

@@ -101,44 +101,76 @@ gov.cms.bfd.server.ng.PatientMatchIT.patientMatchSnapshot=[
 
 gov.cms.bfd.server.ng.PatientMatchIT.testAuditSnapByBeneLastIndex[GET]=[
 {
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/AuditEvent?_count=1&entity=Patient%2F-300428643&lastIndex=-300428643-20260612204333828277000"
+  "entry" : [ {
+    "resource" : {
+      "action" : "E",
+      "agent" : [ {
+        "altId" : "test-client-name",
+        "name" : "test-client-name",
+        "network" : {
+          "address" : "127.0.0.1",
+          "type" : "2"
+        },
+        "requestor" : true
+      } ],
+      "entity" : [ {
+        "description" : "The detail elements refer to the matching algorithm + version combination that resulted in a unique match.",
+        "detail" : [ {
+          "type" : "matchAlgorithm",
+          "valueString" : "08"
+        }, {
+          "type" : "matchAlgorithmVersion",
+          "valueString" : "3.2.2"
+        } ],
+        "name" : "Match Info",
+        "role" : {
+          "code" : "1",
+          "display" : "Patient",
+          "system" : "http://terminology.hl7.org/CodeSystem/object-role"
+        },
+        "type" : {
+          "code" : "Patient",
+          "display" : "Patient",
+          "system" : "http://hl7.org/fhir/resource-types"
+        },
+        "what" : {
+          "reference" : "Patient/-300428643"
+        }
+      } ],
+      "id" : "-300428643-20260612204333828277000",
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/StructureDefinition/AuditEvent" ]
+      },
+      "outcome" : "0",
+      "purposeOfEvent" : [ {
+        "coding" : [ {
+          "code" : "PATRQT",
+          "display" : "patient requested",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
+        "text" : "patient requested"
+      } ],
+      "recorded" : "2026-06-12T20:43:33.828+00:00",
+      "resourceType" : "AuditEvent",
+      "source" : {
+        "observer" : {
+          "display" : "CMS Beneficiary FHIR Data Server"
+        }
+      },
+      "subtype" : [ {
+        "code" : "patient-match-request",
+        "system" : "urn:cms:hte"
+      } ],
+      "type" : {
+        "code" : "transmit",
+        "system" : "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle"
+      }
+    }
   } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientMatchIT.testAuditSnapByBeneLastIndex[GET_WITH_SEARCH]=[
-{
   "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/AuditEvent/_search?_count=1&entity=Patient%2F-300428643&lastIndex=-300428643-20260612204333828277000"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientMatchIT.testAuditSnapByBeneLastIndex[POST]=[
-{
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/AuditEvent/_search"
+    "url" : "http://localhost/v3/fhir/AuditEvent?_count=1&entity=Patient%2F-300428643&lastIndex=-300428643-20260612204433828277000"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
