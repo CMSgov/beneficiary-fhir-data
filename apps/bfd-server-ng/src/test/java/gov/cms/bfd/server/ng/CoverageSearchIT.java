@@ -152,6 +152,27 @@ class CoverageSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
+  void coverageSearchByBeneficiaryPartAQuery(SearchStyleEnum searchStyle) {
+
+    var coverageBundle =
+        searchBundle()
+            .where(
+                new ReferenceClientParam(Coverage.SP_BENEFICIARY)
+                    .hasId("Patient/" + BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam(Coverage.SP_CLASS_VALUE).exactly().code("part-a"))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        1,
+        coverageBundle.getEntry().size(),
+        "Should find only Part A Coverage resources for the given beneficiary");
+
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
   void coverageSearchByBeneficiaryEmpty(SearchStyleEnum searchStyle) {
 
     var coverageBundle =
