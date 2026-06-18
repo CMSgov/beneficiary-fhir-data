@@ -28,8 +28,6 @@ from pydantic_utils import fields
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
 
-configure_logger()
-
 
 def _run_migrator(postgres: PostgresContainer) -> None:
     # Python recommends using an absolute path when running an executable
@@ -494,6 +492,8 @@ def test_pipeline() -> None:
     # connect. This forces sequential execution of each test case and ensures only a single
     # container is ever started, avoiding the issue in CI
     # TODO: Don't do this, find a way to make parameterized tests work in CI
+    configure_logger()
+
     with (
         PostgresContainer("postgres:16", driver="") as postgres,
         # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the

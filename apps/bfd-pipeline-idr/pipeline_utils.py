@@ -1,11 +1,12 @@
-import logging
 import time
 from datetime import UTC, datetime, timedelta
 
+from loguru import logger
 from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
+from batch_worker import LoadingBatchWorkerClient
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
@@ -15,8 +16,6 @@ from model.base_model import (
     T,
 )
 from model.load_progress import LoadProgress
-
-logger = logging.getLogger(__name__)
 
 
 def get_progress(
@@ -43,6 +42,7 @@ def extract_and_load(
     load_mode: LoadMode,
     job_start: datetime,
     load_type: LoadType,
+    worker_client: LoadingBatchWorkerClient,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
@@ -51,7 +51,7 @@ def extract_and_load(
     else:
         data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
 
-    logger.info("loading %s", cls.table())
+    logger.info("loading {}", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
     loader = PostgresLoader()
     error_count = 0
@@ -63,7 +63,7 @@ def extract_and_load(
 
             if progress:
                 logger.info(
-                    "progress for %s %s - last_ts: %s job_start_ts: %s batch_complete_ts: %s",
+                    "progress for {} {} - last_ts: {} job_start_ts: {} batch_complete_ts: {}",
                     cls.table(),
                     progress.batch_partition,
                     progress.last_ts,
@@ -71,10 +71,19 @@ def extract_and_load(
                     progress.batch_complete_ts,
                 )
             else:
-                logger.info("no previous progress for %s - %s", cls.table(), partition.name)
+                logger.info("no previous progress for {} - {}", cls.table(), partition.name)
 
             data_iter = data_extractor.extract_idr_data(progress, job_start, source)
-            res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
+            res = loader.load(
+                data_iter,
+                cls,
+                job_start,
+                partition,
+                progress,
+                load_type,
+                load_mode,
+                worker_client,
+            )
             data_extractor.close()
             return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
@@ -92,12 +101,12 @@ def extract_and_load(
             error_count += 1
             if error_count < max_errors:
                 last_error = datetime.now(UTC)
-                logger.warning("received transient error, retrying...", exc_info=ex)
+                logger.opt(exception=True).warning("received transient error, retrying...")
                 data_extractor.reconnect()
             else:
                 logger.error("max attempts exceeded")
                 raise ex
             time.sleep(1)
         except Exception as ex:
-            logger.error("error loading %s", cls.table(), exc_info=ex)
+            logger.opt(exception=True).error("error loading {}", cls.table())
             raise ex
