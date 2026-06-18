@@ -160,7 +160,7 @@ public class AuditEventBase {
         .setDisplay("patient requested")
         .setCode("PATRQT")
         .setSystem(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL);
-    AuditEvent.AuditEventEntityComponent entityComponent = ae.addEntity();
+    var entityComponent = ae.addEntity();
     entityComponent.setRole(
         new Coding()
             .setSystem(SystemUrls.OBJECT_ROLE)
