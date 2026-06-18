@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.fhirtrimmer;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.List;
@@ -7,33 +9,34 @@ import java.util.Map;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.FhirR4;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Resource;
 
-/** Third try using HAPI FhirPath. */
+/** Third try using FhirPath. */
 public class FhirTrimmerFhirPath {
 
-  private final Map<String, List<String>> profilePathMap;
+  private final FhirContext fhirContext;
   private final IFhirPath fhirPathEngine;
+  private final Map<String, List<String>> profilePathMap;
 
   /**
    * Constructor.
    *
-   * @param profilePathMap map of profile URL to list of FhirPath expressions to remove
-   * @param fhirContext the FhirContext instance
+   * @param profilePathMap map of profile name and blacklist of fhirpaths
+   * @param fhirContext context shared between trimmers
    */
   public FhirTrimmerFhirPath(Map<String, List<String>> profilePathMap, FhirContext fhirContext) {
     this.profilePathMap = Objects.requireNonNull(profilePathMap, "profilePathMap cannot be null");
-    this.fhirPathEngine = new FhirR4().createFhirPathExecutor(fhirContext);
+    this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
+    this.fhirPathEngine = fhirContext.newFhirPath();
   }
 
   /**
-   * Trim the resource using FhirPath evaluation.
+   * FHIR HAIRCUT.
    *
-   * @param resource resource to trim
-   * @param profile the profile we're trimming to
-   * @return trimmed resource
+   * @param resource the resource to trim
+   * @param profile the profile to trim to
+   * @return the trimmed resource
    */
   public IBaseResource trim(IBaseResource resource, String profile) {
     if (resource == null) {
@@ -46,52 +49,84 @@ public class FhirTrimmerFhirPath {
 
     List<String> pathsToRemove = profilePathMap.get(profile);
 
-    for (String path : pathsToRemove) {
-      removeByFhirPath(baseResource, path);
+    for (String fhirPath : pathsToRemove) {
+      removeElements(baseResource, fhirPath);
     }
 
     return resource;
   }
 
-  private void removeByFhirPath(Resource resource, String fhirPath) {
-    // Evaluate the path to get matching nodes
+  /**
+   * Remove all elements matched by the given FhirPath expression from the resource.
+   *
+   * @param resource the resource to trim
+   * @param fhirPath the FhirPath expression identifying elements to remove
+   */
+  private void removeElements(Base resource, String fhirPath) {
     List<IBase> matches = fhirPathEngine.evaluate(resource, fhirPath, IBase.class);
     if (matches.isEmpty()) {
       return;
     }
 
-    // Derive parent path for child removal
-    int lastDot = fhirPath.lastIndexOf('.');
-    if (lastDot < 0) {
-      return;
-    }
-
-    String parentPath = fhirPath.substring(0, lastDot);
-    String childName = stripPredicate(fhirPath.substring(lastDot + 1));
+    int splitIdx = findParentPathSplit(fhirPath);
+    String parentPath = splitIdx >= 0 ? fhirPath.substring(0, splitIdx) : fhirPath;
 
     List<IBase> parents = fhirPathEngine.evaluate(resource, parentPath, IBase.class);
 
-    for (IBase parent : parents) {
-      if (!(parent instanceof Base baseParent)) {
+    for (IBase parentNode : parents) {
+      if (!(parentNode instanceof Base parent)) {
         continue;
       }
+      removeMatchesFromParent(parent, matches);
+    }
+  }
+
+  /**
+   * For a given parent, walks its runtime child definitions to find which named child slot should
+   * die.
+   *
+   * @param parent the parent node
+   * @param matches the matched nodes to remove
+   */
+  private void removeMatchesFromParent(Base parent, List<IBase> matches) {
+    BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(parent.getClass());
+
+    for (BaseRuntimeChildDefinition childDef : def.getChildren()) {
+      List<?> values = childDef.getAccessor().getValues(parent);
+      if (values.isEmpty()) {
+        continue;
+      }
+
       for (IBase match : matches) {
         if (!(match instanceof Base baseMatch)) {
           continue;
         }
-        baseParent.removeChild(childName, baseMatch);
+        if (values.contains(baseMatch)) {
+          parent.removeChild(childDef.getElementName(), baseMatch);
+        }
       }
     }
   }
 
   /**
-   * Strips FhirPath predicates from a path. Does not work if there are multiple predicates.
+   * Finds the index of the dot separating a FhirPath's parent collection path from its final
+   * segment, skipping dots nested inside parentheses (e.g. {@code where(value.exists())}).
    *
-   * @param segment the path
-   * @return the stripped path
+   * @param fhirPath fhir path
+   * @return the index of the splitting dot, or -1 if none found
    */
-  private String stripPredicate(String segment) {
-    int paren = segment.indexOf('(');
-    return paren >= 0 ? segment.substring(0, paren) : segment;
+  private int findParentPathSplit(String fhirPath) {
+    int depth = 0;
+    for (int i = fhirPath.length() - 1; i >= 0; i--) {
+      char c = fhirPath.charAt(i);
+      if (c == ')') {
+        depth++;
+      } else if (c == '(') {
+        depth--;
+      } else if (c == '.' && depth == 0) {
+        return i;
+      }
+    }
+    return -1;
   }
 }
