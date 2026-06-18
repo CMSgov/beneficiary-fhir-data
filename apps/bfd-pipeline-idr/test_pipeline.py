@@ -1,14 +1,16 @@
 import os
 import shutil
 import subprocess
+from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
 
 import psycopg
+import pytest
 from psycopg import Connection, sql
-from psycopg.rows import DictRow, dict_row
+from psycopg.rows import DictRow, TupleRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
@@ -81,7 +83,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert row is not None
     max_ts = cast(datetime, row["max_ts"])
     datetime_now = max_ts + timedelta(days=1)
-    advance_time(datetime_now)
+    _advance_time(datetime_now)
 
     conn.execute(
         f"""
@@ -360,7 +362,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
-        advance_time(ss_clm_ts)
+        _advance_time(ss_clm_ts)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
@@ -398,7 +400,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
-        advance_time(nch_load_job.event_time)
+        _advance_time(nch_load_job.event_time)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the NCH claim in the v3 idr schema
@@ -459,7 +461,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         conn.commit()
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
-        advance_time(ss_load_job.event_time)
+        _advance_time(ss_load_job.event_time)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the SS claim in the v3 idr schema
@@ -488,78 +490,94 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert updated_ss_job.completion_time >= ss_clm_ts
 
 
-def advance_time(timestamp: datetime) -> None:
+def _advance_time(timestamp: datetime) -> None:
     new_time = timestamp + timedelta(minutes=1)
     os.environ["BFD_TEST_DATE"] = new_time.isoformat()
 
 
-def test_pipeline() -> None:
-    # This is REALLY dumb. Typically we would use a parameterized test plus a fixture to setup the
-    # database and run the same test with both load types, but GitHub Actions Runners seem to have
-    # some issue with testcontainers where only a single test case succeeds and all others fail to
-    # connect. This forces sequential execution of each test case and ensures only a single
-    # container is ever started, avoiding the issue in CI
-    # TODO: Don't do this, find a way to make parameterized tests work in CI
-    with (
-        PostgresContainer("postgres:16", driver="") as postgres,
-        # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
-        # argument type here.
-        psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
-    ):
-        for load_type in [LoadType.INCREMENTAL, LoadType.INITIAL]:
-            # Truncate all tables first. See above for justification
-            conn.execute(
-                """
-                DO $$ DECLARE
-                    r RECORD;
-                BEGIN
-                    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'idr') LOOP
-                        EXECUTE 'DROP TABLE idr.' || quote_ident(r.tablename) || ' CASCADE';
-                    END LOOP;
+def _reset_db(
+    conn: psycopg.Connection[TupleRow], sample_path: Path, postgres: PostgresContainer
+) -> None:
+    conn.execute(
+        """
+        DO $$ DECLARE
+            r RECORD;
+        BEGIN
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'idr') LOOP
+                EXECUTE 'DROP TABLE idr.' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
 
-                    FOR r IN (
-                        SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd'
-                    ) LOOP
-                        EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.'
-                            || quote_ident(r.tablename)
-                            || ' CASCADE';
-                    END LOOP;
+            FOR r IN (
+                SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd'
+            ) LOOP
+                EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.'
+                    || quote_ident(r.tablename)
+                    || ' CASCADE';
+            END LOOP;
 
-                    FOR r IN (
-                        SELECT tablename FROM pg_tables 
-                        WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
-                    ) LOOP
-                        EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.'
-                            || quote_ident(r.tablename)
-                            || ' CASCADE';
-                    END LOOP;
-                END $$;
-                """
-            )
-            conn.commit()
+            FOR r IN (
+                SELECT tablename FROM pg_tables 
+                WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
+            ) LOOP
+                EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.'
+                    || quote_ident(r.tablename)
+                    || ' CASCADE';
+            END LOOP;
+        END $$;
+        """
+    )
+    conn.commit()
 
-            with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
-                conn.execute(f.read())  # type: ignore
-            conn.commit()
+    with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
+        conn.execute(f.read())  # type: ignore
+    conn.commit()
 
-            _run_migrator(postgres)
-            load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
+    _run_migrator(postgres)
+    load_from_csv(PostgresExecutor(conn), sample_path)  # type: ignore
 
-            info = conn.info
-            # Info level logs obscure the error output when running tests
-            # so we want to override this unless the calling process has set this explicitly
-            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-            os.environ["BFD_DB_ENDPOINT"] = info.host
-            os.environ["BFD_DB_PORT"] = str(info.port)
-            os.environ["BFD_DB_NAME"] = info.dbname
-            os.environ["BFD_DB_USERNAME"] = info.user
-            os.environ["BFD_DB_PASSWORD"] = info.password
-            os.environ["IDR_BATCH_SIZE"] = "100000"
-            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
-            os.environ["BFD_TEST_DATE"] = "2023-04-02"
-            os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
-            os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
-            if load_type == LoadType.INITIAL:
-                os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
 
-            _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
+    # Info level logs obscure the error output when running tests
+    # so we want to override this unless the calling process has set this explicitly
+    os.environ.setdefault("IDR_LOG_LEVEL", "warning")
+    os.environ["BFD_DB_ENDPOINT"] = info.host
+    os.environ["BFD_DB_PORT"] = str(info.port)
+    os.environ["BFD_DB_NAME"] = info.dbname
+    os.environ["BFD_DB_USERNAME"] = info.user
+    os.environ["BFD_DB_PASSWORD"] = info.password
+    os.environ["IDR_BATCH_SIZE"] = "100000"
+    os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+    os.environ["BFD_TEST_DATE"] = "2023-04-02"
+    os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
+    os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
+
+
+@pytest.fixture(scope="module")
+def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
+    with PostgresContainer("postgres:16", driver="") as postgres:
+        conninfo = postgres.get_connection_url()
+        yield postgres, conninfo
+
+
+def _test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
+        _do_test_pipeline(cast(Connection[DictRow], conn), LoadType.INITIAL)
+
+
+def _test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        _do_test_pipeline(cast(Connection[DictRow], conn), LoadType.INCREMENTAL)
+
+
+def test_pipeline(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_incremental_pipeline_load(postgres_db)
+    _test_initial_pipeline_load(postgres_db)
