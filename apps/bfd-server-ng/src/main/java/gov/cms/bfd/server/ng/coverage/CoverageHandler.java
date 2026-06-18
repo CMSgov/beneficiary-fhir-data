@@ -88,11 +88,13 @@ public class CoverageHandler {
     }
     var beneficiary = beneficiaryOpt.get();
     var benefitDate = dateUtil.nowAoe();
+    var coverageParts =
+        criteria
+            .coveragePart()
+            .map(Stream::of)
+            .orElseGet(() -> Arrays.stream(CoveragePart.values()));
     var coverages =
-        Arrays.stream(
-                criteria.coveragePart().isEmpty()
-                    ? CoveragePart.values()
-                    : new CoveragePart[] {criteria.coveragePart().get()})
+        coverageParts
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
