@@ -351,6 +351,13 @@ class _LoadingBatchWorker(Process):
         last_updated_set_clause = sql.SQL(", ").join(
             t"{col:i} = s.bfd_updated_ts" for col in task.model.last_updated_date_column()
         )
+        # Ensure we only set last-updated timestamp columns where they specify that they were last
+        # updated in the past. This ensures out-of-order execution of _do_last_updated does not
+        # "rewind time". We should only ever set these columns if a child row has updated, which
+        # implies these columns having timestamps in the past prior to being updated
+        where_timestamp_less_clause = sql.SQL(" AND ").join(
+            t"t.{col:i} < s.bfd_updated_ts" for col in task.model.last_updated_date_column()
+        )
         target_table = sql.Identifier(*task.target_table.split(".", 1))
         source_table = sql.Identifier(*task.model.table().split(".", 1))
         chunks = {
@@ -368,7 +375,8 @@ class _LoadingBatchWorker(Process):
                         SET {last_updated_set_clause:q}
                         FROM {source_table:i} s
                         WHERE t.{task.target_table_key:i} = ANY({chunks[chunk_id]})
-                            AND t.{task.target_table_key:i} = s.{task.target_table_key:i};
+                            AND t.{task.target_table_key:i} = s.{task.target_table_key:i}
+                            AND {where_timestamp_less_clause:q};
                         """,
                     )
                     chunks_complete[chunk_id] = True
