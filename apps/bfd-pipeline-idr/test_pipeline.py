@@ -72,7 +72,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     if load_type == LoadType.INITIAL:
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
-        assert cur.rowcount == 207
+        assert cur.rowcount == 64
         rows = cur.fetchmany(1)
         assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
@@ -578,5 +578,5 @@ def _test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) 
 
 def test_pipeline(postgres_db: tuple[PostgresContainer, str]) -> None:
     configure_logger()
-    # _test_incremental_pipeline_load(postgres_db)
+    _test_incremental_pipeline_load(postgres_db)
     _test_initial_pipeline_load(postgres_db)

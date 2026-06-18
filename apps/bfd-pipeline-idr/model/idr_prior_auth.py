@@ -9,7 +9,6 @@ from constants import (
 )
 from load_partition import LoadPartition
 from model.base_model import (
-    BATCH_ID,
     BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
     PRIMARY_KEY_ORDER,
@@ -24,7 +23,7 @@ from model.base_model import (
 
 
 class IdrPriorAuth(IdrBaseModel):
-    mbi_num: Annotated[str, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True}]
+    mbi_num: Annotated[str, {PRIMARY_KEY_ORDER: 0}]
     utn: Annotated[str, {PRIMARY_KEY_ORDER: 1}]
     current_segment: Annotated[int, {PRIMARY_KEY_ORDER: 2}]
     utn_valid_st_dt: Annotated[date, BeforeValidator(transform_null_date_to_min)]
