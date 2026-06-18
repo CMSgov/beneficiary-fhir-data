@@ -43,10 +43,6 @@ public class AuditEventBase {
   private String finalDetermination;
   private String matchAlgorithmVersion;
 
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.NONE)
-  private AuditEventId eventId;
-
   /**
    * Create Audit Table Schema For DynamoDB. We use this rather than @DynamoDbBean. This annotation
    * has known issues with Spring Boot. Supporting documentation under section 4.1.2 <a
@@ -128,10 +124,7 @@ public class AuditEventBase {
    * @return resource id
    */
   public final AuditEventId getAuditId() {
-    if (eventId == null) {
-      eventId = AuditEventId.fromDynamoTimestamp(getMatchedBeneSk(), getTimestamp());
-    }
-    return eventId;
+    return AuditEventId.fromDynamoTimestamp(getMatchedBeneSk(), getTimestamp());
   }
 
   /**

@@ -13,10 +13,9 @@ import java.time.format.DateTimeFormatter;
  */
 public record AuditEventId(Long beneId, String timestampToken) {
 
+  private static final String TIMESTAMP_FORMAT = "yyyyMMddHHmmssnnnnnnnnn";
   private static final DateTimeFormatter TIMESTAMP_TOKEN_FORMATTER =
-      DateTimeFormatter.ofPattern("yyyyMMddHHmmssnnnnnnnnn");
-
-  private static final int TIMESTAMP_TOKEN_LENGTH = 23;
+      DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT);
 
   /**
    * Generates AuditEvent Resource ID.
@@ -61,7 +60,7 @@ public record AuditEventId(Long beneId, String timestampToken) {
     if (isNegative) {
       id = id.replaceFirst("-", "");
     }
-    String[] split = id.split("-", 2);
+    var split = id.split("-", 2);
     if (split.length != 2) {
       throw new IllegalArgumentException("Invalid AuditEvent id format");
     }
@@ -74,7 +73,7 @@ public record AuditEventId(Long beneId, String timestampToken) {
 
   private static void validateTimestampToken(String timestampToken) {
     if (!timestampToken.chars().allMatch(Character::isDigit)
-        || timestampToken.length() != TIMESTAMP_TOKEN_LENGTH) {
+        || timestampToken.length() != TIMESTAMP_FORMAT.length()) {
       throw new IllegalArgumentException("Invalid timestamp token format");
     }
   }
