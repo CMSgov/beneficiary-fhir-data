@@ -823,8 +823,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt(
 
 CREATE TABLE cms_edp_view_cvm_prau_prd.prauc (
     mbi_num VARCHAR(11) NOT NULL,
-    current_segment INT NOT NULL,
     utn VARCHAR(14) NOT NULL,
+    current_segment INT NOT NULL,
     utn_valid_st_dt DATE,
     utn_valid_en_dt DATE,
     clm_type VARCHAR(1) NOT NULL,
@@ -855,5 +855,7 @@ CREATE TABLE cms_edp_view_cvm_prau_prd.prauc (
     mr_count_end_dt DATE,
     att_phy_npi VARCHAR(10) NOT NULL,
     rrb_excl_ind VARCHAR(1),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(mbi_num, utn, current_segment)
 );

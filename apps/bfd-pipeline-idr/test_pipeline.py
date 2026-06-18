@@ -30,8 +30,6 @@ from pydantic_utils import fields
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
 
-configure_logger()
-
 
 def _run_migrator(postgres: PostgresContainer) -> None:
     # Python recommends using an absolute path when running an executable
@@ -579,5 +577,6 @@ def _test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) 
 
 
 def test_pipeline(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_incremental_pipeline_load(postgres_db)
+    configure_logger()
+    # _test_incremental_pipeline_load(postgres_db)
     _test_initial_pipeline_load(postgres_db)

@@ -10,7 +10,10 @@ from constants import (
 from load_partition import LoadPartition
 from model.base_model import (
     BATCH_ID,
+    BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     PRIMARY_KEY_ORDER,
+    UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
     Source,
@@ -54,6 +57,13 @@ class IdrPriorAuth(IdrBaseModel):
     mr_count_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     att_phy_npi: Annotated[str, BeforeValidator(transform_default_string)]
     rrb_excl_ind: Annotated[str, BeforeValidator(transform_default_string)]
+    # TBD: might have to change the insert & update ts once IDR adds those
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True}]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @override
     @staticmethod
@@ -63,7 +73,7 @@ class IdrPriorAuth(IdrBaseModel):
     @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        return []  # TBD once IDR adds ts
+        return []
 
     @override
     @staticmethod
@@ -83,5 +93,7 @@ class IdrPriorAuth(IdrBaseModel):
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
                 WHERE pa_req_rec_dt > {start_time_sql}
-            ) SELECT {{COLUMNS}} FROM distinct_prior_auths;
+            ) 
+            SELECT {{COLUMNS}} FROM distinct_prior_auths 
+            {{WHERE_CLAUSE}} AND row_order = 1;
             """

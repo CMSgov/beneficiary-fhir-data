@@ -1,10 +1,10 @@
 import argparse
 import csv
-import logging
 import typing
 from pathlib import Path
 
 import psycopg
+from loguru import logger
 
 from constants import (
     IDR_BENE_COMBINED_DUAL_TABLE,
@@ -39,12 +39,10 @@ from constants import (
     IDR_PRIOR_AUTH_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
+from db_utils import get_connection_string
 from extractor import CsvFile, DbExecutor, PostgresExecutor, SnowflakeExecutor
-from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
-
-logger = logging.getLogger(__name__)
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": IDR_BENE_HISTORY_TABLE},
@@ -133,7 +131,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
     paths = [path] if path.is_file() and src_folder.endswith(file) else path.glob(f"./**/{file}")
 
     for match in paths:
-        logger.info("loading from file: %s", match)
+        logger.info("loading from file: {}", match)
         with match.open() as f:
             reader = csv.DictReader(f)
             # skip empty files
@@ -150,7 +148,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
                 {"sql_table": sql_table},
             )
             db_columns = [typing.cast(str, col["column_name"]).lower() for col in db_columns]
-            logger.info("found %d columns", len(db_columns))
+            logger.info("found {} columns", len(db_columns))
 
             cols = [
                 col

@@ -1,10 +1,10 @@
 CREATE TABLE idr.prior_auth (
     mbi_num VARCHAR(11) NOT NULL,
     utn VARCHAR(14) NOT NULL,
+    current_segment INT NOT NULL,
     utn_valid_st_dt DATE,
     utn_valid_en_dt DATE,
     clm_type VARCHAR(1) NOT NULL,
-    current_segment INT NOT NULL,
     hcpcs_or_cpt_or_hipps VARCHAR(5) NOT NULL,
     mac_id VARCHAR(5) NOT NULL,
     pa_dt_added DATE NOT NULL,
@@ -33,5 +33,6 @@ CREATE TABLE idr.prior_auth (
     att_phy_npi VARCHAR(10) NOT NULL,
     rrb_excl_ind VARCHAR(1) NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ,
     PRIMARY KEY(mbi_num, utn, current_segment)
 );

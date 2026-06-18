@@ -88,7 +88,7 @@ def main():
             "MR_COUNT_IND",
             "MR_COUNT_ST_DT",
             "MR_COUNT_END_DT",
-            "RRB_EXCL_IND"
+            "RRB_EXCL_IND",
         ]:
             val = str(row.get(field, "")).strip()
             if val:
