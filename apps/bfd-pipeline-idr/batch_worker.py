@@ -110,7 +110,7 @@ class _DoLastUpdated(_LoadPartitionTask):
             target_table=target_table,
             target_table_key=target_table_key,
             partition=batch.partition,
-            keys=list(OrderedDict.fromkeys(x[target_table_key] for x in keys)),
+            keys=sorted(OrderedDict.fromkeys(x[target_table_key] for x in keys)),
             timestamp=batch.timestamp,
         )
 
