@@ -1,4 +1,5 @@
 import logging
+import psycopg
 import time
 from datetime import UTC, datetime, timedelta
 
@@ -6,10 +7,18 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from constants import DEFAULT_PARTITION
+from constants import (
+    DEFAULT_PARTITION,
+    CLAIM_PROFESSIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    PHASE_1_SS_MIN,
+    PHASE_1_SS_MAX,
+)
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
-from loader import LoadType, PostgresLoader, should_track_load_progress
+from loader import LoadType, PostgresLoader, should_track_load_progress, get_connection_string
 from model.base_model import (
     LoadMode,
     T,
@@ -101,3 +110,46 @@ def extract_and_load(
         except Exception as ex:
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
+
+# todo, add some logs
+def prune_phase_1_ss_claims(
+    cls: type[T],
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    prune_cutoff_date = job_start - timedelta(days=60)
+    shared_claim_tables = {
+        CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+        CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    }
+
+    claim_table = cls.table()
+    item_table = shared_claim_tables.get(claim_table)
+    if item_table is None:
+        return True
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        with conn.transaction():
+            res = conn.execute(
+                f"""
+                DELETE FROM {item_table}
+                WHERE clm_uniq_id IN (
+                    SELECT clm_uniq_id FROM {claim_table}
+                    WHERE clm_type_cd BETWEEN %s AND %s
+                    AND clm_idr_ld_dt < %s
+                )
+                """,
+                (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
+            )
+            logger.info("pruned %d rows from %s", res.rowcount, item_table)
+
+            res = conn.execute(
+                f"""
+                DELETE FROM {claim_table}
+                WHERE clm_type_cd BETWEEN %s AND %s
+                AND clm_idr_ld_dt < %s
+                """,
+                (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
+            )
+            logger.info("pruned %d rows from %s", res.rowcount, claim_table)
+    return True
