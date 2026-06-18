@@ -88,6 +88,7 @@ public class ClaimRepository {
   public List<ClaimBase> findByIds(
       @MeterTag(key = "hasServiceUpdated", expression = "hasServiceUpdated()")
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimIdSearchCriteria criteria) {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
@@ -97,6 +98,7 @@ public class ClaimRepository {
         List.of(
             new BillablePeriodFilterParam(criteria.serviceDate()),
             new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
     var professionalSharedSystemsClaims =

@@ -53,11 +53,43 @@ class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
                     .exactly()
-                    .identifier("1071939711295"))
+                    .identifier(CLAIM_ID_ADJUDICATED))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  static Stream<Arguments> provideEobSearchByIdOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(
+                    Arguments.of("MatchingOutcome", OUTCOME_COMPLETE, 1, searchStyle),
+                    Arguments.of("NonMatchingOutcome", OUTCOME_PARTIAL, 0, searchStyle)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideEobSearchByIdOutcomeScenarios")
+  void eobSearchByIdAndOutcome(
+      String scenarioName, String outcome, int expectedCount, SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_ADJUDICATED))
+            .and(new TokenClientParam(OUTCOME).exactly().identifier(outcome))
+            .usingStyle(searchStyle)
+            .execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    assertEquals(expectedCount, eobs.size(), scenarioName);
+
+    assertTrue(
+        eobs.stream().allMatch(eob -> outcome.equals(eob.getOutcome().toCode())),
+        "All returned EOBs should have outcome " + outcome);
   }
 
   @ParameterizedTest

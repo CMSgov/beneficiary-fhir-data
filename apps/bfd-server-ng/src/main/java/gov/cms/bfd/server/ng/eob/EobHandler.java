@@ -61,7 +61,11 @@ public class EobHandler {
     var eobs =
         searchByIdsInner(
             new ClaimIdSearchCriteria(
-                List.of(fhirId), new DateTimeRange(), new DateTimeRange(), Collections.emptyList()),
+                List.of(fhirId),
+                new DateTimeRange(),
+                new DateTimeRange(),
+                Collections.emptyList(),
+                Collections.emptyList()),
             options);
     return eobs.stream().findFirst();
   }

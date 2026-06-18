@@ -151,6 +151,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param lastUpdated last updated
    * @param requestDetails request Details object
    * @param request HTTP request details
+   * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @return bundle
    */
@@ -162,6 +163,7 @@ public class EobResourceProvider implements IResourceProvider {
           final DateRangeParam lastUpdated,
       final RequestDetails requestDetails,
       final HttpServletRequest request,
+      @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source) {
 
     var includeTaxNumbers =
@@ -178,6 +180,7 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toLongList(fhirIds),
             FhirInputConverter.toDateTimeRange(serviceDate),
             FhirInputConverter.toDateTimeRange(lastUpdated),
+            FhirInputConverter.parseOutcomeParameter(outcome),
             FhirInputConverter.parseSourceParameter(source));
 
     return eobHandler.searchById(searchCriteria, options);
