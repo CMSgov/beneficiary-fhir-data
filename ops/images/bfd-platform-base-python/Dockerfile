@@ -1,7 +1,6 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023.10.20260325.0-minimal@sha256:37c9056c6fc3492b333aff2836dfbd4013f5f63458a9e557907ccf9996da6e7f AS base
 
 RUN dnf -y update && \
-    dnf -y install git && \
     dnf -y clean all && \
     rm -rf /var/cache
 
