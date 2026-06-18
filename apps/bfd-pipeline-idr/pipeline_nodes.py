@@ -32,8 +32,7 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
-from pipeline_utils import extract_and_load
-from pipeline_utils import prune_phase_1_ss_claims
+from pipeline_utils import extract_and_load, prune_phase_1_ss_claims
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
@@ -269,12 +268,13 @@ def do_stage5(
         start_time: datetime,
 ) -> bool:
     if load_type == LoadType.INCREMENTAL:
-        model_type, partition = stage5_inputs
+        model_type, _ = stage5_inputs
         return prune_phase_1_ss_claims(
             cls=model_type,
             job_start=start_time,
             load_mode=load_mode,
         )
+    return False
 
 
 def collect_stage5(
