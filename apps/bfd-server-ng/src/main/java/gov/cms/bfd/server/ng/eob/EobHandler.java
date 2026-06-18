@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
-import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
+import static gov.cms.bfd.server.ng.util.MetricRecorder.SAMHSA_FILTER_MODE;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
@@ -16,10 +16,8 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
-import gov.cms.bfd.server.ng.util.MetricTimer;
+import gov.cms.bfd.server.ng.util.MetricRecorder;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import java.time.LocalDate;
 import java.util.*;
@@ -43,8 +41,7 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
-  private final MeterRegistry meterRegistry;
-  private final MetricTimer metricTimer;
+  private final MetricRecorder metricRecorder;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
@@ -98,34 +95,32 @@ public class EobHandler {
             criteria.sources());
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
-
-    var filteredClaims =
-        metricTimer.recordMetric(
-            "application.eob.handler.search_by_bene",
-            () ->
-                filterSamhsaClaims(claims, options.getSamhsaFilterMode())
-                    .skip(repositoryCriteria.resolveOffset())
-                    .limit(repositoryCriteria.resolveLimitWithExtra(1))
-                    .map(claim -> transformToFhir(claim, options)),
-            _ -> Tags.of(SAMHSA_FILTER_MODE, options.getSamhsaFilterMode().name()));
+    var samhsaFilterMode = options.getSamhsaFilterMode();
 
     var bundle =
-        FhirUtil.bundleOrDefault(
-            filteredClaims,
-            loadProgressRepository::lastUpdated,
-            requestDetails,
-            // we want the raw limit
-            Optional.of(repositoryCriteria.resolveLimit()),
-            Optional.of(repositoryCriteria.resolveOffset()));
-    recordResultSize(bundle, options.getSamhsaFilterMode());
+        metricRecorder.recordMetric(
+            "application.eob.handler.transform",
+            () -> {
+              var filteredClaims =
+                  filterSamhsaClaims(claims, samhsaFilterMode)
+                      .skip(repositoryCriteria.resolveOffset())
+                      .limit(repositoryCriteria.resolveLimitWithExtra(1))
+                      .map(claim -> transformToFhir(claim, options));
+              return FhirUtil.bundleOrDefault(
+                  filteredClaims,
+                  loadProgressRepository::lastUpdated,
+                  requestDetails,
+                  // we want the raw limit
+                  Optional.of(repositoryCriteria.resolveLimit()),
+                  Optional.of(repositoryCriteria.resolveOffset()));
+            },
+            _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
+    metricRecorder.recordDistribution(
+        "application.eob.handler.results.size",
+        bundle.getEntry().size(),
+        SAMHSA_FILTER_MODE,
+        samhsaFilterMode.name());
     return bundle;
-  }
-
-  private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
-    DistributionSummary.builder("application.eob.handler.results.size")
-        .tag(SAMHSA_FILTER_MODE, samhsaFilterMode.name())
-        .register(meterRegistry)
-        .record(bundle.getEntry().size());
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(

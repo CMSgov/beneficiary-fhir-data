@@ -126,6 +126,12 @@ public class LoggerConstants {
   /** Name of the HTTP request uri. */
   public static final String HTTP_ACCESS_REQUEST_URI = "http_access_request_uri";
 
+  /** Name of the FHIR resource and/or operation performed. */
+  public static final String RESOURCE_OPERATION = "resource_operation";
+
+  /** Name of the FHIR operation type performed. */
+  public static final String OPERATION_TYPE = "operationType";
+
   /** Name for the number of FHIR resources returned in the response. */
   public static final String RESOURCES_RETURNED_COUNT = "resources_returned_count";
 
