@@ -137,7 +137,7 @@ def prune_phase_1_ss_claims(
                     WHERE clm_type_cd BETWEEN %s AND %s
                     AND clm_idr_ld_dt < %s
                 )
-                """,
+                """,  # type: ignore
             (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
         )
         logger.info("pruned %d rows from %s", res.rowcount, item_table)
@@ -147,7 +147,7 @@ def prune_phase_1_ss_claims(
                 DELETE FROM {claim_table}
                 WHERE clm_type_cd BETWEEN %s AND %s
                 AND clm_idr_ld_dt < %s
-                """,
+                """,  # type: ignore
             (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
         )
         logger.info("pruned %d rows from %s", res.rowcount, claim_table)
