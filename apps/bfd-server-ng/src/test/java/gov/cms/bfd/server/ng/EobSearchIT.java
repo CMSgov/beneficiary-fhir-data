@@ -683,21 +683,32 @@ class EobSearchIT extends IntegrationTestBase {
     return Stream.of(SearchStyleEnum.values())
         .flatMap(
             searchStyle ->
-                Stream.of(MetaSourceSk.NCH.getDisplay(), MetaSourceSk.DDPS.getDisplay())
-                    .flatMap(
-                        source ->
-                            Stream.of(
-                                    OUTCOME_COMPLETE,
-                                    OUTCOME_PARTIAL,
-                                    OUTCOME_QUEUED,
-                                    OUTCOME_ERROR)
-                                .map(
-                                    outcome ->
-                                        Arguments.of(
-                                            source + "_" + outcome,
-                                            source,
-                                            outcome,
-                                            searchStyle))));
+                Stream.of(
+                    Arguments.of(
+                        "NCH_complete",
+                        MetaSourceSk.NCH.getDisplay(),
+                        OUTCOME_COMPLETE,
+                        searchStyle),
+                    Arguments.of(
+                        "NCH_partial", MetaSourceSk.NCH.getDisplay(), OUTCOME_PARTIAL, searchStyle),
+                    Arguments.of(
+                        "NCH_queued", MetaSourceSk.NCH.getDisplay(), OUTCOME_QUEUED, searchStyle),
+                    Arguments.of(
+                        "NCH_error", MetaSourceSk.NCH.getDisplay(), OUTCOME_ERROR, searchStyle),
+                    Arguments.of(
+                        "DDPS_complete",
+                        MetaSourceSk.DDPS.getDisplay(),
+                        OUTCOME_COMPLETE,
+                        searchStyle),
+                    Arguments.of(
+                        "DDPS_partial",
+                        MetaSourceSk.DDPS.getDisplay(),
+                        OUTCOME_PARTIAL,
+                        searchStyle),
+                    Arguments.of(
+                        "DDPS_queued", MetaSourceSk.DDPS.getDisplay(), OUTCOME_QUEUED, searchStyle),
+                    Arguments.of(
+                        "DDPS_error", MetaSourceSk.DDPS.getDisplay(), OUTCOME_ERROR, searchStyle)));
   }
 
   @ParameterizedTest
