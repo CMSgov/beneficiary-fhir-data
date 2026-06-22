@@ -1,6 +1,5 @@
 import functools
 import itertools
-import os
 import random
 from datetime import datetime
 
@@ -36,6 +35,7 @@ from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
 from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import extract_and_load
+from settings import enable_prior_auth_ingestion
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
@@ -112,7 +112,7 @@ class StagedIdrPipeline:
         tables = [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
         if self.load_type == LoadType.INITIAL:
             tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
-            if os.environ.get("IDR_ENABLE_PRIOR_AUTH", "False"):
+            if enable_prior_auth_ingestion():
                 tables.append(*_PRIOR_AUTH_TABLES)
 
         filtered_tables = self._filter_tables(tables)

@@ -26,6 +26,10 @@ def bfd_test_date() -> datetime | None:
     return datetime.fromisoformat(test_date) if test_date else None
 
 
+def enable_prior_auth_ingestion() -> bool:
+    return _parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+
+
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
 """Enables partitioning claims data based on dates.
 It's useful to disable this for synthetic loads since
@@ -45,9 +49,6 @@ MIN_PRIOR_AUTH_TRANSACTION_DATE = getenv(
     "IDR_MIN_PRIOR_AUTH_TRANSACTION_DATE", MIN_PRIOR_AUTH_LOAD_DATE
 )
 """Minimum prior auth date to load."""
-
-ENABLE_PRIOR_AUTH_INGESTION = _parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
-"""Enables prior auth ingestion."""
 
 PARTITION_TYPE = getenv("IDR_PARTITION_TYPE", "year").lower()
 """Partition type (year/month/day).

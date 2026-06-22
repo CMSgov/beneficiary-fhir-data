@@ -5,7 +5,8 @@ import sys
 from datetime import datetime, timezone
 import pandas as pd
 
-#we should only really need this for prior auth, since PA doesn't have it. 
+
+# we should only really need this for prior auth, since PA doesn't have it.
 def find_bene_sk(mbi_num: str) -> str:
     bene_history_path = "out/SYNTHETIC_BENE_HSTRY.csv"
     if os.path.exists(bene_history_path):
@@ -49,7 +50,9 @@ def main():
     target_mbi = utn_matches.iloc[0]["MBI_NUM"]
 
     # Filter all rows matching target_mbi and UTN
-    matching_rows_df = df_prauc[(df_prauc["UTN"] == args.utn) & (df_prauc["MBI_NUM"] == target_mbi)].copy()
+    matching_rows_df = df_prauc[
+        (df_prauc["UTN"] == args.utn) & (df_prauc["MBI_NUM"] == target_mbi)
+    ].copy()
 
     # Sort matching rows by CURRENT_SEGMENT (cast to int to sort correctly)
     matching_rows_df["CURRENT_SEGMENT"] = matching_rows_df["CURRENT_SEGMENT"].astype(int)
@@ -96,7 +99,9 @@ def main():
         prior_auth_items.append(item)
 
     # Determine derivedOutcome based on segment decisions
-    has_pending = any(str(row.get("PA_DECISION", "")).strip() == "P" for _, row in matching_rows_df.iterrows())
+    has_pending = any(
+        str(row.get("PA_DECISION", "")).strip() == "P" for _, row in matching_rows_df.iterrows()
+    )
     derived_outcome = "partial" if has_pending else "complete"
 
     # Now we build our actual sample data.
@@ -116,7 +121,6 @@ def main():
         "NPI": billing_npi,
         "NAME": str(first_row.get("NAME", "")).strip(),
         "CMS_CERT": str(first_row.get("CMS_CERT", "")).strip(),
-        
         # Avoid futzing too much with augment_sample_resources
         "PRVDR_BLG_PRVDR_NPI_NUM": billing_npi,
         "PRVDR_ATNDG_PRVDR_NPI_NUM": str(first_row.get("ATT_PHY_NPI", "")).strip(),
@@ -124,8 +128,7 @@ def main():
         "PRVDR_RNDRNG_PRVDR_NPI_NUM": str(first_row.get("RENDER_NPI", "")).strip(),
         "PRVDR_OPRTG_PRVDR_NPI_NUM": str(first_row.get("OPERATE_NPI", "")).strip(),
         "CLM_BLG_PRVDR_OSCAR_NUM": str(first_row.get("CMS_CERT", "")).strip(),
-
-        "priorAuthItem": prior_auth_items
+        "priorAuthItem": prior_auth_items,
     }
 
     output_file = "sample-data/EOB-PriorAuth-Sample.json"

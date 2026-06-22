@@ -25,6 +25,7 @@ from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
+from settings import enable_prior_auth_ingestion
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -70,7 +71,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    if load_type == LoadType.INITIAL:
+    if load_type == LoadType.INITIAL and enable_prior_auth_ingestion():
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
         assert cur.rowcount == 64
         rows = cur.fetchmany(1)
