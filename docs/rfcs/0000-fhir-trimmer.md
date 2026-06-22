@@ -8,7 +8,7 @@
     * [BFD-4768](https://jira.cms.gov/browse/BFD-4768)
 
 To implement CARIN Basis Profiles in v3 in an effort to speed up bulk queries from the APIs (AB2D), BFD v3 needs to be sending trimmed FHIR resources. To trim these resources, BFD needs a framework for applying these profiles, either to queries into our internal database or by applying a profile to a FHIR resource and trimming unnecessary elements. This document serves as a record of research done in the interest of implementing this solution, the findings from that research, and a proposed solution to support it going forward.
-
+git 
 ## Status
 [Status]: #status
 
@@ -49,14 +49,6 @@ To support this implementation, we need to copy the YAML map files from the mode
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
-This is the technical portion of the RFC. Explain the design in sufficient detail that:
-
-* Its interaction with other features is clear.
-* It is reasonably clear how the feature would be implemented.
-* Corner cases are dissected by example.
-
-The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
-
 There are two portions of this code; reading and parsing the YAML files into a useable framework for trimming, and then doing the trimming.
 
 * Mapping Framework
@@ -86,9 +78,11 @@ After toFhir(), the resource exists as a full resource. Before sending, some con
 Because our mapping has valid FhirPaths, we will either need to implement logic that walks a FhirPath (FhirTerser proved to be too slow in testing) and removes elements via a blacklist, or verify evey element in the resultant resource matches a whitelist and remove those that don't. I think there is some wiggle room on converting FhirPath logic into something more similar for directly accessing values in a FhirResource.
 
 FhirPath
+
 ```Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD').value.code```
 
 HAPI Java to Remove
+
 ```coverage.getExtension().removeIf(ext -> "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD".equals(ext.getUrl()));```
 
 Work still needs to be done to make this universal, but I believe if we can translate the FhirPaths into HAPI Java fhir code 1:1, it will speed up removal and makes the structure of the BasisProfileMapping a lot easier to manage (whether or not we go with the blacklist or whitelist).
@@ -98,9 +92,15 @@ Work still needs to be done to make this universal, but I believe if we can tran
 
 Items to be discussed:
 
-* Is there a way to access files across projects?
+* Is there a way to access files across modules?
+  
+    Either by using symlinks or by moving the files into the shared-utils module
 * Spring Config vs Static?
+
+    N/A
 * Is there a way to modify the bundles without using HAPI Fhir? Would that be faster?
+
+    There is, but it is much more dangerous and should only be considered if other options aren't feasible
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
