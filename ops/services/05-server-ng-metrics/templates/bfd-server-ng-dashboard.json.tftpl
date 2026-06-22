@@ -3,7 +3,7 @@
         {
             "type": "metric",
             "x": 0,
-            "y": 24,
+            "y": 18,
             "width": 6,
             "height": 6,
             "properties": {
@@ -31,7 +31,7 @@
         {
             "type": "metric",
             "x": 12,
-            "y": 24,
+            "y": 18,
             "width": 6,
             "height": 6,
             "properties": {
@@ -58,7 +58,7 @@
         {
             "type": "metric",
             "x": 6,
-            "y": 30,
+            "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
@@ -77,8 +77,8 @@
         },
         {
             "type": "metric",
-            "x": 0,
-            "y": 30,
+            "x": 12,
+            "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
@@ -97,13 +97,13 @@
         },
         {
             "type": "metric",
-            "x": 12,
-            "y": 6,
+            "x": 18,
+            "y": 12,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('http-requests/count/all ${namespace} certificate_alias', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                    [ { "expression": "SEARCH('http-requests.count.by-partner ${namespace} certificate_alias', 'Sum', 60)", "label": "$${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -133,7 +133,7 @@
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,
-                "title": "CPU and Memory Utilization of server-ng Service",
+                "title": "CPU and Memory Utilization of ${service} Service",
                 "liveData": true,
                 "yAxis": {
                     "left": {
@@ -149,7 +149,7 @@
         },
         {
             "type": "metric",
-            "x": 12,
+            "x": 6,
             "y": 0,
             "width": 6,
             "height": 6,
@@ -164,31 +164,41 @@
                 "stat": "Average",
                 "period": 60,
                 "liveData": true,
-                "title": "server-ng Service Running and Desired Task Count"
+                "title": "${service} Service Running and Desired Task Count"
             }
         },
         {
             "type": "metric",
-            "x": 6,
+            "x": 0,
             "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "application.eob.handler.search_by_bene.avg", "samhsa_filter_mode", "EXCLUDE", { "label": "EXCLUDE" } ]
+                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.samhsa_filter.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Latency", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.results.size.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Bundle Size", "id": "e2", "yAxis": "right", "period": 60, "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "EOB Seatch Latency by SAMHSA Mode",
                 "region": "${region}",
                 "stat": "Average",
-                "period": 60
+                "period": 60,
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "label": "Latency"
+                    },
+                    "right": {
+                        "label": "EOB Count"
+                    }
+                }
             }
         },
         {
             "type": "metric",
-            "x": 18,
-            "y": 0,
+            "x": 6,
+            "y": 6,
             "width": 6,
             "height": 6,
             "properties": {
@@ -222,8 +232,8 @@
         },
         {
             "type": "metric",
-            "x": 6,
-            "y": 0,
+            "x": 0,
+            "y": 6,
             "width": 6,
             "height": 6,
             "properties": {
@@ -256,14 +266,14 @@
         {
             "type": "metric",
             "x": 18,
-            "y": 6,
+            "y": 0,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated", "region": "${region}", "id": "m1" } ],
-                    [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile", "region": "${region}", "id": "m2" } ],
-                    [ "...", { "color": "#d62728", "label": "Maximum", "region": "${region}", "id": "m3" } ]
+                    [ "${namespace}", "http-requests.latency.all.avg", { "region": "${region}", "label": "Aggregated" } ],
+                    [ ".", "http-requests.latency.all.max", { "region": "${region}", "label": "Maximum" } ],
+                    [ ".", "http-requests.latency.all.percentile.value", "phi", "0.99", { "stat": "p99", "label": "99th percentile" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -277,16 +287,12 @@
         {
             "type": "metric",
             "x": 18,
-            "y": 12,
+            "y": 6,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/count/all", { "region": "${region}", "visible": false, "id": "m1" } ],
-                    [ ".", "http-requests/count/metadata", { "region": "${region}", "id": "m2", "label": "Metadata Requests" } ],
-                    [ ".", "http-requests/count/coverage-all", { "region": "${region}", "id": "m3", "label": "Coverage Requests" } ],
-                    [ ".", "http-requests/count/patient-all", { "region": "${region}", "id": "m4", "label": "Patient Requests" } ],
-                    [ ".", "http-requests/count/eob-all", { "region": "${region}", "id": "m5", "label": "EOB Requests" } ]
+                    [ { "expression": "SEARCH('{${namespace},endpoint} MetricName=http-requests.count.all.count\"', 'Sum', 60)", "label": "$${PROP('Dim.endpoint')}", "id": "e1", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -300,58 +306,41 @@
         {
             "type": "metric",
             "x": 0,
-            "y": 18,
+            "y": 12,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/eob-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"ExplanationOfBenefit\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"ExplanationOfBenefit\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
-                "stat": "Sum",
+                "stat": "Average",
                 "period": 60,
                 "liveData": true,
-                "title": "EOB Request Count with 1 Minute Period per Client"
+                "title": "Average EOB Request Latency and Count with 1 Minute Period per Client"
             }
         },
         {
             "type": "metric",
             "x": 6,
-            "y": 18,
+            "y": 12,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/patient-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
-                "stat": "Sum",
+                "stat": "Average",
                 "period": 60,
                 "liveData": true,
-                "title": "Patient Request Count with 1 Minute Period per Client"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 18,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/coverage-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Sum",
-                "period": 60,
-                "liveData": true,
-                "title": "Coverage Request Count with 1 Minute Period per Client"
+                "title": "Average Patient Request Latency and Count with 1 Minute Period per Client"
             }
         },
         {
@@ -362,26 +351,8 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/metadata\"', 'Sum', 60)", "label": "", "id": "e1" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Sum",
-                "period": 60,
-                "liveData": true,
-                "title": "Metadata Request Count with 1 Minute Period per Client"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 0,
-            "y": 12,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/eob-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"metadata\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"metadata\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -389,56 +360,18 @@
                 "stat": "Average",
                 "period": 60,
                 "liveData": true,
-                "title": "Average EOB Request Latency with 1 Minute Period per Client"
+                "title": "Average Metadata Request Latency and Count with 1 Minute Period per Client"
             }
         },
         {
             "type": "metric",
-            "x": 6,
-            "y": 12,
+            "x": 12,
+            "y": 0,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/patient-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "Average Patient Request Latency with 1 Minute Period per Client"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 18,
-            "y": 18,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/metadata\"', 'Average', 60)", "label": "", "id": "e1", "region": "${region}" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "Average Metadata Request Latency with 1 Minute Period per Client"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 6,
-            "y": 6,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SEARCH('http-requests/count/4xx-responses ${namespace} status_code', 'Sum', 60)", "label": "$${PROP('Dim.status_code')}", "id": "e1", "region": "${region}" } ]
+                    [ { "expression": "SEARCH('http-requests.count.4xx-responses ${namespace} response_status', 'Sum', 60)", "label": "$${PROP('Dim.response_status')}", "id": "e1", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -460,13 +393,13 @@
         },
         {
             "type": "metric",
-            "x": 0,
+            "x": 12,
             "y": 6,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},status_code} MetricName=\"http-requests/count/5xx-responses\"', 'Sum', 60)", "id": "e1" } ]
+                    [ { "expression": "SEARCH('http-requests.count.5xx-responses ${namespace} response_status', 'Sum', 60)", "label": "$${PROP('Dim.response_status')}", "id": "e1", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -479,20 +412,61 @@
         },
         {
             "type": "metric",
+            "x": 18,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Coverage\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Coverage\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Average Coverage Request Latency and Count with 1 Minute Period per Client",
+                "region": "${region}",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
             "x": 12,
             "y": 12,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/coverage-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$idi-match\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient/$idi-match\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "title": "Average Coverage Request Latency with 1 Minute Period per Client",
                 "region": "${region}",
+                "stat": "Average",
                 "period": 60,
-                "stat": "Average"
+                "liveData": true,
+                "title": "Average Patient/$idi-match Request Latency and Count with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.latency.by-partner.avg\" endpoint=\"Patient/$generate-insurance-card\"', 'Average', 60)", "label": "Latency (ms) for $${PROP('Dim.certificate_alias')}", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},endpoint,certificate_alias} MetricName=http-requests.count.by-partner\" endpoint=\"Patient/$generate-insurance-card\"', 'Sum', 60)", "label": "Count for $${PROP('Dim.certificate_alias')}", "id": "e2", "region": "${region}", "yAxis": "right" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average Patient/$generate-insurance-card Request Latency and Count with 1 Minute Period per Client"
             }
         }
     ]
