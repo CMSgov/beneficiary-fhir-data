@@ -37,17 +37,16 @@ public class CoverageRepository {
       @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           CoverageSearchCriteria criteria) {
     var benefitDate = dateUtil.nowAoe();
+    var lowerBoundInclusive = ">=".equals(criteria.lastUpdated().getLowerBoundSqlOperator());
+    var upperBoundInclusive = "<=".equals(criteria.lastUpdated().getUpperBoundSqlOperator());
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
     // active and future coverages. We sort first by active coverage records by latest begin date.
     // In the case of rx enrollments, if multiple records have matching begin dates then we sort by
     // latest pdp rx info begin date.
 
-    var query =
-        entityManager
-            .createQuery(
-                String.format(
-                    """
+    var coverageQuery =
+        """
                         WITH latestPartCDEnrollments AS (
                             SELECT e.id AS id,
                                 ROW_NUMBER() OVER (
@@ -92,23 +91,41 @@ public class CoverageRepository {
                         WHERE b.beneSk = :beneSk
                           AND (
                               CAST(:lowerBound AS ZonedDateTime) IS NULL
-                              OR GREATEST(
-                                    b.meta.partACoverageUpdatedTs,
-                                    b.meta.partBCoverageUpdatedTs,
-                                    b.meta.partCCoverageUpdatedTs,
-                                    b.meta.partDCoverageUpdatedTs,
-                                    b.meta.partDualCoverageUpdatedTs
-                                ) %s :lowerBound
+                              OR (:lowerBoundInclusive = TRUE
+                                  AND GREATEST(
+                                        b.meta.partACoverageUpdatedTs,
+                                        b.meta.partBCoverageUpdatedTs,
+                                        b.meta.partCCoverageUpdatedTs,
+                                        b.meta.partDCoverageUpdatedTs,
+                                        b.meta.partDualCoverageUpdatedTs
+                                    ) >= :lowerBound)
+                              OR (:lowerBoundInclusive = FALSE
+                                  AND GREATEST(
+                                        b.meta.partACoverageUpdatedTs,
+                                        b.meta.partBCoverageUpdatedTs,
+                                        b.meta.partCCoverageUpdatedTs,
+                                        b.meta.partDCoverageUpdatedTs,
+                                        b.meta.partDualCoverageUpdatedTs
+                                    ) > :lowerBound)
                             )
                           AND (
                               CAST(:upperBound AS ZonedDateTime) IS NULL
-                              OR LEAST(
-                                    b.meta.partACoverageUpdatedTs,
-                                    b.meta.partBCoverageUpdatedTs,
-                                    b.meta.partCCoverageUpdatedTs,
-                                    b.meta.partDCoverageUpdatedTs,
-                                    b.meta.partDualCoverageUpdatedTs
-                                ) %s :upperBound
+                              OR (:upperBoundInclusive = TRUE
+                                  AND LEAST(
+                                        b.meta.partACoverageUpdatedTs,
+                                        b.meta.partBCoverageUpdatedTs,
+                                        b.meta.partCCoverageUpdatedTs,
+                                        b.meta.partDCoverageUpdatedTs,
+                                        b.meta.partDualCoverageUpdatedTs
+                                    ) <= :upperBound)
+                              OR (:upperBoundInclusive = FALSE
+                                  AND LEAST(
+                                        b.meta.partACoverageUpdatedTs,
+                                        b.meta.partBCoverageUpdatedTs,
+                                        b.meta.partCCoverageUpdatedTs,
+                                        b.meta.partDCoverageUpdatedTs,
+                                        b.meta.partDualCoverageUpdatedTs
+                                    ) < :upperBound)
                             )
                           AND b.beneSk = b.xrefSk
                           AND (ben IS NULL
@@ -128,12 +145,16 @@ public class CoverageRepository {
                                   AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
                           ))
                         ORDER BY b.obsoleteTimestamp DESC
-                      """,
-                    criteria.lastUpdated().getLowerBoundSqlOperator(),
-                    criteria.lastUpdated().getUpperBoundSqlOperator()),
-                BeneficiaryCoverage.class)
+                      """
+            .stripIndent();
+
+    var query =
+        entityManager
+            .createQuery(coverageQuery, BeneficiaryCoverage.class)
             .setParameter("lowerBound", criteria.lastUpdated().getLowerBoundDateTime().orElse(null))
             .setParameter("upperBound", criteria.lastUpdated().getUpperBoundDateTime().orElse(null))
+            .setParameter("lowerBoundInclusive", lowerBoundInclusive)
+            .setParameter("upperBoundInclusive", upperBoundInclusive)
             .setParameter("today", benefitDate)
             .setParameter("beneSk", criteria.beneSk());
 
