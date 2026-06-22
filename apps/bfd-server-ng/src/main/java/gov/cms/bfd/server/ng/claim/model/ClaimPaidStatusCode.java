@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +46,15 @@ public enum ClaimPaidStatusCode {
   private final ExplanationOfBenefit.RemittanceOutcome outcome;
 
   /**
+   * Gets the mapped FHIR RemittanceOutcome directly from the enum instance.
+   *
+   * @return the remittance outcome
+   */
+  public ExplanationOfBenefit.RemittanceOutcome getRemittanceOutcome() {
+    return this.outcome;
+  }
+
+  /**
    * Convert from a database code.
    *
    * @param code database code
@@ -56,5 +66,37 @@ public enum ClaimPaidStatusCode {
     }
 
     return Arrays.stream(values()).filter(v -> v.code.equals(code.trim())).findFirst();
+  }
+
+  /**
+   * Gets all claim paid status codes that map to the provided remittance outcome.
+   *
+   * @param outcome the remittance outcome
+   * @return claim paid status codes for the outcome
+   */
+  public static List<ClaimPaidStatusCode> findByOutcome(
+      ExplanationOfBenefit.RemittanceOutcome outcome) {
+    if (outcome == null) {
+      return List.of();
+    }
+
+    return Arrays.stream(values())
+        .filter(statusCode -> outcome.equals(statusCode.getRemittanceOutcome()))
+        .toList();
+  }
+
+  /**
+   * Safely resolves the remittance outcome from a status code, defaulting to PARTIAL if the status
+   * code or its mapped outcome is null.
+   *
+   * @param statusCode the status code to evaluate
+   * @return the resolved FHIR RemittanceOutcome
+   */
+  public static ExplanationOfBenefit.RemittanceOutcome resolveOutcome(
+      ClaimPaidStatusCode statusCode) {
+    if (statusCode != null && statusCode.getRemittanceOutcome() != null) {
+      return statusCode.getRemittanceOutcome();
+    }
+    return ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
   }
 }

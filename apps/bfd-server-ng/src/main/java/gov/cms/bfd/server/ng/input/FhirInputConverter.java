@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
  * Provides utility methods for converting FHIR input types to another type more suited for use in
  * the API.
  */
+@Slf4j
 public class FhirInputConverter {
   private static final Set<String> SUPPORTED_SYSTEM_TYPES =
       Set.of(
@@ -468,6 +470,10 @@ public class FhirInputConverter {
    */
   public static List<List<ExplanationOfBenefit.RemittanceOutcome>> parseOutcomeParameter(
       @Nullable TokenAndListParam outcomeParam) {
+    if (outcomeParam == null) {
+      return List.of();
+    }
+
     return FhirTokenParameterParser.parse(outcomeParam, token -> List.of(parseOutcomeToken(token)));
   }
 
@@ -488,7 +494,8 @@ public class FhirInputConverter {
       }
 
       return parsedOutcome;
-    } catch (FHIRException _) {
+    } catch (FHIRException e) {
+      log.warn("Failed to parse FHIR outcome", e);
       throw new InvalidRequestException(
           "Unknown outcome. Supported outcomes are: complete, partial, queued, error.");
     }

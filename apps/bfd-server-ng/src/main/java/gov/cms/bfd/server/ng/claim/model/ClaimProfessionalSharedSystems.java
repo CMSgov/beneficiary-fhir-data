@@ -2,8 +2,10 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -61,7 +63,13 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   private SortedSet<ClaimItemProfessionalSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
-  private String claimPaidStatusCode;
+  @Convert(converter = ClaimPaidStatusCodeConverter.class)
+  private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Override
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.ofNullable(claimPaidStatusCode);
+  }
 
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
@@ -122,34 +130,6 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
     otherProviderHistory
         .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
-  }
-
-  /**
-   * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail
-   * logic. "I", "S", and "T" are included to document the mapping, even though the default case
-   * also handles them.
-   */
-  @Override
-  protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
-    if (claimPaidStatusCode != null) {
-      var statusCode = ClaimPaidStatusCode.tryFromCode(claimPaidStatusCode).orElse(null);
-      if (statusCode != null) {
-        switch (statusCode) {
-          case P, NUM_1, R, NUM_2, D, Y:
-            outcome = ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
-            break;
-          case EMPTY, I, S, T:
-            outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
-            break;
-          default:
-            outcome = ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
-            break;
-        }
-      }
-    }
-
-    eob.setOutcome(outcome);
   }
 
   @Override

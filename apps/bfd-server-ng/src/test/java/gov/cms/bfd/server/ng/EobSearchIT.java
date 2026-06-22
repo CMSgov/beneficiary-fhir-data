@@ -88,7 +88,8 @@ class EobSearchIT extends IntegrationTestBase {
     assertEquals(expectedCount, eobs.size(), scenarioName);
 
     assertTrue(
-        eobs.stream().allMatch(eob -> outcome.equals(eob.getOutcome().toCode())),
+        eobs.stream()
+            .allMatch(eob -> eob.hasOutcome() && outcome.equals(eob.getOutcome().toCode())),
         "All returned EOBs should have outcome " + outcome);
   }
 
@@ -678,6 +679,76 @@ class EobSearchIT extends IntegrationTestBase {
     }
   }
 
+  	static Stream<Arguments> provideSourceOutcomeScenarios() {
+		return Stream.of(SearchStyleEnum.values())
+			.flatMap(
+				searchStyle ->
+				Stream.of(MetaSourceSk.NCH.getDisplay(), MetaSourceSk.DDPS.getDisplay())
+					.flatMap(
+						source ->
+						Stream.of(
+							OUTCOME_COMPLETE,
+							OUTCOME_PARTIAL,
+							OUTCOME_QUEUED,
+							OUTCOME_ERROR)
+							.map(
+								outcome ->
+								Arguments.of(
+									source + "_" + outcome,
+									source,
+									outcome,
+									searchStyle))));
+	}
+
+  @ParameterizedTest
+  @MethodSource("provideSourceOutcomeScenarios")
+  void eobSearchBySourceAndOutcome(
+      String scenarioName, String source, String outcome, SearchStyleEnum searchStyle) {
+
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var sourceParam = new TokenClientParam(Constants.PARAM_SOURCE).exactly().code(source);
+    var outcomeParam = new TokenClientParam(OUTCOME).exactly().identifier(outcome);
+
+    var sourceOnlyBundle =
+        searchBundle().where(patientParam).and(sourceParam).usingStyle(searchStyle).execute();
+
+    var sourceOnlyEobs = getEobFromBundle(sourceOnlyBundle);
+
+    assertFalse(sourceOnlyEobs.isEmpty(), "Precondition failed for source " + source);
+
+    var expectedCount =
+        (int)
+            sourceOnlyEobs.stream()
+                .filter(
+                    eob -> eob.hasOutcome() && outcome.equalsIgnoreCase(eob.getOutcome().toCode()))
+                .count();
+
+    var sourceAndOutcomeBundle =
+        searchBundle()
+            .where(patientParam)
+            .and(sourceParam)
+            .and(outcomeParam)
+            .usingStyle(searchStyle)
+            .execute();
+
+    var sourceAndOutcomeEobs = getEobFromBundle(sourceAndOutcomeBundle);
+
+    assertEquals(
+        expectedCount,
+        sourceAndOutcomeEobs.size(),
+        "Should find matching EOBs for scenario " + scenarioName);
+
+    assertTrue(
+        sourceAndOutcomeEobs.stream()
+            .allMatch(
+                eob -> eob.hasOutcome() && outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
+        "All returned EOBs should have outcome " + outcome);
+  }
+
   public static Stream<Arguments> provideOutcomeScenarios() {
     return Stream.of(SearchStyleEnum.values())
         .flatMap(
@@ -712,7 +783,11 @@ class EobSearchIT extends IntegrationTestBase {
       assertFalse(eobs.isEmpty(), "Should find EOBs for outcome " + scenarioName);
 
       assertTrue(
-          eobs.stream().allMatch(eob -> outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
+          eobs.stream()
+              .allMatch(
+                  eob ->
+                      eob.getOutcome() != null
+                          && outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
           "All returned EOBs should have outcome " + scenarioName);
     } else {
       assertEquals(0, eobs.size(), scenarioName + " should have no hits");
@@ -741,6 +816,9 @@ class EobSearchIT extends IntegrationTestBase {
         eobs.stream()
             .allMatch(
                 eob -> {
+                  if (eob.getOutcome() == null) {
+                    return false;
+                  }
                   var outcome = eob.getOutcome().toCode();
                   return OUTCOME_COMPLETE.equals(outcome) || OUTCOME_PARTIAL.equals(outcome);
                 }),

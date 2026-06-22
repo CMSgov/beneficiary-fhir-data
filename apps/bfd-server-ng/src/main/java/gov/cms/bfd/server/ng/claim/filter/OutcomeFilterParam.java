@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes)
     implements DbFilterBuilder {
-  private static final List<String> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
-      List.of("P", "1", "R", "2", "D", "Y");
+  private static final List<ClaimPaidStatusCode> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
+      ClaimPaidStatusCode.findByOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
 
   @NotNull
   @Override
@@ -48,45 +49,47 @@ public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcom
       SystemType systemType,
       List<ExplanationOfBenefit.RemittanceOutcome> orList,
       int index) {
-    if (systemType == SystemType.NCH || systemType == SystemType.DDPS) {
-      if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)) {
-        return DbFilter.empty();
+
+    switch (systemType) {
+      case NCH, DDPS -> {
+        if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)) {
+          return DbFilter.empty();
+        }
+        return noMatchesFilter();
       }
+      case SS -> {
+        var clauses = new ArrayList<String>();
+        var params = new ArrayList<DbFilterParam>();
 
-      return noMatchesFilter();
+        if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)) {
+          var paramName = "completeOutcomeStatuses_" + index;
+          clauses.add(tableAlias + ".claimPaidStatusCode IN :" + paramName);
+          params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
+        }
+
+        if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.PARTIAL)) {
+          var paramName = "completeOutcomeStatusesForPartial_" + index;
+          clauses.add(
+              "("
+                  + tableAlias
+                  + ".claimPaidStatusCode IS NULL OR "
+                  + tableAlias
+                  + ".claimPaidStatusCode NOT IN :"
+                  + paramName
+                  + ")");
+          params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
+        }
+
+        if (clauses.isEmpty()) {
+          return noMatchesFilter();
+        }
+
+        return new DbFilter(" AND (" + String.join(" OR ", clauses) + ")", params);
+      }
+      default -> {
+        return noMatchesFilter();
+      }
     }
-
-    if (systemType != SystemType.SS) {
-      return noMatchesFilter();
-    }
-
-    var clauses = new ArrayList<String>();
-    var params = new ArrayList<DbFilterParam>();
-
-    if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)) {
-      var paramName = "completeOutcomeStatuses_" + index;
-      clauses.add(tableAlias + ".claimPaidStatusCode IN :" + paramName);
-      params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
-    }
-
-    if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.PARTIAL)) {
-      var paramName = "completeOutcomeStatusesForPartial_" + index;
-      clauses.add(
-          "("
-              + tableAlias
-              + ".claimPaidStatusCode IS NULL OR "
-              + tableAlias
-              + ".claimPaidStatusCode NOT IN :"
-              + paramName
-              + ")");
-      params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
-    }
-
-    if (clauses.isEmpty()) {
-      return noMatchesFilter();
-    }
-
-    return new DbFilter(" AND (" + String.join(" OR ", clauses) + ")", params);
   }
 
   private static DbFilter noMatchesFilter() {
@@ -101,12 +104,12 @@ public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcom
 
     var requestedOutcomes = outcomes.stream().flatMap(List::stream).toList();
 
-    if (systemType == SystemType.NCH || systemType == SystemType.DDPS) {
-      return requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
-    }
-
-    return systemType == SystemType.SS
-        && (requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)
-            || requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
+    return switch (systemType) {
+      case NCH, DDPS -> requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
+      case SS ->
+          requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)
+              || requestedOutcomes.contains(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+      default -> false;
+    };
   }
 }
