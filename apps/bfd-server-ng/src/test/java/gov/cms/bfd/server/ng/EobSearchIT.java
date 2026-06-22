@@ -679,26 +679,26 @@ class EobSearchIT extends IntegrationTestBase {
     }
   }
 
-  	static Stream<Arguments> provideSourceOutcomeScenarios() {
-		return Stream.of(SearchStyleEnum.values())
-			.flatMap(
-				searchStyle ->
-				Stream.of(MetaSourceSk.NCH.getDisplay(), MetaSourceSk.DDPS.getDisplay())
-					.flatMap(
-						source ->
-						Stream.of(
-							OUTCOME_COMPLETE,
-							OUTCOME_PARTIAL,
-							OUTCOME_QUEUED,
-							OUTCOME_ERROR)
-							.map(
-								outcome ->
-								Arguments.of(
-									source + "_" + outcome,
-									source,
-									outcome,
-									searchStyle))));
-	}
+  static Stream<Arguments> provideSourceOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(MetaSourceSk.NCH.getDisplay(), MetaSourceSk.DDPS.getDisplay())
+                    .flatMap(
+                        source ->
+                            Stream.of(
+                                    OUTCOME_COMPLETE,
+                                    OUTCOME_PARTIAL,
+                                    OUTCOME_QUEUED,
+                                    OUTCOME_ERROR)
+                                .map(
+                                    outcome ->
+                                        Arguments.of(
+                                            source + "_" + outcome,
+                                            source,
+                                            outcome,
+                                            searchStyle))));
+  }
 
   @ParameterizedTest
   @MethodSource("provideSourceOutcomeScenarios")
