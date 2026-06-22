@@ -1,19 +1,39 @@
 import logging
-import queue
-from logging.handlers import QueueHandler, QueueListener
-from os import getenv
-from typing import Any
+import os
+import sys
+
+from loguru import logger
+
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame and frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def configure_logger() -> None:
-    # logging should only be configured once per process
-    if len(logging.root.handlers) > 0:
-        return
-    log_queue: queue.Queue[Any] = queue.Queue()
-    queue_handler = QueueHandler(log_queue)
-    console_handler = logging.StreamHandler()
-    queue_listener = QueueListener(log_queue, console_handler)
-    queue_listener.start()
-    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-    console_handler.setFormatter(formatter)
-    logging.basicConfig(level=getenv("IDR_LOG_LEVEL", "INFO").upper(), handlers=[queue_handler])
+    # Loguru requires that there be a single Logger configured at the very beginning of the
+    # program. That Logger is then inherited by all processes such that each process has the same
+    # configuration and "sink"
+
+    # This line intercepts all logs from the standard logging module for compatibility with Loguru
+    logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
+
+    logger.remove()
+    logger.add(
+        sink=sys.stderr,
+        level=os.getenv("IDR_LOG_LEVEL", "INFO").upper(),
+        enqueue=True,  # Ensures non-blocking and async+multiprocessing-safe
+        diagnose=False,  # Ensures local variables are not logged for exceptions
+    )

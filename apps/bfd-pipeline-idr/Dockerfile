@@ -5,7 +5,8 @@ ARG base_version=latest
 FROM bfd-platform-base-python:${base_version} AS groupadd
 
 # "shadow-utils" provides groupadd/useradd
-RUN dnf -y install shadow-utils && \
+# TODO: Remove git when loguru is no longer installed from GitHub directly
+RUN dnf -y install shadow-utils git && \
   dnf -y clean all && \
   rm -rf /var/cache
 
