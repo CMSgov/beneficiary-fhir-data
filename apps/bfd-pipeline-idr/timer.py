@@ -1,10 +1,9 @@
-import logging
 import time
+
+from loguru import logger
 
 from load_partition import LoadPartition
 from model.base_model import T
-
-logger = logging.getLogger(__name__)
 
 
 class Timer:
@@ -20,5 +19,5 @@ class Timer:
     def stop(self) -> None:
         segment = time.perf_counter() - self.perf_start
         logger.info(
-            "%s-%s %s: %.6f seconds", self.model.table(), self.partition.name, self.name, segment
+            "{}-{} {}: {:.6f} seconds", self.model.table(), self.partition.name, self.name, segment
         )

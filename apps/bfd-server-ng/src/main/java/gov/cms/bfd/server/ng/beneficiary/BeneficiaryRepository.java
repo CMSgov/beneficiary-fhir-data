@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
-import static gov.cms.bfd.server.ng.util.MetricTimer.PATIENT_MATCH_OUTCOME;
+import static gov.cms.bfd.server.ng.util.MetricRecorder.PATIENT_MATCH_OUTCOME;
 
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
@@ -9,11 +9,9 @@ import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
-import gov.cms.bfd.server.ng.util.MetricTimer;
+import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -32,8 +30,7 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
   @PersistenceContext private EntityManager entityManager;
-  private final MeterRegistry meterRegistry;
-  private final MetricTimer metricTimer;
+  private final MetricRecorder metricRecorder;
   private final QueryTelemetryUtil queryTelemetryUtil;
 
   private static final String PATIENT_MATCH_TYPE = "exact";
@@ -162,7 +159,7 @@ public class BeneficiaryRepository {
                     """;
 
     var result =
-        metricTimer.recordMetric(
+        metricRecorder.recordMetric(
             "application.beneficiary.patient_match.outcome",
             () -> {
               var combinationResults = new ArrayList<MatchCombinationResult>();
@@ -210,10 +207,12 @@ public class BeneficiaryRepository {
                     PATIENT_MATCH_OUTCOME,
                     r.matchedBeneficiary().isPresent() ? "match" : "no_match"));
 
-    DistributionSummary.builder("application.beneficiary.patient_match.scenarios_attempted")
-        .tag(PATIENT_MATCH_OUTCOME, result.matchedBeneficiary().isPresent() ? "match" : "no_match")
-        .register(meterRegistry)
-        .record(result.combinations().size());
+    metricRecorder.recordDistribution(
+        "application.beneficiary.patient_match.scenarios_attempted",
+        result.combinations().size(),
+        PATIENT_MATCH_OUTCOME,
+        result.matchedBeneficiary().isPresent() ? "match" : "no_match");
+
     return result;
   }
 }

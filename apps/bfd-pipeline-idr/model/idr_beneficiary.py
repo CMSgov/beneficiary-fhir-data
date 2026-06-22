@@ -1,9 +1,9 @@
-import logging
 import re
 import string
 from datetime import date, datetime
 from typing import Annotated, override
 
+from loguru import logger
 from pydantic import BeforeValidator, computed_field
 from unidecode import unidecode
 
@@ -33,8 +33,6 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def _normalize_str(s: str) -> str:
@@ -151,7 +149,7 @@ class IdrBeneficiary(IdrBaseModel):
             ).replace("\n", " ")
         except Exception:
             # Not logging exception since it could contain address
-            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
+            logger.warning("error normalizing address. bene_sk: {}", self.bene_sk)
             return ""
 
     @override
