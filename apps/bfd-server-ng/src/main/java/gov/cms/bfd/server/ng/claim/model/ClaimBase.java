@@ -169,7 +169,7 @@ public abstract class ClaimBase {
     // status codes are resolved as PARTIAL to match the outcome search filter behavior.
     if (this instanceof ClaimInstitutionalSharedSystems
         || this instanceof ClaimProfessionalSharedSystems) {
-      eob.setOutcome(ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode().orElse(null)));
+      ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
     }
   }
 }

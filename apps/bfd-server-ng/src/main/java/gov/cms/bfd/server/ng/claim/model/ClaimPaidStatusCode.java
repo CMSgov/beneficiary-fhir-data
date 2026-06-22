@@ -46,15 +46,6 @@ public enum ClaimPaidStatusCode {
   private final ExplanationOfBenefit.RemittanceOutcome outcome;
 
   /**
-   * Gets the mapped FHIR RemittanceOutcome directly from the enum instance.
-   *
-   * @return the remittance outcome
-   */
-  public ExplanationOfBenefit.RemittanceOutcome getRemittanceOutcome() {
-    return this.outcome;
-  }
-
-  /**
    * Convert from a database code.
    *
    * @param code database code
@@ -76,27 +67,22 @@ public enum ClaimPaidStatusCode {
    */
   public static List<ClaimPaidStatusCode> findByOutcome(
       ExplanationOfBenefit.RemittanceOutcome outcome) {
-    if (outcome == null) {
-      return List.of();
-    }
-
     return Arrays.stream(values())
-        .filter(statusCode -> outcome.equals(statusCode.getRemittanceOutcome()))
+        .filter(statusCode -> outcome.equals(statusCode.getOutcome()))
         .toList();
   }
 
   /**
    * Safely resolves the remittance outcome from a status code, defaulting to PARTIAL if the status
-   * code or its mapped outcome is null.
+   * code or its mapped outcome is empty.
    *
    * @param statusCode the status code to evaluate
    * @return the resolved FHIR RemittanceOutcome
    */
-  public static ExplanationOfBenefit.RemittanceOutcome resolveOutcome(
-      ClaimPaidStatusCode statusCode) {
-    if (statusCode != null && statusCode.getRemittanceOutcome() != null) {
-      return statusCode.getRemittanceOutcome();
-    }
-    return ExplanationOfBenefit.RemittanceOutcome.PARTIAL;
+  public static Optional<ExplanationOfBenefit.RemittanceOutcome> resolveOutcome(
+      Optional<ClaimPaidStatusCode> statusCode) {
+    return statusCode
+        .map(ClaimPaidStatusCode::getOutcome)
+        .or(() -> Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
   }
 }

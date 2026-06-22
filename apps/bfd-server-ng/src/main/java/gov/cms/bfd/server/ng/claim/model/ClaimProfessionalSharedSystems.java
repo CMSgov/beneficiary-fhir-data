@@ -64,11 +64,11 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
-  private ClaimPaidStatusCode claimPaidStatusCode;
+  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
 
   @Override
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
-    return Optional.ofNullable(claimPaidStatusCode);
+    return claimPaidStatusCode;
   }
 
   /**

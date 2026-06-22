@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes)
     implements DbFilterBuilder {
-  private static final List<ClaimPaidStatusCode> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
-      ClaimPaidStatusCode.findByOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
+  private static final List<Optional<ClaimPaidStatusCode>> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
+      ClaimPaidStatusCode.findByOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE).stream()
+          .map(Optional::of)
+          .toList();
 
   @NotNull
   @Override
@@ -62,21 +65,17 @@ public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcom
         var params = new ArrayList<DbFilterParam>();
 
         if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.COMPLETE)) {
-          var paramName = "completeOutcomeStatuses_" + index;
-          clauses.add(tableAlias + ".claimPaidStatusCode IN :" + paramName);
+          var paramName = String.format("completeOutcomeStatuses_%d", index);
+          clauses.add(String.format("%s.claimPaidStatusCode IN :%s", tableAlias, paramName));
           params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
         }
 
         if (orList.contains(ExplanationOfBenefit.RemittanceOutcome.PARTIAL)) {
-          var paramName = "completeOutcomeStatusesForPartial_" + index;
+          var paramName = String.format("completeOutcomeStatusesForPartial_%d", index);
           clauses.add(
-              "("
-                  + tableAlias
-                  + ".claimPaidStatusCode IS NULL OR "
-                  + tableAlias
-                  + ".claimPaidStatusCode NOT IN :"
-                  + paramName
-                  + ")");
+              String.format(
+                  "(%s.claimPaidStatusCode IS NULL OR %s.claimPaidStatusCode NOT IN :%s)",
+                  tableAlias, tableAlias, paramName));
           params.add(new DbFilterParam(paramName, COMPLETE_SHARED_SYSTEMS_STATUS_CODES));
         }
 
@@ -84,7 +83,7 @@ public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcom
           return noMatchesFilter();
         }
 
-        return new DbFilter(" AND (" + String.join(" OR ", clauses) + ")", params);
+        return new DbFilter(String.format(" AND (%s)", String.join(" OR ", clauses)), params);
       }
       default -> {
         return noMatchesFilter();
