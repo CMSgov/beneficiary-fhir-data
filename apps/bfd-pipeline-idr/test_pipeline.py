@@ -71,7 +71,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    if load_type == LoadType.INITIAL and enable_prior_auth_ingestion():
+    if enable_prior_auth_ingestion():
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
         assert cur.rowcount == 64
         rows = cur.fetchmany(1)
@@ -549,6 +549,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
+    os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
 
 
 @pytest.fixture(scope="module")
@@ -564,7 +565,6 @@ def _test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> N
         sample_dir = Path(__file__).parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
         _setup_pipeline_environment(conn.info)
-        os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
         _do_test_pipeline(cast(Connection[DictRow], conn), LoadType.INITIAL)
 
 

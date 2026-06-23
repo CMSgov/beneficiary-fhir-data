@@ -4,9 +4,7 @@ from typing import Annotated, override
 from dateutil.relativedelta import relativedelta
 from pydantic import BeforeValidator
 
-from constants import (
-    IDR_PRIOR_AUTH_TABLE,
-)
+from constants import IDR_PRIOR_AUTH_TABLE, PRIOR_AUTH_LOOKBACK_YEARS
 from load_partition import LoadPartition
 from model.base_model import (
     BATCH_TIMESTAMP,
@@ -83,7 +81,7 @@ class IdrPriorAuth(IdrBaseModel):
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # Prior auth data older than 2 years should be filtered
-        prior_auth_cutoff_date = start_time - relativedelta(years=2)
+        prior_auth_cutoff_date = start_time - relativedelta(years=PRIOR_AUTH_LOOKBACK_YEARS)
         start_time_sql = prior_auth_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
 
         return f"""

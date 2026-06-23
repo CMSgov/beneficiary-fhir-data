@@ -112,8 +112,8 @@ class StagedIdrPipeline:
         tables = [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
         if self.load_type == LoadType.INITIAL:
             tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
-            if enable_prior_auth_ingestion():
-                tables.append(*_PRIOR_AUTH_TABLES)
+        if enable_prior_auth_ingestion():
+            tables.append(*_PRIOR_AUTH_TABLES)
 
         filtered_tables = self._filter_tables(tables)
 

@@ -51,9 +51,6 @@ class CsvFile:
     def cols_str(self) -> str:
         return ",".join(self.cols)
 
-    def full_table(self) -> str:
-        return f"{self.table}"
-
 
 # TODO: UP046 seems to cause issues with pyright
 class Extractor(ABC, Generic[T]):  # noqa: UP046
@@ -273,7 +270,7 @@ class PostgresExecutor(DbExecutor):
                 return
 
             with cur.copy(
-                f"COPY {file.full_table()} ({file.cols_str()}) FROM STDIN"  # type: ignore
+                f"COPY {file.table} ({file.cols_str()}) FROM STDIN"  # type: ignore
             ) as copy:
                 for row in reader:
                     copy.write_row([row[c] or None for c in file.cols])
@@ -380,7 +377,7 @@ class SnowflakeExecutor(DbExecutor):
         self.session.sql("create or replace temp stage source_stage").collect()
         self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
         self.session.sql(f"""COPY INTO
-                            {file.full_table()}
+                            {file.table}
                             FROM @source_stage/{file.csv_file.name}
                             FILE_FORMAT = (
                                 TYPE = 'CSV',
