@@ -328,7 +328,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                     FROM claim_procedures
                 )
                 SELECT {{COLUMNS}}
-                FROM claims {clm}
+                FROM claims {clm} {{TABLESAMPLE}}
                 JOIN claim_groups {clm_grp}
                     ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_lines {line}
@@ -366,4 +366,5 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
+                {{LIMIT}}
         """

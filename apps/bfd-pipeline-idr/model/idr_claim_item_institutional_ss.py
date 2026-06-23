@@ -446,7 +446,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     FROM claim_vals
                 )
                 SELECT {{COLUMNS}}
-                FROM claims {clm}
+                FROM claims {clm} {{TABLESAMPLE}}
                 JOIN claim_groups {clm_grp}
                     ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_lines {line}
@@ -496,4 +496,5 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_fiss_bnft_flattened}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
+                {{LIMIT}}
         """

@@ -515,7 +515,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
             claim_related_conditions AS {not_materialized}
                 ({claim_related_conditions_cte(source)})
             SELECT {{COLUMNS}}
-            FROM claims c
+            FROM claims c {{TABLESAMPLE}}
             JOIN {IDR_CLAIM_TABLE} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
@@ -575,4 +575,5 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
             {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
+            {{LIMIT}}
         """

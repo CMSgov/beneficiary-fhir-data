@@ -282,6 +282,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         return f"""
                 WITH claim_base AS (
                     {clm_base_query(start_time, partition, cls.model_type())}
+                    {{LIMIT}}
                 ),
                 claims as (
                     {clm_query()}
@@ -295,6 +296,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     {clm_child_query(IDR_CLAIM_LINE_INSTITUTIONAL_TABLE)}
                     UNION
                     {clm_ansi_sgntr_query()}
+                    {{LIMIT}}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -303,12 +305,13 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                             PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {line}.clm_line_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_LINE_TABLE} {line}
+                    FROM {IDR_CLAIM_LINE_TABLE} {line} {{TABLESAMPLE}}
                     JOIN claims {clm}
                         ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
                         AND {line}.clm_num_sk = {clm}.clm_num_sk
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    {{LIMIT}}
                 ),
                 claim_procedures AS {not_materialized} (
                     SELECT
@@ -319,12 +322,13 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                             ORDER BY {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_PROD_TABLE} {prod}
+                    FROM {IDR_CLAIM_PROD_TABLE} {prod} {{TABLESAMPLE}}
                     JOIN claims {clm}
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    {{LIMIT}}
                 ),
                 claim_vals AS {not_materialized} (
                     SELECT
@@ -334,12 +338,13 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                             PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_VAL_TABLE} {val}
+                    FROM {IDR_CLAIM_VAL_TABLE} {val} {{TABLESAMPLE}}
                     JOIN claims {clm}
                         ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {val}.clm_type_cd = {clm}.clm_type_cd
                         AND {val}.clm_num_sk = {clm}.clm_num_sk
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    {{LIMIT}}
                 ),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
@@ -352,7 +357,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     FROM claim_vals
                 )
                 SELECT {{COLUMNS}}
-                FROM claims {clm}
+                FROM claims {clm} {{TABLESAMPLE}}
                 JOIN claim_groups {clm_grp}
                     ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_lines {line}
@@ -386,4 +391,5 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
+                {{LIMIT}}
         """

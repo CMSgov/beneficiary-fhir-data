@@ -288,7 +288,7 @@ class IdrClaimRx(IdrBaseModel):
                 FROM {IDR_CONTRACT_PBP_NUM_TABLE}
             )
             SELECT {{COLUMNS}}
-            FROM claims c
+            FROM claims c {{TABLESAMPLE}}
             JOIN {IDR_CLAIM_TABLE} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
@@ -318,4 +318,5 @@ class IdrClaimRx(IdrBaseModel):
                 AND {pbp_num}.contract_version_rank = 1
             {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
+            {{LIMIT}}
         """

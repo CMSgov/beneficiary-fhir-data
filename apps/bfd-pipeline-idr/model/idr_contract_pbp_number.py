@@ -61,8 +61,9 @@ class IdrContractPbpNumber(IdrBaseModel):
             )
             SELECT
                 {{COLUMNS}}
-            FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
+            FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num} {{TABLESAMPLE}}
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
             WHERE {pbp_num}.cntrct_pbp_sk != 0
+            {{LIMIT}}
             """
