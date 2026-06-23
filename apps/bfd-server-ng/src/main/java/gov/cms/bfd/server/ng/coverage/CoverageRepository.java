@@ -25,7 +25,7 @@ public class CoverageRepository {
   @PersistenceContext private EntityManager entityManager;
   private final DateUtil dateUtil;
   private final QueryTelemetryUtil queryTelemetryUtil;
-  private final MetricRecorder metricTimer;
+  private final MetricRecorder metricRecorder;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -140,7 +140,7 @@ public class CoverageRepository {
             .setParameter("today", benefitDate)
             .setParameter("beneSk", criteria.beneSk());
 
-    return metricTimer.recordMetric(
+    return metricRecorder.recordMetric(
         "application.coverage.search_by_bene",
         () ->
             queryTelemetryUtil.executeAndTrack("searchBeneficiaryWithCoverage", query).stream()
