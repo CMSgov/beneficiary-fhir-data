@@ -1,0 +1,88 @@
+###############################################################################
+# BFD Local Development Stack
+#
+# Usage:
+#   make build   - Build the Java apps and Docker images
+#   make run     - Start PostgreSQL, run migrations, load 10K synth data, start server
+#   make stop    - Tear down all containers
+#   make clean   - Remove containers, volumes, and images
+#
+# The BFD server will be available at: http://localhost:8080
+# PostgreSQL is exposed on: localhost:5432 (user: bfd / password: InsecureLocalDev)
+###############################################################################
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bfd-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: fhirdb
+      POSTGRES_USER: bfd
+      POSTGRES_PASSWORD: InsecureLocalDev
+    volumes:
+      - bfd-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bfd -d fhirdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  migrator:
+    build:
+      context: ..
+      dockerfile: local/Dockerfile.migrator
+    container_name: bfd-migrator
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - -url=jdbc:postgresql://db:5432/fhirdb
+      - -user=bfd
+      - -password=InsecureLocalDev
+      - migrate
+
+  data-loader:
+    build:
+      context: ..
+      dockerfile: local/Dockerfile.data-loader
+    container_name: bfd-data-loader
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/fhirdb
+      DB_USER: bfd
+      DB_PASSWORD: InsecureLocalDev
+
+  server:
+    build:
+      context: ..
+      dockerfile: local/Dockerfile.server
+    container_name: bfd-server
+    depends_on:
+      data-loader:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      BFD_LOCAL_DB_HOST: db
+      BFD_SENSITIVE_DB_USERNAME: bfd
+      BFD_SENSITIVE_DB_PASSWORD: InsecureLocalDev
+      AWS_REGION: us-east-1
+      SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY: "000000000042"
+      SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY: "LSIAQAAAAAAVNCBMPNSG"
+      SPRING_CONFIG_IMPORT: ""
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/metrics || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+
+volumes:
+  bfd-db-data:
+

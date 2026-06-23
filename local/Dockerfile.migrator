@@ -1,0 +1,7 @@
+FROM docker.io/flyway/flyway:10.15.0
+
+COPY apps/bfd-model/bfd-model-rif/src/main/resources/db/migration /flyway/sql
+COPY local/flyway.conf /flyway/conf/flyway.conf
+
+ENTRYPOINT ["flyway"]
+CMD ["migrate"]

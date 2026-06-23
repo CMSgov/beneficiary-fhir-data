@@ -1,0 +1,16 @@
+FROM amazoncorretto:25-alpine
+
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy the Spring Boot executable jar
+COPY apps/bfd-server-ng/target/bfd-server-ng-*-SNAPSHOT.jar /app/bfd-server-ng.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", \
+  "-Duser.timezone=UTC", \
+  "-Dserver.port=8080", \
+  "-jar", "/app/bfd-server-ng.jar" \
+  ]
