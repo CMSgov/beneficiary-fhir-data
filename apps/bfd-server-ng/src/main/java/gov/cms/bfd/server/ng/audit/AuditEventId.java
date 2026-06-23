@@ -56,17 +56,13 @@ public record AuditEventId(Long beneId, String timestampToken) {
    * @return id object
    */
   public static AuditEventId parse(String id) {
-    var isNegative = id.startsWith("-");
-    if (isNegative) {
-      id = id.replaceFirst("-", "");
-    }
-    var split = id.split("-", 2);
-    if (split.length != 2) {
+    var lastIndex = id.lastIndexOf("-");
+    if (lastIndex == -1) {
       throw new IllegalArgumentException("Invalid AuditEvent id format");
     }
 
-    var beneId = Long.parseLong(isNegative ? "-" + split[0] : split[0]);
-    var token = split[1];
+    var beneId = Long.parseLong(id.substring(0, lastIndex));
+    var token = id.substring(lastIndex + 1);
     validateTimestampToken(token);
     return new AuditEventId(beneId, token);
   }
@@ -78,15 +74,22 @@ public record AuditEventId(Long beneId, String timestampToken) {
     }
   }
 
+  private static Integer parseNextChars(StringBuffer buffer, int numChars) {
+    var res = Integer.parseInt(buffer.substring(0, numChars));
+    buffer.delete(0, numChars);
+    return res;
+  }
+
   private static Instant parseTimestampTokenToInstant(String timestampToken) {
     try {
-      var year = Integer.parseInt(timestampToken.substring(0, 4));
-      var month = Integer.parseInt(timestampToken.substring(4, 6));
-      var day = Integer.parseInt(timestampToken.substring(6, 8));
-      var hour = Integer.parseInt(timestampToken.substring(8, 10));
-      var minute = Integer.parseInt(timestampToken.substring(10, 12));
-      var second = Integer.parseInt(timestampToken.substring(12, 14));
-      var nanos = Integer.parseInt(timestampToken.substring(14, 23));
+      var buffer = new StringBuffer(timestampToken);
+      var year = parseNextChars(buffer, 4);
+      var month = parseNextChars(buffer, 2);
+      var day = parseNextChars(buffer, 2);
+      var hour = parseNextChars(buffer, 2);
+      var minute = parseNextChars(buffer, 2);
+      var second = parseNextChars(buffer, 2);
+      var nanos = parseNextChars(buffer, 9);
       var localDateTime = LocalDateTime.of(year, month, day, hour, minute, second, nanos);
       return localDateTime.toInstant(ZoneOffset.UTC);
     } catch (RuntimeException e) {

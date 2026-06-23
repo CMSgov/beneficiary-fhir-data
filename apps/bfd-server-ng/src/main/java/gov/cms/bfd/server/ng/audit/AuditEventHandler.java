@@ -56,6 +56,8 @@ public class AuditEventHandler {
     return bundle;
   }
 
+  // we are doing this here rather than in the fhir until because how to determine next is different
+  // in dynamoDb
   private void applyLinks(Bundle bundle, RequestDetails requestDetails, Integer limit) {
     // check if a link is needed
     if (bundle.getEntry().size() > limit) {
@@ -68,8 +70,9 @@ public class AuditEventHandler {
           .setRelation(Constants.LINK_NEXT)
           .setUrl(
               buildLinkURL(requestDetails, bundle.getEntry().getLast().getResource().getIdPart()));
+      // we need to reset the total if we do a concat on the list
+      bundle.setTotal(bundle.getEntry().size());
     }
-    bundle.setTotal(bundle.getEntry().size());
   }
 
   private static String buildLinkURL(RequestDetails requestDetails, String lastIndex) {

@@ -191,7 +191,7 @@ public class FhirUtil {
     // if we do not have a request we cannot build the links
     requestDetails.ifPresent(
         details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit));
-
+    bundle.setTotal(bundle.getEntry().size());
     return bundle;
   }
 

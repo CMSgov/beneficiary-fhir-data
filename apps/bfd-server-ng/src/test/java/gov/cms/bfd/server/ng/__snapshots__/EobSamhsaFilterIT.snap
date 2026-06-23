@@ -12593,6 +12593,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 3,
   "type" : "searchset"
 }
 ]
@@ -20864,6 +20865,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 3,
   "type" : "searchset"
 }
 ]
