@@ -66,6 +66,7 @@ locals {
       BFD_DB_PASSWORD = "/bfd/${local.env}/${local.service}/sensitive/db/password"
     } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
   }
+  idr_task_tmp_dir = "/app/.tmp"
 }
 
 resource "aws_cloudwatch_log_group" "idr_messages" {
@@ -145,6 +146,10 @@ resource "aws_ecs_task_definition" "idr" {
             value = "UTC"
           },
           {
+            name  = "TMPDIR",
+            value = local.idr_task_tmp_dir
+          },
+          {
             name  = "BFD_ENV"
             value = local.env
           },
@@ -205,6 +210,14 @@ resource "aws_ecs_task_definition" "idr" {
             {
               containerPath = "/app/.cache"
               size          = min(max(128, floor(0.025 * local.idr_memory)), 256) # Min 128 MiB/max 256 MiB
+              mountOptions = [
+                "uid=1001",
+                "gid=1001"
+              ]
+            },
+            {
+              containerPath = local.idr_task_tmp_dir
+              size          = 32 # 32 MiB
               mountOptions = [
                 "uid=1001",
                 "gid=1001"

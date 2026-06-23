@@ -9,23 +9,26 @@ dependencies = [
     "psycopg[binary,pool]>=3.3.3",
     "snowflake-connector-python>=4.4.0",
     "snowflake-snowpark-python>=1.50.0",
-    "sf-hamilton>=1.89.0",
     "python-dateutil>=2.9.0",
     "pydantic>=2.13.3",
     "usaddress>=0.5.16",
     "unidecode>=1.4.0",
     "click>=8.3.3",
     "anyio",
+    "loguru"
 ]
 
 [dependency-groups]
 dev = [
     "ruff>=0.14.6",
-    "uv>=0.9.11",
+    "uv>=0.11.15",
     "pytest>=9.0.1",
     "testcontainers>=4.13.3",
     "pyright>=1.1.407",
 ]
+
+[tool.uv.sources]
+loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }
 
 # [[tool.mypy.overrides]]
 # module = ["testcontainers.*"]

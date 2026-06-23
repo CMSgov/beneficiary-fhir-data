@@ -1,21 +1,16 @@
 package gov.cms.bfd.server.ng.eob;
 
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
@@ -38,6 +33,8 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String SERVICE_DATE = "service-date";
   private static final String START_INDEX = "startIndex";
   private static final String TYPE = "type";
+  private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
+  private static final String SOURCE_QUERY_PARAM = "_source";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -49,14 +46,25 @@ public class EobResourceProvider implements IResourceProvider {
    *
    * @param fhirId FHIR ID
    * @param request HTTP request details
+   * @param requestDetails different HTTP request details
    * @return patient
    */
   @Read
-  public ExplanationOfBenefit find(@IdParam final IdType fhirId, final HttpServletRequest request) {
-    var eob =
-        eobHandler.find(
-            FhirInputConverter.toLong(fhirId),
-            getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
+  public ExplanationOfBenefit find(
+      @IdParam final IdType fhirId,
+      final HttpServletRequest request,
+      final RequestDetails requestDetails) {
+
+    var includeTaxNumbers =
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
+    var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(samhsaFilterMode)
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .build();
+
+    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), options);
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
@@ -68,11 +76,13 @@ public class EobResourceProvider implements IResourceProvider {
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
+   * @param offset offset
    * @param tag tags to filter by
    * @param type claim type to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
    * @param request HTTP request details
+   * @param requestDetails HAPI FHIR request details
    * @return bundle
    */
   @Search
@@ -83,15 +93,25 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
+      @Offset final Integer offset,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      final HttpServletRequest request) {
+      final HttpServletRequest request,
+      final RequestDetails requestDetails) {
 
+    var includeTaxNumbers =
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
+
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(getFilterModeForRequest(request, samhsaSearchIntent))
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .build();
 
     var criteria =
         new ClaimSearchCriteria(
@@ -99,12 +119,14 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toDateTimeRange(serviceDate),
             FhirInputConverter.toDateTimeRange(lastUpdated),
             Optional.ofNullable(count),
-            FhirInputConverter.toIntOptional(startIndex),
+            // we will support both offset and startIndex for now, but they can't be used together.
+            // If both are provided, offset will take precedence
+            Optional.ofNullable(offset).or(() -> FhirInputConverter.toIntOptional(startIndex)),
             tagCriteria,
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
 
-    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
+    return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
   }
 
   /**
@@ -113,7 +135,9 @@ public class EobResourceProvider implements IResourceProvider {
    * @param fhirIds FHIR IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
+   * @param requestDetails request Details object
    * @param request HTTP request details
+   * @param source claim source to filter by
    * @return bundle
    */
   @Search
@@ -122,12 +146,27 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
-      final HttpServletRequest request) {
-    return eobHandler.searchById(
-        FhirInputConverter.toLongList(fhirIds),
-        FhirInputConverter.toDateTimeRange(serviceDate),
-        FhirInputConverter.toDateTimeRange(lastUpdated),
-        getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
+      final RequestDetails requestDetails,
+      final HttpServletRequest request,
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source) {
+
+    var includeTaxNumbers =
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
+    var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(samhsaFilterMode)
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .build();
+
+    var searchCriteria =
+        new ClaimIdSearchCriteria(
+            FhirInputConverter.toLongList(fhirIds),
+            FhirInputConverter.toDateTimeRange(serviceDate),
+            FhirInputConverter.toDateTimeRange(lastUpdated),
+            FhirInputConverter.parseSourceParameter(source));
+
+    return eobHandler.searchById(searchCriteria, options);
   }
 
   private SamhsaFilterMode getFilterModeForRequest(

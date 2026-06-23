@@ -4,7 +4,6 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
-import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Component;
 @WebFilter(filterName = "ExtractMetadataFilter")
 public class ExtractMetadataFilter implements Filter {
 
-  private final CertificateUtil certificateUtil;
   private final RequestTelemetryLogger requestTelemetryLogger;
 
   @Override
@@ -43,36 +41,12 @@ public class ExtractMetadataFilter implements Filter {
 
       requestTelemetryLogger.setRequestStartTime(httpRequest);
 
-      final var certAlias = certificateUtil.getAliasFromCert(httpRequest);
-      final var uri = httpRequest.getRequestURI();
-
-      var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
-
-      if (certAlias.isPresent()) {
-        certificateUtil.attachCertAliasToRequest(httpRequest, certAlias.get());
-        MDC.put(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certAlias.get());
-      }
-
-      var clientIp = httpRequest.getHeader(CLIENT_IP_HEADER);
-      var clientName = httpRequest.getHeader(CLIENT_NAME_HEADER);
-      var clientId = httpRequest.getHeader(CLIENT_ID_HEADER);
-
-      if (isPatientMatchRequest
-          && (Strings.isNullOrEmpty(clientIp)
-              || Strings.isNullOrEmpty(clientName)
-              || Strings.isNullOrEmpty(clientId))) {
+      if (isAnInvalidPatientMatchRequest(httpRequest)) {
         httpResponse.sendError(
             HttpServletResponse.SC_BAD_REQUEST,
             "Missing Required Headers: X-CLIENT-IP, X-CLIENT-NAME, X-CLIENT-ID");
         return;
       }
-
-      MDC.put(logKey(MDC_PREFIX, URI_KEY), uri);
-      MDC.put(logKey(MDC_PREFIX, REQUEST_ID_KEY), httpRequest.getRequestId());
-      MDC.put(logKey(MDC_PREFIX, REMOTE_ADDRESS_KEY), httpRequest.getRemoteAddr());
-      MDC.put(logKey(MDC_PREFIX, CLIENT_IP_KEY), clientIp);
-      MDC.put(logKey(MDC_PREFIX, CLIENT_NAME_KEY), clientName);
-      MDC.put(logKey(MDC_PREFIX, CLIENT_ID_KEY), clientId);
 
       requestTelemetryLogger.recordRequestHeaders(httpRequest);
     }
@@ -83,10 +57,26 @@ public class ExtractMetadataFilter implements Filter {
       if (servletRequest instanceof HttpServletRequest httpRequest
           && servletResponse instanceof HttpServletResponse httpResponse) {
         requestTelemetryLogger.recordResponse(httpRequest, httpResponse);
-        requestTelemetryLogger.logRequestComplete();
       }
       // Clean up to prevent leaks
       MDC.clear();
     }
+  }
+
+  private boolean isAnInvalidPatientMatchRequest(HttpServletRequest request) {
+    var uri = request.getRequestURI();
+    var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
+
+    if (!isPatientMatchRequest) {
+      return false;
+    }
+
+    var clientIp = request.getHeader(CLIENT_IP_HEADER);
+    var clientName = request.getHeader(CLIENT_NAME_HEADER);
+    var clientId = request.getHeader(CLIENT_ID_HEADER);
+
+    return Strings.isNullOrEmpty(clientIp)
+        || Strings.isNullOrEmpty(clientName)
+        || Strings.isNullOrEmpty(clientId);
   }
 }

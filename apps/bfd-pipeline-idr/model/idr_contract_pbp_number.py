@@ -10,7 +10,7 @@ from model.base_model import (
     ALIAS_CNTRCT_SGMT,
     ALIAS_PBP_NUM,
     BATCH_ID,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     IdrBaseModel,
     ModelType,
     Source,
@@ -19,7 +19,7 @@ from model.base_model import (
 
 
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_default_string)]
@@ -59,7 +59,7 @@ class IdrContractPbpNumber(IdrBaseModel):
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
-            SELECT 
+            SELECT
                 {{COLUMNS}}
             FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
             LEFT JOIN sgmt

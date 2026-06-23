@@ -26,7 +26,12 @@ public class MetricsConfiguration {
 
   /** List of metric names that are allowed to be published to Cloudwatch by Micrometer. */
   public static final Set<String> MICROMETER_ALLOWED_METRIC_PREFIX_NAMES =
-      Set.of("application.", "jvm.threads.virtual.", "http.server.requests.", "executor.");
+      Set.of(
+          "application.",
+          "jvm.threads.virtual.",
+          "executor.",
+          "http-requests.latency.",
+          "http-requests.count.");
 
   /**
    * Configures Micrometer to support @MeterTag annotations with SPEL expressions.
@@ -128,10 +133,12 @@ public class MetricsConfiguration {
         .config()
         .meterFilter(
             MeterFilter.denyUnless(
-                id -> {
-                  var name = id.getName();
-                  return MICROMETER_ALLOWED_METRIC_PREFIX_NAMES.stream().anyMatch(name::startsWith);
-                }));
+                id ->
+                    MICROMETER_ALLOWED_METRIC_PREFIX_NAMES.stream()
+                        .anyMatch(id.getName()::startsWith)))
+        .meterFilter(MeterFilter.denyNameStartsWith("application.started"))
+        .meterFilter(MeterFilter.denyNameStartsWith("application.ready"))
+        .meterFilter(MeterFilter.ignoreTags("class", "method", "exception", "uri"));
 
     return registry;
   }

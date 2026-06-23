@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EobReadIT extends IntegrationTestBase {
+
   @Autowired private EobResourceProvider eobResourceProvider;
   @Mock HttpServletRequest request;
 
@@ -79,6 +80,7 @@ class EobReadIT extends IntegrationTestBase {
   void eobReadProfessionalClaim() {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL)).execute();
     assertFalse(eob.isEmpty());
+    assertFalse(hasTaxNumberExtension(eob));
 
     assertTrue(
         eob.getMeta().getProfile().stream()
@@ -96,9 +98,32 @@ class EobReadIT extends IntegrationTestBase {
   }
 
   @Test
+  void eobReadProfessionalClaimIncludesTaxNumberWhenHeaderTrue() {
+    var eob =
+        eobReadWithIncludeTaxNumbersHeader("true")
+            .withId(Long.parseLong(CLAIM_ID_PROFESSIONAL))
+            .execute();
+
+    assertFalse(eob.isEmpty());
+    assertTrue(hasTaxNumberExtension(eob));
+  }
+
+  @Test
+  void eobReadProfessionalClaimDoesNotIncludeTaxNumberWhenHeaderFalse() {
+    var eob =
+        eobReadWithIncludeTaxNumbersHeader("false")
+            .withId(Long.parseLong(CLAIM_ID_PROFESSIONAL))
+            .execute();
+
+    assertFalse(eob.isEmpty());
+    assertFalse(hasTaxNumberExtension(eob));
+  }
+
+  @Test
   void eobReadProfessionalClaimBillingOrg() {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG)).execute();
     assertFalse(eob.isEmpty());
+    assertFalse(hasTaxNumberExtension(eob));
     expectFhir().toMatchSnapshot(eob);
   }
 
@@ -115,10 +140,10 @@ class EobReadIT extends IntegrationTestBase {
             .createQuery(
                 """
                 SELECT c
-                  FROM ClaimProfessionalNch c
-                  JOIN FETCH c.beneficiary b
-                  JOIN FETCH c.claimItems cl
-                  WHERE c.claimUniqueId = :claimId
+                FROM ClaimProfessionalNch c
+                JOIN FETCH c.beneficiary b
+                JOIN FETCH c.claimItems cl
+                WHERE c.claimUniqueId = :claimId
                 """,
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))

@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.249.0-SNAPSHOT</version>
+    <version>2.250.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -72,7 +72,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2026-06-01T17:11:59Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-06-15T16:13:46Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -157,7 +157,7 @@
         <mockito.version>5.16.0</mockito.version>
         <byte-buddy.version>1.17.2</byte-buddy.version>
         <rest-assured.version>5.5.1</rest-assured.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <snowflake.version>4.1.0</snowflake.version>
         <postgresql.version>42.7.11</postgresql.version>
@@ -181,7 +181,7 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <netty.version>4.1.133.Final</netty.version>
+        <netty.version>4.1.135.Final</netty.version>
         <jetty.version>12.1.7</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
@@ -327,6 +327,43 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <!-- Fix for Snyk vulnerability in netty-handler -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <!-- Pin remaining transitive netty artifacts to ${netty.version} for consistency -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-transport</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-common</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-buffer</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-resolver</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-transport-native-unix-common</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-transport-classes-epoll</artifactId>
                 <version>${netty.version}</version>
             </dependency>
             <!-- Fix for Snyk vulnerability (CWE-835 and CWE-770)-->
