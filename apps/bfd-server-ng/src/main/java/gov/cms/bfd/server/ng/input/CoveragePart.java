@@ -63,28 +63,6 @@ public enum CoveragePart {
   }
 
   /**
-   * Finds a {@link CoveragePart} by matching the provided {@code param} against either the
-   * standard. The match is case-insensitive. It is tolerated of patterns it can determine are
-   * intent. Examples plan a plan_a plan-a will all translate a Plan A search.
-   *
-   * @param param The query param from.
-   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
-   *     Optional#empty()} if no exact match.
-   */
-  public static Optional<CoveragePart> parseFromQueryParam(String param) {
-    if (param == null || param.isBlank()) {
-      return Optional.empty();
-    }
-    param = param.trim().toLowerCase().replace(" ", "-").replace("_", "-");
-    for (CoveragePart part : values()) {
-      if (part.getStandardSystem().equalsIgnoreCase(param)) {
-        return Optional.of(part);
-      }
-    }
-    return Optional.empty();
-  }
-
-  /**
    * Finds a {@link CoveragePart} by matching the provided {@code rawUrlPrefix} or throws an
    * exception.
    *

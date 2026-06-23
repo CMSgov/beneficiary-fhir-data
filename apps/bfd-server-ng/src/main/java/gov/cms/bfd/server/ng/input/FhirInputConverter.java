@@ -203,6 +203,23 @@ public class FhirInputConverter {
   }
 
   /**
+   * Finds a {@link CoveragePart} by matching the provided {@code param} against either the
+   * standard. The match is case-insensitive. It is tolerated of patterns it can determine are
+   * intent. Examples plan a plan_a plan-a will all translate a Plan A search.
+   *
+   * @param param The query param from.
+   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
+   *     Optional#empty()} if no exact match.
+   */
+  public static Optional<CoveragePart> parseCoverageClassPart(@Nullable String param) {
+    if (param == null || param.isBlank()) {
+      return Optional.empty();
+    }
+    param = param.trim().toLowerCase().replace(" ", "-").replace("_", "-");
+    return CoveragePart.fromExactRawPrefix(param);
+  }
+
+  /**
    * Parses the tag query parameter into a nested list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.

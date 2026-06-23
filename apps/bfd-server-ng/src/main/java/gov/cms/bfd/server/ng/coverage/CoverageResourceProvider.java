@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +85,6 @@ public class CoverageResourceProvider implements IResourceProvider {
         new CoverageSearchCriteria(
             beneSk,
             FhirInputConverter.toDateTimeRange(lastUpdated),
-            CoveragePart.parseFromQueryParam(classValue)));
+            FhirInputConverter.parseCoverageClassPart(classValue)));
   }
 }
