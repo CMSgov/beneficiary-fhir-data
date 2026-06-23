@@ -1,14 +1,14 @@
-FROM alpine:3.20
+FROM python:3.14-alpine
 
 RUN apk add --no-cache postgresql16-client
+RUN pip install --no-cache-dir psycopg2-binary
 
 WORKDIR /app
 
-# Copy the sample RIF data
-COPY apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-synthea /app/rif-data/
+# Copy the v3 IDR synthetic data
+COPY apps/bfd-model-idr/synthetic-data /app/idr-data/
 
 # Copy loader script
-COPY local/load-data.sh /app/load-data.sh
-RUN chmod +x /app/load-data.sh
+COPY local/load-data.py /app/load-data.py
 
-ENTRYPOINT ["/app/load-data.sh"]
+ENTRYPOINT ["python", "/app/load-data.py"]

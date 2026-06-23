@@ -1,4 +1,4 @@
-.PHONY: build run stop clean status logs
+.PHONY: build run stop clean status logs generate-data
 
 # ============================================================================
 # BFD Local Development Environment
@@ -94,3 +94,15 @@ status:
 # Tail logs from all services
 logs:
 	$(COMPOSE) logs -f
+
+# Generate 10K synthetic IDR beneficiary + claims data
+generate-data:
+	@echo "==> Generating 10K synthetic IDR beneficiaries and claims..."
+	@echo "    (requires Node.js for sushi FHIR compiler)"
+	cd apps/bfd-model-idr && npx fsh-sushi sushi
+	cd apps/bfd-model-idr && uv sync && uv run patient_generator.py --patients 10000 --claims
+	@echo "==> Copying generated data to synthetic-data/..."
+	cp apps/bfd-model-idr/out/SYNTHETIC_*.csv apps/bfd-model-idr/synthetic-data/
+	@echo ""
+	@echo "==> Data generation complete!"
+	@echo "    Run 'make build && make run' to load it into the local stack."
