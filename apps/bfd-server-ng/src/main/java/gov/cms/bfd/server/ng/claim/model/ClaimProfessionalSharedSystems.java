@@ -66,11 +66,6 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
   private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
 
-  @Override
-  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
-    return claimPaidStatusCode;
-  }
-
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
    * date, provider assignment switch, and clinical trial number.

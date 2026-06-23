@@ -60,11 +60,6 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
 
   @Override
-  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
-    return claimPaidStatusCode;
-  }
-
-  @Override
   Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
