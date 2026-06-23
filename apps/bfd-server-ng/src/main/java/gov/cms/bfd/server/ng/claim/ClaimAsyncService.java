@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim;
 
-import static gov.cms.bfd.server.ng.util.MetricTimer.CLAIM_TYPE;
+import static gov.cms.bfd.server.ng.util.MetricRecorder.CLAIM_TYPE;
 
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
@@ -9,7 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
-import gov.cms.bfd.server.ng.util.MetricTimer;
+import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.*;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Repository;
 public class ClaimAsyncService {
 
   private final EntityManagerFactory entityManagerFactory;
-  private final MetricTimer metricTimer;
+  private final MetricRecorder metricRecorder;
   private final QueryTelemetryUtil queryTelemetryUtil;
 
   @Async
@@ -52,7 +52,7 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    return metricTimer.recordMetricAsync(
+    return metricRecorder.recordMetricAsync(
         "application.claim.search_by_ids_in_claim_type",
         () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
         () -> {
@@ -89,7 +89,7 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
     try (var entityManager = entityManagerFactory.createEntityManager()) {
-      return metricTimer.recordMetricAsync(
+      return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
           () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
           () -> {

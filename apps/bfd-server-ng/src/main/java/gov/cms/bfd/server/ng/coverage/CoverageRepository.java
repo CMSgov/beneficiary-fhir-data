@@ -1,13 +1,13 @@
 package gov.cms.bfd.server.ng.coverage;
 
-import static gov.cms.bfd.server.ng.util.MetricTimer.*;
+import static gov.cms.bfd.server.ng.util.MetricRecorder.*;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.MetricTimer;
+import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.aop.MeterTag;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
@@ -25,7 +25,7 @@ public class CoverageRepository {
   @PersistenceContext private EntityManager entityManager;
   private final DateUtil dateUtil;
   private final QueryTelemetryUtil queryTelemetryUtil;
-  private final MetricTimer metricTimer;
+  private final MetricRecorder metricRecorder;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -141,7 +141,7 @@ public class CoverageRepository {
             .setParameter("today", benefitDate)
             .setParameter("beneSk", beneSk);
 
-    return metricTimer.recordMetric(
+    return metricRecorder.recordMetric(
         "application.coverage.search_by_bene",
         () ->
             queryTelemetryUtil.executeAndTrack("searchBeneficiaryWithCoverage", query).stream()
