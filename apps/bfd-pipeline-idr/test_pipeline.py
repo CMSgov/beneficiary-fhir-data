@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import psycopg
 import pytest
+from loguru import logger
 from psycopg import Connection, sql
 from psycopg.rows import DictRow, TupleRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
@@ -559,25 +560,20 @@ def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
         yield postgres, conninfo
 
 
-def _test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    postgres, conninfo = postgres_db
-    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
-        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
-        _reset_db(conn, sample_dir, postgres)
-        _setup_pipeline_environment(conn.info)
-        _do_test_pipeline(cast(Connection[DictRow], conn), LoadType.INITIAL)
-
-
-def _test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    postgres, conninfo = postgres_db
-    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
-        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
-        _reset_db(conn, sample_dir, postgres)
-        _setup_pipeline_environment(conn.info)
-        _do_test_pipeline(cast(Connection[DictRow], conn), LoadType.INCREMENTAL)
-
-
-def test_pipeline(postgres_db: tuple[PostgresContainer, str]) -> None:
+def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
     configure_logger()
-    _test_incremental_pipeline_load(postgres_db)
-    _test_initial_pipeline_load(postgres_db)
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+    logger.remove()
+
+
+def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_pipeline_load(postgres_db, LoadType.INITIAL)
+
+
+def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
