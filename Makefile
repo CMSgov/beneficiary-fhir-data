@@ -16,6 +16,7 @@
 #   make clean  - Remove containers, volumes, and local images
 #   make status - Show status of local BFD services
 #   make logs   - Tail logs from all services
+#	make generate-data - Generates the required synth data.
 #
 # After `make run`, the BFD FHIR server is at: http://localhost:8080
 # ============================================================================
