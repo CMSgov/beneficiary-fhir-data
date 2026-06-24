@@ -191,6 +191,12 @@ public class FhirUtil {
     // if we do not have a request we cannot build the links
     requestDetails.ifPresent(
         details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit));
+    // if we have a next page this number is not accurate, and we do not want to provide it
+    if (page.hasMore()) {
+      bundle.setTotalElement(null);
+    } else {
+      bundle.setTotal(bundle.getEntry().size());
+    }
 
     return bundle;
   }
