@@ -149,7 +149,7 @@ def prune_phase_1_ss_claims(
                 """,  # type: ignore
             (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
         )
-        logger.info("pruned %d rows from %s", res.rowcount, item_table)
+        logger.info("pruned {} rows from {}", res.rowcount, item_table)
 
         res = conn.execute(
             f"""
@@ -159,5 +159,5 @@ def prune_phase_1_ss_claims(
                 """,  # type: ignore
             (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
         )
-        logger.info("pruned %d rows from %s", res.rowcount, claim_table)
+        logger.info("pruned {} rows from {}", res.rowcount, claim_table)
     return True
