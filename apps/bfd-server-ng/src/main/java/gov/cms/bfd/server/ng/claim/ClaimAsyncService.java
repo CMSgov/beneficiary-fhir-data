@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
+import gov.cms.bfd.server.ng.model.QueryProfile;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
@@ -39,18 +40,19 @@ public class ClaimAsyncService {
           Class<C> claimClass,
           SystemType systemType,
           List<Long> claimUniqueIds,
-          List<B> filterBuilders) {
+          List<B> filterBuilders,
+          QueryProfile queryProfile) {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters, systemType);
-    var jpql =
+    var conditions =
         String.format(
             """
-            %s
             WHERE c.claimUniqueId IN :claimUniqueIds
             %s
             """,
-            baseQuery, whereClause);
+            whereClause);
+    var jpql = buildProfileJpql(baseQuery, claimClass, queryProfile, conditions);
 
     return metricRecorder.recordMetricAsync(
         "application.claim.search_by_ids_in_claim_type",
@@ -80,14 +82,14 @@ public class ClaimAsyncService {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters, systemType);
-    var jpql =
+    var conditions =
         String.format(
             """
-             %s
              WHERE b.xrefSk = :beneSk
              %s
             """,
-            baseQuery, whereClause);
+            whereClause);
+    var jpql = buildProfileJpql(baseQuery, claimClass, criteria.queryProfile(), conditions);
     try (var entityManager = entityManagerFactory.createEntityManager()) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
@@ -129,5 +131,143 @@ public class ClaimAsyncService {
       queryParams.addAll(params.params());
     }
     return new DbFilter(sb.toString(), queryParams);
+  }
+
+  private String buildProfileJpql(
+      String baseQuery, Class<?> claimClass, QueryProfile profile, String conditions) {
+    if (claimClass == ClaimRx.class) {
+      String selectClause =
+          switch (profile) {
+            case BASIS ->
+                """
+                SELECT new gov.cms.bfd.server.ng.claim.model.ClaimRx(
+                    c.claimUniqueId,
+                    c.claimTypeCode,
+                    c.claimEffectiveDate,
+                    c.finalAction,
+                    c.latestClaimIndicator,
+                    null,
+                    c.meta,
+                    c.identifiers,
+                    c.billablePeriod,
+                    c.claimIDRLoadDate,
+                    b,
+                    null,
+                    c.contractName,
+                    c.pricingCode,
+                    c.serviceProviderHistory,
+                    c.prescribingProviderHistory,
+                    null,
+                    c.claimPaymentDate,
+                    c.submitterContractNumber,
+                    c.submitterContractPBPNumber,
+                    c.claimSubmissionDate,
+                    null,
+                    new gov.cms.bfd.server.ng.claim.model.ClaimItemRx(
+                        new gov.cms.bfd.server.ng.claim.model.ClaimLineRx(
+                            c.claimItems.claimLine.fromDate,
+                            c.claimItems.claimLine.ndc,
+                            c.claimItems.claimLine.serviceUnitQuantity,
+                            c.claimItems.claimLine.claimRxSupportingInfo
+                        ),
+                        c.claimItems.claimLineRxNum
+                    )
+                )
+                """;
+            case REGULAR ->
+                """
+                SELECT new gov.cms.bfd.server.ng.claim.model.ClaimRx(
+                    c.claimUniqueId,
+                    c.claimTypeCode,
+                    c.claimEffectiveDate,
+                    c.finalAction,
+                    c.latestClaimIndicator,
+                    null,
+                    c.meta,
+                    c.identifiers,
+                    c.billablePeriod,
+                    c.claimIDRLoadDate,
+                    b,
+                    c.claimFormatCode,
+                    c.contractName,
+                    c.pricingCode,
+                    c.serviceProviderHistory,
+                    c.prescribingProviderHistory,
+                    c.adjudicationCharge,
+                    c.claimPaymentDate,
+                    c.submitterContractNumber,
+                    c.submitterContractPBPNumber,
+                    c.claimSubmissionDate,
+                    null,
+                    new gov.cms.bfd.server.ng.claim.model.ClaimItemRx(
+                        new gov.cms.bfd.server.ng.claim.model.ClaimLineRx(
+                            c.claimItems.claimLine.fromDate,
+                            c.claimItems.claimLine.ndc,
+                            c.claimItems.claimLine.serviceUnitQuantity,
+                            c.claimItems.claimLine.adjudicationCharge,
+                            c.claimItems.claimLine.claimRxSupportingInfo
+                        ),
+                        c.claimItems.claimLineRxNum
+                    )
+                )
+                """;
+            case CMS ->
+                """
+                SELECT new gov.cms.bfd.server.ng.claim.model.ClaimRx(
+                    c.claimUniqueId,
+                    c.claimTypeCode,
+                    c.claimEffectiveDate,
+                    c.finalAction,
+                    c.latestClaimIndicator,
+                    c.claimAdjustmentTypeCode,
+                    c.meta,
+                    c.identifiers,
+                    c.billablePeriod,
+                    c.claimIDRLoadDate,
+                    b,
+                    c.claimFormatCode,
+                    c.contractName,
+                    c.pricingCode,
+                    c.serviceProviderHistory,
+                    c.prescribingProviderHistory,
+                    c.adjudicationCharge,
+                    c.claimPaymentDate,
+                    c.submitterContractNumber,
+                    c.submitterContractPBPNumber,
+                    c.claimSubmissionDate,
+                    c.claimProcessDate,
+                    new gov.cms.bfd.server.ng.claim.model.ClaimItemRx(
+                        new gov.cms.bfd.server.ng.claim.model.ClaimLineRx(
+                            c.claimItems.claimLine.fromDate,
+                            c.claimItems.claimLine.ndc,
+                            c.claimItems.claimLine.serviceUnitQuantity,
+                            c.claimItems.claimLine.adjudicationCharge,
+                            c.claimItems.claimLine.claimRxSupportingInfo
+                        ),
+                        c.claimItems.claimLineRxNum
+                    )
+                )
+                """;
+          };
+      String queryWithoutSelect =
+          baseQuery
+              .replaceFirst("(?i)SELECT\\s+c\\s+", "")
+              .replace("JOIN FETCH", "JOIN")
+              .replace("LEFT JOIN FETCH", "LEFT JOIN");
+      return String.format(
+          """
+          %s
+          %s
+          %s
+          """,
+          selectClause, queryWithoutSelect, conditions);
+    } else {
+      return String.format(
+          """
+          %s
+          %s
+          """,
+          baseQuery, conditions);
+    }
   }
 }

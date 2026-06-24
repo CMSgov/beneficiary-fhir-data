@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.model.QueryProfile;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param claimTypeCodes claim type codes
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param queryProfile the query profile to use
  */
 public record ClaimSearchCriteria(
     long beneSk,
@@ -28,7 +30,44 @@ public record ClaimSearchCriteria(
     List<List<TagCriterion>> tagCriteria,
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    List<List<MetaSourceSk>> sources) {
+    List<List<MetaSourceSk>> sources,
+    QueryProfile queryProfile) {
+
+  /**
+   * Constructs a new ClaimSearchCriteria with default QueryProfile.CMS.
+   *
+   * @param beneSk bene sk
+   * @param claimThroughDate claim through date
+   * @param lastUpdated last updated
+   * @param limit record count
+   * @param offset start index
+   * @param tagCriteria tag criteria
+   * @param claimTypeCodes claim type codes
+   * @param outcomes outcomes
+   * @param sources sources
+   */
+  public ClaimSearchCriteria(
+      long beneSk,
+      DateTimeRange claimThroughDate,
+      DateTimeRange lastUpdated,
+      Optional<Integer> limit,
+      Optional<Integer> offset,
+      List<List<TagCriterion>> tagCriteria,
+      List<ClaimTypeCode> claimTypeCodes,
+      List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
+      List<List<MetaSourceSk>> sources) {
+    this(
+        beneSk,
+        claimThroughDate,
+        lastUpdated,
+        limit,
+        offset,
+        tagCriteria,
+        claimTypeCodes,
+        outcomes,
+        sources,
+        QueryProfile.CMS);
+  }
 
   /**
    * Returns the offset or the default.
@@ -72,7 +111,7 @@ public record ClaimSearchCriteria(
    *
    * @return boolean
    */
-  public boolean hasLasUpdated() {
+  public boolean hasLastUpdated() {
     return lastUpdated().hasBounds();
   }
 

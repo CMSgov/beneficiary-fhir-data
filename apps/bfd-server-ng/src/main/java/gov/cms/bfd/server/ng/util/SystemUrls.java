@@ -627,6 +627,14 @@ public class SystemUrls {
   public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.2.0";
 
+  /** CARIN Blue Button - ExplanationOfBenefit Pharmacy Basis. */
+  public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY_BASIS =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy-Basis|2.2.0";
+
+  /** CMS - ExplanationOfBenefit Pharmacy. */
+  public static final String CMS_STRUCTURE_DEFINITION_PHARMACY =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Pharmacy";
+
   /** CARIN Blue Button - ExplanationOfBenefit Inpatient Institutional. */
   public static final String CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0";

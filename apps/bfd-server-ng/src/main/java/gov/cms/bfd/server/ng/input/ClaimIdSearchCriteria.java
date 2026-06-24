@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.model.QueryProfile;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -13,13 +14,33 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param lastUpdated last updated
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param queryProfile query profile
  */
 public record ClaimIdSearchCriteria(
     List<Long> claimUniqueIds,
     @NotNull DateTimeRange serviceDate,
     @NotNull DateTimeRange lastUpdated,
     @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    @NotNull List<List<MetaSourceSk>> sources) {
+    @NotNull List<List<MetaSourceSk>> sources,
+    QueryProfile queryProfile) {
+
+  /**
+   * Constructs a new ClaimIdSearchCriteria with default QueryProfile.CMS.
+   *
+   * @param claimUniqueIds claim unique ids
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @param outcomes outcomes
+   * @param sources sources
+   */
+  public ClaimIdSearchCriteria(
+      List<Long> claimUniqueIds,
+      @NotNull DateTimeRange serviceDate,
+      @NotNull DateTimeRange lastUpdated,
+      @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
+      @NotNull List<List<MetaSourceSk>> sources) {
+    this(claimUniqueIds, serviceDate, lastUpdated, outcomes, sources, QueryProfile.CMS);
+  }
 
   /**
    * Returns whether a last updated date filter has been provided.

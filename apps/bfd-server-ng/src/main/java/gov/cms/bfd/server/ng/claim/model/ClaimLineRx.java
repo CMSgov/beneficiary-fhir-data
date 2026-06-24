@@ -29,6 +29,53 @@ public class ClaimLineRx implements ClaimLineBase {
   @Embedded private ClaimLineAdjudicationChargeRx adjudicationCharge;
   @Embedded private ClaimLineRxSupportingInfo claimRxSupportingInfo;
 
+  /** Default constructor for JPA. */
+  public ClaimLineRx() {
+    // Default constructor for JPA
+  }
+
+  /**
+   * Parameterized constructor.
+   *
+   * @param fromDate from date
+   * @param ndc ndc code
+   * @param serviceUnitQuantity service unit quantity
+   * @param adjudicationCharge adjudication charge
+   * @param claimRxSupportingInfo claim Rx supporting info
+   */
+  public ClaimLineRx(
+      Optional<LocalDate> fromDate,
+      ClaimLineNdc ndc,
+      ClaimLineServiceUnitQuantity serviceUnitQuantity,
+      ClaimLineAdjudicationChargeRx adjudicationCharge,
+      ClaimLineRxSupportingInfo claimRxSupportingInfo) {
+    this.fromDate = fromDate != null ? fromDate : Optional.empty();
+    this.ndc = ndc;
+    this.serviceUnitQuantity = serviceUnitQuantity;
+    this.adjudicationCharge = adjudicationCharge;
+    this.claimRxSupportingInfo = claimRxSupportingInfo;
+  }
+
+  /**
+   * Parameterized constructor without adjudication charge.
+   *
+   * @param fromDate from date
+   * @param ndc ndc code
+   * @param serviceUnitQuantity service unit quantity
+   * @param claimRxSupportingInfo claim Rx supporting info
+   */
+  public ClaimLineRx(
+      Optional<LocalDate> fromDate,
+      ClaimLineNdc ndc,
+      ClaimLineServiceUnitQuantity serviceUnitQuantity,
+      ClaimLineRxSupportingInfo claimRxSupportingInfo) {
+    this.fromDate = fromDate != null ? fromDate : Optional.empty();
+    this.ndc = ndc;
+    this.serviceUnitQuantity = serviceUnitQuantity;
+    this.adjudicationCharge = null;
+    this.claimRxSupportingInfo = claimRxSupportingInfo;
+  }
+
   @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
     return Optional.empty();
@@ -55,7 +102,9 @@ public class ClaimLineRx implements ClaimLineBase {
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
-    adjudicationCharge.toFhir().forEach(line::addAdjudication);
+    if (adjudicationCharge != null) {
+      adjudicationCharge.toFhir().forEach(line::addAdjudication);
+    }
 
     return Optional.of(line);
   }

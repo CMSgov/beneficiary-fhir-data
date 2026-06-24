@@ -59,6 +59,36 @@ public abstract class ClaimBase {
   @JoinColumn(name = "bene_sk")
   private BeneficiarySimple beneficiary;
 
+  protected ClaimBase() {
+    // Default constructor for JPA
+  }
+
+  protected ClaimBase(
+      long claimUniqueId,
+      ClaimTypeCode claimTypeCode,
+      LocalDate claimEffectiveDate,
+      ClaimFinalAction finalAction,
+      Boolean latestClaimIndicator,
+      Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode,
+      Meta meta,
+      Identifiers identifiers,
+      BillablePeriod billablePeriod,
+      ClaimIDRLoadDate claimIDRLoadDate,
+      BeneficiarySimple beneficiary) {
+    this.claimUniqueId = claimUniqueId;
+    this.claimTypeCode = claimTypeCode;
+    this.claimEffectiveDate = claimEffectiveDate;
+    this.finalAction = finalAction;
+    this.latestClaimIndicator = latestClaimIndicator;
+    this.claimAdjustmentTypeCode =
+        claimAdjustmentTypeCode != null ? claimAdjustmentTypeCode : Optional.empty();
+    this.meta = meta;
+    this.identifiers = identifiers;
+    this.billablePeriod = billablePeriod;
+    this.claimIDRLoadDate = claimIDRLoadDate;
+    this.beneficiary = beneficiary;
+  }
+
   @Transient protected SupportingInfoFactory supportingInfoFactory = new SupportingInfoFactory();
 
   /**

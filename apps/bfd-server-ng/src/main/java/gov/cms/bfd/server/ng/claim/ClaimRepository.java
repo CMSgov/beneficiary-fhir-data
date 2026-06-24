@@ -86,7 +86,7 @@ public class ClaimRepository {
   @Timed(value = "application.claim.search_by_id")
   public List<ClaimBase> findByIds(
       @MeterTag(key = "hasServiceUpdated", expression = "hasServiceUpdated()")
-          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimIdSearchCriteria criteria) {
@@ -106,7 +106,8 @@ public class ClaimRepository {
             ClaimProfessionalSharedSystems.class,
             ClaimProfessionalSharedSystems.getSystemType(),
             criteria.claimUniqueIds(),
-            paramBuilders);
+            paramBuilders,
+            criteria.queryProfile());
 
     var professionalNchClaims =
         asyncService.findByIdsInClaimType(
@@ -114,7 +115,8 @@ public class ClaimRepository {
             ClaimProfessionalNch.class,
             ClaimProfessionalNch.getSystemType(),
             criteria.claimUniqueIds(),
-            paramBuilders);
+            paramBuilders,
+            criteria.queryProfile());
 
     var institutionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
@@ -122,7 +124,8 @@ public class ClaimRepository {
             ClaimInstitutionalSharedSystems.class,
             ClaimInstitutionalSharedSystems.getSystemType(),
             criteria.claimUniqueIds(),
-            paramBuilders);
+            paramBuilders,
+            criteria.queryProfile());
 
     var institutionalNchClaims =
         asyncService.findByIdsInClaimType(
@@ -130,7 +133,8 @@ public class ClaimRepository {
             ClaimInstitutionalNch.class,
             ClaimInstitutionalNch.getSystemType(),
             criteria.claimUniqueIds(),
-            paramBuilders);
+            paramBuilders,
+            criteria.queryProfile());
 
     var rxClaims =
         asyncService.findByIdsInClaimType(
@@ -138,7 +142,8 @@ public class ClaimRepository {
             ClaimRx.class,
             ClaimRx.getSystemType(),
             criteria.claimUniqueIds(),
-            paramBuilders);
+            paramBuilders,
+            criteria.queryProfile());
 
     // Wait for all queries
     CompletableFuture.allOf(
@@ -168,7 +173,7 @@ public class ClaimRepository {
   @Timed(value = "application.claim.search_by_bene")
   public List<ClaimBase> findByBeneXrefSk(
       @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
-          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")

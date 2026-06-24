@@ -22,6 +22,7 @@ import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import gov.cms.bfd.server.ng.model.QueryProfile;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -68,10 +69,12 @@ public class EobResourceProvider implements IResourceProvider {
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var queryProfile = getQueryProfile(requestDetails);
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(samhsaFilterMode)
             .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .queryProfile(queryProfile)
             .build();
 
     var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), options);
@@ -92,6 +95,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
+   * @param profile profile
    * @param request HTTP request details
    * @param requestDetails HAPI FHIR request details
    * @return bundle
@@ -110,6 +114,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final TokenAndListParam profile,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
@@ -119,11 +124,13 @@ public class EobResourceProvider implements IResourceProvider {
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var outcomeCriteria = FhirInputConverter.parseOutcomeParameter(outcome);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
+    var queryProfile = getQueryProfile(requestDetails);
 
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(getFilterModeForRequest(request, samhsaSearchIntent))
             .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .queryProfile(queryProfile)
             .build();
 
     var criteria =
@@ -138,7 +145,8 @@ public class EobResourceProvider implements IResourceProvider {
             tagCriteria,
             claimTypeCodes,
             outcomeCriteria,
-            FhirInputConverter.parseSourceParameter(source));
+            FhirInputConverter.parseSourceParameter(source),
+            queryProfile);
 
     return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
   }
@@ -153,6 +161,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param request HTTP request details
    * @param outcome outcome to filter by
    * @param source claim source to filter by
+   * @param profile profile
    * @return bundle
    */
   @Search
@@ -161,18 +170,21 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
-      final RequestDetails requestDetails,
       final HttpServletRequest request,
+      final RequestDetails requestDetails,
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
-      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source) {
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final TokenAndListParam profile) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var queryProfile = getQueryProfile(requestDetails);
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(samhsaFilterMode)
             .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .queryProfile(queryProfile)
             .build();
 
     var searchCriteria =
@@ -181,7 +193,8 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toDateTimeRange(serviceDate),
             FhirInputConverter.toDateTimeRange(lastUpdated),
             FhirInputConverter.parseOutcomeParameter(outcome),
-            FhirInputConverter.parseSourceParameter(source));
+            FhirInputConverter.parseSourceParameter(source),
+            queryProfile);
 
     return eobHandler.searchById(searchCriteria, options);
   }
@@ -202,5 +215,31 @@ public class EobResourceProvider implements IResourceProvider {
       case EXCLUDE_SAMHSA -> SamhsaFilterMode.EXCLUDE;
       case UNSPECIFIED -> SamhsaFilterMode.INCLUDE;
     };
+  }
+
+  private QueryProfile getQueryProfile(RequestDetails requestDetails) {
+    if (requestDetails == null || requestDetails.getParameters() == null) {
+      return QueryProfile.CMS;
+    }
+    String[] profiles = requestDetails.getParameters().get("_profile");
+    if (profiles != null && profiles.length > 0) {
+      for (String p : profiles) {
+        // Strip FHIR version suffix (|x.x.x) if present so bare and versioned URLs both match.
+        // Use contains() for URL patterns in case the pipe is encoded differently by the client.
+        String normalized = p.contains("|") ? p.substring(0, p.lastIndexOf('|')) : p;
+        if ("Basis".equalsIgnoreCase(normalized)
+            || normalized.contains("C4BB-ExplanationOfBenefit-Pharmacy-Basis")) {
+          return QueryProfile.BASIS;
+        } else if ("Regular".equalsIgnoreCase(normalized)
+            || normalized.contains("C4BB-ExplanationOfBenefit-Pharmacy-Regular")) {
+          return QueryProfile.REGULAR;
+        } else if ("CMS".equalsIgnoreCase(normalized)
+            || normalized.contains("C4BB-ExplanationOfBenefit-Pharmacy-CMS")
+            || normalized.contains("CMS-ExplanationOfBenefit-Pharmacy")) {
+          return QueryProfile.CMS;
+        }
+      }
+    }
+    return QueryProfile.CMS;
   }
 }

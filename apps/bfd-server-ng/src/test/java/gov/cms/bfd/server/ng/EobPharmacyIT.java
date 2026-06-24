@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.ng;
 
 import static gov.cms.bfd.server.ng.util.SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE;
+import static gov.cms.bfd.server.ng.util.SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY;
+import static gov.cms.bfd.server.ng.util.SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY_BASIS;
+import static gov.cms.bfd.server.ng.util.SystemUrls.CMS_STRUCTURE_DEFINITION_PHARMACY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -8,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import gov.cms.bfd.server.ng.claim.model.ProviderIdQualifierCode;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -168,5 +172,153 @@ class EobPharmacyIT extends IntegrationTestBase {
             "Adjudication field " + coding.getCode() + " should have been removed");
       }
     }
+  }
+
+  @Test
+  void eobReadPharmacyBasisProfile() {
+    var bundle =
+        getFhirClient()
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .code(String.valueOf(CLAIM_ID_RX)))
+            .and(new TokenClientParam("_profile").exactly().code("Basis"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertFalse(bundle.isEmpty());
+    assertEquals(1, bundle.getEntry().size());
+    var eob = (ExplanationOfBenefit) bundle.getEntryFirstRep().getResource();
+
+    // Basis profile should use only the Pharmacy-Basis structure definition URL
+    var basisProfiles = eob.getMeta().getProfile();
+    assertEquals(1, basisProfiles.size());
+    assertEquals(CARIN_STRUCTURE_DEFINITION_PHARMACY_BASIS, basisProfiles.get(0).getValue());
+
+    // Basis profile should NOT contain CLM_SBMT_FRMT_CD or CLM_CMS_PROC_DT
+    assertFalse(hasSupportingInfoCategory(eob, "CLM_SBMT_FRMT_CD"));
+    assertFalse(hasSupportingInfoCategory(eob, "CLM_CMS_PROC_DT"));
+
+    // Basis profile should NOT contain total drug cost / adjudication charge totals
+    assertTrue(eob.getTotal().isEmpty());
+
+    // Basis profile line item should NOT contain adjudication component
+    assertTrue(eob.getItemFirstRep().getAdjudication().isEmpty());
+
+    expectFhir().toMatchSnapshot(eob);
+  }
+
+  @Test
+  void eobReadPharmacyBasisProfileFullUrl() {
+    // Same assertions as eobReadPharmacyBasisProfile, but the _profile parameter is
+    // the full versioned FHIR structure definition URL rather than the shorthand "Basis".
+    var bundle =
+        getFhirClient()
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .code(String.valueOf(CLAIM_ID_RX)))
+            .and(
+                new TokenClientParam("_profile")
+                    .exactly()
+                    .code(CARIN_STRUCTURE_DEFINITION_PHARMACY_BASIS))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertFalse(bundle.isEmpty());
+    assertEquals(1, bundle.getEntry().size());
+    var eob = (ExplanationOfBenefit) bundle.getEntryFirstRep().getResource();
+
+    // Full-URL Basis should resolve to the Basis profile URL
+    var profiles = eob.getMeta().getProfile();
+    assertEquals(1, profiles.size());
+    assertEquals(CARIN_STRUCTURE_DEFINITION_PHARMACY_BASIS, profiles.get(0).getValue());
+
+    // Same column pruning as shorthand Basis
+    assertFalse(hasSupportingInfoCategory(eob, "CLM_SBMT_FRMT_CD"));
+    assertFalse(hasSupportingInfoCategory(eob, "CLM_CMS_PROC_DT"));
+    assertTrue(eob.getTotal().isEmpty());
+    assertTrue(eob.getItemFirstRep().getAdjudication().isEmpty());
+  }
+
+  @Test
+  void eobReadPharmacyRegularProfile() {
+    var bundle =
+        getFhirClient()
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .code(String.valueOf(CLAIM_ID_RX)))
+            .and(new TokenClientParam("_profile").exactly().code("Regular"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertFalse(bundle.isEmpty());
+    assertEquals(1, bundle.getEntry().size());
+    var eob = (ExplanationOfBenefit) bundle.getEntryFirstRep().getResource();
+
+    // Regular profile should use only the full CARIN Pharmacy structure definition URL
+    var regularProfiles = eob.getMeta().getProfile();
+    assertEquals(1, regularProfiles.size());
+    assertEquals(CARIN_STRUCTURE_DEFINITION_PHARMACY, regularProfiles.get(0).getValue());
+
+    // Regular profile should contain CLM_SBMT_FRMT_CD but NOT CLM_CMS_PROC_DT
+    assertTrue(hasSupportingInfoCategory(eob, "CLM_SBMT_FRMT_CD"));
+    assertFalse(hasSupportingInfoCategory(eob, "CLM_CMS_PROC_DT"));
+
+    // Regular profile should contain totals
+    assertFalse(eob.getTotal().isEmpty());
+
+    // Regular profile line item should contain adjudication component
+    assertFalse(eob.getItemFirstRep().getAdjudication().isEmpty());
+  }
+
+  @Test
+  void eobReadPharmacyCmsProfile() {
+    var bundle =
+        getFhirClient()
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .code(String.valueOf(CLAIM_ID_RX)))
+            .and(new TokenClientParam("_profile").exactly().code("CMS"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    assertFalse(bundle.isEmpty());
+    assertEquals(1, bundle.getEntry().size());
+    var eob = (ExplanationOfBenefit) bundle.getEntryFirstRep().getResource();
+
+    // CMS profile should have CARIN Pharmacy URL first, then the CMS-specific URL
+    var cmsProfiles = eob.getMeta().getProfile();
+    assertEquals(2, cmsProfiles.size());
+    assertEquals(CARIN_STRUCTURE_DEFINITION_PHARMACY, cmsProfiles.get(0).getValue());
+    assertEquals(CMS_STRUCTURE_DEFINITION_PHARMACY, cmsProfiles.get(1).getValue());
+
+    // CMS profile should contain CLM_SBMT_FRMT_CD and CLM_CMS_PROC_DT
+    assertTrue(hasSupportingInfoCategory(eob, "CLM_SBMT_FRMT_CD"));
+    assertTrue(hasSupportingInfoCategory(eob, "CLM_CMS_PROC_DT"));
+
+    // CMS profile should contain totals
+    assertFalse(eob.getTotal().isEmpty());
+
+    // CMS profile line item should contain adjudication component
+    assertFalse(eob.getItemFirstRep().getAdjudication().isEmpty());
+  }
+
+  private boolean hasSupportingInfoCategory(ExplanationOfBenefit eob, String categoryCode) {
+    return eob.getSupportingInfo().stream()
+        .anyMatch(
+            s ->
+                s.getCategory().getCoding().stream()
+                    .anyMatch(c -> categoryCode.equals(c.getCode())));
   }
 }
