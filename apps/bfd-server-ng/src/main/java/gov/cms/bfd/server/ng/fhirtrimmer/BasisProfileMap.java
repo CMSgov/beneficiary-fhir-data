@@ -106,7 +106,17 @@ public class BasisProfileMap {
    * @return the resolved resource type, or null if the leading segment isn't a known type
    */
   private ResourceType resolveResourceType(String fhirPath) {
-    return ResourceType.fromCode(fhirPath.substring(0, fhirPath.indexOf('.')));
+    for (ResourceType type : ResourceType.values()) {
+      var name = type.toString();
+      int idx = fhirPath.indexOf(name);
+      if (idx >= 0
+              && (idx == 0 || !Character.isLetterOrDigit(fhirPath.charAt(idx - 1)))
+              && idx + name.length() < fhirPath.length()
+              && fhirPath.charAt(idx + name.length()) == '.') {
+        return type;
+      }
+    }
+    return null;
   }
 
   /** Generates the profiles and loads them into the class instance. */

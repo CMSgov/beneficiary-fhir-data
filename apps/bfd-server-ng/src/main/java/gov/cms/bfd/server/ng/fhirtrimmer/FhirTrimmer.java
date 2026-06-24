@@ -13,23 +13,23 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 
-/** Fourth try is the charm MAYBE. */
+/** Fourth try is the charm, MAYBE. */
 public class FhirTrimmer {
 
   private final FhirContext fhirContext;
   private final IFhirPath fhirPathEngine;
-  private final EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> blackList;
+  private final BasisProfileMap basisProfileMap;
 
   /**
    * Constructor.
    *
-   * @param blackList map of resource type -> profile -> list of fhirpaths
+   * @param basisProfileMap map of resource type -> profile -> list of fhirpaths
    * @param fhirContext context shared between trimmers
    */
   public FhirTrimmer(
-          EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> blackList,
+          BasisProfileMap basisProfileMap,
           FhirContext fhirContext) {
-    this.blackList = Objects.requireNonNull(blackList, "blackList cannot be null");
+    this.basisProfileMap = basisProfileMap;
     this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
     this.fhirPathEngine = fhirContext.newFhirPath();
   }
@@ -50,7 +50,7 @@ public class FhirTrimmer {
     }
 
     ResourceType resourceType = baseResource.getResourceType();
-    EnumMap<BasisProfile, List<String>> profileMap = blackList.get(resourceType);
+    EnumMap<BasisProfile, List<String>> profileMap = basisProfileMap.getBlackList().get(resourceType);
     List<String> pathsToRemove = profileMap == null ? null : profileMap.get(profile);
 
     if (pathsToRemove == null || pathsToRemove.isEmpty()) {
