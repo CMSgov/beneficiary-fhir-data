@@ -53,11 +53,44 @@ class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
                     .exactly()
-                    .identifier("1071939711295"))
+                    .identifier(CLAIM_ID_ADJUDICATED))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  static Stream<Arguments> provideEobSearchByIdOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(
+                    Arguments.of("MatchingOutcome", OUTCOME_COMPLETE, 1, searchStyle),
+                    Arguments.of("NonMatchingOutcome", OUTCOME_PARTIAL, 0, searchStyle)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideEobSearchByIdOutcomeScenarios")
+  void eobSearchByIdAndOutcome(
+      String scenarioName, String outcome, int expectedCount, SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_ADJUDICATED))
+            .and(new TokenClientParam(OUTCOME).exactly().identifier(outcome))
+            .usingStyle(searchStyle)
+            .execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    assertEquals(expectedCount, eobs.size(), scenarioName);
+
+    assertTrue(
+        eobs.stream()
+            .allMatch(eob -> eob.hasOutcome() && outcome.equals(eob.getOutcome().toCode())),
+        "All returned EOBs should have outcome " + outcome);
   }
 
   @ParameterizedTest
@@ -644,6 +677,163 @@ class EobSearchIT extends IntegrationTestBase {
           eobBundle.getEntry().size(),
           "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
     }
+  }
+
+  static Stream<Arguments> provideSourceOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(
+                    Arguments.of(
+                        "NCH_complete",
+                        MetaSourceSk.NCH.getDisplay(),
+                        OUTCOME_COMPLETE,
+                        searchStyle),
+                    Arguments.of(
+                        "NCH_partial", MetaSourceSk.NCH.getDisplay(), OUTCOME_PARTIAL, searchStyle),
+                    Arguments.of(
+                        "NCH_queued", MetaSourceSk.NCH.getDisplay(), OUTCOME_QUEUED, searchStyle),
+                    Arguments.of(
+                        "NCH_error", MetaSourceSk.NCH.getDisplay(), OUTCOME_ERROR, searchStyle),
+                    Arguments.of(
+                        "DDPS_complete",
+                        MetaSourceSk.DDPS.getDisplay(),
+                        OUTCOME_COMPLETE,
+                        searchStyle),
+                    Arguments.of(
+                        "DDPS_partial",
+                        MetaSourceSk.DDPS.getDisplay(),
+                        OUTCOME_PARTIAL,
+                        searchStyle),
+                    Arguments.of(
+                        "DDPS_queued", MetaSourceSk.DDPS.getDisplay(), OUTCOME_QUEUED, searchStyle),
+                    Arguments.of(
+                        "DDPS_error", MetaSourceSk.DDPS.getDisplay(), OUTCOME_ERROR, searchStyle)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideSourceOutcomeScenarios")
+  void eobSearchBySourceAndOutcome(
+      String scenarioName, String source, String outcome, SearchStyleEnum searchStyle) {
+
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var sourceParam = new TokenClientParam(Constants.PARAM_SOURCE).exactly().code(source);
+    var outcomeParam = new TokenClientParam(OUTCOME).exactly().identifier(outcome);
+
+    var sourceOnlyBundle =
+        searchBundle().where(patientParam).and(sourceParam).usingStyle(searchStyle).execute();
+
+    var sourceOnlyEobs = getEobFromBundle(sourceOnlyBundle);
+
+    assertFalse(sourceOnlyEobs.isEmpty(), "Precondition failed for source " + source);
+
+    var expectedCount =
+        (int)
+            sourceOnlyEobs.stream()
+                .filter(
+                    eob -> eob.hasOutcome() && outcome.equalsIgnoreCase(eob.getOutcome().toCode()))
+                .count();
+
+    var sourceAndOutcomeBundle =
+        searchBundle()
+            .where(patientParam)
+            .and(sourceParam)
+            .and(outcomeParam)
+            .usingStyle(searchStyle)
+            .execute();
+
+    var sourceAndOutcomeEobs = getEobFromBundle(sourceAndOutcomeBundle);
+
+    assertEquals(
+        expectedCount,
+        sourceAndOutcomeEobs.size(),
+        "Should find matching EOBs for scenario " + scenarioName);
+
+    assertTrue(
+        sourceAndOutcomeEobs.stream()
+            .allMatch(
+                eob -> eob.hasOutcome() && outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
+        "All returned EOBs should have outcome " + outcome);
+  }
+
+  public static Stream<Arguments> provideOutcomeScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            searchStyle ->
+                Stream.of(
+                    Arguments.of("complete", OUTCOME_COMPLETE, true, searchStyle),
+                    Arguments.of("partial", OUTCOME_PARTIAL, true, searchStyle),
+                    Arguments.of("queued", OUTCOME_QUEUED, false, searchStyle),
+                    Arguments.of("error", OUTCOME_ERROR, false, searchStyle)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideOutcomeScenarios")
+  void eobSearchByOutcome(
+      String scenarioName,
+      String outcome,
+      boolean shouldReturnResults,
+      SearchStyleEnum searchStyle) {
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var outcomeParam = new TokenClientParam(OUTCOME).exactly().identifier(outcome);
+
+    var eobBundle =
+        searchBundle().where(patientParam).and(outcomeParam).usingStyle(searchStyle).execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    if (shouldReturnResults) {
+      assertFalse(eobs.isEmpty(), "Should find EOBs for outcome " + scenarioName);
+
+      assertTrue(
+          eobs.stream()
+              .allMatch(
+                  eob ->
+                      eob.getOutcome() != null
+                          && outcome.equalsIgnoreCase(eob.getOutcome().toCode())),
+          "All returned EOBs should have outcome " + scenarioName);
+    } else {
+      assertEquals(0, eobs.size(), scenarioName + " should have no hits");
+    }
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByOutcomeCompleteOrPartial(SearchStyleEnum searchStyle) {
+    var patientParam =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_ID_ALL_PARTS_WITH_XREF);
+
+    var outcomeParam =
+        new TokenClientParam(OUTCOME).exactly().codes(OUTCOME_COMPLETE, OUTCOME_PARTIAL);
+
+    var eobBundle =
+        searchBundle().where(patientParam).and(outcomeParam).usingStyle(searchStyle).execute();
+
+    var eobs = getEobFromBundle(eobBundle);
+
+    assertFalse(eobs.isEmpty(), "Should find EOBs for complete or partial outcomes");
+
+    assertTrue(
+        eobs.stream()
+            .allMatch(
+                eob -> {
+                  if (eob.getOutcome() == null) {
+                    return false;
+                  }
+                  var outcome = eob.getOutcome().toCode();
+                  return OUTCOME_COMPLETE.equals(outcome) || OUTCOME_PARTIAL.equals(outcome);
+                }),
+        "All returned EOBs should have outcome complete or partial");
   }
 
   @Test

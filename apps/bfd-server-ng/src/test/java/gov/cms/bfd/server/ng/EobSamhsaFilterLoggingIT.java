@@ -38,6 +38,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
             new DateTimeRange(),
             new DateTimeRange(),
+            Collections.emptyList(),
             Collections.emptyList()),
         excludeOptions);
 
@@ -67,6 +68,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             List.of(CLAIM_ID_WITH_NO_SAMHSA),
             new DateTimeRange(),
             new DateTimeRange(),
+            Collections.emptyList(),
             Collections.emptyList()),
         excludeOptions);
 

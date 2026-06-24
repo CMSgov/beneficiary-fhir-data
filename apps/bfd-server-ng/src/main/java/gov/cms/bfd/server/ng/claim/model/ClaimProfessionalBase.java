@@ -51,16 +51,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
 
-  /**
-   * Optionally overrides the EOB outcome for subclass-specific logic (e.g. SS PAC-stage-2 audit
-   * trail status).
-   *
-   * @param eob the EOB being built
-   */
-  void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    // default: no override SS overrides this
-  }
-
   /** {@inheritDoc} */
   @Override
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {

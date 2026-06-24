@@ -46,6 +46,13 @@ public class IntegrationTestBase {
   protected static final String SOURCE = "_source";
   protected static final String DDPS_SOURCE = "DDPS";
 
+  public static final String OUTCOME = "outcome";
+  public static final String OUTCOME_COMPLETE = "complete";
+  public static final String OUTCOME_PARTIAL = "partial";
+  public static final String OUTCOME_QUEUED = "queued";
+  public static final String OUTCOME_ERROR = "error";
+  public static final String OUTCOME_PARTIAL_CASE_INSENSITIVE = "PaRtIaL";
+
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
   protected static final String CURRENT_MERGED_BENE_SK = "517782585";

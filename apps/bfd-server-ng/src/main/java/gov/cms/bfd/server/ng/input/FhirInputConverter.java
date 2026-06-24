@@ -16,13 +16,17 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -33,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
  * Provides utility methods for converting FHIR input types to another type more suited for use in
  * the API.
  */
+@Slf4j
 public class FhirInputConverter {
   private static final Set<String> SUPPORTED_SYSTEM_TYPES =
       Set.of(
@@ -453,6 +458,47 @@ public class FhirInputConverter {
                 new InvalidRequestException(
                     "Unknown source. Supported sources are: "
                         + Arrays.toString(MetaSourceSk.values())));
+  }
+
+  /**
+   * Parses the outcome query parameter into a nested list of outcomes.
+   *
+   * <p>Outer list is AND conditions, inner list is OR conditions.
+   *
+   * @param outcomeParam outcome param from request
+   * @return list of outcomes
+   */
+  public static List<List<ExplanationOfBenefit.RemittanceOutcome>> parseOutcomeParameter(
+      @Nullable TokenAndListParam outcomeParam) {
+    if (outcomeParam == null) {
+      return List.of();
+    }
+
+    return FhirTokenParameterParser.parse(outcomeParam, token -> List.of(parseOutcomeToken(token)));
+  }
+
+  private static ExplanationOfBenefit.RemittanceOutcome parseOutcomeToken(TokenParam token) {
+    var outcome = token.getValue();
+
+    if (outcome == null || outcome.trim().isEmpty()) {
+      throw new InvalidRequestException("Outcome cannot be empty.");
+    }
+
+    try {
+      var parsedOutcome =
+          ExplanationOfBenefit.RemittanceOutcome.fromCode(outcome.trim().toLowerCase(Locale.ROOT));
+
+      if (parsedOutcome == null || parsedOutcome == ExplanationOfBenefit.RemittanceOutcome.NULL) {
+        throw new InvalidRequestException(
+            "Unknown outcome. Supported outcomes are: complete, partial, queued, error.");
+      }
+
+      return parsedOutcome;
+    } catch (FHIRException e) {
+      log.warn("Failed to parse FHIR outcome", e);
+      throw new InvalidRequestException(
+          "Unknown outcome. Supported outcomes are: complete, partial, queued, error.");
+    }
   }
 
   /**
