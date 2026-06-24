@@ -23,10 +23,10 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.22'
+          go-version: '1.25.2'
       
       - name: Install SCC
-        run: go install github.com/boyter/scc/v3@latest
+        run: go install github.com/boyter/scc/v3@v3.7.0
 
       - name: "Generate an App Token"
         id: generate_token
