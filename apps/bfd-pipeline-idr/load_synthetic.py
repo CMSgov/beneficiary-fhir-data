@@ -112,11 +112,12 @@ tables = [
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str) -> None:
+def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = True) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
-        extractor.execute(f"TRUNCATE TABLE {sql_table}")
+        if truncate:
+            extractor.execute(f"TRUNCATE TABLE {sql_table}")
         file = table["csv_name"]
         _load_file(extractor, src_folder, file, sql_table)
         extractor.commit()

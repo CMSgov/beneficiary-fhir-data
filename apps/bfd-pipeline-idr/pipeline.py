@@ -58,13 +58,28 @@ from settings import (
     help="Load type - affects claim filtering",
 )
 @click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
-def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: str | None) -> None:
+@click.option(
+    "--truncate-mode",
+    type=click.Choice(["reset", "append"]),
+    default="reset",
+    show_default=True,
+    help="reset = truncate tables before loading (default), append = do not truncate",
+)
+def main(
+    source: Source,
+    load_mode: LoadMode,
+    load_type: LoadType,
+    seed_from: str | None,
+    truncate_mode: str,
+) -> None:
+    truncate = truncate_mode == "reset"
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
             if source == Source.SNOWFLAKE
             else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
             seed_from,
+            truncate,
         )
     run(source, load_mode, load_type)
 
