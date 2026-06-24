@@ -9,6 +9,11 @@ public class BasisProfileMapTest {
 
   @Test
   void testBasisProfileMap() {
-    var profileMap = BasisProfileMap.getBasisProfileMap();
+    var profileMap = new BasisProfileMap();
+    profileMap.generateProfileBasisMap();
+
+    var blackList = profileMap.getBlackList();
+    var whiteList = profileMap.getWhiteList();
+    var x = 2;
   }
 }
