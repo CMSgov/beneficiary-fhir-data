@@ -67,19 +67,16 @@ public class BasisProfileMap {
 
     for (var entry : entries) {
       String fhirPath = entry.getFhirPath();
+
+      // FhirPath missing from YAML
       if (fhirPath == null || fhirPath.isBlank()) {
         continue;
       }
 
       ResourceType resourceType = resolveResourceType(fhirPath);
-      if (resourceType == null) {
-        System.err.println("OH NO: could not resolve resource type from FhirPath: " + fhirPath);
-        continue;
-      }
 
-      // profiles = where this field APPLIES (should be kept, i.e. whitelisted).
-      // Every other profile blacklists it.
-      Set<BasisProfile> applicableProfiles = EnumSet.allOf(BasisProfile.class);
+      // If profile is missing, assume it is valid for any profile
+      Set<BasisProfile> applicableProfiles = EnumSet.noneOf(BasisProfile.class);
       if (entry.getProfiles() != null) {
         applicableProfiles =
                 entry.getProfiles().stream()
@@ -100,7 +97,8 @@ public class BasisProfileMap {
   }
 
   /**
-   * Get ResourceType from FhirPath.
+   * Get ResourceType from FhirPath. Loops through all resource types and looks for them at
+   * the beginning of a FhirPath expression.
    *
    * @param fhirPath the FhirPath expression
    * @return the resolved resource type, or null if the leading segment isn't a known type
@@ -108,11 +106,11 @@ public class BasisProfileMap {
   private ResourceType resolveResourceType(String fhirPath) {
     for (ResourceType type : ResourceType.values()) {
       var name = type.toString();
-      int idx = fhirPath.indexOf(name);
-      if (idx >= 0
-              && (idx == 0 || !Character.isLetterOrDigit(fhirPath.charAt(idx - 1)))
-              && idx + name.length() < fhirPath.length()
-              && fhirPath.charAt(idx + name.length()) == '.') {
+      int index = fhirPath.indexOf(name);
+      if (index >= 0
+              && (index == 0 || !Character.isLetterOrDigit(fhirPath.charAt(index - 1)))
+              && index + name.length() < fhirPath.length()
+              && fhirPath.charAt(index + name.length()) == '.') {
         return type;
       }
     }

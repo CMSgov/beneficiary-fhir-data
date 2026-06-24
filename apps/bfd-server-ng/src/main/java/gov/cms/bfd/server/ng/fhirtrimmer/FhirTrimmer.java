@@ -30,7 +30,7 @@ public class FhirTrimmer {
           BasisProfileMap basisProfileMap,
           FhirContext fhirContext) {
     this.basisProfileMap = basisProfileMap;
-    this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
+    this.fhirContext = fhirContext;
     this.fhirPathEngine = fhirContext.newFhirPath();
   }
 
@@ -93,18 +93,10 @@ public class FhirTrimmer {
    * @param matches the matches to remove
    */
   private void removeMatchesFromParent(Base parent, List<IBase> matches) {
-    BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(parent.getClass());
 
-    for (BaseRuntimeChildDefinition childDef : def.getChildren()) {
-      List<?> values = childDef.getAccessor().getValues(parent);
-      if (values.isEmpty()) {
-        continue;
-      }
-
-      for (IBase match : matches) {
-        if (match instanceof Base baseMatch && values.contains(baseMatch)) {
-          parent.removeChild(childDef.getElementName(), baseMatch);
-        }
+    for (var match : matches) {
+      if (match instanceof Base baseMatch) {
+        parent.removeChild(baseMatch.fhirType(), baseMatch);
       }
     }
   }
