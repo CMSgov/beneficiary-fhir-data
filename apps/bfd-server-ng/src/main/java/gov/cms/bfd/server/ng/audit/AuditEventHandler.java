@@ -70,8 +70,8 @@ public class AuditEventHandler {
           .setRelation(Constants.LINK_NEXT)
           .setUrl(
               buildLinkURL(requestDetails, bundle.getEntry().getLast().getResource().getIdPart()));
-      // we need to reset the total if we do a concat on the list
-      bundle.setTotal(bundle.getEntry().size());
+      // remove total we do not provide it on next queries due to performance concerns
+      bundle.setTotalElement(null);
     }
   }
 
