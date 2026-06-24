@@ -71,6 +71,8 @@ _NCH_TABLES = {
         IdrClaimItemInstitutionalNch,
     }
 }
+# The addition of prior auth here is a temp workaround for synthetic prior auth incremental loads
+# until IDR provides actual prod support for this.
 _BENE_TABLES = {
     x.table()
     for x in {

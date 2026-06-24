@@ -80,7 +80,7 @@ class IdrPriorAuth(IdrBaseModel):
     @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
-        # Prior auth data older than 2 years should be filtered
+        # Prior auth data older than the lookback period should be filtered
         prior_auth_cutoff_date = start_time - relativedelta(years=PRIOR_AUTH_LOOKBACK_YEARS)
         start_time_sql = prior_auth_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
 
