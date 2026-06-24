@@ -119,7 +119,7 @@
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
         <sonar.version>5.4.0.6343</sonar.version>
         <jacoco.version>0.8.14</jacoco.version>
-        <micrometer.version>1.14.14</micrometer.version>
+        <micrometer.version>1.15.12</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <aws-java-sdk-bom.version>2.40.17</aws-java-sdk-bom.version>
@@ -128,9 +128,9 @@
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
         <spring-framework.version>6.2.18</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
-        <spring-boot.version>3.5.14</spring-boot.version>
+        <spring-boot.version>3.5.15</spring-boot.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
-        <spring-cloud-aws.version>3.4.0</spring-cloud-aws.version>
+        <spring-cloud-aws.version>3.4.2</spring-cloud-aws.version>
 
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
