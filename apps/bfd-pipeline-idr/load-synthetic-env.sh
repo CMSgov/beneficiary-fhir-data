@@ -41,7 +41,7 @@ IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitiv
 readonly IDR_SCHEMA
 export IDR_SCHEMA
 
-args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic' '--truncate-mode' 'append')
+args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
 if [[ -n "$1" ]]; then
     args+=('--seed-from' "$1")
 fi

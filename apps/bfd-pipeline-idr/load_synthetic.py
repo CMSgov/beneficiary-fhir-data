@@ -112,7 +112,7 @@ tables = [
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = True) -> None:
+def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]

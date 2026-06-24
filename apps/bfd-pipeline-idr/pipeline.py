@@ -59,20 +59,19 @@ from settings import (
 )
 @click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
 @click.option(
-    "--truncate-mode",
-    type=click.Choice(["reset", "append"]),
-    default="reset",
+    "--truncate",
+    is_flag=True,
+    default=False,
     show_default=True,
-    help="reset = truncate tables before loading (default), append = do not truncate",
+    help="Truncate tables before reloading. Default is false",
 )
 def main(
     source: Source,
     load_mode: LoadMode,
     load_type: LoadType,
     seed_from: str | None,
-    truncate_mode: str,
+    truncate: bool,
 ) -> None:
-    truncate = truncate_mode == "reset"
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
