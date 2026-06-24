@@ -12,18 +12,21 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-/** Map of basis profiles to FhirPaths. */
+/** Map of resource type -&gt; basis profile -&gt; FhirPaths, both blacklisted and whitelisted. */
 @NoArgsConstructor
 @Getter
 public class BasisProfileMap {
 
-  private final EnumMap<BasisProfile, List<String>> blackList = new EnumMap<>(BasisProfile.class);
-  private final EnumMap<BasisProfile, List<String>> whiteList = new EnumMap<>(BasisProfile.class);
+  private final EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> blackList =
+          new EnumMap<>(ResourceType.class);
+  private final EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> whiteList =
+          new EnumMap<>(ResourceType.class);
 
   /** A single entry from a dictionary support file YAML, exhaustive property list. */
   @Data
@@ -47,6 +50,7 @@ public class BasisProfileMap {
 
   /**
    * Updates the BasisProfileMap with a file input stream (dictionary yaml).
+   *
    * @param fileStream the YAML file
    */
   private void updateBasisProfileMapWithStream(InputStream fileStream) {
@@ -62,30 +66,50 @@ public class BasisProfileMap {
     }
 
     for (var entry : entries) {
-      if (entry.getFhirPath() == null) {
+      String fhirPath = entry.getFhirPath();
+      if (fhirPath == null || fhirPath.isBlank()) {
         continue;
       }
 
-      // Default to all profiles if profile is not a property in the YAML
-      // TODO: Discuss this with Alex
-      Set<BasisProfile> applicableProfiles = EnumSet.allOf(BasisProfile.class);
-
-      if (entry.getProfiles() != null) {
-        applicableProfiles = entry.getProfiles().stream()
-                .map(p -> BasisProfile.valueOf(p.toUpperCase()))
-                .collect(Collectors.toSet());
+      ResourceType resourceType = resolveResourceType(fhirPath);
+      if (resourceType == null) {
+        System.err.println("OH NO: could not resolve resource type from FhirPath: " + fhirPath);
+        continue;
       }
 
+      // profiles = where this field APPLIES (should be kept, i.e. whitelisted).
+      // Every other profile blacklists it.
+      Set<BasisProfile> applicableProfiles = EnumSet.allOf(BasisProfile.class);
+      if (entry.getProfiles() != null) {
+        applicableProfiles =
+                entry.getProfiles().stream()
+                        .map(p -> BasisProfile.valueOf(p.toUpperCase()))
+                        .collect(Collectors.toSet());
+      }
+
+      var blackProfileMap =
+              blackList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
+      var whiteProfileMap =
+              whiteList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
+
       for (var profile : BasisProfile.values()) {
-        var targetMap = applicableProfiles.contains(profile) ? this.whiteList : this.blackList;
-        targetMap.computeIfAbsent(profile, _ -> new ArrayList<>()).add(entry.getFhirPath());
+        var targetMap = applicableProfiles.contains(profile) ? whiteProfileMap : blackProfileMap;
+        targetMap.computeIfAbsent(profile, _ -> new ArrayList<>()).add(fhirPath);
       }
     }
   }
 
   /**
-   * Generates the profiles and loads them into the class instance.
+   * Get ResourceType from FhirPath.
+   *
+   * @param fhirPath the FhirPath expression
+   * @return the resolved resource type, or null if the leading segment isn't a known type
    */
+  private ResourceType resolveResourceType(String fhirPath) {
+    return ResourceType.fromCode(fhirPath.substring(0, fhirPath.indexOf('.')));
+  }
+
+  /** Generates the profiles and loads them into the class instance. */
   public void generateProfileBasisMap() {
     try {
       var resolver = new PathMatchingResourcePatternResolver();
