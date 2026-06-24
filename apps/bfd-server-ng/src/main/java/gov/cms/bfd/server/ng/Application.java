@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** BFD Server startup class. */
@@ -77,12 +79,16 @@ public class Application {
    * Creates the audit logger(s).
    *
    * @param configuration app configuration
+   * @param auditEventRepository Audit Event Repository
    * @param objectMapper object mapper
    * @return audit logger
    */
   @Bean
-  public AuditLogger auditLogger(Configuration configuration, ObjectMapper objectMapper) {
-    return configuration.getAuditLogger(objectMapper);
+  public AuditLogger auditLogger(
+      Configuration configuration,
+      AuditEventRepository auditEventRepository,
+      ObjectMapper objectMapper) {
+    return configuration.getAuditLogger(auditEventRepository, objectMapper);
   }
 
   /**
@@ -94,6 +100,18 @@ public class Application {
   @Bean
   public DynamoDbClient dynamoDbClient(Configuration configuration) {
     return configuration.getDynamoDbClient();
+  }
+
+  /**
+   * Creates the DynamoDB table mapping for audit events. Built once in the application classloader
+   * to avoid ClassCastException with DevTools restart.
+   *
+   * @param dynamoDbClient DynamoDB client
+   * @return configured DynamoDB table for AuditEventDynamoItem
+   */
+  @Bean
+  public DynamoDbEnhancedClient auditEventTable(DynamoDbClient dynamoDbClient) {
+    return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
   }
 
   /**
