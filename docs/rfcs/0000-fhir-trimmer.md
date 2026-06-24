@@ -53,7 +53,7 @@ There are two portions of this code; reading and parsing the YAML files into a u
 
 * Mapping Framework
 
-On bfd-server-ng startup, the yaml files need to be parsed and translated into usable lists (shape to be determined) and stored in memory (or in a cache). This will interact with server startup. There are some impelemtnation questions that are outstanding, but I will suggest two possible implementations.
+On bfd-server-ng startup, the yaml files need to be parsed and translated into usable lists (shape to be determined) and stored in memory (or in a cache). These will be read into either a blacklist or whitelist and used to trim FHIR resources after generation. This will interact with server startup, and be instantiated as a singleton that is used across all FHIR resource handlers. There are some implementation questions that are outstanding, but I will suggest two possible implementations.
 
 Copy Existing Cache Protocol
 
@@ -94,13 +94,13 @@ Items to be discussed:
 
 * Is there a way to access files across modules?
   
-    Either by using symlinks or by moving the files into the shared-utils module
+    Answer: Either by using symlinks or by moving the files into the shared-utils module
 * Spring Config vs Static?
 
-    N/A
+    Answer: 
 * Is there a way to modify the bundles without using HAPI Fhir? Would that be faster?
 
-    There is, but it is much more dangerous and should only be considered if other options aren't feasible
+    Answer: There is, but it is much more dangerous and should only be considered if other options aren't feasible
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
@@ -113,7 +113,7 @@ Items to be discussed:
 
 * Query Level
 
-In the JPA (Jakarta Persistence) layer, we define entities that map to the database via @Embedded and @Column for building FHIR resources. The entities contain fields that map to columns which map to FhirPaths. When an object is requested (say a Claim) by a request, we build it as fully as possible (with some exceptions, like SAMHSA) and send it out. We already short-circuit on concepts like system type ()
+In the JPA (Jakarta Persistence) layer, we define entities that map to the database via @Embedded and @Column for building FHIR resources. The entities contain fields that map to columns which map to FhirPaths. When an object is requested (say a Claim) by a request, we build it as fully as possible (with some exceptions, like SAMHSA) and send it out. We already short-circuit on concepts like system type.
 
 To achieve our objective at this layer, it would require us to modify how we handle @Embedded and @Column with some sort of Hibernate interception. Given the complicated nature of implementing this and possible caching pitfalls + rewriting our entire JQL generating code, I have opted not to go with this approach.
 
@@ -129,7 +129,7 @@ It's possible to use StructureDefinitions and HAPI FHIR validation to remove ele
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
-Too many unknowns for the present to think about the future.
+There should be the ability to add new profiles (or some similar concept) to the trimmer, maybe without requesting it to the dictionary support map YAML files. Possibly a StructureDefinition resource that's broken down into blacklist/whitelist? We can't use the HAPI parser because it's too slow, but we could theoretically convert a StructureDefinition into a list of FhirPaths.
 
 ## Addendums
 [Addendums]: #addendums
