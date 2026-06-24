@@ -14,8 +14,11 @@ from constants import (
     CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_PARTITION,
+    FISS_CLM_SOURCE,
+    MCS_CLM_SOURCE,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
+    VMS_CLM_SOURCE,
 )
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
@@ -144,6 +147,7 @@ def prune_phase_1_ss_claims(
                 WHERE clm_uniq_id IN (
                     SELECT clm_uniq_id FROM {claim_table}
                     WHERE clm_type_cd BETWEEN %s AND %s
+                    AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                     AND clm_idr_ld_dt < %s
                 )
                 """,  # type: ignore
@@ -155,6 +159,7 @@ def prune_phase_1_ss_claims(
             f"""
                 DELETE FROM {claim_table}
                 WHERE clm_type_cd BETWEEN %s AND %s
+                AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                 AND clm_idr_ld_dt < %s
                 """,  # type: ignore
             (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
