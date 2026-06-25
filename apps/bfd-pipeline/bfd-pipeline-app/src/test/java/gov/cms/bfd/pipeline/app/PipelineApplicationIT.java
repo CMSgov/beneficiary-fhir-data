@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
-import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForMiniStack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +17,7 @@ import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -64,7 +64,7 @@ import software.amazon.awssdk.utils.StringUtils;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
+public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
   /**
    * Name of log file that will contain log output from the app. This has to match the value in our
    * {@code logback-test.xml} file.
@@ -78,10 +78,10 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   private static final FileBasedAssertionHelper LOG_FILE =
       new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
 
-  /** Name of SQS queue created in localstack to receive progress messages via SQS. */
+  /** Name of SQS queue created in MiniStack to receive progress messages via SQS. */
   private static final String SQS_QUEUE_NAME = "ccw-pipeline-progress";
 
-  /** Used to communicate with the localstack SQS service. */
+  /** Used to communicate with the MiniStack SQS service. */
   private SqsDao sqsDao;
 
   /** ec2 client. */
@@ -104,10 +104,10 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     LOG_FILE.endTest();
   }
 
-  /** Create our progress queue in the localstack SQS service before each test. */
+  /** Create our progress queue in the miniStack SQS service before each test. */
   @BeforeEach
   void createQueue() {
-    sqsDao = new SqsDao(createSqsClientForLocalStack(localstack));
+    sqsDao = new SqsDao(createSqsClientForMiniStack(miniStack));
     sqsDao.createQueue(SQS_QUEUE_NAME);
   }
 
@@ -502,9 +502,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
         AppConfiguration.SSM_PATH_IDEMPOTENCY_REQUIRED,
         String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
 
-    environment.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    environment.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
+    environment.put(AppConfiguration.ENV_VAR_AWS_ENDPOINT, miniStack.getEndpoint());
+    environment.put(AppConfiguration.ENV_VAR_AWS_ACCESS_KEY, miniStack.getAccessKey());
+    environment.put(AppConfiguration.ENV_VAR_AWS_SECRET_KEY, miniStack.getSecretKey());
   }
 
   /**
@@ -573,7 +573,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
   /**
    * Read back all of the {@link CcwRifLoadJobStatusEvent.JobStage} values (JSON strings) from the
-   * SQS event queue in localstack. Stages are listed in chronological order based on timestamps of
+   * SQS event queue in MiniStack. Stages are listed in chronological order based on timestamps of
    * the events and duplicates are removed to ensure test stability.
    *
    * @return the list

@@ -171,7 +171,7 @@ public final class LayeredConfiguration {
 
   /**
    * Loads {@link AwsClientConfig} for use in configuring SSM clients. These settings are generally
-   * only changed from defaults during localstack based tests.
+   * only changed from defaults during miniStack based tests.
    *
    * @return the aws client settings
    */

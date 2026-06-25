@@ -322,7 +322,7 @@ public abstract class BaseConfiguration {
 
   /**
    * Loads {@link AwsClientConfig} for use in configuring AWS clients. These settings are generally
-   * only changed from defaults during localstack based tests.
+   * only changed from defaults during miniStack based tests.
    *
    * @param config used to load configuration values
    * @return the aws client settings

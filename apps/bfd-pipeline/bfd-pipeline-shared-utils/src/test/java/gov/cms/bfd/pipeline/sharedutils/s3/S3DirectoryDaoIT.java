@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,22 +26,26 @@ import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.regions.Region;
 
 /** Integration test for {@link S3DirectoryDao}. */
-class S3DirectoryDaoIT extends AbstractLocalStackTest {
+class S3DirectoryDaoIT extends AbstractMiniStackTest {
   /** Provides S3 access during testing. */
   private S3Dao s3Dao;
 
   /** Creates the {@link S3Dao} and a bucket for use in tests. */
   @BeforeEach
   void createDao() {
-    s3Dao =
-        new AwsS3ClientFactory(
-                S3ClientConfig.s3Builder()
-                    .region(Region.of(localstack.getRegion()))
-                    .endpointOverride(localstack.getEndpoint())
-                    .accessKey(localstack.getAccessKey())
-                    .secretKey(localstack.getSecretKey())
-                    .build())
-            .createS3Dao();
+    try {
+      s3Dao =
+          new AwsS3ClientFactory(
+                  S3ClientConfig.s3Builder()
+                      .region(Region.of(miniStack.getRegion()))
+                      .endpointOverride(new URI(miniStack.getEndpoint()))
+                      .accessKey(miniStack.getAccessKey())
+                      .secretKey(miniStack.getSecretKey())
+                      .build())
+              .createS3Dao();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /** Deletes bucket and closes the {@link S3Dao} after each test. */

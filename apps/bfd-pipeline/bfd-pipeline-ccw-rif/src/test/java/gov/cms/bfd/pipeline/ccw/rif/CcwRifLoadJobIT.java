@@ -13,7 +13,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -43,7 +43,7 @@ import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for {@link CcwRifLoadJob}. */
 @ExtendWith(MockitoExtension.class)
-final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
+final class CcwRifLoadJobIT extends AbstractMiniStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
   /** Used to capture status updates from the job. */
