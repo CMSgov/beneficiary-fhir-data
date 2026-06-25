@@ -1,22 +1,18 @@
 package gov.cms.bfd.server.ng.fhirtrimmer;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 
-/** Fourth try is the charm, MAYBE. */
+/** Fourth try is the charm, MAYBE. Nope. */
 public class FhirTrimmer {
 
-  private final FhirContext fhirContext;
   private final IFhirPath fhirPathEngine;
   private final BasisProfileMap basisProfileMap;
 
@@ -30,7 +26,6 @@ public class FhirTrimmer {
           BasisProfileMap basisProfileMap,
           FhirContext fhirContext) {
     this.basisProfileMap = basisProfileMap;
-    this.fhirContext = fhirContext;
     this.fhirPathEngine = fhirContext.newFhirPath();
   }
 
