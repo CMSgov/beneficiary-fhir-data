@@ -92,6 +92,23 @@ public class FhirInputConverter {
   }
 
   /**
+   * Converts a {@link TokenAndListParam} to a list of {@link String}.
+   *
+   * @param ids FHIR IDs
+   * @return list of string values
+   */
+  public static List<String> toStringList(@Nullable TokenAndListParam ids) {
+    if (ids == null) {
+      throw new InvalidRequestException("ID is missing");
+    }
+    var idStrings = FhirTokenParameterParser.flatten(ids).map(TokenParam::getValue).toList();
+    if (idStrings.size() > 100) {
+      throw new InvalidRequestException("A maximum of 100 claim IDs may be requested at once.");
+    }
+    return idStrings;
+  }
+
+  /**
    * Converts a {@link TokenParam} to a {@link Long}.
    *
    * @param token FHIR token
