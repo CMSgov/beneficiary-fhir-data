@@ -9,7 +9,7 @@ import org.testcontainers.utility.DockerImageName;
  * docs</a> for explanation of the singleton container pattern.
  */
 // False positive - not a utility class
-@SuppressWarnings("java:S118")
+@SuppressWarnings("java:S1118")
 public abstract class AbstractMiniStackTest {
   /** The system property defined in pom.xml containing the image to use for test AWS stack. */
   public static final String TEST_CONTAINER_AWS_IMAGE_PROPERTY = "its.testcontainer.aws.image";
