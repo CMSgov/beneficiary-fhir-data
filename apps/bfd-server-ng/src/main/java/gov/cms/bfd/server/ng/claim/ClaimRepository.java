@@ -86,7 +86,8 @@ public class ClaimRepository {
   @Timed(value = "application.claim.search_by_id")
   public List<ClaimBase> findByIds(
       @MeterTag(key = "hasServiceUpdated", expression = "hasServiceUpdated()")
-          @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimIdSearchCriteria criteria) {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
@@ -96,6 +97,7 @@ public class ClaimRepository {
         List.of(
             new BillablePeriodFilterParam(criteria.serviceDate()),
             new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
     var professionalSharedSystemsClaims =
@@ -169,6 +171,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimSearchCriteria criteria) {
 
@@ -178,6 +181,7 @@ public class ClaimRepository {
             new LastUpdatedFilterParam(criteria.lastUpdated()),
             new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
             new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
     var futures =

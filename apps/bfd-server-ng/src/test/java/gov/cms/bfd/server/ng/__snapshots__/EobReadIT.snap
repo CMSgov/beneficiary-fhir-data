@@ -2333,7 +2333,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
-  "outcome" : "queued",
+  "outcome" : "partial",
   "patient" : {
     "reference" : "Patient/405764107"
   },
@@ -3263,7 +3263,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
-  "outcome" : "complete",
+  "outcome" : "partial",
   "patient" : {
     "reference" : "Patient/178083966"
   },

@@ -1068,6 +1068,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -1669,6 +1670,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -2270,6 +2272,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -2460,6 +2463,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -2602,6 +2606,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET_WITH_SEARCH]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -2744,6 +2749,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -3011,6 +3017,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3278,6 +3285,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3545,6 +3553,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3796,6 +3805,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4047,6 +4057,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4298,6 +4309,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4553,6 +4565,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4808,6 +4821,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -5063,6 +5077,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -5228,6 +5243,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -5370,6 +5386,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -5512,6 +5529,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -5802,6 +5820,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -6044,6 +6063,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -6286,6 +6306,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -6400,6 +6421,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6514,6 +6536,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET_WITH_SEAR
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6628,6 +6651,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6733,6 +6757,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchForBeneWithSingleP
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6887,6 +6912,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchForBeneWithSingleP
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -7001,6 +7027,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -7115,6 +7142,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -7229,6 +7257,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]

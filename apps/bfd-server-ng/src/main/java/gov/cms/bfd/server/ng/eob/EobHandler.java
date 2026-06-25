@@ -58,7 +58,11 @@ public class EobHandler {
     var eobs =
         searchByIdsInner(
             new ClaimIdSearchCriteria(
-                List.of(fhirId), new DateTimeRange(), new DateTimeRange(), Collections.emptyList()),
+                List.of(fhirId),
+                new DateTimeRange(),
+                new DateTimeRange(),
+                Collections.emptyList(),
+                Collections.emptyList()),
             options);
     return eobs.stream().findFirst();
   }
@@ -92,6 +96,7 @@ public class EobHandler {
             criteria.offset(),
             criteria.tagCriteria(),
             criteria.claimTypeCodes(),
+            criteria.outcomes(),
             criteria.sources());
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
