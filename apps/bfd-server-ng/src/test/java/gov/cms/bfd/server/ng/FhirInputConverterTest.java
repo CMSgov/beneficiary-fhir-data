@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import java.util.List;
 import java.util.Optional;
@@ -168,5 +170,37 @@ class FhirInputConverterTest extends IntegrationTestBase {
             () -> FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
 
     assertEquals("Multiple values supplied for header: IncludeTaxNumbers", thrown.getMessage());
+  }
+
+  @Test
+  void parseFromQueryParam_validScenarios() {
+    assertEquals(
+        CoveragePart.PART_A, FhirInputConverter.parseCoverageClassPart("part-a").orElse(null));
+    assertEquals(
+        CoveragePart.PART_B, FhirInputConverter.parseCoverageClassPart("part-b").orElse(null));
+    assertEquals(
+        CoveragePart.PART_C, FhirInputConverter.parseCoverageClassPart("part-c").orElse(null));
+    assertEquals(
+        CoveragePart.PART_D, FhirInputConverter.parseCoverageClassPart("part-d").orElse(null));
+    assertEquals(CoveragePart.DUAL, FhirInputConverter.parseCoverageClassPart("dual").orElse(null));
+
+    assertEquals(
+        CoveragePart.PART_A, FhirInputConverter.parseCoverageClassPart("Part A").orElse(null));
+    assertEquals(
+        CoveragePart.PART_B, FhirInputConverter.parseCoverageClassPart("PART_B").orElse(null));
+    assertEquals(
+        CoveragePart.PART_C, FhirInputConverter.parseCoverageClassPart(" part-c ").orElse(null));
+    assertEquals(
+        CoveragePart.PART_D, FhirInputConverter.parseCoverageClassPart("Part_D").orElse(null));
+  }
+
+  @Test
+  void parseFromQueryParam_invalidScenarios() {
+    assertTrue(FhirInputConverter.parseCoverageClassPart(null).isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("   ").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("part-e").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("medicare").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("part/a").isEmpty());
   }
 }
