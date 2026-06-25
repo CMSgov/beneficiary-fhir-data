@@ -183,6 +183,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[GET
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -325,6 +326,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[GET
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -467,6 +469,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[POS
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
