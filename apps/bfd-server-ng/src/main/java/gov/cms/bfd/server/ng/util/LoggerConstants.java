@@ -67,6 +67,12 @@ public class LoggerConstants {
    */
   public static final String FINAL_DETERMINATION = "finalDetermination";
 
+  /** Name of the current match algorithm version used. */
+  public static final String MATCH_ALGORITHM_VERSION = "matchAlgorithmVersion";
+
+  /** Current match algorithm version. */
+  public static final String CURRENT_MATCH_ALGORITHM_VERSION = "3.2.2";
+
   /** Name of the timestamp when the HAPI request reached pre-handle processing. */
   public static final String HAPI_INCOMING_PRE_HANDLE =
       "hapi.server_incoming_request_pre_handle_timestamp_in_millis";
