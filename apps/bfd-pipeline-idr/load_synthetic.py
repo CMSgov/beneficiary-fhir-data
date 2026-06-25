@@ -172,6 +172,11 @@ if __name__ == "__main__":
         default=default_dir,
         help="base directory to load files from",
     )
+    parser.add_argument(
+        "--truncate",
+        action="store_true",
+        help="Truncate tables before reloading. Default is false",
+    )
 
     args = parser.parse_args()
     print("base dir " + args.base_dir)
@@ -180,4 +185,5 @@ if __name__ == "__main__":
         if args.database_type == "snowflake"
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         args.base_dir or default_dir,
+        args.truncate,
     )

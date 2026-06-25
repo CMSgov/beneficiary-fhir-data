@@ -63,7 +63,7 @@ from settings import (
     is_flag=True,
     default=False,
     show_default=True,
-    help="Truncate tables before reloading. Default is false",
+    help="Truncate tables before reloading",
 )
 def main(
     source: Source,
