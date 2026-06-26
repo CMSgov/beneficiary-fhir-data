@@ -197,6 +197,7 @@ def load_inputs():
         BENE_MAPD_ENRLMT: [],
         BENE_MAPD_ENRLMT_RX: [],
         BENE_LIS: [],
+        BENE_LIS_CMBND: [],
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
     }
@@ -306,6 +307,15 @@ def load_inputs():
                 bene_sk=patient["BENE_SK"],
             ):
                 generator.generate_bene_lis(RowAdapter(initial_kv_template.copy()))
+
+            # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
+            # any of those are true
+            if probability(0.5) and not output_table_contains_by_bene_sk(
+                    table=generator.bene_lis_cmbnd,
+                    for_file=BENE_LIS_CMBND,
+                    bene_sk=patient["BENE_SK"],
+            ):
+                generator.generate_bene_lis_cmbnd(RowAdapter(initial_kv_template.copy()))
 
         if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
             # Exclude rows from the original patient that will be modified so that RowAdapter does
