@@ -67,6 +67,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryMaPartDEnrollment,
     IdrBeneficiaryMaPartDEnrollmentRx,
     IdrBeneficiaryLowIncomeSubsidy,
+    IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 _PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
