@@ -1,10 +1,9 @@
 from datetime import date, datetime
 from typing import Annotated, override
 
-from dateutil.relativedelta import relativedelta
 from pydantic import BeforeValidator
 
-from constants import IDR_PRIOR_AUTH_TABLE, PRIOR_AUTH_LOOKBACK_YEARS
+from constants import IDR_PRIOR_AUTH_TABLE
 from load_partition import LoadPartition
 from model.base_model import (
     BATCH_TIMESTAMP,
@@ -18,6 +17,7 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from settings import MIN_PRIOR_AUTH_LOAD_DATE
 
 
 class IdrPriorAuth(IdrBaseModel):
@@ -81,15 +81,12 @@ class IdrPriorAuth(IdrBaseModel):
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # Prior auth data older than the lookback period should be filtered
-        prior_auth_cutoff_date = start_time - relativedelta(years=PRIOR_AUTH_LOOKBACK_YEARS)
-        start_time_sql = prior_auth_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
-
         return f"""
             WITH distinct_prior_auths AS (
                 SELECT *, ROW_NUMBER() 
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > {start_time_sql}
+                WHERE pa_req_rec_dt > '{MIN_PRIOR_AUTH_LOAD_DATE}'
             ) 
             SELECT {{COLUMNS}} FROM distinct_prior_auths 
             {{WHERE_CLAUSE}} AND row_order = 1;

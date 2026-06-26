@@ -175,6 +175,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--truncate",
         action="store_true",
+        default=False,
         help="Truncate tables before reloading. Default is false",
     )
 
