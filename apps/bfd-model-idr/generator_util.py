@@ -817,8 +817,8 @@ class GeneratorUtil:
             ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
             lis_row["IDR_LTST_TRANS_FLG"] = "Y"
-            lis_row["BENE_LIS_EFCTV_CD"] = lis_efctv_cd
-            lis_row["BENE_LIS_COPMT_LVL_CD"] = copmt_lvl_cd
+            lis_row["BENE_CMBND_DEEMD_IND"] = lis_efctv_cd
+            lis_row["BENE_CMBND_DEEMD_COPMT_LVL_ID"] = copmt_lvl_cd
             lis_row["BENE_CMBND_DEEMD_PRM_PCT"] = str(ptd_prm_pct)
             lis_row["BENE_CMBND_DEEMD_EFCTV_DT"] = str(lis_start_date)
             lis_row["BENE_CMBND_DEEMD_TRMNTN_DT"] = lis_end_date
