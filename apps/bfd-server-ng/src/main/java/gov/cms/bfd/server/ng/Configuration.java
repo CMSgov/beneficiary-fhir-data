@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -39,8 +41,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 public class Configuration implements Serializable {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
   private static final String LOCAL_ENV = "local";
+  private static final String FORCE_DYNAMO_LOG = "FORCE_DYNAMO_LOG";
 
-  /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
+  /**
+   * Identifies which Spring profiles indicate that the server is being run on a local machinzze.
+   */
   private static final List<String> ALLOWED_LOCAL_PROFILES =
       List.of(LOCAL_ENV, "sql-profile", "structured-log");
 
@@ -111,15 +116,15 @@ public class Configuration implements Serializable {
    * Creates a new {@link AuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both loggers will be
    * used.
    *
+   * @param auditEventRepository used for logging to DynamoDB
    * @param objectMapper used for serializing patient audit records
    * @return audit logger
    */
-  public AuditLogger getAuditLogger(ObjectMapper objectMapper) {
+  public AuditLogger getAuditLogger(
+      AuditEventRepository auditEventRepository, ObjectMapper objectMapper) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
     if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
-      var dynamoLogger =
-          new DynamoDbAuditLogger(
-              getDynamoDbClient(), objectMapper, getPatientMatchAuditTableName());
+      var dynamoLogger = new DynamoDbAuditLogger(auditEventRepository, objectMapper);
 
       return auditRecord -> {
         logStreamLogger.log(auditRecord);
@@ -131,6 +136,10 @@ public class Configuration implements Serializable {
 
   boolean isLocal() {
     return env.equalsIgnoreCase(LOCAL_ENV);
+  }
+
+  boolean forceLogDynamo() {
+    return Boolean.parseBoolean(System.getenv(FORCE_DYNAMO_LOG));
   }
 
   /** Represents possible types of audit logging. */
@@ -147,6 +156,9 @@ public class Configuration implements Serializable {
    * @return the audit logger type
    */
   public AuditLoggerType getAuditLoggerType() {
+    if (forceLogDynamo()) {
+      return AuditLoggerType.DYNAMO_DB;
+    }
     return isLocal() ? AuditLoggerType.LOG_STREAM : AuditLoggerType.DYNAMO_DB;
   }
 
@@ -170,7 +182,13 @@ public class Configuration implements Serializable {
     return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
   }
 
-  protected String getPatientMatchAuditTableName() {
+  /**
+   * Audit table name dynamically created per environment.
+   *
+   * @return audit table name
+   */
+  @Bean(name = "auditTableName")
+  public String getPatientMatchAuditTableName() {
     return String.format("bfd-%s-patient-match-audit", env);
   }
 

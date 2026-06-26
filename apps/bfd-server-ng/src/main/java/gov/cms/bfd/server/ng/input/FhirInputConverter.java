@@ -92,6 +92,23 @@ public class FhirInputConverter {
   }
 
   /**
+   * Converts a {@link TokenAndListParam} to a list of {@link String}.
+   *
+   * @param ids FHIR IDs
+   * @return list of string values
+   */
+  public static List<String> toStringList(@Nullable TokenAndListParam ids) {
+    if (ids == null) {
+      throw new InvalidRequestException("ID is missing");
+    }
+    var idStrings = FhirTokenParameterParser.flatten(ids).map(TokenParam::getValue).toList();
+    if (idStrings.size() > 100) {
+      throw new InvalidRequestException("A maximum of 100 claim IDs may be requested at once.");
+    }
+    return idStrings;
+  }
+
+  /**
    * Converts a {@link TokenParam} to a {@link Long}.
    *
    * @param token FHIR token
@@ -205,6 +222,23 @@ public class FhirInputConverter {
 
     var rawCompositeIdStr = coverageId.getIdPart();
     return CoverageCompositeId.parse(rawCompositeIdStr);
+  }
+
+  /**
+   * Finds a {@link CoveragePart} by matching the provided {@code param} against either the
+   * standard. The match is case-insensitive. It is tolerated of patterns it can determine are
+   * intent. Examples plan a plan_a plan-a will all translate a Plan A search.
+   *
+   * @param param The query param from.
+   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
+   *     Optional#empty()} if no exact match.
+   */
+  public static Optional<CoveragePart> parseCoverageClassPart(@Nullable String param) {
+    if (param == null || param.isBlank()) {
+      return Optional.empty();
+    }
+    param = param.trim().toLowerCase().replace(" ", "-").replace("_", "-");
+    return CoveragePart.fromExactRawPrefix(param);
   }
 
   /**

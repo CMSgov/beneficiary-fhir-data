@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
@@ -41,6 +42,7 @@ public class IntegrationTestBase {
   @Autowired protected EntityManager entityManager;
   @Autowired protected Configuration configuration;
   @Autowired protected DynamoDbClient dynamoDbClient;
+  @Autowired protected AuditEventRepository auditEventRepository;
 
   public static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
   protected static final String SOURCE = "_source";
@@ -261,7 +263,8 @@ public class IntegrationTestBase {
       Integer scenarioIndex,
       String clientId,
       String clientName,
-      String clientIp) {}
+      String clientIp,
+      String timestamp) {}
 
   protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(
       Long beneSk, String testClientId) {
@@ -272,6 +275,7 @@ public class IntegrationTestBase {
             .keyConditionExpression("matchedBeneSk = :beneSk")
             .expressionAttributeValues(
                 Map.of(":beneSk", AttributeValue.builder().n(beneSk.toString()).build()))
+            .scanIndexForward(false)
             .build();
 
     var response = dynamoDbClient.query(request);
@@ -284,8 +288,9 @@ public class IntegrationTestBase {
               var clientId = item.get("clientId").s();
               var clientName = item.get("clientName").s();
               var clientIP = item.get("clientIp").s();
+              var timestamp = item.get("timestamp").s();
               return new PatientMatchTestAuditRecord(
-                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP);
+                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP, timestamp);
             })
         .toList();
   }
@@ -335,6 +340,10 @@ public class IntegrationTestBase {
     fhirClient.registerInterceptor(headersInterceptor);
 
     return fhirClient.search().forResource(ExplanationOfBenefit.class).returnBundle(Bundle.class);
+  }
+
+  protected AuditEventRepository getAuditEventRepository() {
+    return auditEventRepository;
   }
 
   public boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
