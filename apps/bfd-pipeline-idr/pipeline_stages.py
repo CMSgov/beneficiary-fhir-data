@@ -65,7 +65,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryMaPartDEnrollment,
     IdrBeneficiaryMaPartDEnrollmentRx,
     IdrBeneficiaryLowIncomeSubsidy,
-    IdrBeneficiaryLowIncomeSubsidyCmbnd
+    IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 _LOAD_ALL_TABLES = {"all"}
