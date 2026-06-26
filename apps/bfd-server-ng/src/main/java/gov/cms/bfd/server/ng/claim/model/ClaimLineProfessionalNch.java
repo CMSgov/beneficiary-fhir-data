@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
+import gov.cms.bfd.server.ng.converter.OptionalStringConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
@@ -58,12 +59,20 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   private Optional<Double> claimLineHCTHGBTestResult;
 
   @Column(name = "clm_line_carr_clncl_lab_num")
+  @Convert(converter = OptionalStringConverter.class)
   private Optional<String> claimLineCarrierClinicalLabNumber;
+
+  @Column(name = "clm_line_ndc_cd")
+  @Convert(converter = OptionalStringConverter.class)
+  private Optional<String> claimLineNdcCode;
 
   @Override
   void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
     var productOrService = new CodeableConcept();
     getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
+    claimLineNdcCode
+        .map(code -> new Coding().setSystem(SystemUrls.NDC).setCode(code))
+        .ifPresent(productOrService::addCoding);
     line.setQuantity(getServiceUnitQuantity().toFhir());
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
   }

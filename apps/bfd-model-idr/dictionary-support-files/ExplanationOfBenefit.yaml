@@ -1137,7 +1137,7 @@
     - REV_CNTR_IDE_NDC_UPC_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
-  fhirPath: ExplanationOfBenefit.item.detail.productOrService.where(coding.system='http://hl7.org/fhir/sid/ndc').coding.code
+  fhirPath: (ExplanationOfBenefit.item.productOrService.coding|ExplanationOfBenefit.item.detail.productOrService.coding).where(system='http://hl7.org/fhir/sid/ndc').code
   profiles:
     - Basis
     - Regular

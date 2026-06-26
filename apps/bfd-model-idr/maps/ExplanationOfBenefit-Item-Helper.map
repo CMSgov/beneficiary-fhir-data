@@ -522,6 +522,7 @@ group addProductOrService(source src: LineItemComponent, target tgt: CodeableCon
     src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()=5 and hcpcsCd.substring(0,1).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", hcpcsCd) "Add coding";
     src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()!=5) -> tgt.coding = c("http://terminology.hl7.org/CodeSystem/data-absent-reason","not-applicable") "add DAR";
     src.CLM_REV_APC_HIPPS_CD as hippsCd where(hippsCd.length()=5 and hippsCd!="00000") -> tgt.coding = c("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", hippsCd) "Add coding";
+    src.CLM_LINE_NDC_CD as ndcCd where(ndcCd.length()=11) -> tgt.coding = c("http://hl7.org/fhir/sid/ndc", ndcCd) "Add NDC coding";
 }
 
 group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneElement){

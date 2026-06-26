@@ -3211,6 +3211,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         } ]
       }
     } ],
+    "detail" : [ {
+      "productOrService" : {
+        "coding" : [ {
+          "code" : "00409189001",
+          "system" : "http://hl7.org/fhir/sid/ndc"
+        } ]
+      },
+      "sequence" : 1
+    } ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
       "valueCoding" : {
@@ -3240,6 +3249,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "coding" : [ {
         "code" : "J2270",
         "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
+      }, {
+        "code" : "00409189001",
+        "system" : "http://hl7.org/fhir/sid/ndc"
       } ]
     },
     "quantity" : {
