@@ -17,11 +17,6 @@ uv sync
 > - Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
 > - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, this synthetic data already exists in `apps/bfd-model-idr/synthetic-data`. Consult the `README.md` in that directory for further detail.
 
-> [!NOTE]
-> 
-> By defauly, loading synthetic data does not truncate existing tables before loading. This allows additional synthetic data to be appended.
-> To perform a fresh load, pass the '--truncate' flag to the pipeline or in 'load_synthetic.py'
-
 To load from `apps/bfd-model-idr/out`, run:
 
 ```sh
@@ -68,6 +63,11 @@ Data is loaded into a live environment from our Snowflake dev instance
 (replace the value of `BFD_ENV` with the environment name you want to target).
 
 This will load the current contents of Snowflake into the environment.
+
+> [!NOTE]
+>
+> By default, loading synthetic data does not truncate existing tables before loading. This allows additional synthetic data to be appended.
+> To perform a fresh load, pass the '--truncate' flag to the pipeline or in 'load_synthetic.py'
 
 ```sh
 BFD_ENV=1234-test ./load-synthetic-env.sh
