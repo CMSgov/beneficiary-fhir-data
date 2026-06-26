@@ -130,6 +130,8 @@ def prune_phase_1_ss_claims(
     job_start: datetime,
 ) -> bool:
     prune_cutoff_date = job_start - timedelta(days=60)
+    logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
+
     shared_claim_tables = {
         CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
         CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
@@ -146,23 +148,23 @@ def prune_phase_1_ss_claims(
                 DELETE FROM {item_table}
                 WHERE clm_uniq_id IN (
                     SELECT clm_uniq_id FROM {claim_table}
-                    WHERE clm_type_cd BETWEEN %s AND %s
+                    WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
                     AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                     AND clm_idr_ld_dt < %s
                 )
                 """,  # type: ignore
-            (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
+            (prune_cutoff_date,),
         )
         logger.info("pruned {} rows from {}", res.rowcount, item_table)
 
         res = conn.execute(
             f"""
                 DELETE FROM {claim_table}
-                WHERE clm_type_cd BETWEEN %s AND %s
+                WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
                 AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                 AND clm_idr_ld_dt < %s
                 """,  # type: ignore
-            (PHASE_1_SS_MIN, PHASE_1_SS_MAX, prune_cutoff_date),
+            (prune_cutoff_date,),
         )
         logger.info("pruned {} rows from {}", res.rowcount, claim_table)
     return True
