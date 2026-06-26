@@ -15,6 +15,7 @@ from model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
 from model.idr_beneficiary_entitlement import IdrBeneficiaryEntitlement
 from model.idr_beneficiary_entitlement_reason import IdrBeneficiaryEntitlementReason
 from model.idr_beneficiary_low_income_subsidy import IdrBeneficiaryLowIncomeSubsidy
+from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.idr_beneficiary_mbi_id import IdrBeneficiaryMbiId
@@ -64,6 +65,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryMaPartDEnrollment,
     IdrBeneficiaryMaPartDEnrollmentRx,
     IdrBeneficiaryLowIncomeSubsidy,
+    IdrBeneficiaryLowIncomeSubsidyCmbnd
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 _LOAD_ALL_TABLES = {"all"}

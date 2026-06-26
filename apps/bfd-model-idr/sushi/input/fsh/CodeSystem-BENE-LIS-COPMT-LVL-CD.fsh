@@ -10,4 +10,7 @@ Description: "Codes indicating the copayment level for Low Income Subsidy (LIS) 
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
 
 * #1 "High"
-* #4 "15% Copayment" 
+* #4 "15% Copayment"
+* #5 "Unknown"
+* #3 "0 (no copay)"
+* #2 "Low"

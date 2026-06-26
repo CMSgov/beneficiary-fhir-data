@@ -13,6 +13,7 @@ from generator_util import (
     BENE_ENTLMT_RSN,
     BENE_HSTRY,
     BENE_LIS,
+    BENE_LIS_CMBND,
     BENE_MAPD_ENRLMT,
     BENE_MAPD_ENRLMT_RX,
     BENE_MBI_ID,
@@ -167,6 +168,9 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
 
     for bene_lis_row in files[BENE_LIS]:
         generator.generate_bene_lis(lis_row=bene_lis_row)
+
+    for bene_lis_row in files[BENE_LIS_CMBND]:
+        generator.generate_bene_lis_cmbnd(lis_row=bene_lis_row)
 
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
