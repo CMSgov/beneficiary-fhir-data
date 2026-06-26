@@ -93,6 +93,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -193,6 +194,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -293,6 +295,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -446,6 +449,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -551,6 +555,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -656,6 +661,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -685,6 +691,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -714,6 +721,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARC
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -743,6 +751,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -817,6 +826,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -891,6 +901,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -965,6 +976,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1040,6 +1052,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1115,6 +1128,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1190,6 +1204,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1338,6 +1353,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1438,6 +1454,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -1538,6 +1555,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]

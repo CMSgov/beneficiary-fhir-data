@@ -161,6 +161,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             Optional.empty(),
             Collections.emptyList(),
             List.of(),
+            List.of(),
             Collections.emptyList());
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
@@ -311,6 +312,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             .findFirst();
 
     assertTrue(samhsaEob.isPresent(), "Expected SAMHSA EOB found in bundle.");
+    assertEquals(OUTCOME_PARTIAL, samhsaEob.get().getOutcome().toCode());
 
     Predicate<Coding> isSamhsaSecurityTag =
         tag ->
