@@ -4,7 +4,7 @@ import static gov.cms.bfd.server.ng.util.MetricRecorder.*;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.CoveragePart;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
@@ -30,16 +30,15 @@ public class CoverageRepository {
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
    *
-   * @param beneSk bene surrogate key
-   * @param lastUpdatedRange last updated search range
+   * @param criteria Coverage search criteria
    * @return beneficiary record
    */
+  // suppress SonarQube about dynamically formatted SQL queries being safe here. We set the value in
+  // code.
+  @SuppressWarnings("java:S2077")
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
-      long beneSk,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdatedRange) {
+      @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
+          CoverageSearchCriteria criteria) {
     var benefitDate = dateUtil.nowAoe();
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
@@ -132,14 +131,14 @@ public class CoverageRepository {
                                   AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
                           ))
                         ORDER BY b.obsoleteTimestamp DESC
-                      """,
-                    lastUpdatedRange.getLowerBoundSqlOperator(),
-                    lastUpdatedRange.getUpperBoundSqlOperator()),
+                    """,
+                    criteria.lastUpdated().getLowerBoundSqlOperator(),
+                    criteria.lastUpdated().getUpperBoundSqlOperator()),
                 BeneficiaryCoverage.class)
-            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+            .setParameter("lowerBound", criteria.lastUpdated().getLowerBoundDateTime().orElse(null))
+            .setParameter("upperBound", criteria.lastUpdated().getUpperBoundDateTime().orElse(null))
             .setParameter("today", benefitDate)
-            .setParameter("beneSk", beneSk);
+            .setParameter("beneSk", criteria.beneSk());
 
     return metricRecorder.recordMetric(
         "application.coverage.search_by_bene",
