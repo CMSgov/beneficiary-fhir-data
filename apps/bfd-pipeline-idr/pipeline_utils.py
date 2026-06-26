@@ -129,9 +129,6 @@ def prune_phase_1_ss_claims(
     load_mode: LoadMode,
     job_start: datetime,
 ) -> bool:
-    prune_cutoff_date = job_start - timedelta(days=60)
-    logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
-
     shared_claim_tables = {
         CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
         CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
@@ -141,6 +138,9 @@ def prune_phase_1_ss_claims(
     item_table = shared_claim_tables.get(claim_table)
     if item_table is None:
         return True
+
+    prune_cutoff_date = job_start - timedelta(days=60)
+    logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         res = conn.execute(

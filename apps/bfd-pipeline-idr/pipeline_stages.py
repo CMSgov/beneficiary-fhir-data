@@ -44,6 +44,10 @@ _CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
 ]
+_CLAIM_SS_TABLES: list[type[IdrBaseModel]] = [
+    IdrClaimProfessionalSs,
+    IdrClaimInstitutionalSs,
+]
 _CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
     # RX/Part D is special because we combine claim + claim line
     IdrClaimRx,
@@ -140,7 +144,7 @@ class StagedIdrPipeline:
         if self.load_type == LoadType.INITIAL:
             return
 
-        for model in self._filter_tables(_CLAIM_TABLES):
+        for model in self._filter_tables(_CLAIM_SS_TABLES):
             yield functools.partial(
                 prune_phase_1_ss_claims,
                 model,
