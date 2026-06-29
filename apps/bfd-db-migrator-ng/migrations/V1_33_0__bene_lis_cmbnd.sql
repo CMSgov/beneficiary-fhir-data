@@ -9,7 +9,7 @@ CREATE TABLE idr.beneficiary_low_income_subsidy_cmbnd(
    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-   idr_updt_ts TIMESTAMPTZ,
+   idr_updt_ts TIMESTAMPTZ NOT NULL,
    bfd_created_ts TIMESTAMPTZ NOT NULL,
    bfd_updated_ts TIMESTAMPTZ NOT NULL,
    PRIMARY KEY(bene_sk, bene_cmbnd_deemd_efctv_dt)
