@@ -827,7 +827,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_lis(
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
-    PRIMARY KEY(bene_sk, bene_cmbnd_deemd_efctv_dt)
+    PRIMARY KEY(bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts)
 );
 
 

@@ -4,7 +4,6 @@ from typing import Annotated, override
 from pydantic import BeforeValidator
 
 from constants import (
-    DEFAULT_MAX_DATE,
     IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE,
 )
 from load_partition import LoadPartition
@@ -32,7 +31,7 @@ class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
     bene_cmbnd_deemd_ind: str
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
+    idr_trans_obslt_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 2}]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
@@ -65,6 +64,5 @@ class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
                     {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = bene_lis.bene_sk
                 )
-                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
                 {{ORDER_BY}}
             """
