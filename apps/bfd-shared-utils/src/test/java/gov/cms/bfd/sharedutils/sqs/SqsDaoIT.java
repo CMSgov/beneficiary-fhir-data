@@ -1,10 +1,10 @@
 package gov.cms.bfd.sharedutils.sqs;
 
-import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForMiniStack;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -14,14 +14,14 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 /** Integration tests for {@link SqsDao}. */
-class SqsDaoIT extends AbstractLocalStackTest {
-  /** Will be connected to the localstack SQS service. */
+class SqsDaoIT extends AbstractMiniStackTest {
+  /** Will be connected to the MiniStack SQS service. */
   private SqsDao dao;
 
-  /** Create the {@link SqsDao} connected to our localstack SQS service. */
+  /** Create the {@link SqsDao} connected to our MiniStack SQS service. */
   @BeforeEach
   void setUp() {
-    SqsClient client = createSqsClientForLocalStack(localstack);
+    SqsClient client = createSqsClientForMiniStack(miniStack);
     dao = new SqsDao(client);
   }
 

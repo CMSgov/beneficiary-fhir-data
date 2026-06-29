@@ -8,7 +8,7 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link S3FileManager}. */
-public class S3FileManagerIT extends AbstractLocalStackS3Test {
+public class S3FileManagerIT extends AbstractMiniStackS3Test {
   /** Name of the temporary S3 bucket used in test. */
   private String bucketName;
 
