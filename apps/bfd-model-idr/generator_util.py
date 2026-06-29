@@ -319,6 +319,7 @@ class GeneratorUtil:
         self.mdcr_rsn: list[dict[str, Any]] = []
         self.bene_cmbnd_dual_mdcr: list[dict[str, Any]] = []
         self.bene_lis: list[dict[str, Any]] = []
+        self.bene_lis_cmbnd: list[dict[str, Any]] = []
         self.bene_mapd_enrlmt_rx: list[dict[str, Any]] = []
         self.bene_mapd_enrlmt: list[dict[str, Any]] = []
         self.code_systems = {}
