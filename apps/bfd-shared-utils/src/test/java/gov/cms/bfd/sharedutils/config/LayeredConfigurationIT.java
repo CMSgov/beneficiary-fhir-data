@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ import software.amazon.awssdk.services.ssm.model.ParameterType;
 import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 
 /** Integration test for {@link AwsParameterStoreClient}. */
-public class LayeredConfigurationIT extends AbstractLocalStackTest {
+public class LayeredConfigurationIT extends AbstractMiniStackTest {
   /** Shared client used by all tests. */
   private SsmClient ssmClient;
 
@@ -41,15 +43,19 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
    */
   @BeforeEach
   void setUp() throws IOException {
-    ssmClient =
-        SsmClient.builder()
-            .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpoint())
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.getAccessKey(), localstack.getSecretKey())))
-            .build();
+    try {
+      ssmClient =
+          SsmClient.builder()
+              .region(Region.of(miniStack.getRegion()))
+              .endpointOverride(new URI(miniStack.getEndpoint()))
+              .credentialsProvider(
+                  StaticCredentialsProvider.create(
+                      AwsBasicCredentials.create(
+                          miniStack.getAccessKey(), miniStack.getSecretKey())))
+              .build();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
     propertiesFile = File.createTempFile("test", ".properties");
   }
 
@@ -109,11 +115,11 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
         ImmutableMap.<String, String>builder().put(nameA, "a-system-property").build();
     final var envVars =
         ImmutableMap.<String, String>builder()
-            .put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_REGION, miniStack.getRegion())
             .put(LayeredConfiguration.SSM_PATH_CONFIG_SETTINGS_JSON, configSettingsJson)
-            .put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString())
-            .put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey())
-            .put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, miniStack.getEndpoint())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, miniStack.getAccessKey())
+            .put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, miniStack.getSecretKey())
             .put(nameA, "a-env-var")
             .put(nameB, "b-env-var")
             .build();
@@ -230,10 +236,10 @@ public class LayeredConfigurationIT extends AbstractLocalStackTest {
 
     // Set up map to hold our simulated environment variables
     final var envVars = new HashMap<String, String>();
-    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_REGION, localstack.getRegion());
-    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
-    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_REGION, miniStack.getRegion());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ENDPOINT, miniStack.getEndpoint());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_ACCESS_KEY, miniStack.getAccessKey());
+    envVars.put(BaseAppConfiguration.ENV_VAR_AWS_SECRET_KEY, miniStack.getSecretKey());
 
     // the source we'll pass as our environment variables
     final var getenv = ConfigLoaderSource.fromMap(envVars);

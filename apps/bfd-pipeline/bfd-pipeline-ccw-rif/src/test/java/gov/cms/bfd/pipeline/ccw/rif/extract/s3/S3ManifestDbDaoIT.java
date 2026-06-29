@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import jakarta.annotation.Nullable;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for {@link S3ManifestDbDao}. */
-public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
+public class S3ManifestDbDaoIT extends AbstractMiniStackS3Test {
   /** Fixed time for manifests. */
   private static final Instant MANIFEST_TIMESTAMP = Instant.parse("2024-01-18T15:04:25Z");
 

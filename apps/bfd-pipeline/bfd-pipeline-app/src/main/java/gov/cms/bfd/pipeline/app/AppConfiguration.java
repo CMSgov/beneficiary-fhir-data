@@ -734,7 +734,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * Loads {@link S3ClientConfig} for use in configuring S3 clients. These settings are generally
-   * only changed from defaults during localstack based tests.
+   * only changed from defaults during MiniStack based tests.
    *
    * @param config used to load configuration values
    * @return the aws client settings

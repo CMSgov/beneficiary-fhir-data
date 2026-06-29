@@ -336,7 +336,7 @@ public class S3Dao implements AutoCloseable {
 
   /**
    * Creates a new test bucket with a name based on a fixed prefix and a random number. Only works
-   * when communicating with localstack or minio or other simulated S3 service using an endpoint
+   * when communicating with MiniStack or minio or other simulated S3 service using an endpoint
    * override.
    *
    * @return the bucket name of a new, random {@link Bucket} for use in an integration test

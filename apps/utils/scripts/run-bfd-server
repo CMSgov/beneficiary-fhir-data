@@ -94,7 +94,7 @@ password="InsecureLocalDev"
 install=true
 image_tag=
 image_name=bfd-server
-localstack_ip=localhost
+ministack_ip=localhost
 kubernetes=false
 
 function usage() {
@@ -107,8 +107,8 @@ $script_name [options]
 -u username               Username for the database connection.
 -p password               Password for the database connection.
 -i image_tag              Runs the server as a containing using the image with given tag.
--k                       Run using kubernetes (using ops/k8s).
--l localstack_ip          Localstack IP address (for bridge networking).
+-k                        Run using kubernetes (using ops/k8s).
+-l ministack_ip           Ministack IP address (for bridge networking).
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
 -Z                        Enable debugger support and wait for debugger to connect.
@@ -132,7 +132,7 @@ while getopts "d:u:p:i:kl:xzZh" option ; do
      ;;
   i) image_tag=$OPTARG ; install=false ;;
   k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
-  l) localstack_ip=$OPTARG ;;
+  l) ministack_ip=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
   Z) debug_enabled=true ; debug_suspend=y ;;
@@ -152,14 +152,14 @@ if [[ x$image_tag != x ]] ; then
   echo "using docker image $image_name:$image_tag"
 fi
 
-# Autodetect if localstack is running based on whether we can connect to its port locally.
+# Autodetect if MiniStack is running based on whether we can connect to its port locally.
 if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
-  echo "using localstack"
+  echo "using MiniStack"
   export AWS_REGION=us-east-1
-  export AWS_ENDPOINT=http://${localstack_ip}:4566
+  export AWS_ENDPOINT=http://${ministack_ip}:4566
   # bfd environment variables
-  export AWS_ACCESS_KEY=000000000042
-  export AWS_SECRET_KEY=LSIAQAAAAAAVNCBMPNSG
+  export AWS_ACCESS_KEY=test
+  export AWS_SECRET_KEY=test
   # aws cli environment variables
   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
@@ -174,7 +174,7 @@ EOF
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
-# parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
+# parameter in SSM if we are using it.  Used to allow MiniStack based config to simulate using
 # SSM in the cloud.
 function setvar() {
   ssm_name="$1"

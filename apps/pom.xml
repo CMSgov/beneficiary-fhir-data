@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
@@ -59,8 +60,8 @@
     </modules>
 
     <properties>
-        <surefire.jvm.args />
-        <failsafe.jvm.args />
+        <surefire.jvm.args/>
+        <failsafe.jvm.args/>
         <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -137,13 +138,14 @@
         <junit.platform.version>1.12.0</junit.platform.version>
         <javadoc.version>3.11.2</javadoc.version>
         <testcontainers.version>1.21.4</testcontainers.version>
+        <testcontainers-ministack.version>0.1.5</testcontainers-ministack.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-        <jackson-databind.version>2.21.2</jackson-databind.version>
-        <jackson-datatype-jdk8.version>2.21.2</jackson-datatype-jdk8.version>
-        <jackson-dataformat-yaml.version>2.21.2</jackson-dataformat-yaml.version>
-        <jackson-datatype-jsr310.version>2.21.2</jackson-datatype-jsr310.version>
+        <jackson-databind.version>2.21.4</jackson-databind.version>
+        <jackson-datatype-jdk8.version>2.21.4</jackson-datatype-jdk8.version>
+        <jackson-dataformat-yaml.version>2.21.4</jackson-dataformat-yaml.version>
+        <jackson-datatype-jsr310.version>2.21.4</jackson-datatype-jsr310.version>
         <jackson-annotations.version>2.21</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
         <snakeyaml.version>2.4</snakeyaml.version>
@@ -225,16 +227,16 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
         <its.testcontainer.db.image>public.ecr.aws/docker/library/postgres:16.6-alpine</its.testcontainer.db.image>
         <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
-        <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be
+        <!-- This has a default value in gov.cms.bfd.AbstractMiniStackTest that must also be
         changed when changing this property. -->
-        <its.testcontainer.aws.image>public.ecr.aws/localstack/localstack:3.0.2</its.testcontainer.aws.image>
+        <its.testcontainer.aws.image>docker.io/ministackorg/ministack:1.3.68</its.testcontainer.aws.image>
 
         <!-- Whether the old MBI hash query feature should be enabled -->
         <local.pac.oldMbiHash.enabled>true</local.pac.oldMbiHash.enabled>
@@ -267,7 +269,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
