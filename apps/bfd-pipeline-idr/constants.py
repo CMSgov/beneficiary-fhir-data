@@ -53,6 +53,9 @@ IDR_CONTRACT_PBP_NUM_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_num"
 IDR_CONTRACT_PBP_CONTACT_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_cntct"
 IDR_CONTRACT_PBP_SEGMENT_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_sgmt"
 
+IDR_PRIOR_AUTH_PREFIX = "cms_edp_view_cvm_prau_prd"
+IDR_PRIOR_AUTH_TABLE = f"{IDR_PRIOR_AUTH_PREFIX}.prauc"
+
 DEATH_DATE_CUTOFF_YEARS = 4
 
 match PARTITION_TYPE:

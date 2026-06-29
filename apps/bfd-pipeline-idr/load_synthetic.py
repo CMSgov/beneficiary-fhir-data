@@ -37,6 +37,7 @@ from constants import (
     IDR_CLAIM_VAL_TABLE,
     IDR_CONTRACT_PBP_CONTACT_TABLE,
     IDR_CONTRACT_PBP_NUM_TABLE,
+    IDR_PRIOR_AUTH_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
 from db_utils import get_connection_string
@@ -106,14 +107,19 @@ tables = [
         "csv_name": "SYNTHETIC_CNTRCT_PBP_CNTCT.csv",
         "table": IDR_CONTRACT_PBP_CONTACT_TABLE,
     },
+    {
+        "csv_name": "SYNTHETIC_PRAUC.csv",
+        "table": IDR_PRIOR_AUTH_TABLE,
+    },
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str) -> None:
+def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
-        extractor.execute(f"TRUNCATE TABLE {sql_table}")
+        if truncate:
+            extractor.execute(f"TRUNCATE TABLE {sql_table}")
         file = table["csv_name"]
         _load_file(extractor, src_folder, file, sql_table)
         extractor.commit()
@@ -155,7 +161,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             # skip empty files since we won't have any valid columns
             # which causes the COPY command below to fail
             if cols:
-                extractor.copy(CsvFile(cols, sql_table, match))
+                extractor.copy(CsvFile(cols, full_table, match))
 
 
 if __name__ == "__main__":
@@ -168,6 +174,12 @@ if __name__ == "__main__":
         default=default_dir,
         help="base directory to load files from",
     )
+    parser.add_argument(
+        "--truncate",
+        action="store_true",
+        default=False,
+        help="Truncate tables before reloading. Default is false",
+    )
 
     args = parser.parse_args()
     print("base dir " + args.base_dir)
@@ -176,4 +188,5 @@ if __name__ == "__main__":
         if args.database_type == "snowflake"
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         args.base_dir or default_dir,
+        args.truncate,
     )

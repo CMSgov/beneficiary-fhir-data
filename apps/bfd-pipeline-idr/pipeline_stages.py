@@ -33,8 +33,10 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
+from model.idr_prior_auth import IdrPriorAuth
 from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import extract_and_load
+from settings import enable_prior_auth_ingestion
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
@@ -68,6 +70,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
+_PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
 _LOAD_ALL_TABLES = {"all"}
 
 
@@ -108,18 +111,15 @@ class StagedIdrPipeline:
         yield from self._extract_and_load_stage([(IdrBeneficiaryOvershareMbi, None)])
 
     def _stage2_do_claims_and_benes_tbls(self) -> Stage[bool]:
-        tables = self._filter_tables(
-            [
-                *_CLAIM_AUX_TABLES,
-                *_BENE_AUX_TABLES,
-                *_CLAIM_TABLES,
-                *_BENE_TABLES,
-            ]
-            if self.load_type == LoadType.INITIAL
-            else [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
-        )
+        tables = [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
+        if self.load_type == LoadType.INITIAL:
+            tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
+        if enable_prior_auth_ingestion():
+            tables.append(*_PRIOR_AUTH_TABLES)
 
-        yield from self._extract_and_load_stage(self._gen_partitioned_node_inputs(tables))
+        filtered_tables = self._filter_tables(tables)
+
+        yield from self._extract_and_load_stage(self._gen_partitioned_node_inputs(filtered_tables))
 
     def _stage3_do_parent_claims_tbls(self) -> Stage[bool]:
         if self.load_type == LoadType.INITIAL:

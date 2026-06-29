@@ -649,6 +649,8 @@ class _ClaimsFile(StrEnum):
             f.MR_COUNT_END_DT,
             f.ATT_PHY_NPI,
             f.RRB_EXCL_IND,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
         ],
     )
 
