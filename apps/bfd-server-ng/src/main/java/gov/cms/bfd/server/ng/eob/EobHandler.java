@@ -306,8 +306,8 @@ public class EobHandler {
   }
 
   private boolean isClaimDateWithinBounds(LocalDate claimDate, SecurityLabel entry) {
-    var entryStart = entry.getStartDateAsDate();
-    var entryEnd = entry.getEndDateAsDate();
+    var entryStart = entry.getStartDate();
+    var entryEnd = entry.getEndDate();
     return !entryStart.isAfter(claimDate) && !entryEnd.isBefore(claimDate);
   }
 }

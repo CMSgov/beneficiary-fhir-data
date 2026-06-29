@@ -60,24 +60,6 @@ public class SecurityLabel {
     this.endDate = LocalDate.parse(endDate.trim());
   }
 
-  /**
-   * Get the start date as a LocalDate.
-   *
-   * @return date
-   */
-  public LocalDate getStartDateAsDate() {
-    return this.startDate;
-  }
-
-  /**
-   * Get the end date as a LocalDate.
-   *
-   * @return date
-   */
-  public LocalDate getEndDateAsDate() {
-    return this.endDate;
-  }
-
   private void validate() {
     Objects.requireNonNull(this.code);
     Objects.requireNonNull(this.system);
