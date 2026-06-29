@@ -1,14 +1,17 @@
 import os
 import shutil
 import subprocess
+from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
 
 import psycopg
+import pytest
+from loguru import logger
 from psycopg import Connection, sql
-from psycopg.rows import DictRow, dict_row
+from psycopg.rows import DictRow, TupleRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
@@ -23,6 +26,7 @@ from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
+from settings import enable_prior_auth_ingestion
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -68,12 +72,18 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
+    if enable_prior_auth_ingestion():
+        cur = conn.execute("select * from idr.prior_auth order by mbi_num")
+        assert cur.rowcount == 64
+        rows = cur.fetchmany(1)
+        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
     assert row is not None
     max_ts = cast(datetime, row["max_ts"])
     datetime_now = max_ts + timedelta(days=1)
-    advance_time(datetime_now)
+    _advance_time(datetime_now)
 
     conn.execute(
         f"""
@@ -352,7 +362,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
-        advance_time(ss_clm_ts)
+        _advance_time(ss_clm_ts)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
@@ -390,7 +400,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
-        advance_time(nch_load_job.event_time)
+        _advance_time(nch_load_job.event_time)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the NCH claim in the v3 idr schema
@@ -451,7 +461,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         conn.commit()
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
-        advance_time(ss_load_job.event_time)
+        _advance_time(ss_load_job.event_time)
         run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the SS claim in the v3 idr schema
@@ -480,69 +490,90 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert updated_ss_job.completion_time >= ss_clm_ts
 
 
-def advance_time(timestamp: datetime) -> None:
+def _advance_time(timestamp: datetime) -> None:
     new_time = timestamp + timedelta(minutes=1)
     os.environ["BFD_TEST_DATE"] = new_time.isoformat()
 
 
-def test_pipeline() -> None:
-    # This is REALLY dumb. Typically we would use a parameterized test plus a fixture to setup the
-    # database and run the same test with both load types, but GitHub Actions Runners seem to have
-    # some issue with testcontainers where only a single test case succeeds and all others fail to
-    # connect. This forces sequential execution of each test case and ensures only a single
-    # container is ever started, avoiding the issue in CI
-    # TODO: Don't do this, find a way to make parameterized tests work in CI
+def _reset_db(
+    conn: psycopg.Connection[TupleRow], sample_path: Path, postgres: PostgresContainer
+) -> None:
+    conn.execute(
+        """
+        DO $$ DECLARE
+            r RECORD;
+        BEGIN
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'idr') LOOP
+                EXECUTE 'DROP TABLE idr.' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+
+            FOR r IN (
+                SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd'
+            ) LOOP
+                EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.'
+                    || quote_ident(r.tablename)
+                    || ' CASCADE';
+            END LOOP;
+
+            FOR r IN (
+                SELECT tablename FROM pg_tables 
+                WHERE schemaname = 'cms_edp_view_cvm_prau_prd'
+            ) LOOP
+                EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.'
+                    || quote_ident(r.tablename)
+                    || ' CASCADE';
+            END LOOP;
+        END $$;
+        """
+    )
+    conn.commit()
+
+    with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
+        conn.execute(f.read())  # type: ignore
+    conn.commit()
+
+    _run_migrator(postgres)
+    load_from_csv(PostgresExecutor(conn), sample_path)  # type: ignore
+
+
+def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
+    # Info level logs obscure the error output when running tests
+    # so we want to override this unless the calling process has set this explicitly
+    os.environ.setdefault("IDR_LOG_LEVEL", "warning")
+    os.environ["BFD_DB_ENDPOINT"] = info.host
+    os.environ["BFD_DB_PORT"] = str(info.port)
+    os.environ["BFD_DB_NAME"] = info.dbname
+    os.environ["BFD_DB_USERNAME"] = info.user
+    os.environ["BFD_DB_PASSWORD"] = info.password
+    os.environ["IDR_BATCH_SIZE"] = "100000"
+    os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+    os.environ["BFD_TEST_DATE"] = "2023-04-02"
+    os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
+    os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
+    os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
+
+
+@pytest.fixture(scope="module")
+def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
+    with PostgresContainer("postgres:16", driver="") as postgres:
+        conninfo = postgres.get_connection_url()
+        yield postgres, conninfo
+
+
+def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
     configure_logger()
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+    logger.remove()
 
-    with (
-        PostgresContainer("postgres:16", driver="") as postgres,
-        # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
-        # argument type here.
-        psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
-    ):
-        for load_type in [LoadType.INCREMENTAL, LoadType.INITIAL]:
-            # Truncate all tables first. See above for justification
-            conn.execute(
-                """
-                DO $$ DECLARE
-                    r RECORD;
-                BEGIN
-                    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'idr') LOOP
-                        EXECUTE 'DROP TABLE idr.' || quote_ident(r.tablename) || ' CASCADE';
-                    END LOOP;
 
-                    FOR r IN (
-                        SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd'
-                    ) LOOP
-                        EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.'
-                            || quote_ident(r.tablename)
-                            || ' CASCADE';
-                    END LOOP;
-                END $$;
-                """
-            )
-            conn.commit()
+def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_pipeline_load(postgres_db, LoadType.INITIAL)
 
-            with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
-                conn.execute(f.read())  # type: ignore
-            conn.commit()
 
-            _run_migrator(postgres)
-            load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
-
-            info = conn.info
-            # Info level logs obscure the error output when running tests
-            # so we want to override this unless the calling process has set this explicitly
-            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-            os.environ["BFD_DB_ENDPOINT"] = info.host
-            os.environ["BFD_DB_PORT"] = str(info.port)
-            os.environ["BFD_DB_NAME"] = info.dbname
-            os.environ["BFD_DB_USERNAME"] = info.user
-            os.environ["BFD_DB_PASSWORD"] = info.password
-            os.environ["IDR_BATCH_SIZE"] = "100000"
-            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
-            os.environ["BFD_TEST_DATE"] = "2023-04-02"
-            os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
-            os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
-
-            _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)

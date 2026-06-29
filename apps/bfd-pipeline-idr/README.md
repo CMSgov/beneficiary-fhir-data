@@ -64,6 +64,11 @@ Data is loaded into a live environment from our Snowflake dev instance
 
 This will load the current contents of Snowflake into the environment.
 
+> [!NOTE]
+>
+> By default, loading synthetic data does not truncate existing tables before loading. This allows additional synthetic data to be appended.
+> To perform a fresh load, pass the '--truncate' flag to the pipeline or in 'load_synthetic.py'
+
 ```sh
 BFD_ENV=1234-test ./load-synthetic-env.sh
 ```
