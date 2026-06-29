@@ -4,7 +4,7 @@ Id: ExplanationOfBenefit-Base
 * ^status = #draft
 * ^type = "ExplanationOfBenefit-Base"
 * . ^label = "Explanation of Benefit Base Resource for IDR. Ignore in DD Generation"
-* lastUpdated 1..1 string "This field represents the last time that an ExplanationOfBenefit was updated." "Last Updated Time"
+* lastUpdated 1..1 string "Last Updated Time" "This field represents the last time that an ExplanationOfBenefit was updated." 
 * CLM_FINL_ACTN_IND 1..1 string "Final Action Indicator" "A value indicating a final action claim. Valid values: Y = Final action claim, not voided. N = Not final action claim"
 * BENE_SK 1..1 string "Beneficiary Source Key - On Claim" "A unique number assigned by the Enrollment Data Base (EDB) to each EDB record to identify a beneficiary."
 * CLM_TYPE_CD 1..1 integer "Claim Type Code" "A code identifying the source and type of claim submitted through the Medicare or Medicaid program. For example: 60 = Medicare National Claims History (NCH) inpatient claim. 8900 = Medicaid fee for service dental. Reference table: CLM_TYPE_CD"
