@@ -40,14 +40,72 @@ We need a way to implement CARIN Basis Profiles to limit the data we're sending 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-* FHIR Trimmer
+Resource Class Hierarchy Rewrite
 
-FHIR trimming happens after the toFhir() call on a resource is made during the creation of FHIR resources. This happens after all data is pulled up from the database, and would involve running some quick pruning of resources via a yet-to-be-fully-realized process. I do know that it needs to skip validation, it needs to not use many HAPI library calls, and it needs to take a FHIRPath and process some sort of whitelist or blacklist for performance resource trimming.
+We can implement the profiles by adding an additional layer into the existing class hierarchy for querying the database. My proposed layer (and file naming convention) is \[Resource][Domain][Profile][Source][(Optional)Base], as seen in the graph below.
 
-To support this implementation, we need to copy the YAML map files from the model projects into the bfd-server-ng project. If there is a way to replicate or reference across projects cleanly, I am unsure, so a manual copy (or scipted copy) needs to occur. Then, on server startup, it needs to load it into memory so that it is easily accessible by the resource handlers when they are creating the FHIR resources.
+```
+ClaimBase (Abstract)
+    │
+    └─ClaimInstitutionalBase (Abstract)
+                │
+                └─ClaimInstitutionalBasisBase (Abstract)
+                              │
+                              ├─ClaimInstitutionalBasisSharedSystem (Concrete)
+                              │
+                              └─ClaimInstitutionalBasisNch (Concrete)
+```
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
+
+The detailed design isn't very technical, it'll just be a full graph of the new Claim structure with profiles impelemented. Probably take an opportunity to do some DRY in the embeddeds.
+
+```
+ ClaimBase                                      
+ ├──ClaimInstitutionalBase                      
+ │  ├──ClaimInstitutionalBasisBase              
+ │  │  ├─ ClaimInstitutionalBasisSharedSystem   
+ │  │  ├──ClaimInstitutionalBasisNch            
+ │  ├──ClaimInstitutionalRegularBase            
+ │  │  ├─ ClaimInstitutionalRegularSharedSystem 
+ │  │  └─ ClaimInstitutionalRegularNch          
+ │  └──ClaimInstitutionalCmsBase                
+ │        ClaimInstitutionalCmsSharedSytem      
+ │        ClaimInstitutionalCmsNch              
+ │
+ │...Repeat for Professional
+ │──ClaimRx (remains the same)
+```
+
+To assist in breaking the profiles and their associated column values into manageable chunks, I've written a python script to analyze the YAML files and the Java classes and build a rudimentary tree for analyzing where things could be grouped and moved. Most of the flat Embedded classes don't need to change, but some may.
+
+The reason that Source is the lowest category (and has to remain the lowest category) is that it addresses a specific table, and we gain no benefit from moving that defintiion higher in the tree because then we're querying data we might not need for profiles.
+
+### Proposed Solution: Unresolved Questions
+[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+
+Items to be discussed:
+
+* Class naming structure: is it good?
+* This rewrites a lot of code, or renames it, which makes the blast radius for this change higher.
+* Should these files be moved into separate folders for organization? They are the "core" resource handled by the repository patterns.
+
+### Proposed Solution: Drawbacks
+[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
+
+* Maintaining this code is brittle, as there is no dynamic generation and any new profile or new domain or system will require several new classes and an analysis of columns to minimize repetition.
+
+### Proposed Solution: Notable Alternatives
+[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
+
+* JPA Annotations (Dynamic)
+
+In the JPA (Jakarta Persistence) layer, we define entities that map to the database via @Embedded and @Column for building FHIR resources. The entities contain fields that map to columns which map to FhirPaths. When an object is requested (say a Claim) by a request, we build it as fully as possible (with some exceptions, like SAMHSA) and send it out. We already short-circuit on concepts like system type.
+
+To achieve our objective at this layer, it would require us to modify how we handle @Embedded and @Column with some sort of Hibernate interception. Given the complicated nature of implementing this and possible caching pitfalls + rewriting our entire JQL generating code, I have opted not to go with this approach.
+
+The primary impact of not doing this is that the pain of doing it now may be necessary depending on performance of the trimming process.
 
 There are two portions of this code; reading and parsing the YAML files into a useable framework for trimming, and then doing the trimming.
 
@@ -86,38 +144,6 @@ HAPI Java to Remove
 ```coverage.getExtension().removeIf(ext -> "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD".equals(ext.getUrl()));```
 
 Work still needs to be done to make this universal, but I believe if we can translate the FhirPaths into HAPI Java fhir code 1:1, it will speed up removal and makes the structure of the BasisProfileMapping a lot easier to manage (whether or not we go with the blacklist or whitelist).
-
-### Proposed Solution: Unresolved Questions
-[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
-
-Items to be discussed:
-
-* Is there a way to access files across modules?
-  
-    Answer: Either by using symlinks or by moving the files into the shared-utils module
-* Spring Config vs Static?
-
-    Answer: 
-* Is there a way to modify the bundles without using HAPI Fhir? Would that be faster?
-
-    Answer: There is, but it is much more dangerous and should only be considered if other options aren't feasible
-
-### Proposed Solution: Drawbacks
-[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
-
-* We are spending resources querying the database and building a full FHIR resource before throwing some of it away.
-* It is tied to the YAML dictionary map files that we maintain, so the logic of the mapping may be less transferrable to new structures of data
-
-### Proposed Solution: Notable Alternatives
-[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
-
-* Query Level
-
-In the JPA (Jakarta Persistence) layer, we define entities that map to the database via @Embedded and @Column for building FHIR resources. The entities contain fields that map to columns which map to FhirPaths. When an object is requested (say a Claim) by a request, we build it as fully as possible (with some exceptions, like SAMHSA) and send it out. We already short-circuit on concepts like system type.
-
-To achieve our objective at this layer, it would require us to modify how we handle @Embedded and @Column with some sort of Hibernate interception. Given the complicated nature of implementing this and possible caching pitfalls + rewriting our entire JQL generating code, I have opted not to go with this approach.
-
-The primary impact of not doing this is that the pain of doing it now may be necessary depending on performance of the trimming process.
 
 ## Prior Art
 [Prior Art]: #prior-art
