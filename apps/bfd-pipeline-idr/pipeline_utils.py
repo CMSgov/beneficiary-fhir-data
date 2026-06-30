@@ -152,6 +152,7 @@ def prune_phase_1_ss_claims(
                     WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
                     AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                     AND clm_idr_ld_dt < %s
+                    LIMIT 1000
                 )
                 """,  # type: ignore
             (prune_cutoff_date,),
@@ -161,9 +162,13 @@ def prune_phase_1_ss_claims(
         res = conn.execute(
             f"""
                 DELETE FROM {claim_table}
-                WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                AND clm_idr_ld_dt < %s
+                WHERE clm_uniq_id IN (
+                    SELECT clm_uniq_id FROM {claim_table}
+                    WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                    AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+                    AND clm_idr_ld_dt < %s
+                    LIMIT 1000
+                )
                 """,  # type: ignore
             (prune_cutoff_date,),
         )
