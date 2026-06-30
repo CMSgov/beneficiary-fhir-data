@@ -33,6 +33,7 @@ from constants import (
     NON_CLAIM_PARTITION,
     PART_D_CLAIM_TYPE_CODES,
     PART_D_PARTITIONS,
+    PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
     PROFESSIONAL_NCH_PARTITIONS,
@@ -693,7 +694,7 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
         latest_claim_ind = ""
 
     # PAC data older than 60 days should be filtered
-    pac_cutoff_date = start_time - timedelta(days=60)
+    pac_cutoff_date = start_time - timedelta(days=PHASE_1_CUTOFF)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
 
     # Note: checking clm_type_cd as the first branch of the OR here might be more efficient

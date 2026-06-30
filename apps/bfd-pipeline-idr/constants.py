@@ -15,6 +15,8 @@ CLAIM_INSTITUTIONAL_NCH_TABLE = "idr.claim_institutional_nch"
 CLAIM_INSTITUTIONAL_SS_TABLE = "idr.claim_institutional_ss"
 CLAIM_INSTITUTIONAL_ITEM_SS_TABLE = "idr.claim_item_institutional_ss"
 
+# Phase 1 claims younger than 60 days are allowed
+PHASE_1_CUTOFF = 60
 PHASE_1_SS_MIN = 1000
 PHASE_1_SS_MAX = 1999
 FISS_CLM_SOURCE = "21000"

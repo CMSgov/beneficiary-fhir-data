@@ -16,6 +16,7 @@ from constants import (
     DEFAULT_PARTITION,
     FISS_CLM_SOURCE,
     MCS_CLM_SOURCE,
+    PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
     VMS_CLM_SOURCE,
@@ -139,7 +140,7 @@ def prune_phase_1_ss_claims(
     if item_table is None:
         return True
 
-    prune_cutoff_date = job_start - timedelta(days=60)
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
