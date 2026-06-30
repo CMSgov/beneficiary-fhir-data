@@ -76,13 +76,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
 
-  /**
-   * Optionally overrides the EOB outcome. NCH has no override
-   *
-   * @param eob the EOB being built
-   */
-  protected void applyOutcomeOverride(ExplanationOfBenefit eob) {}
-
   @Override
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
     var eob = super.toFhir(options, claimState);

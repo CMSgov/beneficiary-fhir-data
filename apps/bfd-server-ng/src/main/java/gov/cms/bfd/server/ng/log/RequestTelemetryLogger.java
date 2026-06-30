@@ -1,18 +1,20 @@
 package gov.cms.bfd.server.ng.log;
 
 import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+import static gov.cms.bfd.server.ng.util.MetricRecorder.*;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
+import gov.cms.bfd.server.ng.util.MetricRecorder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +50,9 @@ public class RequestTelemetryLogger {
 
   private record HeaderMapping(String mdcKey, String header) {}
 
-  private final ObjectMapper objectMapper;
-
   private final CertificateUtil certificateUtil;
+
+  private final MetricRecorder metricRecorder;
 
   /**
    * Records the current timestamp to the MDC using the supplied key.
@@ -96,22 +98,26 @@ public class RequestTelemetryLogger {
   }
 
   /**
-   * Records response metadata and request duration.
+   * Records response metadata and emits a structured log containing a summary of all metrics.
    *
    * @param request the request
    * @param response the response
    */
   public void recordResponse(HttpServletRequest request, HttpServletResponse response) {
-    MDC.put(logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_STATUS), String.valueOf(response.getStatus()));
+    var responseStatusCode = response.getStatus();
+    MDC.put(logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_STATUS), String.valueOf(responseStatusCode));
     putIfPresent(HTTP_ACCESS_RESPONSE_HEADER_ENCODING, response.getHeader("Content-Encoding"));
     putIfPresent(HTTP_ACCESS_RESPONSE_CONTENT_LENGTH, response.getHeader("Content-Length"));
 
-    var requestStart = (Long) request.getAttribute(REQUEST_START_TIME);
-    if (requestStart != null) {
-      MDC.put(
-          logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS),
-          String.valueOf(System.currentTimeMillis() - requestStart));
+    recordMetrics(request, response);
+
+    var reuquestLogBuilder =
+        LOGGER.atInfo().setMessage("Request Completed").addKeyValue(LOG_TYPE, "requestTelemetry");
+    var queryParams = request.getAttribute(REQUEST_QUERY_PARAMETERS);
+    if (queryParams != null) {
+      reuquestLogBuilder = reuquestLogBuilder.addKeyValue(REQUEST_QUERY_PARAMETERS, queryParams);
     }
+    reuquestLogBuilder.addKeyValue(HTTP_ACCESS_RESPONSE_STATUS, responseStatusCode).log();
   }
 
   /**
@@ -129,10 +135,14 @@ public class RequestTelemetryLogger {
    * @param requestDetails the request details
    */
   public void recordRequestDetails(RequestDetails requestDetails) {
-    putIfPresent("resource", requestDetails.getResourceName());
-    putIfPresent("operation", requestDetails.getOperation());
+    var resourceOperation =
+        Stream.of(requestDetails.getResourceName(), requestDetails.getOperation())
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining("/"));
+    putIfPresent(RESOURCE_OPERATION, resourceOperation);
+
     var operationType = requestDetails.getRestOperationType();
-    putIfPresent("operationType", operationType.getCode());
+    putIfPresent(OPERATION_TYPE, operationType.getCode());
 
     // stores the sanitized params in the request instead of the MDC to later add them directly to
     // the log event so we can actually query them through log insights
@@ -169,29 +179,59 @@ public class RequestTelemetryLogger {
         .log();
   }
 
-  /**
-   * Emits a structured log containing a summary of all metrics and attributes of a request as
-   * populated by the MDC.
-   *
-   * @param request the request
-   * @param response the response
-   */
-  public void logRequestComplete(HttpServletRequest request, HttpServletResponse response) {
-    var queryParams = request.getAttribute(REQUEST_QUERY_PARAMETERS);
+  private void recordMetrics(HttpServletRequest request, HttpServletResponse response) {
+    if (request.getAttribute(REQUEST_START_TIME) instanceof Long requestStart) {
+      var duration = System.currentTimeMillis() - requestStart;
+
+      MDC.put(
+          logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS), String.valueOf(duration));
+
+      metricRecorder.recordDuration(
+          OVERALL_REQUEST_LATENCY_METRIC, duration, TimeUnit.MILLISECONDS);
+
+      var resourceOperation = getMdcValue(RESOURCE_OPERATION);
+      var certificateAlias = getMdcValue(CERTIFICATE_ALIAS);
+
+      if (resourceOperation.isPresent() && certificateAlias.isPresent()) {
+        metricRecorder.recordDuration(
+            REQUEST_LATENCY_BY_PARTNER_METRIC,
+            duration,
+            TimeUnit.MILLISECONDS,
+            ENDPOINT,
+            resourceOperation.get(),
+            CLIENT,
+            certificateAlias.get());
+        metricRecorder.incrementCounter(
+            REQUEST_COUNT_PER_PARTNER_METRIC, CLIENT, certificateAlias.get());
+        metricRecorder.incrementCounter(
+            REQUEST_COUNT_PER_ENDPOINT_PER_PARTNER_METRIC,
+            CLIENT,
+            certificateAlias.get(),
+            ENDPOINT,
+            resourceOperation.get());
+        metricRecorder.incrementCounter(
+            OVERALL_REQUEST_COUNT_PER_ENDPOINT_METRIC, ENDPOINT, resourceOperation.get());
+      }
+    }
+
     var responseStatusCode = response.getStatus();
-    LOGGER
-        .atInfo()
-        .setMessage("Request Completed")
-        .addKeyValue(LOG_TYPE, "requestTelemetry")
-        .addKeyValue(REQUEST_QUERY_PARAMETERS, queryParams)
-        .addKeyValue(HTTP_ACCESS_RESPONSE_STATUS, responseStatusCode)
-        .log();
+
+    if (responseStatusCode >= 400) {
+      metricRecorder.incrementCounter(
+          responseStatusCode < 500 ? RESPONSES_4XX_METRIC : RESPONSES_5XX_METRIC,
+          RESPONSE_STATUS,
+          String.valueOf(responseStatusCode));
+    }
   }
 
   private void putIfPresent(String key, String value) {
     if (value != null) {
       MDC.put(logKey(MDC_PREFIX, key), value);
     }
+  }
+
+  private Optional<String> getMdcValue(String key) {
+    return Optional.ofNullable(MDC.get(logKey(MDC_PREFIX, key)));
   }
 
   private String replaceAllMbis(String input) {

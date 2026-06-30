@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
+
+import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -51,6 +55,10 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
 
+  @Column(name = "clm_pd_stus_cd")
+  @Convert(converter = ClaimPaidStatusCodeConverter.class)
+  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
+
   @Override
   Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
@@ -83,18 +91,6 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo() {
     return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
-  }
-
-  @Override
-  protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var auditTrailStatusCode =
-        claimAuditTrailStatusCode.flatMap(
-            status ->
-                ClaimAuditTrailStatusCode.tryFromCode(
-                    getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA));
-    auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */

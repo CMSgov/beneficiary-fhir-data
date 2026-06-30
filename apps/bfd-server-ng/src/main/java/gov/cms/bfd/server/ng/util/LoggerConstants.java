@@ -67,6 +67,12 @@ public class LoggerConstants {
    */
   public static final String FINAL_DETERMINATION = "finalDetermination";
 
+  /** Name of the current match algorithm version used. */
+  public static final String MATCH_ALGORITHM_VERSION = "matchAlgorithmVersion";
+
+  /** Current match algorithm version. */
+  public static final String CURRENT_MATCH_ALGORITHM_VERSION = "3.2.2";
+
   /** Name of the timestamp when the HAPI request reached pre-handle processing. */
   public static final String HAPI_INCOMING_PRE_HANDLE =
       "hapi.server_incoming_request_pre_handle_timestamp_in_millis";
@@ -125,6 +131,12 @@ public class LoggerConstants {
 
   /** Name of the HTTP request uri. */
   public static final String HTTP_ACCESS_REQUEST_URI = "http_access_request_uri";
+
+  /** Name of the FHIR resource and/or operation performed. */
+  public static final String RESOURCE_OPERATION = "resource_operation";
+
+  /** Name of the FHIR operation type performed. */
+  public static final String OPERATION_TYPE = "operationType";
 
   /** Name for the number of FHIR resources returned in the response. */
   public static final String RESOURCES_RETURNED_COUNT = "resources_returned_count";

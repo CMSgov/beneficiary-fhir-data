@@ -2,8 +2,10 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -59,6 +61,10 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemProfessionalSharedSystems> claimItems;
+
+  @Column(name = "clm_pd_stus_cd")
+  @Convert(converter = ClaimPaidStatusCodeConverter.class)
+  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
 
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
@@ -119,22 +125,6 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
     otherProviderHistory
         .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
-  }
-
-  /**
-   * For PAC claims, the outcome is driven by the audit-trail status code, audit-status code, and
-   * the meta source sk rather than the default claim-type outcome.
-   */
-  @Override
-  protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var auditTrailStatusCode =
-        claimAuditTrailStatusCode.flatMap(
-            status ->
-                ClaimAuditTrailStatusCode.tryFromCode(
-                    getMetaSourceSk(), status, claimAuditTrailLocationCode));
-    auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
   }
 
   @Override
