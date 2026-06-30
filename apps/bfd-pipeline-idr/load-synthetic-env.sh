@@ -46,4 +46,4 @@ if [[ -n "$1" ]]; then
     args+=('--seed-from' "$1")
 fi
 
-IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py "${args[@]}"
+IDR_ENABLE_DATE_PARTITIONS=0 IDR_ENABLE_PRIOR_AUTH=1 uv run pipeline.py "${args[@]}"

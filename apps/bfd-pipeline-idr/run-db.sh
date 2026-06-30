@@ -21,6 +21,7 @@ function do_load() {
   BFD_DB_PASSWORD="$DB_PASSWORD" \
   BFD_DB_ENDPOINT="$DB_ENDPOINT" \
   IDR_ENABLE_DATE_PARTITIONS=0 \
+  IDR_ENABLE_PRIOR_AUTH=1 \
   uv run pipeline.py \
   --source postgres \
   --load-mode synthetic \

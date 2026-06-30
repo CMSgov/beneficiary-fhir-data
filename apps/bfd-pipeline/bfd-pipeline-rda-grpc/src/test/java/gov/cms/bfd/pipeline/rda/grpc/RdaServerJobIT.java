@@ -9,7 +9,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaS3JsonMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 /** Integration tests for the RDA server. */
-public class RdaServerJobIT extends AbstractLocalStackS3Test {
+public class RdaServerJobIT extends AbstractMiniStackS3Test {
   /** The server name to use for the test. */
   public static final String SERVER_NAME = "test-server";
 

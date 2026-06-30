@@ -42,7 +42,8 @@ podman run \
 ## Granting Permissions
 
 Snowflake requires a lot of permissions to allow the migrator/pipeline to work.
-Here are the list of commands in case they need to be re-ran in the future:
+Here are the list of commands in case they need to be re-ran in the future for both schemas 
+(CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
 
 ```sql
 GRANT USAGE ON DATABASE BFD_{ENV} TO {ENV}_SERVICE_USER;

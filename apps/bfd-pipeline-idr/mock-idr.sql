@@ -19,6 +19,21 @@ BEGIN
     LOOP
         EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.' || quote_ident(r.tablename) || ' CASCADE';
     END LOOP;
+
+    -- Prior auth exists in a separate schema
+    IF NOT EXISTS(
+        SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name = 'cms_edp_view_cvm_prau_prd'
+    )
+    THEN
+        CREATE SCHEMA cms_edp_view_cvm_prau_prd;
+    END IF;
+
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'cms_edp_view_cvm_prau_prd')
+    LOOP
+        EXECUTE 'DROP TABLE cms_edp_view_cvm_prau_prd.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
 END $$;
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
@@ -804,4 +819,43 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt(
     cntrct_pbp_sk BIGINT NOT NULL,
     cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL,
     PRIMARY KEY(cntrct_pbp_sk, cntrct_pbp_sgmt_num)
+);
+
+CREATE TABLE cms_edp_view_cvm_prau_prd.prauc (
+    mbi_num VARCHAR(11) NOT NULL,
+    utn VARCHAR(14) NOT NULL,
+    current_segment INT NOT NULL,
+    utn_valid_st_dt DATE,
+    utn_valid_en_dt DATE,
+    clm_type VARCHAR(1) NOT NULL,
+    hcpcs_or_cpt_or_hipps VARCHAR(5) NOT NULL,
+    mac_id VARCHAR(5) NOT NULL,
+    pa_dt_added DATE NOT NULL,
+    pa_dt_updated DATE,
+    service_cnts INT NOT NULL,
+    pa_decision VARCHAR(1) NOT NULL,
+    pa_req_sub_dt DATE NOT NULL,
+    pa_req_rec_dt DATE NOT NULL,
+    pa_decision_dt DATE,
+    pa_decision_exp_dt DATE,
+    order_refer_npi VARCHAR(10) NOT NULL,
+    render_npi VARCHAR(10) NOT NULL,
+    svc_render_st VARCHAR(2) NOT NULL,
+    place_of_serv VARCHAR(2) NOT NULL,
+    price_mod1 VARCHAR(2) NOT NULL,
+    price_mod2 VARCHAR(2) NOT NULL,
+    icn_dcn VARCHAR(23) NOT NULL,
+    cms_cert VARCHAR(13) NOT NULL,
+    npi VARCHAR(10) NOT NULL,
+    name VARCHAR(30) NOT NULL,
+    rev_code_1 VARCHAR(4) NOT NULL,
+    tob VARCHAR(3) NOT NULL,
+    mr_count_ind INT NOT NULL,
+    mr_count_st_dt DATE,
+    mr_count_end_dt DATE,
+    att_phy_npi VARCHAR(10) NOT NULL,
+    rrb_excl_ind VARCHAR(1),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(mbi_num, utn, current_segment)
 );

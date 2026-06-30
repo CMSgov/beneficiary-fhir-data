@@ -1,6 +1,8 @@
 package gov.cms.bfd;
 
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.ministack.testcontainers.MiniStackContainer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -10,18 +12,22 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 public class SqsTestUtils {
   /**
    * Create a {@link SqsClient} configured for the SQS service in the provided {@link
-   * LocalStackContainer}.
+   * MiniStackContainer}.
    *
-   * @param localstack the container info
+   * @param miniStack the container info
    * @return the client
    */
-  public static SqsClient createSqsClientForLocalStack(LocalStackContainer localstack) {
-    return SqsClient.builder()
-        .region(Region.of(localstack.getRegion()))
-        .endpointOverride(localstack.getEndpoint())
-        .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
-        .build();
+  public static SqsClient createSqsClientForMiniStack(MiniStackContainer miniStack) {
+    try {
+      return SqsClient.builder()
+          .region(Region.of(miniStack.getRegion()))
+          .endpointOverride(new URI(miniStack.getEndpoint()))
+          .credentialsProvider(
+              StaticCredentialsProvider.create(
+                  AwsBasicCredentials.create(miniStack.getAccessKey(), miniStack.getSecretKey())))
+          .build();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

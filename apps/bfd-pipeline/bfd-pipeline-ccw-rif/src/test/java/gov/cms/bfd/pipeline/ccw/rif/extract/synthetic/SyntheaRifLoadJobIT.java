@@ -12,7 +12,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.AbstractLocalStackS3Test;
+import gov.cms.bfd.pipeline.AbstractMiniStackS3Test;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJobStatusReporter;
@@ -49,7 +49,7 @@ import software.amazon.awssdk.utils.StringUtils;
 
 /** Integration tests for Synthea pre-validation bucket handling. */
 @ExtendWith(MockitoExtension.class)
-final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
+final class SyntheaRifLoadJobIT extends AbstractMiniStackS3Test {
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheaRifLoadJobIT.class);
 
   /** Used to capture status updates from the job. */

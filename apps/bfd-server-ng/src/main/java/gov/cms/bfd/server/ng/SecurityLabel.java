@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 public class SecurityLabel {
   private String code;
   private String system;
-  private String startDate;
-  private String endDate;
+  private LocalDate startDate;
+  private LocalDate endDate;
   // This is set in the input file, but it's for display purposes only
   // so we can ignore it
   private String comment;
@@ -48,7 +48,7 @@ public class SecurityLabel {
    * @param startDate startDate
    */
   public void setStartDate(String startDate) {
-    this.startDate = startDate.trim();
+    this.startDate = LocalDate.parse(startDate.trim());
   }
 
   /**
@@ -57,25 +57,7 @@ public class SecurityLabel {
    * @param endDate endDate
    */
   public void setEndDate(String endDate) {
-    this.endDate = endDate.trim();
-  }
-
-  /**
-   * Get the start date as a LocalDate.
-   *
-   * @return date
-   */
-  public LocalDate getStartDateAsDate() {
-    return LocalDate.parse(this.startDate);
-  }
-
-  /**
-   * Get the end date as a LocalDate.
-   *
-   * @return date
-   */
-  public LocalDate getEndDateAsDate() {
-    return LocalDate.parse(this.endDate);
+    this.endDate = LocalDate.parse(endDate.trim());
   }
 
   private void validate() {

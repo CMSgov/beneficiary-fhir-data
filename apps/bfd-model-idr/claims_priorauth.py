@@ -181,6 +181,7 @@ class PriorAuthGeneratorUtil:
                     "MR_COUNT_END_DT": mr_count_end_dt,
                     "ATT_PHY_NPI": att_phy_npi,
                     "RRB_EXCL_IND": rrb_excl_ind,
+                    "IDR_INSRT_TS": pa_req_rec_dt,
                 }
                 prauc_rows.append(RowAdapter(row_data))
 

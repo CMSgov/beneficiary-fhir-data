@@ -6,6 +6,6 @@ ENTRYPOINT [ \
   "flyway", \
   "-workingDirectory=/app", \
   "-locations=filesystem:migrations", \
-  "-schemas=CMS_VDM_VIEW_MDCR_PRD" \
+  "-schemas=CMS_VDM_VIEW_MDCR_PRD,CMS_EDP_VIEW_CVM_PRAU_PRD" \
   ]
 CMD ["migrate"]
