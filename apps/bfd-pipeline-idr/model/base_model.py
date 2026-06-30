@@ -179,6 +179,7 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
         WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
+        {{LIMIT}}
     """
 
 
@@ -192,7 +193,7 @@ def clm_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM claim_base {clm} {{TABLESAMPLE}}
+        FROM claim_base {clm}
         WHERE (
             {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}}
             OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -211,7 +212,7 @@ def clm_child_query(table: str) -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {table} temp {{TABLESAMPLE}}
+        FROM {table} temp
         JOIN claim_base clm ON
             {clm}.geo_bene_sk = temp.geo_bene_sk AND
             {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
@@ -232,7 +233,7 @@ def clm_ansi_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_ANSI_SIGNATURE_TABLE} sgntr {{TABLESAMPLE}}
+        FROM {IDR_CLAIM_ANSI_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -250,7 +251,7 @@ def clm_dt_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_DATE_SIGNATURE_TABLE} sgntr {{TABLESAMPLE}}
+        FROM {IDR_CLAIM_DATE_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -268,7 +269,7 @@ def clm_ocrnc_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} sgntr {{TABLESAMPLE}}
+        FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
         WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
@@ -289,7 +290,7 @@ def clm_rlt_ocrnc_clause() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} sgntr {{TABLESAMPLE}}
+        FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
         WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
@@ -309,7 +310,7 @@ def clm_rlt_cond_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} sgntr {{TABLESAMPLE}}
+            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} sgntr
             JOIN claim_base {clm} ON
                 {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
@@ -767,7 +768,7 @@ def claim_occurrence_cte() -> str:
                 MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
                     THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} {ocrnc_sgntr} {{TABLESAMPLE}}
+            FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} {ocrnc_sgntr}
             WHERE clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
             GROUP BY clm_ocrnc_sgntr_sk"""
 
@@ -784,7 +785,7 @@ def claim_related_occurrences_cte() -> str:
                 MAX(CASE WHEN clm_rlt_ocrnc_cd = '{ACTIVE_CARE_CD}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} {rlt_ocrnc_sgntr} {{TABLESAMPLE}}
+            FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} {rlt_ocrnc_sgntr}
             WHERE clm_rlt_ocrnc_cd in ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
     """
@@ -818,7 +819,7 @@ def claim_related_conditions_cte(source: Source) -> str:
                 clm_rlt_cond_sgntr_sk,
                 ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} {rlt_cond} {{TABLESAMPLE}}
+            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} {rlt_cond}
             WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
             AND clm_rlt_cond_cd != '~'
             GROUP BY clm_rlt_cond_sgntr_sk
