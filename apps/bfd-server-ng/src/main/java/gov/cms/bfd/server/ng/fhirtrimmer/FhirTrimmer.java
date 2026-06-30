@@ -22,9 +22,7 @@ public class FhirTrimmer {
    * @param basisProfileMap map of resource type -> profile -> list of fhirpaths
    * @param fhirContext context shared between trimmers
    */
-  public FhirTrimmer(
-          BasisProfileMap basisProfileMap,
-          FhirContext fhirContext) {
+  public FhirTrimmer(BasisProfileMap basisProfileMap, FhirContext fhirContext) {
     this.basisProfileMap = basisProfileMap;
     this.fhirPathEngine = fhirContext.newFhirPath();
   }
@@ -45,7 +43,8 @@ public class FhirTrimmer {
     }
 
     ResourceType resourceType = baseResource.getResourceType();
-    EnumMap<BasisProfile, List<String>> profileMap = basisProfileMap.getBlackList().get(resourceType);
+    EnumMap<BasisProfile, List<String>> profileMap =
+        basisProfileMap.getBlackList().get(resourceType);
     List<String> pathsToRemove = profileMap == null ? null : profileMap.get(profile);
 
     if (pathsToRemove == null || pathsToRemove.isEmpty()) {
@@ -84,6 +83,7 @@ public class FhirTrimmer {
 
   /**
    * Walks the resource for matches.
+   *
    * @param parent the parent resource
    * @param matches the matches to remove
    */

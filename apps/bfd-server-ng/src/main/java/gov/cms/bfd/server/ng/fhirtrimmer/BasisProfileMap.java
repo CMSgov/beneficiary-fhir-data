@@ -8,7 +8,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,9 +23,9 @@ import org.yaml.snakeyaml.constructor.Constructor;
 public class BasisProfileMap {
 
   private final EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> blackList =
-          new EnumMap<>(ResourceType.class);
+      new EnumMap<>(ResourceType.class);
   private final EnumMap<ResourceType, EnumMap<BasisProfile, List<String>>> whiteList =
-          new EnumMap<>(ResourceType.class);
+      new EnumMap<>(ResourceType.class);
 
   /** A single entry from a dictionary support file YAML, exhaustive property list. */
   @Data
@@ -76,7 +75,7 @@ public class BasisProfileMap {
       ResourceType resourceType = resolveResourceType(fhirPath);
 
       // If profile is missing, assume it is valid for any profile
-      Set<BasisProfile> applicableProfiles = EnumSet.noneOf(BasisProfile.class);
+      Set<BasisProfile> applicableProfiles = EnumSet.allOf(BasisProfile.class);
       if (entry.getProfiles() != null) {
         applicableProfiles =
                 entry.getProfiles().stream()
@@ -85,20 +84,20 @@ public class BasisProfileMap {
       }
 
       var blackProfileMap =
-              blackList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
+          blackList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
       var whiteProfileMap =
-              whiteList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
+          whiteList.computeIfAbsent(resourceType, _ -> new EnumMap<>(BasisProfile.class));
 
       for (var profile : BasisProfile.values()) {
         var targetMap = applicableProfiles.contains(profile) ? whiteProfileMap : blackProfileMap;
-        targetMap.computeIfAbsent(profile, _ -> new ArrayList<>()).add(fhirPath);
+        targetMap.computeIfAbsent(profile, _ -> new ArrayList<>()).add(entry.getInputPath());
       }
     }
   }
 
   /**
-   * Get ResourceType from FhirPath. Loops through all resource types and looks for them at
-   * the beginning of a FhirPath expression.
+   * Get ResourceType from FhirPath. Loops through all resource types and looks for them at the
+   * beginning of a FhirPath expression.
    *
    * @param fhirPath the FhirPath expression
    * @return the resolved resource type, or null if the leading segment isn't a known type
@@ -108,9 +107,9 @@ public class BasisProfileMap {
       var name = type.toString();
       int index = fhirPath.indexOf(name);
       if (index >= 0
-              && (index == 0 || !Character.isLetterOrDigit(fhirPath.charAt(index - 1)))
-              && index + name.length() < fhirPath.length()
-              && fhirPath.charAt(index + name.length()) == '.') {
+          && (index == 0 || !Character.isLetterOrDigit(fhirPath.charAt(index - 1)))
+          && index + name.length() < fhirPath.length()
+          && fhirPath.charAt(index + name.length()) == '.') {
         return type;
       }
     }
@@ -129,8 +128,26 @@ public class BasisProfileMap {
         }
       }
 
+      dumpWhitelistToConsole();
+
     } catch (IOException e) {
       System.err.println("OH NO: " + e.getMessage());
     }
+  }
+
+  /**
+   * Temporary debug utility to dump whitelisted paths in a scannable format.
+   * Call this after generateProfileBasisMap() executes.
+   */
+  public void dumpWhitelistToConsole() {
+    System.out.println("=== START WHITELIST DUMP ===");
+    whiteList.forEach((resourceType, profileMap) -> {
+      System.out.println("\nResource Type: " + resourceType);
+      profileMap.forEach((profile, paths) -> {
+        System.out.println("  Profile: " + profile);
+        paths.forEach(path -> System.out.println("    - " + path));
+      });
+    });
+    System.out.println("=== END WHITELIST DUMP ===");
   }
 }
