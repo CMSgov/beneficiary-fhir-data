@@ -3,7 +3,6 @@ from os import getenv
 
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
 MIN_PRIOR_AUTH_LOAD_DATE = "2024-01-01"
-PRUNE_BATCH_MAX_SIZE = 1_000
 
 
 def _parse_bool_default_false(var_name: str) -> bool:
