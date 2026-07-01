@@ -23,6 +23,9 @@ dev = [
     "debugpy>=1.8.19",
 ]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100
