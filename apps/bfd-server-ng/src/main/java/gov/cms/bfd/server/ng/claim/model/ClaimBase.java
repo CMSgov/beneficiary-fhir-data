@@ -147,4 +147,29 @@ public abstract class ClaimBase {
    * @return the ClaimRelatedCondition
    */
   public abstract Optional<ClaimRelatedCondition> getClaimRelatedCondition();
+
+  /**
+   * Returns the claim paid status code if applicable to this claim source type. Defaults to empty
+   * for base claims (like NCH/DDPS) that do not track this field.
+   *
+   * @return an optional containing the claim paid status code
+   */
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.empty();
+  }
+
+  /**
+   * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail
+   * logic. Standard base claims with no status code will ignore this.
+   *
+   * @param eob the EOB being built
+   */
+  public void applyOutcomeOverride(ExplanationOfBenefit eob) {
+    // Only Shared Systems claims derive outcome from CLM_PD_STUS_CD. Missing or unmapped paid
+    // status codes are resolved as PARTIAL to match the outcome search filter behavior.
+    if (this instanceof ClaimInstitutionalSharedSystems
+        || this instanceof ClaimProfessionalSharedSystems) {
+      ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
+    }
+  }
 }

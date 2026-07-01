@@ -8,12 +8,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.io.ByteStreams;
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao.S3ObjectDetails;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedIOException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -39,7 +41,7 @@ import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 /** Integration tests for {@link S3Dao}. */
-class S3DaoIT extends AbstractLocalStackTest {
+class S3DaoIT extends AbstractMiniStackTest {
   /**
    * {@link S3TransferManager#copy} does not preserve meta data when using multi-part transfers. To
    * test with with reasonable overhead we need to reduce the partition size to the minimum allowed
@@ -60,16 +62,20 @@ class S3DaoIT extends AbstractLocalStackTest {
   /** Creates the {@link S3Dao} and a bucket for use in tests. */
   @BeforeEach
   void createDao() {
-    s3Dao =
-        new AwsS3ClientFactory(
-                S3ClientConfig.s3Builder()
-                    .region(Region.of(localstack.getRegion()))
-                    .endpointOverride(localstack.getEndpoint())
-                    .accessKey(localstack.getAccessKey())
-                    .secretKey(localstack.getSecretKey())
-                    .minimumPartSizeForDownload((long) MIN_PART_SIZE_FOR_TESTING)
-                    .build())
-            .createS3Dao();
+    try {
+      s3Dao =
+          new AwsS3ClientFactory(
+                  S3ClientConfig.s3Builder()
+                      .region(Region.of(miniStack.getRegion()))
+                      .endpointOverride(new URI(miniStack.getEndpoint()))
+                      .accessKey(miniStack.getAccessKey())
+                      .secretKey(miniStack.getSecretKey())
+                      .minimumPartSizeForDownload((long) MIN_PART_SIZE_FOR_TESTING)
+                      .build())
+              .createS3Dao();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
     bucket = s3Dao.createTestBucket();
   }
 

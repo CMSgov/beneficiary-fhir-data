@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng;
 
-import static gov.cms.bfd.server.ng.IntegrationTestBase.INCLUDE_TAX_NUMBERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,17 +13,19 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class FhirInputConverterTest {
+class FhirInputConverterTest extends IntegrationTestBase {
 
   // These scenarios may not be easy to reproduce in an integration test, but we should be sure our
   // input validation is resilient against null/empty inputs.
@@ -103,6 +105,60 @@ class FhirInputConverterTest {
         expected, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
   }
 
+  public static Stream<Arguments> provideOutcomeParameterScenarios() {
+    var completeOrPartial =
+        new TokenOrListParam()
+            .addOr(new TokenParam(OUTCOME_COMPLETE))
+            .addOr(new TokenParam(OUTCOME_PARTIAL));
+
+    return Stream.of(
+        Arguments.of(
+            "complete",
+            new TokenAndListParam().addAnd(new TokenParam(OUTCOME_COMPLETE)),
+            List.of(List.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE))),
+        Arguments.of(
+            "partial",
+            new TokenAndListParam().addAnd(new TokenParam(OUTCOME_PARTIAL)),
+            List.of(List.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL))),
+        Arguments.of(
+            "queued",
+            new TokenAndListParam().addAnd(new TokenParam(OUTCOME_QUEUED)),
+            List.of(List.of(ExplanationOfBenefit.RemittanceOutcome.QUEUED))),
+        Arguments.of(
+            "error",
+            new TokenAndListParam().addAnd(new TokenParam(OUTCOME_ERROR)),
+            List.of(List.of(ExplanationOfBenefit.RemittanceOutcome.ERROR))),
+        Arguments.of(
+            "case insensitive",
+            new TokenAndListParam().addAnd(new TokenParam(OUTCOME_PARTIAL_CASE_INSENSITIVE)),
+            List.of(List.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL))),
+        Arguments.of(
+            "complete OR partial",
+            new TokenAndListParam().addAnd(completeOrPartial),
+            List.of(
+                List.of(
+                    ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
+                    ExplanationOfBenefit.RemittanceOutcome.PARTIAL))),
+        Arguments.of(
+            "complete AND partial",
+            new TokenAndListParam()
+                .addAnd(new TokenParam(OUTCOME_COMPLETE))
+                .addAnd(new TokenParam(OUTCOME_PARTIAL)),
+            List.of(
+                List.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+                List.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL))));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideOutcomeParameterScenarios")
+  void parseOutcomeParameter(
+      String scenario,
+      TokenAndListParam outcomeParam,
+      List<List<ExplanationOfBenefit.RemittanceOutcome>> expectedOutcomes) {
+    assertEquals(
+        expectedOutcomes, FhirInputConverter.parseOutcomeParameter(outcomeParam), scenario);
+  }
+
   @Test
   void parseBooleanHeaderThrowsWhenHeaderRepeated() {
     var requestDetails = mock(RequestDetails.class);
@@ -114,5 +170,37 @@ class FhirInputConverterTest {
             () -> FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
 
     assertEquals("Multiple values supplied for header: IncludeTaxNumbers", thrown.getMessage());
+  }
+
+  @Test
+  void parseFromQueryParam_validScenarios() {
+    assertEquals(
+        CoveragePart.PART_A, FhirInputConverter.parseCoverageClassPart("part-a").orElse(null));
+    assertEquals(
+        CoveragePart.PART_B, FhirInputConverter.parseCoverageClassPart("part-b").orElse(null));
+    assertEquals(
+        CoveragePart.PART_C, FhirInputConverter.parseCoverageClassPart("part-c").orElse(null));
+    assertEquals(
+        CoveragePart.PART_D, FhirInputConverter.parseCoverageClassPart("part-d").orElse(null));
+    assertEquals(CoveragePart.DUAL, FhirInputConverter.parseCoverageClassPart("dual").orElse(null));
+
+    assertEquals(
+        CoveragePart.PART_A, FhirInputConverter.parseCoverageClassPart("Part A").orElse(null));
+    assertEquals(
+        CoveragePart.PART_B, FhirInputConverter.parseCoverageClassPart("PART_B").orElse(null));
+    assertEquals(
+        CoveragePart.PART_C, FhirInputConverter.parseCoverageClassPart(" part-c ").orElse(null));
+    assertEquals(
+        CoveragePart.PART_D, FhirInputConverter.parseCoverageClassPart("Part_D").orElse(null));
+  }
+
+  @Test
+  void parseFromQueryParam_invalidScenarios() {
+    assertTrue(FhirInputConverter.parseCoverageClassPart(null).isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("   ").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("part-e").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("medicare").isEmpty());
+    assertTrue(FhirInputConverter.parseCoverageClassPart("part/a").isEmpty());
   }
 }

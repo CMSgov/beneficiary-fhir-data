@@ -8,7 +8,7 @@ endpoints.
 
 We use Spring profiles to modify the behavior of the application:
 
-- `local` - configures the application to run against a local database, optionally using localstack for SSM-based
+- `local` - configures the application to run against a local database, optionally using miniStack for SSM-based
   configuration
 - `aws` - configures the application to run against an RDS database and requires configuration to be loaded from SSM
 
@@ -23,12 +23,10 @@ export BFD_SENSITIVE_DB_USERNAME=someUser
 
 ### Local SSM configuration
 
-You can verify SSM configuration is working correctly using `localstack`.
-
-using [`awslocal`](https://github.com/localstack/awscli-local):
+You can verify SSM configuration is working correctly using `ministack`.
 
 ```sh
-awslocal ssm put-parameter --name "/bfd/local/server/nonsensitive/some_key" --value "some_value" --overwrite --type String
+aws --endpoint-url=http://localhost:4566 ssm put-parameter --name "/bfd/local/server/nonsensitive/some_key" --value "some_value" --overwrite --type String
 ```
 
 ## Running the application
@@ -174,3 +172,47 @@ The output will be under `./codegen/out`
 
 The output will not be a complete java class, but just a fragment that you can copy inside of an `Enum` block.
 The output may require some modifications.
+
+## Audit Events
+BFD server captures audit events on the Patient/$idi-match operation. These events are stored in a DynamoDB not captured locally. If you want to test of make any changes that require interaction with the DynamoDB the following steps are required:
+
+- Pull down a local dynamoDB docker image and run it locally. You can use the following command to do that:
+
+```bash
+docker pull amazon/dynamodb-local:3.3.0
+docker run -p 8000:8000 amazon/dynamodb-local
+```
+
+- Install AWS CLI v2 and configure it to point to the local DynamoDB instance with instructions from the [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- Create a local profile for AWS with the CLI
+```bash
+aws configure set aws_access_key_id local --profile local
+aws configure set aws_secret_access_key local --profile local
+aws configure set region us-east-1 --profile local
+aws configure set output json --profile local
+```
+
+- Install the table schema using the AWS CLI
+```bash
+AWS_ACCESS_KEY_ID=dummy \
+AWS_SECRET_ACCESS_KEY=dummy \
+AWS_REGION=us-east-1 \
+aws dynamodb create-table \
+  --table-name bfd-local-patient-match-audit \
+  --attribute-definitions \
+    AttributeName=matchedBeneSk,AttributeType=N \
+    AttributeName=timestamp,AttributeType=S \
+  --key-schema \
+    AttributeName=matchedBeneSk,KeyType=HASH \
+    AttributeName=timestamp,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST \
+  --endpoint-url http://localhost:8000
+```
+- Verify that the table was created successfully by running the following command:
+```bash
+AWS_ACCESS_KEY_ID=dummy \
+AWS_SECRET_ACCESS_KEY=dummy \
+AWS_REGION=us-east-1 \
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
+

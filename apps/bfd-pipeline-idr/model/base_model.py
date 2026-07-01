@@ -26,6 +26,7 @@ from constants import (
     IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE,
     IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE,
     IDR_CLAIM_TABLE,
+    IDR_PRIOR_AUTH_TABLE,
     INSTITUTIONAL_NCH_PARTITIONS,
     INSTITUTIONAL_SS_PARTITIONS,
     NON_CLAIM_PARTITION,
@@ -40,6 +41,7 @@ from settings import (
     MIN_CLAIM_LOAD_DATE,
     MIN_CLAIM_NCH_TRANSACTION_DATE,
     MIN_CLAIM_SS_TRANSACTION_DATE,
+    MIN_PRIOR_AUTH_TRANSACTION_DATE,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -79,7 +81,7 @@ def transform_default_date_to_null(value: date | None) -> date | None:
 def transform_default_string(value: str | None) -> str:
     if value is None or value == "~":
         return ""
-    return value
+    return value.strip()
 
 
 def transform_null_float(value: float | None) -> float:
@@ -421,6 +423,7 @@ class ModelType(Enum):
     CLAIM_RX = (MIN_CLAIM_NCH_TRANSACTION_DATE, CLAIM_RX_TABLE, PART_D_PARTITIONS)
     BENEFICIARY = (DEFAULT_MIN_DATE, BENEFICIARY_TABLE, [NON_CLAIM_PARTITION])
     LOAD_PROGRESS = (DEFAULT_MIN_DATE, "", EMPTY_PARTITION)
+    PRIOR_AUTH = (MIN_PRIOR_AUTH_TRANSACTION_DATE, IDR_PRIOR_AUTH_TABLE, [NON_CLAIM_PARTITION])
 
     def __init__(
         self,

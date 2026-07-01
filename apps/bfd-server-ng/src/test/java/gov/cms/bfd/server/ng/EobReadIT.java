@@ -60,7 +60,7 @@ class EobReadIT extends IntegrationTestBase {
   void eobReadPhase2() {
     var eob = eobRead().withId(CLAIM_ID_PHASE_2).execute();
     assertFalse(eob.isEmpty());
-    assertEquals("QUEUED", eob.getOutcome().name());
+    assertEquals("PARTIAL", eob.getOutcome().name());
     expectFhir().toMatchSnapshot(eob);
   }
 
@@ -81,6 +81,7 @@ class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL)).execute();
     assertFalse(eob.isEmpty());
     assertFalse(hasTaxNumberExtension(eob));
+    assertEquals(ExplanationOfBenefit.RemittanceOutcome.PARTIAL, eob.getOutcome());
 
     assertTrue(
         eob.getMeta().getProfile().stream()

@@ -10,6 +10,7 @@ import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
+import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
@@ -128,7 +129,8 @@ public class PatientHandler {
   public Bundle searchByBeneficiaryC4DIC(Long beneSk, LocalDate benefitDate) {
     var beneficiaryOpt =
         coverageRepository
-            .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
+            .searchBeneficiaryWithCoverage(
+                new CoverageSearchCriteria(beneSk, new DateTimeRange(), Optional.empty()))
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);

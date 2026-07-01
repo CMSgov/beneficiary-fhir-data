@@ -46,6 +46,435 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryEmpty[POST]=[
 ]
 
 
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[GET]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/405764107"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "E",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "P",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-405764107",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2021-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Coverage?beneficiary=Patient%2F405764107&class-value=part-a"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "total" : 1,
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[GET_WITH_SEARCH]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/405764107"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "E",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "P",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-405764107",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2021-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Coverage/_search?beneficiary=Patient%2F405764107&class-value=part-a"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "total" : 1,
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiaryPartAQuery[POST]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/405764107"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "E",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "P",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-405764107",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2021-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Coverage/_search"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "total" : 1,
+  "type" : "searchset"
+}
+]
+
+
 gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
 {
   "entry" : [ {
@@ -642,6 +1071,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -1243,6 +1673,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -1844,6 +2275,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 5,
   "type" : "searchset"
 }
 ]
@@ -2034,6 +2466,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -2176,6 +2609,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET_WITH_SEARCH]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -2318,6 +2752,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -2585,6 +3020,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -2852,6 +3288,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3119,6 +3556,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3370,6 +3808,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3621,6 +4060,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -3872,6 +4312,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4127,6 +4568,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4382,6 +4824,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4637,6 +5080,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataSh
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -4802,6 +5246,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -4944,6 +5389,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -5086,6 +5532,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -5376,6 +5823,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -5618,6 +6066,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -5860,6 +6309,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 2,
   "type" : "searchset"
 }
 ]
@@ -5974,6 +6424,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6088,6 +6539,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET_WITH_SEAR
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6202,6 +6654,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[POST]=[
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6307,6 +6760,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchForBeneWithSingleP
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6461,6 +6915,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchForBeneWithSingleP
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6575,6 +7030,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6689,6 +7145,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
@@ -6803,6 +7260,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDSameProgramTypeCodeCoverageSearc
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
+  "total" : 1,
   "type" : "searchset"
 }
 ]
