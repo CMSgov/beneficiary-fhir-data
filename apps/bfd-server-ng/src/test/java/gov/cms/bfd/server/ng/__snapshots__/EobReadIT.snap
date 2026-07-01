@@ -3249,9 +3249,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "coding" : [ {
         "code" : "J2270",
         "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-      }, {
-        "code" : "00409189001",
-        "system" : "http://hl7.org/fhir/sid/ndc"
       } ]
     },
     "quantity" : {

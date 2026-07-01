@@ -348,10 +348,13 @@ public class IntegrationTestBase {
 
   public boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
     return eob.getItem().stream()
-        .flatMap(item -> item.getProductOrService().getCoding().stream())
-        .anyMatch(
-            coding ->
-                SystemUrls.NDC.equals(coding.getSystem())
-                    && CLAIM_LINE_NDC_CODE.equals(coding.getCode()));
+        .flatMap(item -> item.getDetail().stream())
+        .flatMap(detail -> detail.getProductOrService().getCoding().stream())
+        .anyMatch(this::isClaimLineNdcCoding);
+  }
+
+  private boolean isClaimLineNdcCoding(Coding coding) {
+    return SystemUrls.NDC.equals(coding.getSystem())
+        && CLAIM_LINE_NDC_CODE.equals(coding.getCode());
   }
 }
