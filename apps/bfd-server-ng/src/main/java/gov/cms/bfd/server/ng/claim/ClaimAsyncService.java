@@ -57,10 +57,12 @@ public class ClaimAsyncService {
         () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
         () -> {
           try (var entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.unwrap(org.hibernate.Session.class).setDefaultReadOnly(true);
             var query =
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("claimUniqueIds", claimUniqueIds);
+            query.setHint("org.hibernate.readOnly", true);
             var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
             result.stream()
                 .findFirst()
@@ -89,6 +91,7 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
     try (var entityManager = entityManagerFactory.createEntityManager()) {
+      entityManager.unwrap(org.hibernate.Session.class).setDefaultReadOnly(true);
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
           () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
@@ -97,6 +100,7 @@ public class ClaimAsyncService {
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("beneSk", criteria.beneSk());
+            query.setHint("org.hibernate.readOnly", true);
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);
