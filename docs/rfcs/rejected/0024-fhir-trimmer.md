@@ -14,7 +14,7 @@ This RFC has been rejected since there is no technically complex effort being ac
 ## Status
 [Status]: #status
 
-* Status: Proposed
+* Status: Rejected
 * Implementation JIRA Ticket(s):
     * [BFD-4768](https://jira.cms.gov/browse/BFD-4768)
 
