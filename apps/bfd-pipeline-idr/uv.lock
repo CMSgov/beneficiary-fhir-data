@@ -43,6 +43,7 @@ dependencies = [
     { name = "loguru" },
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "pydantic" },
+    { name = "pydantic-partial" },
     { name = "python-dateutil" },
     { name = "snowflake-connector-python" },
     { name = "snowflake-snowpark-python" },
@@ -67,6 +68,7 @@ requires-dist = [
     { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
     { name = "pydantic", specifier = ">=2.13.3" },
+    { name = "pydantic-partial" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "snowflake-connector-python", specifier = ">=4.4.0" },
     { name = "snowflake-snowpark-python", specifier = ">=1.50.0" },
@@ -506,6 +508,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/30/a6/9f9f380dbb301f67023bf8f707aaa75daadf84f7152d95c410fd7e81d994/pydantic_core-2.46.4-cp314-cp314t-win32.whl", hash = "sha256:e846ae7835bf0703ae43f534ab79a867146dadd59dc9ca5c8b53d5c8f7c9ef02", size = 1955575, upload-time = "2026-05-06T13:38:51.116Z" },
     { url = "https://files.pythonhosted.org/packages/40/1f/f1eb9eb350e795d1af8586289746f5c5677d16043040d63710e22abc43c9/pydantic_core-2.46.4-cp314-cp314t-win_amd64.whl", hash = "sha256:2108ba5c1c1eca18030634489dc544844144ee36357f2f9f780b93e7ddbb44b5", size = 2051624, upload-time = "2026-05-06T13:38:21.672Z" },
     { url = "https://files.pythonhosted.org/packages/f6/d2/42dd53d0a85c27606f316d3aa5d2869c4e8470a5ed6dec30e4a1abe19192/pydantic_core-2.46.4-cp314-cp314t-win_arm64.whl", hash = "sha256:4fcbe087dbc2068af7eda3aa87634eba216dbda64d1ae73c8684b621d33f6596", size = 2017325, upload-time = "2026-05-06T13:40:52.723Z" },
+]
+
+[[package]]
+name = "pydantic-partial"
+version = "0.11.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/65/28/92f47cdece522436ca4d55a77f3b8f7f41795a270bb1698833c77d8709c2/pydantic_partial-0.11.1.tar.gz", hash = "sha256:172874d96144eb947f7b11f3669888560bf11ee353f45edf129554bca634862a", size = 6027, upload-time = "2026-06-26T18:54:53.699Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9d/02/f9c7b99aca4e3e1d836f92b2fe31399f404e16a29ace420f13dd973099a3/pydantic_partial-0.11.1-py3-none-any.whl", hash = "sha256:8b3ddfbb68430b8a98829efb2f5146691df09a05de609c4fcf3e8e20971462bd", size = 7464, upload-time = "2026-06-26T18:54:52.787Z" },
 ]
 
 [[package]]
