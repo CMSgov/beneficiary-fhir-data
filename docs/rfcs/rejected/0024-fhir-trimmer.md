@@ -8,7 +8,9 @@
     * [BFD-4768](https://jira.cms.gov/browse/BFD-4768)
 
 To implement CARIN Basis Profiles in v3 in an effort to speed up bulk queries from the APIs (AB2D), BFD v3 needs to be sending trimmed FHIR resources. To trim these resources, BFD needs a framework for applying these profiles, either to queries into our internal database or by applying a profile to a FHIR resource and trimming unnecessary elements. This document serves as a record of research done in the interest of implementing this solution, the findings from that research, and a proposed solution to support it going forward.
-git 
+
+This RFC has been rejected since there is no technically complex effort being accepted. The FHIR trimmer concept is dead.
+
 ## Status
 [Status]: #status
 
