@@ -29,6 +29,7 @@ from model.base_model import (
     T,
 )
 from model.load_progress import LoadProgress
+from settings import PRUNE_BATCH_MAX_SIZE
 
 
 def get_progress(
@@ -143,34 +144,56 @@ def prune_phase_1_ss_claims(
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
-        res = conn.execute(
-            f"""
-                DELETE FROM {item_table}
-                WHERE clm_uniq_id IN (
-                    SELECT clm_uniq_id FROM {claim_table}
-                    WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                    AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                    AND clm_idr_ld_dt < %s
-                    LIMIT 1000
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        totalRowCount = 0
+        while True:
+            with conn.transaction():
+                res = conn.execute(
+                    f"""
+                        DELETE FROM {item_table}
+                        WHERE (clm_uniq_id, bfd_row_id) IN (
+                            SELECT item.clm_uniq_id, item.bfd_row_id
+                            FROM {item_table} item
+                            JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                            AND clm.clm_src_id IN 
+                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+                            AND clm.clm_idr_ld_dt < %s
+                            LIMIT {PRUNE_BATCH_MAX_SIZE}
+                        )
+                    """,  # type: ignore
+                    (prune_cutoff_date,),
                 )
-                """,  # type: ignore
-            (prune_cutoff_date,),
-        )
-        logger.info("pruned {} rows from {}", res.rowcount, item_table)
 
-        res = conn.execute(
-            f"""
-                DELETE FROM {claim_table}
-                WHERE clm_uniq_id IN (
-                    SELECT clm_uniq_id FROM {claim_table}
-                    WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                    AND clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                    AND clm_idr_ld_dt < %s
-                    LIMIT 1000
+                totalRowCount += res.rowcount
+                logger.info("pruned {} rows from {}", res.rowcount, item_table)
+
+                if res.rowcount == 0:
+                    logger.info("Total rows pruned from {}: {}", item_table, totalRowCount)
+                    break
+
+        totalRowCount = 0
+        while True:
+            with conn.transaction():
+                res = conn.execute(
+                    f"""
+                        DELETE FROM {claim_table}
+                        WHERE clm_uniq_id IN (
+                            SELECT clm_uniq_id FROM {claim_table}
+                            WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                            AND clm_src_id IN 
+                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+                            AND clm_idr_ld_dt < %s
+                            LIMIT {PRUNE_BATCH_MAX_SIZE}
+                        )
+                    """,  # type: ignore
+                    (prune_cutoff_date,),
                 )
-                """,  # type: ignore
-            (prune_cutoff_date,),
-        )
-        logger.info("pruned {} rows from {}", res.rowcount, claim_table)
+
+                totalRowCount += res.rowcount
+                logger.info("pruned {} rows from {}", res.rowcount, claim_table)
+
+                if res.rowcount == 0:
+                    logger.info("Total rows pruned from {}: {}", claim_table, totalRowCount)
+                    break
     return True
