@@ -8,6 +8,9 @@ dependencies = ["aws-lambda-powertools[all]>=3.14.0", "boto3>=1.38.28", "pydanti
 [dependency-groups]
 dev = ["ruff", "uv>=0.11.15"]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100
