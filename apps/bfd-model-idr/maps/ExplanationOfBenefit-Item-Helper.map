@@ -6,7 +6,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
 
     src -> tgt.productOrService = create('CodeableConcept') as prodCC then addProductOrService(src,prodCC) "Add productOrService";
     //We know we CAN get HCPCS + HIPPS code, and potentially NDC, we'll want to add it.
-    src.CLM_LINE_NDC_CD as ndcCd where(ndcCd.length()=11) -> tgt.detail = create('BackboneElement') as tgtDetail then addNDCToInstitutional(src, tgtDetail) "Add ndc info";
+    src.CLM_LINE_NDC_CD as ndcCd where(ndcCd.length()=11) -> tgt.detail = create('BackboneElement') as tgtDetail then addNDCToDetail(src, tgtDetail) "Add ndc info";
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_LINE_SRVC_UNIT_QTY as unitQty -> tgtQuantity.value=cast(unitQty,"decimal") "set quantity";
     } "Set quantity of service provided";
@@ -524,7 +524,7 @@ group addProductOrService(source src: LineItemComponent, target tgt: CodeableCon
     src.CLM_REV_APC_HIPPS_CD as hippsCd where(hippsCd.length()=5 and hippsCd!="00000") -> tgt.coding = c("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", hippsCd) "Add coding";
 }
 
-group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneElement){
+group addNDCToDetail(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NDC_CD as ndcCd -> tgt.productOrService = cc("http://hl7.org/fhir/sid/ndc",ndcCd) "Add NDC Code";
     src -> tgt.sequence = 1 "Add sequence";
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
