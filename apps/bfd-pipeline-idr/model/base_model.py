@@ -179,6 +179,7 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
         WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
+            {{BASE_CLAIMS_WHERE_FILTERS}}
         {{LIMIT}}
     """
 

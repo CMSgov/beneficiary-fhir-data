@@ -137,7 +137,8 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 .replace("{LAST_TS}", "%(timestamp)s")
                 .replace("{ORDER_BY}", order_by)
                 .replace("{TABLESAMPLE}", "")
-                .replace("{LIMIT}", ""),
+                .replace("{LIMIT}", "")
+                .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
                 {"timestamp": min_transaction_date},
             )
 
@@ -185,7 +186,8 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             .replace("{LAST_TS}", "%(timestamp)s")
             .replace("{ORDER_BY}", order_by)
             .replace("{TABLESAMPLE}", "")
-            .replace("{LIMIT}", ""),
+            .replace("{LIMIT}", "")
+            .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
             {"timestamp": compare_timestamp},
         )
 
