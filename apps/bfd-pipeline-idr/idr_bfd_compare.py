@@ -18,7 +18,13 @@ from logger_config import configure_logger
 from model.base_model import ALIAS_CLM, DbType, LoadMode, Source, T
 from model.load_progress import LoadProgress
 from parallel_executor import ParallelStagesExecutor, Stage
-from pipeline_stages import BENE_AUX_TABLES, BENE_TABLES, CLAIM_AUX_TABLES, CLAIM_TABLES
+from pipeline_stages import (
+    BENE_AUX_TABLES,
+    BENE_TABLES,
+    CLAIM_AUX_TABLES,
+    CLAIM_TABLES,
+    PRIOR_AUTH_TABLES,
+)
 
 if TYPE_CHECKING:
     from loguru import Record
@@ -32,7 +38,7 @@ _TABLES_TO_LOAD = [
 _ROW_LIMIT = int(os.environ.get("ROW_LIMIT", "1000"))
 _MAX_PARALLELISM = int(os.environ.get("MAX_PARALLELISM", "12"))
 
-_ALL_MODELS = [*CLAIM_AUX_TABLES, *CLAIM_TABLES, *BENE_TABLES, *BENE_AUX_TABLES]
+_ALL_MODELS = [*CLAIM_AUX_TABLES, *CLAIM_TABLES, *BENE_TABLES, *BENE_AUX_TABLES, *PRIOR_AUTH_TABLES]
 _IGNORED_COLS_PER_MODEL = {
     k: v
     for keys, v in {
