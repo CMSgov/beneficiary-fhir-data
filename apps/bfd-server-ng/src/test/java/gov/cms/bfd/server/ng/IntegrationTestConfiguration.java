@@ -108,8 +108,6 @@ public class IntegrationTestConfiguration {
                     container.getUsername(),
                     "flyway.password",
                     container.getPassword(),
-                    "flyway.postgresql.transactional.lock",
-                    "false",
                     "flyway.locations",
                     "filesystem:" + Paths.get(baseDir, "../bfd-db-migrator-ng/migrations")))
             .load();

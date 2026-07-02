@@ -48,6 +48,5 @@ db_endpoint="${DB_ENDPOINT:-"$env_db_endpoint"}"
         "-Dflyway.url=$db_endpoint" \
         "-Dflyway.user=$username" \
         "-Dflyway.password=$password" \
-        "-Dflyway.callbackLocations=filesystem:$SCRIPT_DIR/callbacks" \
-        "-Dflyway.postgresql.transactional.lock=false"
+        "-Dflyway.callbackLocations=filesystem:$SCRIPT_DIR/callbacks"
 )
