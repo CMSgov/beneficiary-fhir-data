@@ -29,6 +29,7 @@ from model.base_model import (
 )
 from model.load_progress import LoadProgress
 from settings import (
+    ALLOW_EXTRACTOR_QUERY_LOGGING,
     BATCH_MULTIPLIER,
     ENABLE_DATE_PARTITIONS,
     IDR_ACCOUNT,
@@ -234,7 +235,8 @@ class PostgresExtractor(Extractor[T]):
         sql: str,
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
-        logger.debug(sql)
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -327,7 +329,8 @@ class SnowflakeExtractor(Extractor[T]):
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
         cur = None
-        logger.debug(sql)
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
