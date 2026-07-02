@@ -51,6 +51,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_run_locust" {
 
 resource "aws_cloudwatch_log_group" "run_locust" {
   name         = "/aws/lambda/${local.run_locust_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

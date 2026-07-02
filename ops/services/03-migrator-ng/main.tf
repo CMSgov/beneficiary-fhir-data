@@ -58,6 +58,7 @@ locals {
 
 resource "aws_cloudwatch_log_group" "messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

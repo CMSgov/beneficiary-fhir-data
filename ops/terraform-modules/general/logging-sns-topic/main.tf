@@ -47,12 +47,14 @@ data "aws_iam_policy_document" "combined" {
 
 resource "aws_cloudwatch_log_group" "success" {
   name         = "sns/${local.region}/${local.account_id}/${var.topic_name}"
+  retention_in_days = 14
   kms_key_id   = var.kms_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "failure" {
   name         = "sns/${local.region}/${local.account_id}/${var.topic_name}/Failure"
+  retention_in_days = 14
   kms_key_id   = var.kms_key_arn
   skip_destroy = true
 }

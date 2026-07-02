@@ -21,6 +21,7 @@ data "archive_file" "this" {
 
 resource "aws_cloudwatch_log_group" "this" {
   name         = "/aws/lambda/${var.lambda_name}"
+  retention_in_days = 14
   kms_key_id   = var.kms_key_arn
   skip_destroy = true
 }

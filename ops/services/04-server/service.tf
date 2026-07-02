@@ -79,36 +79,42 @@ data "aws_ecr_image" "server" {
 
 resource "aws_cloudwatch_log_group" "certstores_messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "server_access" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "adot_messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "adot_metrics" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

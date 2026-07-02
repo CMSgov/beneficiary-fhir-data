@@ -176,6 +176,7 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoint_allow_sftp_traffic_
 
 resource "aws_cloudwatch_log_group" "sftp_server" {
   name         = "/bfd/${local.service}/${local.full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

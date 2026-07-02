@@ -37,6 +37,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ccw_runner_rds_cluster" {
 
 resource "aws_cloudwatch_log_group" "ccw_runner" {
   name         = "/aws/lambda/${local.ccw_runner_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
