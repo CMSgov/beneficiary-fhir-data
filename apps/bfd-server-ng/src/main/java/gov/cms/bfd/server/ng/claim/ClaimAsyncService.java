@@ -62,7 +62,6 @@ public class ClaimAsyncService {
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("claimUniqueIds", claimUniqueIds);
-            query.setHint("org.hibernate.readOnly", true);
             var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
             result.stream()
                 .findFirst()
@@ -100,7 +99,6 @@ public class ClaimAsyncService {
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("beneSk", criteria.beneSk());
-            query.setHint("org.hibernate.readOnly", true);
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);
