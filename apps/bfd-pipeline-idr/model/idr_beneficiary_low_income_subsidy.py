@@ -58,7 +58,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM {IDR_BENE_LOW_INCOME_SUBSIDY_TABLE} bene_lis
+                FROM {IDR_BENE_LOW_INCOME_SUBSIDY_TABLE} bene_lis {{TABLESAMPLE}}
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry, start_time)}
@@ -66,4 +66,5 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
                 {{ORDER_BY}}
+                {{LIMIT}}
             """
