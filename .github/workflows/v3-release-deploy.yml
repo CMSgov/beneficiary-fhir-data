@@ -355,6 +355,7 @@ jobs:
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: >-
         bfd-platform-server-fluent-bit,
+        bfd-platform-server-datadog-agent,
         bfd-platform-idr-pipeline,
         bfd-platform-migrator-ng,
         bfd-platform-consume-idr-events,

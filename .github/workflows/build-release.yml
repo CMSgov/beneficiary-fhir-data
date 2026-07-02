@@ -444,6 +444,7 @@ jobs:
         bfd-platform-server-regression,
         bfd-platform-mount-certstores,
         bfd-platform-server-fluent-bit,
+        bfd-platform-server-datadog-agent,
         bfd-platform-idr-pipeline,
         bfd-platform-migrator-ng,
         bfd-platform-run-locust,

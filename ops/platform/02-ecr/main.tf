@@ -42,6 +42,7 @@ locals {
     # sidecar container image repositories
     "bfd-platform-mount-certstores",
     "bfd-platform-server-fluent-bit",
+    "bfd-platform-server-datadog-agent",
     # application container image repositories
     "bfd-platform-idr-pipeline",
     "bfd-platform-migrator-ng",
