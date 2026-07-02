@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from enum import Enum, StrEnum
 from typing import Any, TypeVar, cast
@@ -44,7 +44,7 @@ from settings import (
     MIN_PRIOR_AUTH_TRANSACTION_DATE,
 )
 
-type DbType = str | float | int | bool | date | datetime | Sequence[DbType]
+type DbType = str | float | int | bool | date | datetime
 
 
 def transform_null_date_to_max(value: date | None) -> date:

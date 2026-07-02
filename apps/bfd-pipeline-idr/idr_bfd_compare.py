@@ -80,11 +80,11 @@ def _compare_table(
             f"""
             SELECT DISTINCT ON (last_ts) *
             FROM {LoadProgress.table()}
-            WHERE batch_partition = ANY(%(partition_list)s)
+            WHERE batch_partition IN ({", ".join(_escape_sql_val(x) for x in partition_list)})
             AND table_name = %(table)s
             ORDER BY last_ts
             """,
-            {"partition_list": partition_list, "table": model.table()},
+            {"table": model.table()},
         )
 
         batch_timestamp_clause = idr_extractor.build_filter_columns(progress)
