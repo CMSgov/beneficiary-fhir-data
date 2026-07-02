@@ -13,51 +13,76 @@ import org.hl7.fhir.r4.model.Coding;
 @AllArgsConstructor
 public enum ClaimSubtype {
   /** Represents CARRIER type. */
-  CARRIER("carrier", SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL, ClaimType.PROFESSIONAL),
+  CARRIER(
+      "carrier",
+      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
+      ClaimType.PROFESSIONAL,
+      "What Part B Covers"),
 
   /** Represents DME type. */
-  DME("dme", SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL, ClaimType.PROFESSIONAL),
+  DME(
+      "dme",
+      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
+      ClaimType.PROFESSIONAL,
+      "What Part B Covers: Durable Medical Equipment"),
 
   /** Represents HHA type. */
   HHA(
       "hha",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "What Part A Covers: Home Health Services"),
 
   /** Represents HOSPICE type. */
   HOSPICE(
       "hospice",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "What Part A Covers: Hospice"),
 
   /** Represents INPATIENT type. */
   INPATIENT(
       "inpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "What Part A Covers: Inpatient Hospital Care"),
 
   /** Represents OUTPATIENT type. */
   OUTPATIENT(
       "outpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "What Part B Covers"),
 
   /** Represents PDE type. */
-  PDE("pde", SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY, ClaimType.PHARMACY),
+  PDE(
+      "pde",
+      SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY,
+      ClaimType.PHARMACY,
+      "What Drug Plans Cover"),
 
   /** Represents SNF type. */
   SNF(
       "snf",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL);
+      ClaimType.INSTITUTIONAL,
+      "What Part A Covers: Skilled Nursing Facility Care");
 
   private final String code;
   private final String systemUrl;
   private final ClaimType claimType;
+  private final String eobTypeDisplay;
 
   CodeableConcept toFhir() {
     return new CodeableConcept(
         new Coding().setSystem(SystemUrls.CARIN_CLAIM_SUBTYPE).setCode(code));
+  }
+
+  Coding toEobTypeFhir() {
+    return new Coding()
+        .setSystem(SystemUrls.BLUE_BUTTON_EOB_TYPE_CODE)
+        .setCode(toString())
+        .setDisplay(eobTypeDisplay);
   }
 
   /**
