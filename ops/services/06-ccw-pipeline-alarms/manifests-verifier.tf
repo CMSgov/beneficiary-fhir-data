@@ -54,6 +54,7 @@ resource "aws_scheduler_schedule" "verifier" {
 
 resource "aws_cloudwatch_log_group" "verifier" {
   name         = "/aws/lambda/${local.verifier_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

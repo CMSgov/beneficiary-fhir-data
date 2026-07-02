@@ -50,12 +50,14 @@ data "aws_iam_policy_document" "topic_template" {
 
 resource "aws_cloudwatch_log_group" "splunk_incident_success" {
   name         = "sns/${local.region}/${local.account_id}/${local.splunk_incident_topic}"
+  retention_in_days = 14
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "splunk_incident_failure" {
   name         = "sns/${local.region}/${local.account_id}/${local.splunk_incident_topic}/Failure"
+  retention_in_days = 14
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }
@@ -95,6 +97,7 @@ resource "aws_cloudwatch_log_group" "slack_success" {
   for_each = local.slack_channel_to_topic
 
   name         = "sns/${local.region}/${local.account_id}/${each.value}"
+  retention_in_days = 14
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }
@@ -103,6 +106,7 @@ resource "aws_cloudwatch_log_group" "slack_failure" {
   for_each = local.slack_channel_to_topic
 
   name         = "sns/${local.region}/${local.account_id}/${each.value}/Failure"
+  retention_in_days = 14
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }

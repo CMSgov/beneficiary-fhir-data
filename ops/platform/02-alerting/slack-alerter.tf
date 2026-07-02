@@ -103,6 +103,7 @@ data "archive_file" "slack_alerter_src" {
 
 resource "aws_cloudwatch_log_group" "slack_alerter" {
   name         = "/aws/lambda/${local.slack_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }

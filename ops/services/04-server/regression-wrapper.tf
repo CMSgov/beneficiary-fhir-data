@@ -44,6 +44,7 @@ resource "aws_cloudwatch_log_group" "regression_wrapper" {
   count = local.regression_wrapper_enabled ? 1 : 0
 
   name         = "/aws/lambda/${local.rw_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }

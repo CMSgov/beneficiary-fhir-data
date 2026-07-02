@@ -11,6 +11,7 @@ resource "aws_cloudwatch_log_group" "this" {
   count = local.conditional_count
 
   name       = "/aws/lambda/${local.name_prefix}"
+  retention_in_days = 14
   kms_key_id = local.env_key_arn
 }
 

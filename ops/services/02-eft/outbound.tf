@@ -198,6 +198,7 @@ resource "aws_cloudwatch_log_group" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name         = "/aws/lambda/${local.outbound_lambda_full_name}"
+  retention_in_days = 14
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
