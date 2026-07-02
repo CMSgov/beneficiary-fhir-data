@@ -1149,7 +1149,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0117",
-            "display" : "ROOM & BOARD - PRIVATE (ONE BED) - ONCOLOGY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0117",
@@ -1437,7 +1436,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0421",
-            "display" : "PHYSICAL THERAPY - VISIT",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0421",
@@ -1752,7 +1750,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0352",
-            "display" : "CT SCAN - BODY SCAN",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0352",
@@ -2049,7 +2046,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0280",
-            "display" : "ONCOLOGY - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0280",
@@ -2352,7 +2348,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0921",
-            "display" : "OTHER DIAGNOSTIC SERVICES - PERIPHERAL VASCULAR LAB",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0921",
@@ -2646,7 +2641,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0815",
-            "display" : "ACQUISITION OF BODY COMPONENTS - ALLOGENEIC (EFFECTIVE 1/1/17)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0815",
@@ -2955,7 +2949,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0551",
-            "display" : "SKILLED NURSING - VISIT CHARGE",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0551",
@@ -3264,7 +3257,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0770",
-            "display" : "PREVENTIVE CARE SERVICES - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0770",
@@ -3561,7 +3553,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0902",
-            "display" : "BEHAVIORAL HEALTH TREATMENT/SERVICES (ALSO SEE 091X, AN EXTENSION OF 090X) - MILIEU THERAPY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0902",
@@ -3858,7 +3849,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "revenue" : {
           "coding" : [ {
             "code" : "0902",
-            "display" : "BEHAVIORAL HEALTH TREATMENT/SERVICES (ALSO SEE 091X, AN EXTENSION OF 090X) - MILIEU THERAPY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0902",
@@ -5408,7 +5398,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0204",
-            "display" : "INTENSIVE CARE UNIT - PSYCHIATRIC",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0204",
@@ -5695,7 +5684,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0143",
-            "display" : "ROOM & BOARD - DELUXE PRIVATE - PEDIATRIC",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0143",
@@ -5990,7 +5978,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0193",
-            "display" : "SUBACUTE CARE - SUBACUTE CARE - LEVEL III",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0193",
@@ -7759,7 +7746,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0117",
-            "display" : "ROOM & BOARD - PRIVATE (ONE BED) - ONCOLOGY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0117",
@@ -8036,7 +8022,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0421",
-            "display" : "PHYSICAL THERAPY - VISIT",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0421",
@@ -8346,7 +8331,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0352",
-            "display" : "CT SCAN - BODY SCAN",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0352",
@@ -8632,7 +8616,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0280",
-            "display" : "ONCOLOGY - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0280",
@@ -8924,7 +8907,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0921",
-            "display" : "OTHER DIAGNOSTIC SERVICES - PERIPHERAL VASCULAR LAB",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0921",
@@ -9213,7 +9195,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0815",
-            "display" : "ACQUISITION OF BODY COMPONENTS - ALLOGENEIC (EFFECTIVE 1/1/17)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0815",
@@ -9517,7 +9498,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0551",
-            "display" : "SKILLED NURSING - VISIT CHARGE",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0551",
@@ -9821,7 +9801,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0770",
-            "display" : "PREVENTIVE CARE SERVICES - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0770",
@@ -10113,7 +10092,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0902",
-            "display" : "BEHAVIORAL HEALTH TREATMENT/SERVICES (ALSO SEE 091X, AN EXTENSION OF 090X) - MILIEU THERAPY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0902",
@@ -11509,7 +11487,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0647",
-            "display" : "HOME IV THERAPY SERVICES - TRAINING  PATIENT/ CAREGIVER, PERIPHERAL LINE",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0647",
@@ -11801,7 +11778,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0132",
-            "display" : "ROOM & BOARD - SEMI-PRIVATE - THREE AND FOUR BEDS - OBSTETRICS (OB)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0132",
@@ -12087,7 +12063,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "revenue" : {
           "coding" : [ {
             "code" : "0300",
-            "display" : "LABORATORY - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0300",
@@ -13680,7 +13655,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0204",
-            "display" : "INTENSIVE CARE UNIT - PSYCHIATRIC",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0204",
@@ -13967,7 +13941,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0143",
-            "display" : "ROOM & BOARD - DELUXE PRIVATE - PEDIATRIC",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0143",
@@ -14262,7 +14235,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0193",
-            "display" : "SUBACUTE CARE - SUBACUTE CARE - LEVEL III",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0193",
@@ -16031,7 +16003,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0117",
-            "display" : "ROOM & BOARD - PRIVATE (ONE BED) - ONCOLOGY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0117",
@@ -16308,7 +16279,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0421",
-            "display" : "PHYSICAL THERAPY - VISIT",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0421",
@@ -16618,7 +16588,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0352",
-            "display" : "CT SCAN - BODY SCAN",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0352",
@@ -16904,7 +16873,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0280",
-            "display" : "ONCOLOGY - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0280",
@@ -17196,7 +17164,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0921",
-            "display" : "OTHER DIAGNOSTIC SERVICES - PERIPHERAL VASCULAR LAB",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0921",
@@ -17485,7 +17452,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0815",
-            "display" : "ACQUISITION OF BODY COMPONENTS - ALLOGENEIC (EFFECTIVE 1/1/17)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0815",
@@ -17789,7 +17755,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0551",
-            "display" : "SKILLED NURSING - VISIT CHARGE",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0551",
@@ -18093,7 +18058,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0770",
-            "display" : "PREVENTIVE CARE SERVICES - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0770",
@@ -18385,7 +18349,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0902",
-            "display" : "BEHAVIORAL HEALTH TREATMENT/SERVICES (ALSO SEE 091X, AN EXTENSION OF 090X) - MILIEU THERAPY",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0902",
@@ -19781,7 +19744,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0647",
-            "display" : "HOME IV THERAPY SERVICES - TRAINING  PATIENT/ CAREGIVER, PERIPHERAL LINE",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0647",
@@ -20073,7 +20035,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0132",
-            "display" : "ROOM & BOARD - SEMI-PRIVATE - THREE AND FOUR BEDS - OBSTETRICS (OB)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0132",
@@ -20359,7 +20320,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "revenue" : {
           "coding" : [ {
             "code" : "0300",
-            "display" : "LABORATORY - GENERAL CLASSIFICATION",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
           }, {
             "code" : "0300",
