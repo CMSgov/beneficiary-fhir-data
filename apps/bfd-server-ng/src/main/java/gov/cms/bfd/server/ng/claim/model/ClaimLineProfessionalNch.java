@@ -83,6 +83,7 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
     var detail = new ExplanationOfBenefit.DetailComponent();
     detail.setSequence(1);
 
+    // This doesn't use the main `ClaimLineNdc` class because the quantity isn't available here
     var coding = new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode);
     detail.setProductOrService(new CodeableConcept(coding));
 
