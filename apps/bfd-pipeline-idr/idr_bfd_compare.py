@@ -255,8 +255,6 @@ def _compare_all() -> Stage[bool]:
         if _TABLES_TO_LOAD
         else all_models_set
     )
-    logger.info(_TABLES_TO_LOAD)
-    logger.info(filtered_models)
     models_to_compare = filtered_models - immutable_models
 
     models_and_partitions = [
