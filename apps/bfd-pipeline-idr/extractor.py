@@ -1,7 +1,7 @@
 import csv
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -110,7 +110,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
     def extract_idr_data(
         self, progress: LoadProgress | None, start_time: datetime, source: Source
-    ) -> Iterator[Sequence[T]]:
+    ) -> Iterator[list[T]]:
         fetch_query = self.get_query(start_time, source)
 
         # We need to create batches using the most recent timestamp from all of the
