@@ -87,6 +87,9 @@ def _compare_table(
             {"table": model.table()},
         )
 
+        if progress:
+            logger.info("Last load progress time: {}", progress.last_ts.astimezone(UTC).isoformat())
+
         batch_timestamp_clause = idr_extractor.build_filter_columns(progress)
         model_pkeys = model.ordered_pkeys()
         columns = _comma_list(model.column_aliases())
