@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.AttributeOverride;

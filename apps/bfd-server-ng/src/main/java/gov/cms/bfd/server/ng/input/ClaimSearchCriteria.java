@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;

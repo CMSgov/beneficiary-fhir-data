@@ -1,7 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import static gov.cms.bfd.server.ng.claim.model.ProviderHistoryBase.NpiType.*;
+import static gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase.NpiType.*;
 
+import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;

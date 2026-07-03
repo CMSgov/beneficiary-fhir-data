@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+
 import java.util.List;
 
 /** The type of system for a given claim. Used to group various systems under SS together. */

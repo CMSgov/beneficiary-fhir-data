@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import java.util.List;
+
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Common interface for supporting-info types. */

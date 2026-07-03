@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;

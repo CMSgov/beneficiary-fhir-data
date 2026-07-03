@@ -10,6 +10,9 @@ import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -232,7 +235,7 @@ public class EobHandler {
   }
 
   private boolean claimItemIsSamhsa(
-      ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
+          ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
     return procedureIsSamhsa(claimItem.getProcedure(), claimThroughDate, claimUniqueId)
         || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }

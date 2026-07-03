@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Optional;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.converter;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;

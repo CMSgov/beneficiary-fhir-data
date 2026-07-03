@@ -1,0 +1,40 @@
+package gov.cms.bfd.server.ng.claim.model.common;
+
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import lombok.AllArgsConstructor;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+
+
+/**
+ * The Carin Supporting Info Category.
+ */
+@AllArgsConstructor
+@SuppressWarnings("checkstyle:JavadocVariable")
+public enum CarinSupportingInfoCategory {
+  ACTIVE_CARE_FROM_DATE("admissionperiod"),
+  ADMISSION_TYPE_CODE("admtype"),
+  SUBMISSION_DATE("clmrecvddate"),
+  PATIENT_STATUS_CODE("discharge-status"),
+  DIAGNOSIS_DRG_CODE("drg"),
+  ADMISSION_SOURCE_CODE("pointoforigin"),
+  TYPE_OF_BILL_CODE("typeofbill"),
+  DAYS_SUPPLY("dayssupply"),
+  REFILL_NUM("refillnum"),
+  DAW_CODE("dawcode"),
+  COMPOUND_CODE("compoundcode"),
+  BRAND_GENERIC_IND_CODE("brandgenericindicator"),
+  RX_ORIGIN_CODE("rxorigincode"),
+  REFILLS_AUTHORIZED("refillsauthorized");
+
+  private final String code;
+
+  /**
+   * Enum -> CodeableConcept.
+   * @return the CodeableConcept concept generated from the enum
+   */
+  public CodeableConcept toFhir() {
+    return new CodeableConcept(
+        new Coding().setSystem(SystemUrls.CARIN_CODE_SYSTEM_SUPPORTING_INFO_TYPE).setCode(code));
+  }
+}

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
+import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

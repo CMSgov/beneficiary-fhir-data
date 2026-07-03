@@ -1,0 +1,541 @@
+package gov.cms.bfd.server.ng.claim.model.common;
+
+import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
+
+/** Claim type codes. */
+@Getter
+@AllArgsConstructor
+public enum ClaimTypeCode {
+  /** 1 - MEDICARE PART D ORIGINAL CLAIM. */
+  _1(1, "MEDICARE PART D ORIGINAL CLAIM"),
+  /** 2 - MEDICARE PART D ADJUSTED CLAIM. */
+  _2(2, "MEDICARE PART D ADJUSTED CLAIM"),
+  /** 3 - MEDICARE PART D DELETED CLAIM. */
+  _3(3, "MEDICARE PART D DELETED CLAIM"),
+  /** 4 - MEDICARE PART D RESUBMITTED CLAIM. */
+  _4(4, "MEDICARE PART D RESUBMITTED CLAIM"),
+  /** 10 - MEDICARE HHA CLAIM. */
+  _10(10, "MEDICARE HHA CLAIM"),
+  /** 20 - MEDICARE NON-SWING BED SNF CLAIM. */
+  _20(20, "MEDICARE NON-SWING BED SNF CLAIM"),
+  /** 30 - MEDICARE SWING BED SNF CLAIM. */
+  _30(30, "MEDICARE SWING BED SNF CLAIM"),
+  /** 40 - MEDICARE OUTPATIENT CLAIM. */
+  _40(40, "MEDICARE OUTPATIENT CLAIM"),
+  /** 50 - MEDICARE HOSPICE CLAIM. */
+  _50(50, "MEDICARE HOSPICE CLAIM"),
+  /** 60 - MEDICARE INPATIENT CLAIM. */
+  _60(60, "MEDICARE INPATIENT CLAIM"),
+  /** 61 - MEDICARE INPATIENT FULL ENCOUNTER CLAIM. */
+  _61(61, "MEDICARE INPATIENT FULL ENCOUNTER CLAIM"),
+  /** 62 - MEDICARE ADVANTAGE IME/GME CLAIMS. */
+  _62(62, "MEDICARE ADVANTAGE IME/GME CLAIMS"),
+  /** 63 - MEDICARE ADVANTAGE (NO-PAY) CLAIMS. */
+  _63(63, "MEDICARE ADVANTAGE (NO-PAY) CLAIMS"),
+  /** 64 - MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS. */
+  _64(64, "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS"),
+  /** 71 - MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS). */
+  _71(71, "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)"),
+  /** 72 - MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (DMEPOS). */
+  _72(72, "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (DMEPOS)"),
+  /** 81 - MEDICARE PART B DME REGIONAL CARRIER (DMERC) CLAIM (NON-DMEPOS). */
+  _81(81, "MEDICARE PART B DME REGIONAL CARRIER (DMERC) CLAIM (NON-DMEPOS)"),
+  /** 82 - MEDICARE PART B DME REGIONAL CARRIER (DMERC) CLAIM (DMEPOS). */
+  _82(82, "MEDICARE PART B DME REGIONAL CARRIER (DMERC) CLAIM (DMEPOS)"),
+  /** 1000 - 000X MEDICARE SS OTHER TYPE OF BILL GROUPS - PHASE 1. */
+  _1000(1000, "000X MEDICARE SS OTHER TYPE OF BILL GROUPS - PHASE 1"),
+  /** 1011 - 011X MEDICARE SS HOSPITAL INPATIENT (PART A) - PHASE 1. */
+  _1011(1011, "011X MEDICARE SS HOSPITAL INPATIENT (PART A) - PHASE 1"),
+  /** 1012 - 012X MEDICARE SS HOSPITAL INPATIENT (PART B) - PHASE 1. */
+  _1012(1012, "012X MEDICARE SS HOSPITAL INPATIENT (PART B) - PHASE 1"),
+  /** 1013 - 013X MEDICARE SS HOSPITAL OUTPATIENT - PHASE 1. */
+  _1013(1013, "013X MEDICARE SS HOSPITAL OUTPATIENT - PHASE 1"),
+  /** 1014 - 014X MEDICARE SS HOSPITAL OTHER (PART B) - PHASE 1. */
+  _1014(1014, "014X MEDICARE SS HOSPITAL OTHER (PART B) - PHASE 1"),
+  /** 1018 - 018X MEDICARE SS HOSPITAL SWING BED - PHASE 1. */
+  _1018(1018, "018X MEDICARE SS HOSPITAL SWING BED - PHASE 1"),
+  /** 1019 - 019X MEDICARE SS - HOSPITAL RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1019(1019, "019X MEDICARE SS - HOSPITAL RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1021 - 021X MEDICARE SS SNF INPATIENT (PART A)- PHASE 1. */
+  _1021(1021, "021X MEDICARE SS SNF INPATIENT (PART A)- PHASE 1"),
+  /** 1022 - 022X MEDICARE SS SNF INPATIENT (PART B) - PHASE 1. */
+  _1022(1022, "022X MEDICARE SS SNF INPATIENT (PART B) - PHASE 1"),
+  /** 1023 - 023X MEDICARE SS SNF OUTPATIENT - PHASE 1. */
+  _1023(1023, "023X MEDICARE SS SNF OUTPATIENT - PHASE 1"),
+  /** 1028 - 028X MEDICARE SS SNF SWING BED - PHASE 1. */
+  _1028(1028, "028X MEDICARE SS SNF SWING BED - PHASE 1"),
+  /** 1029 - 029X MEDICARE SS - SKILLED NURSING RESERVED FOR NATIONAL ASSIGNMENT- PHASE 1. */
+  _1029(1029, "029X MEDICARE SS - SKILLED NURSING RESERVED FOR NATIONAL ASSIGNMENT- PHASE 1"),
+  /** 1032 - 032X MEDICARE SS HOME HEALTH INPATIENT (PART B) - PHASE 1. */
+  _1032(1032, "032X MEDICARE SS HOME HEALTH INPATIENT (PART B) - PHASE 1"),
+  /** 1033 - 033X MEDICARE SS HOME HEALTH OUTPATIENT - PHASE 1. */
+  _1033(1033, "033X MEDICARE SS HOME HEALTH OUTPATIENT - PHASE 1"),
+  /** 1034 - 034X MEDICARE SS HOME HEALTH (PART B ONLY) - PHASE 1. */
+  _1034(1034, "034X MEDICARE SS HOME HEALTH (PART B ONLY) - PHASE 1"),
+  /** 1039 - 039X MEDICARE SS HHA - RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1039(1039, "039X MEDICARE SS HHA - RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1041 - 041X MEDICARE SS RELIGIOUS NONMEDICAL HEALTH CARE INSTITUTIONS - PHASE 1. */
+  _1041(1041, "041X MEDICARE SS RELIGIOUS NONMEDICAL HEALTH CARE INSTITUTIONS - PHASE 1"),
+  /**
+   * 1042 - 042X MEDICARE SS RNHCI HOSPITAL-INPATIENT OR HOME HEALTH VISITS (PART B ONLY) - PHASE 1.
+   */
+  _1042(
+      1042,
+      "042X MEDICARE SS RNHCI HOSPITAL-INPATIENT OR HOME HEALTH VISITS (PART B ONLY) - PHASE 1"),
+  /** 1043 - 043X MEDICARE SS RNHCI HOSPITAL-OUTPATIENT (HHA-A ALSO) - PHASE 1. */
+  _1043(1043, "043X MEDICARE SS RNHCI HOSPITAL-OUTPATIENT (HHA-A ALSO) - PHASE 1"),
+  /** 1049 - 049X MEDICARE SS RNHCI HOSPITAL-RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1049(1049, "049X MEDICARE SS RNHCI HOSPITAL-RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1065 - 065X MEDICARE SS INTERMEDIATE CARE - LEVEL I PHASE 1. */
+  _1065(1065, "065X MEDICARE SS INTERMEDIATE CARE - LEVEL I PHASE 1"),
+  /** 1066 - 066X MEDICARE SS INTERMEDIATE CARE LEVEL II PHASE 1. */
+  _1066(1066, "066X MEDICARE SS INTERMEDIATE CARE LEVEL II PHASE 1"),
+  /** 1069 - 069X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1069(1069, "069X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1071 - 071X MEDICARE SS CLINIC RHC RURAL HEALTH - PHASE 1. */
+  _1071(1071, "071X MEDICARE SS CLINIC RHC RURAL HEALTH - PHASE 1"),
+  /** 1072 - 072X MEDICARE SS CLINIC ESRD RENAL DIALYSIS - PHASE 1. */
+  _1072(1072, "072X MEDICARE SS CLINIC ESRD RENAL DIALYSIS - PHASE 1"),
+  /** 1073 - 073X MEDICARE SS CLINIC FREESTANDING - PHASE 1. */
+  _1073(1073, "073X MEDICARE SS CLINIC FREESTANDING - PHASE 1"),
+  /** 1074 - 074X MEDICARE SS CLINIC ORF OTHER REHAB - PHASE 1. */
+  _1074(1074, "074X MEDICARE SS CLINIC ORF OTHER REHAB - PHASE 1"),
+  /** 1075 - 075X MEDICARE SS CLINIC CORF COMPREHENSIVE OUTPATIENT REHAB - PHASE 1. */
+  _1075(1075, "075X MEDICARE SS CLINIC CORF COMPREHENSIVE OUTPATIENT REHAB - PHASE 1"),
+  /** 1076 - 076X MEDICARE SS CLINIC CMHC COMMUNITY MENTAL HEALTH CENTERS - PHASE 1. */
+  _1076(1076, "076X MEDICARE SS CLINIC CMHC COMMUNITY MENTAL HEALTH CENTERS - PHASE 1"),
+  /** 1077 - 077X MEDICARE SS CLINIC FQHC FEDERAL QUALIFIED HEALTH CENTER - PHASE 1. */
+  _1077(1077, "077X MEDICARE SS CLINIC FQHC FEDERAL QUALIFIED HEALTH CENTER - PHASE 1"),
+  /**
+   * 1078 - 078X MEDICARE SS LICENSED FREESTANDING EMERGENCY MEDICAL FACILITY (EFFECTIVE 7/1/12) -
+   * PHASE 1.
+   */
+  _1078(
+      1078,
+      "078X MEDICARE SS LICENSED FREESTANDING EMERGENCY MEDICAL FACILITY (EFFECTIVE 7/1/12) - PHASE 1"),
+  /** 1079 - 079X MEDICARE SS CLINIC - OTHER - PHASE 1. */
+  _1079(1079, "079X MEDICARE SS CLINIC - OTHER - PHASE 1"),
+  /** 1081 - 081X MEDICARE SS HOSPICE NONHOSPITAL-BASED - PHASE 1. */
+  _1081(1081, "081X MEDICARE SS HOSPICE NONHOSPITAL-BASED - PHASE 1"),
+  /** 1082 - 082X MEDICARE SS HOSPICE HOSPITAL-BASED - PHASE 1. */
+  _1082(1082, "082X MEDICARE SS HOSPICE HOSPITAL-BASED - PHASE 1"),
+  /** 1083 - 083X MEDICARE SS ASC AMBULATORY SURGERY CENTER - PHASE 1. */
+  _1083(1083, "083X MEDICARE SS ASC AMBULATORY SURGERY CENTER - PHASE 1"),
+  /** 1084 - 084X MEDICARE SS SPECIAL FACILITY FREESTANDING BIRTHING CENTER - PHASE 1. */
+  _1084(1084, "084X MEDICARE SS SPECIAL FACILITY FREESTANDING BIRTHING CENTER - PHASE 1"),
+  /** 1085 - 085X MEDICARE SS CAH CRITICAL ACCESS HOSPITAL - PHASE 1. */
+  _1085(1085, "085X MEDICARE SS CAH CRITICAL ACCESS HOSPITAL - PHASE 1"),
+  /** 1086 - 086X MEDICARE SS SPECIAL FACILITY RESIDENTIAL FACILITY _ PHASE 1. */
+  _1086(1086, "086X MEDICARE SS SPECIAL FACILITY RESIDENTIAL FACILITY _ PHASE 1"),
+  /**
+   * 1087 - 087X MEDICARE SS FREESTANDING NON-RESIDENTIAL OPIOID TREATMENT PROGRAM (EFFECTIVE
+   * 1/1/21) - PHASE 1.
+   */
+  _1087(
+      1087,
+      "087X MEDICARE SS FREESTANDING NON-RESIDENTIAL OPIOID TREATMENT PROGRAM (EFFECTIVE 1/1/21) - PHASE 1"),
+  /** 1088 - 088X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1088(1088, "088X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1089 - 089X MEDICARE SS SPECIAL FACILITY OR ASC SURGERY-OTHER PHASE 1. */
+  _1089(1089, "089X MEDICARE SS SPECIAL FACILITY OR ASC SURGERY-OTHER  PHASE 1"),
+  /** 1091 - 091X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1091(1091, "091X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1092 - 092X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1092(1092, "092X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1093 - 093X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1093(1093, "093X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1094 - 094X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1094(1094, "094X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1095 - 095X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1095(1095, "095X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1096 - 096X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1096(1096, "096X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1097 - 097X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1097(1097, "097X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1098 - 098X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1098(1098, "098X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1099 - 099X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1. */
+  _1099(1099, "099X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT - PHASE 1"),
+  /** 1700 - PROF MEDICARE SS PART B PROFESSIONAL - PHASE 1. */
+  _1700(1700, "PROF MEDICARE SS PART B PROFESSIONAL - PHASE 1"),
+  /** 1800 - DME MEDICARE SS DME - PHASE 1. */
+  _1800(1800, "DME MEDICARE SS DME - PHASE 1"),
+  /** 1900 - HOSPICE NOTICE OF ELECTION - PHASE 1. */
+  _1900(1900, "HOSPICE NOTICE OF ELECTION - PHASE 1"),
+  /** 2000 - 000X MEDICARE SS OTHER TYPE OF BILL GROUPS. */
+  _2000(2000, "000X MEDICARE SS OTHER TYPE OF BILL GROUPS"),
+  /** 2011 - 011X MEDICARE SS HOSPITAL INPATIENT (PART A). */
+  _2011(2011, "011X MEDICARE SS HOSPITAL INPATIENT (PART A)"),
+  /** 2012 - 012X MEDICARE SS HOSPITAL INPATIENT (PART B). */
+  _2012(2012, "012X MEDICARE SS HOSPITAL INPATIENT (PART B)"),
+  /** 2013 - 013X MEDICARE SS HOSPITAL OUTPATIENT. */
+  _2013(2013, "013X MEDICARE SS HOSPITAL OUTPATIENT"),
+  /** 2014 - 014X MEDICARE SS HOSPITAL OTHER (PART B). */
+  _2014(2014, "014X MEDICARE SS HOSPITAL OTHER (PART B)"),
+  /** 2018 - 018X MEDICARE SS HOSPITAL SWING BED. */
+  _2018(2018, "018X MEDICARE SS HOSPITAL SWING BED"),
+  /** 2019 - 019X MEDICARE SS - HOSPITAL RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2019(2019, "019X MEDICARE SS - HOSPITAL RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2021 - 021X MEDICARE SS SNF INPATIENT. */
+  _2021(2021, "021X MEDICARE SS SNF INPATIENT"),
+  /** 2022 - 022X MEDICARE SS SNF INPATIENT. */
+  _2022(2022, "022X MEDICARE SS SNF INPATIENT"),
+  /** 2023 - 023X MEDICARE SS SNF OUTPATIENT. */
+  _2023(2023, "023X MEDICARE SS SNF OUTPATIENT"),
+  /** 2028 - 028X MEDICARE SS SNF SWING BED. */
+  _2028(2028, "028X MEDICARE SS SNF SWING BED"),
+  /** 2029 - 029X MEDICARE SS - SKILLED NURSING RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2029(2029, "029X MEDICARE SS - SKILLED NURSING RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2032 - 032X MEDICARE SS HOME HEALTH INPATIENT (PART B). */
+  _2032(2032, "032X MEDICARE SS HOME HEALTH INPATIENT (PART B)"),
+  /** 2033 - 033X MEDICARE SS HOME HEALTH OUTPATIENT. */
+  _2033(2033, "033X MEDICARE SS HOME HEALTH OUTPATIENT"),
+  /** 2034 - 034X MEDICARE SS HOME HEALTH (PART B ONLY). */
+  _2034(2034, "034X MEDICARE SS HOME HEALTH (PART B ONLY)"),
+  /** 2039 - 039X MEDICARE SS HHA - RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2039(2039, "039X MEDICARE SS HHA - RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2041 - 041X MEDICARE SS RELIGIOUS NONMEDICAL HEALTH CARE INSTITUTIONS. */
+  _2041(2041, "041X MEDICARE SS RELIGIOUS NONMEDICAL HEALTH CARE INSTITUTIONS"),
+  /** 2042 - 042X MEDICARE SS RNHCI HOSPITAL-INPATIENT OR HOME HEALTH VISITS (PART B ONLY). */
+  _2042(2042, "042X MEDICARE SS RNHCI HOSPITAL-INPATIENT OR HOME HEALTH VISITS (PART B ONLY)"),
+  /** 2043 - 043X MEDICARE SS RNHCI HOSPITAL-OUTPATIENT (HHA-A ALSO). */
+  _2043(2043, "043X MEDICARE SS RNHCI HOSPITAL-OUTPATIENT (HHA-A ALSO)"),
+  /** 2049 - 049X MEDICARE SS RNHCI HOSPITAL-RESERVED FOR NATIONAL ASSIGNMENT . */
+  _2049(2049, "049X MEDICARE SS RNHCI HOSPITAL-RESERVED FOR NATIONAL ASSIGNMENT "),
+  /** 2065 - 065X MEDICARE SS INTERMEDIATE CARE - LEVEL I. */
+  _2065(2065, "065X MEDICARE SS INTERMEDIATE CARE - LEVEL I"),
+  /** 2066 - 066X MEDICARE SS INTERMEDIATE CARE LEVEL II. */
+  _2066(2066, "066X MEDICARE SS INTERMEDIATE CARE LEVEL II"),
+  /** 2069 - 069X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2069(2069, "069X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2071 - 071X MEDICARE SS CLINIC RHC RURAL HEALTH. */
+  _2071(2071, "071X MEDICARE SS CLINIC RHC RURAL HEALTH"),
+  /** 2072 - 072X MEDICARE SS CLINIC ESRD RENAL DIALYSIS. */
+  _2072(2072, "072X MEDICARE SS CLINIC ESRD RENAL DIALYSIS"),
+  /** 2073 - 073X MEDICARE SS CLINIC FREESTANDING. */
+  _2073(2073, "073X MEDICARE SS CLINIC FREESTANDING"),
+  /** 2074 - 074X MEDICARE SS CLINIC ORF OTHER REHAB. */
+  _2074(2074, "074X MEDICARE SS CLINIC ORF OTHER REHAB"),
+  /** 2075 - 075X MEDICARE SS CLINIC CORF COMPREHENSIVE OUTPATIENT REHAB. */
+  _2075(2075, "075X MEDICARE SS CLINIC CORF COMPREHENSIVE OUTPATIENT REHAB"),
+  /** 2076 - 076X MEDICARE SS CLINIC CMHC COMMUNITY MENTAL HEALTH CENTERS. */
+  _2076(2076, "076X MEDICARE SS CLINIC CMHC COMMUNITY MENTAL HEALTH CENTERS"),
+  /** 2077 - 077X MEDICARE SS CLINIC FQHC FEDERAL QUALIFIED HEALTH CENTER. */
+  _2077(2077, "077X MEDICARE SS CLINIC FQHC FEDERAL QUALIFIED HEALTH CENTER"),
+  /**
+   * 2078 - 078X MEDICARE SS LICENSED FREESTANDING EMERGENCY MEDICAL FACILITY (EFFECTIVE 7/1/12).
+   */
+  _2078(
+      2078, "078X MEDICARE SS LICENSED FREESTANDING EMERGENCY MEDICAL FACILITY (EFFECTIVE 7/1/12)"),
+  /** 2079 - 079X MEDICARE SS CLINIC - OTHER. */
+  _2079(2079, "079X MEDICARE SS CLINIC - OTHER"),
+  /** 2081 - 081X MEDICARE SS HOSPICE NONHOSPITAL-BASED. */
+  _2081(2081, "081X MEDICARE SS HOSPICE NONHOSPITAL-BASED"),
+  /** 2082 - 082X MEDICARE SS HOSPICE HOSPITAL-BASED. */
+  _2082(2082, "082X MEDICARE SS HOSPICE HOSPITAL-BASED"),
+  /** 2083 - 083X MEDICARE SS ASC AMBULATORY SURGERY CENTER. */
+  _2083(2083, "083X MEDICARE SS ASC AMBULATORY SURGERY CENTER"),
+  /** 2084 - 084X MEDICARE SS SPECIAL FACILITY FREESTANDING BIRTHING CENTER. */
+  _2084(2084, "084X MEDICARE SS SPECIAL FACILITY FREESTANDING BIRTHING CENTER"),
+  /** 2085 - 085X MEDICARE SS CAH CRITICAL ACCESS HOSPITAL. */
+  _2085(2085, "085X MEDICARE SS CAH CRITICAL ACCESS HOSPITAL"),
+  /** 2086 - 086X MEDICARE SS SPECIAL FACILITY RESIDENTIAL FACILITY. */
+  _2086(2086, "086X MEDICARE SS SPECIAL FACILITY RESIDENTIAL FACILITY"),
+  /**
+   * 2087 - 087X MEDICARE SS FREESTANDING NON-RESIDENTIAL OPIOID TREATMENT PROGRAM (EFFECTIVE
+   * 1/1/21).
+   */
+  _2087(
+      2087,
+      "087X MEDICARE SS FREESTANDING NON-RESIDENTIAL OPIOID TREATMENT PROGRAM (EFFECTIVE 1/1/21)"),
+  /** 2088 - 088X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2088(2088, "088X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2089 - 089X MEDICARE SS SPECIAL FACILITY OR ASC SURGERY-OTHER. */
+  _2089(2089, "089X MEDICARE SS SPECIAL FACILITY OR ASC SURGERY-OTHER"),
+  /** 2091 - 091X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2091(2091, "091X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2092 - 092X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2092(2092, "092X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2093 - 093X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2093(2093, "093X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2094 - 094X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2094(2094, "094X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2095 - 095X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2095(2095, "095X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2096 - 096X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2096(2096, "096X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2097 - 097X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2097(2097, "097X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2098 - 098X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2098(2098, "098X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2099 - 099X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT. */
+  _2099(2099, "099X MEDICARE SS RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** 2700 - PROF MEDICARE SS PART B PROFESSIONAL. */
+  _2700(2700, "PROF MEDICARE SS PART B PROFESSIONAL"),
+  /** 2800 - DME MEDICARE SS DME. */
+  _2800(2800, "DME MEDICARE SS DME"),
+  /** 2900 - HOSPICE NOTICE OF ELECTION. */
+  _2900(2900, "HOSPICE NOTICE OF ELECTION");
+
+  private final int code;
+  private final String display;
+  private static final String INSURER_ORG = "insurer-org";
+  private static final String PART_A_DISPLAY = "Part A";
+  private static final String PART_B_DISPLAY = "Part B";
+
+  /**
+   * Converts from a database code.
+   *
+   * @param code database code
+   * @return claim type code
+   */
+  public static ClaimTypeCode fromCode(int code) {
+    return Arrays.stream(values())
+        .collect(Collectors.toMap(ClaimTypeCode::getCode, e -> e))
+        .get(code);
+  }
+
+  Optional<ClaimContext> toContext() {
+    if (isInstitutional()) {
+      return Optional.of(ClaimContext.INSTITUTIONAL);
+    }
+    if (isProfessional()) {
+      return Optional.of(ClaimContext.PROFESSIONAL);
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * TODO.
+   * @return TODO.
+   */
+  public CodeableConcept toFhirType() {
+    var codeableConcept =
+        new CodeableConcept(
+            new Coding()
+                .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_TYPE_CODE)
+                .setCode(String.valueOf(code))
+                .setDisplay(display));
+    getClaimType().ifPresent(t -> codeableConcept.addCoding(t.toFhir()));
+    return codeableConcept;
+  }
+
+  Optional<CodeableConcept> toFhirSubtype() {
+    return getGroupedClaimSubtype().map(ClaimSubtype::toFhir);
+  }
+
+  Optional<Organization> toFhirInsurerPartAB() {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var organization = OrganizationFactory.toFhir();
+    organization.setId(INSURER_ORG);
+    organization.setName("Centers for Medicare and Medicaid Services");
+    return Optional.of(organization);
+  }
+
+  Optional<Organization> toFhirInsurerPartD(String pbpName) {
+    if (!isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var organization = OrganizationFactory.toFhir();
+    organization.setId(INSURER_ORG);
+    organization.setName(pbpName);
+    return Optional.of(organization);
+  }
+
+  ExplanationOfBenefit.InsuranceComponent toFhirPartDInsurance() {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    insurance.setCoverage(new Reference().setDisplay("Part D"));
+    return insurance;
+  }
+
+  ExplanationOfBenefit.InsuranceComponent toFhirInsurance(
+      Optional<ClaimRecordType> claimRecordType) {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.flatMap(ClaimRecordType::toFhirReference).ifPresent(insurance::setCoverage);
+    if (insurance.getCoverage().isEmpty()) {
+      var fallbackDisplay =
+          isClaimSubtype(ClaimSubtype.CARRIER) || isClaimSubtype(ClaimSubtype.DME)
+              ? PART_B_DISPLAY
+              : PART_A_DISPLAY;
+      insurance.setCoverage(new Reference().setDisplay(fallbackDisplay));
+    }
+
+    return insurance;
+  }
+
+  Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var adjudication = new ExplanationOfBenefit.AdjudicationComponent();
+    adjudication.setCategory(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                    .setCode("benefitpaymentstatus")
+                    .setDisplay("Benefit Payment Status")));
+    adjudication.setReason(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
+                    .setCode("other")
+                    .setDisplay("Other")));
+    return Optional.of(adjudication);
+  }
+
+  boolean isClaimSubtype(ClaimSubtype subtype) {
+    return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
+  }
+
+  Optional<String> toFhirStructureDefinition() {
+    return getClaimSubtype().map(ClaimSubtype::getSystemUrl);
+  }
+
+  private Optional<ClaimType> getClaimType() {
+    return getClaimSubtype().map(ClaimSubtype::getClaimType);
+  }
+
+  /** Claim Type codes grouped by claim subtypes. * */
+  public static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
+      Map.of(
+          ClaimSubtype.CARRIER,
+          mapCarrierToClaimTypeCodes(),
+          ClaimSubtype.DME,
+          mapDmeToClaimTypeCodes(),
+          ClaimSubtype.HHA,
+          mapHhaToClaimTypeCodes(),
+          ClaimSubtype.HOSPICE,
+          mapHospiceToClaimTypeCodes(),
+          ClaimSubtype.INPATIENT,
+          mapInpatientToClaimTypeCodes(),
+          ClaimSubtype.OUTPATIENT,
+          mapOutpatientToClaimTypeCodes(),
+          ClaimSubtype.PDE,
+          mapPDEToClaimTypeCodes(),
+          ClaimSubtype.SNF,
+          mapSnfToClaimTypeCodes());
+
+  /**
+   * Gets claim type codes mapped to type params.
+   *
+   * @param normalizedType The normalized claim type.
+   * @return A list of matching ClaimTypeCode
+   */
+  public static List<ClaimTypeCode> getClaimTypeCodesByType(String normalizedType) {
+
+    if ("*".equals(normalizedType)) {
+      return Collections.emptyList();
+    }
+    var claimType =
+        ClaimSubtype.fromCode(normalizedType)
+            .orElseThrow(
+                () -> new IllegalStateException("Not a valid claim type code " + normalizedType));
+    var codesForThisType = CLAIM_TYPE_CODE_MAP.getOrDefault(claimType, List.of());
+    if (codesForThisType.isEmpty()) {
+      throw new IllegalStateException("Not a valid claim type code " + normalizedType);
+    }
+    return codesForThisType;
+  }
+
+  private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
+    return List.of(_71, _72, _1700, _2700);
+  }
+
+  private static List<ClaimTypeCode> mapDmeToClaimTypeCodes() {
+    return List.of(_81, _82, _1800, _2800);
+  }
+
+  private static List<ClaimTypeCode> mapHhaToClaimTypeCodes() {
+    return List.of(
+        _10, _1032, _1033, _1039, _1042, _1066, _1092, _2032, _2033, _2039, _2042, _2066, _2092);
+  }
+
+  private static List<ClaimTypeCode> mapHospiceToClaimTypeCodes() {
+    return List.of(_50, _1081, _1082, _1900, _1091, _1098, _2081, _2082, _2091, _2900, _2098);
+  }
+
+  private static List<ClaimTypeCode> mapInpatientToClaimTypeCodes() {
+    return List.of(_60, _61, _62, _63, _64, _1011, _1041, _1069, _2011, _2041, _2069);
+  }
+
+  private static List<ClaimTypeCode> mapOutpatientToClaimTypeCodes() {
+    return List.of(
+        _40, _1000, _1012, _1013, _1014, _1022, _1023, _1028, _1034, _1043, _1049, _1065, _1071,
+        _1072, _1073, _1074, _1075, _1076, _1077, _1078, _1079, _1083, _1084, _1085, _1086, _1087,
+        _1088, _1089, _1093, _1094, _1095, _1096, _1097, _1099, _2000, _2012, _2013, _2014, _2022,
+        _2023, _2028, _2034, _2043, _2049, _2065, _2071, _2072, _2073, _2074, _2075, _2076, _2077,
+        _2078, _2079, _2083, _2084, _2085, _2086, _2087, _2088, _2089, _2093, _2094, _2095, _2096,
+        _2097, _2099);
+  }
+
+  private static List<ClaimTypeCode> mapPDEToClaimTypeCodes() {
+    return List.of(_1, _2, _3, _4);
+  }
+
+  private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
+    return List.of(_20, _30, _1018, _1021, _2018, _2021);
+  }
+
+  /**
+   * Checks if isInstitutional (Inpatient, Outpatient, SNF, HHA, Hospice).
+   *
+   * @return Returns true if this code maps to an Institutional claim type
+   */
+  public boolean isInstitutional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.INSTITUTIONAL)
+        .orElse(false);
+  }
+
+  /**
+   * Checks if Professional claim type (Carrier, DME).
+   *
+   * @return true if this code maps to a Professional
+   */
+  public boolean isProfessional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
+        .orElse(false);
+  }
+
+  private static final Map<ClaimTypeCode, ClaimSubtype> CODE_TO_SUBTYPE = createInvertedMap();
+
+  private static Map<ClaimTypeCode, ClaimSubtype> createInvertedMap() {
+    var map = new EnumMap<ClaimTypeCode, ClaimSubtype>(ClaimTypeCode.class);
+    CLAIM_TYPE_CODE_MAP.forEach((subtype, codes) -> codes.forEach(code -> map.put(code, subtype)));
+    return Collections.unmodifiableMap(map);
+  }
+
+  private Optional<ClaimSubtype> getGroupedClaimSubtype() {
+    return getClaimSubtype().flatMap(ClaimSubtype::grouped);
+  }
+
+  private Optional<ClaimSubtype> getClaimSubtype() {
+    return Optional.ofNullable(CODE_TO_SUBTYPE.get(this));
+  }
+}
