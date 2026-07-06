@@ -812,7 +812,7 @@ class GeneratorUtil:
                 datetime.date(year=2021, month=1, day=1),
             )
             lis_end_date = "9999-12-31"
-            lis_efctv_cd = random.choice(self.code_systems["BENE_LIS_EFCTV_CD"])
+            lis_efctv_cd = random.choice(["Y",""])
             copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
             ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
