@@ -78,7 +78,7 @@ public enum ClaimSubtype {
         new Coding().setSystem(SystemUrls.CARIN_CLAIM_SUBTYPE).setCode(code));
   }
 
-  Coding toEobTypeFhir() {
+  Coding toFhirEobType() {
     return new Coding()
         .setSystem(SystemUrls.BLUE_BUTTON_EOB_TYPE_CODE)
         .setCode(toString())
