@@ -139,8 +139,7 @@ public class ClaimAsyncService {
     if (systemType.filterLatestClaims()) {
       queryParams.add(
           new DbFilterParam(
-              "partDClaimTypeCodes",
-              ClaimTypeCode.CLAIM_TYPE_CODE_MAP.get(ClaimSubtype.PDE)));
+              "partDClaimTypeCodes", ClaimTypeCode.CLAIM_TYPE_CODE_MAP.get(ClaimSubtype.PDE)));
     }
 
     return new DbFilter(sb.toString(), queryParams);
