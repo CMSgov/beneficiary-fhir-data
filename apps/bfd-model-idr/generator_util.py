@@ -812,12 +812,11 @@ class GeneratorUtil:
                 datetime.date(year=2021, month=1, day=1),
             )
             lis_end_date = "9999-12-31"
-            lis_efctv_cd = random.choice(["Y",""])
             copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
             ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
             lis_row["IDR_LTST_TRANS_FLG"] = "Y"
-            lis_row["BENE_CMBND_DEEMD_IND"] = str(lis_efctv_cd)
+            lis_row["BENE_CMBND_DEEMD_IND"] = random.choice(["Y", ""])
             lis_row["BENE_CMBND_DEEMD_COPMT_LVL_ID"] = copmt_lvl_cd
             lis_row["BENE_CMBND_DEEMD_PRM_PCT"] = str(ptd_prm_pct)
             lis_row["BENE_CMBND_DEEMD_EFCTV_DT"] = str(lis_start_date)
