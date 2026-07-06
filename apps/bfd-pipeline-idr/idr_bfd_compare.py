@@ -56,7 +56,9 @@ _IGNORED_COLS_PER_MODEL = {
 }
 _REDACTED_PKEYS_PER_MODEL = {
     k: v
-    for keys, v in {tuple([*BENE_TABLES, *BENE_AUX_TABLES]): {"bene_mbi_id"}}.items()
+    for keys, v in {
+        tuple([*BENE_TABLES, *BENE_AUX_TABLES]): {"bene_mbi_id", "bene_ssm_num"}
+    }.items()
     for k in keys
 }
 
