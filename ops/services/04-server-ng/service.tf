@@ -191,6 +191,7 @@ resource "aws_ecs_task_definition" "server" {
               "-XX:+UseContainerSupport",
               "-XX:MaxRAMPercentage=75.0",
               "-XX:+PreserveFramePointer",
+              "-XX:+UseCompactObjectHeaders",
               "-Dnetworkaddress.cache.ttl=5",
               "-Dsun.net.inetaddr.ttl=0"
             ])

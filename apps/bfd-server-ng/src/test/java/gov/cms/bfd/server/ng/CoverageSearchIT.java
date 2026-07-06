@@ -108,7 +108,7 @@ class CoverageSearchIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
     var coverage =
         coverageResourceProvider.searchByBeneficiary(
-            new ReferenceParam(BENE_ID_ALL_PARTS_WITH_XREF), new DateRangeParam());
+            new ReferenceParam(BENE_ID_ALL_PARTS_WITH_XREF), new DateRangeParam(), null);
     // This should increase when we map the other coverage types
     assertEquals(5, coverage.getEntry().size());
     assertEquals(1, queryCount(events));
@@ -146,6 +146,27 @@ class CoverageSearchIT extends IntegrationTestBase {
         5,
         coverageBundle.getEntry().size(),
         "Should find all Coverage resources for the given beneficiary");
+
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearchByBeneficiaryPartAQuery(SearchStyleEnum searchStyle) {
+
+    var coverageBundle =
+        searchBundle()
+            .where(
+                new ReferenceClientParam(Coverage.SP_BENEFICIARY)
+                    .hasId("Patient/" + BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam(Coverage.SP_CLASS_VALUE).exactly().code("part-a"))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        1,
+        coverageBundle.getEntry().size(),
+        "Should find only Part A Coverage resources for the given beneficiary");
 
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }

@@ -207,6 +207,9 @@ public class EobHandler {
       String type,
       long claimId,
       String system) {
+    if (targetCode.isEmpty()) {
+      return false;
+    }
     var isSamhsa = isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
     if (isSamhsa) {
       LOGGER
@@ -307,8 +310,8 @@ public class EobHandler {
   }
 
   private boolean isClaimDateWithinBounds(LocalDate claimDate, SecurityLabel entry) {
-    var entryStart = entry.getStartDateAsDate();
-    var entryEnd = entry.getEndDateAsDate();
+    var entryStart = entry.getStartDate();
+    var entryEnd = entry.getEndDate();
     return !entryStart.isAfter(claimDate) && !entryEnd.isBefore(claimDate);
   }
 }

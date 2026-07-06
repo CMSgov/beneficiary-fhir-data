@@ -8,7 +8,7 @@ endpoints.
 
 We use Spring profiles to modify the behavior of the application:
 
-- `local` - configures the application to run against a local database, optionally using localstack for SSM-based
+- `local` - configures the application to run against a local database, optionally using miniStack for SSM-based
   configuration
 - `aws` - configures the application to run against an RDS database and requires configuration to be loaded from SSM
 
@@ -23,12 +23,10 @@ export BFD_SENSITIVE_DB_USERNAME=someUser
 
 ### Local SSM configuration
 
-You can verify SSM configuration is working correctly using `localstack`.
-
-using [`awslocal`](https://github.com/localstack/awscli-local):
+You can verify SSM configuration is working correctly using `ministack`.
 
 ```sh
-awslocal ssm put-parameter --name "/bfd/local/server/nonsensitive/some_key" --value "some_value" --overwrite --type String
+aws --endpoint-url=http://localhost:4566 ssm put-parameter --name "/bfd/local/server/nonsensitive/some_key" --value "some_value" --overwrite --type String
 ```
 
 ## Running the application

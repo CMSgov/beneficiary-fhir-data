@@ -26,24 +26,20 @@ public final class AwsClientConfig {
   /** The AWS region to connect to. Defaults to {@link #REGION_DEFAULT}. */
   private final Optional<Region> region;
 
-  /** Alternative endpoint URI for service. Generally only used for testing with localstack. */
+  /** Alternative endpoint URI for service. Generally only used for testing with MiniStack. */
   private final Optional<URI> endpointOverride;
 
-  /**
-   * Access key for authenticating with service. Generally only used for testing with localstack.
-   */
+  /** Access key for authenticating with service. Generally only used for testing with MiniStack. */
   private final Optional<String> accessKey;
 
-  /**
-   * Secret key for authenticating with service. Generally only used for testing with localstack.
-   */
+  /** Secret key for authenticating with service. Generally only used for testing with MiniStack. */
   private final Optional<String> secretKey;
 
   /**
    * Initializes an instance. Any variable can be null. Region defaults to {@link #REGION_DEFAULT}.
    *
    * @param region an AWS {@link Region}
-   * @param endpointOverride alternative URI for accessing AWS services (used with localstack)
+   * @param endpointOverride alternative URI for accessing AWS services (used with MiniStack)
    * @param accessKey optional access key
    * @param secretKey optional secret key
    */

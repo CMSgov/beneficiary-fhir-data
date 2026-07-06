@@ -1,6 +1,6 @@
 package gov.cms.bfd.migrator.app;
 
-import static gov.cms.bfd.SqsTestUtils.createSqsClientForLocalStack;
+import static gov.cms.bfd.SqsTestUtils.createSqsClientForMiniStack;
 import static gov.cms.bfd.migrator.app.AppConfiguration.SSM_PATH_SQS_QUEUE_NAME;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_BAD_CONFIG;
 import static gov.cms.bfd.migrator.app.MigratorApp.EXIT_CODE_FAILED_HIBERNATE_VALIDATION;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.spy;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
@@ -53,10 +53,10 @@ import org.slf4j.LoggerFactory;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
 @Disabled("Temporarily disable while evaluating github actions runners")
-public final class MigratorAppIT extends AbstractLocalStackTest {
+public final class MigratorAppIT extends AbstractMiniStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorAppIT.class);
 
-  /** Name of SQS queue created in localstack to receive progress messages via SQS. */
+  /** Name of SQS queue created in MiniStack to receive progress messages via SQS. */
   private static final String SQS_QUEUE_NAME = "migrator-progress";
 
   /**
@@ -73,7 +73,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   static final FileBasedAssertionHelper LOG_FILE =
       new FileBasedAssertionHelper(Path.of(LOG_FILE_PATH));
 
-  /** Used to communicate with the localstack SQS service. */
+  /** Used to communicate with the MiniStack SQS service. */
   private SqsDao sqsDao;
 
   /** Enum for determining which flyway script directory to run a test against. */
@@ -130,10 +130,10 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
     DatabaseTestUtils.get().dropSchemaForDataSource();
   }
 
-  /** Create our progress queue in the localstack SQS service before each test. */
+  /** Create our progress queue in the MiniStack SQS service before each test. */
   @BeforeEach
   void createQueue() {
-    sqsDao = new SqsDao(createSqsClientForLocalStack(localstack));
+    sqsDao = new SqsDao(createSqsClientForMiniStack(miniStack));
     sqsDao.createQueue(SQS_QUEUE_NAME);
   }
 
@@ -387,10 +387,10 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
 
     // add SQS related configuration settings
     environment.put(SSM_PATH_SQS_QUEUE_NAME, SQS_QUEUE_NAME);
-    environment.put(ENV_VAR_AWS_ENDPOINT, localstack.getEndpoint().toString());
-    environment.put(ENV_VAR_AWS_REGION, localstack.getRegion());
-    environment.put(ENV_VAR_AWS_ACCESS_KEY, localstack.getAccessKey());
-    environment.put(ENV_VAR_AWS_SECRET_KEY, localstack.getSecretKey());
+    environment.put(ENV_VAR_AWS_ENDPOINT, miniStack.getEndpoint());
+    environment.put(ENV_VAR_AWS_REGION, miniStack.getRegion());
+    environment.put(ENV_VAR_AWS_ACCESS_KEY, miniStack.getAccessKey());
+    environment.put(ENV_VAR_AWS_SECRET_KEY, miniStack.getSecretKey());
 
     Path testFilePath =
         Path.of(".", "src", "test", "resources", "db", "migration-test", "error-scenarios");
@@ -406,7 +406,7 @@ public final class MigratorAppIT extends AbstractLocalStackTest {
   }
 
   /**
-   * Read back all of the progress messages (JSON strings) from the SQS queue in localstack.
+   * Read back all of the progress messages (JSON strings) from the SQS queue in MiniStack.
    *
    * @return the list
    */
