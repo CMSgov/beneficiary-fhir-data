@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamBase;
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;

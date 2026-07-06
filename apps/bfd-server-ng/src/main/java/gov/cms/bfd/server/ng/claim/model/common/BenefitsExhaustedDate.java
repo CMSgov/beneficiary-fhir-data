@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,12 +8,13 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class BenefitsExhaustedDate {
+public class BenefitsExhaustedDate {
   @Column(name = "clm_mdcr_exhstd_dt")
   private Optional<LocalDate> benefitsExhaustedDate;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (benefitsExhaustedDate.isEmpty()) {
       return Optional.empty();

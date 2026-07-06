@@ -1,5 +1,6 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
+import gov.cms.bfd.server.ng.claim.model.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -29,7 +30,7 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
   private Optional<String> providerTaxNumber;
 
   @Override
-  protected CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType() {
     return CareTeamType.BILLING;
   }
 
@@ -56,7 +57,7 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
    * @return an Optional containing a bundle resource with either the Organization or Practitioner,
    *     or empty if NPI number is not present.
    */
-  Optional<DomainResource> toFhirNpiType() {
+  public Optional<DomainResource> toFhirNpiType() {
     return getProviderNpiNumber()
         .map(
             npi ->
@@ -77,7 +78,7 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
     return practitioner;
   }
 
-  HumanName toFhirName() {
+  private HumanName toFhirName() {
     var name = new HumanName();
     providerFirstName.ifPresent(name::addGiven);
     getProviderName().ifPresent(name::setFamily);
