@@ -14,9 +14,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The supporting info for an institutional claim from nch. */
 @Embeddable
 @Getter
-class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase {
+public class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase {
 
   @Column(name = "clm_hha_lup_ind_cd")
   private Optional<HhaLupaIndicatorCode> hhaLupaIndicatorCode;

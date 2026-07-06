@@ -14,7 +14,8 @@ public class SubmitterContractNumber {
   @Column(name = "clm_sbmtr_cntrct_num")
   private Optional<String> contractNumber;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return contractNumber.map(
         num ->

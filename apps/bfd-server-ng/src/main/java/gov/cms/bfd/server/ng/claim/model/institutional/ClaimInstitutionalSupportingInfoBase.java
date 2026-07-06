@@ -16,9 +16,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The institutional supporting info base. */
 @Embeddable
 @Getter
-class ClaimInstitutionalSupportingInfoBase implements SupportingInfoComponentBase {
+public class ClaimInstitutionalSupportingInfoBase implements SupportingInfoComponentBase {
   @Column(name = "clm_admsn_src_cd")
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 

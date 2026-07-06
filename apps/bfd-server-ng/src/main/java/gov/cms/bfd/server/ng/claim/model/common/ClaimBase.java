@@ -2,8 +2,8 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;

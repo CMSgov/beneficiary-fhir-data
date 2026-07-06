@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.Instant;

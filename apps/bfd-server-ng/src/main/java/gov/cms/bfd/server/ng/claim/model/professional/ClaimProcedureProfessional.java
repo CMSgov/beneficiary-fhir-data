@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Procedure and diagnosis info. */
 @Embeddable
 @Getter
-class ClaimProcedureProfessional extends ClaimProcedureBase {
+public class ClaimProcedureProfessional extends ClaimProcedureBase {
 
   @Override
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(

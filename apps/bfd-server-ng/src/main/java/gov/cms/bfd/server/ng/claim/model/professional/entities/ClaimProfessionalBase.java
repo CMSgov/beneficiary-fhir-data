@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
@@ -10,6 +10,9 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
+import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
+import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

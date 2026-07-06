@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-class AdjudicationChargeInstitutional {
+public class AdjudicationChargeInstitutional {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;
@@ -113,7 +114,7 @@ class AdjudicationChargeInstitutional {
   @Column(name = "clm_ss_outlier_std_pymt_amt")
   private BigDecimal shortStayOutlierPaymentAmount;
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     return Stream.of(
             AdjudicationChargeClaimValue.toFhir(claimValues),
             List.of(

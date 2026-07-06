@@ -12,8 +12,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Identifier;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class Identifiers {
+public class Identifiers {
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
 
@@ -23,7 +24,7 @@ class Identifiers {
   @Column(name = "clm_orig_cntl_num")
   private Optional<String> claimOriginalControlNumber;
 
-  List<Identifier> toFhir(ClaimTypeCode claimTypeCode) {
+  public List<Identifier> toFhir(ClaimTypeCode claimTypeCode) {
     var claimId =
         new Identifier()
             .setValue(String.valueOf(claimUniqueId))

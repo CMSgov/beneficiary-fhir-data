@@ -41,7 +41,11 @@ public enum ClaimSourceId {
         .orElseThrow(() -> new IllegalArgumentException("Unknown ClaimSourceId: " + id));
   }
 
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
+  /**
+   * switch statement for the value of the enum, returning status COMPLETE if NATIONAL_CLAIMS_HISTORY.
+   * @return eob.RemittanceOutcome
+   */
+  public Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
     return switch (this) {
       case NATIONAL_CLAIMS_HISTORY -> Optional.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
       default -> Optional.empty();

@@ -13,14 +13,15 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-class DiagnosisDrgCode {
+public class DiagnosisDrgCode {
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "dgns_drg_cd") // SAMHSA
   private Optional<Integer> diagnosisDrgCode;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (diagnosisDrgCode.isEmpty()) {
       return Optional.empty();

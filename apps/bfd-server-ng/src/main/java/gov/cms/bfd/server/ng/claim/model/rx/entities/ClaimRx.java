@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.rx;
+package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
@@ -16,6 +16,12 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
+import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
+import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
+import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
+import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
+import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractPBPNumber;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;

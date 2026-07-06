@@ -1,9 +1,12 @@
-package gov.cms.bfd.server.ng.claim.model.institutional;
+package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimProcedureInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -18,16 +21,16 @@ import lombok.Getter;
 @Getter
 @Entity
 @EqualsAndHashCode
-@Table(name = "claim_item_institutional_nch", schema = "idr")
-public class ClaimItemInstitutionalNch implements ClaimItemBase {
+@Table(name = "claim_item_institutional_ss", schema = "idr")
+public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
-  @Embedded private ClaimLineInstitutionalNch claimLine;
+  @Embedded private ClaimLineInstitutionalSharedSystems claimLine;
   @Embedded private ClaimProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimInstitutionalNch claim;
+  private ClaimInstitutionalSharedSystems claim;
 
   @Override
   public Optional<ClaimProcedureBase> getProcedure() {

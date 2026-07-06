@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.common.BenefitsExhaustedDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
@@ -13,8 +12,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The claim date for a supporting info component. */
 @Embeddable
-class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
+public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;

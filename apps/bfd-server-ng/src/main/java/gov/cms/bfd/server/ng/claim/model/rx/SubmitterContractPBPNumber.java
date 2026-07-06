@@ -14,7 +14,8 @@ public class SubmitterContractPBPNumber {
   @Column(name = "clm_sbmtr_cntrct_pbp_num")
   private Optional<String> contractPbpNumber;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
     return contractPbpNumber.map(

@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.institutional;
+package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
@@ -7,6 +7,10 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSupportingInfoBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;

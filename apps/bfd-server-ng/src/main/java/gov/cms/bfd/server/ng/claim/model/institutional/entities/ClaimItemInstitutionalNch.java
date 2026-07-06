@@ -1,10 +1,12 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.rx.ClaimLineRxNumber;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimProcedureInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -19,16 +21,16 @@ import lombok.Getter;
 @Getter
 @Entity
 @EqualsAndHashCode
-@Table(name = "claim_item_professional_ss", schema = "idr")
-public class ClaimItemProfessionalSharedSystems implements ClaimItemBase {
+@Table(name = "claim_item_institutional_nch", schema = "idr")
+public class ClaimItemInstitutionalNch implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
-  @Embedded private ClaimLineProfessionalSharedSystems claimLine;
-  @Embedded private ClaimProcedureProfessional claimProcedure;
-  @Embedded private ClaimLineRxNumber claimLineRxNum;
+  @Embedded private ClaimLineInstitutionalNch claimLine;
+  @Embedded private ClaimProcedureInstitutional claimProcedure;
+  @Embedded private ClaimValue claimValue;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimProfessionalSharedSystems claim;
+  private ClaimInstitutionalNch claim;
 
   @Override
   public Optional<ClaimProcedureBase> getProcedure() {

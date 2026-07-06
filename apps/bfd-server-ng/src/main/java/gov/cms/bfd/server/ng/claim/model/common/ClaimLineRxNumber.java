@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model.rx;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;

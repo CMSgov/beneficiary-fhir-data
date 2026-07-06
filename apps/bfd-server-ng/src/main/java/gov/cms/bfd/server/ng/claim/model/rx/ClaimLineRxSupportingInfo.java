@@ -19,9 +19,10 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-class ClaimLineRxSupportingInfo {
+public class ClaimLineRxSupportingInfo {
 
   @Column(name = "clm_phrmcy_srvc_type_cd")
   private Optional<PharmacySrvcTypeCode> pharmacyServiceTypeCode;
@@ -53,7 +54,7 @@ class ClaimLineRxSupportingInfo {
   @Column(name = "clm_ctstrphc_cvrg_ind_cd")
   private Optional<CatastrophicCoverageCode> catastrophicCovCode;
 
-  List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),

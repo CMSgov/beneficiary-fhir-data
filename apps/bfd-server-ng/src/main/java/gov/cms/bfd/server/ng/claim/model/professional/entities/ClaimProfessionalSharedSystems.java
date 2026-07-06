@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
@@ -14,6 +14,8 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;

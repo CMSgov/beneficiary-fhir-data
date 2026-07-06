@@ -11,8 +11,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The claim date for institutional claims in the shared system. */
 @Embeddable
-class ClaimDateInstitutionalSharedSystems implements SupportingInfoComponentBase {
+public class ClaimDateInstitutionalSharedSystems implements SupportingInfoComponentBase {
 
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;

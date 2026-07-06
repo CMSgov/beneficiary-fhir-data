@@ -7,13 +7,14 @@ import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-class Meta {
+public class Meta {
   @Column(name = "bfd_claim_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;
 
-  org.hl7.fhir.r4.model.Meta toFhir(
+  public org.hl7.fhir.r4.model.Meta toFhir(
       ClaimTypeCode claimTypeCode,
       ClaimSecurityStatus securityStatus,
       ClaimFinalAction finalAction,

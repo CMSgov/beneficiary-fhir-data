@@ -10,8 +10,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class TypeOfBillCode {
+public class TypeOfBillCode {
   @Column(name = "clm_bill_fac_type_cd")
   private Optional<String> facilityTypeCode;
 
@@ -21,7 +22,7 @@ class TypeOfBillCode {
   @Column(name = "clm_bill_freq_cd")
   private Optional<String> billFrequencyCode;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var billClassificationCodeNormalized = billClassificationCode.orElse("");
     var facilityTypeCodeNormalized = facilityTypeCode.orElse("");

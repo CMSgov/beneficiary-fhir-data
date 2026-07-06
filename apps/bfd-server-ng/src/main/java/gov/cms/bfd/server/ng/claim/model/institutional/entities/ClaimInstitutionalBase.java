@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.institutional;
+package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
@@ -16,6 +16,16 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DiagnosisDrgCode;
+import gov.cms.bfd.server.ng.claim.model.institutional.OperatingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.OtherInstitutionalCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.ReferringInstitutionalCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.RenderingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.TypeOfBillCode;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

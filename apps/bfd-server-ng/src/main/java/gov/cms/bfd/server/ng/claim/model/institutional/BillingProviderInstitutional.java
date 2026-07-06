@@ -60,7 +60,7 @@ public class BillingProviderInstitutional extends ProviderHistoryBase {
    * @return an Optional containing a bundle resource with either the Organization or Practitioner,
    *     or empty if NPI number is not present.
    */
-  Optional<DomainResource> toFhirNpiType() {
+  public Optional<DomainResource> toFhirNpiType() {
     return getProviderNpiNumber()
         .map(
             npi ->

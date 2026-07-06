@@ -8,12 +8,13 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.StringType;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class ClinicalTrialNumber {
+public class ClinicalTrialNumber {
   @Column(name = "clm_clncl_tril_num")
   private Optional<String> clinicalTrialNum;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return clinicalTrialNum.map(
         trialNumber ->

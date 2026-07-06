@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalNch;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;

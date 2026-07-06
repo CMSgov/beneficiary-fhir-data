@@ -8,8 +8,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The adjudication charge for a pharmacy claim. */
 @Embeddable
-class AdjudicationChargeRx implements AdjudicationChargeBase {
+public class AdjudicationChargeRx implements AdjudicationChargeBase {
 
   @Column(name = "clm_bene_pmt_amt")
   private BigDecimal benePaymentAmount;

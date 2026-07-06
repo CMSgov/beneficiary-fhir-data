@@ -8,8 +8,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The adjudication charge for a professional claim from nch. */
 @Embeddable
-class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
+public class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;

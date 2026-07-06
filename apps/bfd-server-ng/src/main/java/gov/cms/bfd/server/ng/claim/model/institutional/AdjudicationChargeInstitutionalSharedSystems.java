@@ -8,8 +8,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The adjudication charge in institutional claims from the shared system. */
 @Embeddable
-class AdjudicationChargeInstitutionalSharedSystems implements AdjudicationChargeBase {
+public class AdjudicationChargeInstitutionalSharedSystems implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
