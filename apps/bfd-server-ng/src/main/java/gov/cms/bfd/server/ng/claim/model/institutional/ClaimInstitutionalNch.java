@@ -1,15 +1,13 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimDateSupportingInfo;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.ClaimRelatedCondition;
-import gov.cms.bfd.server.ng.claim.model.ClaimValue;
-import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
-import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -75,12 +73,12 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  ClaimSourceId getClaimSourceId() {
+  public ClaimSourceId getClaimSourceId() {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 
   @Override
-  MetaSourceSk getMetaSourceSk() {
+  public MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.NCH;
   }
 
@@ -90,7 +88,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  protected List<ClaimValue> getClaimValues() {
+  public List<ClaimValue> getClaimValues() {
     return getClaimItems().stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
   }
 

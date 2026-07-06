@@ -403,7 +403,7 @@ public enum ClaimTypeCode {
     return Optional.of(adjudication);
   }
 
-  boolean isClaimSubtype(ClaimSubtype subtype) {
+  public boolean isClaimSubtype(ClaimSubtype subtype) {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }
 

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
@@ -42,6 +42,7 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
    * @return the NPI type
    */
   @Transient
+  @Override
   public ProviderHistoryBase.NpiType getNpiType() {
     if (providerFirstName.isEmpty()) {
       return ProviderHistoryBase.NpiType.ORGANIZATION;

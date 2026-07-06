@@ -14,7 +14,13 @@ public class ClaimSubmissionDate {
   @Column(name = "clm_submsn_dt")
   private Optional<LocalDate> claimSubmissionDate;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  /**
+   * add claim submission date to support information component.
+   *
+   * @param supportingInfoFactory supporting info factory
+   * @return the eob.SupportingInformationComponent
+   */
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (claimSubmissionDate.isEmpty()) {
       return Optional.empty();

@@ -42,7 +42,13 @@ public enum ClaimSubmissionFormatCode {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  /**
+   * takes a supporting info factory to generate a component from display and code.
+   *
+   * @param supportingInfoFactory supporting info factory
+   * @return an eob.SupportingInformationComponent
+   */
+  public ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()

@@ -15,7 +15,7 @@ public class ClaimPaymentAmount {
   @Column(name = "clm_pd_dt")
   private Optional<LocalDate> claimPaymentDate;
 
- public ExplanationOfBenefit.PaymentComponent toFhir() {
+  public ExplanationOfBenefit.PaymentComponent toFhir() {
     var payment =
         new ExplanationOfBenefit.PaymentComponent().setAmount(USD.toFhir(claimPaymentAmount));
     claimPaymentDate.ifPresent(d -> payment.setDate(DateUtil.toDate(d)));

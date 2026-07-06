@@ -1,16 +1,16 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDenialCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -92,12 +92,12 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   }
 
   @Override
-  ClaimSourceId getClaimSourceId() {
+  public ClaimSourceId getClaimSourceId() {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 
   @Override
-  MetaSourceSk getMetaSourceSk() {
+  public MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.NCH;
   }
 

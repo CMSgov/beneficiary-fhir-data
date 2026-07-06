@@ -56,6 +56,7 @@ public enum ProviderIdQualifierCode {
 
   /**
    * Convert code and display into a Coding for a new CodeableConcept.
+   *
    * @return the CodeableConcept
    */
   public CodeableConcept toFhir() {

@@ -1,9 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
-import gov.cms.bfd.server.ng.claim.model.RenderingProviderSsaStateCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
+import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -124,9 +125,19 @@ public abstract class ClaimBase {
     return eob;
   }
 
-  abstract ClaimSourceId getClaimSourceId();
+  /**
+   * Return the claim source id.
+   *
+   * @return the claim source id, as defined by implemented classes
+   */
+  public abstract ClaimSourceId getClaimSourceId();
 
-  abstract MetaSourceSk getMetaSourceSk();
+  /**
+   * Return the meta source of the claim.
+   *
+   * @return the meta source
+   */
+  public abstract MetaSourceSk getMetaSourceSk();
 
   /**
    * Returns the set of claim items associated with this claim.

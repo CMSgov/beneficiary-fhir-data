@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.BillingProviderSsaStateCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimOutpatientServiceTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.HhaReferralCode;
 import gov.cms.bfd.server.ng.claim.model.common.PpsIndicatorCode;

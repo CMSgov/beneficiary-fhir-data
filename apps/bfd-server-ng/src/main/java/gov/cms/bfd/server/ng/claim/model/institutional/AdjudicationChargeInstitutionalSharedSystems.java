@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

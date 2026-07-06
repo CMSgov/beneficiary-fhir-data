@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model.institutional;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.BlueButtonSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -11,13 +9,21 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The NCH Primary Payor Code. */
 @Embeddable
 @Getter
-class NchPrimaryPayorCode {
+public class NchPrimaryPayorCode {
   @Column(name = "clm_nch_prmry_pyr_cd")
   private Optional<String> nchPrimaryPayorCode;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  /**
+   * generates an eob supporting information component from the map of codes into a supporting info
+   * factory.
+   *
+   * @param supportingInfoFactory the supporting info factory
+   * @return an eob.SupportingInformationComponent
+   */
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return nchPrimaryPayorCode.map(
         code ->
