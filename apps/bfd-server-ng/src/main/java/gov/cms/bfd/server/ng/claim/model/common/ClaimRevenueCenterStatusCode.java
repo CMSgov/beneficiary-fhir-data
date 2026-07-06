@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -14,7 +14,12 @@ public class ClaimRevenueCenterStatusCode {
   @Column(name = "clm_rev_cntr_stus_cd")
   private Optional<String> revenueCenterStatusCode;
 
-  Optional<Extension> toFhir() {
+  /**
+   * generates an extension with the coding code set to the revenue center status.
+   *
+   * @return Extension with revenue center status code
+   */
+  public Optional<Extension> toFhir() {
     return revenueCenterStatusCode.map(
         s ->
             new Extension()

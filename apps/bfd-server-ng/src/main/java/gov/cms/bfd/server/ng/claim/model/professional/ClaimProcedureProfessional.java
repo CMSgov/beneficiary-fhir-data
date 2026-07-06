@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 class ClaimProcedureProfessional extends ClaimProcedureBase {
 
   @Override
-  protected Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
+  public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
       SequenceGenerator sequenceGenerator) {
     return getDiagnosisType()
         .filter(type -> type == ClaimDiagnosisType.BASE_DIAGNOSIS_CODE)

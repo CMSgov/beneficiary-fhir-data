@@ -37,7 +37,7 @@ public enum ClaimPricingReasonCode {
    *
    * @return list of FHIR codings
    */
-  Coding toFhir() {
+  public Coding toFhir() {
     return new Coding()
         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
         .setCode(code)

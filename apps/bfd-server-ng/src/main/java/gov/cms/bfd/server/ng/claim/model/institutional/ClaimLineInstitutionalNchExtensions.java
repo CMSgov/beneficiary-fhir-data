@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.professional.ClaimRevenueCenterStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRevenueCenterStatusCode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
