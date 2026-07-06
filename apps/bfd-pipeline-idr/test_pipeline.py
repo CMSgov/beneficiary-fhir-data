@@ -176,10 +176,17 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
-    cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
-    assert cur.rowcount == 21
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 123359318723
+    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 21
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 123359318723
+    else:
+        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 9
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 849348853948
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 51
@@ -201,10 +208,17 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
-    cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-    assert cur.rowcount == 327
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 123359318723
+    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 327
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 123359318723
+    else:
+        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 151
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 849348853948
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 442

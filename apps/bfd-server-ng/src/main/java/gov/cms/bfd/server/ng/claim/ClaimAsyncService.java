@@ -5,7 +5,10 @@ import static gov.cms.bfd.server.ng.util.MetricRecorder.CLAIM_TYPE;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.claim.model.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
+import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -13,7 +16,8 @@ import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -111,7 +115,9 @@ public class ClaimAsyncService {
 
   private String buildWhereClause(DbFilter filter, SystemType systemType) {
     var latestClaimFilter =
-        systemType.filterLatestClaims() ? "AND c.latestClaimIndicator = 'Y'" : "";
+        systemType.filterLatestClaims()
+            ? "AND (c.latestClaimIndicator = 'Y' OR c.claimTypeCode IN :partDClaimTypeCodes)"
+            : "";
     return String.format(
         """
         AND b.latestTransactionFlag = 'Y'
@@ -129,6 +135,14 @@ public class ClaimAsyncService {
       sb.append(params.filterClause());
       queryParams.addAll(params.params());
     }
+
+    if (systemType.filterLatestClaims()) {
+      queryParams.add(
+          new DbFilterParam(
+              "partDClaimTypeCodes",
+              ClaimTypeCode.CLAIM_TYPE_CODE_MAP.get(ClaimSubtype.PDE)));
+    }
+
     return new DbFilter(sb.toString(), queryParams);
   }
 

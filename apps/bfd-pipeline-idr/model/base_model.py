@@ -19,6 +19,7 @@ from constants import (
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
     EMPTY_PARTITION,
+    FISS_CLM_SOURCE,
     IDR_BENE_HISTORY_TABLE,
     IDR_CLAIM_ANSI_SIGNATURE_TABLE,
     IDR_CLAIM_DATE_SIGNATURE_TABLE,
@@ -29,11 +30,16 @@ from constants import (
     IDR_PRIOR_AUTH_TABLE,
     INSTITUTIONAL_NCH_PARTITIONS,
     INSTITUTIONAL_SS_PARTITIONS,
+    MCS_CLM_SOURCE,
     NON_CLAIM_PARTITION,
     PART_D_CLAIM_TYPE_CODES,
     PART_D_PARTITIONS,
+    PHASE_1_CUTOFF,
+    PHASE_1_SS_MAX,
+    PHASE_1_SS_MIN,
     PROFESSIONAL_NCH_PARTITIONS,
     PROFESSIONAL_SS_PARTITIONS,
+    VMS_CLM_SOURCE,
 )
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 from settings import (
@@ -341,9 +347,6 @@ LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 EXPR = "expr"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
-FISS_CLM_SOURCE = "21000"
-MCS_CLM_SOURCE = "22000"
-VMS_CLM_SOURCE = "23000"
 
 
 ALIAS_CLM = "clm"
@@ -694,17 +697,16 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
         latest_claim_ind = ""
 
     # PAC data older than 60 days should be filtered
-    pac_cutoff_date = start_time - timedelta(days=60)
+    pac_cutoff_date = start_time - timedelta(days=PHASE_1_CUTOFF)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
-    pac_phase_1_min = 1000
-    pac_phase_1_max = 1999
+
     # Note: checking clm_type_cd as the first branch of the OR here might be more efficient
     # Since it's more likely to return true
     pac_filter = (
         f"""
         AND
         (
-            {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
+            {clm}.clm_type_cd NOT BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
             OR
             (
                 {clm}.clm_src_id IN (
