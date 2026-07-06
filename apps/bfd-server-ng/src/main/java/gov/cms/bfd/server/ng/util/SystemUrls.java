@@ -687,7 +687,7 @@ public class SystemUrls {
   // CMS Blue Button
   /** Blue Button code system - Code system for eob-type. */
   public static final String BLUE_BUTTON_EOB_TYPE_CODE =
-      "https://bluebutton.cms.gov/resources/codesystem/eob-type";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE";
 
   /** Blue Button code system - Brand Generic Code. */
   public static final String BLUE_BUTTON_GENERIC_BRAND_IND =
