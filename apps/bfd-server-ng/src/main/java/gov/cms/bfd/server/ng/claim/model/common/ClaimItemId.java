@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,12 +10,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("checkstyle:MissingJavadocType")
 @EqualsAndHashCode
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
 @Embeddable
-class ClaimItemId implements Serializable, Comparable<ClaimItemId> {
+public class ClaimItemId implements Serializable, Comparable<ClaimItemId> {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 

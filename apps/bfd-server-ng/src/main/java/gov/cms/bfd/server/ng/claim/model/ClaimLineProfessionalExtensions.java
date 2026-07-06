@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
 /** Embedded container for professional claim line extensions. */
+@SuppressWarnings("checkstyle:MissingJavadocMethod")
 @Embeddable
 public class ClaimLineProfessionalExtensions {
 
@@ -31,7 +32,7 @@ public class ClaimLineProfessionalExtensions {
 
   @Embedded ClaimTaxNumberCode claimTaxNumberCode;
 
-  List<Extension> toFhir(ClaimFilterOptions options) {
+  public List<Extension> toFhir(ClaimFilterOptions options) {
     return Stream.of(
             supplierTypeCode.map(ClaimSupplierTypeCode::toFhir),
             federalTypeOfServiceCode.map(ClaimFederalTypeOfServiceCode::toFhir),

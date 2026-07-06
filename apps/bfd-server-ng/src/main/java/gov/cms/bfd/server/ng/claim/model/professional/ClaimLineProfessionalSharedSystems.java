@@ -1,5 +1,6 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;

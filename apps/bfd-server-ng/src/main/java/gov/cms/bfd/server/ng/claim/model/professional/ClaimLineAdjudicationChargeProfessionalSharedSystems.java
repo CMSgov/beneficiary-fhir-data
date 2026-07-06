@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;

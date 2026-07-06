@@ -14,7 +14,7 @@ import jakarta.persistence.Embeddable;
 public class OperatingCareTeam extends CareTeamBase {
 
   @Override
-  protected CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType() {
     return CareTeamType.OPERATING;
   }
 }

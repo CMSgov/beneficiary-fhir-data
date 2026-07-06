@@ -1,6 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.IdrUnit;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -9,8 +8,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class ClaimLineNdc {
+public class ClaimLineNdc {
   @Column(name = "clm_line_ndc_cd")
   private Optional<String> ndcCode;
 
@@ -20,7 +20,7 @@ class ClaimLineNdc {
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;
 
-  Optional<ExplanationOfBenefit.DetailComponent> toFhirDetail() {
+  public Optional<ExplanationOfBenefit.DetailComponent> toFhirDetail() {
     if (ndcCode.isEmpty()) {
       return Optional.empty();
     }
@@ -32,11 +32,11 @@ class ClaimLineNdc {
     return Optional.of(detail);
   }
 
-  Optional<Coding> toFhirCoding() {
+  public Optional<Coding> toFhirCoding() {
     return ndcCode.map(c -> new Coding().setSystem(SystemUrls.NDC).setCode(c));
   }
 
-  Optional<String> getQualifier() {
+  public Optional<String> getQualifier() {
     return ndcQuantityQualifierCode.map(Object::toString);
   }
 }

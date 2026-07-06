@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -11,8 +11,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @MappedSuperclass
-abstract class ClaimLineAdjudicationChargeProfessionalBase {
+public abstract class ClaimLineAdjudicationChargeProfessionalBase {
 
   @Column(name = "clm_line_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -41,7 +42,7 @@ abstract class ClaimLineAdjudicationChargeProfessionalBase {
   @Column(name = "clm_line_prfnl_dme_price_amt")
   private BigDecimal purchasePriceAmount;
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     var benefitPaymentStatus = new ExplanationOfBenefit.AdjudicationComponent();
     benefitPaymentStatus.setCategory(
         new CodeableConcept()

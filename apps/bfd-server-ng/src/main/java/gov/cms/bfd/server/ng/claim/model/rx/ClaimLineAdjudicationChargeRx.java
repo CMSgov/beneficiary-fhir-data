@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
@@ -10,8 +10,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class ClaimLineAdjudicationChargeRx {
+public class ClaimLineAdjudicationChargeRx {
   @Column(name = "clm_line_ingrdnt_cst_amt")
   private BigDecimal ingredientCostAmount;
 
@@ -46,9 +47,8 @@ class ClaimLineAdjudicationChargeRx {
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
-  ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    var adjudicationComponent =
-        new ArrayList<>(
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+    return new ArrayList<>(
             List.of(
                 AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(
                     patientLiabReductPaidAmount),
@@ -62,7 +62,5 @@ class ClaimLineAdjudicationChargeRx {
                     reportedGapDiscountAmount),
                 AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
                     getTotalDrugCost())));
-
-    return adjudicationComponent;
   }
 }

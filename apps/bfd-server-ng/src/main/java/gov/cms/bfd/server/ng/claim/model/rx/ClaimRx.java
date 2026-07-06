@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.rx;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.ClaimItemRx;
 import gov.cms.bfd.server.ng.claim.model.ClaimPaymentDate;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;

@@ -9,9 +9,9 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
@@ -263,7 +263,7 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-      Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
+          Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
     if (proc.isEmpty()) {
       return false;
     }

@@ -2,9 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import java.util.Optional;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.ClaimLineBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedureBase;
 import org.jetbrains.annotations.NotNull;
 
 /** Common interface for all claim item types. */

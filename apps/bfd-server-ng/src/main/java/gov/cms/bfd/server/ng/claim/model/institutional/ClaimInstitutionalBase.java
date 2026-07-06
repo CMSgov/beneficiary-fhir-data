@@ -10,7 +10,7 @@ import gov.cms.bfd.server.ng.claim.model.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.ClaimPaymentAmount;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;

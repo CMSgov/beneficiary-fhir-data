@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.CarinSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
