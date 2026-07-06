@@ -2,10 +2,9 @@ package gov.cms.bfd.server.ng.claim.model.professional;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.OtherProfessionalSharedSystemsCareTeam;
-import gov.cms.bfd.server.ng.claim.model.ProviderAssignmentIndicatorSwitch;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;

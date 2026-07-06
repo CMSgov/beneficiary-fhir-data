@@ -1,14 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
-import gov.cms.bfd.server.ng.claim.model.CatastrophicCoverageCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimDispenseAsWrittenCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimLineBrandGenericCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimLineCompoundCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimPatientResidenceCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimPrescriptionOriginCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimSubmissionCode;
-import gov.cms.bfd.server.ng.claim.model.DrugCoverageStatusCode;
-import gov.cms.bfd.server.ng.claim.model.PharmacySrvcTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.CatastrophicCoverageCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBrandGenericCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineCompoundCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPatientResidenceCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPrescriptionOriginCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionCode;
+import gov.cms.bfd.server.ng.claim.model.common.PharmacySrvcTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;

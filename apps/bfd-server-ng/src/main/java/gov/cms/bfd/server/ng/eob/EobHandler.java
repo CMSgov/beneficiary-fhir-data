@@ -239,7 +239,7 @@ public class EobHandler {
   }
 
   private boolean claimItemIsSamhsa(
-          ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
+      ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
     return procedureIsSamhsa(claimItem.getProcedure(), claimThroughDate, claimUniqueId)
         || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }
@@ -253,7 +253,7 @@ public class EobHandler {
   }
 
   private boolean hcpcsIsSamhsa(
-          Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
+      Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
     if (hcpcsCode.isEmpty()) {
       return false;
     }
@@ -266,7 +266,7 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-          Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
+      Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
     if (proc.isEmpty()) {
       return false;
     }

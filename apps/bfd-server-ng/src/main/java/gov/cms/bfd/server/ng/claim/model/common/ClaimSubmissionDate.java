@@ -8,9 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * Claim Submission Date.
- */
+/** Claim Submission Date. */
 @Embeddable
 public class ClaimSubmissionDate {
   @Column(name = "clm_submsn_dt")

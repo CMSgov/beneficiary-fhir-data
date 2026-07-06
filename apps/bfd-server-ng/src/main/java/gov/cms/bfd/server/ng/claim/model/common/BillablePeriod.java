@@ -31,6 +31,7 @@ public class BillablePeriod {
 
   /**
    * LocalDate -> Period.
+   *
    * @return the Period generated from claimFromDate and claimThroughDate
    */
   public Period toFhir() {

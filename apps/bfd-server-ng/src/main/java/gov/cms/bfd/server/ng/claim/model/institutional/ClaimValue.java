@@ -8,9 +8,10 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 
+@SuppressWarnings("checkstyle:MissingJavadocType")
 @Getter
 @Embeddable
-class ClaimValue {
+public class ClaimValue {
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_val_sqnc_num_val")
   private Optional<Integer> sequenceNumber;

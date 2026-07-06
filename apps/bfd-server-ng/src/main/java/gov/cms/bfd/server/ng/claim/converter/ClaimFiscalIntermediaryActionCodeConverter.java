@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimFiscalIntermediaryActionCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFiscalIntermediaryActionCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;

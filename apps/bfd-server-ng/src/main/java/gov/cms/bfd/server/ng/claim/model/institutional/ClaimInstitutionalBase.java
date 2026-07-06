@@ -3,25 +3,18 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
-import gov.cms.bfd.server.ng.claim.model.ClaimContractorNumber;
-import gov.cms.bfd.server.ng.claim.model.ClaimDispositionCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimPaymentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimQueryCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
-import gov.cms.bfd.server.ng.claim.model.ClaimValue;
-import gov.cms.bfd.server.ng.claim.model.DiagnosisDrgCode;
-import gov.cms.bfd.server.ng.claim.model.NchPrimaryPayorCode;
-import gov.cms.bfd.server.ng.claim.model.OperatingCareTeam;
-import gov.cms.bfd.server.ng.claim.model.OtherInstitutionalCareTeam;
-import gov.cms.bfd.server.ng.claim.model.ReferringInstitutionalCareTeam;
-import gov.cms.bfd.server.ng.claim.model.RenderingCareTeam;
-import gov.cms.bfd.server.ng.claim.model.SupportingInfoComponentBase;
-import gov.cms.bfd.server.ng.claim.model.TypeOfBillCode;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -85,7 +78,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    *
    * @return list of ClaimValues from each item
    */
-  protected abstract List<ClaimValue> getClaimValues();
+  public abstract List<ClaimValue> getClaimValues();
 
   /**
    * Adds care-team members that are unique to the subclass.

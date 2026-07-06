@@ -1,9 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPlaceOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
-import gov.cms.bfd.server.ng.claim.model.ClaimLineProfessionalExtensions;
-import gov.cms.bfd.server.ng.claim.model.ClaimPlaceOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;

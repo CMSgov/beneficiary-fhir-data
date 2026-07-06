@@ -10,7 +10,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 // Suppress warnings for duplicate string literals.
 // There's too many values here - creating constants for all of these adds too much noise.
-@SuppressWarnings({"java:S1192", "checkstyle:MissingJavadocType", "checkstyle:JavadocVariable", "checkstyle:MissingJavadocMethod"})
+@SuppressWarnings({
+  "java:S1192",
+  "checkstyle:MissingJavadocType",
+  "checkstyle:JavadocVariable",
+  "checkstyle:MissingJavadocMethod"
+})
 @AllArgsConstructor
 @Getter
 public enum AdjudicationChargeType {
@@ -464,7 +469,8 @@ public enum AdjudicationChargeType {
         .setValue(value);
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(BigDecimal value) {
+  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(
+      BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setValue(value);

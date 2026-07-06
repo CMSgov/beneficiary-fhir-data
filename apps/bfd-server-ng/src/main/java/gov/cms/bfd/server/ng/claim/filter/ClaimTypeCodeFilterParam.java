@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 

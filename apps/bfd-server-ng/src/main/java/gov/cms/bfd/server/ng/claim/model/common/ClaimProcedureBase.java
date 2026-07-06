@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Procedure and diagnosis info. */
+@SuppressWarnings("checkstyle:MissingJavadocMethod")
 @Getter
 @MappedSuperclass
 public abstract class ClaimProcedureBase {
@@ -29,19 +30,19 @@ public abstract class ClaimProcedureBase {
   @Column(name = "clm_dgns_cd") // SAMHSA
   private Optional<String> diagnosisCode;
 
-  Optional<String> getDiagnosisKey() {
+  public Optional<String> getDiagnosisKey() {
     return diagnosisCode.map(
         s -> s + "|" + getIcdIndicator().map(IcdIndicator::getCode).orElse(""));
   }
 
-  Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
+  public Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     return Optional.empty();
   }
 
-  abstract Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
+  public abstract Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
       SequenceGenerator sequenceGenerator);
 
-  protected Optional<ExplanationOfBenefit.DiagnosisComponent> buildBaseDiagnosis(
+  public Optional<ExplanationOfBenefit.DiagnosisComponent> buildBaseDiagnosis(
       SequenceGenerator sequenceGenerator, String typeCode, String typeSystem) {
     if (diagnosisCode.isEmpty() || icdIndicator.isEmpty()) {
       return Optional.empty();

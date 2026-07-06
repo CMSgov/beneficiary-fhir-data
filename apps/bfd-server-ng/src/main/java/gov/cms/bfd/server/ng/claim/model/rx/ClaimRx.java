@@ -3,20 +3,17 @@ package gov.cms.bfd.server.ng.claim.model.rx;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.ClaimPaymentDate;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcessDate;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
-import gov.cms.bfd.server.ng.claim.model.PrescribingCareTeam;
-import gov.cms.bfd.server.ng.claim.model.ServiceProviderPharmacy;
-import gov.cms.bfd.server.ng.claim.model.SubmitterContractNumber;
-import gov.cms.bfd.server.ng.claim.model.SubmitterContractPBPNumber;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -192,7 +189,7 @@ public class ClaimRx extends ClaimBase {
   }
 
   @Override
-  ClaimSourceId getClaimSourceId() {
+  public ClaimSourceId getClaimSourceId() {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 

@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimObligatedToAcceptAsFinalOneIndicatorCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimRevenueCenterStatusCode;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimRevenueCenterStatusCode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
@@ -16,8 +15,7 @@ public class ClaimLineInstitutionalNchExtensions {
   @Embedded
   ClaimObligatedToAcceptAsFinalOneIndicatorCode claimObligatedToAcceptasFinalOneIndicatorCode;
 
-  @Embedded
-  ClaimRevenueCenterStatusCode claimRevenueCenterStatusCode;
+  @Embedded ClaimRevenueCenterStatusCode claimRevenueCenterStatusCode;
 
   List<Extension> toFhir() {
     return Stream.of(

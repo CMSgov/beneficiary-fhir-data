@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;

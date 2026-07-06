@@ -1,8 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimRevenueDiscountIndicatorCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimRevenuePackageIndicatorCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimRevenuePaymentMethodCode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
@@ -13,12 +10,9 @@ import org.hl7.fhir.r4.model.Extension;
 /** Embedded container for institutional claim line extensions. */
 @Embeddable
 public class ClaimLineInstitutionalExtensions {
-  @Embedded
-  ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;
-  @Embedded
-  ClaimRevenuePackageIndicatorCode claimRevenuePackageIndicatorCode;
-  @Embedded
-  ClaimRevenuePaymentMethodCode claimRevenuePaymentMethodCode;
+  @Embedded ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;
+  @Embedded ClaimRevenuePackageIndicatorCode claimRevenuePackageIndicatorCode;
+  @Embedded ClaimRevenuePaymentMethodCode claimRevenuePaymentMethodCode;
 
   List<Extension> toFhir() {
     return Stream.of(

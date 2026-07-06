@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +17,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Claim type codes. */
+@SuppressWarnings("checkstyle:MissingJavadocMethod")
 @Getter
 @AllArgsConstructor
 public enum ClaimTypeCode {
@@ -311,7 +310,7 @@ public enum ClaimTypeCode {
         .get(code);
   }
 
-  Optional<ClaimContext> toContext() {
+  public Optional<ClaimContext> toContext() {
     if (isInstitutional()) {
       return Optional.of(ClaimContext.INSTITUTIONAL);
     }
@@ -321,10 +320,6 @@ public enum ClaimTypeCode {
     return Optional.empty();
   }
 
-  /**
-   * TODO.
-   * @return TODO.
-   */
   public CodeableConcept toFhirType() {
     var codeableConcept =
         new CodeableConcept(
@@ -336,11 +331,11 @@ public enum ClaimTypeCode {
     return codeableConcept;
   }
 
-  Optional<CodeableConcept> toFhirSubtype() {
+  public Optional<CodeableConcept> toFhirSubtype() {
     return getGroupedClaimSubtype().map(ClaimSubtype::toFhir);
   }
 
-  Optional<Organization> toFhirInsurerPartAB() {
+  public Optional<Organization> toFhirInsurerPartAB() {
     if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
@@ -351,7 +346,7 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
-  Optional<Organization> toFhirInsurerPartD(String pbpName) {
+  public Optional<Organization> toFhirInsurerPartD(String pbpName) {
     if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
@@ -362,14 +357,14 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
-  ExplanationOfBenefit.InsuranceComponent toFhirPartDInsurance() {
+  public ExplanationOfBenefit.InsuranceComponent toFhirPartDInsurance() {
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
     insurance.setCoverage(new Reference().setDisplay("Part D"));
     return insurance;
   }
 
-  ExplanationOfBenefit.InsuranceComponent toFhirInsurance(
+  public ExplanationOfBenefit.InsuranceComponent toFhirInsurance(
       Optional<ClaimRecordType> claimRecordType) {
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
@@ -385,7 +380,7 @@ public enum ClaimTypeCode {
     return insurance;
   }
 
-  Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
@@ -412,11 +407,11 @@ public enum ClaimTypeCode {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }
 
-  Optional<String> toFhirStructureDefinition() {
+  public Optional<String> toFhirStructureDefinition() {
     return getClaimSubtype().map(ClaimSubtype::getSystemUrl);
   }
 
-  private Optional<ClaimType> getClaimType() {
+  public Optional<ClaimType> getClaimType() {
     return getClaimSubtype().map(ClaimSubtype::getClaimType);
   }
 

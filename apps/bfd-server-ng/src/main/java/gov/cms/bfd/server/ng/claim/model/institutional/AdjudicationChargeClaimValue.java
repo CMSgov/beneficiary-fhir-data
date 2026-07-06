@@ -1,12 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.ClaimValue;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 class AdjudicationChargeClaimValue {

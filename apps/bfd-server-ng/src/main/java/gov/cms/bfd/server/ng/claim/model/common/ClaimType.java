@@ -5,16 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
+@SuppressWarnings({"checkstyle:JavadocVariable", "checkstyle:MissingJavadocType","checkstyle:MissingJavadocMethod"})
 @Getter
 @AllArgsConstructor
-enum ClaimType {
+public enum ClaimType {
   PHARMACY("pharmacy"),
   INSTITUTIONAL("institutional"),
   PROFESSIONAL("professional");
 
   private final String code;
 
-  Coding toFhir() {
+  public Coding toFhir() {
     return new Coding().setSystem(SystemUrls.HL7_CLAIM_TYPE).setCode(code);
   }
 }

@@ -3,21 +3,18 @@ package gov.cms.bfd.server.ng.claim.model.common;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * TODO.
- */
+/** TODO. */
 public class SupportingInfoFactory {
   private final SequenceGenerator sequenceGenerator;
 
-  /**
-   * TODO.
-   */
+  /** TODO. */
   public SupportingInfoFactory() {
     this.sequenceGenerator = new SequenceGenerator();
   }
 
   /**
    * TODO.
+   *
    * @return TODO.
    */
   public ExplanationOfBenefit.SupportingInformationComponent createSupportingInfo() {

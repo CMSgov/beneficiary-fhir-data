@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 
 /** Used by classes that create database filters. */
 public interface DbFilterBuilder {

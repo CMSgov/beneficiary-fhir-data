@@ -1,12 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimAdmissionSourceCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimAdmissionTypeCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimFiscalIntermediaryActionCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimNonpaymentReasonCode;
-import gov.cms.bfd.server.ng.claim.model.McoPaidSwitch;
-import gov.cms.bfd.server.ng.claim.model.PatientStatusCode;
-import gov.cms.bfd.server.ng.claim.model.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimAdmissionSourceCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimAdmissionTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFiscalIntermediaryActionCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimNonpaymentReasonCode;
+import gov.cms.bfd.server.ng.claim.model.common.McoPaidSwitch;
+import gov.cms.bfd.server.ng.claim.model.common.PatientStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
@@ -10,7 +9,11 @@ import org.hl7.fhir.r4.model.*;
 
 @AllArgsConstructor
 @Getter
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType", "checkstyle:JavadocVariable"})
+@SuppressWarnings({
+  "checkstyle:MissingJavadocMethod",
+  "checkstyle:MissingJavadocType",
+  "checkstyle:JavadocVariable"
+})
 public enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),

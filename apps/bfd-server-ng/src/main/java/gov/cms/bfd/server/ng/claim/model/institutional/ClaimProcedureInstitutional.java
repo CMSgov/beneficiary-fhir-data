@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.converter.ClaimPoaIndicatorConverter;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -77,7 +77,7 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
   }
 
   private ExplanationOfBenefit.DiagnosisComponent applyPoaIfPresent(
-          ClaimDiagnosisType type, ExplanationOfBenefit.DiagnosisComponent diagnosis) {
+      ClaimDiagnosisType type, ExplanationOfBenefit.DiagnosisComponent diagnosis) {
     if (type != ClaimDiagnosisType.BASE_DIAGNOSIS_CODE) {
       return diagnosis;
     }

@@ -1,9 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
-import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.Optional;

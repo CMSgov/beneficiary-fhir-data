@@ -5,15 +5,13 @@ import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * TODO.
- */
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 public class ClaimRelatedCondition {
   @Column(name = "clm_rlt_cond_cd")
   private Optional<ClaimRelatedConditionCode> claimRelatedConditionCode;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
     return claimRelatedConditionCode.map(

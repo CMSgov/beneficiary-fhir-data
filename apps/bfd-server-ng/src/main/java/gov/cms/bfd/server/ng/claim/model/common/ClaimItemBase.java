@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
 import java.util.Optional;
-
-import gov.cms.bfd.server.ng.claim.model.ClaimLineBase;
 import org.jetbrains.annotations.NotNull;
 
 /** Common interface for all claim item types. */

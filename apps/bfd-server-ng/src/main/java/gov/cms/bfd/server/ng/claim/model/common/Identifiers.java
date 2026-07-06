@@ -23,7 +23,6 @@ class Identifiers {
   @Column(name = "clm_orig_cntl_num")
   private Optional<String> claimOriginalControlNumber;
 
-
   List<Identifier> toFhir(ClaimTypeCode claimTypeCode) {
     var claimId =
         new Identifier()
@@ -53,6 +52,7 @@ class Identifiers {
 
   /**
    * Maps original control number to RelatedClaimComponents.
+   *
    * @param claimTypeCode the claim type code
    * @return a list of fhir eob.relatedclaimcomponents
    */

@@ -49,18 +49,17 @@ public class ClaimLineAdjudicationChargeRx {
 
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return new ArrayList<>(
-            List.of(
-                AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(
-                    patientLiabReductPaidAmount),
-                AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudication(
-                    lowIncomeCostShareSubAmount),
-                AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudication(
-                    grossCostBelowThresholdAmount),
-                AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT.toFhirAdjudication(
-                    grossCostAboveThresholdAmount),
-                AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT.toFhirAdjudication(
-                    reportedGapDiscountAmount),
-                AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
-                    getTotalDrugCost())));
+        List.of(
+            AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(
+                patientLiabReductPaidAmount),
+            AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudication(
+                lowIncomeCostShareSubAmount),
+            AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudication(
+                grossCostBelowThresholdAmount),
+            AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT.toFhirAdjudication(
+                grossCostAboveThresholdAmount),
+            AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT.toFhirAdjudication(
+                reportedGapDiscountAmount),
+            AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(getTotalDrugCost())));
   }
 }

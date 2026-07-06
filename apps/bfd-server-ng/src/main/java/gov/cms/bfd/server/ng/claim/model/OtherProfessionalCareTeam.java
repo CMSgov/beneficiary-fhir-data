@@ -13,7 +13,7 @@ import jakarta.persistence.Embeddable;
 public class OtherProfessionalCareTeam extends ProviderHistoryBase {
 
   @Override
-  protected CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType() {
     return CareTeamType.OTHER;
   }
 }

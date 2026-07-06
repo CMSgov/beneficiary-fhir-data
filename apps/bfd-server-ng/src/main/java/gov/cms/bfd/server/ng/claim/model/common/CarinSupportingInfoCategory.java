@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-
-/**
- * The Carin Supporting Info Category.
- */
+/** The Carin Supporting Info Category. */
 @AllArgsConstructor
 @SuppressWarnings("checkstyle:JavadocVariable")
 public enum CarinSupportingInfoCategory {
@@ -31,6 +28,7 @@ public enum CarinSupportingInfoCategory {
 
   /**
    * Enum -> CodeableConcept.
+   *
    * @return the CodeableConcept concept generated from the enum
    */
   public CodeableConcept toFhir() {

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.PharmacySrvcTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.PharmacySrvcTypeCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;

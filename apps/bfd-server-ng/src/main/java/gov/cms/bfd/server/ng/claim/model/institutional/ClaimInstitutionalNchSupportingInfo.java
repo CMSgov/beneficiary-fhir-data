@@ -1,11 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.BillingProviderSsaStateCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimOutpatientServiceTypeCode;
-import gov.cms.bfd.server.ng.claim.model.HhaLupaIndicatorCode;
-import gov.cms.bfd.server.ng.claim.model.HhaReferralCode;
-import gov.cms.bfd.server.ng.claim.model.PpsIndicatorCode;
-import gov.cms.bfd.server.ng.claim.model.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimOutpatientServiceTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.HhaReferralCode;
+import gov.cms.bfd.server.ng.claim.model.common.PpsIndicatorCode;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -34,8 +33,7 @@ class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase
 
   @Embedded ClaimInstitutionalSupportingInfoBase claimInstitutionalSupportingInfo;
 
-  @Embedded
-  BillingProviderSsaStateCode billingProviderSsaStateCode;
+  @Embedded BillingProviderSsaStateCode billingProviderSsaStateCode;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(

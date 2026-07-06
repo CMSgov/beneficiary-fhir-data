@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Optional;
