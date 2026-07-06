@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Column;
@@ -9,9 +9,10 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
+@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:MissingJavadocMethod"})
 @Embeddable
 @Getter
-class ClaimLineHcpcsModifierCode {
+public class ClaimLineHcpcsModifierCode {
   @Column(name = "hcpcs_1_mdfr_cd")
   private Optional<String> hcpcsModifierCode1;
 
@@ -27,7 +28,7 @@ class ClaimLineHcpcsModifierCode {
   @Column(name = "hcpcs_5_mdfr_cd")
   private Optional<String> hcpcsModifierCode5;
 
-  CodeableConcept toFhir() {
+  public CodeableConcept toFhir() {
     var coding =
         Stream.of(
                 hcpcsModifierCode1,

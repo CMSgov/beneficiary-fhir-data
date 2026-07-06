@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderSpecialtyCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;

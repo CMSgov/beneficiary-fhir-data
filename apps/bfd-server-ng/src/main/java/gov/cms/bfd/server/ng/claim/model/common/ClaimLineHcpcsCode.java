@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Column;
@@ -27,7 +27,7 @@ public class ClaimLineHcpcsCode {
    * @return an {@link Optional} containing the FHIR {@link Coding} if the HCPCS code is present;
    *     otherwise, an empty {@link Optional}.
    */
-  Optional<Coding> toFhir() {
+  public Optional<Coding> toFhir() {
     if (hcpcsCode.isEmpty()) {
       return Optional.empty();
     }

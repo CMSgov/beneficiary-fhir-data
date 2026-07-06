@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystems;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;

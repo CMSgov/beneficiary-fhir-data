@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
@@ -249,7 +250,7 @@ public class EobHandler {
   }
 
   private boolean hcpcsIsSamhsa(
-      Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
+          Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
     if (hcpcsCode.isEmpty()) {
       return false;
     }

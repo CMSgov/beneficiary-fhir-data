@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
-import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Optional;
 import lombok.Getter;
@@ -14,7 +12,7 @@ public abstract class CareTeamBase extends ProviderHistoryBase {
   private Optional<ProviderSpecialtyCode> specialtyCode;
 
   @Override
-  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
+  public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
       Integer sequence, Optional<ClaimContext> claimContext) {
     var careTeamComponent = super.toFhirCareTeamComponent(sequence, claimContext);
 

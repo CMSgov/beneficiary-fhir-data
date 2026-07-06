@@ -5,6 +5,8 @@ import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.rx.ClaimRx;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;

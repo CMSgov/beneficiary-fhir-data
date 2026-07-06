@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.BloodPints;
+import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.ClaimDateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;

@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Reference;
  * Helper class for converting provider data to FHIR resources. Centralizes common logic to avoid
  * duplication.
  */
-class ProviderFhirHelper {
+public class ProviderFhirHelper {
   private ProviderFhirHelper() {}
 
   private static final String NPI_DISPLAY = "National provider identifier";

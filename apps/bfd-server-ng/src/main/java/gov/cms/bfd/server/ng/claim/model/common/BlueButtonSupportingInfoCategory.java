@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-/**
- * TODO.
- */
 @AllArgsConstructor
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 public enum BlueButtonSupportingInfoCategory {
   /** CLM_NCH_WKLY_PROC_DT - Weekly Process Date. */
   CLM_NCH_WKLY_PROC_DT("CLM_NCH_WKLY_PROC_DT", "Weekly Process Date"),
@@ -121,7 +119,7 @@ public enum BlueButtonSupportingInfoCategory {
   private final String code;
   private final String display;
 
-  CodeableConcept toFhir() {
+  public CodeableConcept toFhir() {
     return new CodeableConcept()
         .addCoding(
             new Coding()

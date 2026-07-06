@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;

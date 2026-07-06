@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -12,12 +10,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
 @Embeddable
-class BloodPints {
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+public class BloodPints {
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_blood_pt_frnsh_qty")
   private Optional<Integer> bloodPints;
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return bloodPints.map(
         pints ->

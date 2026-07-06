@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.CarinSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,8 +8,11 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/**
+ * Claim Submission Date.
+ */
 @Embeddable
-class ClaimSubmissionDate {
+public class ClaimSubmissionDate {
   @Column(name = "clm_submsn_dt")
   private Optional<LocalDate> claimSubmissionDate;
 

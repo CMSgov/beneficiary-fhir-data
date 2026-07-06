@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import java.util.List;
 import java.util.Optional;
 
-import gov.cms.bfd.server.ng.claim.model.RenderingCareTeamLine;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Observation;
 

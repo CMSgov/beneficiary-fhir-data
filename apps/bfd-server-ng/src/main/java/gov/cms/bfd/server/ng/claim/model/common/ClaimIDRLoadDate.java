@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -8,15 +7,13 @@ import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * Yep.
- */
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 public class ClaimIDRLoadDate {
   @Column(name = "clm_idr_ld_dt")
   private LocalDate claimIDRLoadDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  public ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()

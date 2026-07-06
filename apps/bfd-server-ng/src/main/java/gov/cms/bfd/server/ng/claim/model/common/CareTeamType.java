@@ -10,7 +10,8 @@ import org.hl7.fhir.r4.model.*;
 
 @AllArgsConstructor
 @Getter
-enum CareTeamType {
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType", "checkstyle:JavadocVariable"})
+public enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
@@ -24,7 +25,7 @@ enum CareTeamType {
   private final String roleCode;
   private final String roleDisplay;
 
-  CareTeamComponents toFhir(
+  public CareTeamComponents toFhir(
       SequenceGenerator sequenceGenerator,
       String value,
       HumanName name,

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import gov.cms.bfd.server.ng.claim.model.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.ClaimLineBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcedureBase;
 import org.jetbrains.annotations.NotNull;
 

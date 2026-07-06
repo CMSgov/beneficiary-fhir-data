@@ -1,7 +1,15 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.BillingProviderProfessional;
+import gov.cms.bfd.server.ng.claim.model.ClaimContractorNumber;
+import gov.cms.bfd.server.ng.claim.model.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.ClinicalTrialNumber;
+import gov.cms.bfd.server.ng.claim.model.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimPaymentAmount;

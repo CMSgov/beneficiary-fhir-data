@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Provider History. */
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Getter
 @MappedSuperclass
 public abstract class ProviderHistoryBase {
@@ -32,9 +33,9 @@ public abstract class ProviderHistoryBase {
     private final String type;
   }
 
-  protected abstract CareTeamType getCareTeamType();
+  public abstract CareTeamType getCareTeamType();
 
-  protected ProviderHistoryBase.NpiType getNpiType() {
+  public ProviderHistoryBase.NpiType getNpiType() {
     if (getProviderName().isEmpty()) {
       return ProviderHistoryBase.NpiType.ORGANIZATION;
     } else {
@@ -42,7 +43,7 @@ public abstract class ProviderHistoryBase {
     }
   }
 
-  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
+  public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
       Integer sequence, Optional<ClaimContext> claimContext) {
     if (providerNpiNumber.isEmpty()) {
       return Optional.empty();
@@ -59,7 +60,7 @@ public abstract class ProviderHistoryBase {
     return getCareTeamComponent(sequence, providerReference);
   }
 
-  Optional<ExplanationOfBenefit.CareTeamComponent> getCareTeamComponent(
+  public Optional<ExplanationOfBenefit.CareTeamComponent> getCareTeamComponent(
       Integer sequence, Reference providerReference) {
     CodeableConcept roleConcept = new CodeableConcept();
     // Always add THO coding

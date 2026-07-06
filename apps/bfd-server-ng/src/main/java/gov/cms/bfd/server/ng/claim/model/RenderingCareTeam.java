@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.CareTeamBase;
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -13,7 +14,7 @@ import jakarta.persistence.Embeddable;
 public class RenderingCareTeam extends CareTeamBase {
 
   @Override
-  protected CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType() {
     return CareTeamType.RENDERING;
   }
 }

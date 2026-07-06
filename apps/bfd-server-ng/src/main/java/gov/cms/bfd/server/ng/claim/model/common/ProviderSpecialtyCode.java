@@ -1,8 +1,7 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.common;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase.NpiType.*;
 
-import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
@@ -14,9 +13,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /** Maps internal provider specialty codes to NUCC taxonomy codes. */
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "java:S1192"})
 @Getter
 @AllArgsConstructor
-@SuppressWarnings("java:S1192")
 public enum ProviderSpecialtyCode {
   /** 01 - GENERAL PRACTICE - 208D00000X. */
   _01("01", "GENERAL PRACTICE", "208D00000X", INDIVIDUAL),
@@ -342,7 +341,7 @@ public enum ProviderSpecialtyCode {
     return Optional.ofNullable(fromCode(code));
   }
 
-  CodeableConcept toFhir() {
+  public CodeableConcept toFhir() {
     var codeableConcept =
         new CodeableConcept(
             new Coding().setSystem(SystemUrls.SYS_CLM_PRVDR_SPCLTY_CD).setCode(code));
@@ -353,7 +352,7 @@ public enum ProviderSpecialtyCode {
     return codeableConcept;
   }
 
-  Extension toFhirExtension() {
+  public Extension toFhirExtension() {
     return new Extension(SystemUrls.EXT_CLM_PRVDR_SPCLTY_CD_URL)
         .setValue(new Coding(SystemUrls.SYS_CLM_PRVDR_SPCLTY_CD, code, display));
   }

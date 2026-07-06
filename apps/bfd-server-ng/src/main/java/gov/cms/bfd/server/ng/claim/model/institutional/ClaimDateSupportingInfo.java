@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.ActiveCareThroughDate;
 import gov.cms.bfd.server.ng.claim.model.AdmissionPeriod;
 import gov.cms.bfd.server.ng.claim.model.BenefitsExhaustedDate;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcessDate;
-import gov.cms.bfd.server.ng.claim.model.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.NoncoveredFromDate;
 import gov.cms.bfd.server.ng.claim.model.NoncoveredThroughDate;

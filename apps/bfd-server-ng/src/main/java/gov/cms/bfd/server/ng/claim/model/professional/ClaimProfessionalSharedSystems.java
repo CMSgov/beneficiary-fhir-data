@@ -1,7 +1,12 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.professional;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.claim.model.ClaimItemProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.OtherProfessionalSharedSystemsCareTeam;
+import gov.cms.bfd.server.ng.claim.model.ProviderAssignmentIndicatorSwitch;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -11,7 +16,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.NchPrimaryPayorCode;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
