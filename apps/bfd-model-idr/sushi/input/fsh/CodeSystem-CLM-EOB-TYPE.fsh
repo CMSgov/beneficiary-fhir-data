@@ -6,7 +6,7 @@ Description: "This is the EOB type code for Blue Button."
 * ^status = #active
 * ^content = #complete
 
-* #CARRIER "Professional physician/supplier claim"
+* #CARRIER "Professional Physician/Supplier Claim"
 * #DME "Durable Medical Equipment Claim"
 * #HHA "Home Health Services"
 * #HOSPICE "Hospice Care"
