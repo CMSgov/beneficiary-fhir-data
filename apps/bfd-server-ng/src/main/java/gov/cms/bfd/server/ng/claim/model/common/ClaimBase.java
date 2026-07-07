@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
-import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -179,7 +179,7 @@ public abstract class ClaimBase {
   public void applyOutcomeOverride(ExplanationOfBenefit eob) {
     // Only Shared Systems claims derive outcome from CLM_PD_STUS_CD. Missing or unmapped paid
     // status codes are resolved as PARTIAL to match the outcome search filter behavior.
-    if (this instanceof ClaimInstitutionalSharedSystems
+    if (this instanceof ClaimInstitutionalCmsSharedSystems
         || this instanceof ClaimProfessionalSharedSystems) {
 
       ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);

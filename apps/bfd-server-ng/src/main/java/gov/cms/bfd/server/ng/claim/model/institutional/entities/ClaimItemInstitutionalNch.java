@@ -30,7 +30,7 @@ public class ClaimItemInstitutionalNch implements ClaimItemBase {
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimInstitutionalNch claim;
+  private ClaimInstitutionalCmsNch claim;
 
   @Override
   public Optional<ClaimProcedureBase> getProcedure() {

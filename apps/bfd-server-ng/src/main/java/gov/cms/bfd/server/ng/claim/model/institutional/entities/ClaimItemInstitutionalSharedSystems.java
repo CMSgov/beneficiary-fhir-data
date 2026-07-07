@@ -30,7 +30,7 @@ public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimInstitutionalSharedSystems claim;
+  private ClaimInstitutionalCmsSharedSystems claim;
 
   @Override
   public Optional<ClaimProcedureBase> getProcedure() {

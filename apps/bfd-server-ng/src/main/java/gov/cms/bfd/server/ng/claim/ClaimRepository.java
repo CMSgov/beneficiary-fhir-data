@@ -4,8 +4,8 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalNch;
-import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRx;
@@ -77,10 +77,10 @@ public class ClaimRepository {
               CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, SystemType.NCH),
           new ClaimTypeDefinition(
               CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
-              ClaimInstitutionalSharedSystems.class,
+              ClaimInstitutionalCmsSharedSystems.class,
               SystemType.SS),
           new ClaimTypeDefinition(
-              CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, SystemType.NCH),
+              CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalCmsNch.class, SystemType.NCH),
           new ClaimTypeDefinition(CLAIM_RX, ClaimRx.class, SystemType.DDPS));
 
   /**
@@ -125,16 +125,16 @@ public class ClaimRepository {
     var institutionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
             CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
-            ClaimInstitutionalSharedSystems.class,
-            ClaimInstitutionalSharedSystems.getSystemType(),
+            ClaimInstitutionalCmsSharedSystems.class,
+            ClaimInstitutionalCmsSharedSystems.getSystemType(),
             criteria.claimUniqueIds(),
             paramBuilders);
 
     var institutionalNchClaims =
         asyncService.findByIdsInClaimType(
             CLAIM_INSTITUTIONAL_NCH,
-            ClaimInstitutionalNch.class,
-            ClaimInstitutionalNch.getSystemType(),
+            ClaimInstitutionalCmsNch.class,
+            ClaimInstitutionalCmsNch.getSystemType(),
             criteria.claimUniqueIds(),
             paramBuilders);
 
