@@ -17,56 +17,56 @@ public enum ClaimSubtype {
       "carrier",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
       ClaimType.PROFESSIONAL,
-      "What Part B Covers"),
+      "Professional physician/supplier claim"),
 
   /** Represents DME type. */
   DME(
       "dme",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
       ClaimType.PROFESSIONAL,
-      "What Part B Covers: Durable Medical Equipment"),
+      "Durable Medical Equipment Claim"),
 
   /** Represents HHA type. */
   HHA(
       "hha",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
-      "What Part A Covers: Home Health Services"),
+      "Home Health Services"),
 
   /** Represents HOSPICE type. */
   HOSPICE(
       "hospice",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
-      "What Part A Covers: Hospice"),
+      "Hospice Care"),
 
   /** Represents INPATIENT type. */
   INPATIENT(
       "inpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
-      "What Part A Covers: Inpatient Hospital Care"),
+      "Inpatient Hospital Care"),
 
   /** Represents OUTPATIENT type. */
   OUTPATIENT(
       "outpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
-      "What Part B Covers"),
+      "Outpatient Hospital Care"),
 
   /** Represents PDE type. */
   PDE(
       "pde",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY,
       ClaimType.PHARMACY,
-      "What Drug Plans Cover"),
+      "Drug Plan Event"),
 
   /** Represents SNF type. */
   SNF(
       "snf",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
-      "What Part A Covers: Skilled Nursing Facility Care");
+      "Skilled Nursing Facility Care");
 
   private final String code;
   private final String systemUrl;
