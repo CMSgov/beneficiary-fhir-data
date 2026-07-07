@@ -26,17 +26,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
     } "Create type";
 
-    src -> tgtCC.coding = create('Coding') as tgtCoding then {
-      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
-      tgtCoding.code = "PDE",
-      tgtCoding.display = "Drug plan event" "Add EOB type coding";
-    } "Add EOB-Type coding";
-
-    src -> tgtCC.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
-        tgtCoding.code = "PDE",
-        tgtCoding.display = "Drug plan event" "Add EOB type coding";
-    } "Add coding";
+   src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE', 'PDE') "Add eob-type coding";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
       src.BENE_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
