@@ -4350,8 +4350,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "SNF",
-          "display" : "What Part A Covers: Skilled Nursing Facility Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Skilled Nursing Facility Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -6640,8 +6640,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "SNF",
-          "display" : "What Part A Covers: Skilled Nursing Facility Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Skilled Nursing Facility Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -10656,8 +10656,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "SNF",
-          "display" : "What Part A Covers: Skilled Nursing Facility Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Skilled Nursing Facility Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -12593,8 +12593,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "INPATIENT",
-          "display" : "What Part A Covers: Inpatient Hospital Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Inpatient Hospital Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -14924,8 +14924,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "SNF",
-          "display" : "What Part A Covers: Skilled Nursing Facility Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Skilled Nursing Facility Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -18940,8 +18940,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "SNF",
-          "display" : "What Part A Covers: Skilled Nursing Facility Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Skilled Nursing Facility Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"
@@ -20877,8 +20877,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
           "code" : "INPATIENT",
-          "display" : "What Part A Covers: Inpatient Hospital Care",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+          "display" : "Inpatient Hospital Care",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
         } ]
       },
       "use" : "claim"

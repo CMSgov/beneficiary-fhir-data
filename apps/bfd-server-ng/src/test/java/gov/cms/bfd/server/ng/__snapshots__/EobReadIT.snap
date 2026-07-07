@@ -1371,8 +1371,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "OUTPATIENT",
-      "display" : "What Part B Covers",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Outpatient Hospital Care",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -2803,8 +2803,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "OUTPATIENT",
-      "display" : "What Part B Covers",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Outpatient Hospital Care",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -3538,8 +3538,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "DME",
-      "display" : "What Part B Covers: Durable Medical Equipment",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Durable Medical Equipment Claim",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -4389,8 +4389,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "CARRIER",
-      "display" : "What Part B Covers",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Professional physician/supplier claim",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -6150,8 +6150,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "HHA",
-      "display" : "What Part A Covers: Home Health Services",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Home Health Services",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -7911,8 +7911,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "HHA",
-      "display" : "What Part A Covers: Home Health Services",
-      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type"
+      "display" : "Home Health Services",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"

@@ -55,11 +55,7 @@ public enum ClaimSubtype {
       "Outpatient Hospital Care"),
 
   /** Represents PDE type. */
-  PDE(
-      "pde",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY,
-      ClaimType.PHARMACY,
-      "Drug Plan Event"),
+  PDE("pde", SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY, ClaimType.PHARMACY, "Drug Plan Event"),
 
   /** Represents SNF type. */
   SNF(
