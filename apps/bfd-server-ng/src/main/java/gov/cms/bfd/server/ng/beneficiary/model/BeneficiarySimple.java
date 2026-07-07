@@ -20,6 +20,9 @@ public class BeneficiarySimple {
   @Column(name = "bene_sk")
   private long beneSk;
 
+  @Column(name = "bene_mbi_id")
+  private String mbi;
+
   @Column(name = "bene_xref_efctv_sk")
   private long xrefSk;
 

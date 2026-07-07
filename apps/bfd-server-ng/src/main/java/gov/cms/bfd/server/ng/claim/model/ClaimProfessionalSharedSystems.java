@@ -76,10 +76,24 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
     return Stream.concat(
             Stream.of(
                 nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory))),
+                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
+                claimPaidStatusCode.map(cd -> cd.toFhir(supportingInfoFactory)),
+                buildAuditStatusSupportingInfo()),
             buildRxSupportingInfo())
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  private Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      buildAuditStatusSupportingInfo() {
+    // since audit trail status codes can overlap between the different shares systems, we must
+    // specifically handle this code to use the actual corresponding display
+    return claimAuditTrailStatusCode
+        .flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, claimAuditTrailLocationCode))
+        .map(code -> code.toFhir(supportingInfoFactory));
   }
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>

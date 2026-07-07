@@ -62,9 +62,7 @@ public class ClaimAsyncService {
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("claimUniqueIds", claimUniqueIds);
             var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
-            result.stream()
-                .findFirst()
-                .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+            result.forEach(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
             return CompletableFuture.completedFuture(result);
           }
         });

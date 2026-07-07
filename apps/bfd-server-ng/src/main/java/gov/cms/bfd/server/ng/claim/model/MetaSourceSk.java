@@ -13,18 +13,19 @@ import org.hl7.fhir.r4.model.Coding;
 @AllArgsConstructor
 public enum MetaSourceSk {
   /** 1 - DDPS. */
-  DDPS(1, "D", "DDPS", IdrConstants.SYSTEM_TYPE_DDPS),
+  DDPS(1, "DDPS", IdrConstants.SYSTEM_TYPE_DDPS),
   /** 7 - NCH. */
-  NCH(7, "N", "NCH", IdrConstants.SYSTEM_TYPE_NCH),
+  NCH(7, "NCH", IdrConstants.SYSTEM_TYPE_NCH),
   /** 1001 - MCS. */
-  MCS(1001, "M", "MCS", IdrConstants.SYSTEM_TYPE_SHARED),
+  MCS(1001, "MCS", IdrConstants.SYSTEM_TYPE_SHARED),
   /** 1002 - VMS. */
-  VMS(1002, "V", "VMS", IdrConstants.SYSTEM_TYPE_SHARED),
+  VMS(1002, "VMS", IdrConstants.SYSTEM_TYPE_SHARED),
   /** 1003 - FISS. */
-  FISS(1003, "F", "FISS", IdrConstants.SYSTEM_TYPE_SHARED);
+  FISS(1003, "FISS", IdrConstants.SYSTEM_TYPE_SHARED),
+  /** 237 - CWF. */
+  CWF(237, "CWF", IdrConstants.SYSTEM_TYPE_SHARED);
 
   private final int sourceSk;
-  private final String prefix;
   private final String display;
   private final String systemType;
 

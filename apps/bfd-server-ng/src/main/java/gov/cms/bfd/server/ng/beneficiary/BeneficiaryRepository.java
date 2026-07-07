@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 @SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
+
   @PersistenceContext private EntityManager entityManager;
   private final MetricRecorder metricRecorder;
   private final QueryTelemetryUtil queryTelemetryUtil;
@@ -105,16 +106,16 @@ public class BeneficiaryRepository {
    * @return xrefSk for the bene
    */
   @Timed(value = "application.beneficiary.search_xref_by_bene_sk")
-  public Optional<Long> getXrefSkFromBeneSk(long beneSk) {
+  public Optional<BeneficiarySimple> getXrefSkFromBeneSk(long beneSk) {
     var query =
         entityManager
             .createQuery(
                 """
-                 SELECT bene.xrefSk
-                 FROM Beneficiary bene
+                 SELECT bene
+                 FROM BeneficiarySimple bene
                  WHERE bene.beneSk = :beneSk
                """,
-                Long.class)
+                BeneficiarySimple.class)
             .setParameter("beneSk", beneSk);
     return queryTelemetryUtil.executeAndTrack("getXrefSkFromBeneSk", query).stream().findFirst();
   }

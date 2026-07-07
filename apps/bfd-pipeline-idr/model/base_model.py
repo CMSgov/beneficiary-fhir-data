@@ -143,14 +143,30 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     return f"""
         COALESCE(
             {f"{_normalize_to_null(f'{ALIAS_CLM}.clm_{type}_prvdr_name')}" if type else "NULL"},
-            CASE
-                WHEN {alias}.prvdr_last_name IS NULL
-                    OR {_normalize(f"{alias}.prvdr_last_name")} = ''
-                THEN {_normalize(f"{alias}.prvdr_lgl_name")}
-                ELSE {_normalize(f"{alias}.prvdr_last_name")}
-                    || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
-            END
+            {normalize_provider_careteam_name_expr(alias)}
         )
+    """
+
+
+def normalize_provider_careteam_name_expr(alias: str) -> str:
+    return f"""
+        CASE
+            WHEN {alias}.prvdr_last_name IS NULL
+                OR {_normalize(f"{alias}.prvdr_last_name")} = ''
+            THEN {_normalize(f"{alias}.prvdr_lgl_name")}
+            ELSE {_normalize(f"{alias}.prvdr_last_name")}
+                || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
+        END
+    """
+
+
+def provider_npi_type_expr(alias: str) -> str:
+    return f"""
+        CASE 
+            WHEN {alias}.prvdr_lgl_name IS NOT NULL THEN 2
+            WHEN {alias}.prvdr_lgl_name IS NULL AND {alias}.prvdr_1st_name IS NOT NULL THEN 1
+            ELSE NULL 
+        END
     """
 
 
@@ -372,6 +388,10 @@ ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
 ALIAS_PRVDR_ATNDG = "prvdr_atndg"
 ALIAS_PRVDR_OPRTG = "prvdr_oprtg"
 ALIAS_PRVDR_OTHR = "prvdr_othr"
+ALIAS_PRVDR_ATT_PHY = "prvdr_att"
+ALIAS_PRVDR_RENDER = "prvdr_render"
+ALIAS_PRVDR_ORDER_REFER = "prvdr_order_refer"
+ALIAS_PRIOR_AUTH = "prior_auth"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"

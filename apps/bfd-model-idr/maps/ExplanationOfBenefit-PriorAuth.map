@@ -34,7 +34,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     } "Create metadata";
 
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
-      //CodeSystem -> CLM_TYPE_CD
+      //CodeSystem -> CLM_TYPE
       //Two types -  1: PDEX, 2: CMS-specific. use concept map
       src.CLM_TYPE as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PriorAuthType','coding') "translate code";
       //No blanks here since 2023. 
@@ -236,7 +236,7 @@ group addSvcRenderSt(source src: String, target tgt: Extension){
 
 group addMRCountInd(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND" "Add extension url";
-    src as val -> tgt.value = cast(val, "decimal") "set value";
+    src as val -> tgt.value = cast(val,'unsignedInt') "set value";
 }
 
 group addMRCountStDt(source src: String, target tgt: Extension){

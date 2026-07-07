@@ -33,6 +33,7 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
+from model.idr_prior_auth_item import IdrPriorAuthItem
 from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import extract_and_load
 from settings import enable_prior_auth_ingestion
@@ -68,7 +69,7 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidy,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
-_PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
+_PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth, IdrPriorAuthItem]
 _LOAD_ALL_TABLES = {"all"}
 
 
@@ -113,7 +114,7 @@ class StagedIdrPipeline:
         if self.load_type == LoadType.INITIAL:
             tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
         if enable_prior_auth_ingestion():
-            tables.append(*_PRIOR_AUTH_TABLES)
+            tables.extend([*_PRIOR_AUTH_TABLES])
 
         filtered_tables = self._filter_tables(tables)
 

@@ -42,6 +42,7 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
+from model.idr_prior_auth_item import IdrPriorAuthItem
 from pydantic_utils import fields
 
 LOAD_EVENTS_TABLE = "source_load_events"
@@ -88,6 +89,7 @@ _BENE_TABLES = {
         IdrBeneficiaryMaPartDEnrollment,
         IdrBeneficiaryMaPartDEnrollmentRx,
         IdrPriorAuth,
+        IdrPriorAuthItem,
     }
 }
 _HPMS_TABLES = {

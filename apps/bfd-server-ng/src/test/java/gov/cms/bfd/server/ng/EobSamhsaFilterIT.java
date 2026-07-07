@@ -164,7 +164,9 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             Collections.emptyList());
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
-    return getEobFromBundle(claims);
+    return getEobFromBundle(claims).stream()
+        .filter(c -> c.getUse() != ExplanationOfBenefit.Use.PREAUTHORIZATION)
+        .toList();
   }
 
   private List<Long> getClaimIdsByBene(long beneSk, ClaimFilterOptions options) {
@@ -215,11 +217,13 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       List<Long> skipBundleVerification) {
     var bundle = searchBundle(beneSk, samhsaCertType).execute();
     // Before checking for SAMHSA codes, filter any cases that won't pass
-    // verification due to
-    // system/code mismatches.
+    // verification due to system/code mismatches and prior auth eobs
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()
-            .filter(c -> !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
+            .filter(
+                c ->
+                    c.getUse() != ExplanationOfBenefit.Use.PREAUTHORIZATION
+                        && !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
             .toList();
     // Bundle from endpoint should not contain any sensitive codes
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));

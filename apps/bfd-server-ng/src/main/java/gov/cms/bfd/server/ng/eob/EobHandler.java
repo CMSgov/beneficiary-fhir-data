@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
+import gov.cms.bfd.server.ng.claim.PriorAuthorizationRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
@@ -41,6 +42,7 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
+  private final PriorAuthorizationRepository priorAuthorizationRepository;
   private final MetricRecorder metricRecorder;
 
   // Cache the security labels map to avoid repeated I/O and parsing
@@ -81,15 +83,16 @@ public class EobHandler {
       Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
-    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    var beneSimple = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
-    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+    if (beneSimple.isEmpty() || (beneSimple.get().getXrefSk() != beneSk)) {
       return new Bundle();
     }
+    var beneficiary = beneSimple.get();
 
     var repositoryCriteria =
         new ClaimSearchCriteria(
-            beneXrefSk.get(),
+            beneficiary.getXrefSk(),
             criteria.claimThroughDate(),
             criteria.lastUpdated(),
             criteria.limit(),
@@ -98,6 +101,29 @@ public class EobHandler {
             criteria.claimTypeCodes(),
             criteria.outcomes(),
             criteria.sources());
+
+    var priorAuthSourceEvaluation = evaluatePriorAuthSourceFilters(criteria.sources());
+    // impossible prior auth source filter: CWF AND any other source
+    if (priorAuthSourceEvaluation.isImpossibleCombination()) {
+      return FhirUtil.bundleOrDefault(
+          Stream.empty(),
+          loadProgressRepository::lastUpdated,
+          requestDetails,
+          Optional.of(repositoryCriteria.resolveLimit()),
+          Optional.of(repositoryCriteria.resolveOffset()));
+    }
+
+    // Only CWF source was provided so short circuit this to avoid querying for claims
+    if (priorAuthSourceEvaluation.isOnlyPriorAuth()) {
+      var priorAuths =
+          priorAuthorizationRepository.getPriorAuthorizationFromMbi(beneficiary.getMbi());
+      return FhirUtil.bundleOrDefault(
+          priorAuths.stream().map(PriorAuthorization::toFhir),
+          loadProgressRepository::lastUpdated,
+          requestDetails,
+          Optional.of(repositoryCriteria.resolveLimit()),
+          Optional.of(repositoryCriteria.resolveOffset()));
+    }
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
     var samhsaFilterMode = options.getSamhsaFilterMode();
@@ -111,13 +137,23 @@ public class EobHandler {
                       .skip(repositoryCriteria.resolveOffset())
                       .limit(repositoryCriteria.resolveLimitWithExtra(1))
                       .map(claim -> transformToFhir(claim, options));
-              return FhirUtil.bundleOrDefault(
-                  filteredClaims,
-                  loadProgressRepository::lastUpdated,
-                  requestDetails,
-                  // we want the raw limit
-                  Optional.of(repositoryCriteria.resolveLimit()),
-                  Optional.of(repositoryCriteria.resolveOffset()));
+              var baseBundle =
+                  FhirUtil.bundleOrDefault(
+                      filteredClaims,
+                      loadProgressRepository::lastUpdated,
+                      requestDetails,
+                      // we want the raw limit
+                      Optional.of(repositoryCriteria.resolveLimit()),
+                      Optional.of(repositoryCriteria.resolveOffset()));
+              var includePriorAuth =
+                  criteria.sources().isEmpty() || priorAuthSourceEvaluation.hasPriorAuthSource();
+              if (includePriorAuth) {
+                var priorAuths =
+                    priorAuthorizationRepository.getPriorAuthorizationFromMbi(beneficiary.getMbi());
+                priorAuths.forEach(
+                    priorAuth -> baseBundle.addEntry().setResource(priorAuth.toFhir()));
+              }
+              return baseBundle;
             },
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
     metricRecorder.recordDistribution(
@@ -127,6 +163,37 @@ public class EobHandler {
         samhsaFilterMode.name());
     return bundle;
   }
+
+  private SourceEvaluation evaluatePriorAuthSourceFilters(List<List<MetaSourceSk>> sources) {
+    var hasPriorAuthSource = false;
+    var hasOnlyPriorAuthClause = false;
+    var sourceClausesCount = 0;
+
+    for (var orClause : sources) {
+      if (orClause.isEmpty()) {
+        continue;
+      }
+      sourceClausesCount++;
+
+      var innerHasCWF = orClause.contains(MetaSourceSk.CWF);
+      var innerHasOthers = orClause.stream().anyMatch(src -> src != MetaSourceSk.CWF);
+
+      if (innerHasCWF) {
+        hasPriorAuthSource = true;
+        if (!innerHasOthers) {
+          hasOnlyPriorAuthClause = true;
+        }
+      }
+    }
+
+    var isImpossibleCombination = hasOnlyPriorAuthClause && sourceClausesCount > 1;
+    var isOnlyPriorAuth = hasOnlyPriorAuthClause && sourceClausesCount == 1;
+
+    return new SourceEvaluation(hasPriorAuthSource, isOnlyPriorAuth, isImpossibleCombination);
+  }
+
+  private record SourceEvaluation(
+      boolean hasPriorAuthSource, boolean isOnlyPriorAuth, boolean isImpossibleCombination) {}
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
       List<? extends ClaimBase> claims, SamhsaFilterMode samhsaFilterMode) {

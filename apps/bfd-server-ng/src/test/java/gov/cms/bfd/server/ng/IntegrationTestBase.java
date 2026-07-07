@@ -83,6 +83,7 @@ public class IntegrationTestBase {
   protected static final String BENE_ID_FUTURE_COVERAGE = "971050241";
   protected static final String BENE_ID_NON_CURRENT = "181968400";
   protected static final String BENE_ID_NO_COVERAGE = "289169129";
+  protected static final String BENE_WITH_PRIOR_AUTH = "794471559";
 
   protected static final String CLAIM_ID_ADJUDICATED_ICD_9 = "1071939711294";
   protected static final String CLAIM_ID_ADJUDICATED = "1071939711295";
