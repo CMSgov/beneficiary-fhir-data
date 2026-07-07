@@ -17,7 +17,7 @@ public enum ClaimSubtype {
       "carrier",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
       ClaimType.PROFESSIONAL,
-      "Professional physician/supplier claim"),
+      "Professional Physician/Supplier Claim"),
 
   /** Represents DME type. */
   DME(
