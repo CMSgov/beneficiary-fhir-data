@@ -4389,7 +4389,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     }, {
       "code" : "CARRIER",
-      "display" : "Professional physician/supplier claim",
+      "display" : "Professional Physician/Supplier Claim",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
