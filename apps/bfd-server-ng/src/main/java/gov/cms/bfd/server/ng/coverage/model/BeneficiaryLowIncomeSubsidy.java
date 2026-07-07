@@ -21,18 +21,18 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_low_income_subsidy", schema = "idr")
+@Table(name = "beneficiary_low_income_subsidy_cmbnd", schema = "idr")
 public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowIncomeSubsidy> {
 
   @EmbeddedId private BeneficiaryLowIncomeSubsidyId id;
 
-  @Column(name = "bene_rng_end_dt")
+  @Column(name = "bene_cmbnd_deemd_trmntn_dt")
   private LocalDate benefitRangeEndDate;
 
-  @Column(name = "bene_lis_copmt_lvl_cd")
+  @Column(name = "bene_cmbnd_deemd_copmt_lvl_id")
   private Optional<BeneficiaryLISCopaymentLevelCode> copayLevelCode;
 
-  @Column(name = "bene_lis_ptd_prm_pct")
+  @Column(name = "bene_cmbnd_deemd_prm_pct")
   @Convert(converter = StringToDoubleConverter.class)
   private double partDPremiumPercentage;
 
