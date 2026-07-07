@@ -103,6 +103,7 @@ public sealed interface ClaimTypePriorAuth
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
+  @SuppressWarnings("java:S1192")
   enum Valid implements ClaimTypePriorAuth {
     /** B - professional - Part B - Part B. */
     B("B", "professional", "Part B", "Part B"),
