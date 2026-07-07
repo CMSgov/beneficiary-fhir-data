@@ -27,6 +27,12 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     } "Create type";
 
     src -> tgtCC.coding = create('Coding') as tgtCoding then {
+      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      tgtCoding.code = "PDE",
+      tgtCoding.display = "Drug plan event" "Add EOB type coding";
+    } "Add EOB-Type coding";
+
+    src -> tgtCC.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
         tgtCoding.code = "PDE",
         tgtCoding.display = "Drug plan event" "Add EOB type coding";
