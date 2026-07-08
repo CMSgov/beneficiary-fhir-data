@@ -16,7 +16,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 
 /** Claim line info. */
 @Embeddable
@@ -60,12 +67,27 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
 
+  @Column(name = "clm_line_ndc_cd")
+  private Optional<String> claimLineNdcCode;
+
   @Override
   void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
     var productOrService = new CodeableConcept();
     getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
+    claimLineNdcCode.map(this::toNdcDetail).ifPresent(line::addDetail);
     line.setQuantity(getServiceUnitQuantity().toFhir());
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
+  }
+
+  private ExplanationOfBenefit.DetailComponent toNdcDetail(String ndcCode) {
+    var detail = new ExplanationOfBenefit.DetailComponent();
+    detail.setSequence(1);
+
+    // This doesn't use the main `ClaimLineNdc` class because the quantity isn't available here
+    var coding = new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode);
+    detail.setProductOrService(new CodeableConcept(coding));
+
+    return detail;
   }
 
   /**

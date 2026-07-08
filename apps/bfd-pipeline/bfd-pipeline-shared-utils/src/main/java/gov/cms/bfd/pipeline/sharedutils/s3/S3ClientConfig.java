@@ -44,7 +44,7 @@ public class S3ClientConfig {
    *
    * @param awsClientConfig specific {@link AwsClientConfig} to use instead of buildng one
    * @param region an AWS {@link Region}
-   * @param endpointOverride alternative URI for accessing AWS services (used with localstack)
+   * @param endpointOverride alternative URI for accessing AWS services (used with miniStack)
    * @param accessKey optional access key
    * @param secretKey optional secret key
    * @param minimumPartSizeForDownload optional minimum part size
@@ -84,7 +84,7 @@ public class S3ClientConfig {
     final var endpointOverride = awsClientConfig.getEndpointOverride().orElse(null);
     if (endpointOverride != null) {
       builder.endpointOverride(endpointOverride);
-      // prevents AWS SDK from adding bucket name to host name when using localstack
+      // prevents AWS SDK from adding bucket name to host name when using miniStack
       builder.forcePathStyle(true);
     }
     if (awsClientConfig.getAccessKey().isPresent() && awsClientConfig.getSecretKey().isPresent()) {

@@ -2,7 +2,9 @@ package gov.cms.bfd.sharedutils.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.cms.bfd.AbstractLocalStackTest;
+import gov.cms.bfd.AbstractMiniStackTest;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,22 +22,26 @@ import software.amazon.awssdk.services.ssm.model.ParameterType;
 import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
 
 /** Integration test for {@link AwsParameterStoreClient}. */
-public class AwsParameterStoreClientIT extends AbstractLocalStackTest {
+public class AwsParameterStoreClientIT extends AbstractMiniStackTest {
   /** Shared client used by all tests. */
   private SsmClient ssmClient;
 
   /** Create a {@link SsmClient} before each test. */
   @BeforeEach
   void setUp() {
-    ssmClient =
-        SsmClient.builder()
-            .region(Region.of(localstack.getRegion()))
-            .endpointOverride(localstack.getEndpoint())
-            .credentialsProvider(
-                StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(
-                        localstack.getAccessKey(), localstack.getSecretKey())))
-            .build();
+    try {
+      ssmClient =
+          SsmClient.builder()
+              .region(Region.of(miniStack.getRegion()))
+              .endpointOverride(new URI(miniStack.getEndpoint()))
+              .credentialsProvider(
+                  StaticCredentialsProvider.create(
+                      AwsBasicCredentials.create(
+                          miniStack.getAccessKey(), miniStack.getSecretKey())))
+              .build();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
     Awaitility.await().atMost(30, TimeUnit.SECONDS).until(this::isReady);
   }
 

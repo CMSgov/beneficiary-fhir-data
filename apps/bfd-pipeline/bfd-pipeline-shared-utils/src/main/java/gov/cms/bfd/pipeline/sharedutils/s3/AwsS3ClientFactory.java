@@ -24,7 +24,7 @@ public class AwsS3ClientFactory implements S3ClientFactory {
     builder.defaultsMode(DefaultsMode.STANDARD);
     s3ClientConfig.getAwsClientConfig().configureAwsService(builder);
     if (s3ClientConfig.getAwsClientConfig().getEndpointOverride().isPresent()) {
-      // prevents AWS SDK from adding bucket name to host name when using localstack
+      // prevents AWS SDK from adding bucket name to host name when using MiniStack
       builder.forcePathStyle(true);
     }
     return builder.build();
@@ -35,7 +35,7 @@ public class AwsS3ClientFactory implements S3ClientFactory {
     final S3CrtAsyncClientBuilder builder = S3AsyncClient.crtBuilder();
     s3ClientConfig.configureS3ServiceForAsyncS3(builder);
     if (s3ClientConfig.getAwsClientConfig().getEndpointOverride().isPresent()) {
-      // prevents AWS SDK from adding bucket name to host name when using localstack
+      // prevents AWS SDK from adding bucket name to host name when using MiniStack
       builder.forcePathStyle(true);
     }
     return builder.build();

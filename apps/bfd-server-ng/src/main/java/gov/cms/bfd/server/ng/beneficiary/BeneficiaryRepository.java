@@ -20,11 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for querying beneficiary information. Suppress SonarQube about dynamically formatted
  * SQL queries being safe here. Ignore. These are internally generated.
  */
+@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 @SuppressWarnings("java:S2077")

@@ -499,8 +499,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     var eobEnd = eob.getBillablePeriod().getEnd();
     var json = normalize(context.newJsonParser().encodeResourceToString(eob));
     for (var entry : SECURITY_LABELS.values().stream().flatMap(Collection::stream).toList()) {
-      var eobAfter = eobEnd.after(DateUtil.toDate(entry.getEndDateAsDate()));
-      var eobBefore = eobEnd.before(DateUtil.toDate(entry.getStartDateAsDate()));
+      var eobAfter = eobEnd.after(DateUtil.toDate(entry.getEndDate()));
+      var eobBefore = eobEnd.before(DateUtil.toDate(entry.getStartDate()));
       if (validateDates && (eobAfter || eobBefore)) {
         continue;
       }
