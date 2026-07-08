@@ -22,11 +22,9 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src -> tgt.outcome = "complete" "Set outcome";
     
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_TYPE_CD','coding') "translate code";
+      src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
+      src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE', 'PDE') "Add eob-type coding";
     } "Create type";
-
-   src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
-   src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE', 'PDE') "Add eob-type coding";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
       src.BENE_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
