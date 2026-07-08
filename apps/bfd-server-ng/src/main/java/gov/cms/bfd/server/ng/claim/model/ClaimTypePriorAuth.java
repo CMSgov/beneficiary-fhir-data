@@ -72,10 +72,10 @@ public sealed interface ClaimTypePriorAuth
    * @return a ClaimContext or an empty Optional if the display did not match
    */
   default Optional<ClaimContext> toContext() {
-    if (getDisplay().equals("institutional")) {
+    if (getDisplay().equals(ClaimType.INSTITUTIONAL.getCode())) {
       return Optional.of(ClaimContext.INSTITUTIONAL);
     }
-    if (getDisplay().equals("professional")) {
+    if (getDisplay().equals(ClaimType.PROFESSIONAL.getCode())) {
       return Optional.of(ClaimContext.PROFESSIONAL);
     }
     return Optional.empty();
@@ -106,17 +106,17 @@ public sealed interface ClaimTypePriorAuth
   @SuppressWarnings("java:S1192")
   enum Valid implements ClaimTypePriorAuth {
     /** B - professional - Part B - Part B. */
-    B("B", "professional", "Part B", "Part B"),
+    B("B", ClaimType.PROFESSIONAL.getCode(), "Part B", "Part B"),
     /** C - professional - Durable Medical Equipment - Part B. */
-    D("D", "professional", "Durable Medical Equipment", "Part B"),
+    D("D", ClaimType.PROFESSIONAL.getCode(), "Durable Medical Equipment", "Part B"),
     /** I - institutional - Inpatient - Part A. */
-    I("I", "institutional", "Inpatient", "Part A"),
+    I("I", ClaimType.INSTITUTIONAL.getCode(), "Inpatient", "Part A"),
     /** O - institutional - Outpatient - Part B. */
-    O("O", "institutional", "Outpatient", "Part B"),
+    O("O", ClaimType.INSTITUTIONAL.getCode(), "Outpatient", "Part B"),
     /** H - institutional - Home Health - Part A. */
-    H("H", "institutional", "Home Health", "Part A"),
+    H("H", ClaimType.INSTITUTIONAL.getCode(), "Home Health", "Part A"),
     /** C - institutional - Hospice - Part A. */
-    C("C", "institutional", "Hospice", "Part A");
+    C("C", ClaimType.INSTITUTIONAL.getCode(), "Hospice", "Part A");
 
     private final String code;
     private final String display;

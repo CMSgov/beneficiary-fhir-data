@@ -166,7 +166,7 @@ public class ClaimRepository {
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
-  public List<ClaimBase> findByBeneXrefSk(
+  public ClaimAndAuthResult findByBeneXrefSk(
       @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
@@ -174,6 +174,11 @@ public class ClaimRepository {
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimSearchCriteria criteria) {
+
+    var priorAuthSourceEvaluation = evaluatePriorAuthSourceFilters(criteria.sources());
+    if (priorAuthSourceEvaluation.isImpossibleCombination()) {
+      return new ClaimAndAuthResult(Collections.emptyList(), Collections.emptyList());
+    }
 
     List<DbFilterBuilder> filterBuilders =
         List.of(
@@ -184,7 +189,7 @@ public class ClaimRepository {
             new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
-    var futures =
+    var claimFutures =
         ALL_CLAIM_TYPES.stream()
             .filter(claimTypeDefinition -> claimTypeDefinition.matchesSystemType(filterBuilders))
             .map(
@@ -193,10 +198,62 @@ public class ClaimRepository {
                         d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
             .toList();
 
-    metricRecorder.recordDistribution("application.claim.search_by_bene.fan_out", futures.size());
+    var includePriorAuth =
+        criteria.sources().isEmpty() || priorAuthSourceEvaluation.hasPriorAuthSource();
+    CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
+        CompletableFuture.completedFuture(Collections.emptyList());
+    if (includePriorAuth) {
+      priorAuthFuture = asyncService.fetchPriorAuth(criteria.mbi());
+    }
 
-    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-    Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());
-    return claims.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
+    List<CompletableFuture<?>> allFutures = new ArrayList<>(claimFutures);
+    allFutures.add(priorAuthFuture);
+    CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
+
+    metricRecorder.recordDistribution(
+        "application.claim.search_by_bene.fan_out", allFutures.size());
+
+    Stream<ClaimBase> claimStream = claimFutures.stream().flatMap(f -> f.join().stream());
+    var claims = claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
+    var priorAuths = priorAuthFuture.join();
+    return new ClaimAndAuthResult(claims, priorAuths);
   }
+
+  /**
+   * Wrapper for the parallel results of claims and prior auth queries.
+   *
+   * @param claims list of claims found
+   * @param priorAuths list of prior authorizations found
+   */
+  public record ClaimAndAuthResult(List<ClaimBase> claims, List<PriorAuthorization> priorAuths) {}
+
+  private SourceEvaluation evaluatePriorAuthSourceFilters(List<List<MetaSourceSk>> sources) {
+    var hasPriorAuthSource = false;
+    var hasOtherSources = false;
+    var sourceClausesCount = 0;
+
+    for (var orClause : sources) {
+      if (orClause.isEmpty()) {
+        continue;
+      }
+      sourceClausesCount++;
+
+      var innerHasCWF = orClause.contains(MetaSourceSk.CWF);
+      var innerHasOthers = orClause.stream().anyMatch(src -> src != MetaSourceSk.CWF);
+
+      if (innerHasCWF) {
+        hasPriorAuthSource = true;
+      }
+      if (innerHasOthers) {
+        hasOtherSources = true;
+      }
+    }
+
+    // impossible prior auth source filter: CWF AND any other source
+    var isImpossibleCombination = sourceClausesCount > 1 && hasPriorAuthSource && hasOtherSources;
+
+    return new SourceEvaluation(hasPriorAuthSource, isImpossibleCombination);
+  }
+
+  private record SourceEvaluation(boolean hasPriorAuthSource, boolean isImpossibleCombination) {}
 }

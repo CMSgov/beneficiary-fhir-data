@@ -26,7 +26,7 @@ public class PriorAuthorizationRepository {
                  SELECT p
                  FROM PriorAuthorization p
                  JOIN FETCH p.beneficiary b
-                 LEFT JOIN FETCH p.items i
+                 JOIN FETCH p.items i
                  WHERE b.latestTransactionFlag = 'Y'
                  AND p.id.mbi = :mbi
                """,

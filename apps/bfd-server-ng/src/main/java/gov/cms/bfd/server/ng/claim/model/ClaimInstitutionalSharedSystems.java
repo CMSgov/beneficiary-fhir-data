@@ -99,7 +99,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
       buildAuditStatusSupportingInfo() {
-    // since audit trail status codes can overlap between the different shares systems, we must
+    // since audit trail status codes can overlap between the different shared systems, we must
     // specifically handle this code to use the actual corresponding display. Claim audit trail
     // location code is only used to determine codes from VMS so it does not apply here.
     return claimAuditTrailStatusCode

@@ -18,7 +18,7 @@ from model.base_model import (
     IdrBaseModel,
     ModelType,
     Source,
-    normalize_provider_careteam_name_expr,
+    provider_careteam_name_expr,
     provider_npi_type_expr,
     transform_default_string,
     transform_null_date_to_max,
@@ -37,7 +37,7 @@ class IdrPriorAuth(IdrBaseModel):
     order_refer_npi: Annotated[str, BeforeValidator(transform_default_string)]
     bfd_order_refer_careteam_name: Annotated[
         str,
-        {EXPR: normalize_provider_careteam_name_expr(ALIAS_PRVDR_ORDER_REFER)},
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_ORDER_REFER, None)},
         BeforeValidator(transform_default_string),
     ]
     bfd_order_refer_npi_type: Annotated[
@@ -46,7 +46,7 @@ class IdrPriorAuth(IdrBaseModel):
     render_npi: Annotated[str, BeforeValidator(transform_default_string)]
     bfd_render_careteam_name: Annotated[
         str,
-        {EXPR: normalize_provider_careteam_name_expr(ALIAS_PRVDR_RENDER)},
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RENDER, None)},
         BeforeValidator(transform_default_string),
     ]
     bfd_render_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RENDER)}]
@@ -58,7 +58,7 @@ class IdrPriorAuth(IdrBaseModel):
     att_phy_npi: Annotated[str, BeforeValidator(transform_default_string)]
     bfd_att_phy_careteam_name: Annotated[
         str,
-        {EXPR: normalize_provider_careteam_name_expr(ALIAS_PRVDR_ATT_PHY)},
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_ATT_PHY, None)},
         BeforeValidator(transform_default_string),
     ]
     bfd_att_phy_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_ATT_PHY)}]

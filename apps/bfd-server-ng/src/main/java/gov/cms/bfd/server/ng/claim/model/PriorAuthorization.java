@@ -4,12 +4,28 @@ import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
-import java.util.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 
 /** Prior Authorization table. */
 @Entity
@@ -59,15 +75,6 @@ public class PriorAuthorization {
   private static final String INSURER_ORG = "insurer-org";
 
   @Transient protected SupportingInfoFactory supportingInfoFactory = new SupportingInfoFactory();
-
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.SS;
-  }
 
   MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.CWF;
@@ -158,7 +165,6 @@ public class PriorAuthorization {
     var outcome =
         getItems().stream()
                 .map(PriorAuthorizationItem::getExtensions)
-                .filter(Objects::nonNull)
                 .anyMatch(
                     ext ->
                         ext.getDecision()
@@ -170,9 +176,7 @@ public class PriorAuthorization {
     eob.setOutcome(outcome);
 
     getItems().stream()
-        .map(PriorAuthorizationItem::getExtensions)
-        .filter(Objects::nonNull)
-        .map(PriorAuthorizationItemExtensions::getPriorAuthDateUpdated)
+        .map(item -> item.getExtensions().getPriorAuthDateUpdated())
         .flatMap(Optional::stream)
         .max(Comparator.naturalOrder())
         .map(DateUtil::toDate)

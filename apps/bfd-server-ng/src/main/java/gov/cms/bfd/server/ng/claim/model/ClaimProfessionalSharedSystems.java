@@ -86,7 +86,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
       buildAuditStatusSupportingInfo() {
-    // since audit trail status codes can overlap between the different shares systems, we must
+    // since audit trail status codes can overlap between the different shared systems, we must
     // specifically handle this code to use the actual corresponding display
     return claimAuditTrailStatusCode
         .flatMap(

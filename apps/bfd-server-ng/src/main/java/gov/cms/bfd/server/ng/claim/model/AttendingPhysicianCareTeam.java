@@ -23,11 +23,7 @@ class AttendingPhysicianCareTeam extends ProviderHistoryBase {
   @Override
   @Transient
   protected ProviderHistoryBase.NpiType getNpiType() {
-    if (npiType.isPresent() && npiType.get().equals(2)) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
+    return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   @Override

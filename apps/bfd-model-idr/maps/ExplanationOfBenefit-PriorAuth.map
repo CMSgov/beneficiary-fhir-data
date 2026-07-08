@@ -236,7 +236,7 @@ group addSvcRenderSt(source src: String, target tgt: Extension){
 
 group addMRCountInd(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND" "Add extension url";
-    src as val -> tgt.value = cast(val,'unsignedInt') "set value";
+    src as val -> tgt.value = cast(val, 'unsignedInt') "set value";
 }
 
 group addMRCountStDt(source src: String, target tgt: Extension){

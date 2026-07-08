@@ -143,20 +143,14 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     return f"""
         COALESCE(
             {f"{_normalize_to_null(f'{ALIAS_CLM}.clm_{type}_prvdr_name')}" if type else "NULL"},
-            {normalize_provider_careteam_name_expr(alias)}
+            CASE
+                WHEN {alias}.prvdr_last_name IS NULL
+                    OR {_normalize(f"{alias}.prvdr_last_name")} = ''
+                THEN {_normalize(f"{alias}.prvdr_lgl_name")}
+                ELSE {_normalize(f"{alias}.prvdr_last_name")}
+                    || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
+            END
         )
-    """
-
-
-def normalize_provider_careteam_name_expr(alias: str) -> str:
-    return f"""
-        CASE
-            WHEN {alias}.prvdr_last_name IS NULL
-                OR {_normalize(f"{alias}.prvdr_last_name")} = ''
-            THEN {_normalize(f"{alias}.prvdr_lgl_name")}
-            ELSE {_normalize(f"{alias}.prvdr_last_name")}
-                || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
-        END
     """
 
 

@@ -2076,7 +2076,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
-  "total" : 1,
+  "total" : 3,
   "type" : "searchset"
 }
 ]
@@ -6246,7 +6246,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
-  "total" : 1,
+  "total" : 3,
   "type" : "searchset"
 }
 ]
@@ -10416,7 +10416,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
-  "total" : 1,
+  "total" : 3,
   "type" : "searchset"
 }
 ]
@@ -14570,7 +14570,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
-  "total" : 1,
+  "total" : 3,
   "type" : "searchset"
 }
 ]
