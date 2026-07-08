@@ -15,6 +15,7 @@ dependencies = [
   "idna>=3.15",
   "certifi>=2025.4.26",
   "psycopg[binary,pool]>=3.2.9",
+  "python-socketio>=5.16.2",
 ]
 
 [dependency-groups]
@@ -28,6 +29,9 @@ dev = [
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
+
+[tool.uv]
+exclude-newer = "7 days"
 
 [tool.ruff]
 # Set the maximum line length to 100.
