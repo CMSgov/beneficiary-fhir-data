@@ -327,6 +327,7 @@ public enum ClaimTypeCode {
                 .setCode(String.valueOf(code))
                 .setDisplay(display));
     getClaimType().ifPresent(t -> codeableConcept.addCoding(t.toFhir()));
+    getClaimSubtype().ifPresent(t -> codeableConcept.addCoding(t.toFhirEobType()));
     return codeableConcept;
   }
 
