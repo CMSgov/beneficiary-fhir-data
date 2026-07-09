@@ -22,6 +22,9 @@ dev = [
     "pyright>=1.1.407",
 ]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100

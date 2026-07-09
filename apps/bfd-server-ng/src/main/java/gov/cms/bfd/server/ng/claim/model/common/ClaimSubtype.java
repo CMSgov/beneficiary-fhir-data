@@ -13,51 +13,72 @@ import org.hl7.fhir.r4.model.Coding;
 @AllArgsConstructor
 public enum ClaimSubtype {
   /** Represents CARRIER type. */
-  CARRIER("carrier", SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL, ClaimType.PROFESSIONAL),
+  CARRIER(
+      "carrier",
+      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
+      ClaimType.PROFESSIONAL,
+      "Professional Physician/Supplier Claim"),
 
   /** Represents DME type. */
-  DME("dme", SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL, ClaimType.PROFESSIONAL),
+  DME(
+      "dme",
+      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
+      ClaimType.PROFESSIONAL,
+      "Durable Medical Equipment Claim"),
 
   /** Represents HHA type. */
   HHA(
       "hha",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "Home Health Services"),
 
   /** Represents HOSPICE type. */
   HOSPICE(
       "hospice",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "Hospice Care"),
 
   /** Represents INPATIENT type. */
   INPATIENT(
       "inpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "Inpatient Hospital Care"),
 
   /** Represents OUTPATIENT type. */
   OUTPATIENT(
       "outpatient",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL),
+      ClaimType.INSTITUTIONAL,
+      "Outpatient Hospital Care"),
 
   /** Represents PDE type. */
-  PDE("pde", SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY, ClaimType.PHARMACY),
+  PDE("pde", SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY, ClaimType.PHARMACY, "Drug Plan Event"),
 
   /** Represents SNF type. */
   SNF(
       "snf",
       SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
-      ClaimType.INSTITUTIONAL);
+      ClaimType.INSTITUTIONAL,
+      "Skilled Nursing Facility Care");
 
   private final String code;
   private final String systemUrl;
   private final ClaimType claimType;
+  private final String eobTypeDisplay;
 
   CodeableConcept toFhir() {
     return new CodeableConcept(
         new Coding().setSystem(SystemUrls.CARIN_CLAIM_SUBTYPE).setCode(code));
+  }
+
+  Coding toFhirEobType() {
+    return new Coding()
+        .setSystem(SystemUrls.BLUE_BUTTON_EOB_TYPE_CODE)
+        .setCode(toString())
+        .setDisplay(eobTypeDisplay);
   }
 
   /**
