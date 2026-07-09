@@ -129,7 +129,7 @@ def extract_and_load(
 
 
 def _prune_table_in_batches(
-    conn,
+    conn: psycopg.Connection,
     table_name: str,
     delete_query: str,
     params: tuple[object, ...] | None = None,
