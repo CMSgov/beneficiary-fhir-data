@@ -148,7 +148,7 @@ class EobReadIT extends IntegrationTestBase {
             .createQuery(
                 """
                 SELECT c
-                FROM ClaimProfessionalNch c
+                FROM ClaimProfessionalCmsNch c
                 JOIN FETCH c.beneficiary b
                 JOIN FETCH c.claimItems cl
                 WHERE c.claimUniqueId = :claimId

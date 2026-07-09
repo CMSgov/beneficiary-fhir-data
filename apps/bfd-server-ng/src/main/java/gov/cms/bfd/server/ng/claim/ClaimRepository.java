@@ -2,8 +2,8 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
-import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
@@ -31,7 +31,7 @@ public class ClaimRepository {
   private static final String CLAIM_PROFESSIONAL_SHARED_SYSTEMS =
       """
         SELECT c
-        FROM ClaimProfessionalSharedSystems c
+        FROM ClaimProfessionalCmsSharedSystems c
         JOIN FETCH c.beneficiary b
         LEFT JOIN FETCH c.claimItems cl
       """;
@@ -39,7 +39,7 @@ public class ClaimRepository {
   private static final String CLAIM_PROFESSIONAL_NCH =
       """
         SELECT c
-        FROM ClaimProfessionalNch c
+        FROM ClaimProfessionalCmsNch c
         JOIN FETCH c.beneficiary b
         JOIN FETCH c.claimItems cl
       """;
@@ -47,7 +47,7 @@ public class ClaimRepository {
   private static final String CLAIM_INSTITUTIONAL_SHARED_SYSTEMS =
       """
         SELECT c
-        FROM ClaimInstitutionalSharedSystems c
+        FROM ClaimInstitutionalCmsSharedSystems c
         JOIN FETCH c.beneficiary b
         LEFT JOIN FETCH c.claimItems cl
       """;
@@ -55,7 +55,7 @@ public class ClaimRepository {
   private static final String CLAIM_INSTITUTIONAL_NCH =
       """
         SELECT c
-        FROM ClaimInstitutionalNch c
+        FROM ClaimInstitutionalCmsNch c
         JOIN FETCH c.beneficiary b
         JOIN FETCH c.claimItems cl
       """;
@@ -63,7 +63,7 @@ public class ClaimRepository {
   private static final String CLAIM_RX =
       """
         SELECT c
-        FROM ClaimRx c
+        FROM ClaimCmsRx c
         JOIN FETCH c.beneficiary b
       """;
 

@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class SupportingInfoFactory {
   private final SequenceGenerator sequenceGenerator;
 
-
   public SupportingInfoFactory() {
     this.sequenceGenerator = new SequenceGenerator();
   }

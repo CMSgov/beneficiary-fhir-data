@@ -8,8 +8,4 @@ import lombok.Getter;
 @Getter
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr")
-public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
-
-
-
-}
+public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {}

@@ -42,7 +42,9 @@ public enum ClaimSourceId {
   }
 
   /**
-   * switch statement for the value of the enum, returning status COMPLETE if NATIONAL_CLAIMS_HISTORY.
+   * switch statement for the value of the enum, returning status COMPLETE if
+   * NATIONAL_CLAIMS_HISTORY.
+   *
    * @return eob.RemittanceOutcome
    */
   public Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

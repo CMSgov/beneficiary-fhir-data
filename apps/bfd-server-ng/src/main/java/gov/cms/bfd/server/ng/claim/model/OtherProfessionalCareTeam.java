@@ -6,8 +6,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/** Attending Provider History.
- *  NOTE - this is not currently in use anywhere (as far as I can tell)
+/**
+ * Attending Provider History. NOTE - this is not currently in use anywhere (as far as I can tell)
  */
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_othr_prvdr_npi_num"))

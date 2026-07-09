@@ -308,7 +308,7 @@ class EobSearchIT extends IntegrationTestBase {
                 .createQuery(
                     """
                 SELECT billablePeriod.claimThroughDate
-                FROM ClaimInstitutionalNch c
+                FROM ClaimInstitutionalCmsNch c
                 WHERE c.claimUniqueId = :id
                 """,
                     Optional.class)
@@ -843,7 +843,7 @@ class EobSearchIT extends IntegrationTestBase {
             .createQuery(
                 """
                 SELECT c
-                FROM ClaimProfessionalNch c
+                FROM ClaimProfessionalCmsNch c
                 JOIN FETCH c.beneficiary b
                 JOIN FETCH c.claimItems cl
                 WHERE c.claimUniqueId = :claimId
