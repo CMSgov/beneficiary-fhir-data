@@ -189,9 +189,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert rows[0]["clm_uniq_id"] == 849348853948
 
     # Non-latest non-Part-D SS parent claims are filtered before final claim-table load
-    cur = conn.execute(
-        "select * from idr.claim_institutional_ss where clm_uniq_id = 999999434800"
-    )
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 999999434800")
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
