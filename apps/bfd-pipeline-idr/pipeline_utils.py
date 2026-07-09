@@ -1,5 +1,6 @@
 import time
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import psycopg
 from loguru import logger
