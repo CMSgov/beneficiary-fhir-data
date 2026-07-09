@@ -15,7 +15,9 @@ from constants import (
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_PARTITION,
     FISS_CLM_SOURCE,
+    IDR_CLAIM_TABLE,
     MCS_CLM_SOURCE,
+    PART_D_CLAIM_TYPE_CODES,
     PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
@@ -126,6 +128,29 @@ def extract_and_load(
             raise ex
 
 
+def _prune_table_in_batches(
+    conn,
+    table_name: str,
+    delete_query: str,
+    params: tuple[object, ...] | None = None,
+) -> None:
+    total_row_count = 0
+
+    while True:
+        with conn.transaction():
+            if params is None:
+                res = conn.execute(delete_query)
+            else:
+                res = conn.execute(delete_query, params)
+
+            total_row_count += res.rowcount
+            logger.info("pruned {} rows from {}", res.rowcount, table_name)
+
+            if res.rowcount == 0:
+                logger.info("Total rows pruned from {}: {}", table_name, total_row_count)
+                break
+
+
 def prune_phase_1_ss_claims(
     cls: type[T],
     load_mode: LoadMode,
@@ -142,58 +167,82 @@ def prune_phase_1_ss_claims(
         return True
 
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+
+    phase_1_claim_filter = f"""
+        clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+        AND clm.clm_src_id IN
+            ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+        AND clm.clm_idr_ld_dt < %s
+    """
+    non_latest_non_part_d_claim_filter = f"""
+        clm.clm_ltst_clm_ind = 'N'
+        AND clm.clm_type_cd NOT IN ({part_d_codes})
+    """
+
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
     with psycopg.connect(get_connection_string(load_mode)) as conn:
-        totalRowCount = 0
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                        DELETE FROM {item_table}
-                        WHERE (clm_uniq_id, bfd_row_id) IN (
-                            SELECT item.clm_uniq_id, item.bfd_row_id
-                            FROM {item_table} item
-                            JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
-                            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                            AND clm.clm_src_id IN 
-                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                            AND clm.clm_idr_ld_dt < %s
-                            LIMIT {PRUNE_BATCH_MAX_SIZE}
-                        )
-                    """,  # type: ignore
-                    (prune_cutoff_date,),
+        _prune_table_in_batches(
+            conn,
+            item_table,
+            f"""
+                DELETE FROM {item_table}
+                WHERE (clm_uniq_id, bfd_row_id) IN (
+                    SELECT item.clm_uniq_id, item.bfd_row_id
+                    FROM {item_table} item
+                    JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                    WHERE {phase_1_claim_filter}
+                    LIMIT {PRUNE_BATCH_MAX_SIZE}
                 )
+            """,
+            (prune_cutoff_date,),
+        )
 
-                totalRowCount += res.rowcount
-                logger.info("pruned {} rows from {}", res.rowcount, item_table)
-
-                if res.rowcount == 0:
-                    logger.info("Total rows pruned from {}: {}", item_table, totalRowCount)
-                    break
-
-        totalRowCount = 0
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                        DELETE FROM {claim_table}
-                        WHERE clm_uniq_id IN (
-                            SELECT clm_uniq_id FROM {claim_table}
-                            WHERE clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                            AND clm_src_id IN 
-                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                            AND clm_idr_ld_dt < %s
-                            LIMIT {PRUNE_BATCH_MAX_SIZE}
-                        )
-                    """,  # type: ignore
-                    (prune_cutoff_date,),
+        _prune_table_in_batches(
+            conn,
+            claim_table,
+            f"""
+                DELETE FROM {claim_table}
+                WHERE clm_uniq_id IN (
+                    SELECT clm.clm_uniq_id FROM {claim_table} clm
+                    WHERE {phase_1_claim_filter}
+                    LIMIT {PRUNE_BATCH_MAX_SIZE}
                 )
+            """,
+            (prune_cutoff_date,),
+        )
 
-                totalRowCount += res.rowcount
-                logger.info("pruned {} rows from {}", res.rowcount, claim_table)
+        logger.info("pruning non-latest non-Part-D ss claims")
 
-                if res.rowcount == 0:
-                    logger.info("Total rows pruned from {}: {}", claim_table, totalRowCount)
-                    break
+        # Claim items can exist even when the non-latest parent claim was filtered
+        # before final claim-table load, so use the source claim table.
+        _prune_table_in_batches(
+            conn,
+            item_table,
+            f"""
+                DELETE FROM {item_table}
+                WHERE (clm_uniq_id, bfd_row_id) IN (
+                    SELECT item.clm_uniq_id, item.bfd_row_id
+                    FROM {item_table} item
+                    JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                    WHERE {non_latest_non_part_d_claim_filter}
+                    LIMIT {PRUNE_BATCH_MAX_SIZE}
+                )
+            """,
+        )
+
+        _prune_table_in_batches(
+            conn,
+            claim_table,
+            f"""
+                DELETE FROM {claim_table}
+                WHERE clm_uniq_id IN (
+                    SELECT clm.clm_uniq_id FROM {claim_table} clm
+                    WHERE {non_latest_non_part_d_claim_filter}
+                    LIMIT {PRUNE_BATCH_MAX_SIZE}
+                )
+            """,
+        )
+
     return True
