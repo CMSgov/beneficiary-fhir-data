@@ -4,7 +4,7 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
@@ -47,7 +47,7 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")
-public class ClaimRx extends ClaimBase {
+public class ClaimCmsRx extends ClaimBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;

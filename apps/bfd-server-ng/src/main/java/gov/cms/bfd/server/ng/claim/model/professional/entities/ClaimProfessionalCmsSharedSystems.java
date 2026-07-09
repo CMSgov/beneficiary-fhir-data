@@ -45,7 +45,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -74,7 +74,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemProfessionalSharedSystems> claimItems;
+  private SortedSet<ClaimItemProfessionalCmsSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)

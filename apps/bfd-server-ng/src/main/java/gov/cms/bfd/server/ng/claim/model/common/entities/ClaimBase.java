@@ -1,9 +1,24 @@
-package gov.cms.bfd.server.ng.claim.model.common;
+package gov.cms.bfd.server.ng.claim.model.common.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimIDRLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.Identifiers;
+import gov.cms.bfd.server.ng.claim.model.common.Meta;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.PatientReferenceFactory;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -180,7 +195,7 @@ public abstract class ClaimBase {
     // Only Shared Systems claims derive outcome from CLM_PD_STUS_CD. Missing or unmapped paid
     // status codes are resolved as PARTIAL to match the outcome search filter behavior.
     if (this instanceof ClaimInstitutionalCmsSharedSystems
-        || this instanceof ClaimProfessionalSharedSystems) {
+        || this instanceof ClaimProfessionalCmsSharedSystems) {
 
       ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
     }

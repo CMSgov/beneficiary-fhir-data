@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import java.util.List;
 

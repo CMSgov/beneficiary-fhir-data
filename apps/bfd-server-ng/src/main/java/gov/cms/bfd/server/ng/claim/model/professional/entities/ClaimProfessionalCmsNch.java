@@ -41,7 +41,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalNch extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
 
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
@@ -65,7 +65,7 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemProfessionalNch> claimItems;
+  private SortedSet<ClaimItemProfessionalCmsNch> claimItems;
 
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>

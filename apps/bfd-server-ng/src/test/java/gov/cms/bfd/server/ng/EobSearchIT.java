@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.Instant;
@@ -848,7 +848,7 @@ class EobSearchIT extends IntegrationTestBase {
                 JOIN FETCH c.claimItems cl
                 WHERE c.claimUniqueId = :claimId
                 """,
-                ClaimProfessionalNch.class)
+                ClaimProfessionalCmsNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
     // Precondition - claim should be available in the db

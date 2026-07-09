@@ -6,7 +6,7 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
