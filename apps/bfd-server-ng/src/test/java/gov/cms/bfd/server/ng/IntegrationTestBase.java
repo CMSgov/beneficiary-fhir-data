@@ -96,6 +96,8 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_RX_NON_LATEST = "1409088853949";
   protected static final String CLAIM_ID_PROFESSIONAL_NON_LATEST = "3351266481404";
 
+  protected static final String CLAIM_LINE_NDC_CODE = "00409189001";
+
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
   private static final String FHIR_JSON = "fhir+json";
@@ -342,5 +344,17 @@ public class IntegrationTestBase {
 
   protected AuditEventRepository getAuditEventRepository() {
     return auditEventRepository;
+  }
+
+  public boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
+    return eob.getItem().stream()
+        .flatMap(item -> item.getDetail().stream())
+        .flatMap(detail -> detail.getProductOrService().getCoding().stream())
+        .anyMatch(this::isClaimLineNdcCoding);
+  }
+
+  private boolean isClaimLineNdcCoding(Coding coding) {
+    return SystemUrls.NDC.equals(coding.getSystem())
+        && CLAIM_LINE_NDC_CODE.equals(coding.getCode());
   }
 }

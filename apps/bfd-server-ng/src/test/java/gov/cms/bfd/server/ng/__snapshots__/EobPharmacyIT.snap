@@ -604,6 +604,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "code" : "pharmacy",
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
+    }, {
+      "code" : "PDE",
+      "display" : "Drug Plan Event",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"
@@ -1217,6 +1221,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "code" : "pharmacy",
       "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
+    }, {
+      "code" : "PDE",
+      "display" : "Drug Plan Event",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
     } ]
   },
   "use" : "claim"

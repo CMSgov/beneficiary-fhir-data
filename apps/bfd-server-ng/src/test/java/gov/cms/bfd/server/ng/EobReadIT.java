@@ -79,6 +79,7 @@ class EobReadIT extends IntegrationTestBase {
   @Test
   void eobReadProfessionalClaim() {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL)).execute();
+
     assertFalse(eob.isEmpty());
     assertFalse(hasTaxNumberExtension(eob));
     assertEquals(ExplanationOfBenefit.RemittanceOutcome.PARTIAL, eob.getOutcome());
@@ -87,14 +88,20 @@ class EobReadIT extends IntegrationTestBase {
         eob.getMeta().getProfile().stream()
             .anyMatch(p -> p.getValue().contains("Professional-NonClinician")));
 
+    assertTrue(
+        hasClaimLineNdcCoding(eob),
+        String.format("Expected professional claim to include NDC code '%s'", CLAIM_LINE_NDC_CODE));
+
     var insurance =
         eob.getInsurance().stream()
             .filter(i -> i.hasCoverage() && i.getCoverage().hasDisplay())
             .findFirst();
+
     if (insurance.isPresent()) {
       var display = insurance.get().getCoverage().getDisplay();
       assertEquals("Part B", display);
     }
+
     expectFhir().toMatchSnapshot(eob);
   }
 
