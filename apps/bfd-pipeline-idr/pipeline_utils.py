@@ -135,18 +135,12 @@ def _prune_table_in_batches(
     delete_query: str,
     params: tuple[Any, ...] | None = None,
 ) -> None:
-    """Run a batched DELETE until there are no matching rows left to prune.
-
-    Callers provide the table-specific DELETE statement, including its WHERE
-    criteria and LIMIT. This helper only owns the shared batching behavior:
-    execute one delete batch, log the row count, and stop when a batch deletes
-    zero rows.
-    """
+    """Run a batched DELETE until no matching rows remain."""
     total_rows_pruned = 0
 
     while True:
-        # Keep each batch in its own transaction so a large prune does not
-        # become one long-running transaction.
+        # Use a separate transaction for each batch so large prunes do not run
+        # as one long transaction.
         with conn.transaction():
             result: Any = conn.execute(delete_query, params)  # type: ignore
             rows_pruned = int(result.rowcount)
@@ -154,8 +148,6 @@ def _prune_table_in_batches(
         total_rows_pruned += rows_pruned
         logger.info("pruned {} rows from {}", rows_pruned, table_name)
 
-        # A zero-row batch means every row matching the delete criteria has
-        # already been removed by earlier batches.
         if rows_pruned == 0:
             logger.info("Total rows pruned from {}: {}", table_name, total_rows_pruned)
             break
