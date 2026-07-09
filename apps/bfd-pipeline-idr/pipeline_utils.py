@@ -1,5 +1,6 @@
 import time
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import psycopg
 from loguru import logger
@@ -129,26 +130,35 @@ def extract_and_load(
 
 
 def _prune_table_in_batches(
-    conn: psycopg.Connection,
+    conn: psycopg.Connection[Any],
     table_name: str,
     delete_query: str,
-    params: tuple[object, ...] | None = None,
+    params: tuple[Any, ...] | None = None,
 ) -> None:
-    total_row_count = 0
+    """Run a batched DELETE until there are no matching rows left to prune.
+
+    Callers provide the table-specific DELETE statement, including its WHERE
+    criteria and LIMIT. This helper only owns the shared batching behavior:
+    execute one delete batch, log the row count, and stop when a batch deletes
+    zero rows.
+    """
+    total_rows_pruned = 0
 
     while True:
+        # Keep each batch in its own transaction so a large prune does not
+        # become one long-running transaction.
         with conn.transaction():
-            if params is None:
-                res = conn.execute(delete_query)
-            else:
-                res = conn.execute(delete_query, params)
+            result: Any = conn.execute(delete_query, params)  # type: ignore
+            rows_pruned = int(result.rowcount)
 
-            total_row_count += res.rowcount
-            logger.info("pruned {} rows from {}", res.rowcount, table_name)
+        total_rows_pruned += rows_pruned
+        logger.info("pruned {} rows from {}", rows_pruned, table_name)
 
-            if res.rowcount == 0:
-                logger.info("Total rows pruned from {}: {}", table_name, total_row_count)
-                break
+        # A zero-row batch means every row matching the delete criteria has
+        # already been removed by earlier batches.
+        if rows_pruned == 0:
+            logger.info("Total rows pruned from {}: {}", table_name, total_rows_pruned)
+            break
 
 
 def prune_phase_1_ss_claims(
@@ -187,15 +197,15 @@ def prune_phase_1_ss_claims(
             conn,
             item_table,
             f"""
-                DELETE FROM {item_table}
-                WHERE (clm_uniq_id, bfd_row_id) IN (
-                    SELECT item.clm_uniq_id, item.bfd_row_id
-                    FROM {item_table} item
-                    JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
-                    WHERE {phase_1_claim_filter}
-                    LIMIT {PRUNE_BATCH_MAX_SIZE}
-                )
-            """,
+                    DELETE FROM {item_table}
+                    WHERE (clm_uniq_id, bfd_row_id) IN (
+                        SELECT item.clm_uniq_id, item.bfd_row_id
+                        FROM {item_table} item
+                        JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                        WHERE {phase_1_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
             (prune_cutoff_date,),
         )
 
@@ -203,13 +213,13 @@ def prune_phase_1_ss_claims(
             conn,
             claim_table,
             f"""
-                DELETE FROM {claim_table}
-                WHERE clm_uniq_id IN (
-                    SELECT clm.clm_uniq_id FROM {claim_table} clm
-                    WHERE {phase_1_claim_filter}
-                    LIMIT {PRUNE_BATCH_MAX_SIZE}
-                )
-            """,
+                    DELETE FROM {claim_table}
+                    WHERE clm_uniq_id IN (
+                        SELECT clm.clm_uniq_id FROM {claim_table} clm
+                        WHERE {phase_1_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
             (prune_cutoff_date,),
         )
 
@@ -221,28 +231,28 @@ def prune_phase_1_ss_claims(
             conn,
             item_table,
             f"""
-                DELETE FROM {item_table}
-                WHERE (clm_uniq_id, bfd_row_id) IN (
-                    SELECT item.clm_uniq_id, item.bfd_row_id
-                    FROM {item_table} item
-                    JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
-                    WHERE {non_latest_non_part_d_claim_filter}
-                    LIMIT {PRUNE_BATCH_MAX_SIZE}
-                )
-            """,
+                    DELETE FROM {item_table}
+                    WHERE (clm_uniq_id, bfd_row_id) IN (
+                        SELECT item.clm_uniq_id, item.bfd_row_id
+                        FROM {item_table} item
+                        JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                        WHERE {non_latest_non_part_d_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
         )
 
         _prune_table_in_batches(
             conn,
             claim_table,
             f"""
-                DELETE FROM {claim_table}
-                WHERE clm_uniq_id IN (
-                    SELECT clm.clm_uniq_id FROM {claim_table} clm
-                    WHERE {non_latest_non_part_d_claim_filter}
-                    LIMIT {PRUNE_BATCH_MAX_SIZE}
-                )
-            """,
+                    DELETE FROM {claim_table}
+                    WHERE clm_uniq_id IN (
+                        SELECT clm.clm_uniq_id FROM {claim_table} clm
+                        WHERE {non_latest_non_part_d_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
         )
 
     return True
