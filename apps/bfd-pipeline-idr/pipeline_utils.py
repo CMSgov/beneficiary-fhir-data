@@ -135,7 +135,7 @@ def _prune_table_in_batches(
     delete_query: str,
     params: tuple[Any, ...] | None = None,
 ) -> None:
-    """Run a batched DELETE until no matching rows remain."""
+    # Run a batched DELETE until no matching rows remain.
     total_rows_pruned = 0
 
     while True:
@@ -180,6 +180,7 @@ def prune_phase_1_ss_claims(
     non_latest_non_part_d_claim_filter = f"""
         clm.clm_ltst_clm_ind = 'N'
         AND clm.clm_type_cd NOT IN ({part_d_codes})
+        AND clm.clm_idr_ld_dt < %s
     """
 
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
@@ -215,7 +216,7 @@ def prune_phase_1_ss_claims(
             (prune_cutoff_date,),
         )
 
-        logger.info("pruning non-latest non-Part-D ss claims")
+        logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
 
         # Claim items can exist even when the non-latest parent claim was filtered
         # before final claim-table load, so use the source claim table.
@@ -232,6 +233,7 @@ def prune_phase_1_ss_claims(
                         LIMIT {PRUNE_BATCH_MAX_SIZE}
                     )
                 """,
+            (prune_cutoff_date,),
         )
 
         _prune_table_in_batches(
@@ -245,6 +247,7 @@ def prune_phase_1_ss_claims(
                         LIMIT {PRUNE_BATCH_MAX_SIZE}
                     )
                 """,
+            (prune_cutoff_date,),
         )
 
     return True
