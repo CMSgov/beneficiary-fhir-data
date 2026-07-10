@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import gov.cms.bfd.server.ng.input.PageCursor;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class FhirUtil {
   private static final Pattern IS_INTEGER = Pattern.compile("\\d+");
   private static final String OFFSET_PARAM = "_offset";
   private static final String START_INDEX_PARAM = "startIndex";
+  private static final String CURSOR_PARAM = "_cursor";
 
   /**
    * Adds a data absent reason of the coding is empty.
@@ -73,7 +75,30 @@ public class FhirUtil {
       Optional<RequestDetails> requestDetails,
       Optional<Integer> limit,
       Optional<Integer> offset) {
-    var bundle = getBundle(resources, requestDetails, limit, offset);
+    return bundleOrDefault(resources, batchLastUpdated, requestDetails, limit, offset, false);
+  }
+
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * adds previous link if an offset exists add a next link if the stream contains at least one more
+   * than the limit empty. Supports cursor-based keyset pagination if useCursor is true.
+   *
+   * @param resources resources
+   * @param batchLastUpdated last updated
+   * @param requestDetails request details
+   * @param limit record count
+   * @param offset start index
+   * @param useCursor whether to use cursor-based next links
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      Stream<? extends Resource> resources,
+      Supplier<ZonedDateTime> batchLastUpdated,
+      Optional<RequestDetails> requestDetails,
+      Optional<Integer> limit,
+      Optional<Integer> offset,
+      boolean useCursor) {
+    var bundle = getBundle(resources, requestDetails, limit, offset, useCursor);
 
     if (bundle.getEntry().isEmpty()) {
       return defaultBundle(batchLastUpdated);
@@ -92,7 +117,7 @@ public class FhirUtil {
   public static Bundle bundleOrDefault(
       Stream<? extends Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
     return bundleOrDefault(
-        resources, batchLastUpdated, Optional.empty(), Optional.empty(), Optional.empty());
+        resources, batchLastUpdated, Optional.empty(), Optional.empty(), Optional.empty(), false);
   }
 
   /**
@@ -115,7 +140,8 @@ public class FhirUtil {
     return resource
         .map(
             value ->
-                bundleOrDefault(Stream.of(value), batchLastUpdated, requestDetails, limit, offset))
+                bundleOrDefault(
+                    Stream.of(value), batchLastUpdated, requestDetails, limit, offset, false))
         .orElseGet(() -> defaultBundle(batchLastUpdated));
   }
 
@@ -168,7 +194,8 @@ public class FhirUtil {
       Stream<? extends Resource> resources,
       Optional<RequestDetails> requestDetails,
       Optional<Integer> limit,
-      Optional<Integer> offset) {
+      Optional<Integer> offset,
+      boolean useCursor) {
 
     record Page(List<Bundle.BundleEntryComponent> items, boolean hasMore) {}
 
@@ -190,7 +217,7 @@ public class FhirUtil {
 
     // if we do not have a request we cannot build the links
     requestDetails.ifPresent(
-        details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit));
+        details -> applyBundleLinks(bundle, details, page.hasMore(), offset, limit, useCursor));
     // if we have a next page this number is not accurate, and we do not want to provide it
     if (page.hasMore()) {
       bundle.setTotalElement(null);
@@ -230,23 +257,36 @@ public class FhirUtil {
       RequestDetails requestDetails,
       boolean hasMore,
       Optional<Integer> offset,
-      Optional<Integer> limit) {
-    // check if a link is needed
-    if (hasMore) {
-      var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
-      bundle
-          .addLink()
-          .setRelation(Constants.LINK_NEXT)
-          .setUrl(buildLinkURL(requestDetails, nextOffset));
-    }
-    // check if a previous link is needed
-    if (offset.isPresent() && offset.get() > 0) {
-      // get previous offset
-      var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
-      bundle
-          .addLink()
-          .setRelation(Constants.LINK_PREVIOUS)
-          .setUrl(buildLinkURL(requestDetails, previousOffset));
+      Optional<Integer> limit,
+      boolean useCursor) {
+    if (useCursor) {
+      if (hasMore && !bundle.getEntry().isEmpty()) {
+        var lastEntry = bundle.getEntry().get(bundle.getEntry().size() - 1);
+        var lastClaimId = Long.parseLong(lastEntry.getResource().getIdElement().getIdPart());
+        var nextCursorStr = new PageCursor(lastClaimId).encode();
+        bundle
+            .addLink()
+            .setRelation(Constants.LINK_NEXT)
+            .setUrl(buildCursorLinkURL(requestDetails, nextCursorStr));
+      }
+    } else {
+      // check if a link is needed
+      if (hasMore) {
+        var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
+        bundle
+            .addLink()
+            .setRelation(Constants.LINK_NEXT)
+            .setUrl(buildLinkURL(requestDetails, nextOffset));
+      }
+      // check if a previous link is needed
+      if (offset.isPresent() && offset.get() > 0) {
+        // get previous offset
+        var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
+        bundle
+            .addLink()
+            .setRelation(Constants.LINK_PREVIOUS)
+            .setUrl(buildLinkURL(requestDetails, previousOffset));
+      }
     }
   }
 
@@ -261,6 +301,28 @@ public class FhirUtil {
     if (offset != 0) {
       uriBuilder.queryParam(OFFSET_PARAM, offset);
     }
+
+    return uriBuilder.build().toUriString();
+  }
+
+  /**
+   * Builds a cursor-based next link URL. Removes any existing offset/startIndex/cursor parameters
+   * and replaces them with the new cursor value.
+   *
+   * @param requestDetails the original request details
+   * @param cursorValue the encoded cursor string for the next page
+   * @return the complete URL for the next page
+   */
+  public static String buildCursorLinkURL(RequestDetails requestDetails, String cursorValue) {
+    var uriBuilder = UriComponentsBuilder.fromUriString(requestDetails.getCompleteUrl());
+
+    // Remove all pagination parameters
+    uriBuilder.replaceQueryParam(OFFSET_PARAM);
+    uriBuilder.replaceQueryParam(START_INDEX_PARAM);
+    uriBuilder.replaceQueryParam(CURSOR_PARAM);
+
+    // Add the cursor parameter
+    uriBuilder.queryParam(CURSOR_PARAM, cursorValue);
 
     return uriBuilder.build().toUriString();
   }

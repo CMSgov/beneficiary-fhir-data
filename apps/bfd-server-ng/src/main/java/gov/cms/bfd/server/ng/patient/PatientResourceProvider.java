@@ -7,9 +7,12 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -66,12 +69,21 @@ public class PatientResourceProvider implements IResourceProvider {
    *
    * @param identifier identifier
    * @param lastUpdated last updated datetime
+   * @param requestDetails request details
    * @return bundle
    */
   @Search
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) final TokenParam identifier,
-      @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
+      @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated,
+      final RequestDetails requestDetails) {
+    if (requestDetails != null
+        && RequestTypeEnum.POST != requestDetails.getRequestType()
+        && SystemUrls.CMS_MBI.equals(identifier.getSystem())) {
+      throw new InvalidRequestException(
+          String.format(
+              "Search query by '%s' is only supported in POST request", SystemUrls.CMS_MBI));
+    }
     return patientHandler.searchByIdentifier(
         FhirInputConverter.toString(identifier, SystemUrls.CMS_MBI),
         FhirInputConverter.toDateTimeRange(lastUpdated));

@@ -876,4 +876,73 @@ class EobSearchIT extends IntegrationTestBase {
 
     assertEquals(1, getEobFromBundle(eobBundle).size());
   }
+
+  @Test
+  void eobSearchWithCursorAndOffsetThrowsBadRequest() {
+    assertThrows(
+        InvalidRequestException.class,
+        () ->
+            searchBundle()
+                .where(
+                    new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                        .exactly()
+                        .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+                .count(1)
+                .offset(1)
+                .and(
+                    new TokenClientParam("_cursor")
+                        .exactly()
+                        .code("eyJsYXN0Q2xhaW1VbmlxdWVJZCI6MTAwfQ=="))
+                .execute());
+  }
+
+  @Test
+  void eobSearchCursorPaginationRoundTrip() {
+    // 1. Fetch first page with count=1
+    var firstPage =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .count(1)
+            .execute();
+
+    assertEquals(1, firstPage.getEntry().size());
+    var firstEob = getEobFromBundle(firstPage).getFirst();
+
+    // Verify next link is present and contains _cursor
+    var nextLink = firstPage.getLink(Bundle.LINK_NEXT);
+    assertTrue(nextLink != null && nextLink.getUrl() != null);
+    assertTrue(nextLink.getUrl().contains("_cursor="));
+
+    // 2. Fetch second page using HAPI FHIR loadPage helper (next link)
+    var secondPage = getFhirClient().loadPage().next(firstPage).execute();
+    assertEquals(1, secondPage.getEntry().size());
+    var secondEob = getEobFromBundle(secondPage).getFirst();
+
+    // Verify they are different claims
+    assertFalse(firstEob.getIdElement().getIdPart().equals(secondEob.getIdElement().getIdPart()));
+
+    // 3. Alternatively, extract the cursor parameter and query it directly to verify
+    var url = nextLink.getUrl();
+    var cursorVal = url.substring(url.indexOf("_cursor=") + 8);
+    if (cursorVal.contains("&")) {
+      cursorVal = cursorVal.substring(0, cursorVal.indexOf("&"));
+    }
+
+    var secondPageDirect =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .count(1)
+            .and(new TokenClientParam("_cursor").exactly().code(cursorVal))
+            .execute();
+
+    assertEquals(1, secondPageDirect.getEntry().size());
+    var secondEobDirect = getEobFromBundle(secondPageDirect).getFirst();
+    assertEquals(secondEob.getIdElement().getIdPart(), secondEobDirect.getIdElement().getIdPart());
+  }
 }

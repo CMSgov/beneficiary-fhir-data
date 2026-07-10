@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.eob;
 
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -8,12 +9,14 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
@@ -22,9 +25,11 @@ import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import gov.cms.bfd.server.ng.input.PageCursor;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -45,6 +50,7 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
   private static final String OUTCOME = "outcome";
   private static final String SOURCE_QUERY_PARAM = "_source";
+  private static final String CURSOR_PARAM = "_cursor";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -92,6 +98,11 @@ public class EobResourceProvider implements IResourceProvider {
    * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
+   * @param elements optional set of FHIR element names to include in the response (field
+   *     projection). Only supported via POST requests to prevent leaking element selections in URL
+   *     logs.
+   * @param cursorParam opaque cursor string for keyset pagination. When provided, offset and
+   *     startIndex are ignored.
    * @param request HTTP request details
    * @param requestDetails HAPI FHIR request details
    * @return bundle
@@ -110,8 +121,28 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
+      @Elements @OptionalParam(name = Constants.PARAM_ELEMENTS) final Set<String> elements,
+      @OptionalParam(name = CURSOR_PARAM) final String cursorParam,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
+
+    // Enforce _elements restriction to POST requests only, matching V2 behavior.
+    // This prevents element selection parameters from appearing in GET URL logs.
+    if (RequestTypeEnum.POST != requestDetails.getRequestType()
+        && elements != null
+        && !elements.isEmpty()) {
+      throw new InvalidRequestException("_elements tag is only supported via POST request");
+    }
+
+    // Parse cursor if provided; cursor and offset are mutually exclusive
+    Optional<PageCursor> cursor = Optional.empty();
+    if (cursorParam != null && !cursorParam.isBlank()) {
+      if (offset != null || startIndex != null) {
+        throw new InvalidRequestException(
+            "_cursor cannot be used together with _offset or startIndex");
+      }
+      cursor = Optional.of(PageCursor.parse(cursorParam));
+    }
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
@@ -120,10 +151,29 @@ public class EobResourceProvider implements IResourceProvider {
     var outcomeCriteria = FhirInputConverter.parseOutcomeParameter(outcome);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
+    // Under FHIR specifications and BFD SAMHSA filtering requirements, certain fields must never
+    // be stripped, even if omitted from the _elements list: id, meta, status, patient.
+    Set<String> activeElements = elements;
+    if (elements != null && !elements.isEmpty()) {
+      activeElements = new java.util.HashSet<>(elements);
+      activeElements.add("id");
+      activeElements.add("meta");
+      activeElements.add("status");
+      activeElements.add("patient");
+
+      var params = new java.util.HashMap<>(requestDetails.getParameters());
+      params.put("_elements", new String[] {String.join(",", activeElements)});
+      if (requestDetails
+          instanceof ca.uhn.fhir.rest.server.servlet.ServletRequestDetails servletRequestDetails) {
+        servletRequestDetails.setParameters(params);
+      }
+    }
+
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(getFilterModeForRequest(request, samhsaSearchIntent))
             .includeTaxNumber(includeTaxNumbers.orElse(false))
+            .elements(activeElements)
             .build();
 
     var criteria =
@@ -138,7 +188,8 @@ public class EobResourceProvider implements IResourceProvider {
             tagCriteria,
             claimTypeCodes,
             outcomeCriteria,
-            FhirInputConverter.parseSourceParameter(source));
+            FhirInputConverter.parseSourceParameter(source),
+            cursor);
 
     return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
   }

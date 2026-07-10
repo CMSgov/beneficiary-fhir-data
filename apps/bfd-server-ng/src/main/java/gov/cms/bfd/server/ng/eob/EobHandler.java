@@ -97,7 +97,8 @@ public class EobHandler {
             criteria.tagCriteria(),
             criteria.claimTypeCodes(),
             criteria.outcomes(),
-            criteria.sources());
+            criteria.sources(),
+            criteria.cursor());
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
     var samhsaFilterMode = options.getSamhsaFilterMode();
@@ -106,18 +107,30 @@ public class EobHandler {
         metricRecorder.recordMetric(
             "application.eob.handler.transform",
             () -> {
-              var filteredClaims =
-                  filterSamhsaClaims(claims, samhsaFilterMode)
-                      .skip(repositoryCriteria.resolveOffset())
-                      .limit(repositoryCriteria.resolveLimitWithExtra(1))
-                      .map(claim -> transformToFhir(claim, options));
+              var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+
+              // When using cursor-based pagination, the DB seek already positions past
+              // previously seen records, so we skip the in-memory offset. For legacy
+              // offset pagination, we apply the offset skip as before.
+              if (repositoryCriteria.hasCursor()) {
+                filteredClaims = filteredClaims.limit(repositoryCriteria.resolveLimitWithExtra(1));
+              } else {
+                filteredClaims =
+                    filteredClaims
+                        .skip(repositoryCriteria.resolveOffset())
+                        .limit(repositoryCriteria.resolveLimitWithExtra(1));
+              }
+
+              var transformedClaims = filteredClaims.map(claim -> transformToFhir(claim, options));
+
               return FhirUtil.bundleOrDefault(
-                  filteredClaims,
+                  transformedClaims,
                   loadProgressRepository::lastUpdated,
                   requestDetails,
                   // we want the raw limit
                   Optional.of(repositoryCriteria.resolveLimit()),
-                  Optional.of(repositoryCriteria.resolveOffset()));
+                  Optional.of(repositoryCriteria.resolveOffset()),
+                  repositoryCriteria.hasCursor());
             },
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
     metricRecorder.recordDistribution(

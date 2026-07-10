@@ -81,14 +81,26 @@ public class ClaimAsyncService {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters, systemType);
+
+    // When a cursor is present, add a keyset seek condition so the database
+    // efficiently skips past previously returned claims. This replaces the
+    // in-memory offset/skip approach for cursor-based pagination.
+    var cursorClause =
+        (criteria.hasCursor() && criteria.cursor().isPresent())
+            ? "AND c.claimUniqueId > :cursorId"
+            : "";
+    var orderClause = criteria.hasCursor() ? "ORDER BY c.claimUniqueId ASC" : "";
+
     var jpql =
         String.format(
             """
              %s
              WHERE b.xrefSk = :beneSk
              %s
+             %s
+             %s
             """,
-            baseQuery, whereClause);
+            baseQuery, whereClause, cursorClause, orderClause);
     try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
@@ -98,6 +110,12 @@ public class ClaimAsyncService {
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("beneSk", criteria.beneSk());
+
+            // Bind cursor parameter if keyset pagination is active and cursor is present
+            if (criteria.hasCursor() && criteria.cursor().isPresent()) {
+              query.setParameter("cursorId", criteria.cursor().get().lastClaimUniqueId());
+            }
+
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);

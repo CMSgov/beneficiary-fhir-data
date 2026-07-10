@@ -13,11 +13,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param claimThroughDate service date
  * @param lastUpdated last updated
  * @param limit record count
- * @param offset start index
+ * @param offset start index (used for legacy offset-based pagination)
  * @param tagCriteria tagCriteria
  * @param claimTypeCodes claim type codes
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param cursor optional cursor for keyset pagination (mutually exclusive with offset)
  */
 public record ClaimSearchCriteria(
     long beneSk,
@@ -28,7 +29,34 @@ public record ClaimSearchCriteria(
     List<List<TagCriterion>> tagCriteria,
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    List<List<MetaSourceSk>> sources) {
+    List<List<MetaSourceSk>> sources,
+    Optional<PageCursor> cursor) {
+
+  /**
+   * Convenience constructor without cursor for backwards compatibility. Defaults cursor to empty.
+   */
+  public ClaimSearchCriteria(
+      long beneSk,
+      DateTimeRange claimThroughDate,
+      DateTimeRange lastUpdated,
+      Optional<Integer> limit,
+      Optional<Integer> offset,
+      List<List<TagCriterion>> tagCriteria,
+      List<ClaimTypeCode> claimTypeCodes,
+      List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
+      List<List<MetaSourceSk>> sources) {
+    this(
+        beneSk,
+        claimThroughDate,
+        lastUpdated,
+        limit,
+        offset,
+        tagCriteria,
+        claimTypeCodes,
+        outcomes,
+        sources,
+        Optional.empty());
+  }
 
   /**
    * Returns the offset or the default.
@@ -56,6 +84,15 @@ public record ClaimSearchCriteria(
    */
   public Integer resolveLimitWithExtra(int extra) {
     return limit.orElse(5000) + extra;
+  }
+
+  /**
+   * Returns whether cursor-based pagination is being used.
+   *
+   * @return true if a cursor is present
+   */
+  public boolean hasCursor() {
+    return cursor.isPresent();
   }
 
   /**
