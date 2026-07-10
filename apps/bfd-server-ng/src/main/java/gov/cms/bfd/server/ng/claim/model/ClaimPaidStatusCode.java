@@ -33,17 +33,12 @@ public sealed interface ClaimPaidStatusCode
    * @param code database code
    * @return claim paid status code
    */
-  static Optional<ClaimPaidStatusCode> tryFromCode(String code) {
-    if (code == null) {
-      return Optional.empty();
-    }
-
-    return Optional.of(
-        Arrays.stream(ClaimPaidStatusCode.Valid.values())
-            .filter(v -> v.code.equals(code))
-            .map(v -> (ClaimPaidStatusCode) v)
-            .findFirst()
-            .orElseGet(() -> new ClaimPaidStatusCode.Invalid(code)));
+  static ClaimPaidStatusCode tryFromCode(String code) {
+    return Arrays.stream(ClaimPaidStatusCode.Valid.values())
+        .filter(v -> v.code.equals(code))
+        .map(v -> (ClaimPaidStatusCode) v)
+        .findFirst()
+        .orElseGet(() -> new ClaimPaidStatusCode.Invalid(code));
   }
 
   /**

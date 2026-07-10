@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -139,7 +139,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
     if (samhsaCertType != SamhsaCertType.NO_CERT) {
       final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.certValue);
+      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.getCertValue());
 
       fhirClient.registerInterceptor(headersInterceptor);
     }
@@ -524,15 +524,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private String normalize(String val) {
     return val.trim().replace(".", "").toLowerCase();
-  }
-
-  @AllArgsConstructor
-  private enum SamhsaCertType {
-    NO_CERT(null),
-    SAMHSA_ALLOWED_CERT("samhsa_allowed"),
-    SAMHSA_NOT_ALLOWED_CERT("samhsa_not_allowed");
-
-    private final String certValue;
   }
 
   static Stream<Arguments> provideSecurityScenarios() {

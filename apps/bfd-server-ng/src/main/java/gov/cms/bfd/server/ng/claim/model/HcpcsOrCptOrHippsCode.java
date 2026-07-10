@@ -3,38 +3,46 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
+/** Represents the HCPCS, CPT and HIPPS code information for a prior authorization line. */
 @Getter
 @Embeddable
-class HcpcsOrCptOrHippsCode {
+public class HcpcsOrCptOrHippsCode {
 
   @Column(name = "hcpcs_or_cpt_or_hipps")
   private String hcpcsOrCptOrHipps;
 
-  private static final Pattern IS_INTEGER = Pattern.compile("\\d+");
+  /**
+   * Determines the corresponding coding systems for the applicable codes.
+   *
+   * @return the coding systems
+   */
+  public List<String> getCodingSystems() {
+    var systems = new ArrayList<String>();
+
+    if (Character.isDigit(hcpcsOrCptOrHipps.charAt(0))) {
+      systems.add(SystemUrls.AMA_CPT);
+    } else {
+      systems.add(SystemUrls.CMS_HCPCS);
+    }
+
+    if (!Character.isDigit(hcpcsOrCptOrHipps.charAt(1))) {
+      systems.add(SystemUrls.CMS_HIPPS);
+    }
+
+    return systems;
+  }
 
   CodeableConcept toFhir() {
-    var codeableConcept = new CodeableConcept();
-    var code = hcpcsOrCptOrHipps.substring(0, 1);
-
-    if (IS_INTEGER.matcher(code).matches()) {
-      codeableConcept.addCoding(
-          new Coding().setSystem(SystemUrls.AMA_CPT).setCode(hcpcsOrCptOrHipps));
-    } else {
-      codeableConcept.addCoding(
-          new Coding().setSystem(SystemUrls.CMS_HCPCS).setCode(hcpcsOrCptOrHipps));
-    }
-
-    var hippsCode = hcpcsOrCptOrHipps.substring(1, 2);
-
-    if (!IS_INTEGER.matcher(hippsCode).matches()) {
-      codeableConcept.addCoding(
-          new Coding().setSystem(SystemUrls.CMS_HIPPS).setCode(hcpcsOrCptOrHipps));
-    }
-    return codeableConcept;
+    return new CodeableConcept()
+        .setCoding(
+            getCodingSystems().stream()
+                .map(system -> new Coding().setSystem(system).setCode(hcpcsOrCptOrHipps))
+                .toList());
   }
 }

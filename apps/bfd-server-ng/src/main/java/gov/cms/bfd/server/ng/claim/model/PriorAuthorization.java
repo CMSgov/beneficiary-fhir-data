@@ -46,7 +46,7 @@ public class PriorAuthorization {
   private UUID resourceId;
 
   @Column(name = "clm_type")
-  private ClaimTypePriorAuth claimType;
+  private Optional<ClaimTypePriorAuth> claimType;
 
   @Column(name = "mac_id")
   private Optional<ClaimContractorNumber> macId;
@@ -83,9 +83,10 @@ public class PriorAuthorization {
   /**
    * Convert the prior authorization info to a FHIR ExplanationOfBenefit.
    *
+   * @param claimState the security status
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir() {
+  public ExplanationOfBenefit toFhir(ClaimState claimState) {
     var eob = new ExplanationOfBenefit();
     eob.setId(resourceId.toString());
     eob.addIdentifier(
@@ -95,15 +96,18 @@ public class PriorAuthorization {
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.PREAUTHORIZATION);
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
-    eob.setMeta(meta.toFhir(getMetaSourceSk()));
-    eob.setType(claimType.toFhir());
-    eob.addInsurance(claimType.toFhirInsurance());
-    if (claimType.equals(ClaimTypePriorAuth.Valid.B)) {
-      eob.addIdentifier(
-          new Identifier()
-              .setSystem(SystemUrls.BLUE_BUTTON_INTERNAL_CONTROL_NUMBER_OR_DCN)
-              .setValue(internalControlNumberOrDcn));
-    }
+    eob.setMeta(meta.toFhir(getMetaSourceSk(), claimState.getSecurityStatus()));
+    claimType.ifPresent(
+        type -> {
+          eob.setType(type.toFhir());
+          eob.addInsurance(type.toFhirInsurance());
+          if (type.equals(ClaimTypePriorAuth.Valid.B)) {
+            eob.addIdentifier(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_INTERNAL_CONTROL_NUMBER_OR_DCN)
+                    .setValue(internalControlNumberOrDcn));
+          }
+        });
     eob.setPreAuthRefPeriod(List.of(uniqueTrackingNumberPeriod.toFhir()));
     addCareTeam(eob);
     eob.setProvider(new Reference("#" + getFacilityNpi()));
@@ -130,10 +134,7 @@ public class PriorAuthorization {
             getRenderingProviderHistory(),
             getAttendingPhysicianProviderHistory())
         .flatMap(
-            p ->
-                p
-                    .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimType().toContext())
-                    .stream())
+            p -> p.toFhirCareTeamComponent(sequenceGenerator.next(), Optional.empty()).stream())
         .forEach(eob::addCareTeam);
   }
 

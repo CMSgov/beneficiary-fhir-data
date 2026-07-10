@@ -44,12 +44,16 @@ public sealed interface ClaimTypePriorAuth
    * @param code database code
    * @return claim type prior auth code or empty Optional if code is null or blank
    */
-  static ClaimTypePriorAuth tryFromCode(String code) {
-    return Arrays.stream(ClaimTypePriorAuth.Valid.values())
-        .filter(v -> v.code.equals(code))
-        .map(v -> (ClaimTypePriorAuth) v)
-        .findFirst()
-        .orElseGet(() -> new ClaimTypePriorAuth.Invalid(code));
+  static Optional<ClaimTypePriorAuth> tryFromCode(String code) {
+    if (code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(ClaimTypePriorAuth.Valid.values())
+            .filter(v -> v.code.equals(code))
+            .map(v -> (ClaimTypePriorAuth) v)
+            .findFirst()
+            .orElseGet(() -> new ClaimTypePriorAuth.Invalid(code)));
   }
 
   /**

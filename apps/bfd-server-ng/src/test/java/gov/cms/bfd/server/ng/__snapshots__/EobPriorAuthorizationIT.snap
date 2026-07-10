@@ -1735,7 +1735,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -1763,22 +1763,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -1787,10 +1787,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -1822,22 +1822,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -1846,10 +1846,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -1881,22 +1881,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -1905,10 +1905,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -1928,7 +1928,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -1943,22 +1943,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -1967,10 +1967,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -2003,6 +2003,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -2014,8 +2019,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -2522,7 +2527,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -2550,22 +2555,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -2574,10 +2579,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -2609,22 +2614,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -2633,10 +2638,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -2668,22 +2673,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -2692,10 +2697,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -2715,7 +2720,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -2730,22 +2735,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -2754,10 +2759,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -2790,6 +2795,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -2801,8 +2811,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -5913,7 +5923,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -5941,22 +5951,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -5965,10 +5975,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6000,22 +6010,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -6024,10 +6034,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6059,22 +6069,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -6083,10 +6093,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -6106,7 +6116,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -6121,22 +6131,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -6145,10 +6155,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6181,6 +6191,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -6192,8 +6207,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -6700,7 +6715,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -6728,22 +6743,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -6752,10 +6767,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6787,22 +6802,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -6811,10 +6826,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6846,22 +6861,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -6870,10 +6885,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -6893,7 +6908,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -6908,22 +6923,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -6932,10 +6947,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -6968,6 +6983,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -6979,8 +6999,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -10091,7 +10111,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -10119,22 +10139,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -10143,10 +10163,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -10178,22 +10198,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -10202,10 +10222,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -10237,22 +10257,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -10261,10 +10281,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -10284,7 +10304,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -10299,22 +10319,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -10323,10 +10343,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -10359,6 +10379,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -10370,8 +10395,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -10878,7 +10903,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       } ],
-      "created" : "2026-06-10T00:00:00+00:00",
+      "created" : "2025-06-10T00:00:00+00:00",
       "id" : "00000000-0000-0000-0000-000000000000",
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
@@ -10906,22 +10931,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 11
@@ -10930,10 +10955,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           "valueInteger" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
+          "valueDateTime" : "2025-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
+          "valueDateTime" : "2026-06-18"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -10965,22 +10990,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 14
@@ -10989,10 +11014,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           "valueInteger" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
+          "valueDateTime" : "2025-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
+          "valueDateTime" : "2026-05-22"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -11024,22 +11049,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -11048,10 +11073,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           "valueInteger" : 49
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDateTime" : "2025-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
+          "valueDateTime" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
           "valueString" : "true"
@@ -11071,7 +11096,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
         } ],
         "productOrService" : {
           "coding" : [ {
-            "code" : "G0493",
+            "code" : "G0532",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         },
@@ -11086,22 +11111,22 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
+          "valueDateTime" : "2025-06-10"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
+          "valueDateTime" : "2025-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
+          "valueDateTime" : "2026-06-11"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
           "valueInteger" : 4
@@ -11110,10 +11135,10 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           "valueInteger" : 96
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
+          "valueDateTime" : "2025-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
+          "valueDateTime" : "2026-06-25"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -11146,6 +11171,11 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
+        "security" : [ {
+          "code" : "42CFRPart2",
+          "display" : "42 CFR Part 2",
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        } ],
         "source" : "CWF",
         "tag" : [ {
           "code" : "SharedSystem",
@@ -11157,8 +11187,8 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
         "reference" : "Patient/794471559"
       },
       "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
+        "end" : "2026-06-20",
+        "start" : "2025-06-20"
       } ],
       "provider" : {
         "reference" : "#1835331558"
@@ -12536,1291 +12566,6 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
 {
   "entry" : [ {
     "resource" : {
-      "adjudication" : [ {
-        "category" : {
-          "coding" : [ {
-            "code" : "benefitpaymentstatus",
-            "display" : "Benefit Payment Status",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
-          } ]
-        },
-        "reason" : {
-          "coding" : [ {
-            "code" : "other",
-            "display" : "Other",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0.0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-            "display" : "Operating Disproportionate Share Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0.0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_OPRTNL_IME_AMT",
-            "display" : "Operating Indirect Medical Education Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_LRD_USE_CNT",
-            "display" : "Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 8
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_MDCR_COINS_DAY_CNT",
-            "display" : "Beneficiary Total Coinsurance Days Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 1
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_NCVRD_DAY_CNT",
-            "display" : "Claim Medicare Non Utilization Days Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 1
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
-            "display" : "PPS DRG Weight Number",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0.54
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_CVRD_DAY_CNT",
-            "display" : "Claim Medicare Utilization Day Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 1
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 200.15
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_PER_DIEM_AMT",
-            "display" : "Claim Pass Thru Per Diem Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 5412.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_DSPRPRTNT_AMT",
-            "display" : "Claim PPS Capital Disproportionate Share Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 15.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_EXCPTN_AMT",
-            "display" : "Claim PPS Capital Exception Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 4.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_CPTL_FSP_AMT",
-            "display" : "Claim PPS Capital Federal Specific Portion (FSP) Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 57.57
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_CPTL_IME_AMT",
-            "display" : "Claim PPS Capital Indirect Medical Education (IME) Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 12.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_OUTLIER_AMT",
-            "display" : "Claim PPS Capital Outlier Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 23.25
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT",
-            "display" : "Claim PPS Old Capital Hold Harmless Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 5.5
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_PPS_CPTL_TOT_AMT",
-            "display" : "Claim Total PPS Capital Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 4551.15
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_INSTNL_PRMRY_PYR_AMT",
-            "display" : "Primary Payer (if not Medicare) Claim Paid Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 7657.37
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_PRFNL_AMT",
-            "display" : "Professional Component Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 455.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_DRG_OUTLIER_AMT",
-            "display" : "DRG Outlier Approved Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 154.54
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_UNCOMPD_CARE_AMT",
-            "display" : "Claim Uncompensated Care Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 54.25
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-            "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 4308.03
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_READMSN_RDCTN_AMT",
-            "display" : "Readmission Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 3095.75
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_VBP_AMT",
-            "display" : "HIPPS Value Based Purchasing Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 6159.25
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display" : "Low Volume Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 654.49
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_1ST_YR_RATE_AMT",
-            "display" : "First Year Rate Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 3203.65
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_SCND_YR_RATE_AMT",
-            "display" : "Second Year Rate Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 1963.11
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
-            "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 436.6
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BLOOD_CHRG_AMT",
-            "display" : "Blood Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 6.2
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BLOOD_LBLTY_AMT",
-            "display" : "Beneficiary Blood Deductible Liability Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 415.53
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
-            "display" : "Blood Noncovered Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      } ],
-      "billablePeriod" : {
-        "end" : "2018-07-20",
-        "start" : "2018-06-23"
-      },
-      "careTeam" : [ {
-        "provider" : {
-          "display" : "Potter, Harry",
-          "identifier" : {
-            "system" : "http://hl7.org/fhir/sid/us-npi",
-            "type" : {
-              "coding" : [ {
-                "code" : "NPI",
-                "display" : "National provider identifier",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1093792350"
-          },
-          "type" : "Practitioner"
-        },
-        "role" : {
-          "coding" : [ {
-            "code" : "service",
-            "display" : "Service provider",
-            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-          }, {
-            "code" : "service",
-            "display" : "Service provider",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-          } ]
-        },
-        "sequence" : 6
-      } ],
-      "contained" : [ {
-        "active" : true,
-        "id" : "insurer-org",
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
-        },
-        "name" : "Centers for Medicare and Medicaid Services",
-        "resourceType" : "Organization"
-      } ],
-      "created" : "2025-08-26T00:00:00+00:00",
-      "diagnosis" : [ {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "F10.10",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "Z",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
-        "sequence" : 1,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "other",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        } ]
-      } ],
-      "id" : "4146709784142",
-      "identifier" : [ {
-        "type" : {
-          "coding" : [ {
-            "code" : "uc",
-            "display" : "Unique Claim ID",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
-          } ]
-        },
-        "value" : "4146709784142"
-      }, {
-        "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
-        "value" : "93208825286965GVA"
-      } ],
-      "insurance" : [ {
-        "coverage" : {
-          "display" : "Part A"
-        },
-        "focal" : true
-      } ],
-      "insurer" : {
-        "reference" : "#insurer-org"
-      },
-      "item" : [ {
-        "adjudication" : [ {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 2.13
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "deductible",
-              "display" : "Deductible",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
-              "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-              "display" : "Cash Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 10.46
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 772968.46
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "paidtopatient",
-              "display" : "Paid to patient",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_BENE_PD_AMT",
-              "display" : "Payment Amount to Beneficiary",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 3.41
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "paidbypatient",
-              "display" : "Paid by patient",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Line Paid By Beneficiary Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 326.24
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "noncovered",
-              "display" : "Noncovered",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-              "display" : "Non-Covered Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 887996.87
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "paidtoprovider",
-              "display" : "Paid to provider",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_PRVDR_PMT_AMT",
-              "display" : "Line Provider Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 36129.5
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "benefit",
-              "display" : "Benefit Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
-              "code" : "CLM_LINE_CVRD_PD_AMT",
-              "display" : "Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1.99
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
-              "code" : "CLM_LINE_SBMT_CHRG_AMT",
-              "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 375.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 886.52
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 16.44
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "priorpayerpaid",
-              "display" : "Prior payer paid",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_INSTNL_MSP1_PD_AMT",
-              "display" : "Revenue Center 1st MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 58.54
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "priorpayerpaid",
-              "display" : "Prior payer paid",
-              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-            }, {
-              "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
-              "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 13.41
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 2126.25
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 7900.67
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_REV_CNTR_TDAPA_AMT",
-              "display" : "Transitional Drug Add-On Payment Adjustment",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        } ],
-        "detail" : [ {
-          "productOrService" : {
-            "coding" : [ {
-              "code" : "00338011704",
-              "system" : "http://hl7.org/fhir/sid/ndc"
-            } ]
-          },
-          "quantity" : {
-            "code" : "mL",
-            "system" : "http://unitsofmeasure.org",
-            "unit" : "ML",
-            "value" : 5.0
-          },
-          "sequence" : 1
-        } ],
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD",
-          "valueCoding" : {
-            "code" : "N",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-ONE-IND-CD"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD",
-          "valueCoding" : {
-            "code" : "M",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
-          "valueCoding" : {
-            "code" : "7",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
-          }
-        } ],
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "J2270",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        },
-        "quantity" : {
-          "value" : 7.0
-        },
-        "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0" ],
-        "security" : [ {
-          "code" : "42CFRPart2",
-          "display" : "42 CFR Part 2",
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
-        } ],
-        "source" : "NCH",
-        "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
-          "code" : "FinalAction",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
-        } ]
-      },
-      "outcome" : "complete",
-      "patient" : {
-        "reference" : "Patient/794471559"
-      },
-      "payment" : {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 152869.19
-        },
-        "date" : "2018-07-20"
-      },
-      "resourceType" : "ExplanationOfBenefit",
-      "status" : "active",
-      "subType" : {
-        "coding" : [ {
-          "code" : "inpatient",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
-        } ]
-      },
-      "supportingInfo" : [ {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_IDR_LD_DT",
-            "display" : "Claim IDR Load Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "typeofbill",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "024H",
-            "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
-          }, {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
-          }, {
-            "code" : "24",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
-          }, {
-            "code" : "24H",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
-          } ]
-        },
-        "sequence" : 2
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QUERY_CD",
-            "display" : "Claim Query Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "2",
-            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          } ]
-        },
-        "sequence" : 3
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_CNTRCTR_NUM",
-            "display" : "Claim Contractor Number",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "04311",
-            "display" : "OKLAHOMA - NOVITAS SOLUTIONS, INC (EFF. 10/29/2012)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-          } ]
-        },
-        "sequence" : 4
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_PRMRY_PYR_CD",
-            "display" : "NCH Primary Payer Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "X",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
-          } ]
-        },
-        "sequence" : 5
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_DISP_CD",
-            "display" : "Claim Disposition Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "52",
-            "display" : "MASTER RECORD AT ANOTHER CWF SITE",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-          } ]
-        },
-        "sequence" : 6
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "clmrecvddate",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_CMS_PROC_DT",
-            "display" : "FI Claim Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NRLN_RIC_CD",
-            "display" : "Near Line Record Identification Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
-          } ]
-        },
-        "sequence" : 10
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "pointoforigin",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "Y",
-            "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
-          }, {
-            "code" : "Y",
-            "display" : "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
-          } ]
-        },
-        "sequence" : 11
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "discharge-status",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "93",
-            "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
-          }, {
-            "code" : "93",
-            "display" : "DISCHARGED/TRANSFERRED TO A PSYCHIATRIC HOSPITAL OR PSYCHIATRIC DISTINCT PART UNIT OF A HOSPITAL WITH A PLANNED ACUTE CARE HOSPITAL INPATIENT READMISSION (EFFECTIVE 10/1/13)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
-          } ]
-        },
-        "sequence" : 12
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "admtype",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-          }, {
-            "code" : "8",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
-          } ]
-        },
-        "sequence" : 13
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
-            "display" : "MCO Paid Switch",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "0",
-            "display" : "No managed care organization (MCO) payment",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
-          } ]
-        },
-        "sequence" : 14
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FI_ACTN_CD",
-            "display" : "Claim Fiscal Intermediary Action Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "1",
-            "display" : "Original debit action (always a 1 for all regular bills)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-          } ]
-        },
-        "sequence" : 15
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PPS_IND_CD",
-            "display" : "Claim PPS Indicator Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "1",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
-          } ]
-        },
-        "sequence" : 16
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Federal Information Processing Standards (FIPS) State Code",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "04",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
-          } ]
-        },
-        "sequence" : 17
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "25",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
-          } ]
-        },
-        "sequence" : 18
-      } ],
-      "total" : [ {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "eligible",
-            "display" : "Eligible Amount",
-            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-          }, {
-            "code" : "CLM_ALOWD_CHRG_AMT",
-            "display" : "Allowed Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 310211.02
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "submitted",
-            "display" : "Submitted Amount",
-            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-          }, {
-            "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "paidtoprovider",
-            "display" : "Paid to provider",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_PRVDR_PMT_AMT",
-            "display" : "Provider Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 14.13
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "deductible",
-            "display" : "Deductible",
-            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-          }, {
-            "code" : "CLM_MDCR_DDCTBL_AMT",
-            "display" : "Beneficiary Deductible Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "coinsurance",
-            "display" : "Co-insurance",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_MDCR_COINSRNC_AMT",
-            "display" : "Beneficiary Coinsurance Liability Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 157341.83
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "noncovered",
-            "display" : "Noncovered",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_NCVRD_CHRG_AMT",
-            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "paidtopatient",
-            "display" : "Paid to patient",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Paid to Beneficiary Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      } ],
-      "type" : {
-        "coding" : [ {
-          "code" : "60",
-          "display" : "MEDICARE INPATIENT CLAIM",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "institutional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
-        }, {
-          "code" : "INPATIENT",
-          "display" : "Inpatient Hospital Care",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
-        } ]
-      },
-      "use" : "claim"
-    }
-  }, {
-    "resource" : {
       "careTeam" : [ {
         "provider" : {
           "identifier" : {
@@ -14138,456 +12883,6 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
       },
       "use" : "preauthorization"
     }
-  }, {
-    "resource" : {
-      "careTeam" : [ {
-        "provider" : {
-          "identifier" : {
-            "system" : "http://hl7.org/fhir/sid/us-npi",
-            "type" : {
-              "coding" : [ {
-                "code" : "NPI",
-                "display" : "National provider identifier",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1925159539"
-          },
-          "type" : "Practitioner"
-        },
-        "role" : {
-          "coding" : [ {
-            "code" : "referring",
-            "display" : "Referring",
-            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-          }, {
-            "code" : "referring",
-            "display" : "Referring",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-          } ]
-        },
-        "sequence" : 1
-      }, {
-        "provider" : {
-          "identifier" : {
-            "system" : "http://hl7.org/fhir/sid/us-npi",
-            "type" : {
-              "coding" : [ {
-                "code" : "NPI",
-                "display" : "National provider identifier",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1835331558"
-          },
-          "type" : "Practitioner"
-        },
-        "role" : {
-          "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
-            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-          }, {
-            "code" : "rendering",
-            "display" : "Rendering provider",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-          } ]
-        },
-        "sequence" : 2
-      }, {
-        "provider" : {
-          "identifier" : {
-            "system" : "http://hl7.org/fhir/sid/us-npi",
-            "type" : {
-              "coding" : [ {
-                "code" : "NPI",
-                "display" : "National provider identifier",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1726578739"
-          },
-          "type" : "Practitioner"
-        },
-        "role" : {
-          "coding" : [ {
-            "code" : "attending",
-            "display" : "Attending",
-            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-          }, {
-            "code" : "attending",
-            "display" : "Attending",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-          } ]
-        },
-        "sequence" : 3
-      } ],
-      "contained" : [ {
-        "active" : true,
-        "id" : "1835331558",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "display" : "National provider identifier",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1835331558"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001509"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
-        },
-        "name" : "HEALTHCARE CENTER",
-        "resourceType" : "Organization"
-      }, {
-        "active" : true,
-        "id" : "insurer-org",
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
-        },
-        "name" : "Centers for Medicare and Medicaid Services",
-        "resourceType" : "Organization"
-      } ],
-      "created" : "2026-06-10T00:00:00+00:00",
-      "id" : "00000000-0000-0000-0000-000000000000",
-      "identifier" : [ {
-        "system" : "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number",
-        "value" : "-Z7E63N3ROZJC9"
-      }, {
-        "system" : "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN",
-        "value" : "59304624928145"
-      } ],
-      "insurance" : [ {
-        "coverage" : {
-          "display" : "Part B"
-        },
-        "focal" : true
-      } ],
-      "insurer" : {
-        "reference" : "#insurer-org"
-      },
-      "item" : [ {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
-          "valueCoding" : {
-            "code" : "N",
-            "display" : "Non-affirmed",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 11
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 5
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-18"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-18"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
-          "valueCoding" : {
-            "code" : "FL",
-            "system" : "https://www.usps.com"
-          }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "G0162",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        },
-        "sequence" : 1
-      }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
-          "valueCoding" : {
-            "code" : "N",
-            "display" : "Non-affirmed",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 14
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-05-22"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-05-22"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
-          "valueCoding" : {
-            "code" : "FL",
-            "system" : "https://www.usps.com"
-          }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "G0495",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        },
-        "sequence" : 2
-      }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
-          "valueCoding" : {
-            "code" : "A",
-            "display" : "Affirmed",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 4
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 49
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-16"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-16"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
-          "valueString" : "true"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
-          "valueCoding" : {
-            "code" : "FL",
-            "system" : "https://www.usps.com"
-          }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "G0493",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        },
-        "sequence" : 3
-      }, {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION",
-          "valueCoding" : {
-            "code" : "A",
-            "display" : "Affirmed",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION"
-          }
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-10"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-11"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 4
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 96
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-25"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-25"
-        }, {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
-          "valueCoding" : {
-            "code" : "FL",
-            "system" : "https://www.usps.com"
-          }
-        } ],
-        "locationCodeableConcept" : {
-          "coding" : [ {
-            "code" : "41",
-            "display" : "Ambulance - Land",
-            "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
-          } ]
-        },
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "G0495",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        },
-        "sequence" : 4
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" ],
-        "source" : "CWF",
-        "tag" : [ {
-          "code" : "SharedSystem",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        } ]
-      },
-      "outcome" : "complete",
-      "patient" : {
-        "reference" : "Patient/794471559"
-      },
-      "preAuthRefPeriod" : [ {
-        "end" : "2027-06-20",
-        "start" : "2026-06-20"
-      } ],
-      "provider" : {
-        "reference" : "#1835331558"
-      },
-      "resourceType" : "ExplanationOfBenefit",
-      "status" : "active",
-      "supportingInfo" : [ {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_CNTRCTR_NUM",
-            "display" : "Claim Contractor Number",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "01311",
-            "display" : "NEVADA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 8/26/2013)",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-          } ]
-        },
-        "sequence" : 1
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "typeofbill",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "32X",
-            "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
-          } ]
-        },
-        "sequence" : 2
-      } ],
-      "type" : {
-        "coding" : [ {
-          "code" : "B",
-          "display" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
-        }, {
-          "code" : "B",
-          "display" : "Part B",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE"
-        } ]
-      },
-      "use" : "preauthorization"
-    }
   } ],
   "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
@@ -14598,7 +12893,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
-  "total" : 3,
+  "total" : 1,
   "type" : "searchset"
 }
 ]

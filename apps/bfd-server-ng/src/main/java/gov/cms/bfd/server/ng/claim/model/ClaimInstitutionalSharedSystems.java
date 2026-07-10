@@ -56,7 +56,12 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
-  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
+  private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Override
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.of(claimPaidStatusCode);
+  }
 
   @Override
   Optional<ClaimRecordType> getClaimRecordTypeOptional() {
@@ -91,7 +96,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
       buildRecordTypeSupportingInfo() {
     return Stream.of(
             claimRecordType.toFhir(supportingInfoFactory),
-            claimPaidStatusCode.map(cd -> cd.toFhir(supportingInfoFactory)),
+            Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
             buildAuditStatusSupportingInfo())
         .flatMap(Optional::stream)
         .toList();

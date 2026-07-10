@@ -175,11 +175,6 @@ public class ClaimRepository {
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimSearchCriteria criteria) {
 
-    var priorAuthSourceEvaluation = evaluatePriorAuthSourceFilters(criteria.sources());
-    if (priorAuthSourceEvaluation.isImpossibleCombination()) {
-      return new ClaimAndAuthResult(Collections.emptyList(), Collections.emptyList());
-    }
-
     List<DbFilterBuilder> filterBuilders =
         List.of(
             new BillablePeriodFilterParam(criteria.claimThroughDate()),
@@ -198,13 +193,11 @@ public class ClaimRepository {
                         d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
             .toList();
 
-    var includePriorAuth =
-        criteria.sources().isEmpty() || priorAuthSourceEvaluation.hasPriorAuthSource();
+    var includePriorAuth = filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
     CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
-        CompletableFuture.completedFuture(Collections.emptyList());
-    if (includePriorAuth) {
-      priorAuthFuture = asyncService.fetchPriorAuth(criteria.mbi());
-    }
+        includePriorAuth
+            ? asyncService.fetchPriorAuth(criteria.mbi())
+            : CompletableFuture.completedFuture(Collections.emptyList());
 
     List<CompletableFuture<?>> allFutures = new ArrayList<>(claimFutures);
     allFutures.add(priorAuthFuture);
@@ -226,34 +219,4 @@ public class ClaimRepository {
    * @param priorAuths list of prior authorizations found
    */
   public record ClaimAndAuthResult(List<ClaimBase> claims, List<PriorAuthorization> priorAuths) {}
-
-  private SourceEvaluation evaluatePriorAuthSourceFilters(List<List<MetaSourceSk>> sources) {
-    var hasPriorAuthSource = false;
-    var hasOtherSources = false;
-    var sourceClausesCount = 0;
-
-    for (var orClause : sources) {
-      if (orClause.isEmpty()) {
-        continue;
-      }
-      sourceClausesCount++;
-
-      var innerHasCWF = orClause.contains(MetaSourceSk.CWF);
-      var innerHasOthers = orClause.stream().anyMatch(src -> src != MetaSourceSk.CWF);
-
-      if (innerHasCWF) {
-        hasPriorAuthSource = true;
-      }
-      if (innerHasOthers) {
-        hasOtherSources = true;
-      }
-    }
-
-    // impossible prior auth source filter: CWF AND any other source
-    var isImpossibleCombination = sourceClausesCount > 1 && hasPriorAuthSource && hasOtherSources;
-
-    return new SourceEvaluation(hasPriorAuthSource, isImpossibleCombination);
-  }
-
-  private record SourceEvaluation(boolean hasPriorAuthSource, boolean isImpossibleCombination) {}
 }

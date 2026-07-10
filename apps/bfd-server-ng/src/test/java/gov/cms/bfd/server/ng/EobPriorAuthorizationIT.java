@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
@@ -28,18 +29,29 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class EobPriorAuthorizationIT extends IntegrationTestBase {
 
-  private IQuery<Bundle> searchBundle() {
+  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH =
+      new PriorAuthIdentifier("794471559", "-0Y2K7HP0Y71BO");
+  private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH =
+      new PriorAuthIdentifier("794471559", "-Z7E63N3ROZJC9");
+
+  private record PriorAuthIdentifier(String beneSk, String utn) {}
+
+  private IQuery<Bundle> searchBundle(SamhsaCertType samhsaCertType) {
     final var fhirClient = getFhirClient();
-    final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "samhsa_allowed");
-    fhirClient.registerInterceptor(headersInterceptor);
+
+    if (samhsaCertType != SamhsaCertType.NO_CERT) {
+      final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.getCertValue());
+      fhirClient.registerInterceptor(headersInterceptor);
+    }
+
     return fhirClient.search().forResource(ExplanationOfBenefit.class).returnBundle(Bundle.class);
   }
 
   @Test
   void eobSearchPriorAuthorizationByPatient() {
     var bundle =
-        searchBundle()
+        searchBundle(SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT)
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
@@ -206,7 +218,7 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
       boolean expectsPriorAuth,
       SearchStyleEnum searchStyle) {
     var query =
-        searchBundle()
+        searchBundle(SamhsaCertType.SAMHSA_ALLOWED_CERT)
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
@@ -239,5 +251,47 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
     if (expectedCount > 0) {
       assertEquals(expectsPriorAuth, hasPriorAuth);
     }
+  }
+
+  private static Stream<Arguments> shouldFilterSamhsaPriorAuth() {
+    return Stream.of(
+        Arguments.of(SamhsaCertType.NO_CERT, 1, false),
+        Arguments.of(SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT, 1, false),
+        Arguments.of(SamhsaCertType.SAMHSA_ALLOWED_CERT, 3, true));
+  }
+
+  @MethodSource({"shouldFilterSamhsaPriorAuth"})
+  @ParameterizedTest
+  void shouldFilterSamhsaPriorAuth(
+      SamhsaCertType certType, int expectedBundleSize, boolean expectedSamhsaPriorAuth) {
+    var bundle =
+        searchBundle(certType)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_WITH_PRIOR_AUTH))
+            .execute();
+
+    assertEquals(expectedBundleSize, bundle.getEntry().size());
+
+    var priorAuths =
+        getEobFromBundle(bundle).stream()
+            .filter(
+                eob -> eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION)
+            .toList();
+
+    assertTrue(priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, NO_SAMHSA_PRIOR_AUTH)));
+    assertEquals(
+        expectedSamhsaPriorAuth,
+        priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, SAMHSA_PRIOR_AUTH)));
+  }
+
+  private boolean matchesPriorAuth(ExplanationOfBenefit eob, PriorAuthIdentifier identifier) {
+    assertEquals(ExplanationOfBenefit.Use.PREAUTHORIZATION, eob.getUse());
+
+    var hasMatchingUtn =
+        eob.getIdentifier().stream().anyMatch(id -> identifier.utn().equals(id.getValue()));
+    var hasMatchingMbi = eob.getPatient().getReference().contains(identifier.beneSk());
+    return hasMatchingUtn && hasMatchingMbi;
   }
 }

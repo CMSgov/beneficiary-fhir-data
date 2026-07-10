@@ -8,9 +8,10 @@ import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Period;
 
+/** Represents the period for a prior authorization, including the start and end dates. */
 @Getter
 @Embeddable
-class UniqueTrackingNumberPeriod {
+public class UniqueTrackingNumberPeriod {
   @Column(name = "utn_valid_st_dt")
   private LocalDate startDate;
 

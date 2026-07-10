@@ -64,7 +64,12 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
-  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
+  private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Override
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.of(claimPaidStatusCode);
+  }
 
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
@@ -77,7 +82,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
             Stream.of(
                 nchPrimaryPayorCode.toFhir(supportingInfoFactory),
                 providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-                claimPaidStatusCode.map(cd -> cd.toFhir(supportingInfoFactory)),
+                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
                 buildAuditStatusSupportingInfo()),
             buildRxSupportingInfo())
         .flatMap(Optional::stream)
