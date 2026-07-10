@@ -11,6 +11,9 @@ dependencies = [
     "pyyaml>=6.0.3",
 ]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100
