@@ -9,6 +9,9 @@ dependencies = ["boto3>=1.42.81", "aws-lambda-powertools>=3.26.0", "psycopg[bina
 [dependency-groups]
 dev = ["boto3-stubs[lambda]", "ruff", "uv>=0.11.15", "pyright"]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100

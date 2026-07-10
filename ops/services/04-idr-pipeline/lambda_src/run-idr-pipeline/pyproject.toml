@@ -14,6 +14,9 @@ dependencies = [
 [dependency-groups]
 dev = ["boto3-stubs[ecs,scheduler]", "ruff", "uv>=0.11.15", "pyright"]
 
+[tool.uv]
+exclude-newer = "7 days"
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100

@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -56,7 +57,7 @@ public class ClaimAsyncService {
         "application.claim.search_by_ids_in_claim_type",
         () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
         () -> {
-          try (var entityManager = entityManagerFactory.createEntityManager()) {
+          try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
             var query =
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
@@ -88,7 +89,7 @@ public class ClaimAsyncService {
              %s
             """,
             baseQuery, whereClause);
-    try (var entityManager = entityManagerFactory.createEntityManager()) {
+    try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
           () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
@@ -129,5 +130,10 @@ public class ClaimAsyncService {
       queryParams.addAll(params.params());
     }
     return new DbFilter(sb.toString(), queryParams);
+  }
+
+  private EntityManager readonly(EntityManager entityManager) {
+    entityManager.unwrap(org.hibernate.Session.class).setDefaultReadOnly(true);
+    return entityManager;
   }
 }
