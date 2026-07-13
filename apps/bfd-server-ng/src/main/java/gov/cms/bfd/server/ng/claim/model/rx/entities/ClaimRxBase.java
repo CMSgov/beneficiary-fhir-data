@@ -5,11 +5,14 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+
+import javax.annotation.processing.Generated;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.SortedSet;
 
 /** Shared base for professional claim types (NCH and Shared Systems). */
+@Generated("TODO - Remove after query optimization implementation")
 public class ClaimRxBase extends ClaimBase {
   @Override
   public ClaimSourceId getClaimSourceId() {

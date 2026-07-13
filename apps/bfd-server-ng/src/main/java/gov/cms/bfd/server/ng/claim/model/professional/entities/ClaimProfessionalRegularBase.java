@@ -13,7 +13,10 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+import javax.annotation.processing.Generated;
+
 /** Shared base for regular profile professional claims. */
+@Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
   @Override
   AdjudicationChargeBase getAdjudicationCharge() {

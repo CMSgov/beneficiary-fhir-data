@@ -15,7 +15,10 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+import javax.annotation.processing.Generated;
+
 /** The institutional claim, regular profile base class. */
+@Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
   @Override
   SupportingInfoComponentBase getClaimDateSupportingInfo() {

@@ -5,9 +5,12 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
+
+import javax.annotation.processing.Generated;
 import java.util.Optional;
 
 /** LineItem for a professional claim, regular profile, sourced from shared systems. */
+@Generated("TODO - Remove after query optimization implementation")
 public class ClaimItemProfessionalRegularSharedSystems implements ClaimItemBase {
   @Override
   public ClaimItemId getClaimItemId() {
