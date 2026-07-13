@@ -92,7 +92,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1065725636"
       },
-      "display" : "Practitioner"
+      "display" : "Indiana"
     },
     "role" : {
       "coding" : [{
@@ -117,7 +117,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "2601139399"
       },
-      "display" : "Practitioner"
+      "display" : "Jones, Gromit"
     },
     "role" : {
       "coding" : [{
@@ -142,7 +142,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1248968152"
       },
-      "display" : "Practitioner"
+      "display" : "Tiana"
     },
     "role" : {
       "coding" : [{
@@ -155,7 +155,7 @@
   {
     "sequence" : 4,
     "provider" : {
-      "type" : "Practitioner",
+      "type" : "Organization",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -167,7 +167,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1118124233"
       },
-      "display" : "Practitioner"
+      "display" : "CBS Health Corporation"
     },
     "role" : {
       "coding" : [{

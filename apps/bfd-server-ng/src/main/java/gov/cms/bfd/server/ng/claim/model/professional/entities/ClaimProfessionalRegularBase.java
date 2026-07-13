@@ -11,9 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
 import javax.annotation.processing.Generated;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
 @Generated("TODO - Remove after query optimization implementation")
