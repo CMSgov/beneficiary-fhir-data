@@ -188,10 +188,9 @@ public class S3ManifestDbDaoIT extends AbstractMiniStackS3Test {
     var manifest = new S3ManifestFile();
     // Leave manifestId unset so the sequence generator assigns it on insert. Tests that seed a
     // record via updateS3ManifestAndDataFiles() (merge) rely on the entity being treated as
-    // transient;
+    // transient.
     // assigning an id here would make Hibernate 6.6 treat it as a detached entity and
     // throw StaleObjectStateException when no matching row exists.
-    //
     manifest.setS3Key(baseS3Key + "0_manifest.xml");
     manifest.setStatus(S3ManifestFile.ManifestStatus.DISCOVERED);
     manifest.setStatusTimestamp(DISCOVERY_TIMESTAMP);
