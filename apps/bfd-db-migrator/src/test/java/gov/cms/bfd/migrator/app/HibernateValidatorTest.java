@@ -74,11 +74,6 @@ public class HibernateValidatorTest {
     when(mockSessionFactory.getSessionFactoryOptions()).thenReturn(sessionFactoryOptions);
     StandardServiceRegistry mockRegistry = mock(StandardServiceRegistry.class);
     when(sessionFactoryOptions.getServiceRegistry()).thenReturn(mockRegistry);
-    // As of Hibernate 6.6, internal metadata-building code resolves services via
-    // requireService(...) rather than getService(...). Delegate requireService to the
-    // getService stubs below so the existing mocks continue to satisfy those lookups.
-    when(mockRegistry.requireService(any()))
-        .thenAnswer(invocation -> mockRegistry.getService(invocation.getArgument(0)));
     when(configuration.getProperties()).thenReturn(new Properties());
     ConfigurationService configurationService = mock(ConfigurationService.class);
     when(configurationService.getSetting(
