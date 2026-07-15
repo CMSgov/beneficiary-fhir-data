@@ -92,7 +92,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_alowd_chrg_amt: float | None
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}] # todo, remove? update?
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)

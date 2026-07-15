@@ -13,6 +13,9 @@ CLAIM_PROFESSIONAL_SS_TABLE = "idr.claim_professional_ss"
 CLAIM_INSTITUTIONAL_NCH_TABLE = "idr.claim_institutional_nch"
 CLAIM_INSTITUTIONAL_SS_TABLE = "idr.claim_institutional_ss"
 
+# CLM_VAL_CD values
+BLOOD_PT_FRNSH_QTY_CD = "37"
+
 IDR_PREFIX = "cms_vdm_view_mdcr_prd"
 IDR_BENE_HISTORY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_hstry"
 IDR_BENE_MBI_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_mbi_id"

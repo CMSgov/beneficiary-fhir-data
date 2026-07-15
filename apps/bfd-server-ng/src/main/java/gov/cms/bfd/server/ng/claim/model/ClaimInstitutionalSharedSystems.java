@@ -13,10 +13,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -31,9 +33,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_institutional_ss", schema = "idr")
 @SuppressWarnings({"java:S6539", "java:S2293"})
 public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
-
-  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
+  
   @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private BloodPints bloodPints;
+  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
@@ -74,7 +77,9 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return List.of();
+    return Stream.of(bloodPints.toFhir(supportingInfoFactory).stream().toList())
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   /**

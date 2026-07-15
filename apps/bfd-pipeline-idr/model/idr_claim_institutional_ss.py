@@ -4,6 +4,7 @@ from typing import Annotated, override
 from pydantic import BeforeValidator
 
 from constants import (
+    BLOOD_PT_FRNSH_QTY_CD,
     CLAIM_INSTITUTIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
     IDR_CLAIM_DATE_SIGNATURE_TABLE,
@@ -12,6 +13,7 @@ from constants import (
     IDR_CLAIM_INSTITUTIONAL_TABLE,
     IDR_CLAIM_LOCATION_HISTORY_TABLE,
     IDR_CLAIM_TABLE,
+    IDR_CLAIM_VAL_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
 from load_partition import LoadPartition
@@ -32,6 +34,7 @@ from model.base_model import (
     ALIAS_RLT_COND,
     ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_SGNTR,
+    ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
     EXPR,
@@ -162,6 +165,10 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
+
+    # Columns from v2_mdcr_clm_val
+    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_VAL}]
+
     # columns from v2_mdcr_clm_lctn_hstry
     clm_audt_trl_stus_cd: Annotated[
         str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_default_string)
@@ -451,6 +458,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
+        val = ALIAS_VAL
         dcmtn = ALIAS_DCMTN
         sgntr = ALIAS_SGNTR
         instnl = ALIAS_INSTNL
@@ -478,6 +486,8 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 {clm_child_query(IDR_CLAIM_INSTITUTIONAL_TABLE)}
                 UNION
                 {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
+                UNION
+                {clm_child_query(IDR_CLAIM_VAL_TABLE)}
                 UNION
                 {clm_child_query(IDR_CLAIM_FISS_TABLE)}
                 UNION
@@ -513,7 +523,25 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
             claim_related_occurrences_dates AS {not_materialized}
                 ({claim_related_occurrences_cte()}),
             claim_related_conditions AS {not_materialized}
-                ({claim_related_conditions_cte(source)})
+                ({claim_related_conditions_cte(source)}),
+            claim_vals AS {not_materialized} (
+                SELECT
+                    {val}.geo_bene_sk,
+                    {val}.clm_type_cd,
+                    {val}.clm_num_sk,
+                    {val}.clm_dt_sgntr_sk,
+                    MAX(
+                        CASE WHEN {val}.clm_val_cd = '{BLOOD_PT_FRNSH_QTY_CD}' 
+                        THEN {val}.clm_val_amt END
+                    ) AS clm_blood_pt_frnsh_qty
+                FROM {IDR_CLAIM_VAL_TABLE} {val}
+                JOIN claims {clm}
+                    ON {val}.geo_bene_sk = {clm}.geo_bene_sk
+                    AND {val}.clm_type_cd = {clm}.clm_type_cd
+                    AND {val}.clm_num_sk = {clm}.clm_num_sk
+                    AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                GROUP BY {val}.geo_bene_sk, {val}.clm_type_cd, {val}.clm_num_sk, {val}.clm_dt_sgntr_sk
+            )
             SELECT {{COLUMNS}}
             FROM claims c
             JOIN {IDR_CLAIM_TABLE} {clm} ON
@@ -533,6 +561,11 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
+            LEFT JOIN claim_vals {val}
+                ON {val}.geo_bene_sk = {clm}.geo_bene_sk
+                AND {val}.clm_type_cd = {clm}.clm_type_cd
+                AND {val}.clm_num_sk = {clm}.clm_num_sk
+                AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
                 {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
                 {clm}.clm_type_cd = latest_lctn.clm_type_cd AND

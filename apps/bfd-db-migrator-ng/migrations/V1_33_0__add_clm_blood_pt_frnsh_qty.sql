@@ -1,0 +1,2 @@
+ALTER TABLE idr.claim_institutional_ss
+ADD COLUMN CLM_BLOOD_PT_FRNSH_QTY NUMERIC;
