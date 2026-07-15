@@ -23,17 +23,36 @@ locals {
   slos_alert_arn      = data.aws_sns_topic.slos_alert_sns[*].arn
   slos_warning_arn    = data.aws_sns_topic.slos_warning_sns[*].arn
 
+  http500_log_insights_query = <<-EOF
+fields @timestamp, @message, status, operation, request_id
+| filter status = 500
+| sort @timestamp desc
+| limit 200
+EOF
+  http500_log_insights_query_url = join("", [
+    "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#",
+    "logsV2:logs-insights$3FqueryDetail$3D",
+    urlencode(jsonencode({
+      editorString = local.http500_log_insights_query
+      start        = "-3600"
+      end          = "0"
+      timeType     = "RELATIVE"
+      unit         = "seconds"
+      source       = [local.server_access_log_group_name]
+    }))
+  ])
+
   slos_metrics = {
-    coverage_latency                      = "http-requests/latency/coverage-all"
-    eob_resources_latency                 = "http-requests/latency/eob-all-with-resources"
-    eob_no_resources_latency              = "http-requests/latency/eob-all-no-resources"
-    eob_resources_latency_by_kb           = "http-requests/latency-by-kb/eob-all-with-resources"
-    patient_no_contract_latency           = "http-requests/latency/patient-not-by-contract"
-    patient_contract_count_4000_latency   = "http-requests/latency/patient-by-contract-count-4000"
-    all_responses_count                   = "http-requests/count/all"
-    all_http500s_count                    = "http-requests/count/500-responses"
-    availability_success_count            = "availability/success"
-    availability_failure_count            = "availability/failure"
+    coverage_latency                    = "http-requests/latency/coverage-all"
+    eob_resources_latency               = "http-requests/latency/eob-all-with-resources"
+    eob_no_resources_latency            = "http-requests/latency/eob-all-no-resources"
+    eob_resources_latency_by_kb         = "http-requests/latency-by-kb/eob-all-with-resources"
+    patient_no_contract_latency         = "http-requests/latency/patient-not-by-contract"
+    patient_contract_count_4000_latency = "http-requests/latency/patient-by-contract-count-4000"
+    all_responses_count                 = "http-requests/count/all"
+    all_http500s_count                  = "http-requests/count/500-responses"
+    availability_success_count          = "availability/success"
+    availability_failure_count          = "availability/failure"
   }
 
   # Per-environment "client_ssl_regex" have not been moved to SSM configuration as they will be
@@ -163,15 +182,15 @@ data "aws_sns_topic" "slos_warning_sns" {
 
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-mean-15m-alert"
+  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-alert"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "260"
+  threshold           = "10000"
 
   alarm_description = join("", [
-    "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT SLO threshold of 260ms for ",
+    "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT threshold of 10 seconds for ",
     "${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
@@ -186,15 +205,15 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-mean-15m-warning"
+  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "180"
+  threshold           = "5000"
 
   alarm_description = join("", [
-    "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING SLO threshold of 180ms ",
+    "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING threshold of 5 seconds ",
     "for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
@@ -209,16 +228,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-mean-15m-alert"
+  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-alert"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "440"
+  threshold           = "10000"
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded ALERT SLO threshold of 440 ms for ${local.target_service} in ${local.env} environment.",
+    "exceeded ALERT threshold of 10 seconds for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -232,16 +251,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_al
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-mean-15m-warning"
+  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "310"
+  threshold           = "5000"
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded WARNING SLO threshold of 310 ms for ${local.target_service} in ${local.env} environment.",
+    "exceeded WARNING threshold of 5 seconds for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -255,16 +274,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_wa
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-mean-15m-alert"
+  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-alert"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "450"
+  threshold           = "10000"
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT SLO threshold of 450 ms/KB for ${local.target_service} in ${local.env} environment.",
+    "exceeded ALERT threshold of 10 seconds per KB for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -278,16 +297,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_me
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-mean-15m-warning"
+  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "320"
+  threshold           = "5000"
 
   alarm_description = join("", [
     "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING SLO threshold of 320 ms/KB for ${local.target_service} in ${local.env} environment.",
+    "exceeded WARNING threshold of 5 seconds per KB for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -300,17 +319,17 @@ resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_me
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-count-4000-latency-mean-15m-alert"
+resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_latency_alert" {
+  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-latency-alert"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "40000"
+  threshold           = "10000"
 
   alarm_description = join("", [
-    "/v*/fhir/Patient (by contract, count 4000) response mean 15 minute latency exceeded ALERT ",
-    "SLO threshold of 40 seconds for ${local.target_service} in ${local.env} environment.",
+    "/v*/fhir/Patient (by contract) response mean 15 minute latency exceeded ALERT ",
+    "threshold of 10 seconds for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -323,17 +342,17 @@ resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_laten
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_count_4000_latency_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-count-4000-latency-mean-15m-warning"
+resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_latency_warning" {
+  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-latency-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
   statistic           = "Average"
-  threshold           = "40000"
+  threshold           = "5000"
 
   alarm_description = join("", [
-    "/v*/fhir/Patient (by contract, count 4000) response mean 15 minute latency exceeded WARNING ",
-    "SLO threshold of 40 seconds for ${local.target_service} in ${local.env} environment.",
+    "/v*/fhir/Patient (by contract) response mean 15 minute latency exceeded WARNING ",
+    "threshold of 5 seconds for ${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
@@ -355,10 +374,10 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
   threshold           = each.value.threshold
 
   alarm_description = join("", [
-    "Percent HTTP 500 (error) responses over ${each.value.period / (60 * 60)} hour(s) exceeded ",
-    "${upper(each.value.type)} SLO threshold of ${each.value.threshold}% for ${local.target_service} in ",
-    "${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
+    "HTTP 500 error rate over ${each.value.period / (60 * 60)} hour(s) exceeded ",
+    "${upper(each.value.type)} threshold ${each.value.threshold}% for ${local.target_service} in ",
+    "${local.env}. ",
+    "Logs query: ${local.http500_log_insights_query_url}"
   ])
 
   metric_query {
@@ -393,6 +412,29 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
   }
 
   alarm_actions = each.value.alarm_actions
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
+  alarm_name          = "${local.alarm_name_prefix}-slo-http500-any-count-5m-alert"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = "1"
+
+  alarm_description = join("", [
+    "At least one HTTP 500 response occurred in the last 5 minutes for ",
+    "${local.target_service} in ${local.env}. ",
+    "Logs query: ${local.http500_log_insights_query_url}"
+  ])
+
+  metric_name = local.slos_metrics.all_http500s_count
+  namespace   = local.namespace
+
+  alarm_actions = local.slos_alert_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
@@ -477,27 +519,4 @@ resource "aws_cloudwatch_metric_alarm" "slo_availability_uptime_percent" {
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "breaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "bob" {
-    actions_enabled           = true
-    alarm_actions             = [
-        "arn:aws:sns:us-east-1:830858426211:bfd-platform-slack-bfd-internal-alerts",
-    ]
-    alarm_description         = "Testing 400 for fun"
-    alarm_name                = "${local.alarm_name_prefix}-msw-testing-400"
-    comparison_operator       = "GreaterThanThreshold"
-    datapoints_to_alarm       = 1
-    dimensions                = {
-        "response_status" = "400"
-    }
-    evaluation_periods        = 1
-    insufficient_data_actions = []
-    metric_name               = "http-requests.count.4xx-responses.count"
-    namespace                 = "bfd-test/server-ng"
-    ok_actions                = []
-    period                    = 60
-    statistic                 = "Average"
-    threshold                 = 2
-    treat_missing_data        = "ignore"
 }

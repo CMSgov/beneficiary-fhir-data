@@ -28,6 +28,20 @@ data "aws_sns_topic" "logs_warning_sns" {
   name  = local.logs_env_sns.warning
 }
 
+resource "aws_cloudwatch_log_metric_filter" "server_messages_error_level" {
+  name           = "${local.alarm_name_prefix}-messages-error-level"
+  log_group_name = data.aws_cloudwatch_log_group.server_messages.name
+
+  # Match structured log entries where level is explicitly ERROR.
+  pattern = "{ ($.level = \"ERROR\") || ($.level = \"error\") }"
+
+  metric_transformation {
+    name      = "messages/count/error-level"
+    namespace = local.namespace
+    value     = "1"
+  }
+}
+
 resource "aws_cloudwatch_metric_alarm" "server_log_availability_1hr" {
   alarm_name          = "${local.alarm_name_prefix}-log-availability-1hr"
   comparison_operator = "LessThanOrEqualToThreshold"
@@ -93,6 +107,29 @@ resource "aws_cloudwatch_metric_alarm" "samhsa_mismatch_error" {
   namespace   = local.namespace
 
   # alarm_actions = local.logs_warning_arn
+
+  datapoints_to_alarm = 1
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "server_messages_error_level_warning" {
+  alarm_name          = "${local.alarm_name_prefix}-messages-error-level-warning"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 1
+
+  alarm_description = join("", [
+    "${local.target_service} emitted one or more ERROR-level log messages in the last minute ",
+    "in ${local.env}.",
+    "\n\n${local.default_dashboard_message_fragment}"
+  ])
+
+  metric_name = aws_cloudwatch_log_metric_filter.server_messages_error_level.metric_transformation[0].name
+  namespace   = local.namespace
+
+  alarm_actions = local.logs_warning_arn
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"

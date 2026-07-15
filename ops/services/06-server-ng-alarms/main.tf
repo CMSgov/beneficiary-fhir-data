@@ -28,8 +28,9 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
-  target_service = "server-ng"
-  namespace      = "bfd-${local.env}/${local.target_service}"
+  target_service               = "server-ng"
+  namespace                    = "bfd-${local.env}/${local.target_service}"
+  server_access_log_group_name = "/aws/ecs/bfd-${local.env}-cluster/${local.target_service}/${local.target_service}/access"
 
   slo_dashboard                      = "bfd-${local.env}-server-slos"
   slo_dashboard_url                  = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=${local.slo_dashboard}"
@@ -48,7 +49,7 @@ View the relevant CloudWatch dashboards below for more information:
 }
 
 data "aws_cloudwatch_log_group" "server_access" {
-  name = "/aws/ecs/bfd-${local.env}-cluster/${local.target_service}/${local.target_service}/access"
+  name = local.server_access_log_group_name
 }
 
 data "aws_cloudwatch_log_group" "server_messages" {
