@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import javax.annotation.processing.Generated;
+import jakarta.annotation.Generated;
 
 /** The basis profile pharmacy claim. */
 @Generated("TODO - Remove after query optimization implementation")
