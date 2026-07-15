@@ -15,6 +15,9 @@ from constants import (
     IDR_CLAIM_TABLE,
     IDR_CLAIM_VAL_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
+    INSTNL_LOW_VOL_PMT_AMT_CD,
+    INSTNL_PRFNL_AMT_CD,
+    MDCR_IP_BENE_DDCTBL_AMT_CD,
 )
 from load_partition import LoadPartition
 from model.base_model import (
@@ -168,6 +171,9 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
 
     # Columns from v2_mdcr_clm_val
     clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_VAL}]
+    clm_instnl_low_vol_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
+    clm_instnl_prfnl_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
+    clm_mdcr_ip_bene_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
 
     # columns from v2_mdcr_clm_lctn_hstry
     clm_audt_trl_stus_cd: Annotated[
@@ -273,11 +279,8 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_mdcr_ip_pps_cptl_tot_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_instnl_cvrd_day_cnt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_instnl_prmry_pyr_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_instnl_prfnl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_mdcr_ip_bene_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_instnl_drg_outlier_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_ip_scnd_yr_rate_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_instnl_low_vol_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_readmsn_rdctn_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_model_bndld_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_vbp_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
@@ -533,7 +536,19 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                     MAX(
                         CASE WHEN {val}.clm_val_cd = '{BLOOD_PT_FRNSH_QTY_CD}' 
                         THEN {val}.clm_val_amt END
-                    ) AS clm_blood_pt_frnsh_qty
+                    ) AS clm_blood_pt_frnsh_qty,
+                    MAX(
+                        CASE WHEN {val}.clm_val_cd = '{INSTNL_PRFNL_AMT_CD}' 
+                        THEN {val}.clm_val_amt END
+                    ) AS clm_instnl_prfnl_amt,
+                    MAX(
+                        CASE WHEN {val}.clm_val_cd = '{INSTNL_LOW_VOL_PMT_AMT_CD}' 
+                        THEN {val}.clm_val_amt END
+                    ) AS clm_instnl_low_vol_pmt_amt,
+                    MAX(
+                        CASE WHEN {val}.clm_val_cd = '{MDCR_IP_BENE_DDCTBL_AMT_CD}' 
+                        THEN {val}.clm_val_amt END
+                    ) AS clm_mdcr_ip_bene_ddctbl_amt
                 FROM {IDR_CLAIM_VAL_TABLE} {val}
                 JOIN claims {clm}
                     ON {val}.geo_bene_sk = {clm}.geo_bene_sk

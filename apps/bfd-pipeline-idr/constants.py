@@ -15,6 +15,9 @@ CLAIM_INSTITUTIONAL_SS_TABLE = "idr.claim_institutional_ss"
 
 # CLM_VAL_CD values
 BLOOD_PT_FRNSH_QTY_CD = "37"
+INSTNL_PRFNL_AMT_CD = "05"
+INSTNL_LOW_VOL_PMT_AMT_CD = "74"
+MDCR_IP_BENE_DDCTBL_AMT_CD = "A1"
 
 IDR_PREFIX = "cms_vdm_view_mdcr_prd"
 IDR_BENE_HISTORY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_hstry"
