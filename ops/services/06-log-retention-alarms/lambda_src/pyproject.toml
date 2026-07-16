@@ -1,0 +1,65 @@
+[project]
+name = "log_retention_checker"
+version = "1.0.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["boto3>=1.37.19"]
+
+[dependency-groups]
+dev = ["boto3-stubs[logs]", "ruff", "uv>=0.11.15"]
+
+[tool.uv]
+exclude-newer = "7 days"
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+  "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+# ...
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = "none"
+
