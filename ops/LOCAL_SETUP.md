@@ -198,3 +198,46 @@ tf() {
 alias tofu="tf"
 alias terraform="tf"
 ```
+
+## Troubleshooting: yamldecode and encrypted config values
+
+If you see errors while reading YAML-based config values in Terraform/OpenTofu modules, it is common to wonder whether `yamldecode` needs to be installed locally.
+
+`yamldecode` is a built-in Terraform/OpenTofu function. You do not install it as a separate tool.
+
+When failures happen in this area, the issue is usually local decryption tooling, not YAML parsing.
+
+### Required local tools
+
+- `aws`
+- `yq`
+- `sops`
+
+On macOS, install missing tools with Homebrew:
+
+```bash
+brew install sops yq awscli
+```
+
+### Quick verification
+
+```bash
+which aws && aws --version
+which yq && yq --version
+which sops && sops --version
+```
+
+### Why this matters
+
+The service config module shells out to decryption helpers that rely on `sops` and `yq` before values are passed to `yamldecode`. If `sops` is missing, decryption can return empty or invalid output and downstream evaluation will fail.
+
+### If errors persist
+
+1. Confirm AWS authentication is active:
+
+```bash
+aws sts get-caller-identity
+```
+
+2. Confirm your role can decrypt with the KMS key referenced in SOPS metadata for the encrypted file.
+3. Re-run `tofu plan` or `tofu apply` in the module after fixing tool availability or permissions.
