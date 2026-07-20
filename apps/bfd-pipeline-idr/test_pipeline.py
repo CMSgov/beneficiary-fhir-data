@@ -72,6 +72,11 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
+    # Xref with valid kill_cred_cd should be included
+    cur = conn.execute("select * from idr.beneficiary where bene_sk = 174441863")
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_xref_efctv_sk"] == 629529363
+
     # Xref with no valid entry in v2_bene_xref should not be included
     cur = conn.execute("select * from idr.beneficiary where bene_sk = 353816021")
     rows = cur.fetchmany(1)

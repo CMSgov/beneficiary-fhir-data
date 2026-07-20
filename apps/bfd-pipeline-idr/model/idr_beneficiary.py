@@ -216,8 +216,11 @@ class IdrBeneficiary(IdrBaseModel):
             FROM {IDR_BENE_HISTORY_TABLE} {hstry}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
+            -- Additionally, there are cases where there exists a bene_sk -> bene_xref_efctv_sk
+            -- relationship, but not a bene_sk -> bene_xref_sk relationship. So we cannot join
+            -- on bene_xref_sk on the bene_hstry table.
             LEFT JOIN current_xref {xref}
-                ON {xref}.bene_sk = {hstry}.bene_xref_sk
+                ON {xref}.bene_sk = {hstry}.bene_xref_efctv_sk
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
             AND {hstry}.bene_mbi_id IS NOT NULL
