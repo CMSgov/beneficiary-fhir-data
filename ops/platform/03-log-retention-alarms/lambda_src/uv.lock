@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 
 [options]
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
@@ -79,23 +79,38 @@ version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "mypy-boto3-ecs" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "boto3-stubs", extra = ["logs"] },
+    { name = "mypy-boto3-ecs" },
     { name = "ruff" },
     { name = "uv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "boto3", specifier = ">=1.37.19" }]
+requires-dist = [
+    { name = "boto3", specifier = ">=1.37.19" },
+    { name = "mypy-boto3-ecs", specifier = ">=1.43.43" },
+]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "boto3-stubs", extras = ["logs"] },
+    { name = "mypy-boto3-ecs", specifier = ">=1.43.43" },
     { name = "ruff" },
     { name = "uv", specifier = ">=0.11.15" },
+]
+
+[[package]]
+name = "mypy-boto3-ecs"
+version = "1.43.43"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/03/d5ddefaad7537b8cec58fe799087c58fab0f80cee3c12b53279092cc4ea4/mypy_boto3_ecs-1.43.43.tar.gz", hash = "sha256:31857accf9a2b96c010aff499dcc39192e04dfea57fbe280463f0bf16eb22b4e", size = 61043, upload-time = "2026-07-08T20:16:20.102Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/df/0eb4519b26007e46de8a12c94d005f9f4c25067761c16453c3d89a12d577/mypy_boto3_ecs-1.43.43-py3-none-any.whl", hash = "sha256:21c835d6a22831f4fb2c7962f6bf45ecddecb2a539fbdaff593061ffe16be83e", size = 70017, upload-time = "2026-07-08T20:16:17.437Z" },
 ]
 
 [[package]]

@@ -2,11 +2,19 @@
 name = "log_retention_checker"
 version = "1.0.0"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = ["boto3>=1.37.19"]
+requires-python = ">=3.14"
+dependencies = [
+    "boto3>=1.37.19",
+    "mypy-boto3-ecs>=1.43.43",
+]
 
 [dependency-groups]
-dev = ["boto3-stubs[logs]", "ruff", "uv>=0.11.15"]
+dev = [
+    "boto3-stubs[logs]",
+    "mypy-boto3-ecs>=1.43.43",
+    "ruff",
+    "uv>=0.11.15",
+]
 
 [tool.uv]
 exclude-newer = "7 days"

@@ -1,9 +1,18 @@
 import json
 import logging
 import os
+from typing import TYPE_CHECKING, Protocol, cast
 
-import boto3
+import boto3  # type: ignore[import-not-found]
 from botocore.config import Config# type: ignore[import-not-found]
+
+if TYPE_CHECKING:
+	class CloudWatchLogsClient(Protocol):
+		def get_paginator(self, operation_name: str): ...
+
+		def put_retention_policy(self, *, logGroupName: str, retentionInDays: int) -> dict: ...
+else:
+    CloudWatchLogsClient = object
 
 
 logger = logging.getLogger(__name__)
@@ -24,22 +33,28 @@ BOTO_CONFIG = Config(
 )
 
 
-def _list_non_compliant_log_groups(logs_client) -> list[dict[str, object]]:
+def _list_non_compliant_log_groups(logs_client: CloudWatchLogsClient) -> list[dict[str, object]]:
 	"""Return log groups that are missing or not equal to required retention."""
 	non_compliant = []
 	paginator = logs_client.get_paginator("describe_log_groups")
 
 	for page in paginator.paginate():
 		for group in page.get("logGroups", []):
+			log_group_name = group.get("logGroupName")
 			configured_retention = group.get("retentionInDays")
 			if configured_retention is not None and configured_retention < REQUIRED_RETENTION_DAYS:
 				non_compliant.append(
 					{
-						"logGroupName": group.get("logGroupName"),
+						"logGroupName": log_group_name,
 						"retentionInDays": configured_retention,
 						"requiredRetentionInDays": REQUIRED_RETENTION_DAYS,
 					}
 				)
+				if log_group_name:
+					logs_client.put_retention_policy(
+						logGroupName=log_group_name,
+						retentionInDays=REQUIRED_RETENTION_DAYS,
+					)
 
 	return non_compliant
 
@@ -67,7 +82,7 @@ def lambda_handler(event, context):
 		os.getenv("ALERT_SNS_TOPIC_ARN"),
 	)
 
-	logs_client = boto3.client("logs", config=BOTO_CONFIG)
+	logs_client = cast(CloudWatchLogsClient, boto3.client("logs", config=BOTO_CONFIG))
 	sns_client = boto3.client("sns", config=BOTO_CONFIG)
 
 	non_compliant = _list_non_compliant_log_groups(logs_client)
@@ -94,6 +109,11 @@ def lambda_handler(event, context):
 		"NewStateReason": json.dumps(non_compliant, indent=2),
 		"Trigger": {"MetricName": None},
 	}
+	# log the non-compliant log groups and publish an alert to SNS
+	logger.warning(
+		"Invalid resource payload: %s",
+		json.dumps(non_compliant, indent=2),
+	)
 	alert_message = json.dumps(payload)
 
 	logger.warning(alert_message)

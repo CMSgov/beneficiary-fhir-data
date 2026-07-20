@@ -3,10 +3,18 @@
 
 locals {
   account_types = ["prod", "non-prod"]
+  workspace_to_account_type = {
+    test    = "non-prod"
+    sandbox = "prod"
+  }
   # Instead of just defaulting to terraform.workspace, we use one() to ensure an error is generated
   # if the workspace does not exactly match one of the above account types. Further validation is
   # handled by the Terraservice module.
-  account_type = coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace]))
+  account_type = coalesce(
+    var.account_type,
+    lookup(local.workspace_to_account_type, terraform.workspace, null),
+    try(one([for x in local.account_types : x if x == terraform.workspace]), null),
+  )
 
   # This is just a breadcrum - helper variable that is not actually used in code but helps in tracking whether or not we are including this tf.
   # tflint-ignore: terraform_unused_declarations

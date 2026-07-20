@@ -12,7 +12,7 @@ It is assumed you are using `pyright`/`pylance` for type-checking, `uv` for virt
    brew install uv
    ```
 
-2. Setup Python 3.13 virtual environment:
+2. Setup Python 3.14 virtual environment:
 
    ```bash
    uv sync
