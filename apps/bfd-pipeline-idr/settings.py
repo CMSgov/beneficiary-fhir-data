@@ -100,6 +100,10 @@ PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
 """Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
 Defaults to 20."""
 
+PRUNE_BATCH_MAX_SIZE = int(getenv("PRUNE_BATCH_MAX_SIZE", "1000"))
+"""The maximum batch size for pruning old claims (phase 1 claims from shared systems) on
+INCREMENTAL loads. Defaults to 1000."""
+
 
 # IDR credentials, these are pulled from SSM in prod.
 # You likely don't want to touch these otherwise.
