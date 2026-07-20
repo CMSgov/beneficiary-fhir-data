@@ -217,7 +217,7 @@ class IdrBeneficiary(IdrBaseModel):
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             LEFT JOIN current_xref {xref}
-                ON {xref}.bene_sk = {hstry}.bene_xref_sk
+                ON {xref}.bene_sk = {hstry}.bene_xref_efctv_sk
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
             AND {hstry}.bene_mbi_id IS NOT NULL
