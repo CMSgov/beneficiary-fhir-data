@@ -14,6 +14,8 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -316,6 +318,18 @@ public class IntegrationTestBase {
                 assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
               });
     }
+  }
+
+  protected static Coding tag(String system, String code) {
+    return new Coding(system, code, null);
+  }
+
+  protected static Coding systemType(MetaSourceSk metaSourceSk) {
+    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, metaSourceSk.getSystemType());
+  }
+
+  protected static Coding finalAction(ClaimFinalAction finalAction) {
+    return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
   }
 
   public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {

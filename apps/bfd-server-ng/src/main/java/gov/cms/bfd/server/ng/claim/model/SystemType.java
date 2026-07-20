@@ -30,13 +30,10 @@ public enum SystemType {
    * @return boolean
    */
   public boolean isCompatibleWith(MetaSourceSk source) {
-    // although the system type for CWF, SourceFilterParam's isCompatibleWith is meant only for
-    // filtering standard claims, not prior authorizations.
     return switch (this) {
       case NCH -> source == MetaSourceSk.NCH;
       case DDPS -> source == MetaSourceSk.DDPS;
-      case SS ->
-          source != MetaSourceSk.NCH && source != MetaSourceSk.DDPS && source != MetaSourceSk.CWF;
+      case SS -> source != MetaSourceSk.NCH && source != MetaSourceSk.DDPS;
       case UNKNOWN -> false;
     };
   }

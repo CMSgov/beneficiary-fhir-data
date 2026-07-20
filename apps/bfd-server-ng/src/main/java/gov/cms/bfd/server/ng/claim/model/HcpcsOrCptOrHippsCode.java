@@ -3,8 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -18,31 +17,22 @@ public class HcpcsOrCptOrHippsCode {
   private String hcpcsOrCptOrHipps;
 
   /**
-   * Determines the corresponding coding systems for the applicable codes.
+   * Determines the corresponding coding system for the applicable code.
    *
-   * @return the coding systems
+   * @param claimType the claim type specific to prior authorization
+   * @return the coding system
    */
-  public List<String> getCodingSystems() {
-    var systems = new ArrayList<String>();
-
-    if (Character.isDigit(hcpcsOrCptOrHipps.charAt(0))) {
-      systems.add(SystemUrls.AMA_CPT);
-    } else {
-      systems.add(SystemUrls.CMS_HCPCS);
+  public String getCodingSystem(Optional<ClaimTypePriorAuth> claimType) {
+    if (claimType.isPresent() && claimType.get() == ClaimTypePriorAuth.Valid.I) {
+      return SystemUrls.CMS_HIPPS;
     }
-
-    if (!Character.isDigit(hcpcsOrCptOrHipps.charAt(1))) {
-      systems.add(SystemUrls.CMS_HIPPS);
-    }
-
-    return systems;
+    return Character.isDigit(hcpcsOrCptOrHipps.charAt(0))
+        ? SystemUrls.AMA_CPT
+        : SystemUrls.CMS_HCPCS;
   }
 
-  CodeableConcept toFhir() {
+  CodeableConcept toFhir(Optional<ClaimTypePriorAuth> claimType) {
     return new CodeableConcept()
-        .setCoding(
-            getCodingSystems().stream()
-                .map(system -> new Coding().setSystem(system).setCode(hcpcsOrCptOrHipps))
-                .toList());
+        .addCoding(new Coding().setSystem(getCodingSystem(claimType)).setCode(hcpcsOrCptOrHipps));
   }
 }

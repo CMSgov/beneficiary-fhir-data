@@ -29,10 +29,11 @@ public class PriorAuthorizationItem implements Comparable<PriorAuthorizationItem
   @Column(name = "rev_code_1")
   private Optional<ClaimLineRevenueCenterCode> revenueCode1;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      Optional<ClaimTypePriorAuth> claimType) {
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(currentSegment);
-    populateProductAndQuantity(line);
+    populateProductAndQuantity(line, claimType);
     line.addModifier(priceModifierCode.toFhir());
     placeOfServiceCode.ifPresent(c -> line.setLocation(c.toFhir()));
     revenueCode1.ifPresent(
@@ -45,8 +46,9 @@ public class PriorAuthorizationItem implements Comparable<PriorAuthorizationItem
     return Optional.of(line);
   }
 
-  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
-    var productOrService = hcpcsOrCptOrHipps.toFhir();
+  void populateProductAndQuantity(
+      ExplanationOfBenefit.ItemComponent line, Optional<ClaimTypePriorAuth> claimType) {
+    var productOrService = hcpcsOrCptOrHipps.toFhir(claimType);
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
   }
 

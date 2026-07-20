@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -18,10 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -60,16 +58,12 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
 
     var eobs = getEobFromBundle(bundle);
     assertFalse(eobs.isEmpty());
-    var priorAuth =
-        eobs.stream()
-            .filter(
-                eob -> eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION)
-            .findFirst();
-    assertTrue(priorAuth.isPresent(), "Expected a Prior Authorization EOB");
+    var priorAuths = getPriorAuths(bundle);
+    assertFalse(priorAuths.isEmpty(), "Expected a Prior Authorization EOB");
 
     expectFhir().toMatchSnapshot(bundle);
 
-    var eob = priorAuth.get();
+    var eob = priorAuths.getFirst();
 
     assertEquals(ExplanationOfBenefit.RemittanceOutcome.PARTIAL, eob.getOutcome());
     assertFalse(eob.getPreAuthRefPeriod().isEmpty());
@@ -234,20 +228,15 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
       }
     }
 
-    var eobBundle = query.usingStyle(searchStyle).execute();
-    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(eobBundle);
+    var bundle = query.usingStyle(searchStyle).execute();
+    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(bundle);
 
     assertEquals(
         expectedCount,
-        eobBundle.getEntry().size(),
+        bundle.getEntry().size(),
         "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
 
-    var eobs = getEobFromBundle(eobBundle);
-    var hasPriorAuth =
-        eobs.stream()
-            .anyMatch(
-                eob -> eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION);
-
+    var hasPriorAuth = !getPriorAuths(bundle).isEmpty();
     if (expectedCount > 0) {
       assertEquals(expectsPriorAuth, hasPriorAuth);
     }
@@ -274,16 +263,107 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
 
     assertEquals(expectedBundleSize, bundle.getEntry().size());
 
-    var priorAuths =
-        getEobFromBundle(bundle).stream()
-            .filter(
-                eob -> eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION)
-            .toList();
+    var priorAuths = getPriorAuths(bundle);
 
     assertTrue(priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, NO_SAMHSA_PRIOR_AUTH)));
     assertEquals(
         expectedSamhsaPriorAuth,
         priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, SAMHSA_PRIOR_AUTH)));
+  }
+
+  static Stream<Arguments> provideTagScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of(
+                    Arguments.of(
+                        "WithTag_SharedSystem",
+                        List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "SharedSystem"))),
+                        true,
+                        style),
+                    Arguments.of(
+                        "WithTag_DDPS",
+                        List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "DDPS"))),
+                        false,
+                        style),
+                    Arguments.of(
+                        "WithTagFinalActionAndNch",
+                        List.of(
+                            List.of(systemType(MetaSourceSk.NCH)),
+                            List.of(finalAction(ClaimFinalAction.YES))),
+                        false,
+                        style),
+                    Arguments.of(
+                        "WithTagFinalActionAndSharedSystem",
+                        List.of(
+                            List.of(systemType(MetaSourceSk.FISS)),
+                            List.of(finalAction(ClaimFinalAction.YES))),
+                        true,
+                        style),
+                    Arguments.of(
+                        "WithIncompatibleTags",
+                        List.of(
+                            List.of(systemType(MetaSourceSk.FISS)),
+                            List.of(systemType(MetaSourceSk.NCH))),
+                        false,
+                        style),
+                    Arguments.of(
+                        "WithCombinedTagOr",
+                        List.of(
+                            List.of(
+                                systemType(MetaSourceSk.NCH), finalAction(ClaimFinalAction.YES))),
+                        true,
+                        style),
+                    Arguments.of(
+                        "WithCombinedTagOrDDPSNCH",
+                        List.of(
+                            List.of(systemType(MetaSourceSk.NCH), systemType(MetaSourceSk.DDPS))),
+                        false,
+                        style),
+                    Arguments.of(
+                        "WithSystemTag_FinalAction",
+                        List.of(
+                            List.of(
+                                tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, "FinalAction"))),
+                        true,
+                        style)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideTagScenarios")
+  void shouldQueryPriorAuthForTagScenarios(
+      String scenarioName,
+      List<List<Coding>> tagScenarios,
+      boolean expectedPriorAuth,
+      SearchStyleEnum searchStyle) {
+    var query =
+        searchBundle(SamhsaCertType.SAMHSA_ALLOWED_CERT)
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_WITH_PRIOR_AUTH));
+
+    for (List<Coding> tags : tagScenarios) {
+      if (tags.size() == 1) {
+        query =
+            query.and(
+                new TokenClientParam(Constants.PARAM_TAG)
+                    .exactly()
+                    .systemAndCode(tags.getFirst().getSystem(), tags.getFirst().getCode()));
+      } else {
+        query =
+            query.and(
+                new TokenClientParam(Constants.PARAM_TAG)
+                    .exactly()
+                    .codings(tags.toArray(new Coding[0])));
+      }
+    }
+
+    var bundle = query.usingStyle(searchStyle).execute();
+    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(bundle);
+
+    var hasPriorAuth = !getPriorAuths(bundle).isEmpty();
+    assertEquals(expectedPriorAuth, hasPriorAuth);
   }
 
   private boolean matchesPriorAuth(ExplanationOfBenefit eob, PriorAuthIdentifier identifier) {
@@ -293,5 +373,11 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
         eob.getIdentifier().stream().anyMatch(id -> identifier.utn().equals(id.getValue()));
     var hasMatchingMbi = eob.getPatient().getReference().contains(identifier.beneSk());
     return hasMatchingUtn && hasMatchingMbi;
+  }
+
+  private List<ExplanationOfBenefit> getPriorAuths(Bundle bundle) {
+    return getEobFromBundle(bundle).stream()
+        .filter(eob -> eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION)
+        .toList();
   }
 }

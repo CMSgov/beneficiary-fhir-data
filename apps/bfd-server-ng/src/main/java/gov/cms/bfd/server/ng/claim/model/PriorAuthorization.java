@@ -161,7 +161,7 @@ public class PriorAuthorization {
       return;
     }
 
-    getItems().forEach(item -> item.toFhirItemComponent().ifPresent(eob::addItem));
+    getItems().forEach(item -> item.toFhirItemComponent(claimType).ifPresent(eob::addItem));
 
     var outcome =
         getItems().stream()
