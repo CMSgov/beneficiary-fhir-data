@@ -73,8 +73,8 @@ def _publish_alert(sns_client, message: str) -> None:
 	)
 
 
-def lambda_handler(event, context):
-	del event, context
+@logger.inject_lambda_context(clear_state=True, log_event=True)
+def lambda_handler(event: dict[str, Any], context: LambdaContext):
 
 	logger.info(
 		"Environment: REQUIRED_RETENTION_DAYS=%r, ALERT_SNS_TOPIC_ARN=%r",
