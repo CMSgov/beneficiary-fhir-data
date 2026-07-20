@@ -92,6 +92,7 @@ resource "aws_iam_role_policy_attachment" "checker_publish_alerts" {
   role       = aws_iam_role.checker.name
   policy_arn = one(aws_iam_policy.checker_publish_alerts[*].arn)
 }
+
 data "aws_iam_policy_document" "checker_kms" {
   statement {
     sid       = "AllowKmsDecryptForLogGroup"

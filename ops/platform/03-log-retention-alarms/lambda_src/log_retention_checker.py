@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from typing import Dict, List
 
 import boto3
 from botocore.config import Config# type: ignore[import-not-found]
@@ -25,7 +24,7 @@ BOTO_CONFIG = Config(
 )
 
 
-def _list_non_compliant_log_groups(logs_client) -> List[Dict[str, object]]:
+def _list_non_compliant_log_groups(logs_client) -> list[dict[str, object]]:
 	"""Return log groups that are missing or not equal to required retention."""
 	non_compliant = []
 	paginator = logs_client.get_paginator("describe_log_groups")
