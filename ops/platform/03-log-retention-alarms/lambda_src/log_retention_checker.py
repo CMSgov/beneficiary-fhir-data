@@ -15,8 +15,7 @@ else:
     CloudWatchLogsClient = object
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = Logger()
 
 REQUIRED_RETENTION_DAYS = int(os.getenv("REQUIRED_RETENTION_DAYS", "2557"))
 ALERT_SNS_TOPIC_ARN = os.getenv("ALERT_SNS_TOPIC_ARN")
