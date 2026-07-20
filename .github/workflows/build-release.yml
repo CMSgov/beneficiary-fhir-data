@@ -189,7 +189,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Retrieve base java image
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: '*bfd-platform-base-java*'
           merge-multiple: true
@@ -210,7 +210,7 @@ jobs:
           sudo chmod +x /usr/bin/gitleaks
 
       - name: Setup JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
           java-version: "25"
           distribution: corretto
@@ -272,7 +272,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Upload jib image artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: jib-images
           path: ${{ runner.temp }}/*.tar
@@ -287,7 +287,7 @@ jobs:
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
       - name: Install node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "22"
 
@@ -304,7 +304,7 @@ jobs:
         working-directory: apps/bfd-model-idr
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           version: "0.11.2"
 
@@ -356,7 +356,7 @@ jobs:
           ls -l assets
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: release-artifacts
           path: assets/*
@@ -386,13 +386,13 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download jib image artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: jib-images
           path: ${{ runner.temp }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
@@ -400,7 +400,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
 
       - name: Push jib images
         env:
@@ -472,12 +472,12 @@ jobs:
     steps:
       - name: Pull release artifacts
         id: pull-release-artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: release-artifacts
 
       - name: Release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
           makeLatest: "${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}"

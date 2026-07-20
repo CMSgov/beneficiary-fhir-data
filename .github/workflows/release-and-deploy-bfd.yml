@@ -63,7 +63,7 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Load Start Slack webhook
-        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        uses: cmsgov/cdap/actions/aws-params-env-action@e58035649536e98207b13977e894256f8c590be9 # main
         with:
           params: |
             SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
@@ -159,7 +159,7 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Load Slack webhook
-        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        uses: cmsgov/cdap/actions/aws-params-env-action@e58035649536e98207b13977e894256f8c590be9 # main
         with:
           params: |
             SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
