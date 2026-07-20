@@ -62,7 +62,7 @@ class IdrBeneficiary(IdrBaseModel):
                 WHEN
                     {ALIAS_HSTRY}.bene_xref_efctv_sk = 0 OR
                     ({ALIAS_HSTRY}.bene_xref_efctv_sk != {ALIAS_HSTRY}.bene_sk
-                        AND {ALIAS_XREF}.bene_kill_cred_cd != '2')
+                        AND COALESCE({ALIAS_XREF}.bene_kill_cred_cd, '') != '2')
                 THEN {ALIAS_HSTRY}.bene_sk
                 ELSE {ALIAS_HSTRY}.bene_xref_efctv_sk
             END
