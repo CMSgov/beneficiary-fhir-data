@@ -56,9 +56,10 @@ resource "aws_lambda_function" "checker" {
   source_code_hash = data.archive_file.checker_lambda_src.output_base64sha256
   architectures    = ["arm64"]
   handler          = "${local.checker_lambda_src}.lambda_handler"
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:27"]
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.13"
+  runtime          = "python3.14"
   timeout          = 300
 
   environment {
