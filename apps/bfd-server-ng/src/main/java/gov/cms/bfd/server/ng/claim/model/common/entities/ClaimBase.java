@@ -5,7 +5,7 @@ import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimIDRLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -70,7 +70,6 @@ public abstract class ClaimBase {
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
-  @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -114,7 +113,7 @@ public abstract class ClaimBase {
     var initialSupportingInfo =
         Stream.of(
                 claimAdjustmentTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)))
+                getClaimIdrLoadDate().map(date -> date.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
@@ -184,6 +183,12 @@ public abstract class ClaimBase {
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
     return Optional.empty();
   }
+
+  /**
+   * Template method for ClaimIdrLoadDate (CMS profile only).
+   * @return the ClaimIdrLoadDate, or nothing
+   */
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() { return Optional.empty(); }
 
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail

@@ -56,7 +56,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private ClaimProcessDate claimProcessDate;
+
 
   /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
@@ -186,24 +186,20 @@ public abstract class ClaimRxBase extends ClaimBase {
             getSubmitterContractNumber().toFhir(supportingInfoFactory).stream().findFirst(),
             getSubmitterContractPBPNumber().toFhir(supportingInfoFactory).stream().findFirst(),
             getClaimSubmissionDate().toFhir(supportingInfoFactory),
-            getClaimProcessDate().toFhir(supportingInfoFactory))
+            getClaimProcessDate().flatMap(cpd -> cpd.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }
 
-  /**
-   * Template method related to ClaimSubmissionFormatCode, in CMS and Regular profile.
-   *
-   * @return the SupportingInformationComponent built from the ClaimSubmissionFormatCode
-   */
-  protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
-      submissionFormatSupportingInfo() {
+  //region Template Methods
+  protected Optional<ExplanationOfBenefit.SupportingInformationComponent> submissionFormatSupportingInfo() {
     return Optional.empty();
   }
 
-  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
-    return Optional.empty();
-  }
+  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() { return Optional.empty(); }
+
+  protected Optional<ClaimProcessDate> getClaimProcessDate() { return Optional.empty(); }
+  //endregion
 
   /**
    * Returns the system type.
@@ -229,16 +225,14 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() { return Optional.empty(); }
+
   /** Rx claims have a single embedded rather than a collection. */
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     var items = new TreeSet<ClaimItemBase>();
     items.add(getClaimItems());
     return items;
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

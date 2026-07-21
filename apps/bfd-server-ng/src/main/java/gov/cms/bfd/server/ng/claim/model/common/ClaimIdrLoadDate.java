@@ -9,15 +9,15 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-public class ClaimIDRLoadDate {
+public class ClaimIdrLoadDate {
   @Column(name = "clm_idr_ld_dt")
-  private LocalDate claimIDRLoadDate;
+  private LocalDate idrLoadDate;
 
   public ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
         .setCategory(BlueButtonSupportingInfoCategory.CLM_IDR_LD_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(claimIDRLoadDate)));
+        .setTiming(new DateType().setValue(DateUtil.toDate(idrLoadDate)));
   }
 }
