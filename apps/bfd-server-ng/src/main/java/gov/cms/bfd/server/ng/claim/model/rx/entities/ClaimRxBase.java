@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
-
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -12,7 +10,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
@@ -45,10 +42,7 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @MappedSuperclass
 @Getter
-public class ClaimRxBase extends ClaimBase {
-
-  @Column(name = "clm_sbmt_frmt_cd")
-  private Optional<ClaimSubmissionFormatCode> claimFormatCode;
+public abstract class ClaimRxBase extends ClaimBase {
 
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
@@ -58,7 +52,6 @@ public class ClaimRxBase extends ClaimBase {
 
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
-  @Embedded private AdjudicationChargeRx adjudicationCharge;
   @Embedded private ClaimPaymentDate claimPaymentDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
@@ -84,7 +77,7 @@ public class ClaimRxBase extends ClaimBase {
     return sortedEob(eob);
   }
 
-  private void addPartDInsurer(ExplanationOfBenefit eob) {
+  protected void addPartDInsurer(ExplanationOfBenefit eob) {
     contractName
         .flatMap(name -> getClaimTypeCode().toFhirInsurerPartD(name))
         .ifPresent(
@@ -94,11 +87,11 @@ public class ClaimRxBase extends ClaimBase {
             });
   }
 
-  private void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+  protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
     getClaimItems().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
   }
 
-  private void addServiceProvider(ExplanationOfBenefit eob) {
+  protected void addServiceProvider(ExplanationOfBenefit eob) {
     serviceProviderHistory
         .toFhirNpiType()
         .ifPresent(
@@ -108,22 +101,9 @@ public class ClaimRxBase extends ClaimBase {
             });
   }
 
-  private void addSupportingInfo(ExplanationOfBenefit eob) {
+  protected void addSupportingInfo(ExplanationOfBenefit eob) {
     buildHeaderSupportingInfo().forEach(eob::addSupportingInfo);
     buildLineSupportingInfo().forEach(eob::addSupportingInfo);
-  }
-
-  private List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
-    return Stream.of(
-            claimFormatCode
-                .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
-                .map(c -> c.toFhir(supportingInfoFactory)),
-            submitterContractNumber.toFhir(supportingInfoFactory).stream().findFirst(),
-            submitterContractPBPNumber.toFhir(supportingInfoFactory).stream().findFirst(),
-            claimSubmissionDate.toFhir(supportingInfoFactory),
-            claimProcessDate.toFhir(supportingInfoFactory))
-        .flatMap(Optional::stream)
-        .toList();
   }
 
   private List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
@@ -137,17 +117,20 @@ public class ClaimRxBase extends ClaimBase {
         .toList();
   }
 
-  private void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
+  protected void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     prescribingProviderHistory
         .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
   }
 
-  private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-
-    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
-    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+  protected void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
+    getAdjudicationChargeRx()
+        .ifPresent(
+            charge -> {
+              charge.toFhirTotal().forEach(eob::addTotal);
+              charge.toFhirAdjudication().forEach(eob::addAdjudication);
+            });
 
     getTotalDrugCostAmount()
         .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
@@ -183,13 +166,52 @@ public class ClaimRxBase extends ClaimBase {
    *
    * @return optional total drug cost amount
    */
-  public Optional<BigDecimal> getTotalDrugCostAmount() {
+  protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.ofNullable(
         getClaimItems().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
   }
 
-  private void addInsurance(ExplanationOfBenefit eob) {
+  protected void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirPartDInsurance());
+  }
+
+  /**
+   * Build the SupportingInformationComponent from a ClaimSubmissionFormatCode.
+   *
+   * @return the eob.SupportingInformationComponent
+   */
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
+    return Stream.of(
+            submissionFormatSupportingInfo(),
+            getSubmitterContractNumber().toFhir(supportingInfoFactory).stream().findFirst(),
+            getSubmitterContractPBPNumber().toFhir(supportingInfoFactory).stream().findFirst(),
+            getClaimSubmissionDate().toFhir(supportingInfoFactory),
+            getClaimProcessDate().toFhir(supportingInfoFactory))
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
+  /**
+   * Template method related to ClaimSubmissionFormatCode, in CMS and Regular profile.
+   *
+   * @return the SupportingInformationComponent built from the ClaimSubmissionFormatCode
+   */
+  protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      submissionFormatSupportingInfo() {
+    return Optional.empty();
+  }
+
+  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
+    return Optional.empty();
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.DDPS;
   }
 
   @Override
@@ -200,15 +222,6 @@ public class ClaimRxBase extends ClaimBase {
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.DDPS;
-  }
-
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.DDPS;
   }
 
   @Override
