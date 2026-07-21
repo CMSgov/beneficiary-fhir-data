@@ -59,19 +59,8 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
 
   @Override
   public boolean shouldQueryPriorAuth() {
-    if (metaSourceSk.isEmpty()) {
-      return true;
-    }
-
-    for (var orList : metaSourceSk) {
-      if (orList.isEmpty()) {
-        continue;
-      }
-
-      if (!orList.contains(MetaSourceSk.CWF)) {
-        return false;
-      }
-    }
-    return true;
+    return metaSourceSk.stream()
+        .filter(orList -> !orList.isEmpty())
+        .allMatch(orList -> orList.contains(MetaSourceSk.CWF));
   }
 }

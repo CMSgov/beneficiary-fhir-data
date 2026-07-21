@@ -93,8 +93,6 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
 
   @Override
   public boolean shouldQueryPriorAuth() {
-    if (tagCriteria.isEmpty()) return true;
-
     return tagCriteria.stream()
         .allMatch(
             orList ->
