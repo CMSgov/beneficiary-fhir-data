@@ -43,55 +43,11 @@ EOF
   ])
 
   slos_metrics = {
-    coverage_latency                    = "http-requests/latency/coverage-all"
-    eob_resources_latency               = "http-requests/latency/eob-all-with-resources"
-    eob_no_resources_latency            = "http-requests/latency/eob-all-no-resources"
-    eob_resources_latency_by_kb         = "http-requests/latency-by-kb/eob-all-with-resources"
-    patient_no_contract_latency         = "http-requests/latency/patient-not-by-contract"
-    patient_contract_count_4000_latency = "http-requests/latency/patient-by-contract-count-4000"
+    all_latency                         = "http-requests/latency/all"
     all_responses_count                 = "http-requests/count/all"
     all_http500s_count                  = "http-requests/count/500-responses"
     availability_success_count          = "availability/success"
     availability_failure_count          = "availability/failure"
-  }
-
-  # Per-environment "client_ssl_regex" have not been moved to SSM configuration as they will be
-  # removed entirely when mTLS is moved to the ALB. The Server will expose the partner as a new MDC
-  # attribute, rendering these regexes obsolete
-  slos_partners = {
-    bulk = {
-      ab2d = {
-        timeout_ms = (300 * 1000) / 2
-        client_ssl_regex = {
-          prod_sbx = ".*ab2d-sbx-client.*"
-          prod     = ".*ab2d-prod-client.*"
-        }
-      }
-      bcda = {
-        timeout_ms = (45 * 1000) / 2
-        client_ssl_regex = {
-          prod_sbx = ".*bcda-sbx-client.*"
-          prod     = ".*bcda-prod-client.*"
-        }
-      }
-      dpc = {
-        timeout_ms = (30 * 1000) / 2
-        client_ssl_regex = {
-          prod_sbx = ".*dpc-prod-sbx-client.*"
-          # jq requires escaped characters be escaped with 2 backslashes
-          prod = ".*dpc\\\\.prod\\\\.client.*"
-        }
-      }
-    }
-    non_bulk = {
-      bb = {
-        timeout_ms = (120 * 1000) / 2
-        client_ssl_regex = {
-          prod_sbx = ".*BlueButton.*"
-          prod     = ".*BlueButton.*"
-        }
-      }
-    }
   }
 
   error_slo_configs = {
@@ -143,26 +99,6 @@ EOF
     }
   }
 
-  availability_slo_uptime_percent_configs = {
-    # CloudWatch Alarms have an upper limit of 1 day periods. Unfortunately, our SLO for
-    # availability is on a monthly-basis rather than daily, so this alarm does not exactly model
-    # that SLO. However, these alarms do give us more immediate and actionable feedback when the BFD
-    # Server is falling over, so there is some upside. The thresholds for warning and alert have
-    # been modified slightly with the significantly smaller period in-mind, and any failing checks
-    # at all (between 100% and 99.8% uptime per-day) will be caught by the other availability alarm
-    slo_availability_uptime_percent_24hr_warning = {
-      type          = "warning"
-      period        = 24 * 60 * 60
-      threshold     = "99.8"
-      alarm_actions = local.slos_warning_arn
-    }
-    slo_availability_uptime_percent_24hr_alert = {
-      type          = "alert"
-      period        = 24 * 60 * 60
-      threshold     = "99"
-      alarm_actions = local.slos_alert_arn
-    }
-  }
 }
 
 data "aws_sns_topic" "slos_high_alert_sns" {
@@ -181,8 +117,8 @@ data "aws_sns_topic" "slos_warning_sns" {
 }
 
 
-resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-alert"
+resource "aws_cloudwatch_metric_alarm" "slo_all_latency_mean_15m_alert" {
+  alarm_name          = "${local.alarm_name_prefix}-slo-all-latency-alert"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
@@ -190,12 +126,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
   threshold           = "10000"
 
   alarm_description = join("", [
-    "/v*/fhir/Coverage response mean 15 minute latency exceeded ALERT threshold of 10 seconds for ",
+    "All endpoint response mean 15 minute latency exceeded ALERT threshold of 10 seconds for ",
     "${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
-  metric_name = local.slos_metrics.coverage_latency
+  metric_name = local.slos_metrics.all_latency
   namespace   = local.namespace
 
   alarm_actions = local.slos_alert_arn
@@ -204,8 +140,8 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_alert" {
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-coverage-latency-warning"
+resource "aws_cloudwatch_metric_alarm" "slo_all_latency_mean_15m_warning" {
+  alarm_name          = "${local.alarm_name_prefix}-slo-all-latency-warning"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   period              = "900"
@@ -213,150 +149,12 @@ resource "aws_cloudwatch_metric_alarm" "slo_coverage_latency_mean_15m_warning" {
   threshold           = "5000"
 
   alarm_description = join("", [
-    "/v*/fhir/Coverage response mean 15 minute latency exceeded WARNING threshold of 5 seconds ",
-    "for ${local.target_service} in ${local.env} environment.",
+    "All endpoint response mean 15 minute latency exceeded WARNING threshold of 5 seconds for ",
+    "${local.target_service} in ${local.env} environment.",
     "\n\n${local.default_dashboard_message_fragment}"
   ])
 
-  metric_name = local.slos_metrics.coverage_latency
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_warning_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "10000"
-
-  alarm_description = join("", [
-    "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded ALERT threshold of 10 seconds for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.eob_no_resources_latency
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_alert_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_eob_no_resources_latency_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-no-resources-latency-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "5000"
-
-  alarm_description = join("", [
-    "/v*/fhir/ExplanationOfBenefit response with no resources returned mean 15 minute latency ",
-    "exceeded WARNING threshold of 5 seconds for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.eob_no_resources_latency
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_warning_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_mean_15m_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "10000"
-
-  alarm_description = join("", [
-    "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded ALERT threshold of 10 seconds per KB for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.eob_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_alert_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_eob_with_resources_latency_per_kb_mean_15m_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-eob-with-resources-latency-per-kb-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "5000"
-
-  alarm_description = join("", [
-    "/v*/fhir/ExplanationOfBenefit response with resources returned mean 15 minute latency per KB ",
-    "exceeded WARNING threshold of 5 seconds per KB for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.eob_resources_latency_by_kb
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_warning_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_latency_alert" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-latency-alert"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "10000"
-
-  alarm_description = join("", [
-    "/v*/fhir/Patient (by contract) response mean 15 minute latency exceeded ALERT ",
-    "threshold of 10 seconds for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.patient_contract_count_4000_latency
-  namespace   = local.namespace
-
-  alarm_actions = local.slos_alert_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_patient_by_contract_latency_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-patient-by-contract-latency-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  period              = "900"
-  statistic           = "Average"
-  threshold           = "5000"
-
-  alarm_description = join("", [
-    "/v*/fhir/Patient (by contract) response mean 15 minute latency exceeded WARNING ",
-    "threshold of 5 seconds for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.patient_contract_count_4000_latency
+  metric_name = local.slos_metrics.all_latency
   namespace   = local.namespace
 
   alarm_actions = local.slos_warning_arn
@@ -466,57 +264,3 @@ resource "aws_cloudwatch_metric_alarm" "slo_availability_failures_sum" {
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "slo_availability_uptime_percent" {
-  for_each = local.availability_slo_uptime_percent_configs
-
-  alarm_name          = "${local.alarm_name_prefix}-${replace(each.key, "_", "-")}"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "1"
-  threshold           = each.value.threshold
-
-  alarm_description = join("", [
-    "The alarm transitioned to the ALARM state due to one of the following occurring:\n",
-    "* Percent uptime over ${each.value.period / (24 * 60 * 60)} day(s) dropped below ",
-    "${upper(each.value.type)} SLO threshold of ${each.value.threshold}% for ${local.target_service} in ",
-    "${local.env} environment.\n",
-    "* No data was reported by the availability checker Jenkins pipeline; the pipeline may have ",
-    "stopped running",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_query {
-    id          = "e1"
-    expression  = "100*(m1/(m1+m2))"
-    label       = "% Uptime"
-    return_data = "true"
-  }
-
-  metric_query {
-    id = "m1"
-
-    metric {
-      metric_name = local.slos_metrics.availability_success_count
-      namespace   = local.namespace
-      period      = each.value.period
-      stat        = "Sum"
-      unit        = "Count"
-    }
-  }
-
-  metric_query {
-    id = "m2"
-
-    metric {
-      metric_name = local.slos_metrics.availability_failure_count
-      namespace   = local.namespace
-      period      = each.value.period
-      stat        = "Sum"
-      unit        = "Count"
-    }
-  }
-
-  # alarm_actions = each.value.alarm_actions
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "breaching"
-}
