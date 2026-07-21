@@ -1,6 +1,7 @@
 import time
 from datetime import UTC, datetime, timedelta
 
+import psycopg
 from loguru import logger
 from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
@@ -10,12 +11,14 @@ from batch_worker import LoadingBatchWorkerClient
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
-from loader import LoadType, PostgresLoader, should_track_load_progress
+from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
 from model.base_model import (
     LoadMode,
     T,
 )
+from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
+from settings import BENEFICIARY_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
@@ -110,3 +113,33 @@ def extract_and_load(
         except Exception as ex:
             logger.opt(exception=True).error("error loading {}", cls.table())
             raise ex
+
+
+def prune_bene_lis_cmbnd(
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
+
+    prune_cutoff_date = job_start - timedelta(days=60)
+    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts) IN (
+                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts 
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:
+                break
+
+    return True
