@@ -33,7 +33,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | 6.52.0 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -78,94 +78,94 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Type |
 | ---- | ---- |
-| [aws_appautoscaling_policy.server_track_cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_policy) | resource |
-| [aws_appautoscaling_target.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target) | resource |
-| [aws_cloudwatch_log_group.adot_messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.adot_metrics](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.certstores_messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.log_router_messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_codedeploy_app.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_app) | resource |
-| [aws_codedeploy_deployment_group.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_deployment_group) | resource |
-| [aws_ecs_service.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
-| [aws_ecs_task_definition.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_iam_policy.certstores_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.codedeploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.codedeploy_elbv2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.codedeploy_iam](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.codedeploy_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.regression_wrapper_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.regression_wrapper_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.regression_wrapper_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.regression_wrapper_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_policy.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.service_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.service_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_lambda_function.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
-| [aws_lambda_function_event_invoke_config.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function_event_invoke_config) | resource |
-| [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
-| [aws_lb_listener.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
-| [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
-| [aws_route53_record.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
-| [aws_s3_object.keystore](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
-| [aws_s3_object.truststore](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
-| [aws_security_group.lb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_security_group.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_vpc_security_group_egress_rule.server_allow_all_traffic_ipv4](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.server_allow_db_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.server_allow_tls_nlb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_appautoscaling_policy.server_track_cpu](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_policy) | resource |
+| [aws_appautoscaling_target.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_target) | resource |
+| [aws_cloudwatch_log_group.adot_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.adot_metrics](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.certstores_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.log_router_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.server_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
+| [aws_codedeploy_app.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codedeploy_app) | resource |
+| [aws_codedeploy_deployment_group.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codedeploy_deployment_group) | resource |
+| [aws_ecs_service.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_service) | resource |
+| [aws_ecs_task_definition.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_task_definition) | resource |
+| [aws_iam_policy.certstores_s3](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.codedeploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.codedeploy_elbv2](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.codedeploy_iam](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.codedeploy_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.rds](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.regression_wrapper_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.regression_wrapper_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.regression_wrapper_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.regression_wrapper_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_role.codedeploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.execution_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.codedeploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.execution](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_lambda_function.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
+| [aws_lambda_function_event_invoke_config.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function_event_invoke_config) | resource |
+| [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb) | resource |
+| [aws_lb_listener.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_listener) | resource |
+| [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_target_group) | resource |
+| [aws_route53_record.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/route53_record) | resource |
+| [aws_s3_object.keystore](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/s3_object) | resource |
+| [aws_s3_object.truststore](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/s3_object) | resource |
+| [aws_security_group.lb](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/security_group) | resource |
+| [aws_security_group.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/security_group) | resource |
+| [aws_vpc_security_group_egress_rule.server_allow_all_traffic_ipv4](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.server_allow_db_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.server_allow_tls_nlb](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [null_resource.codedeploy_server](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.generate_truststore](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [terraform_data.keystore_object_size](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.regression_wrapper_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
-| [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
-| [aws_ecr_image.certstores](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
-| [aws_ecr_image.log_router](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
-| [aws_ecr_image.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
-| [aws_ecr_repository.certstores](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
-| [aws_ecr_repository.log_router](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
-| [aws_ecr_repository.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
-| [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecs_cluster) | data source |
-| [aws_iam_policy_document.certstores_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.codedeploy_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.codedeploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.codedeploy_elbv2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.codedeploy_iam](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.codedeploy_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.ecs_service_role_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.ecs_task_execution_role_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.lambda_assume_regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.regression_wrapper_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.regression_wrapper_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.regression_wrapper_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.regression_wrapper_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_lambda_function.run_locust](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lambda_function) | data source |
-| [aws_network_interface.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interface) | data source |
-| [aws_network_interfaces.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interfaces) | data source |
-| [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
-| [aws_route53_zone.parent_env](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
-| [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
-| [aws_ssm_parameter.adot_collector_image](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
-| [aws_ssm_parameter.zone_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+| [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ec2_managed_prefix_list) | data source |
+| [aws_ecr_image.certstores](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_image) | data source |
+| [aws_ecr_image.log_router](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_image) | data source |
+| [aws_ecr_image.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_image) | data source |
+| [aws_ecr_repository.certstores](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_repository) | data source |
+| [aws_ecr_repository.log_router](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_repository) | data source |
+| [aws_ecr_repository.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_repository) | data source |
+| [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecs_cluster) | data source |
+| [aws_iam_policy_document.certstores_s3](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codedeploy_assume](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codedeploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codedeploy_elbv2](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codedeploy_iam](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.codedeploy_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ecs_service_role_assume](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ecs_task_execution_role_assume](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.lambda_assume_regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.rds](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.regression_wrapper_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.regression_wrapper_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.regression_wrapper_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.regression_wrapper_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_lambda_function.run_locust](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/lambda_function) | data source |
+| [aws_network_interface.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/network_interface) | data source |
+| [aws_network_interfaces.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/network_interfaces) | data source |
+| [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/rds_cluster) | data source |
+| [aws_route53_zone.parent_env](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/route53_zone) | data source |
+| [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/security_groups) | data source |
+| [aws_ssm_parameter.adot_collector_image](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ssm_parameter) | data source |
+| [aws_ssm_parameter.zone_name](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ssm_parameter) | data source |
 | [external_external.keystore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [external_external.truststore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
