@@ -98,10 +98,9 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       //Current_segment (line item)
       paItem.CURRENT_SEGMENT as sequenceNumber -> tgtItem.sequence = sequenceNumber "Add sequence number";
 
-      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(0,1).convertsToInteger()) -> tgtItem.productOrService = cc("http://www.ama-assn.org/go/cpt", itemCode) "Add item code";
-      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(0,1).convertsToInteger().not()) -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", itemCode) "Add item code";
-      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()=5 and itemCode.substring(1,2).convertsToInteger().not()) -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", itemCode) "Add item code";
-      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.length()!=5) -> tgtItem.productOrService = cc("http://terminology.hl7.org/CodeSystem/data-absent-reason","not-applicable") "add DAR";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.substring(0,1).convertsToInteger() and src.CLM_TYPE != 'I') -> tgtItem.productOrService = cc("http://www.ama-assn.org/go/cpt", itemCode) "Add item code";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(itemCode.substring(0,1).convertsToInteger().not() and src.CLM_TYPE != 'I') -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", itemCode) "Add item code";
+      paItem.HCPCS_OR_CPT_OR_HIPPS as itemCode where(src.CLM_TYPE = 'I') -> tgtItem.productOrService = cc("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", itemCode) "Add item code";
 
       paItem.PRICE_MOD1 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
       paItem.PRICE_MOD2 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";

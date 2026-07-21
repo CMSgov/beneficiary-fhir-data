@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.*;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
@@ -49,7 +48,7 @@ public class PriorAuthorizationItem implements Comparable<PriorAuthorizationItem
   void populateProductAndQuantity(
       ExplanationOfBenefit.ItemComponent line, Optional<ClaimTypePriorAuth> claimType) {
     var productOrService = hcpcsOrCptOrHipps.toFhir(claimType);
-    line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
+    line.setProductOrService(productOrService);
   }
 
   @Override
