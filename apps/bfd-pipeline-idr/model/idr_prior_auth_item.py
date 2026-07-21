@@ -43,7 +43,6 @@ class IdrPriorAuthItem(IdrBaseModel):
     mr_count_st_dt: Annotated[date, BeforeValidator(transform_null_date_to_min)]
     mr_count_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     rrb_excl_ind: Annotated[str, BeforeValidator(transform_default_string)]
-    # TODO: ask if we need these ts sine same as header table
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True}]
     idr_updt_ts: Annotated[
         datetime,
