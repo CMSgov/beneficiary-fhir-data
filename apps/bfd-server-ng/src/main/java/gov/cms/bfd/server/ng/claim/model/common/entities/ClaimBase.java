@@ -186,9 +186,12 @@ public abstract class ClaimBase {
 
   /**
    * Template method for ClaimIdrLoadDate (CMS profile only).
+   *
    * @return the ClaimIdrLoadDate, or nothing
    */
-  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() { return Optional.empty(); }
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
+    return Optional.empty();
+  }
 
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail

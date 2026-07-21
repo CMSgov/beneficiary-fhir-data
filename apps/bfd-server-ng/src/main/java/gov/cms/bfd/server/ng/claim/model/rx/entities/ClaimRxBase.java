@@ -57,7 +57,6 @@ public abstract class ClaimRxBase extends ClaimBase {
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
 
-
   /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
 
@@ -191,15 +190,21 @@ public abstract class ClaimRxBase extends ClaimBase {
         .toList();
   }
 
-  //region Template Methods
-  protected Optional<ExplanationOfBenefit.SupportingInformationComponent> submissionFormatSupportingInfo() {
+  // region Template Methods
+  protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      submissionFormatSupportingInfo() {
     return Optional.empty();
   }
 
-  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() { return Optional.empty(); }
+  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
+    return Optional.empty();
+  }
 
-  protected Optional<ClaimProcessDate> getClaimProcessDate() { return Optional.empty(); }
-  //endregion
+  protected Optional<ClaimProcessDate> getClaimProcessDate() {
+    return Optional.empty();
+  }
+
+  // endregion
 
   /**
    * Returns the system type.
@@ -226,7 +231,9 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() { return Optional.empty(); }
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.empty();
+  }
 
   /** Rx claims have a single embedded rather than a collection. */
   @Override

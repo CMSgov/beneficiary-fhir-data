@@ -21,40 +21,49 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_rx", schema = "idr")
 public class ClaimCmsRx extends ClaimRxBase {
 
-  //region Adjudication Charge
+  // region Adjudication Charge
   @Embedded private AdjudicationChargeRx adjudicationCharge;
 
   @Override
   protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
     return Optional.of(adjudicationCharge);
   }
-  //endregion
 
-  //region Claim Process Date
+  // endregion
+
+  // region Claim Process Date
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override
-  protected Optional<ClaimProcessDate> getClaimProcessDate() { return Optional.of(claimProcessDate); }
-  //endregion
+  protected Optional<ClaimProcessDate> getClaimProcessDate() {
+    return Optional.of(claimProcessDate);
+  }
 
-  //region Claim Submission Format Code
+  // endregion
+
+  // region Claim Submission Format Code
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimSubmissionFormatCode;
 
   @Override
-  protected Optional<ExplanationOfBenefit.SupportingInformationComponent> submissionFormatSupportingInfo() {
+  protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      submissionFormatSupportingInfo() {
     return claimSubmissionFormatCode
-        .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
+        .filter(_ -> getClaimTypeCode().isClaimSubtype(PDE))
         .map(c -> c.toFhir(supportingInfoFactory));
   }
-  //endregion
 
-  //region Claim IDR Load Date
+  // endregion
+
+  // region Claim IDR Load Date
   @Embedded private ClaimIdrLoadDate claimIdrLoadDate;
 
   @Override
-  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() { return Optional.of(claimIdrLoadDate); }
-  //endregion
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
+    return Optional.of(claimIdrLoadDate);
+  }
+
+  // endregion
 
   /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
