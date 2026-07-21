@@ -100,6 +100,8 @@ PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
 """Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
 Defaults to 20."""
 
+ALLOW_EXTRACTOR_QUERY_LOGGING = _parse_bool_default_true("IDR_ALLOW_EXTRACTOR_QUERY_LOGGING")
+"""Allow logging of Snowflake and Postgres SQL queries at the DEBUG level."""
 
 # IDR credentials, these are pulled from SSM in prod.
 # You likely don't want to touch these otherwise.
