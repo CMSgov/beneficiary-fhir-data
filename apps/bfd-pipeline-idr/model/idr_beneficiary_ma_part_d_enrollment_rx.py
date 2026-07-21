@@ -70,6 +70,5 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
                     {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = enrlmt_rx.bene_sk
                 )
-                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
                 {{ORDER_BY}}
             """

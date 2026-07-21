@@ -4,7 +4,6 @@ from typing import Annotated, override
 from pydantic import BeforeValidator
 
 from constants import (
-    DEFAULT_MAX_DATE,
     IDR_BENE_MA_PART_D_TABLE,
 )
 from load_partition import LoadPartition
@@ -76,7 +75,6 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
                 {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = enrlmt.bene_sk
             )
-            AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
             AND bene_enrlmt_pgm_type_cd != '~'
             {{ORDER_BY}}
         """
