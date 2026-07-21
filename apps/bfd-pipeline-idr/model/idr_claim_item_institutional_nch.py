@@ -386,4 +386,5 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
+                {{LIMIT}}
         """

@@ -41,13 +41,13 @@ from settings import enable_prior_auth_ingestion
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 
-_CLAIM_TABLES: list[type[IdrBaseModel]] = [
+CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
     IdrClaimInstitutionalNch,
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
 ]
-_CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
+CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
     # RX/Part D is special because we combine claim + claim line
     IdrClaimRx,
     IdrClaimItemProfessionalNch,
@@ -55,7 +55,7 @@ _CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimItemProfessionalSs,
     IdrClaimItemInstitutionalSs,
 ]
-_BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
+BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrBeneficiaryEntitlement,
@@ -69,8 +69,8 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidy,
     IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
-_BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
-_PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
+BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
+PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
 _LOAD_ALL_TABLES = {"all"}
 
 
@@ -111,11 +111,11 @@ class StagedIdrPipeline:
         yield from self._extract_and_load_stage([(IdrBeneficiaryOvershareMbi, None)])
 
     def _stage2_do_claims_and_benes_tbls(self) -> Stage[bool]:
-        tables = [*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES]
+        tables = [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES]
         if self.load_type == LoadType.INITIAL:
-            tables.extend([*_CLAIM_TABLES, *_BENE_TABLES])
+            tables.extend([*CLAIM_TABLES, *BENE_TABLES])
         if enable_prior_auth_ingestion():
-            tables.append(*_PRIOR_AUTH_TABLES)
+            tables.append(*PRIOR_AUTH_TABLES)
 
         filtered_tables = self._filter_tables(tables)
 
@@ -126,7 +126,7 @@ class StagedIdrPipeline:
             return
 
         yield from self._extract_and_load_stage(
-            self._gen_partitioned_node_inputs(self._filter_tables(_CLAIM_TABLES))
+            self._gen_partitioned_node_inputs(self._filter_tables(CLAIM_TABLES))
         )
 
     def _stage4_do_beneficiary(self) -> Stage[bool]:
@@ -134,7 +134,7 @@ class StagedIdrPipeline:
             return
 
         yield from self._extract_and_load_stage(
-            self._gen_partitioned_node_inputs(self._filter_tables(_BENE_TABLES))
+            self._gen_partitioned_node_inputs(self._filter_tables(BENE_TABLES))
         )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
