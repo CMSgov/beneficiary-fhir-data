@@ -6,7 +6,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
-import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -60,11 +59,7 @@ public class ClaimCmsRx extends ClaimRxBase {
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
-    return Optional.of(claimIdrLoadDate);
+    return Optional.ofNullable(claimIdrLoadDate);
   }
-
   // endregion
-
-  /** Rx claims carry a single embedded line rather than a collection. */
-  @Embedded private ClaimItemRx claimItems;
 }
