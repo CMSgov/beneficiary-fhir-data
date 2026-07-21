@@ -3,7 +3,9 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from constants import IDR_BENE_COMBINED_DUAL_TABLE
+from constants import (
+    IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE,
+)
 from load_partition import LoadPartition
 from model.base_model import (
     ALIAS_HSTRY,
@@ -16,21 +18,20 @@ from model.base_model import (
     ModelType,
     Source,
     deceased_bene_filter,
-    transform_default_string,
     transform_null_date_to_min,
 )
 
 
-class IdrBeneficiaryDualEligibility(IdrBaseModel):
+class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
-    bene_mdcd_elgblty_end_dt: date
-    bene_dual_stus_cd: str
-    bene_dual_type_cd: str
-    geo_usps_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_cmbnd_deemd_efctv_dt: Annotated[datetime, {PRIMARY_KEY_ORDER: 1}]
+    bene_cmbnd_deemd_trmntn_dt: date
+    bene_cmbnd_deemd_copmt_lvl_id: str
+    bene_cmbnd_deemd_prm_pct: str
+    bene_cmbnd_deemd_ind: str
     idr_ltst_trans_flg: str
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 2}]
-    idr_trans_obslt_ts: datetime
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 2}]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
@@ -39,14 +40,12 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
     @override
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary_dual_eligibility"
+        return "idr.beneficiary_low_income_subsidy_cmbnd"
 
     @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        return [
-            "bfd_part_dual_coverage_updated_ts",
-        ]
+        return ["bfd_part_d_coverage_updated_ts"]
 
     @override
     @staticmethod
@@ -58,13 +57,12 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         hstry = ALIAS_HSTRY
         return f"""
-            SELECT {{COLUMNS}}
-            FROM {IDR_BENE_COMBINED_DUAL_TABLE} dual {{TABLESAMPLE}}
-            {{WHERE_CLAUSE}}
-            AND NOT EXISTS (
-                {deceased_bene_filter(hstry, start_time)}
-                AND {hstry}.bene_sk = dual.bene_sk
-            )
-            {{ORDER_BY}}
-            {{LIMIT}}
-        """
+                SELECT {{COLUMNS}}
+                FROM {IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE} bene_lis
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {deceased_bene_filter(hstry, start_time)}
+                    AND {hstry}.bene_sk = bene_lis.bene_sk
+                )
+                {{ORDER_BY}}
+            """

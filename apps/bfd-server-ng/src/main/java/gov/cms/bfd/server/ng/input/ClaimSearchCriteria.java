@@ -101,7 +101,7 @@ public record ClaimSearchCriteria(
    *
    * @return boolean
    */
-  public boolean hasLasUpdated() {
+  public boolean hasLastUpdated() {
     return lastUpdated().hasBounds();
   }
 
