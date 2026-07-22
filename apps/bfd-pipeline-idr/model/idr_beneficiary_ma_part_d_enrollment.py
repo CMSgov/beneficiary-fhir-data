@@ -3,9 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from constants import (
-    IDR_BENE_MA_PART_D_TABLE,
-)
+from constants import IDR_BENE_MA_PART_D_TABLE
 from load_partition import LoadPartition
 from model.base_model import (
     ALIAS_HSTRY,
