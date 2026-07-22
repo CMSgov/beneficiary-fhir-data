@@ -185,8 +185,17 @@ def prune_bene_ma_part_d_rx(
             res = conn.execute(
                 f"""
                 DELETE FROM {bene_table}
-                WHERE (bene_sk, bene_cntrct_num, bene_pbp_num, bene_enrlmt_bgn_dt, bene_enrlmt_pdp_rx_info_bgn_dt) IN (
-                    SELECT bene_sk, bene_cntrct_num, bene_pbp_num, bene_enrlmt_bgn_dt, bene_enrlmt_pdp_rx_info_bgn_dt
+                WHERE (bene_sk, 
+                       bene_cntrct_num, 
+                       bene_pbp_num, 
+                       bene_enrlmt_bgn_dt, 
+                       bene_enrlmt_pdp_rx_info_bgn_dt
+                    ) IN (
+                    SELECT bene_sk, 
+                           bene_cntrct_num, 
+                           bene_pbp_num, 
+                           bene_enrlmt_bgn_dt, 
+                           bene_enrlmt_pdp_rx_info_bgn_dt
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
                     LIMIT %s
