@@ -47,7 +47,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         # shown since it may be incorrectly linked to more than one person.
         return f"""
                SELECT hstry.bene_mbi_id
-               FROM {IDR_BENE_HISTORY_TABLE} hstry
+               FROM {IDR_BENE_HISTORY_TABLE} hstry {{TABLESAMPLE}}
                WHERE NOT EXISTS (
                    SELECT 1
                    FROM {IDR_BENE_XREF_TABLE} xref
@@ -57,4 +57,5 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
                ) AND hstry.bene_mbi_id IS NOT NULL
                GROUP BY hstry.bene_mbi_id
                HAVING COUNT(DISTINCT hstry.bene_sk) > 1
+               {{LIMIT}}
                """

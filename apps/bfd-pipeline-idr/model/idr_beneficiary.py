@@ -213,7 +213,7 @@ class IdrBeneficiary(IdrBaseModel):
                 {deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_HISTORY_TABLE} {hstry}
+            FROM {IDR_BENE_HISTORY_TABLE} {hstry} {{TABLESAMPLE}}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             -- Additionally, there are cases where there exists a bene_sk -> bene_xref_efctv_sk
@@ -226,4 +226,5 @@ class IdrBeneficiary(IdrBaseModel):
             AND {hstry}.bene_mbi_id IS NOT NULL
             AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
+            {{LIMIT}}
         """
