@@ -146,7 +146,7 @@ class StagedIdrPipeline:
         if self.load_type == LoadType.INITIAL:
             return
 
-        for model in self._filter_tables(_CLAIM_SS_TABLES):
+        for model in self._filter_tables(CLAIM_SS_TABLES):
             yield functools.partial(
                 prune_phase_1_ss_claims,
                 model,
