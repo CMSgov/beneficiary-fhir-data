@@ -100,7 +100,9 @@ PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
 """Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
 Defaults to 20."""
 
-BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT = int(getenv("IDR_BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT", "100000"))
+BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT = int(
+    getenv("IDR_BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT", "100000")
+)
 """Maximum rows to delete per prune statement for Part D beneficiary records."""
 
 BENEFICIARY_PRUNE_BATCH_LIMIT = int(getenv("IDR_BENEFICIARY_PRUNE_BATCH_LIMIT", "1000"))

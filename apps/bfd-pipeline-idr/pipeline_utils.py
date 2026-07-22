@@ -8,7 +8,7 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION, DEFAULT_MAX_DATE
+from constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
@@ -16,9 +16,9 @@ from model.base_model import (
     LoadMode,
     T,
 )
+from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
-from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
 from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
 
@@ -115,7 +115,8 @@ def extract_and_load(
         except Exception as ex:
             logger.opt(exception=True).error("error loading {}", cls.table())
             raise ex
-            
+
+
 def prune_bene_lis_cmbnd(
     load_mode: LoadMode,
 ) -> bool:
@@ -143,8 +144,9 @@ def prune_bene_lis_cmbnd(
 
     return True
 
+
 def prune_bene_ma_part_d(
-        load_mode: LoadMode,
+    load_mode: LoadMode,
 ) -> bool:
     bene_table = IdrBeneficiaryMaPartDEnrollment.table()
 
@@ -170,8 +172,9 @@ def prune_bene_ma_part_d(
 
     return True
 
+
 def prune_bene_ma_part_d_rx(
-        load_mode: LoadMode,
+    load_mode: LoadMode,
 ) -> bool:
     bene_table = IdrBeneficiaryMaPartDEnrollmentRx.table()
 
