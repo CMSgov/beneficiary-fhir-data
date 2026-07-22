@@ -160,9 +160,9 @@ def prune_phase_1_ss_claims(
                                 ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                             AND clm.bfd_updated_ts < %s
                             AND NOT EXISTS (
-                                SELECT 1 from {item_table} i
+                                SELECT 1 FROM {item_table} i
                                 WHERE i.clm_uniq_id = item.clm_uniq_id
-                                AND i.bfd_updated_ts < %s
+                                AND i.bfd_updated_ts >= %s
                             )
                             LIMIT {PRUNE_BATCH_MAX_SIZE}
                         )
@@ -185,15 +185,14 @@ def prune_phase_1_ss_claims(
                         DELETE FROM {claim_table}
                         WHERE clm_uniq_id IN (
                             SELECT clm.clm_uniq_id FROM {claim_table} clm
-                            JOIN {item_table} item ON  item.clm_uniq_id = clm.clm_uniq_id
                             WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
                             AND clm.clm_src_id IN 
                                 ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                             AND clm.bfd_updated_ts < %s
                             AND NOT EXISTS (
-                                SELECT 1 from {item_table} i
-                                WHERE i.clm_uniq_id = item.clm_uniq_id
-                                AND i.bfd_updated_ts < %s
+                                SELECT 1 FROM {item_table} i
+                                WHERE i.clm_uniq_id = clm.clm_uniq_id
+                                AND i.bfd_updated_ts >= %s
                             )
                             LIMIT {PRUNE_BATCH_MAX_SIZE}
                         )
