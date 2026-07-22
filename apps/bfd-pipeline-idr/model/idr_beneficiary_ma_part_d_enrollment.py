@@ -69,7 +69,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_MA_PART_D_TABLE} enrlmt
+            FROM {IDR_BENE_MA_PART_D_TABLE} enrlmt {{TABLESAMPLE}}
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}
@@ -77,4 +77,5 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
             )
             AND bene_enrlmt_pgm_type_cd != '~'
             {{ORDER_BY}}
+            {{LIMIT}}
         """
