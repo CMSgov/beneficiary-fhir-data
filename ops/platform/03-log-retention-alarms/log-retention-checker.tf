@@ -35,7 +35,7 @@ resource "aws_scheduler_schedule" "checker" {
 resource "aws_cloudwatch_log_group" "checker" {
   name              = "/aws/lambda/${local.checker_lambda_full_name}"
   retention_in_days = local.required_retention_in_days
-  kms_key_id        = local.env_key_arn
+  kms_key_id        = local.kms_key_arn
   skip_destroy      = true
 }
 
@@ -51,7 +51,7 @@ resource "aws_lambda_function" "checker" {
     Name = local.checker_lambda_full_name
   }
 
-  kms_key_arn      = local.env_key_arn
+  kms_key_arn      = local.kms_key_arn
   filename         = data.archive_file.checker_lambda_src.output_path
   source_code_hash = data.archive_file.checker_lambda_src.output_base64sha256
   architectures    = ["arm64"]

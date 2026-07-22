@@ -45,4 +45,3 @@ sops:
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
   version: 3.11.0
-/bfd/platform/log-retention-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-warnings

@@ -10,20 +10,20 @@
 /bfd/platform/network/sensitive/route53/zone/test/external_vpcs_list_json: ENC[AES256_GCM,data:ZtMWOGrMx4znKmUeHA3/DOhlEoGWZr4/o5W7nGg7l6TLeszEH1c=,iv:K7ailUBD7JN8LdpIELeC0vN5hOPy15N8If0IcHTJQXg=,tag:bBLlGwtgAPgY91th8r2YrA==,type:str]
 /bfd/platform/network/sensitive/route53/zone/test/records: ENC[AES256_GCM,data:elc=,iv:JaN3qPDgxcrAKVgbAd69k5pVtOR64TnlEyyl/VIIZm8=,tag:RCS21GML9uul4CfmGwlQqg==,type:str]
 /bfd/platform/sonar/sensitive/service_account_access_key: ENC[AES256_GCM,data:I7hQVx3Wry0IUvANFGyJtdj6rT8nJ3zfpPMIiovJ6MeOqBhJgTWx1KqKWEE=,iv:5CMjVqrByv1PlF27QoVCLsfU+fa3vzLHZf+HRGV3w/Y=,tag:dY8Zl1wz92qqhnkOHdqfSA==,type:str]
+/bfd/platform/log-retention-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-warnings
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk
+      aws_profile: ""
       created_at: "2025-05-30T12:44:10Z"
       enc: AQICAHje54t884PQ3I3HmEfbyeDxeth8IxFtXCHA9cZvNPo2hQGyP0QC8tu6Ih5lpqXY+rpOAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMYewoC+MbQztXIxKsAgEQgDvG6oBn0T50sN7lF4nqr1NKNXM481afDxSIeEaIRCa554zT6jLDSvnQb/sbg3pZXnDOk1e6OJOJtb72xA==
-      aws_profile: ""
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      aws_profile: ""
       created_at: "2025-05-30T12:43:15Z"
       enc: AQICAHjxly34ZBDoNlpGiKxZCgGefcvFT75wuI0miwFqykz7tQGBmOF467T0Ol5QmUcAF/ZMAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMCP0Phd4DSMFY3WjJAgEQgDu6gBh8O6AOTBRoQ6ERcZJkEBmHwlnQqvNshDaU17Gb+igYqmbTcusMH0fAt88+P724+DxP/Np6H3R5eg==
-      aws_profile: ""
     - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      aws_profile: ""
       created_at: "2025-06-16T19:01:55Z"
       enc: AQICAHg4lseGbAt9RybBF1VZvUEr9DQG36gKCucJoGCH1eiXJAFoo4+2/9yTYqi454+yQcdtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMzyVNfm3pg/LaNZD1AgEQgDvx4lFyv/o9+OlNWek2ux3mvdxFmuextAhZ9HRjHohto6gSoNhJCea9CbvXT/qriGBlz7l+FdWBhPy7wA==
-      aws_profile: ""
   unencrypted_regex: /nonsensitive/
-  version: 3.10.2
-/bfd/platform/log-retention-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-warnings
+  version: 3.13.2

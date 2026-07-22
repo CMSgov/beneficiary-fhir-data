@@ -4,6 +4,12 @@ data "aws_iam_policy_document" "checker_logs" {
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = ["${aws_cloudwatch_log_group.checker.arn}:*"]
   }
+
+  statement {
+    sid       = "AllowLogGroups"
+    actions   = ["logs:DescribeLogGroups", "logs:PutRetentionPolicy"]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "checker_logs" {
@@ -14,24 +20,6 @@ resource "aws_iam_policy" "checker_logs" {
     "CloudWatch Log Group and Log Streams"
   ])
   policy = data.aws_iam_policy_document.checker_logs.json
-}
-
-data "aws_iam_policy_document" "checker_describe_logs" {
-  statement {
-    sid       = "AllowDescribeLogGroups"
-    actions   = ["logs:DescribeLogGroups"]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "checker_describe_logs" {
-  name = "${local.checker_lambda_full_name}-describe-log-groups"
-  path = local.iam_path
-  description = join("", [
-    "Permissions for ${local.checker_lambda_full_name} Lambda to list CloudWatch Log Groups ",
-    "and evaluate retention settings"
-  ])
-  policy = data.aws_iam_policy_document.checker_describe_logs.json
 }
 
 data "aws_iam_policy_document" "checker_publish_alerts" {
@@ -78,8 +66,7 @@ resource "aws_iam_role" "checker" {
 
 resource "aws_iam_role_policy_attachment" "checker" {
   for_each = {
-    logs          = aws_iam_policy.checker_logs.arn
-    describe_logs = aws_iam_policy.checker_describe_logs.arn
+    logs = aws_iam_policy.checker_logs.arn
   }
 
   role       = aws_iam_role.checker.name
@@ -97,7 +84,7 @@ data "aws_iam_policy_document" "checker_kms" {
   statement {
     sid       = "AllowKmsDecryptForLogGroup"
     actions   = ["kms:Decrypt", "kms:GenerateDataKey", "kms:DescribeKey"]
-    resources = [local.env_key_arn]
+    resources = [local.kms_key_arn]
   }
 }
 
@@ -117,14 +104,14 @@ resource "aws_iam_role_policy_attachment" "checker_kms" {
 
 resource "aws_kms_grant" "checker_kms" {
   name              = "${local.checker_lambda_full_name}-kms"
-  key_id            = local.env_key_arn
+  key_id            = local.kms_key_arn
   grantee_principal = aws_iam_role.checker.arn
   operations        = ["Decrypt", "GenerateDataKey", "DescribeKey"]
 }
 
 resource "aws_kms_grant" "checker_platform_kms" {
   name              = "${local.checker_lambda_full_name}-platform-kms"
-  key_id            = module.terraservice.platform_key_arn
+  key_id            = local.kms_key_arn
   grantee_principal = aws_iam_role.checker.arn
   operations        = ["Decrypt", "GenerateDataKey", "DescribeKey"]
 }

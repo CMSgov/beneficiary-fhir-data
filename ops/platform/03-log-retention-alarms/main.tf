@@ -8,8 +8,7 @@ terraform {
 }
 
 module "terraservice" {
-  source = "../../terraform-modules/bfd/bfd-terraservice"
-
+  source = "../../terraform-modules/bfd/bfd-platform-service"
   service              = local.service
   relative_module_root = "ops/platform/03-log-retention-alarms"
 }
@@ -20,11 +19,8 @@ locals {
   region                   = module.terraservice.region
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
-  env                      = module.terraservice.env
-  is_ephemeral_env         = module.terraservice.is_ephemeral_env
-  bfd_version              = module.terraservice.bfd_version
   ssm_config               = module.terraservice.ssm_config
-  env_key_arn              = module.terraservice.env_key_arn
+  kms_key_arn              = module.terraservice.key_arn
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 

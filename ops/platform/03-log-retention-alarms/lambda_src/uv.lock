@@ -79,7 +79,6 @@ version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
-    { name = "mypy-boto3-ecs" },
 ]
 
 [package.dev-dependencies]
@@ -91,10 +90,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = ">=1.37.19" },
-    { name = "mypy-boto3-ecs", specifier = ">=1.43.43" },
-]
+requires-dist = [{ name = "boto3", specifier = ">=1.37.19" }]
 
 [package.metadata.requires-dev]
 dev = [
