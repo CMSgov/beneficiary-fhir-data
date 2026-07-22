@@ -386,7 +386,8 @@ jobs:
         migrator-ng,
         idr-pipeline,
         server-ng,
-        server-ng-metrics
+        server-ng-metrics,
+        server-ng-alarms
       git-ref: ${{ github.ref_name }}
       per-service-vars-json: >-
         {
