@@ -26,18 +26,6 @@ Various useful `access`/`messages` log-based CloudWatch Alarms are implemented i
 
 For now, a healthy host count CloudWatch Alarm is defined in `alarms-elb.tf` so we are aware if there are no healthy hosts serving traffic in an environment.
 
-### `500` Errors Alerting (`error-alerter` Lambda)
-
-This Terraservice implements Slack alerts for _any_ `500`s (errors) logged by BFD Server in a particular environment (`terraform workspace`). Whenever a particular environment's `server` logs a `500`, an alert will be sent within 10 to 15 seconds.
-
-As it is possible that _many_ errors occur in a short period, these alerts summarize the number of errors that have been returned during a "lookback" period (defined per-environment). These summaries include a count of `500`s per-partner, per-API-operation, along with a total number of errors returned within the "lookback" period.
-
-Along with the summary, the alert includes various links to Log Insights queries that allow an operator to view the log messages related to the errors with more detailed information such as exception stack traces, request URLs, etc.
-
-#### Diagram
-
-![`bfd_server_error_alerts` Diagram](docs/resources/bfd_server_error_alerts_diagram.png)
-
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

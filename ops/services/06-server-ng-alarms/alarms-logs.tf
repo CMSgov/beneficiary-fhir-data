@@ -69,49 +69,6 @@ resource "aws_cloudwatch_metric_alarm" "server_log_availability_1hr" {
   treat_missing_data  = "notBreaching"
 }
 
-# NOTE: alarm is triggered when gov.cms.bfd.server.war QueryLoggingListener encounters an
-#       unknown query, signaling that the application is missing a required pattern.
-resource "aws_cloudwatch_metric_alarm" "server_query_logging_listener_warning" {
-  alarm_name          = "${local.alarm_name_prefix}-query-logging-listener-warning"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  period              = 1 * 60 # 1 Minute
-  statistic           = "Sum"
-  threshold           = 1
-
-  alarm_description = join("", [
-    "${local.target_service} QueryLoggingListener has encountered an unknown query ",
-    "in APP-ENV: bfd-${local.env}"
-  ])
-
-  metric_name = "query-logging-listener/count/warning"
-  namespace   = local.namespace
-
-  # alarm_actions = local.logs_warning_arn
-
-  datapoints_to_alarm = 1
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "samhsa_mismatch_error" {
-  alarm_name          = "${local.alarm_name_prefix}-samhsa-mismatch-error"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  threshold           = 1
-  evaluation_periods  = 1
-  period              = 60
-  statistic           = "Sum"
-
-  alarm_description = "${local.target_service} has encountered a SAMHSA 2.0 filter mismatch error in ${local.env}"
-
-  metric_name = "samhsa-mismatch/count/error"
-  namespace   = local.namespace
-
-  # alarm_actions = local.logs_warning_arn
-
-  datapoints_to_alarm = 1
-  treat_missing_data  = "notBreaching"
-}
-
 resource "aws_cloudwatch_metric_alarm" "server_messages_error_level_warning" {
   alarm_name          = "${local.alarm_name_prefix}-messages-error-level-warning"
   comparison_operator = "GreaterThanOrEqualToThreshold"

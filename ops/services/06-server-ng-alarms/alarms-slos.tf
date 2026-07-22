@@ -43,11 +43,9 @@ EOF
   ])
 
   slos_metrics = {
-    all_latency                         = "http-requests/latency/all"
-    all_responses_count                 = "http-requests/count/all"
-    all_http500s_count                  = "http-requests/count/500-responses"
-    availability_success_count          = "availability/success"
-    availability_failure_count          = "availability/failure"
+    all_latency                         = "http-requests.latency.all.max"
+    all_responses_count                 = "http-requests.count.all.count"
+    all_http500s_count                  = "http-requests.count.5xx-responses.count"
   }
 
   error_slo_configs = {
@@ -233,32 +231,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
   namespace   = local.namespace
 
   alarm_actions = local.slos_alert_arn
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_availability_failures_sum" {
-  for_each = local.availability_slo_failure_sum_configs
-
-  alarm_name          = "${local.alarm_name_prefix}-${replace(each.key, "_", "-")}"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  period              = each.value.period
-  statistic           = "Sum"
-  threshold           = each.value.threshold
-
-  alarm_description = join("", [
-    "The sum of failed availability checks exceeded or was equal to ${upper(each.value.type)} ",
-    "SLO threshold of ${each.value.threshold} failures in ${each.value.period / 60} minute(s) ",
-    "for ${local.target_service} in ${local.env} environment.",
-    "\n\n${local.default_dashboard_message_fragment}"
-  ])
-
-  metric_name = local.slos_metrics.availability_failure_count
-  namespace   = local.namespace
-
-  # alarm_actions = each.value.alarm_actions
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
