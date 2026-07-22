@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 from collections.abc import Generator
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
@@ -176,18 +176,6 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
-    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
-    if load_type == LoadType.INITIAL:
-        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 21
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 123359318723
-    else:
-        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 9
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 849348853948
-
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 51
     rows = cur.fetchmany(1)
@@ -208,18 +196,6 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
-    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
-    if load_type == LoadType.INITIAL:
-        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 327
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 123359318723
-    else:
-        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 151
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 849348853948
-
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 442
     rows = cur.fetchmany(1)
@@ -231,6 +207,32 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert rows[0]["clm_uniq_id"] == 4991490559710
 
     conn.commit()
+
+    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 21
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 123359318723
+
+        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 327
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 123359318723
+
+    else:
+        make_it_stale_ts = datetime.now(UTC) + timedelta(days=60)
+        _advance_time(make_it_stale_ts)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL)
+        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 9
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 849348853948
+
+        cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
+        assert cur.rowcount == 151
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 849348853948
 
     # Test incremental loading logic involving 'source_load_events' if we're testing incremental
     # mode
