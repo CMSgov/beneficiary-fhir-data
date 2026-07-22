@@ -1,7 +1,6 @@
 import time
 from datetime import UTC, datetime, timedelta
 
-from constants import DEFAULT_MAX_DATE
 import psycopg
 from loguru import logger
 from snowflake.connector import ProgrammingError
@@ -9,7 +8,7 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION
+from constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
