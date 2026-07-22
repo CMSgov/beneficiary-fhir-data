@@ -28,8 +28,9 @@ from model.base_model import (
     LoadMode,
     T,
 )
+from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
-from settings import PRUNE_BATCH_MAX_SIZE
+from settings import BENEFICIARY_PRUNE_BATCH_LIMIT, PHASE_1_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
@@ -164,7 +165,7 @@ def prune_phase_1_ss_claims(
                                 WHERE i.clm_uniq_id = item.clm_uniq_id
                                 AND i.bfd_updated_ts >= %s
                             )
-                            LIMIT {PRUNE_BATCH_MAX_SIZE}
+                            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
                         )
                     """,  # type: ignore
                     (prune_cutoff_date, prune_cutoff_date),
@@ -194,7 +195,7 @@ def prune_phase_1_ss_claims(
                                 WHERE i.clm_uniq_id = clm.clm_uniq_id
                                 AND i.bfd_updated_ts >= %s
                             )
-                            LIMIT {PRUNE_BATCH_MAX_SIZE}
+                            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
                         )
                     """,  # type: ignore
                     (prune_cutoff_date, prune_cutoff_date),
@@ -206,4 +207,34 @@ def prune_phase_1_ss_claims(
                 if res.rowcount == 0:
                     logger.info("Total rows pruned from {}: {}", claim_table, totalRowCount)
                     break
+    return True
+
+
+def prune_bene_lis_cmbnd(
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
+
+    prune_cutoff_date = job_start - timedelta(days=60)
+    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts) IN (
+                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts 
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:
+                break
+
     return True

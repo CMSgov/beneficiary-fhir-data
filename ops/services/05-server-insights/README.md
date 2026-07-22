@@ -29,7 +29,7 @@ Terraform has no built-in resource for defining these views, and while there _ar
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | 6.52.0 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -67,24 +67,24 @@ Terraform has no built-in resource for defining these views, and while there _ar
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_subscription_filter.cloudwatch_access_log_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
-| [aws_cloudwatch_log_subscription_filter.ecs_access_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_subscription_filter) | resource |
-| [aws_glue_crawler.glue_crawler_api_requests](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_crawler) | resource |
-| [aws_iam_policy.iam_policy_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.iam_role_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.iam_role_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.iam_role_firehose_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_kinesis_firehose_delivery_stream.firehose_ingester](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
-| [aws_lambda_function.lambda_function_format_firehose_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_cloudwatch_log_subscription_filter.cloudwatch_access_log_subscription](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_subscription_filter) | resource |
+| [aws_cloudwatch_log_subscription_filter.ecs_access_log](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_subscription_filter) | resource |
+| [aws_glue_crawler.glue_crawler_api_requests](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/glue_crawler) | resource |
+| [aws_iam_policy.iam_policy_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_role.iam_role_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.iam_role_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.iam_role_firehose_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_kinesis_firehose_delivery_stream.firehose_ingester](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/kinesis_firehose_delivery_stream) | resource |
+| [aws_lambda_function.lambda_function_format_firehose_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
 | [null_resource.athena_view_api_requests](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.athena_view_api_requests_by_bene](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.athena_view_new_benes_by_day](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [archive_file.zip_archive_format_firehose_logs](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
-| [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/cloudwatch_log_group) | data source |
-| [aws_iam_role.iam_role_glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
-| [aws_kms_key.kms_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
-| [aws_s3_bucket.bfd_insights_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
-| [aws_ssm_parameter.bfd_insights_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+| [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/cloudwatch_log_group) | data source |
+| [aws_iam_role.iam_role_glue](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_role) | data source |
+| [aws_kms_key.kms_key](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/kms_key) | data source |
+| [aws_s3_bucket.bfd_insights_bucket](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/s3_bucket) | data source |
+| [aws_ssm_parameter.bfd_insights_bucket](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ssm_parameter) | data source |
 | [external_external.src_table_version](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

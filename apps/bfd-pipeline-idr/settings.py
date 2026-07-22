@@ -100,10 +100,15 @@ PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
 """Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
 Defaults to 20."""
 
-PRUNE_BATCH_MAX_SIZE = int(getenv("PRUNE_BATCH_MAX_SIZE", "1000"))
+PHASE_1_PRUNE_BATCH_LIMIT = int(getenv("PHASE_1_PRUNE_BATCH_LIMIT", "1000"))
 """The maximum batch size for pruning old claims (phase 1 claims from shared systems) on
 INCREMENTAL loads. Defaults to 1000."""
 
+BENEFICIARY_PRUNE_BATCH_LIMIT = int(getenv("IDR_BENEFICIARY_PRUNE_BATCH_LIMIT", "1000"))
+"""Maximum rows to delete per prune statement for LIS combined beneficiary records."""
+
+ALLOW_EXTRACTOR_QUERY_LOGGING = _parse_bool_default_true("IDR_ALLOW_EXTRACTOR_QUERY_LOGGING")
+"""Allow logging of Snowflake and Postgres SQL queries at the DEBUG level."""
 
 # IDR credentials, these are pulled from SSM in prod.
 # You likely don't want to touch these otherwise.

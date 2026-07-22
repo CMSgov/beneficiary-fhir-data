@@ -51,7 +51,8 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
                SELECT {{COLUMNS}}
-               FROM {IDR_BENE_MBI_TABLE}
+               FROM {IDR_BENE_MBI_TABLE} {{TABLESAMPLE}}
                    {{WHERE_CLAUSE}}
                    {{ORDER_BY}}
+                   {{LIMIT}}
                """

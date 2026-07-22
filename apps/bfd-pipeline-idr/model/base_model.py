@@ -181,10 +181,12 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
             clm_idr_ld_dt,
             idr_insrt_ts,
             idr_updt_ts
-        FROM {IDR_CLAIM_TABLE} {clm}
+        FROM {IDR_CLAIM_TABLE} {clm} {{TABLESAMPLE}}
         WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
+            {{BASE_CLAIMS_WHERE_FILTERS}}
+        {{LIMIT}}
     """
 
 
@@ -496,16 +498,16 @@ class IdrBaseModel(BaseModel, ABC):
         return [key for (key, _) in keys_with_meta]
 
     @classmethod
+    def format_aliases(cls, cols: list[str]) -> list[str]:
+        return [cls._format_column_alias(col) for col in cols]
+
+    @classmethod
     def batch_timestamp_col(cls, is_historical: bool) -> list[str]:
         if is_historical:
             historical_cols = cls._extract_meta_keys(HISTORICAL_BATCH_TIMESTAMP)
             if len(historical_cols) > 0:
                 return historical_cols
         return cls._extract_meta_keys(BATCH_TIMESTAMP)
-
-    @classmethod
-    def batch_timestamp_col_alias(cls, is_historical: bool) -> list[str]:
-        return [cls._format_column_alias(col) for col in cls.batch_timestamp_col(is_historical)]
 
     @classmethod
     def update_timestamp_col(cls) -> list[str]:
@@ -525,10 +527,6 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def last_updated_timestamp_col(cls) -> str | None:
         return cls._single_or_default(LAST_UPDATED_TIMESTAMP)
-
-    @classmethod
-    def update_timestamp_col_alias(cls) -> list[str]:
-        return [cls._format_column_alias(col) for col in cls.update_timestamp_col()]
 
     @classmethod
     def _extract_meta_keys(cls, meta_key: str) -> list[str]:
