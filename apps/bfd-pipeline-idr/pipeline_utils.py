@@ -1,6 +1,7 @@
 import time
 from datetime import UTC, datetime, timedelta
 
+from constants import DEFAULT_MAX_DATE
 import psycopg
 from loguru import logger
 from snowflake.connector import ProgrammingError
@@ -117,12 +118,10 @@ def extract_and_load(
 
 def prune_bene_lis_cmbnd(
     load_mode: LoadMode,
-    job_start: datetime,
 ) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    prune_cutoff_date = job_start - timedelta(days=60)
-    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+    logger.info("pruning obsolete lis beneficiaries", DEFAULT_MAX_DATE)
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:
@@ -136,7 +135,7 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, BENEFICIARY_PRUNE_BATCH_LIMIT),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
             if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:

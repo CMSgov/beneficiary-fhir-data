@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
 import lombok.Getter;
+import org.hibernate.annotations.SQLRestriction;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -47,6 +48,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
+  @SQLRestriction("idr_trans_obslt_ts >= DATE '9999-12-31'")
   private SortedSet<BeneficiaryLowIncomeSubsidy> beneficiaryLowIncomeSubsidies;
 
   @Embedded private BeneficiaryCoverageOptional coverageOptional;
