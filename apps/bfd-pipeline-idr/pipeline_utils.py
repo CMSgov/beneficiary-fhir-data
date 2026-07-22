@@ -120,7 +120,7 @@ def prune_bene_lis_cmbnd(
 ) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    logger.info("pruning obsolete lis beneficiaries", DEFAULT_MAX_DATE)
+    logger.info("pruning obsolete lis beneficiaries")
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:
