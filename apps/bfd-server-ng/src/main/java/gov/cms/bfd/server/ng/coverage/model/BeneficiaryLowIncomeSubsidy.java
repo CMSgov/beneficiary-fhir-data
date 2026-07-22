@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.coverage.converter.StringToDoubleConverter;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.SQLRestriction;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @EqualsAndHashCode
 @Table(name = "beneficiary_low_income_subsidy_cmbnd", schema = "idr")
+@SQLRestriction(value = "idr_trans_obslt_ts >= DATE '" + IdrConstants.DEFAULT_DATE_STRING + "'")
 public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowIncomeSubsidy> {
 
   @EmbeddedId private BeneficiaryLowIncomeSubsidyId id;
