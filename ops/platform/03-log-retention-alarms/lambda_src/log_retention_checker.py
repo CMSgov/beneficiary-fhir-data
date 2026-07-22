@@ -9,8 +9,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 if TYPE_CHECKING:
     from mypy_boto3_logs.client import CloudWatchLogsClient
+    from mypy_boto3_sns.client import SNSClient
 else:
     CloudWatchLogsClient = object
+    SNSClient = object
 
 
 logger = Logger()
@@ -61,7 +63,7 @@ def _list_non_compliant_log_groups(logs_client: CloudWatchLogsClient) -> list[di
     return non_compliant
 
 
-def _publish_alert(sns_client, message: str) -> None:
+def _publish_alert(sns_client: SNSClient, message: str) -> None:
     """Send alert to SNS when topic ARN is configured."""
     if not ALERT_SNS_TOPIC_ARN:
         logger.warning("ALERT_SNS_TOPIC_ARN not configured. Alert only logged to CloudWatch.")
