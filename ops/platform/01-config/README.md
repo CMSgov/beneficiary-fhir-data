@@ -23,7 +23,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | 6.52.0 |
 | <a name="requirement_sops"></a> [sops](#requirement\_sops) | ~> 1.2.0 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -59,7 +59,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Type |
 | ---- | ---- |
-| [aws_ssm_parameter.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ssm_parameter) | resource |
 | [external_external.account_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [external_external.root_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [sops_external.account](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/external) | data source |

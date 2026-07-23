@@ -59,7 +59,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
-    assert cur.rowcount == 28
+    assert cur.rowcount == 29
     rows = cur.fetchmany(2)
 
     assert rows[0]["bene_sk"] == 10464258
@@ -71,6 +71,16 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 24
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
+
+    # Xref with valid kill_cred_cd should be included
+    cur = conn.execute("select * from idr.beneficiary where bene_sk = 174441863")
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_xref_efctv_sk"] == 629529363
+
+    # Xref with no valid entry in v2_bene_xref should not be included
+    cur = conn.execute("select * from idr.beneficiary where bene_sk = 353816021")
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_xref_efctv_sk"] == 353816021
 
     if enable_prior_auth_ingestion():
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
@@ -164,6 +174,11 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert rows[0]["bene_sk"] == 353816020
 
     cur = conn.execute("select * from idr.beneficiary_low_income_subsidy order by bene_sk")
+    assert cur.rowcount == 2
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_sk"] == 353816020
+
+    cur = conn.execute("select * from idr.beneficiary_low_income_subsidy_cmbnd order by bene_sk")
     assert cur.rowcount == 2
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
