@@ -10,11 +10,12 @@ module "bucket_s3logs" {
   force_destroy      = local.is_ephemeral_env
 }
 
-resource "aws_cloudwatch_log_group" "s3logs" {
-  name              = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "s3logs_log_group" {
+  source = "../../terraform-modules/general/high-retention-log-group"
+
+  log_group_name     = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
+  log_retention_days = local.ten_year_retention_days
+  kms_key_id         = local.env_key_arn
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
@@ -42,7 +43,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
 
     cloudwatch_logging_options {
       enabled         = true
-      log_group_name  = aws_cloudwatch_log_group.s3logs.name
+      log_group_name  = module.s3logs_log_group.log_group_name
       log_stream_name = "DestinationDelivery"
     }
 
