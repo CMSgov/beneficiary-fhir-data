@@ -19,8 +19,16 @@ public class IdrConstants {
   /** The string value IDR uses to represent "UNKNOWN". */
   public static final String UNKNOWN = "U";
 
-  /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
+  /** The date used by IDR to indicate a missing or non-applicable value in a date column. */
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
+
+  /**
+   * If there's any date with the year before 1582, Java will switch to the Julian calendar and
+   * misinterpret and convert the date. IDR has the alternate date 1000-01-01 to indicate a missing
+   * or non-applicable value in a date column so we use this check to convert those dates to
+   * optionals.
+   */
+  public static final LocalDate ALTERNATE_DEFAULT_DATE = LocalDate.of(1900, 1, 1);
 
   /** The code for non-final action claims. */
   public static final String NOT_FINAL_ACTION = "NotFinalAction";

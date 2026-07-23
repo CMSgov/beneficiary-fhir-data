@@ -812,10 +812,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3681,10 +3678,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WITH_SEARCH
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -5000,10 +4994,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithCombine
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7869,10 +7860,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[GET_WithSource_
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -9188,10 +9176,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithCombin
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -12057,10 +12042,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchBySources[POST_WithSource
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -13697,10 +13679,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -15000,10 +14979,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -17093,10 +17069,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -19170,10 +19143,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -22073,10 +22043,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -23376,10 +23343,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -25469,10 +25433,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -27546,10 +27507,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -30449,10 +30407,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -31752,10 +31707,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -33845,10 +33797,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -35922,10 +35871,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.shouldQueryPriorAuthForTagScenario
           "value" : 7.0
         },
         "sequence" : 1,
-        "servicedPeriod" : {
-          "end" : "2018-07-20",
-          "start" : "2018-06-23"
-        }
+        "servicedDate" : "2018-06-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

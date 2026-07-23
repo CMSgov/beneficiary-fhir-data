@@ -18,7 +18,9 @@ public class OptionalDateConverter implements AttributeConverter<Optional<LocalD
 
   @Override
   public Optional<LocalDate> convertToEntityAttribute(LocalDate value) {
-    if (value == null || value.equals(IdrConstants.DEFAULT_DATE)) {
+    if (value == null
+        || value.equals(IdrConstants.DEFAULT_DATE)
+        || value.isBefore(IdrConstants.ALTERNATE_DEFAULT_DATE)) {
       return Optional.empty();
     } else {
       return Optional.of(value);

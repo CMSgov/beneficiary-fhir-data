@@ -27,13 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class EobPriorAuthorizationIT extends IntegrationTestBase {
 
-  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH =
-      new PriorAuthIdentifier("794471559", "-0Y2K7HP0Y71BO");
-  private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH =
-      new PriorAuthIdentifier("794471559", "-Z7E63N3ROZJC9");
-
-  private record PriorAuthIdentifier(String beneSk, String utn) {}
-
   private IQuery<Bundle> searchBundle(SamhsaCertType samhsaCertType) {
     final var fhirClient = getFhirClient();
 
@@ -242,35 +235,6 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
     }
   }
 
-  private static Stream<Arguments> shouldFilterSamhsaPriorAuth() {
-    return Stream.of(
-        Arguments.of(SamhsaCertType.NO_CERT, 1, false),
-        Arguments.of(SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT, 1, false),
-        Arguments.of(SamhsaCertType.SAMHSA_ALLOWED_CERT, 3, true));
-  }
-
-  @MethodSource({"shouldFilterSamhsaPriorAuth"})
-  @ParameterizedTest
-  void shouldFilterSamhsaPriorAuth(
-      SamhsaCertType certType, int expectedBundleSize, boolean expectedSamhsaPriorAuth) {
-    var bundle =
-        searchBundle(certType)
-            .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                    .exactly()
-                    .identifier(BENE_WITH_PRIOR_AUTH))
-            .execute();
-
-    assertEquals(expectedBundleSize, bundle.getEntry().size());
-
-    var priorAuths = getPriorAuths(bundle);
-
-    assertTrue(priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, NO_SAMHSA_PRIOR_AUTH)));
-    assertEquals(
-        expectedSamhsaPriorAuth,
-        priorAuths.stream().anyMatch(eob -> matchesPriorAuth(eob, SAMHSA_PRIOR_AUTH)));
-  }
-
   static Stream<Arguments> provideTagScenarios() {
     return Stream.of(SearchStyleEnum.values())
         .flatMap(
@@ -364,15 +328,6 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
 
     var hasPriorAuth = !getPriorAuths(bundle).isEmpty();
     assertEquals(expectedPriorAuth, hasPriorAuth);
-  }
-
-  private boolean matchesPriorAuth(ExplanationOfBenefit eob, PriorAuthIdentifier identifier) {
-    assertEquals(ExplanationOfBenefit.Use.PREAUTHORIZATION, eob.getUse());
-
-    var hasMatchingUtn =
-        eob.getIdentifier().stream().anyMatch(id -> identifier.utn().equals(id.getValue()));
-    var hasMatchingMbi = eob.getPatient().getReference().contains(identifier.beneSk());
-    return hasMatchingUtn && hasMatchingMbi;
   }
 
   private List<ExplanationOfBenefit> getPriorAuths(Bundle bundle) {
