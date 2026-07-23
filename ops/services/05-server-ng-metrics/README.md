@@ -9,7 +9,7 @@
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | 6.52.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -44,7 +44,7 @@
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_dashboard.bfd_dashboard](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_dashboard) | resource |
+| [aws_cloudwatch_dashboard.bfd_dashboard](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
