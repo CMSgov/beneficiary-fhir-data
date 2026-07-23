@@ -10,4 +10,4 @@ import lombok.Getter;
 @Entity
 @Table(name = "claim_rx", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
-public class ClaimBasisRx extends ClaimRxBase {}
+public class ClaimRxBasis extends ClaimRxBase {}

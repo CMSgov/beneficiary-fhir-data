@@ -57,9 +57,6 @@ public abstract class ClaimRxBase extends ClaimBase {
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
 
-  /** Rx claims carry a single embedded line rather than a collection. */
-  @Embedded private ClaimItemRx claimItems;
-
   /** {@inheritDoc} */
   @Override
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
@@ -87,7 +84,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-    getClaimItems().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
+    getClaimItem().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
   }
 
   protected void addServiceProvider(ExplanationOfBenefit eob) {
@@ -107,12 +104,12 @@ public abstract class ClaimRxBase extends ClaimBase {
 
   private List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
     return Stream.concat(
-            getClaimItems()
+            getClaimItem()
                 .getClaimLine()
                 .getClaimRxSupportingInfo()
                 .toFhir(supportingInfoFactory)
                 .stream(),
-            getClaimItems().getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
+            getClaimItem().getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
         .toList();
   }
 
@@ -167,7 +164,7 @@ public abstract class ClaimRxBase extends ClaimBase {
    */
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.ofNullable(
-        getClaimItems().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
+        getClaimItem().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
   }
 
   protected void addInsurance(ExplanationOfBenefit eob) {
@@ -201,6 +198,10 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected Optional<ClaimProcessDate> getClaimProcessDate() {
+    return Optional.empty();
+  }
+
+  protected Optional<ClaimItemRx> getClaimItem() {
     return Optional.empty();
   }
 
@@ -239,7 +240,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     var items = new TreeSet<ClaimItemBase>();
-    items.add(getClaimItems());
+    items.add(getClaimItem());
     return items;
   }
 }

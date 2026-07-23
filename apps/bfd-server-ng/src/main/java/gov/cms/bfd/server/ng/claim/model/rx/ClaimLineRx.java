@@ -16,11 +16,12 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Observation;
 
-/** Claim line info. */
+/** Claim line info base. */
 @Embeddable
 @Getter
 @SuppressWarnings("java:S2201")
@@ -31,8 +32,6 @@ public class ClaimLineRx implements ClaimLineBase {
 
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
-  @Embedded private ClaimLineAdjudicationChargeRx adjudicationCharge;
-  @Embedded private ClaimLineRxSupportingInfo claimRxSupportingInfo;
 
   @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
@@ -43,11 +42,23 @@ public class ClaimLineRx implements ClaimLineBase {
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       ClaimFilterOptions options) {
 
+    return this.toFhirItemComponent(options, Optional.empty());
+  }
+
+  /**
+   * Helper method to allow Cms to pass along a Coding generated from ClaimLineRxSupportingInfo.
+   *
+   * @param options options!
+   * @param supportingInfo the Coding generated from CMS
+   * @return the eob Item Component
+   */
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+      ClaimFilterOptions options, Optional<Coding> supportingInfo) {
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(1);
     var productOrService = new CodeableConcept();
     var quantity = serviceUnitQuantity.toFhir();
-    claimRxSupportingInfo.toFhirNdcCompound().ifPresent(productOrService::addCoding);
+    supportingInfo.ifPresent(productOrService::addCoding);
 
     if (productOrService.isEmpty()) {
       ndc.toFhirCoding().ifPresent(productOrService::addCoding);
@@ -59,8 +70,6 @@ public class ClaimLineRx implements ClaimLineBase {
     line.setQuantity(quantity);
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
-
-    adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);
   }

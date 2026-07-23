@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitution
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimCmsRx;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxCms;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
@@ -81,7 +81,7 @@ public class ClaimRepository {
               SystemType.SS),
           new ClaimTypeDefinition(
               CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalCmsNch.class, SystemType.NCH),
-          new ClaimTypeDefinition(CLAIM_RX, ClaimCmsRx.class, SystemType.DDPS));
+          new ClaimTypeDefinition(CLAIM_RX, ClaimRxCms.class, SystemType.DDPS));
 
   /**
    * Search for a claim by its ID.
@@ -141,8 +141,8 @@ public class ClaimRepository {
     var rxClaims =
         asyncService.findByIdsInClaimType(
             CLAIM_RX,
-            ClaimCmsRx.class,
-            ClaimCmsRx.getSystemType(),
+            ClaimRxCms.class,
+            ClaimRxCms.getSystemType(),
             criteria.claimUniqueIds(),
             paramBuilders);
 
