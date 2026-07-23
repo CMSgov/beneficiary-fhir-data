@@ -8,7 +8,7 @@ terraform {
 }
 
 module "terraservice" {
-  source = "../../terraform-modules/bfd/bfd-platform-service"
+  source               = "../../terraform-modules/bfd/bfd-platform-service"
   service              = local.service
   relative_module_root = "ops/platform/03-log-retention-alarms"
 }

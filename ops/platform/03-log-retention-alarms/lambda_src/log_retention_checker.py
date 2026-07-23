@@ -51,10 +51,10 @@ def _list_non_compliant_log_groups(logs_client: CloudWatchLogsClient) -> list[di
                 )
                 if log_group_name:
                     logger.info(
-						"Updating log retention for %s (%s days).",
-						log_group_name,
-						REQUIRED_RETENTION_DAYS,
-        			)
+                        "Updating log retention for %s (%s days).",
+                        log_group_name,
+                        REQUIRED_RETENTION_DAYS,
+                    )
                     logs_client.put_retention_policy(
                         logGroupName=log_group_name,
                         retentionInDays=REQUIRED_RETENTION_DAYS,
