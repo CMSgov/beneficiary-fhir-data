@@ -1,5 +1,5 @@
 variable "log_group_name" {
-  type    = string
+  type = string
 }
 
 variable "log_retention_days" {
