@@ -24,7 +24,6 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineOutcome;
-import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.pipeline.sharedutils.npi_fda.NpiFdaLoadJob;
 import gov.cms.bfd.pipeline.sharedutils.npi_fda.NpiFdaLoadJobConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
@@ -80,9 +79,6 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 public final class PipelineApplication {
   static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
 
-  /** EC2 client. */
-  private final AwsEc2Client ec2Client;
-
   /** This {@link System#exit(int)} value should be used when the application exits successfully. */
   static final int EXIT_CODE_SUCCESS = 0;
 
@@ -118,7 +114,7 @@ public final class PipelineApplication {
    *     variables)
    */
   public static void main(String[] args) {
-    int exitCode = new PipelineApplication(new AwsEc2Client()).runPipelineAndHandleExceptions();
+    int exitCode = new PipelineApplication().runPipelineAndHandleExceptions();
     System.exit(exitCode);
   }
 
@@ -131,14 +127,7 @@ public final class PipelineApplication {
   @VisibleForTesting
   int runPipelineAndHandleExceptions() {
     try {
-      PipelineOutcome outcome = runPipeline();
-      if (outcome == PipelineOutcome.TERMINATE_INSTANCE) {
-        // When we trigger a scale-in, the instance gets terminated very quickly,
-        // so we should call this at the last minute after all log messages have been flushed.
-        // We can't schedule a scale-in in the future without causing a race condition that may
-        // prevent the next scale-out from happening.
-        ec2Client.scaleInNow();
-      }
+      runPipeline();
       return EXIT_CODE_SUCCESS;
     } catch (FatalAppException ex) {
       if (ex.getCause() != null) {
