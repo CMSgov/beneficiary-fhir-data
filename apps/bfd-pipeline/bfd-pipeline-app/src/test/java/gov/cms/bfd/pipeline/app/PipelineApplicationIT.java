@@ -8,9 +8,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
@@ -31,7 +28,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.json.JsonConverter;
 import gov.cms.bfd.sharedutils.sqs.SqsDao;
@@ -48,7 +44,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -83,9 +78,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
 
   /** Used to communicate with the MiniStack SQS service. */
   private SqsDao sqsDao;
-
-  /** ec2 client. */
-  @Mock private AwsEc2Client ec2Client;
 
   /**
    * Locks and truncates the log file so that each test case can read only its own messages from the
@@ -145,7 +137,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
     // Verify the results match expectations
     assertEquals(PipelineApplication.EXIT_CODE_JOB_FAILED, exitCode);
     assertCcwRifLoadJobFailed(logLines);
-    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -177,8 +168,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
               CcwRifLoadJobStatusEvent.JobStage.NothingToDo),
           readStatusEventsFromSQSQueue());
-      verify(ec2Client).scaleInNow();
-      verifyNoMoreInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -245,7 +234,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
           readStatusEventsFromSQSQueue());
 
-      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -292,7 +280,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job processed all claims");
             });
-    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -338,7 +325,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job terminated by grpc exception");
             });
-    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -375,7 +361,6 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SMOKE_TEST_FAILURE, exitCode);
       assertASmokeTestFailureWasLogged(logLines);
-      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -561,7 +546,7 @@ public final class PipelineApplicationIT extends AbstractMiniStackS3Test {
    */
   private PipelineApplication createApplicationForTest(ConfigLoader configLoader) {
     // using a spy lets us override and verify method calls
-    PipelineApplication app = spy(new PipelineApplication(ec2Client));
+    PipelineApplication app = spy(new PipelineApplication());
 
     // override the default app logic with our own config
     doReturn(configLoader).when(app).createConfigLoader();
