@@ -78,45 +78,45 @@ data "aws_ecr_image" "server" {
 }
 
 module "certstores_messages" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 module "log_router_messages" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 module "server_messages" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 module "server_access" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 module "adot_messages" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 module "adot_metrics" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
-  kms_key_id   = local.env_key_arn
-  prevent_destroy = true
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
+  kms_key_id      = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_ecs_task_definition" "server" {

@@ -1,4 +1,4 @@
-variable "log_group_name" {
+variable "name" {
   type = string
 }
 
@@ -28,4 +28,10 @@ variable "prevent_destroy" {
   type        = bool
   default     = true
   description = "Set true to prevent accidental deletion of the log group."
+}
+
+variable "skip_destroy" {
+  type        = bool
+  default     = true
+  description = "Set true to skip destroying the log group."
 }

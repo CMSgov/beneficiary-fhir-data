@@ -57,42 +57,42 @@ data "aws_ecr_image" "server" {
 
 module "log_router_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
-  prevent_destroy    = true
+  skip_destroy       = true
 }
 
 module "service_connect_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
-  prevent_destroy    = true
+  skip_destroy       = true
 }
 
 module "server_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
-  prevent_destroy    = true
+  skip_destroy       = true
 }
 
 module "server_healthchecks" {
   source             = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
-  prevent_destroy    = true
+  skip_destroy       = true
 }
 
 module "server_nonjson" {
   source             = "../../terraform-modules/general/high-retention-log-group"
-  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
-  prevent_destroy    = true
+  skip_destroy       = true
 }
 
 resource "aws_ecs_task_definition" "server" {

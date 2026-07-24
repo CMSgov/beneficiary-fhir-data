@@ -11,11 +11,11 @@ module "bucket_s3logs" {
 }
 
 module "s3logs_log_group" {
-  source = "../../terraform-modules/general/high-retention-log-group"
-
-  log_group_name     = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  name               = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
   log_retention_days = local.ten_year_retention_days
   kms_key_id         = local.env_key_arn
+  skip_destroy       = true
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
