@@ -25,19 +25,20 @@
 #ENC[AES256_GCM,data:QOpMGpO+e8AXTBF7/pZ3dMNWC2LsSVmMCs92qqa/NsYE5zmIXy6FjoOS0W8ATxN4H7b/KxNtlfGU7uy1jAdse1w2ylIqtiXq/4MdPw==,iv:y9rW6d68E3AXsS/Pfwl5osA7jlUychtLLzM/SG0ABj0=,tag:dh8bJ24T/V4UK2qwCMWHBg==,type:comment]
 /bfd/platform/network/sensitive/route53/zone/sandbox/external_vpcs_list_json: ENC[AES256_GCM,data:Eoz98YToPPHtn5B2P5VdaQQ/bNWejNph+cv0JVfNVXgdmqu6Kak=,iv:zFyBFj+tIOiG0/U7tg2x+KHPTvUjJKuBBaUOeQLdmbs=,tag:XD88QUzmaaW68fkm2R5t6A==,type:str]
 /bfd/platform/network/sensitive/route53/zones/sandbox/records: ENC[AES256_GCM,data:eLQ=,iv:IAJmrV+6kvbxfBDQUCNFiIChEq3A2dsScyTyfJKz7MQ=,tag:kf/9oEE6Neej4MZmCSK6ug==,type:str]
+/bfd/platform/log-retention-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-warnings
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk
+      aws_profile: ""
       created_at: "2025-06-16T18:39:56Z"
       enc: AQICAHje54t884PQ3I3HmEfbyeDxeth8IxFtXCHA9cZvNPo2hQHPEXVyrJuDRtg1OtVF2KPuAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4A8g7SmdVfWwo/XqAgEQgDsOzD6kQd7qxqTSdpQQiio+5JVaib8QfGrdXid+5UdvYvBExleHOBNYR9lpko2aou4AswKUws2Z+TGnfg==
-      aws_profile: ""
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      aws_profile: ""
       created_at: "2025-06-16T18:26:40Z"
       enc: AQICAHhfOyfG21CaEsyppnyWH5WGgx5DhYc4Ue0JLa+mNx8TlwGFUKs60Gy5jQcgCwW6h+A8AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMoGhgCaspO+TCOEYFAgEQgDse/nCj+sp+pSxqhPOEBGztJ3u1Q1zy0J2BOWpuYcl/uplPnrYQTnPOKdM8FpkJuGKXN6SJvfQ9skakGA==
-      aws_profile: ""
     - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      aws_profile: ""
       created_at: "2025-06-16T18:31:22Z"
       enc: AQICAHiUQJFGKP8gsiLp3u7hZwa9ETwwJmmjpmZLPLYGrqKCcAFrfmHLdibQUUGIorbiLIHKAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMUpTUbz9JXXSk6CZSAgEQgDt7csVKhVSq5ZPjMVpsJeGxn6PuAphyvoBf6f0ts1XLQTdOdmlG9c6qpju7L5XxFTmAeTmC8E3IIRLxkw==
-      aws_profile: ""
   unencrypted_regex: /nonsensitive/
-  version: 3.10.2
+  version: 3.13.2
