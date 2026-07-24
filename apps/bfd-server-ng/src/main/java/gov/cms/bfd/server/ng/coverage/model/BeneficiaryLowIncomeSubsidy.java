@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.coverage.converter.StringToDoubleConverter;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.SQLRestriction;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.jetbrains.annotations.NotNull;
@@ -21,18 +23,19 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_low_income_subsidy", schema = "idr")
+@Table(name = "beneficiary_low_income_subsidy_cmbnd", schema = "idr")
+@SQLRestriction(value = "idr_trans_obslt_ts >= DATE '" + IdrConstants.DEFAULT_DATE_STRING + "'")
 public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowIncomeSubsidy> {
 
   @EmbeddedId private BeneficiaryLowIncomeSubsidyId id;
 
-  @Column(name = "bene_rng_end_dt")
+  @Column(name = "bene_cmbnd_deemd_trmntn_dt")
   private LocalDate benefitRangeEndDate;
 
-  @Column(name = "bene_lis_copmt_lvl_cd")
+  @Column(name = "bene_cmbnd_deemd_copmt_lvl_id")
   private Optional<BeneficiaryLISCopaymentLevelCode> copayLevelCode;
 
-  @Column(name = "bene_lis_ptd_prm_pct")
+  @Column(name = "bene_cmbnd_deemd_prm_pct")
   @Convert(converter = StringToDoubleConverter.class)
   private double partDPremiumPercentage;
 

@@ -22,6 +22,9 @@ public class IdrConstants {
   /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
 
+  /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
+  public static final String DEFAULT_DATE_STRING = "9999-12-31";
+
   /** The code for non-final action claims. */
   public static final String NOT_FINAL_ACTION = "NotFinalAction";
 

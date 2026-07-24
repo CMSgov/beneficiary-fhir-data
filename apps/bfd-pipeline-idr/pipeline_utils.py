@@ -8,7 +8,7 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION
+from constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
@@ -117,12 +117,10 @@ def extract_and_load(
 
 def prune_bene_lis_cmbnd(
     load_mode: LoadMode,
-    job_start: datetime,
 ) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    prune_cutoff_date = job_start - timedelta(days=60)
-    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+    logger.info("pruning obsolete lis beneficiaries")
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:
@@ -136,7 +134,7 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, BENEFICIARY_PRUNE_BATCH_LIMIT),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
             if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:

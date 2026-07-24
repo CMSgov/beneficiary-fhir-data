@@ -178,10 +178,17 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
 
-    cur = conn.execute("select * from idr.beneficiary_low_income_subsidy_cmbnd order by bene_sk")
-    assert cur.rowcount == 2
-    rows = cur.fetchmany(1)
-    assert rows[0]["bene_sk"] == 353816020
+    lis_cmbnd_query = "select * from idr.beneficiary_low_income_subsidy_cmbnd order by bene_sk"
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute(lis_cmbnd_query)
+        assert cur.rowcount == 3
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
+    else:
+        cur = conn.execute(lis_cmbnd_query)
+        assert cur.rowcount == 2
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
 
     cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 8244064276500")
     assert cur.rowcount == 0
