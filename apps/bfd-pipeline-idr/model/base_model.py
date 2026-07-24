@@ -834,7 +834,7 @@ def stale_phase_1_claims_query(
     header_table: str,
     item_table: str,
     cutoff_date: datetime,
-) -> tuple[str, tuple]:
+) -> tuple[str, tuple[datetime, datetime]]:
     return (
         f""" 
             SELECT clm.clm_uniq_id 
