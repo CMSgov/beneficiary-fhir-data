@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
-import gov.cms.bfd.server.ng.claim.model.ProviderIdQualifierCode;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderIdQualifierCode;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Set;

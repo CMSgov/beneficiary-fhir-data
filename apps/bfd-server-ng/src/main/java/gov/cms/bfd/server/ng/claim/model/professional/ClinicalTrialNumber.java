@@ -1,0 +1,26 @@
+package gov.cms.bfd.server.ng.claim.model.professional;
+
+import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.util.Optional;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.StringType;
+
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+@Embeddable
+public class ClinicalTrialNumber {
+  @Column(name = "clm_clncl_tril_num")
+  private Optional<String> clinicalTrialNum;
+
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return clinicalTrialNum.map(
+        trialNumber ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_CLNCL_TRIL_NUM.toFhir())
+                .setValue(new StringType(trialNumber)));
+  }
+}

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
@@ -148,12 +148,12 @@ class EobReadIT extends IntegrationTestBase {
             .createQuery(
                 """
                 SELECT c
-                FROM ClaimProfessionalNch c
+                FROM ClaimProfessionalCmsNch c
                 JOIN FETCH c.beneficiary b
                 JOIN FETCH c.claimItems cl
                 WHERE c.claimUniqueId = :claimId
                 """,
-                ClaimProfessionalNch.class)
+                ClaimProfessionalCmsNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
     // Precondition - claim should be available in the db

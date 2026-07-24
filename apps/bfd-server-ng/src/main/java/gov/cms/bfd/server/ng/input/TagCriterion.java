@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 
 /** Parsed criteria from _tag. Expansion requires deliberate addition in TagCriterion. */
 public sealed interface TagCriterion
