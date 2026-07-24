@@ -149,7 +149,7 @@ def prune_phase_1_ss_claims(
             while True:
                 with conn.transaction():
                     res = conn.execute(
-                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""", # type: ignore
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
                         params,
                     )
 

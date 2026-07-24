@@ -830,7 +830,11 @@ def claim_related_conditions_cte(source: Source) -> str:
     """
 
 
-def stale_phase_1_claims_query(header_table: str, item_table: str, cutoff_date: datetime) -> tuple[str, tuple]:
+def stale_phase_1_claims_query(
+    header_table: str,
+    item_table: str,
+    cutoff_date: datetime,
+) -> tuple[str, tuple]:
     return (
         f""" 
             SELECT clm.clm_uniq_id 
