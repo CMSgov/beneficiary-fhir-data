@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "execution_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.messages.arn}:*"]
+    resources = ["${module.messages.arn}:*"]
   }
 }
 

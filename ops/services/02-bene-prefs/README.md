@@ -37,6 +37,7 @@
 | ---- | ------ | ------- |
 | <a name="module_buckets"></a> [buckets](#module\_buckets) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
+| <a name="module_this"></a> [this](#module\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_topics"></a> [topics](#module\_topics) | ../../terraform-modules/general/logging-sns-topic | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -50,7 +51,6 @@
 | ---- | ---- |
 | [aws_cloudwatch_event_rule.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_target) | resource |
-| [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_dynamodb_table.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/dynamodb_table) | resource |
 | [aws_iam_policy.lambda_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.lambda_dynamodb](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |

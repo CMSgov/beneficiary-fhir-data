@@ -7,8 +7,9 @@ locals {
   lambda_runtime     = "python${trimspace(file("${local.lambda_source_path}/.python-version"))}"
 }
 
-resource "aws_cloudwatch_log_group" "this" {
-  count = local.conditional_count
+module "this" {
+  source = "../../terraform-modules/general/high-retention-log-group"
+  count  = local.conditional_count
 
   name       = "/aws/lambda/${local.name_prefix}"
   kms_key_id = local.env_key_arn

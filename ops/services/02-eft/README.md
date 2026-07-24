@@ -50,6 +50,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_bucket_eft"></a> [bucket\_eft](#module\_bucket\_eft) | ../../terraform-modules/general/secure-bucket | n/a |
+| <a name="module_sftp_outbound_transfer"></a> [sftp\_outbound\_transfer](#module\_sftp\_outbound\_transfer) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_sftp_server"></a> [sftp\_server](#module\_sftp\_server) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 | <a name="module_topic_inbound_received_s3_notifs"></a> [topic\_inbound\_received\_s3\_notifs](#module\_topic\_inbound\_received\_s3\_notifs) | ../../terraform-modules/general/logging-sns-topic | n/a |
 | <a name="module_topic_outbound_notifs"></a> [topic\_outbound\_notifs](#module\_topic\_outbound\_notifs) | ../../terraform-modules/general/logging-sns-topic | n/a |
@@ -66,8 +68,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Type |
 | ---- | ---- |
 | [aws_alb_target_group_attachment.nlb_to_vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/alb_target_group_attachment) | resource |
-| [aws_cloudwatch_log_group.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.sftp_server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_policy.isp_bcda_bucket_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.partner_bucket_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.sftp_outbound_transfer_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |

@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "lambda_cloudwatch" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.this[0].arn}:*"]
+    resources = ["${module.this[0].arn}:*"]
   }
 }
 

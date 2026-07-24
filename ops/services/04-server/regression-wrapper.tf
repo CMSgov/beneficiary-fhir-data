@@ -40,12 +40,13 @@ data "archive_file" "regression_wrapper_src" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "regression_wrapper" {
-  count = local.regression_wrapper_enabled ? 1 : 0
+module "regression_wrapper" {
+  source = "../../terraform-modules/general/high-retention-log-group"
+  count  = local.regression_wrapper_enabled ? 1 : 0
 
-  name         = "/aws/lambda/${local.rw_lambda_full_name}"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name  = "/aws/lambda/${local.rw_lambda_full_name}"
+  kms_key_id      = local.env_key_arn
+  prevent_destroy = true
 }
 
 resource "aws_lambda_function" "regression_wrapper" {

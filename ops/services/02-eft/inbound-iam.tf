@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "sftp_server_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.sftp_server.arn}:*"]
+    resources = ["${module.sftp_server.arn}:*"]
   }
 }
 

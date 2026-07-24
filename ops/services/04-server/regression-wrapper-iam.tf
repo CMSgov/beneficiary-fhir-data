@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "regression_wrapper_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = [for arn in aws_cloudwatch_log_group.regression_wrapper[*].arn : "${arn}:*"]
+    resources = [for arn in module.regression_wrapper[*].arn : "${arn}:*"]
   }
 }
 

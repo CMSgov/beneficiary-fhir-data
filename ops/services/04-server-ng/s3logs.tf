@@ -10,11 +10,12 @@ module "bucket_s3logs" {
   force_destroy      = local.is_ephemeral_env
 }
 
-resource "aws_cloudwatch_log_group" "s3logs" {
-  name              = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "s3logs_log_group" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  name               = "/aws/kinesisfirehose/${local.s3logs_firehose_name}"
+  log_retention_days = local.ten_year_retention_days
+  kms_key_id         = local.env_key_arn
+  skip_destroy       = true
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
@@ -42,7 +43,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
 
     cloudwatch_logging_options {
       enabled         = true
-      log_group_name  = aws_cloudwatch_log_group.s3logs.name
+      log_group_name  = module.s3logs_log_group.name
       log_stream_name = "DestinationDelivery"
     }
 
@@ -124,7 +125,7 @@ resource "aws_cloudwatch_log_subscription_filter" "s3logs" {
   depends_on = [aws_iam_role_policy_attachment.s3logs_cw]
 
   name            = "${local.name_prefix}-message-log-subscription"
-  log_group_name  = aws_cloudwatch_log_group.server_messages.name
+  log_group_name  = module.server_messages.name
   filter_pattern  = ""
   destination_arn = aws_kinesis_firehose_delivery_stream.s3logs.arn
   role_arn        = aws_iam_role.s3logs_cw.arn
