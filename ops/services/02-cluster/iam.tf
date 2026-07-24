@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "eventbridge_logs" {
     ]
 
     resources = [
-      "${aws_cloudwatch_log_group.ecs_events[0].arn}:*"
+      "${module.ecs_events[0].arn}:*"
     ]
 
     condition {

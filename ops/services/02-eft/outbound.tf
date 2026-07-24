@@ -194,8 +194,9 @@ resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
   endpoint  = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn)
 }
 
-resource "aws_cloudwatch_log_group" "sftp_outbound_transfer" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+module "sftp_outbound_transfer" {
+  source = "../../terraform-modules/general/high-retention-log-group"
+  count  = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name         = "/aws/lambda/${local.outbound_lambda_full_name}"
   kms_key_id   = local.env_key_arn
@@ -223,7 +224,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   timeout          = local.outbound_lambda_timeout
 
   logging_config {
-    log_group  = one(aws_cloudwatch_log_group.sftp_outbound_transfer[*].name)
+    log_group  = one(module.sftp_outbound_transfer[*].name)
     log_format = "Text"
   }
 

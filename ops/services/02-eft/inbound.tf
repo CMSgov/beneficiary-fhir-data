@@ -174,7 +174,8 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoint_allow_sftp_traffic_
   description                  = "Allow ingress from SFTP traffic from NLB"
 }
 
-resource "aws_cloudwatch_log_group" "sftp_server" {
+module "sftp_server" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/bfd/${local.service}/${local.full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -190,7 +191,7 @@ resource "aws_transfer_server" "this" {
   logging_role                = aws_iam_role.sftp_server.arn
   protocols                   = ["SFTP"]
   security_policy_name        = "TransferSecurityPolicy-FIPS-2024-01"
-  structured_log_destinations = [aws_cloudwatch_log_group.sftp_server.arn]
+  structured_log_destinations = [module.sftp_server.arn]
   tags                        = { Name = local.sftp_full_name }
 
   endpoint_details {

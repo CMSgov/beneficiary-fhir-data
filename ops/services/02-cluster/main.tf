@@ -36,7 +36,8 @@ locals {
   full_name = "bfd-${local.env}-${local.service}"
 }
 
-resource "aws_cloudwatch_log_group" "this" {
+module "this" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/ecs/${local.full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -68,7 +69,7 @@ resource "aws_ecs_cluster" "this" {
       logging    = "OVERRIDE"
 
       log_configuration {
-        cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
+        cloud_watch_log_group_name = module.this.name
       }
     }
   }
@@ -108,14 +109,14 @@ resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
   ]
 
   rule = aws_cloudwatch_event_rule.ecs_events[0].name
-  arn  = aws_cloudwatch_log_group.ecs_events[0].arn
+  arn  = module.ecs_events[0].arn
 }
 
-resource "aws_cloudwatch_log_group" "ecs_events" {
-  count = local.is_ephemeral_env ? 0 : 1
+module "ecs_events" {
+  source = "../../terraform-modules/general/high-retention-log-group"
+  count  = local.is_ephemeral_env ? 0 : 1
 
-  name              = "/aws/ecs/containerinsights/${aws_ecs_cluster.this.name}/performance"
-  retention_in_days = 7
+  name = "/aws/ecs/containerinsights/${aws_ecs_cluster.this.name}/performance"
 }
 
 resource "aws_cloudwatch_log_resource_policy" "eventbridge_to_logs" {

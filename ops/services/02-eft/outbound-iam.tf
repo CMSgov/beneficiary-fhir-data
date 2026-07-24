@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "sftp_outbound_transfer_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${one(aws_cloudwatch_log_group.sftp_outbound_transfer[*].arn)}:*"]
+    resources = ["${one(module.sftp_outbound_transfer[*].arn)}:*"]
   }
 }
 

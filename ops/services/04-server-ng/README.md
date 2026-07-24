@@ -56,6 +56,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ------ | ------- |
 | <a name="module_bucket_s3logs"></a> [bucket\_s3logs](#module\_bucket\_s3logs) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
+| <a name="module_log_router_messages"></a> [log\_router\_messages](#module\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_s3logs_log_group"></a> [s3logs\_log\_group](#module\_s3logs\_log\_group) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_server_healthchecks"></a> [server\_healthchecks](#module\_server\_healthchecks) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_server_messages"></a> [server\_messages](#module\_server\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_server_nonjson"></a> [server\_nonjson](#module\_server\_nonjson) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_service_connect_messages"></a> [service\_connect\_messages](#module\_service\_connect\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -70,12 +76,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_acm_certificate.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/acm_certificate) | resource |
 | [aws_appautoscaling_policy.server_track_cpu](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_policy) | resource |
 | [aws_appautoscaling_target.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_target) | resource |
-| [aws_cloudwatch_log_group.log_router_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.s3logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_healthchecks](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_nonjson](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.service_connect_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_subscription_filter.s3logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_subscription_filter) | resource |
 | [aws_dynamodb_table.patient_match_audit_table](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/dynamodb_table) | resource |
 | [aws_ecs_service.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_service) | resource |
