@@ -54,10 +54,11 @@ locals {
   capacity_provider_strategies = module.data_strategies.strategies
 }
 
-resource "aws_cloudwatch_log_group" "messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+module "messages" {
+  source          = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id      = local.env_key_arn
+  prevent_destroy = true
 }
 
 # TODO: Migrator should not run in Spot to avoid the possibility of Spot Termination
@@ -123,7 +124,7 @@ resource "aws_ecs_task_definition" "this" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = aws_cloudwatch_log_group.messages.name
+            awslogs-group         = module.messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
@@ -206,7 +207,7 @@ resource "null_resource" "start_migrator" {
         for key, value in local.default_tags
         : { key = key, value = tostring(value) }
       ])
-      LOG_GROUP_NAME = aws_cloudwatch_log_group.messages.name
+      LOG_GROUP_NAME = module.messages.name
     }
     interpreter = ["/usr/bin/env", "bash"]
     quiet       = true
