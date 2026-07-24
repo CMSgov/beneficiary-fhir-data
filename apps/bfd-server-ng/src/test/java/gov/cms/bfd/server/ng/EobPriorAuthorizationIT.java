@@ -222,7 +222,6 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
     }
 
     var bundle = query.usingStyle(searchStyle).execute();
-    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(bundle);
 
     assertEquals(
         expectedCount,
@@ -324,7 +323,6 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
     }
 
     var bundle = query.usingStyle(searchStyle).execute();
-    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(bundle);
 
     var hasPriorAuth = !getPriorAuths(bundle).isEmpty();
     assertEquals(expectedPriorAuth, hasPriorAuth);

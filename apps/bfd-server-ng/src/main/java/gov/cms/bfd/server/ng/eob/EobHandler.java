@@ -352,13 +352,14 @@ public class EobHandler {
   private boolean priorAuthorizationItemIsSamhsa(
       PriorAuthorization priorAuth, PriorAuthorizationItem item, LocalDate priorAuthDate) {
     var code = item.getHcpcsOrCptOrHipps().getHcpcsOrCptOrHipps();
-    var claimType = priorAuth.getClaimType();
 
+    // Although PA can have a HIPPS code, HIPPS codes are not samhsa so we don't check HIPPS codes
+    // here.
     return codeIsSamhsa(
         code,
         priorAuthDate,
         priorAuth.getResourceId() + ":" + item.getCurrentSegment(),
-        "PriorAuth HCPCS/CPT/HIPPS",
-        List.of(item.getHcpcsOrCptOrHipps().getCodingSystem(claimType)));
+        "PriorAuth HCPCS/CPT",
+        List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS));
   }
 }

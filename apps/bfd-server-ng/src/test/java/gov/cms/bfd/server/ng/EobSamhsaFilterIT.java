@@ -71,9 +71,11 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       new PriorAuthIdentifier(String.valueOf(BENE_SK2), "-0Y2K7HP0Y71BO");
   private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH_BENE_SK2 =
       new PriorAuthIdentifier(String.valueOf(BENE_SK2), "-Z7E63N3ROZJC9");
-  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK5_1 =
+  private static final PriorAuthIdentifier NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK4), "-5HYJ8PUF9JCGR");
+  private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH_BENE_SK5 =
       new PriorAuthIdentifier(String.valueOf(BENE_SK5), "-NFR7SQYED0KG2");
-  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK5_2 =
+  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK5 =
       new PriorAuthIdentifier(String.valueOf(BENE_SK5), "-QB7ER58LECEVG");
 
   private record PriorAuthIdentifier(String beneSk, String utn) {}
@@ -94,7 +96,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String ICD9_PROCEDURE = "94.45";
   private static final String ICD9_PROCEDURE2 = "94.66";
 
-  // System: HCPCS [clm_line_hcpcs_cd]
+  // System: HCPCS [clm_line_hcpcs_cd, hcpcs_or_cpt_or_hipps]
   private static final String HCPCS = "H0005";
   private static final String HCPCS2 = "H0050";
   private static final String FUTURE_HCPCS = "G0534";
@@ -105,9 +107,14 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String DRG_EXPIRED1 = "522";
   private static final String DRG_EXPIRED2 = "523";
 
-  // System: CPT [clm_line_hcpcs_cd]
+  // System: CPT [clm_line_hcpcs_cd, hcpcs_or_cpt_or_hipps]
   private static final String CPT = "99408";
   private static final String CPT2 = "0078U";
+
+  // System: HIPPS [hcpcs_or_cpt_or_hipps]
+  // Although prior authorization can have a HIPPS code, HIPPS codes are not samhsa, but we still
+  // verify for it here
+  private static final String HIPPS = "A0101";
 
   protected final List<List<String>> samhsaCodesToCheck =
       List.of(
@@ -226,14 +233,14 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             List.of(),
             List.of(),
-            List.of()),
+            List.of(NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4)),
         Arguments.of(
             BENE_SK5,
             List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, CLAIM_UNIQUE_ID_FOR_DRG),
             List.of(),
             List.of(),
-            List.of(),
-            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK5_1, NO_SAMHSA_PRIOR_AUTH_BENE_SK5_2)));
+            List.of(SAMHSA_PRIOR_AUTH_BENE_SK5),
+            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK5)));
   }
 
   private boolean isPriorAuthorization(ExplanationOfBenefit eob) {
@@ -556,6 +563,32 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
             .findFirst();
     assertTrue(drg.isPresent());
+  }
+
+  private static Stream<Arguments> ensureHcpcsCptHipps() {
+    return Stream.of(
+        Arguments.of(BENE_SK2, SAMHSA_PRIOR_AUTH_BENE_SK2, HCPCS, SystemUrls.CMS_HCPCS),
+        Arguments.of(BENE_SK5, SAMHSA_PRIOR_AUTH_BENE_SK5, CPT, SystemUrls.AMA_CPT),
+        Arguments.of(BENE_SK4, NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4, HIPPS, SystemUrls.CMS_HIPPS));
+  }
+
+  @MethodSource
+  @ParameterizedTest
+  void ensureHcpcsCptHipps(
+      long beneSk, PriorAuthIdentifier priorAuthIdentifier, String code, String system) {
+    var allEobs = getClaimsByBene(beneSk, foundIncludeOptions);
+    var priorAuth =
+        allEobs.stream()
+            .filter(this::isPriorAuthorization)
+            .filter(eob -> matchesPriorAuth(eob, priorAuthIdentifier))
+            .findFirst();
+    assertTrue(priorAuth.isPresent());
+    var hcpcsCptHipps =
+        priorAuth.get().getItem().stream()
+            .flatMap(i -> i.getProductOrService().getCoding().stream())
+            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .findFirst();
+    assertTrue(hcpcsCptHipps.isPresent());
   }
 
   /**

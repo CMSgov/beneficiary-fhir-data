@@ -941,7 +941,7 @@ public enum ClaimAuditTrailStatusCode {
         .setCode(
             new CodeableConcept(
                 new Coding()
-                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_PRIMARY_PAYOR_CODE)
+                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_AUDIT_TRAIL_STATUS_CODE)
                     .setDisplay(getDisplay())
                     .setCode(getStatusCode())));
   }

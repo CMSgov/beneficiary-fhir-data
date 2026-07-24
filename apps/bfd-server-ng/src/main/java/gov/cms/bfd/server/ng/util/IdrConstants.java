@@ -28,7 +28,7 @@ public class IdrConstants {
    * or non-applicable value in a date column so we use this check to convert those dates to
    * optionals.
    */
-  public static final LocalDate ALTERNATE_DEFAULT_DATE = LocalDate.of(1900, 1, 1);
+  public static final LocalDate OLD_DATE_CUTOFF = LocalDate.of(1900, 1, 1);
 
   /** The code for non-final action claims. */
   public static final String NOT_FINAL_ACTION = "NotFinalAction";

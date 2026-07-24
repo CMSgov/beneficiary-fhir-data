@@ -111,7 +111,7 @@ public sealed interface ClaimTypePriorAuth
   enum Valid implements ClaimTypePriorAuth {
     /** B - professional - Part B - Part B. */
     B("B", ClaimType.PROFESSIONAL.getCode(), "Part B", "Part B"),
-    /** C - professional - Durable Medical Equipment - Part B. */
+    /** D - professional - Durable Medical Equipment - Part B. */
     D("D", ClaimType.PROFESSIONAL.getCode(), "Durable Medical Equipment", "Part B"),
     /** I - institutional - Inpatient - Part A. */
     I("I", ClaimType.INSTITUTIONAL.getCode(), "Inpatient", "Part A"),
