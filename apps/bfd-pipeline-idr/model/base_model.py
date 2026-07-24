@@ -48,6 +48,7 @@ from settings import (
     MIN_CLAIM_NCH_TRANSACTION_DATE,
     MIN_CLAIM_SS_TRANSACTION_DATE,
     MIN_PRIOR_AUTH_TRANSACTION_DATE,
+    PHASE_1_PRUNE_BATCH_LIMIT,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -827,3 +828,19 @@ def claim_related_conditions_cte(source: Source) -> str:
             AND clm_rlt_cond_cd != '~'
             GROUP BY clm_rlt_cond_sgntr_sk
     """
+
+
+def stale_phase_1_claims_query(header_table: str, item_table: str, cutoff_date: datetime) -> str:
+    return f""" 
+        SELECT clm.clm_uniq_id 
+        FROM {header_table} clm
+        WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+        AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+        AND clm.bfd_updated_ts < %s
+        AND NOT EXISTS (
+            SELECT 1 FROM {item_table} item
+            WHERE clm.clm_uniq_id = item.clm_uniq_id
+            AND item.bfd_updated_ts >= %s
+        )
+        LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+    """, (cutoff_date, cutoff_date)

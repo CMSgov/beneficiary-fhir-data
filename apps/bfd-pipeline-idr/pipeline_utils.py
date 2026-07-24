@@ -27,6 +27,7 @@ from loader import LoadType, PostgresLoader, get_connection_string, should_track
 from model.base_model import (
     LoadMode,
     T,
+    stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
@@ -145,68 +146,24 @@ def prune_phase_1_ss_claims(
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
+    prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
+
     with psycopg.connect(get_connection_string(load_mode)) as conn:
-        totalRowCount = 0
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                        DELETE FROM {item_table}
-                        WHERE (clm_uniq_id, bfd_row_id) IN (
-                            SELECT item.clm_uniq_id, item.bfd_row_id
-                            FROM {item_table} item
-                            JOIN {claim_table} clm ON clm.clm_uniq_id = item.clm_uniq_id
-                            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                            AND clm.clm_src_id IN 
-                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                            AND clm.bfd_updated_ts < %s
-                            AND NOT EXISTS (
-                                SELECT 1 FROM {item_table} i
-                                WHERE i.clm_uniq_id = item.clm_uniq_id
-                                AND i.bfd_updated_ts >= %s
-                            )
-                            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
-                        )
-                    """,  # type: ignore
-                    (prune_cutoff_date, prune_cutoff_date),
-                )
+        for target_table in [item_table, claim_table]:
+            total_row_count = 0
+            while True:
+                with conn.transaction():
+                    res = conn.execute(
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",
+                        params,
+                    )
 
-                totalRowCount += res.rowcount
-                logger.info("pruned {} rows from {}", res.rowcount, item_table)
+                    total_row_count += res.rowcount
+                    logger.info("pruned {} rows from {}", res.rowcount, item_table)
 
-                if res.rowcount == 0:
-                    logger.info("Total rows pruned from {}: {}", item_table, totalRowCount)
-                    break
-
-        totalRowCount = 0
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                        DELETE FROM {claim_table}
-                        WHERE clm_uniq_id IN (
-                            SELECT clm.clm_uniq_id FROM {claim_table} clm
-                            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-                            AND clm.clm_src_id IN 
-                                ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-                            AND clm.bfd_updated_ts < %s
-                            AND NOT EXISTS (
-                                SELECT 1 FROM {item_table} i
-                                WHERE i.clm_uniq_id = clm.clm_uniq_id
-                                AND i.bfd_updated_ts >= %s
-                            )
-                            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
-                        )
-                    """,  # type: ignore
-                    (prune_cutoff_date, prune_cutoff_date),
-                )
-
-                totalRowCount += res.rowcount
-                logger.info("pruned {} rows from {}", res.rowcount, claim_table)
-
-                if res.rowcount == 0:
-                    logger.info("Total rows pruned from {}: {}", claim_table, totalRowCount)
-                    break
+                    if res.rowcount == 0:
+                        logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
+                        break
     return True
 
 
