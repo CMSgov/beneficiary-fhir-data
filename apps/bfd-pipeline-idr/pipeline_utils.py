@@ -14,12 +14,7 @@ from constants import (
     CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_PARTITION,
-    FISS_CLM_SOURCE,
-    MCS_CLM_SOURCE,
     PHASE_1_CUTOFF,
-    PHASE_1_SS_MAX,
-    PHASE_1_SS_MIN,
-    VMS_CLM_SOURCE,
 )
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
@@ -31,7 +26,7 @@ from model.base_model import (
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
-from settings import BENEFICIARY_PRUNE_BATCH_LIMIT, PHASE_1_PRUNE_BATCH_LIMIT
+from settings import BENEFICIARY_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
