@@ -3,12 +3,12 @@ output "log_group" {
   description = "`aws_cloudwatch_log_group` resource created by this module."
 }
 
-output "log_group_arn" {
+output "arn" {
   value       = aws_cloudwatch_log_group.this.arn
   description = "ARN of the CloudWatch log group created by this module."
 }
 
-output "log_group_name" {
+output "name" {
   value       = aws_cloudwatch_log_group.this.name
   description = "Name of the CloudWatch log group created by this module."
 }

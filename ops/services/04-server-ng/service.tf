@@ -55,39 +55,44 @@ data "aws_ecr_image" "server" {
   image_tag       = local.server_version
 }
 
-resource "aws_cloudwatch_log_group" "log_router_messages" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "log_router_messages" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  prevent_destroy    = true
 }
 
-resource "aws_cloudwatch_log_group" "service_connect_messages" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "service_connect_messages" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  prevent_destroy    = true
 }
 
-resource "aws_cloudwatch_log_group" "server_messages" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "server_messages" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  prevent_destroy    = true
 }
 
-resource "aws_cloudwatch_log_group" "server_healthchecks" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "server_healthchecks" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  prevent_destroy    = true
 }
 
-resource "aws_cloudwatch_log_group" "server_nonjson" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = local.ten_year_retention_days
-  skip_destroy      = true
+module "server_nonjson" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  log_group_name     = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  prevent_destroy    = true
 }
 
 resource "aws_ecs_task_definition" "server" {
@@ -137,15 +142,15 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "MESSAGES_LOG_GROUP"
-            value = aws_cloudwatch_log_group.server_messages.name
+            value = module.server_messages.name
           },
           {
             name  = "HEALTHCHECK_LOG_GROUP"
-            value = aws_cloudwatch_log_group.server_healthchecks.name
+            value = module.server_healthchecks.name
           },
           {
             name  = "NONJSON_LOG_GROUP"
-            value = aws_cloudwatch_log_group.server_nonjson.name
+            value = module.server_nonjson.name
           }
         ]
         firelensConfiguration = {
@@ -159,7 +164,7 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = aws_cloudwatch_log_group.log_router_messages.name
+            awslogs-group         = module.log_router_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
@@ -378,7 +383,7 @@ resource "aws_ecs_service" "server" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        "awslogs-group"         = aws_cloudwatch_log_group.service_connect_messages.name
+        "awslogs-group"         = module.service_connect_messages.name
         "awslogs-region"        = local.region
         "awslogs-stream-prefix" = "${local.service}-${local.bfd_version}"
       }

@@ -43,7 +43,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
 
     cloudwatch_logging_options {
       enabled         = true
-      log_group_name  = module.s3logs_log_group.log_group_name
+      log_group_name  = module.s3logs_log_group.name
       log_stream_name = "DestinationDelivery"
     }
 
@@ -125,7 +125,7 @@ resource "aws_cloudwatch_log_subscription_filter" "s3logs" {
   depends_on = [aws_iam_role_policy_attachment.s3logs_cw]
 
   name            = "${local.name_prefix}-message-log-subscription"
-  log_group_name  = aws_cloudwatch_log_group.server_messages.name
+  log_group_name  = module.server_messages.name
   filter_pattern  = ""
   destination_arn = aws_kinesis_firehose_delivery_stream.s3logs.arn
   role_arn        = aws_iam_role.s3logs_cw.arn
