@@ -3,10 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from constants import (
-    DEFAULT_MAX_DATE,
-    IDR_BENE_MA_PART_D_RX_TABLE,
-)
+from constants import IDR_BENE_MA_PART_D_RX_TABLE
 from load_partition import LoadPartition
 from model.base_model import (
     ALIAS_HSTRY,
@@ -70,7 +67,6 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
                     {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = enrlmt_rx.bene_sk
                 )
-                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
                 {{ORDER_BY}}
                 {{LIMIT}}
             """

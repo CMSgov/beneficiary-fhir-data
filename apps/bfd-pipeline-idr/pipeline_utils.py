@@ -8,7 +8,7 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION
+from constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
@@ -17,8 +17,10 @@ from model.base_model import (
     T,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
+from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
+from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.load_progress import LoadProgress
-from settings import BENEFICIARY_PRUNE_BATCH_LIMIT
+from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
@@ -117,12 +119,10 @@ def extract_and_load(
 
 def prune_bene_lis_cmbnd(
     load_mode: LoadMode,
-    job_start: datetime,
 ) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    prune_cutoff_date = job_start - timedelta(days=60)
-    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+    logger.info("pruning obsolete lis beneficiaries", DEFAULT_MAX_DATE)
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:
@@ -136,10 +136,75 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, BENEFICIARY_PRUNE_BATCH_LIMIT),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
             if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:
+                break
+
+    return True
+
+
+def prune_bene_ma_part_d(
+    load_mode: LoadMode,
+) -> bool:
+    bene_table = IdrBeneficiaryMaPartDEnrollment.table()
+
+    logger.info("pruning obsolete part d beneficiaries", DEFAULT_MAX_DATE)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, bene_enrlmt_bgn_dt, bene_enrlmt_pgm_type_cd) IN (
+                    SELECT bene_sk, bene_enrlmt_bgn_dt, bene_enrlmt_pgm_type_cd
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (DEFAULT_MAX_DATE, BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT:
+                break
+
+    return True
+
+
+def prune_bene_ma_part_d_rx(
+    load_mode: LoadMode,
+) -> bool:
+    bene_table = IdrBeneficiaryMaPartDEnrollmentRx.table()
+
+    logger.info("pruning obsolete part d rx beneficiaries", DEFAULT_MAX_DATE)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, 
+                       bene_cntrct_num, 
+                       bene_pbp_num, 
+                       bene_enrlmt_bgn_dt, 
+                       bene_enrlmt_pdp_rx_info_bgn_dt
+                    ) IN (
+                    SELECT bene_sk, 
+                           bene_cntrct_num, 
+                           bene_pbp_num, 
+                           bene_enrlmt_bgn_dt, 
+                           bene_enrlmt_pdp_rx_info_bgn_dt
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (DEFAULT_MAX_DATE, BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT:
                 break
 
     return True

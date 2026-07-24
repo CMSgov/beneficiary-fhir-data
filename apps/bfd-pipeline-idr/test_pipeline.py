@@ -163,15 +163,27 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     # only a future record exists for this contract
     assert rows[6]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
 
-    cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
-    assert cur.rowcount == 3
-    rows = cur.fetchmany(1)
-    assert rows[0]["bene_sk"] == 353816020
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
+        assert cur.rowcount == 4
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
+    else:
+        cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
+        assert cur.rowcount == 3
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
 
-    cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment_rx order by bene_sk")
-    assert cur.rowcount == 2
-    rows = cur.fetchmany(1)
-    assert rows[0]["bene_sk"] == 353816020
+    if load_type == LoadType.INITIAL:
+        cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment_rx order by bene_sk")
+        assert cur.rowcount == 3
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
+    else:
+        cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment_rx order by bene_sk")
+        assert cur.rowcount == 2
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 353816020
 
     cur = conn.execute("select * from idr.beneficiary_low_income_subsidy order by bene_sk")
     assert cur.rowcount == 2
