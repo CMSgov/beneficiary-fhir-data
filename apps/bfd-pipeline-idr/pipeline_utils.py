@@ -8,13 +8,21 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION
+from constants import (
+    CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE,
+    DEFAULT_PARTITION,
+    PHASE_1_CUTOFF,
+)
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
 from model.base_model import (
     LoadMode,
     T,
+    stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from model.load_progress import LoadProgress
@@ -113,6 +121,45 @@ def extract_and_load(
         except Exception as ex:
             logger.opt(exception=True).error("error loading {}", cls.table())
             raise ex
+
+
+def prune_phase_1_ss_claims(
+    cls: type[T],
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    shared_claim_tables = {
+        CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+        CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    }
+
+    claim_table = cls.table()
+    item_table = shared_claim_tables.get(claim_table)
+    if item_table is None:
+        return True
+
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+    logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
+
+    prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        for target_table in [item_table, claim_table]:
+            total_row_count = 0
+            while True:
+                with conn.transaction():
+                    res = conn.execute(
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
+                        params,
+                    )
+
+                    total_row_count += res.rowcount
+                    logger.info("pruned {} rows from {}", res.rowcount, item_table)
+
+                    if res.rowcount == 0:
+                        logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
+                        break
+    return True
 
 
 def prune_bene_lis_cmbnd(
