@@ -84,6 +84,11 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     if enable_prior_auth_ingestion():
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
+        assert cur.rowcount == 21
+        rows = cur.fetchmany(1)
+        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+
+        cur = conn.execute("select * from idr.prior_auth_item order by mbi_num")
         assert cur.rowcount == 64
         rows = cur.fetchmany(1)
         assert rows[0]["mbi_num"] == "1OX4Y88RV68"

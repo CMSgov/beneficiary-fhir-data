@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,10 +17,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public record OutcomeFilterParam(List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes)
     implements DbFilterBuilder {
-  private static final List<Optional<ClaimPaidStatusCode>> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
-      ClaimPaidStatusCode.findByOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE).stream()
-          .map(Optional::of)
-          .toList();
+  private static final List<ClaimPaidStatusCode> COMPLETE_SHARED_SYSTEMS_STATUS_CODES =
+      ClaimPaidStatusCode.findByOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
 
   @NotNull
   @Override

@@ -42,9 +42,4 @@ public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFil
             });
     return new DbFilter(filterClause.toString(), params);
   }
-
-  @Override
-  public boolean matchesSystemType(@NotNull SystemType systemType) {
-    return true;
-  }
 }

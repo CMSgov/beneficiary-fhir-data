@@ -441,18 +441,6 @@ class EobSearchIT extends IntegrationTestBase {
         "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
   }
 
-  private static Coding tag(String system, String code) {
-    return new Coding(system, code, null);
-  }
-
-  private static Coding systemType(MetaSourceSk metaSourceSk) {
-    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, metaSourceSk.getSystemType());
-  }
-
-  private static Coding finalAction(ClaimFinalAction finalAction) {
-    return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
-  }
-
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByType(SearchStyleEnum searchStyle) {

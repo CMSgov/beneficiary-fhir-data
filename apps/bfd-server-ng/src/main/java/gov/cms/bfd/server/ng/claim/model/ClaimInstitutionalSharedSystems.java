@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
-
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -17,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -57,7 +56,12 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
-  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
+  private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Override
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.of(claimPaidStatusCode);
+  }
 
   @Override
   Optional<ClaimRecordType> getClaimRecordTypeOptional() {
@@ -90,7 +94,25 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo() {
-    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
+    return Stream.of(
+            claimRecordType.toFhir(supportingInfoFactory),
+            Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+            buildAuditStatusSupportingInfo())
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
+  private Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      buildAuditStatusSupportingInfo() {
+    // since audit trail status codes can overlap between the different shared systems, we must
+    // specifically handle this code to use the actual corresponding display. Claim audit trail
+    // location code is only used to determine codes from VMS so it does not apply here.
+    return claimAuditTrailStatusCode
+        .flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA))
+        .map(code -> code.toFhir(supportingInfoFactory));
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */

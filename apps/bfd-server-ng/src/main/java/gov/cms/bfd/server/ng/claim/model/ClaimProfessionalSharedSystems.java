@@ -64,7 +64,12 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
-  private Optional<ClaimPaidStatusCode> claimPaidStatusCode;
+  private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Override
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.of(claimPaidStatusCode);
+  }
 
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
@@ -76,10 +81,24 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
     return Stream.concat(
             Stream.of(
                 nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory))),
+                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
+                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+                buildAuditStatusSupportingInfo()),
             buildRxSupportingInfo())
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  private Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      buildAuditStatusSupportingInfo() {
+    // since audit trail status codes can overlap between the different shared systems, we must
+    // specifically handle this code to use the actual corresponding display
+    return claimAuditTrailStatusCode
+        .flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, claimAuditTrailLocationCode))
+        .map(code -> code.toFhir(supportingInfoFactory));
   }
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>

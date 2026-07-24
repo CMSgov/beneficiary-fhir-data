@@ -154,6 +154,16 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
+def provider_npi_type_expr(alias: str) -> str:
+    return f"""
+        CASE 
+            WHEN {alias}.prvdr_lgl_name IS NOT NULL THEN 2
+            WHEN {alias}.prvdr_lgl_name IS NULL AND {alias}.prvdr_1st_name IS NOT NULL THEN 1
+            ELSE NULL 
+        END
+    """
+
+
 MEDICARE_EXHAUSTED_CD = "A3"
 ACTIVE_CARE_CD = "22"
 QUALIFYING_STAY_CD = "70"
@@ -374,6 +384,10 @@ ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
 ALIAS_PRVDR_ATNDG = "prvdr_atndg"
 ALIAS_PRVDR_OPRTG = "prvdr_oprtg"
 ALIAS_PRVDR_OTHR = "prvdr_othr"
+ALIAS_PRVDR_ATT_PHY = "prvdr_att"
+ALIAS_PRVDR_RENDER = "prvdr_render"
+ALIAS_PRVDR_ORDER_REFER = "prvdr_order_refer"
+ALIAS_PRIOR_AUTH = "prior_auth"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
