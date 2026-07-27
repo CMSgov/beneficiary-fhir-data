@@ -112,7 +112,7 @@ class StagedIdrPipeline:
                         self._stage2_do_claims_and_benes_tbls(),
                         self._stage3_do_parent_claims_tbls(),
                         self._stage4_do_beneficiary(),
-                        self._stage5_do_phase_1_prune(),
+                        self._stage5_prune_obsolete_rows(),
                     ],
                 )
             )
@@ -148,7 +148,7 @@ class StagedIdrPipeline:
             self._gen_partitioned_node_inputs(self._filter_tables(BENE_TABLES))
         )
 
-    def _stage5_do_phase_1_prune(self) -> Stage[bool]:
+    def _stage5_prune_obsolete_rows(self) -> Stage[bool]:
         if self.load_type == LoadType.INITIAL:
             return
 
