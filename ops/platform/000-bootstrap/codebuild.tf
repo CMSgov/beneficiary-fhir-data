@@ -157,12 +157,12 @@ resource "aws_codebuild_source_credential" "github" {
   token       = aws_codestarconnections_connection.github.arn
 }
 
-resource "aws_cloudwatch_log_group" "runner" {
+module "runner" {
+  source   = "../../terraform-modules/general/high-retention-log-group"
   for_each = local.codebuild_runner_config
 
-  name              = "/aws/codebuild/${each.value.name}"
-  kms_key_id        = aws_kms_key.primary["platform"].arn
-  retention_in_days = 2557
+  name       = "/aws/codebuild/${each.value.name}"
+  kms_key_id = aws_kms_key.primary["platform"].arn
 }
 
 resource "aws_codebuild_project" "runner" {
@@ -189,7 +189,7 @@ resource "aws_codebuild_project" "runner" {
   logs_config {
     cloudwatch_logs {
       status     = "ENABLED"
-      group_name = aws_cloudwatch_log_group.runner[each.key].name
+      group_name = module.runner[each.key].name
     }
   }
 
