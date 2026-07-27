@@ -36,7 +36,7 @@ from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
 from model.idr_prior_auth_item import IdrPriorAuthItem
 from parallel_executor import ParallelStagesExecutor, Stage
-from pipeline_utils import extract_and_load
+from pipeline_utils import extract_and_load, prune_bene_lis_cmbnd
 from settings import enable_prior_auth_ingestion
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
@@ -103,6 +103,7 @@ class StagedIdrPipeline:
                         self._stage2_do_claims_and_benes_tbls(),
                         self._stage3_do_parent_claims_tbls(),
                         self._stage4_do_beneficiary(),
+                        self._stage5_do_phase_1_prune(),
                     ],
                 )
             )
@@ -136,6 +137,15 @@ class StagedIdrPipeline:
 
         yield from self._extract_and_load_stage(
             self._gen_partitioned_node_inputs(self._filter_tables(BENE_TABLES))
+        )
+
+    def _stage5_do_phase_1_prune(self) -> Stage[bool]:
+        if self.load_type == LoadType.INITIAL:
+            return
+
+        yield functools.partial(
+            prune_bene_lis_cmbnd,
+            self.load_mode,
         )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:

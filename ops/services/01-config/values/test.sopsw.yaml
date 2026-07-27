@@ -145,6 +145,8 @@
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
