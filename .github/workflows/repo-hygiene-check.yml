@@ -45,7 +45,7 @@ jobs:
     name: Get Repolinter Config
     needs: check-first-run
     if: needs.check-first-run.outputs.should_run == 'true'
-    uses: DSACMS/repo-scaffolder/.github/workflows/extendJSONFile.yml@main
+    uses: DSACMS/repo-scaffolder/.github/workflows/extendJSONFile.yml@ff5cf82ff728da9e6042afc7bda867f968de09f6 # main
     with: 
       url_to_json: 'https://raw.githubusercontent.com/DSACMS/repo-scaffolder/main/tier3/%7B%7Bcookiecutter.project_slug%7D%7D/repolinter.json'
   
@@ -62,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - run: echo $RAW_JSON > repolinter.json
-      - uses: DSACMS/repolinter-action@main
+      - uses: DSACMS/repolinter-action@7869c7671df12b546c953dee3b756576f84d6522 # main
         with:
           config_file: 'repolinter.json'
           output_type: 'pull-request'

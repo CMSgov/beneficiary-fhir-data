@@ -20,7 +20,7 @@ from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowInco
 from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.load_progress import LoadProgress
-from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
+from settings import BENEFICIARY_PRUNE_BATCH_LIMIT, BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
@@ -122,7 +122,7 @@ def prune_bene_lis_cmbnd(
 ) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    logger.info("pruning obsolete lis beneficiaries", DEFAULT_MAX_DATE)
+    logger.info("pruning obsolete lis beneficiaries")
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:

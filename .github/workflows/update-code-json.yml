@@ -36,7 +36,7 @@ jobs:
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
       
       - name: Update code.json
-        uses: DSACMS/automated-codejson-generator@main
+        uses: DSACMS/automated-codejson-generator@d21e2a27d6db670dab565cde14980bbbd7d7c6b4 # main
         with:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           BRANCH: 'master'
