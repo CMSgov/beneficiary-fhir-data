@@ -10,8 +10,18 @@ BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr.claim_rx"
 CLAIM_PROFESSIONAL_NCH_TABLE = "idr.claim_professional_nch"
 CLAIM_PROFESSIONAL_SS_TABLE = "idr.claim_professional_ss"
+CLAIM_PROFESSIONAL_ITEM_SS_TABLE = "idr.claim_item_professional_ss"
 CLAIM_INSTITUTIONAL_NCH_TABLE = "idr.claim_institutional_nch"
 CLAIM_INSTITUTIONAL_SS_TABLE = "idr.claim_institutional_ss"
+CLAIM_INSTITUTIONAL_ITEM_SS_TABLE = "idr.claim_item_institutional_ss"
+
+# Phase 1 claims younger than 60 days are allowed
+PHASE_1_CUTOFF = 60
+PHASE_1_SS_MIN = 1000
+PHASE_1_SS_MAX = 1999
+FISS_CLM_SOURCE = "21000"
+MCS_CLM_SOURCE = "22000"
+VMS_CLM_SOURCE = "23000"
 
 IDR_PREFIX = "cms_vdm_view_mdcr_prd"
 IDR_BENE_HISTORY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_hstry"

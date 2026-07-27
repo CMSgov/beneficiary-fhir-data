@@ -40,6 +40,7 @@ from pipeline_utils import (
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
     prune_bene_ma_part_d_rx,
+    prune_phase_1_ss_claims,
 )
 from settings import enable_prior_auth_ingestion
 
@@ -49,6 +50,10 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
     IdrClaimInstitutionalNch,
+    IdrClaimProfessionalSs,
+    IdrClaimInstitutionalSs,
+]
+CLAIM_SS_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
 ]
@@ -161,6 +166,14 @@ class StagedIdrPipeline:
             prune_bene_ma_part_d_rx,
             self.load_mode,
         )
+
+        for model in self._filter_tables(CLAIM_SS_TABLES):
+            yield functools.partial(
+                prune_phase_1_ss_claims,
+                model,
+                self.load_mode,
+                self.start_time,
+            )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
         return [
