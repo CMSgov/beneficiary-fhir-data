@@ -39,7 +39,7 @@ from pipeline_utils import (
     extract_and_load,
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
-    prune_bene_ma_part_d_rx
+    prune_bene_ma_part_d_rx,
 )
 from settings import enable_prior_auth_ingestion
 
