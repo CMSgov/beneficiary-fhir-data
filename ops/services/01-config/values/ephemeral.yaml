@@ -108,6 +108,8 @@ values:
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: UNDEFINED
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
+  /bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
+  /bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21

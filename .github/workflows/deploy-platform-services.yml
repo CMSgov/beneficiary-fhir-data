@@ -18,7 +18,8 @@ on:
           alerting,
           backup,
           ecr,
-          network
+          network,
+          log-retention-alarms
         required: true
       per-service-vars-json:
         description: >-
@@ -60,7 +61,8 @@ on:
           alerting,
           backup,
           ecr,
-          network
+          network,
+          log-retention-alarms
         required: false
       per-service-vars-json:
         type: string
