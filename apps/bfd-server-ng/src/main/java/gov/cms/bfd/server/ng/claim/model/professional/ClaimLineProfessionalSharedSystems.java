@@ -6,11 +6,9 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
-import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Observation;
 
 /** Claim line info. */
 @Embeddable
@@ -21,11 +19,6 @@ public class ClaimLineProfessionalSharedSystems extends ClaimLineProfessionalBas
 
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineAdjudicationChargeProfessionalSharedSystems adjudicationCharge;
-
-  @Override
-  public Optional<Observation> toFhirObservation(int bfdRowId) {
-    return Optional.empty();
-  }
 
   @Override
   void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {

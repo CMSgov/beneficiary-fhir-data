@@ -14,13 +14,6 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
   ClaimItemId getClaimItemId();
 
   /**
-   * Returns the procedure associated with this claim item, if present.
-   *
-   * @return the claim procedure,
-   */
-  Optional<ClaimProcedureBase> getProcedure();
-
-  /**
    * Returns the HCPCS code for this claim line, if present.
    *
    * @return the claim line HCPCS code,
@@ -33,6 +26,15 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
    * @return the claim line professional info.
    */
   ClaimLineBase getClaimLine();
+
+  /**
+   * Returns the procedure associated with this claim item, if present.
+   *
+   * @return the claim procedure,
+   */
+  default Optional<ClaimProcedureBase> getProcedure() {
+    return Optional.empty();
+  }
 
   @Override
   default int compareTo(@NotNull ClaimItemBase o) {

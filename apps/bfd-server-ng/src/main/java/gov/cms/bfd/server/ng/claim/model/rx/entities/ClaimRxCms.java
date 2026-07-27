@@ -3,14 +3,19 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
+import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRxCms;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -25,7 +30,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
-    return Optional.of(adjudicationCharge);
+    return Optional.ofNullable(adjudicationCharge);
   }
 
   // endregion
@@ -35,7 +40,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   protected Optional<ClaimProcessDate> getClaimProcessDate() {
-    return Optional.of(claimProcessDate);
+    return Optional.ofNullable(claimProcessDate);
   }
 
   // endregion
@@ -61,7 +66,30 @@ public class ClaimRxCms extends ClaimRxBase {
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
     return Optional.ofNullable(claimIdrLoadDate);
   }
+
   // endregion
 
-  @Embedded private ClaimItem
+  @Embedded private ClaimItemRxCms claimItem;
+
+  @Override
+  protected ClaimItemBase getClaimItem() {
+    return claimItem;
+  }
+
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
+    return Stream.concat(
+            claimItem
+                .getClaimLine()
+                .getClaimRxSupportingInfo()
+                .toFhir(supportingInfoFactory)
+                .stream(),
+            claimItem.getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
+        .toList();
+  }
+
+  @Override
+  protected Optional<BigDecimal> getTotalDrugCostAmount() {
+    return Optional.ofNullable(claimItem.getClaimLine().getAdjudicationCharge().getTotalDrugCost());
+  }
 }

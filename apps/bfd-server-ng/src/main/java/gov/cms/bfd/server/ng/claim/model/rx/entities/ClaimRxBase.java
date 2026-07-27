@@ -14,7 +14,6 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
-import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
 import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
@@ -102,17 +101,6 @@ public abstract class ClaimRxBase extends ClaimBase {
     buildLineSupportingInfo().forEach(eob::addSupportingInfo);
   }
 
-  private List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
-    return Stream.concat(
-            getClaimItem()
-                .getClaimLine()
-                .getClaimRxSupportingInfo()
-                .toFhir(supportingInfoFactory)
-                .stream(),
-            getClaimItem().getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
-        .toList();
-  }
-
   protected void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     prescribingProviderHistory
@@ -157,16 +145,6 @@ public abstract class ClaimRxBase extends ClaimBase {
             .setReason(reasonCodeableConcept));
   }
 
-  /**
-   * Accessor for claim line rx total drug cost amount, if this is an PDE claim.
-   *
-   * @return optional total drug cost amount
-   */
-  protected Optional<BigDecimal> getTotalDrugCostAmount() {
-    return Optional.ofNullable(
-        getClaimItem().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
-  }
-
   protected void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirPartDInsurance());
   }
@@ -201,7 +179,13 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
-  protected Optional<ClaimItemRx> getClaimItem() {
+  // default no-op, overridden by Cms
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
+    return List.of();
+  }
+
+  // default empty, overridden by Cms
+  protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.empty();
   }
 
@@ -243,4 +227,6 @@ public abstract class ClaimRxBase extends ClaimBase {
     items.add(getClaimItem());
     return items;
   }
+
+  protected abstract ClaimItemBase getClaimItem();
 }

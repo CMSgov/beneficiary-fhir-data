@@ -63,7 +63,7 @@ public class ClaimRepository {
   private static final String CLAIM_RX =
       """
         SELECT c
-        FROM ClaimCmsRx c
+        FROM ClaimRxCms c
         JOIN FETCH c.beneficiary b
       """;
 

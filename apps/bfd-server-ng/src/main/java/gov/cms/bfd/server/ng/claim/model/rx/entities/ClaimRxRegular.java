@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
 import jakarta.persistence.Column;
@@ -26,6 +27,11 @@ public class ClaimRxRegular extends ClaimRxBase {
   @Override
   protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
     return Optional.of(adjudicationCharge);
+  }
+
+  @Override
+  protected ClaimItemBase getClaimItem() {
+    return null;
   }
 
   // endregion
