@@ -145,6 +145,28 @@
     - Basis
     - Regular
     - CMS
+- inputPath: ExplanationOfBenefit-Base.EOB_TYPE
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+    - Carrier
+  sources:
+    - FISS
+    - MCS
+    - NCH
+    - VMS
+  bfdDerived: True
+  nameOverride: EOB Type Code
+  definitionOverride: The EOB type code for Blue Button.
+  fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE').code
+  profiles:
+    - Basis
+    - Regular
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.BENE_SK
   appliesTo:
     - Inpatient
