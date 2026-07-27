@@ -15,7 +15,8 @@ dependencies = [
     "unidecode>=1.4.0",
     "click>=8.3.3",
     "anyio",
-    "loguru"
+    "loguru",
+    "pydantic-partial" # TODO: remove when idr_bfd_compare is moved
 ]
 
 [dependency-groups]

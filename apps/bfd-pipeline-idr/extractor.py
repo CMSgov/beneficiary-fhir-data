@@ -29,6 +29,7 @@ from model.base_model import (
 )
 from model.load_progress import LoadProgress
 from settings import (
+    ALLOW_EXTRACTOR_QUERY_LOGGING,
     BATCH_MULTIPLIER,
     ENABLE_DATE_PARTITIONS,
     IDR_ACCOUNT,
@@ -94,19 +95,27 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
+    def build_filter_columns(self, progress: LoadProgress | None) -> str:
+        is_historical = progress is None or progress.is_historical()
+        # GREATEST doesn't work with nulls so we need to coalesce here
+        batch_timestamp_cols = self._coalesce_dates(
+            self.cls.format_aliases(self.cls.batch_timestamp_col(is_historical))
+        )
+        update_timestamp_cols = self._coalesce_dates(
+            self.cls.format_aliases(self.cls.update_timestamp_col())
+        )
+        # We need to create batches using the most recent timestamp from all of the
+        # insert/update timestamps
+        return self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+
     def extract_idr_data(
         self, progress: LoadProgress | None, start_time: datetime, source: Source
     ) -> Iterator[list[T]]:
-        is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(start_time, source)
-        # GREATEST doesn't work with nulls so we need to coalesce here
-        batch_timestamp_cols = self._coalesce_dates(
-            self.cls.batch_timestamp_col_alias(is_historical)
-        )
-        update_timestamp_cols = self._coalesce_dates(self.cls.update_timestamp_col_alias())
+
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
-        batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+        batch_timestamp_clause = self.build_filter_columns(progress)
         min_transaction_date = self.cls.model_type().min_transaction_date
 
         batch_id_clause = ""
@@ -127,7 +136,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 )
                 .replace("{FILTER_OP}", ">=")
                 .replace("{LAST_TS}", "%(timestamp)s")
-                .replace("{ORDER_BY}", order_by),
+                .replace("{ORDER_BY}", order_by)
+                .replace("{TABLESAMPLE}", "")
+                .replace("{LIMIT}", "")
+                .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
                 {"timestamp": min_transaction_date},
             )
 
@@ -173,7 +185,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             )
             .replace("{FILTER_OP}", filter_op)
             .replace("{LAST_TS}", "%(timestamp)s")
-            .replace("{ORDER_BY}", order_by),
+            .replace("{ORDER_BY}", order_by)
+            .replace("{TABLESAMPLE}", "")
+            .replace("{LIMIT}", "")
+            .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
             {"timestamp": compare_timestamp},
         )
 
@@ -220,7 +235,8 @@ class PostgresExtractor(Extractor[T]):
         sql: str,
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
-        logger.debug(sql)
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -313,7 +329,8 @@ class SnowflakeExtractor(Extractor[T]):
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
         cur = None
-        logger.debug(sql)
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)

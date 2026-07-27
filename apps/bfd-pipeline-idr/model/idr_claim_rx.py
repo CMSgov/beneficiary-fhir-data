@@ -318,4 +318,5 @@ class IdrClaimRx(IdrBaseModel):
                 AND {pbp_num}.contract_version_rank = 1
             {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
+            {{LIMIT}}
         """

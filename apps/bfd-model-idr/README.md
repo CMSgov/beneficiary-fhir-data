@@ -191,6 +191,7 @@ The files output will be in the `out` folder:
 - `SYNTHETIC_BENE_XREF.csv`
 - `SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv`
 - `SYNTHETIC_BENE_LIS.csv`
+- `SYNTHETIC_BENE_LIS_CMBND.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT.csv`
 
