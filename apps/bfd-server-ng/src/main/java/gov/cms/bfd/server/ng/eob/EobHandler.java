@@ -49,6 +49,8 @@ public class EobHandler {
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
+  private static final Set<String> NONSENSITIVE_SYSTEMS = Set.of(SystemUrls.CMS_HIPPS);
+
   /**
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
@@ -338,8 +340,11 @@ public class EobHandler {
   private boolean codeIsSamhsa(
       String code, LocalDate date, String id, String type, Collection<String> systems) {
     return systems.stream()
+        .filter(system -> !NONSENSITIVE_SYSTEMS.contains(system))
         .flatMap(
-            system -> SECURITY_LABELS.get(system).stream().map(label -> Map.entry(system, label)))
+            system ->
+                SECURITY_LABELS.getOrDefault(system, List.of()).stream()
+                    .map(label -> Map.entry(system, label)))
         .anyMatch(entry -> isCodeSamhsa(code, date, entry.getValue(), type, id, entry.getKey()));
   }
 
@@ -352,6 +357,7 @@ public class EobHandler {
   private boolean priorAuthorizationItemIsSamhsa(
       PriorAuthorization priorAuth, PriorAuthorizationItem item, LocalDate priorAuthDate) {
     var code = item.getHcpcsOrCptOrHipps().getHcpcsOrCptOrHipps();
+    var claimType = priorAuth.getClaimType();
 
     // Although PA can have a HIPPS code, HIPPS codes are not samhsa so we don't check HIPPS codes
     // here.
@@ -359,7 +365,7 @@ public class EobHandler {
         code,
         priorAuthDate,
         priorAuth.getResourceId() + ":" + item.getCurrentSegment(),
-        "PriorAuth HCPCS/CPT",
-        List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS));
+        "PriorAuth HCPCS/CPT/HIPPS",
+        List.of(item.getHcpcsOrCptOrHipps().getCodingSystem(claimType)));
   }
 }
