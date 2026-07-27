@@ -23,13 +23,17 @@ public class BeneficiaryLowIncomeSubsidyId
   @Column(name = "bene_sk")
   private long beneSk;
 
-  @Column(name = "bene_rng_bgn_dt")
+  @Column(name = "bene_cmbnd_deemd_efctv_dt")
   private LocalDate benefitRangeBeginDate;
+
+  @Column(name = "idr_trans_obslt_ts")
+  private LocalDate obsoleteDate;
 
   @Override
   public int compareTo(@NotNull BeneficiaryLowIncomeSubsidyId o) {
     return Comparator.comparing((BeneficiaryLowIncomeSubsidyId id) -> id.beneSk)
         .thenComparing(id -> id.benefitRangeBeginDate, Comparator.reverseOrder())
+        .thenComparing(id -> id.obsoleteDate, Comparator.reverseOrder())
         .compare(this, o);
   }
 }
