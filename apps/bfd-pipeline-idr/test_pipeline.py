@@ -545,6 +545,77 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert updated_ss_job.completion_time >= ss_clm_ts
 
 
+def _do_test_prior_auth_update_and_delete(conn: Connection[DictRow], load_type: LoadType) -> None:
+    if not enable_prior_auth_ingestion():
+        return
+
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-OTENCJLOQRAKA'"
+    )
+    assert cur.rowcount == 1
+    rows = cur.fetchmany(6)
+    assert rows[0]["mbi_num"] == "7ZM6HW2AT68"
+    original_updated_ts = rows[0]["bfd_updated_ts"]
+    original_name = rows[0]["name"]
+
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 1
+    row = cur.fetchone()
+    assert row is not None
+
+    prauc_table = sql.Identifier("cms_edp_view_cvm_prau_prd", "prauc")
+    conn.execute(
+        t"""
+        UPDATE {prauc_table:i}
+        SET name = 'BITE AID PHARMACY'
+        WHERE mbi_num = '7ZM6HW2AT68'
+        AND utn = '-OTENCJLOQRAKA'
+        """
+    )
+
+    conn.execute(
+        t"""
+        DELETE FROM {prauc_table:i}
+        WHERE mbi_num = '5OH0K85GU23'
+        AND utn = '-SC21YQR4UY4LI'
+        """
+    )
+    conn.commit()
+
+    _advance_time(datetime.now() + timedelta(days=1))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+
+    # verify that updated rows by upstream were updated
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-OTENCJLOQRAKA'"
+    )
+    assert cur.rowcount == 1
+    updated_row = cur.fetchone()
+    assert updated_row is not None
+    assert updated_row["name"] != original_name
+    assert updated_row["bfd_updated_ts"] > original_updated_ts
+
+    # verify that deleted rows by upstream were deleted in header and item level for prior auth
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 0
+
+    cur = conn.execute(
+        "select * from idr.prior_auth_item where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 0
+
+    # verify that untouched rows by upstream were not updated
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-RVUOWAUT5V5QZ'"
+    )
+    rows = cur.fetchmany(2)
+    assert rows[0]["bfd_updated_ts"] < updated_row["bfd_updated_ts"]
+
+
 def _advance_time(timestamp: datetime) -> None:
     new_time = timestamp + timedelta(minutes=1)
     os.environ["BFD_TEST_DATE"] = new_time.isoformat()
@@ -623,6 +694,7 @@ def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: L
         _reset_db(conn, sample_dir, postgres)
         _setup_pipeline_environment(conn.info)
         _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+        _do_test_prior_auth_update_and_delete(cast(Connection[DictRow], conn), load_type)
     logger.remove()
 
 

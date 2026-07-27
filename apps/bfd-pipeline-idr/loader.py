@@ -78,7 +78,10 @@ class PostgresLoader:
             timeout=600,
         ) as pool:
             await pool.wait()
-            return await BatchLoader(
+            loader_cls = (
+                FullSyncBatchLoader if model.should_fully_sync_delete_diff() else BatchLoader
+            )
+            return await loader_cls(
                 fetch_results,
                 model,
                 pool,
@@ -116,7 +119,7 @@ class BatchLoader:
         self.batch_start = datetime.now(UTC)
         self.insert_cols = list(model.insert_keys())
         self.insert_cols.sort()
-        self.immutable = not model.update_timestamp_col()
+        self.immutable = model.is_immutable()
         self.meta_keys = (
             ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
         )
@@ -167,6 +170,7 @@ class BatchLoader:
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
+        self.load_mode = load_mode
         self.enable_load_progress = should_track_load_progress(load_mode)
 
     async def load(self) -> bool:
@@ -416,6 +420,77 @@ class BatchLoader:
                 await copy.write_row(
                     [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
                 )
+
+
+class FullSyncBatchLoader(BatchLoader):
+    async def load(self) -> bool:
+        timestamp = datetime.now(UTC)
+        self.full_load_timer.start()
+        num_rows = 0
+
+        async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
+            self.progress_start_timer.start()
+            await self._insert_batch_start(cur)
+            self.progress_start_timer.stop()
+
+            full_temp_table = await self._setup_temp_table(cur, "full_temp")
+
+            while True:
+                self.idr_query_timer.start()
+                results = next(self.fetch_results, None)
+                self.idr_query_timer.stop()
+                if not results:
+                    break
+                num_rows += len(results)
+                await self._copy_data(cur, full_temp_table, results)
+
+            logger.info(
+                "{}-{}: staged {} row(s) for full sync",
+                self.table,
+                self.partition.name,
+                num_rows,
+            )
+
+            self.insert_batch_timer.start()
+            updated_keys = await self._upsert(cur, full_temp_table, timestamp)
+            deleted_count = await self._delete_missing(cur, full_temp_table)
+            self.insert_batch_timer.stop()
+
+            logger.info(
+                "{}-{}: upserted {} new/changed row(s), deleted {} row(s) no longer present "
+                "upstream",
+                self.table,
+                self.partition.name,
+                len(updated_keys),
+                deleted_count,
+            )
+            await self._mark_batch_complete(cur)
+
+        self.full_load_timer.stop()
+        logger.info(
+            "{}-{}: finished full sync",
+            self.table,
+            self.partition.name,
+        )
+        return True
+
+    async def _delete_missing(self, cur: psycopg.AsyncCursor[Any], temp_tablename: str) -> int:
+        # We have to exclude our synthetic data that also exists in prod from deletion
+        synthetic_data_filter = (
+            "" if self.load_mode == LoadMode.SYNTHETIC else "WHERE utn NOT LIKE '-%'"
+        )
+        result = await cur.execute(  # type: ignore
+            f'''
+            DELETE FROM {self.table}
+            WHERE ({self.primary_keys_str}) IN (
+                SELECT {self.primary_keys_str} FROM {self.table}
+                {synthetic_data_filter}
+                EXCEPT
+                SELECT {self.primary_keys_str} FROM "{temp_tablename}"
+            )
+            '''  # type: ignore
+        )
+        return result.rowcount  # type: ignore
 
 
 def _remove_null_bytes(val: DbType) -> DbType:

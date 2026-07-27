@@ -192,6 +192,14 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             {"timestamp": compare_timestamp},
         )
 
+    def extract_full_idr_data(self, source: Source) -> Iterator[list[T]]:
+        start_time = self.cls.model_type().min_transaction_date
+        fetch_query = self.get_query(start_time, source)
+        logger.info("extracting full {}", self.cls.table())
+        return self.extract_many(
+            fetch_query.replace("{LAST_TS}", "%(timestamp)s"), {"timestamp": start_time}
+        )
+
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
         self.transform_timer.start()
         res = self.type_adapter.validate_python(

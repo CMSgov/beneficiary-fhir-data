@@ -490,6 +490,15 @@ class IdrBaseModel(BaseModel, ABC):
         """Whether to merge or replace data when loading this table."""
         return False
 
+    @staticmethod
+    def should_fully_sync_delete_diff() -> bool:
+        """Whether upstream data deletion requires manual cleanup on our end.
+
+        Upstream data can be deleted with no indicator like an obsolete timestamp, requiring
+        us to delete it on our end.
+        """
+        return False
+
     @classmethod
     @abstractmethod
     def fetch_query(
@@ -527,6 +536,10 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def update_timestamp_col(cls) -> list[str]:
         return cls._extract_meta_keys(UPDATE_TIMESTAMP)
+
+    @classmethod
+    def is_immutable(cls) -> bool:
+        return not cls.update_timestamp_col()
 
     @classmethod
     def batch_id_col_alias(cls) -> str | None:
