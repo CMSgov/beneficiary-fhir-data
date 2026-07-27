@@ -23,6 +23,7 @@ IDR_BENE_STATUS_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_mdcr_stus"
 IDR_BENE_THIRD_PARTY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_tp"
 IDR_BENE_COMBINED_DUAL_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_cmbnd_dual_mdcr"
 IDR_BENE_LOW_INCOME_SUBSIDY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_lis"
+IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_cmbnd_lis"
 IDR_BENE_MA_PART_D_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_mapd_enrlmt"
 IDR_BENE_MA_PART_D_RX_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_mapd_enrlmt_rx"
 

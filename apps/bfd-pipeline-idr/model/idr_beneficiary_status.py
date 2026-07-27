@@ -58,11 +58,12 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_STATUS_TABLE} stus
+            FROM {IDR_BENE_STATUS_TABLE} stus {{TABLESAMPLE}}
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = stus.bene_sk
             )
             {{ORDER_BY}}
+            {{LIMIT}}
         """

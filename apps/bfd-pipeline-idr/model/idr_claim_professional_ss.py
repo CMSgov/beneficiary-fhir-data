@@ -394,4 +394,5 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
             {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
+            {{LIMIT}}
         """

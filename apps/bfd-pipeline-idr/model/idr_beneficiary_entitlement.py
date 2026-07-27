@@ -60,11 +60,12 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_ENTITLEMENT_TABLE} entlmt
+            FROM {IDR_BENE_ENTITLEMENT_TABLE} entlmt {{TABLESAMPLE}}
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = entlmt.bene_sk
             )
             {{ORDER_BY}}
+            {{LIMIT}}
         """

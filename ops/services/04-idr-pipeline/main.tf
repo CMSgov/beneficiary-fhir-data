@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6"
+      version = "6.52.0" # TODO: Replace with "~> 6" when ECS is fixed
     }
   }
 }

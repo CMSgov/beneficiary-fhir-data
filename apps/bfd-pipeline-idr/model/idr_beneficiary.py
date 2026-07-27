@@ -62,7 +62,7 @@ class IdrBeneficiary(IdrBaseModel):
                 WHEN
                     {ALIAS_HSTRY}.bene_xref_efctv_sk = 0 OR
                     ({ALIAS_HSTRY}.bene_xref_efctv_sk != {ALIAS_HSTRY}.bene_sk
-                        AND {ALIAS_XREF}.bene_kill_cred_cd != '2')
+                        AND COALESCE({ALIAS_XREF}.bene_kill_cred_cd, '') != '2')
                 THEN {ALIAS_HSTRY}.bene_sk
                 ELSE {ALIAS_HSTRY}.bene_xref_efctv_sk
             END
@@ -213,14 +213,18 @@ class IdrBeneficiary(IdrBaseModel):
                 {deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_HISTORY_TABLE} {hstry}
+            FROM {IDR_BENE_HISTORY_TABLE} {hstry} {{TABLESAMPLE}}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
+            -- Additionally, there are cases where there exists a bene_sk -> bene_xref_efctv_sk
+            -- relationship, but not a bene_sk -> bene_xref_sk relationship. So we cannot join
+            -- on bene_xref_sk on the bene_hstry table.
             LEFT JOIN current_xref {xref}
-                ON {xref}.bene_sk = {hstry}.bene_xref_sk
+                ON {xref}.bene_sk = {hstry}.bene_xref_efctv_sk
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
             AND {hstry}.bene_mbi_id IS NOT NULL
             AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
+            {{LIMIT}}
         """

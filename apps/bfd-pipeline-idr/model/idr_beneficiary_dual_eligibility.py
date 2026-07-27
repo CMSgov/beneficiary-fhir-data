@@ -59,11 +59,12 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_COMBINED_DUAL_TABLE} dual
+            FROM {IDR_BENE_COMBINED_DUAL_TABLE} dual {{TABLESAMPLE}}
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = dual.bene_sk
             )
             {{ORDER_BY}}
+            {{LIMIT}}
         """

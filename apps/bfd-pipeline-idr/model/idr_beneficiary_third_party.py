@@ -59,11 +59,12 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_THIRD_PARTY_TABLE} tp
+            FROM {IDR_BENE_THIRD_PARTY_TABLE} tp {{TABLESAMPLE}}
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = tp.bene_sk
             )
             {{ORDER_BY}}
+            {{LIMIT}}
         """
