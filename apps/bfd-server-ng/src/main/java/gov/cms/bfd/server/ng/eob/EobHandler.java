@@ -342,9 +342,7 @@ public class EobHandler {
     return systems.stream()
         .filter(system -> !NONSENSITIVE_SYSTEMS.contains(system))
         .flatMap(
-            system ->
-                SECURITY_LABELS.getOrDefault(system, List.of()).stream()
-                    .map(label -> Map.entry(system, label)))
+            system -> SECURITY_LABELS.get(system).stream().map(label -> Map.entry(system, label)))
         .anyMatch(entry -> isCodeSamhsa(code, date, entry.getValue(), type, id, entry.getKey()));
   }
 
