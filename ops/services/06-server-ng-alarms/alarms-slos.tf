@@ -43,59 +43,11 @@ EOF
   ])
 
   slos_metrics = {
-    all_latency                         = "http-requests.latency.all.max"
-    all_responses_count                 = "http-requests.count.all.count"
-    all_http500s_count                  = "http-requests.count.5xx-responses.count"
+    all_latency         = "http-requests.latency.all.max"
+    all_responses_count = "http-requests.count.all.count"
+    all_http500s_count  = "http-requests.count.5xx-responses.count"
   }
 
-  error_slo_configs = {
-    slo_http500_percent_1hr_alert = {
-      type          = "alert"
-      period        = 1 * 60 * 60
-      threshold     = "10"
-      alarm_actions = local.slos_high_alert_arn
-    }
-    slo_http500_percent_1hr_warning = {
-      type          = "warning"
-      period        = 1 * 60 * 60
-      threshold     = "1"
-      alarm_actions = local.slos_warning_arn
-    }
-    slo_http500_percent_24hr_alert = {
-      type          = "alert"
-      period        = 24 * 60 * 60
-      threshold     = "0.01"
-      alarm_actions = local.slos_high_alert_arn
-    }
-    slo_http500_percent_24hr_warning = {
-      type          = "warning"
-      period        = 24 * 60 * 60
-      threshold     = "0.001"
-      alarm_actions = local.slos_warning_arn
-    }
-    slo_http500_percent_1hr_alert_min_req_1000 = {
-      type          = "alert"
-      period        = 1 * 60 * 60
-      threshold     = "50"
-      min_requests  = 1000
-      alarm_actions = local.slos_high_alert_arn
-    }
-  }
-
-  availability_slo_failure_sum_configs = {
-    slo_availability_failures_sum_5m_alert = {
-      type          = "alert"
-      period        = 60 * 5
-      threshold     = "3"
-      alarm_actions = local.slos_high_alert_arn
-    }
-    slo_availability_failures_sum_5m_warning = {
-      type          = "warning"
-      period        = 60 * 5
-      threshold     = "1"
-      alarm_actions = local.slos_warning_arn
-    }
-  }
 
 }
 
@@ -162,23 +114,21 @@ resource "aws_cloudwatch_metric_alarm" "slo_all_latency_mean_15m_warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
-  for_each = local.error_slo_configs
-
-  alarm_name          = "${local.alarm_name_prefix}-${replace(each.key, "_", "-")}"
+  alarm_name          = "${local.alarm_name_prefix}-slo-http500-50pct-24h-alert"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  threshold           = each.value.threshold
+  threshold           = 50
 
   alarm_description = join("", [
-    "HTTP 500 error rate over ${each.value.period / (60 * 60)} hour(s) exceeded ",
-    "${upper(each.value.type)} threshold ${each.value.threshold}% for ${local.target_service} in ",
-    "${local.env}. ",
+    "HTTP 500 error rate over 24 hours exceeded ALERT threshold of 50% for ",
+    "${local.target_service} in ${local.env}. ",
+    "Only fires if total requests > 1000. ",
     "Logs query: ${local.http500_log_insights_query_url}"
   ])
 
   metric_query {
     id          = "e1"
-    expression  = "IF(m1>${lookup(each.value, "min_requests", 0)}, m2/m1*100, 0)"
+    expression  = "IF(m1>1000, m2/m1*100, 0)"
     label       = "Error Rate"
     return_data = "true"
   }
@@ -189,7 +139,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
     metric {
       metric_name = local.slos_metrics.all_responses_count
       namespace   = local.namespace
-      period      = each.value.period
+      period      = 86400
       stat        = "Sum"
       unit        = "Count"
     }
@@ -201,13 +151,13 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
     metric {
       metric_name = local.slos_metrics.all_http500s_count
       namespace   = local.namespace
-      period      = each.value.period
+      period      = 86400
       stat        = "Sum"
       unit        = "Count"
     }
   }
 
-  alarm_actions = each.value.alarm_actions
+  alarm_actions = local.slos_alert_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
