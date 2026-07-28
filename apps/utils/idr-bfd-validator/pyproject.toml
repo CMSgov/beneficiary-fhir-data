@@ -18,7 +18,7 @@ loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0
 line-length = 100
 
 [tool.ruff.lint]
-select = [
+extend-select = [
     "D",    # pydocstyle
     "E501",
     # pycodestyle

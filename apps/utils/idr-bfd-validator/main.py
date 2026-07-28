@@ -43,7 +43,7 @@ _IGNORED_COLS_PER_MODEL = {
     for keys, v in {
         # Some columns in the claims tables are updated too frequently for us to track updates and
         # so they may differ. This is an accepted compromise, so we must avoid checking them
-        tuple([*CLAIM_TABLES, *CLAIM_AUX_TABLES]): {
+        (*CLAIM_TABLES, *CLAIM_AUX_TABLES): {
             "bfd_prvdr_prscrbng_careteam_name",
             "bfd_prvdr_blg_last_or_lgl_name",
             "bfd_prvdr_rfrg_careteam_name",
@@ -55,9 +55,7 @@ _IGNORED_COLS_PER_MODEL = {
 }
 _REDACTED_PKEYS_PER_MODEL = {
     k: v
-    for keys, v in {
-        tuple([*BENE_TABLES, *BENE_AUX_TABLES]): {"bene_mbi_id", "bene_ssm_num"}
-    }.items()
+    for keys, v in {(*BENE_TABLES, *BENE_AUX_TABLES): {"bene_mbi_id", "bene_ssm_num"}}.items()
     for k in keys
 }
 
@@ -258,7 +256,7 @@ def _comma_list(vals: Iterable[str]) -> str:
 def _compare_all() -> Stage[bool]:
     now = datetime.now(UTC)
 
-    immutable_models = set(model for model in _ALL_MODELS if not model.update_timestamp_col())
+    immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
     all_models_set = set(_ALL_MODELS)
     filtered_models = (
         {x for x in all_models_set if x.table() in _TABLES_TO_LOAD}
