@@ -185,7 +185,7 @@ public abstract class ClaimBase {
   }
 
   /**
-   * Template method for ClaimIdrLoadDate (CMS profile only).
+   * Hook method for ClaimIdrLoadDate (CMS profile only).
    *
    * @return the ClaimIdrLoadDate, or nothing
    */

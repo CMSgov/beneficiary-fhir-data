@@ -165,7 +165,7 @@ public abstract class ClaimRxBase extends ClaimBase {
         .toList();
   }
 
-  // region Template Methods
+  // region Hook Methods
   protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
       submissionFormatSupportingInfo() {
     return Optional.empty();
@@ -179,12 +179,10 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
-  // default no-op, overridden by Cms
   protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
     return List.of();
   }
 
-  // default empty, overridden by Cms
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.empty();
   }

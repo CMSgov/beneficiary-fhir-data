@@ -30,7 +30,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
-    return Optional.ofNullable(adjudicationCharge);
+    return Optional.of(adjudicationCharge);
   }
 
   // endregion
@@ -40,7 +40,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   protected Optional<ClaimProcessDate> getClaimProcessDate() {
-    return Optional.ofNullable(claimProcessDate);
+    return Optional.of(claimProcessDate);
   }
 
   // endregion
@@ -64,7 +64,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
-    return Optional.ofNullable(claimIdrLoadDate);
+    return Optional.of(claimIdrLoadDate);
   }
 
   // endregion
@@ -79,17 +79,13 @@ public class ClaimRxCms extends ClaimRxBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
     return Stream.concat(
-            claimItem
-                .getClaimLine()
-                .getClaimRxSupportingInfo()
-                .toFhir(supportingInfoFactory)
-                .stream(),
+            claimItem.claimRxSupportingInfoToFhir(supportingInfoFactory).stream(),
             claimItem.getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
         .toList();
   }
 
   @Override
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
-    return Optional.ofNullable(claimItem.getClaimLine().getAdjudicationCharge().getTotalDrugCost());
+    return Optional.of(claimItem.getTotalDrugCost());
   }
 }
