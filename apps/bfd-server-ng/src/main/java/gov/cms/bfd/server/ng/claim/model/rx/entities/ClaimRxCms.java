@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
 import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRxCms;
 import jakarta.persistence.Column;
@@ -24,6 +25,15 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_rx", schema = "idr")
 public class ClaimRxCms extends ClaimRxBase {
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.DDPS;
+  }
 
   // region Adjudication Charge
   @Embedded private AdjudicationChargeRx adjudicationCharge;

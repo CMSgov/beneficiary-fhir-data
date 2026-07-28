@@ -4,6 +4,7 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -20,6 +21,15 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_rx", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
 public class ClaimRxRegular extends ClaimRxBase {
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.DDPS;
+  }
 
   // region Adjudication Charge
   @Embedded private AdjudicationChargeRx adjudicationCharge;
