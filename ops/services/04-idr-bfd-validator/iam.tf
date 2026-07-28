@@ -73,6 +73,24 @@ resource "aws_iam_policy" "rds" {
   policy      = data.aws_iam_policy_document.rds.json
 }
 
+data "aws_iam_policy_document" "sns" {
+  statement {
+    sid       = "AllowSnsPublishAlerts"
+    actions   = ["sns:Publish"]
+    resources = [data.aws_sns_topic.slack.arn]
+  }
+}
+
+resource "aws_iam_policy" "sns" {
+  name = "${local.name_prefix}-sns-policy"
+  path = local.iam_path
+  description = join("", [
+    "Permissions for ${local.env} ${local.service} ECS Task to publish data mismatch alerts ",
+    "to the configured SNS topic"
+  ])
+  policy = data.aws_iam_policy_document.sns.json
+}
+
 resource "aws_iam_role" "task" {
   name                  = "${local.name_prefix}-task-role"
   path                  = local.iam_path
@@ -87,6 +105,7 @@ resource "aws_iam_role_policy_attachment" "task" {
     kms        = aws_iam_policy.kms.arn
     rds        = aws_iam_policy.rds.arn
     ssm_params = aws_iam_policy.ssm_params.arn
+    sns        = aws_iam_policy.sns.arn
   }
 
   role       = aws_iam_role.task.name
