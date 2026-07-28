@@ -204,14 +204,19 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_scheduler_schedule_group" "this" {
+  # Only run in prod, for now
+  count = local.env == "prod" ? 1 : 0
+
   name = "${local.name_prefix}-schedules"
 }
 
 resource "aws_scheduler_schedule" "this" {
+  # Only run in prod, for now
+  count      = local.env == "prod" ? 1 : 0
   depends_on = [aws_iam_role_policy_attachment.schedule]
 
   name       = "${local.name_prefix}-every-1-hour"
-  group_name = aws_scheduler_schedule_group.this.name
+  group_name = one(aws_scheduler_schedule_group.this[*].name)
 
   flexible_time_window {
     mode = "OFF"
