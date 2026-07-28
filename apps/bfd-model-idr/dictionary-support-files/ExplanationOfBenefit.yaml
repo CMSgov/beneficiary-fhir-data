@@ -160,8 +160,8 @@
     - NCH
     - VMS
   bfdDerived: True
-  nameOverride: EOB Type Code
-  definitionOverride: The EOB type code for Blue Button.
+  nameOverride: Claim Stream
+  definitionOverride: This field can be used to determine which CMS claim stream the claim was processed under.
   fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE').code
   profiles:
     - Basis
