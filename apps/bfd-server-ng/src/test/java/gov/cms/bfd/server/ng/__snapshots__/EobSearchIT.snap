@@ -2556,7 +2556,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -3968,7 +3968,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -5380,7 +5380,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -6792,7 +6792,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -8204,7 +8204,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -9616,7 +9616,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "00",
+            "code" : "V0008",
             "display" : "Void/Entry Code 3 Claim",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -25404,7 +25404,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -26861,7 +26861,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -33150,7 +33150,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -34607,7 +34607,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -40896,7 +40896,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -42353,7 +42353,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -49922,7 +49922,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -57598,7 +57598,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -65274,7 +65274,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -74416,7 +74416,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -75873,7 +75873,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -80780,7 +80780,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -82237,7 +82237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -83616,7 +83616,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -84459,7 +84459,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -87868,7 +87868,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -88711,7 +88711,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -97746,7 +97746,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -99203,7 +99203,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -104110,7 +104110,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -105567,7 +105567,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -106946,7 +106946,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -107789,7 +107789,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -111198,7 +111198,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -112041,7 +112041,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -121076,7 +121076,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -122533,7 +122533,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -127440,7 +127440,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -128897,7 +128897,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -130276,7 +130276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -131119,7 +131119,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -134528,7 +134528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -135371,7 +135371,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -139902,7 +139902,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -146298,7 +146298,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -152694,7 +152694,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -154151,7 +154151,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -158682,7 +158682,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -165078,7 +165078,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -171474,7 +171474,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -172931,7 +172931,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -177462,7 +177462,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -183858,7 +183858,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -190254,7 +190254,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -191711,7 +191711,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "MA",
             "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]

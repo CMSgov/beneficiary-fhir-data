@@ -58,59 +58,60 @@ class PriorAuthorizationItemExtensions {
   List<Extension> toFhir() {
     var priorAuthDateAddedExtension =
         new Extension(SystemUrls.EXT_PA_DT_ADDED_URL)
-            .setValue(DateUtil.toFhirDate(priorAuthDateAdded));
+            .setValue(DateUtil.toFhirDateType(priorAuthDateAdded));
 
     var priorAuthDateUpdatedExtension =
         priorAuthDateUpdated.map(
             updatedDate ->
                 new Extension(SystemUrls.EXT_PA_DT_UPDATED_URL)
-                    .setValue(DateUtil.toFhirDate(updatedDate)));
+                    .setValue(DateUtil.toFhirDateType(updatedDate)));
 
     var requestSubmitDateExtension =
         new Extension(SystemUrls.EXT_PA_REQ_SUB_DT_URL)
-            .setValue(DateUtil.toFhirDate(requestSubmitDate));
+            .setValue(DateUtil.toFhirDateType(requestSubmitDate));
 
     var requestReceivedDateExtension =
         new Extension(SystemUrls.EXT_PA_REQ_REC_DT_URL)
-            .setValue(DateUtil.toFhirDate(requestReceivedDate));
+            .setValue(DateUtil.toFhirDateType(requestReceivedDate));
 
     var decisionDateExtension =
         decisionDate.map(
             dt ->
-                new Extension(SystemUrls.EXT_PA_DECISION_DT_URL).setValue(DateUtil.toFhirDate(dt)));
+                new Extension(SystemUrls.EXT_PA_DECISION_DT_URL)
+                    .setValue(DateUtil.toFhirDateType(dt)));
 
     var decisionExpiredDateExtension =
         decisionExpiredDate.map(
             dt ->
                 new Extension(SystemUrls.EXT_PA_DECISION_EXP_DT_URL)
-                    .setValue(DateUtil.toFhirDate(dt)));
+                    .setValue(DateUtil.toFhirDateType(dt)));
 
     var numberOfServicesExtension =
         new Extension(SystemUrls.EXT_PA_SERVICE_CNTS_URL)
-            .setValue(new IntegerType(numberOfServices));
+            .setValue(new UnsignedIntType(numberOfServices));
 
     var mrCountIndicatorExtension =
         new Extension(SystemUrls.EXT_PA_MR_COUNT_INDICATOR_URL)
-            .setValue(new IntegerType(mrCountIndicator));
+            .setValue(new UnsignedIntType(mrCountIndicator));
 
     var mrCountStartDateExtension =
         mrCountStartDate.map(
             dt ->
-                new Extension(SystemUrls.EXT_MR_COUNT_ST_DT_URL).setValue(DateUtil.toFhirDate(dt)));
+                new Extension(SystemUrls.EXT_MR_COUNT_ST_DT_URL)
+                    .setValue(DateUtil.toFhirDateType(dt)));
 
     var mrCountEndDateExtension =
         mrCountEndDate.map(
             dt ->
                 new Extension(SystemUrls.EXT_MR_COUNT_END_DT_URL)
-                    .setValue(DateUtil.toFhirDate(dt)));
+                    .setValue(DateUtil.toFhirDateType(dt)));
 
     var rrbExcludeIndicatorExtension =
         rrbExcludeIndicator
             .filter(rrbExcludeInd -> rrbExcludeInd.equals("Y"))
             .map(
                 _ ->
-                    new Extension(SystemUrls.EXT_RRB_EXCL_IND_URL)
-                        .setValue(new StringType("true")));
+                    new Extension(SystemUrls.EXT_RRB_EXCL_IND_URL).setValue(new BooleanType(true)));
 
     var servicingOrRenderingStatusExtension =
         new Extension()

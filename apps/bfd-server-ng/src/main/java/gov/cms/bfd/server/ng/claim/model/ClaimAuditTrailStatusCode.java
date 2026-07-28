@@ -910,6 +910,10 @@ public enum ClaimAuditTrailStatusCode {
   private final ClaimAuditTrailLocationCode locationCode;
   private final String display;
 
+  private String getCompositeStatusCode() {
+    return getSource().getPrefix() + getStatusCode() + getLocationCode().getCode();
+  }
+
   private static final Map<Key, ClaimAuditTrailStatusCode> CLAIM_STATUS_LOOKUP =
       Arrays.stream(values())
           .collect(
@@ -943,6 +947,6 @@ public enum ClaimAuditTrailStatusCode {
                 new Coding()
                     .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_AUDIT_TRAIL_STATUS_CODE)
                     .setDisplay(getDisplay())
-                    .setCode(getStatusCode())));
+                    .setCode(getCompositeStatusCode())));
   }
 }

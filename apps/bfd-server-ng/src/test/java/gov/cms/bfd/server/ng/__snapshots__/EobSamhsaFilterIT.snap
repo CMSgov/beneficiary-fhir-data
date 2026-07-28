@@ -4121,7 +4121,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "code" : {
           "coding" : [ {
-            "code" : "A",
+            "code" : "FA",
             "display" : "Accept",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
           } ]
@@ -4544,34 +4544,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-01-28"
+          "valueDate" : "2025-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 2
+          "valueUnsignedInt" : 2
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 43
+          "valueUnsignedInt" : 43
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-01-30"
+          "valueDate" : "2024-01-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-01-29"
+          "valueDate" : "2025-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -4589,8 +4589,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
         "modifier" : [ {
           "coding" : [ {
             "code" : "NU",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         } ],
@@ -4611,47 +4609,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-01-28"
+          "valueDate" : "2025-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 1
+          "valueUnsignedInt" : 1
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 32
+          "valueUnsignedInt" : 32
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-02-02"
+          "valueDate" : "2024-02-02"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-02-01"
+          "valueDate" : "2025-02-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "IL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -4720,7 +4711,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "D",
+          "code" : "professional",
           "display" : "professional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -4871,34 +4862,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-17"
+          "valueDate" : "2026-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-17"
+          "valueDate" : "2026-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-17"
+          "valueDate" : "2027-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 13
+          "valueUnsignedInt" : 13
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 57
+          "valueUnsignedInt" : 57
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-06"
+          "valueDate" : "2026-06-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-06"
+          "valueDate" : "2027-06-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -4913,13 +4904,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
             "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
           } ]
         },
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "A0101",
@@ -4987,7 +4971,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "I",
+          "code" : "institutional",
           "display" : "institutional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -5156,47 +5140,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 9
+          "valueUnsignedInt" : 9
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 64
+          "valueUnsignedInt" : 64
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-03-16"
+          "valueDate" : "2024-03-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-03-16"
+          "valueDate" : "2025-03-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -5215,47 +5192,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 5
+          "valueUnsignedInt" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
+          "valueUnsignedInt" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-03-30"
+          "valueDate" : "2024-03-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-03-30"
+          "valueDate" : "2025-03-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -5274,34 +5244,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 13
+          "valueUnsignedInt" : 13
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 51
+          "valueUnsignedInt" : 51
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-06"
+          "valueDate" : "2024-04-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-06"
+          "valueDate" : "2025-04-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -5316,13 +5286,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
             "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
           } ]
         },
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "G0299",
@@ -5340,50 +5303,43 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 14
+          "valueUnsignedInt" : 14
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 52
+          "valueUnsignedInt" : 52
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-19"
+          "valueDate" : "2024-04-19"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-19"
+          "valueDate" : "2025-04-19"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
-          "valueString" : "true"
+          "valueBoolean" : true
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -5402,47 +5358,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 9
+          "valueUnsignedInt" : 9
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 21
+          "valueUnsignedInt" : 21
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-17"
+          "valueDate" : "2024-04-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-17"
+          "valueDate" : "2025-04-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -5511,7 +5460,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "D",
+          "code" : "professional",
           "display" : "professional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -13916,47 +13865,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 11
+          "valueUnsignedInt" : 11
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
+          "valueUnsignedInt" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-02-06"
+          "valueDate" : "2026-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-02-06"
+          "valueDate" : "2027-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -13975,47 +13917,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 4
+          "valueUnsignedInt" : 4
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 51
+          "valueUnsignedInt" : 51
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-01-28"
+          "valueDate" : "2026-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-01-28"
+          "valueDate" : "2027-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -14084,7 +14019,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "H",
+          "code" : "institutional",
           "display" : "institutional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -14253,34 +14188,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-01-28"
+          "valueDate" : "2025-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 2
+          "valueUnsignedInt" : 2
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 43
+          "valueUnsignedInt" : 43
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-01-30"
+          "valueDate" : "2024-01-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-01-29"
+          "valueDate" : "2025-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -14298,8 +14233,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "modifier" : [ {
           "coding" : [ {
             "code" : "NU",
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
           } ]
         } ],
@@ -14320,47 +14253,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-01-28"
+          "valueDate" : "2024-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-01-29"
+          "valueDate" : "2024-01-29"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-01-28"
+          "valueDate" : "2025-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 1
+          "valueUnsignedInt" : 1
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 32
+          "valueUnsignedInt" : 32
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-02-02"
+          "valueDate" : "2024-02-02"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-02-01"
+          "valueDate" : "2025-02-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "IL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -14429,7 +14355,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "D",
+          "code" : "professional",
           "display" : "professional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -14580,34 +14506,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-06-17"
+          "valueDate" : "2026-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-06-16"
+          "valueDate" : "2026-06-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-06-17"
+          "valueDate" : "2026-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-06-17"
+          "valueDate" : "2027-06-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 13
+          "valueUnsignedInt" : 13
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 57
+          "valueUnsignedInt" : 57
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-06-06"
+          "valueDate" : "2026-06-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-06-06"
+          "valueDate" : "2027-06-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -14622,13 +14548,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
           } ]
         },
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "A0101",
@@ -14696,7 +14615,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "I",
+          "code" : "institutional",
           "display" : "institutional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -14865,47 +14784,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 9
+          "valueUnsignedInt" : 9
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 64
+          "valueUnsignedInt" : 64
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-03-16"
+          "valueDate" : "2024-03-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-03-16"
+          "valueDate" : "2025-03-16"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -14924,47 +14836,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 5
+          "valueUnsignedInt" : 5
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
+          "valueUnsignedInt" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-03-30"
+          "valueDate" : "2024-03-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-03-30"
+          "valueDate" : "2025-03-30"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -14983,34 +14888,34 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 13
+          "valueUnsignedInt" : 13
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 51
+          "valueUnsignedInt" : 51
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-06"
+          "valueDate" : "2024-04-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-06"
+          "valueDate" : "2025-04-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
@@ -15025,13 +14930,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
             "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
           } ]
         },
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
-        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "G0299",
@@ -15049,50 +14947,43 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 14
+          "valueUnsignedInt" : 14
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 52
+          "valueUnsignedInt" : 52
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-19"
+          "valueDate" : "2024-04-19"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-19"
+          "valueDate" : "2025-04-19"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND",
-          "valueString" : "true"
+          "valueBoolean" : true
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -15111,47 +15002,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2024-03-31"
+          "valueDate" : "2024-03-31"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2024-04-01"
+          "valueDate" : "2024-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2025-04-01"
+          "valueDate" : "2025-04-01"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 9
+          "valueUnsignedInt" : 9
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 21
+          "valueUnsignedInt" : 21
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2024-04-17"
+          "valueDate" : "2024-04-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2025-04-17"
+          "valueDate" : "2025-04-17"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "TX",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -15220,7 +15104,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "D",
+          "code" : "professional",
           "display" : "professional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {
@@ -23625,47 +23509,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 11
+          "valueUnsignedInt" : 11
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
+          "valueUnsignedInt" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-02-06"
+          "valueDate" : "2026-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-02-06"
+          "valueDate" : "2027-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -23684,47 +23561,40 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 4
+          "valueUnsignedInt" : 4
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 51
+          "valueUnsignedInt" : 51
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-01-28"
+          "valueDate" : "2026-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-01-28"
+          "valueDate" : "2027-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -23793,7 +23663,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "H",
+          "code" : "institutional",
           "display" : "institutional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {

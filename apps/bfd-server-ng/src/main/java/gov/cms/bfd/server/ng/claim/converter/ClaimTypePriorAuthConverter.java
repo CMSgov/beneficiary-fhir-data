@@ -11,7 +11,7 @@ public class ClaimTypePriorAuthConverter
     implements AttributeConverter<Optional<ClaimTypePriorAuth>, String> {
   @Override
   public String convertToDatabaseColumn(Optional<ClaimTypePriorAuth> claimTypePriorAuth) {
-    return claimTypePriorAuth.map(ClaimTypePriorAuth::getCode).orElse("");
+    return claimTypePriorAuth.map(ClaimTypePriorAuth::getCmsCode).orElse("");
   }
 
   @Override

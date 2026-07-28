@@ -140,47 +140,40 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 11
+          "valueUnsignedInt" : 11
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 99
+          "valueUnsignedInt" : 99
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-02-06"
+          "valueDate" : "2026-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-02-06"
+          "valueDate" : "2027-02-06"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -199,47 +192,40 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
           }
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT",
-          "valueDateTime" : "2026-01-26"
+          "valueDate" : "2026-01-26"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT",
-          "valueDateTime" : "2026-01-27"
+          "valueDate" : "2026-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT",
-          "valueDateTime" : "2027-01-27"
+          "valueDate" : "2027-01-27"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-          "valueInteger" : 4
+          "valueUnsignedInt" : 4
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-          "valueInteger" : 51
+          "valueUnsignedInt" : 51
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
-          "valueDateTime" : "2026-01-28"
+          "valueDate" : "2026-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT",
-          "valueDateTime" : "2027-01-28"
+          "valueDate" : "2027-01-28"
         }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
           "valueCoding" : {
             "code" : "FL",
             "system" : "https://www.usps.com"
           }
-        } ],
-        "modifier" : [ {
-          "coding" : [ {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          } ]
         } ],
         "productOrService" : {
           "coding" : [ {
@@ -308,7 +294,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "H",
+          "code" : "institutional",
           "display" : "institutional",
           "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         }, {

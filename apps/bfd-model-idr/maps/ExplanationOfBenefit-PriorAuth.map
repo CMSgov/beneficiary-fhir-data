@@ -222,7 +222,7 @@ group addPADecisionExpDt(source src: String, target tgt: Extension){
 
 group addServiceCnts(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS" "Add extension url";
-    src as val -> tgt.value = cast(val, "decimal") "set value";
+    src as val -> tgt.value = cast(val, "unsignedInt") "set value";
 }
 
 group addSvcRenderSt(source src: String, target tgt: Extension){

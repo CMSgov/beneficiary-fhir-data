@@ -15,21 +15,21 @@ public sealed interface ClaimTypePriorAuth
    *
    * @return the code
    */
-  String getCode();
+  String getCmsCode();
 
   /**
    * Gets the display value.
    *
    * @return the display
    */
-  String getDisplay();
+  String getCode();
 
   /**
    * Gets the CMS display value.
    *
    * @return the CMS display
    */
-  String getCmsDisplay();
+  String getDisplay();
 
   /**
    * Gets the insurance type value.
@@ -50,7 +50,7 @@ public sealed interface ClaimTypePriorAuth
     }
     return Optional.of(
         Arrays.stream(ClaimTypePriorAuth.Valid.values())
-            .filter(v -> v.code.equals(code))
+            .filter(v -> v.cmsCode.equals(code))
             .map(v -> (ClaimTypePriorAuth) v)
             .findFirst()
             .orElseGet(() -> new ClaimTypePriorAuth.Invalid(code)));
@@ -69,23 +69,6 @@ public sealed interface ClaimTypePriorAuth
   }
 
   /**
-   * Maps the display type to a ClaimContext. It is temporarily being used in addCareTeam from
-   * ProviderHistoryBase to determine the NPI type for non-prior authorization providers. This will
-   * no longer be needed once we have separate NPI type fields for each npi in BFD-4661.
-   *
-   * @return a ClaimContext or an empty Optional if the display did not match
-   */
-  default Optional<ClaimContext> toContext() {
-    if (getDisplay().equals(ClaimType.INSTITUTIONAL.getCode())) {
-      return Optional.of(ClaimContext.INSTITUTIONAL);
-    }
-    if (getDisplay().equals(ClaimType.PROFESSIONAL.getCode())) {
-      return Optional.of(ClaimContext.PROFESSIONAL);
-    }
-    return Optional.empty();
-  }
-
-  /**
    * Maps enum/record to FHIR spec.
    *
    * @return CodeableConcept
@@ -96,12 +79,12 @@ public sealed interface ClaimTypePriorAuth
             new Coding()
                 .setSystem(SystemUrls.HL7_CLAIM_TYPE)
                 .setCode(getCode())
-                .setDisplay(getDisplay()))
+                .setDisplay(getCode()))
         .addCoding(
             new Coding()
                 .setSystem(SystemUrls.BLUEBUTTON_CLAIM_TYPE)
-                .setCode(getCode())
-                .setDisplay(getCmsDisplay()));
+                .setCode(getCmsCode())
+                .setDisplay(getDisplay()));
   }
 
   /** Enum for all known, valid codes. */
@@ -122,9 +105,9 @@ public sealed interface ClaimTypePriorAuth
     /** C - institutional - Hospice - Part A. */
     C("C", ClaimType.INSTITUTIONAL.getCode(), "Hospice", "Part A");
 
+    private final String cmsCode;
     private final String code;
     private final String display;
-    private final String cmsDisplay;
     private final String insuranceType;
   }
 
@@ -136,17 +119,17 @@ public sealed interface ClaimTypePriorAuth
     }
 
     @Override
-    public String getCmsDisplay() {
-      return "";
-    }
-
-    @Override
     public String getDisplay() {
       return "";
     }
 
     @Override
     public String getCode() {
+      return "";
+    }
+
+    @Override
+    public String getCmsCode() {
       return code;
     }
   }

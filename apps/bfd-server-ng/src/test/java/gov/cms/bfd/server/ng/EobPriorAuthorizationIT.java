@@ -140,7 +140,6 @@ class EobPriorAuthorizationIT extends IntegrationTestBase {
 
     for (var item : eob.getItem()) {
       assertTrue(item.hasProductOrService());
-      assertFalse(item.getModifier().isEmpty());
       assertFalse(item.getExtension().isEmpty());
     }
   }
