@@ -292,7 +292,13 @@ public class IntegrationTestBase {
               var timestamp = item.get("timestamp").s();
               var partnerName = item.get("partnerAppName").s();
               return new PatientMatchTestAuditRecord(
-                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP, timestamp, partnerName);
+                  matchedBeneSk,
+                  successfulCombination,
+                  clientId,
+                  clientName,
+                  clientIP,
+                  timestamp,
+                  partnerName);
             })
         .toList();
   }
