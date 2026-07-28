@@ -277,6 +277,8 @@ jobs:
       - name: Generate build-contexts
         if: ${{ !inputs.skipBasePull }}
         id: gen-build-contexts
+        env:
+          NAMED_CONTEXTS: ${{ matrix.image.namedContexts || '{}' }}
         run: |
           build_contexts=()
 
@@ -285,6 +287,15 @@ jobs:
           do
             build_contexts+=("${image}:${BASE_IMAGES_VERSION}=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")
             build_contexts+=("${image}:latest=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")
+          done
+
+          readarray -t named_contexts < <(echo "$NAMED_CONTEXTS" | jq -rc '. // {} | to_entries[]')
+          for named_context in "${named_contexts[@]}"
+          do
+            context_name="$(jq -rc '.key' <<<"$named_context")"
+            context_path="$(jq -rc '.value' <<<"$named_context")"
+
+            build_contexts+=("${context_name}=${context_path}")
           done
 
           build_contexts_json="$(jq -c -n '$ARGS.positional' --args "${build_contexts[@]}")"
