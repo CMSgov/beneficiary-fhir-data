@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -11,7 +11,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
 import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
@@ -51,7 +50,7 @@ public abstract class ClaimRxBase extends ClaimBase {
 
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
-  @Embedded private ClaimPaymentDate claimPaymentDate;
+  @Embedded private ClaimPaymentComponent paymentComponent;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
@@ -122,7 +121,7 @@ public abstract class ClaimRxBase extends ClaimBase {
 
     headerAdjudicationComponent().ifPresent(eob::addAdjudication);
 
-    claimPaymentDate.toFhir().ifPresent(eob::setPayment);
+    paymentComponent.toFhir().ifPresent(eob::setPayment);
   }
 
   private Optional<ExplanationOfBenefit.AdjudicationComponent> headerAdjudicationComponent() {
@@ -188,15 +187,6 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   // endregion
-
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.DDPS;
-  }
 
   @Override
   public ClaimSourceId getClaimSourceId() {

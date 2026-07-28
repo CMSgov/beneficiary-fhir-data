@@ -60,11 +60,25 @@ public class ClaimRepository {
         JOIN FETCH c.claimItems cl
       """;
 
-  private static final String CLAIM_RX =
+  private static final String CLAIM_RX_CMS =
       """
         SELECT c
         FROM ClaimRxCms c
         JOIN FETCH c.beneficiary b
+      """;
+
+  private static final String CLAIM_RX_REGULAR =
+      """
+          SELECT c
+          FROM ClaimRxRegular c
+          JOIN FETCH c.beneficiary b
+      """;
+
+  private static final String CLAIM_RX_BASIS =
+      """
+          SELECT c
+          FROM ClaimRxBasis c
+          JOIN FETCH c.beneficiary b
       """;
 
   private static final List<ClaimTypeDefinition> ALL_CLAIM_TYPES =
@@ -81,7 +95,7 @@ public class ClaimRepository {
               SystemType.SS),
           new ClaimTypeDefinition(
               CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalCmsNch.class, SystemType.NCH),
-          new ClaimTypeDefinition(CLAIM_RX, ClaimRxCms.class, SystemType.DDPS));
+          new ClaimTypeDefinition(CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS));
 
   /**
    * Search for a claim by its ID.
@@ -140,7 +154,7 @@ public class ClaimRepository {
 
     var rxClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_RX,
+            CLAIM_RX_CMS,
             ClaimRxCms.class,
             ClaimRxCms.getSystemType(),
             criteria.claimUniqueIds(),

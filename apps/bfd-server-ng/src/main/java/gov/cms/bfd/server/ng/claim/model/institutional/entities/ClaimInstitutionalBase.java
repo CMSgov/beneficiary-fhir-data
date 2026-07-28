@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
@@ -54,7 +54,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
   @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
@@ -65,15 +65,21 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
 
+  // region Hook Methods
+
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
   abstract SupportingInfoComponentBase getSupportingInfo();
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
-
   abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
+
+  abstract List<ClaimValue> getClaimValues();
+
+  // endregion
+
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
 
   /**
    * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
@@ -83,13 +89,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    */
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo();
-
-  /**
-   * Returns the claim values from all items, used to populate institutional adjudication.
-   *
-   * @return list of ClaimValues from each item
-   */
-  public abstract List<ClaimValue> getClaimValues();
 
   /**
    * Adds care-team members that are unique to the subclass.
@@ -238,7 +237,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
-    eob.setPayment(getClaimPaymentAmount().toFhir());
+    getPaymentComponent().toFhir().ifPresent(eob::setPayment);
   }
 
   /**

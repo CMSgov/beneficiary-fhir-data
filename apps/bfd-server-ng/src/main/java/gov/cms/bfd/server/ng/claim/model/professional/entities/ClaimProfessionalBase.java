@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -31,7 +31,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
 
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
@@ -76,7 +76,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addCareTeam(eob);
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
-    eob.setPayment(getClaimPaymentAmount().toFhir());
+    getPaymentComponent().toFhir().ifPresent(eob::setPayment);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
