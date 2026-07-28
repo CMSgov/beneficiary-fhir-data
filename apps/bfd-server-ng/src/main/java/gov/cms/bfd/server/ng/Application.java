@@ -81,14 +81,17 @@ public class Application {
    * @param configuration app configuration
    * @param auditEventRepository Audit Event Repository
    * @param objectMapper object mapper
+   * @param certConfiguration certificate configuration
    * @return audit logger
    */
   @Bean
   public AuditLogger auditLogger(
       Configuration configuration,
       AuditEventRepository auditEventRepository,
-      ObjectMapper objectMapper) {
-    return configuration.getAuditLogger(auditEventRepository, objectMapper);
+      ObjectMapper objectMapper,
+      CertConfiguration certConfiguration) {
+    return configuration.getAuditLogger(
+        auditEventRepository, objectMapper, certConfiguration.getPartnerNamesByCertificateAlias());
   }
 
   /**

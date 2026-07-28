@@ -105,6 +105,7 @@ public class PatientHandler {
     var clientIp = MDC.get(logKey(MDC_PREFIX, CLIENT_IP_KEY));
     var clientName = MDC.get(logKey(MDC_PREFIX, CLIENT_NAME_KEY));
     var clientId = MDC.get(logKey(MDC_PREFIX, CLIENT_ID_KEY));
+    var certAlias = MDC.get(logKey(MDC_PREFIX, CERTIFICATE_ALIAS));
     var auditRecord =
         new PatientMatchAuditRecord(
             clientIp,
@@ -112,7 +113,8 @@ public class PatientHandler {
             clientId,
             Instant.now(),
             result.combinations(),
-            result.finalDetermination());
+            result.finalDetermination(),
+            certAlias);
     auditLogger.log(auditRecord);
 
     return patientMatchBundle(beneficiary);

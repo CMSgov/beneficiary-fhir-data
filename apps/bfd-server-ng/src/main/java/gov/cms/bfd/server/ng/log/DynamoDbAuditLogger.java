@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.audit.AuditEventBase;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import java.util.HashSet;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
@@ -15,6 +16,7 @@ public class DynamoDbAuditLogger implements AuditLogger {
 
   private final AuditEventRepository auditEventRepository;
   private final ObjectMapper objectMapper;
+  private final Map<String, String> partnerAliases;
 
   @Override
   public void log(PatientMatchAuditRecord auditRecord) {
@@ -30,6 +32,8 @@ public class DynamoDbAuditLogger implements AuditLogger {
         auditEvent.setTimestamp(auditRecord.timestamp().toString());
         auditEvent.setClientId(auditRecord.clientId());
         auditEvent.setClientName(auditRecord.clientName());
+        auditEvent.setPartnerAppName(
+            partnerAliases.getOrDefault(auditRecord.certAlias(), auditRecord.certAlias()));
         auditEvent.setClientIp(auditRecord.clientIp());
         auditEvent.setCombinationsEvaluated(
             objectMapper.writeValueAsString(auditRecord.combinationsEvaluated()));
