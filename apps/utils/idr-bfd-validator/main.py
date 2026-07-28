@@ -8,11 +8,13 @@ from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Any
 
 import anyio
+import boto3
+from botocore.config import Config
 from idr_pipeline.constants import DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
-from idr_pipeline.model.base_model import ALIAS_CLM, DbType, LoadMode, Source, T
+from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
 from idr_pipeline.model.load_progress import LoadProgress
 from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
 from idr_pipeline.pipeline_stages import (
@@ -61,6 +63,19 @@ _REDACTED_PKEYS_PER_MODEL = {
     for keys, v in {(*BENE_TABLES, *BENE_AUX_TABLES): {"bene_mbi_id", "bene_ssm_num"}}.items()
     for k in keys
 }
+_BFD_ENV = os.environ.get("BFD_ENV")
+_ALERT_SNS_TOPIC_ARN = os.environ.get("ALERT_SNS_TOPIC_ARN")
+_REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
+_BOTO_CONFIG = Config(
+    region_name=_REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+    # Double the read timeout for some extra safety
+    read_timeout=120,
+)
 
 
 def _compare_table(
@@ -256,7 +271,13 @@ def _comma_list(vals: Iterable[str]) -> str:
     return ",".join(vals)
 
 
-def _compare_all() -> Stage[bool]:
+def _wrap_compare(
+    model: type[IdrBaseModel], partition: LoadPartition, row_limit: int
+) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
+    return (_compare_table(model, partition, row_limit), model, partition)
+
+
+def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
     now = datetime.now(UTC)
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
@@ -289,9 +310,10 @@ def _compare_all() -> Stage[bool]:
             f"{model.table()}-{partition.name}" for model, partition in models_and_partitions
         ),
     )
+
     for model, partition in models_and_partitions:
         yield functools.partial(
-            _compare_table,
+            _wrap_compare,
             model,
             partition,
             _ROW_LIMIT,
@@ -300,12 +322,31 @@ def _compare_all() -> Stage[bool]:
 
 async def main() -> bool:
     executor = ParallelStagesExecutor(max_workers=_MAX_PARALLELISM)
-    any_mismatches = not all(
-        itertools.chain.from_iterable(await executor.execute([_compare_all()]))
-    )
+    results = [
+        x for x in itertools.chain.from_iterable(await executor.execute([_compare_all()])) if x
+    ]
+    mismatches = [x for x in results if not x[0]]
 
-    if any_mismatches:
+    if mismatches:
         logger.error("Some mismatches occurred, see log for detail")
+        if _ALERT_SNS_TOPIC_ARN and _BFD_ENV:
+            sns_client = boto3.client("sns", config=_BOTO_CONFIG)  # pyright: ignore[reportUnknownMemberType]
+            alert_message = {
+                "AlarmName": f"bfd-{_BFD_ENV}-idr-bfd-validator-failure",
+                "AlarmDescription": (
+                    f"{len(mismatches)} table(s) failed validation; see log for detail and state "
+                    "reason change for failing table and partition list"
+                ),
+                "NewStateReason": ", ".join(f"{x[1].table()}-{x[2].name}" for x in mismatches),
+                "Trigger": {"MetricName": None},
+            }
+            logger.info(
+                "Publishing alert to {}: {}",
+                _ALERT_SNS_TOPIC_ARN,
+                json.dumps(alert_message, indent=2),
+            )
+
+            sns_client.publish(TopicArn=_ALERT_SNS_TOPIC_ARN, Message=json.dumps(alert_message))
         return False
 
     logger.info("Completed comparing all tables and found no mismatches")
