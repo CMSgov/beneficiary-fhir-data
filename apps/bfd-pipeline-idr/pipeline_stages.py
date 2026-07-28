@@ -175,6 +175,12 @@ class StagedIdrPipeline:
                 self.load_mode,
                 self.start_time,
             )
+            yield functools.partial(
+                prune_non_latest_non_part_d_ss_claims,
+                model,
+                self.load_mode,
+                self.start_time,
+            )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
         return [

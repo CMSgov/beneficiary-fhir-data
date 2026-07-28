@@ -36,6 +36,11 @@ from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDE
 from model.load_progress import LoadProgress
 from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
 
+_SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
+    CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+}
+
 
 def get_progress(
     load_mode: LoadMode,
@@ -136,17 +141,12 @@ def prune_phase_1_ss_claims(
     load_mode: LoadMode,
     job_start: datetime,
 ) -> bool:
-    shared_claim_tables = {
-        CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
-        CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
-    }
-
     claim_table = cls.table()
-    item_table = shared_claim_tables.get(claim_table)
+    item_table = _SHARED_SYSTEM_CLAIM_ITEM_TABLES.get(claim_table)
     if item_table is None:
         return True
-
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
     prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
@@ -163,10 +163,65 @@ def prune_phase_1_ss_claims(
 
                     total_row_count += res.rowcount
                     logger.info("pruned {} rows from {}", res.rowcount, item_table)
+    return True
+
+
+def prune_non_latest_non_part_d_ss_claims(
+    cls: type[T],
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    claim_table = cls.table()
+    item_table = _SHARED_SYSTEM_CLAIM_ITEM_TABLES.get(claim_table)
+    if item_table is None:
+        return True
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+
+    non_latest_non_part_d_claim_filter = f"""
+        clm.clm_ltst_clm_ind = 'N'
+        AND clm.clm_type_cd NOT IN ({part_d_codes})
+        AND clm.clm_idr_ld_dt < %s
+    """
+
+    logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
 
                     if res.rowcount == 0:
                         logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
                         break
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        # Claim items can exist even when the non-latest parent claim was filtered
+        # before final claim-table load, so use the source claim table.
+        _prune_table_in_batches(
+            conn,
+            item_table,
+            f"""
+                    DELETE FROM {item_table}
+                    WHERE (clm_uniq_id, bfd_row_id) IN (
+                        SELECT item.clm_uniq_id, item.bfd_row_id
+                        FROM {item_table} item
+                        JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
+                        WHERE {non_latest_non_part_d_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
+            (prune_cutoff_date,),
+        )
+
+        _prune_table_in_batches(
+            conn,
+            claim_table,
+            f"""
+                    DELETE FROM {claim_table}
+                    WHERE clm_uniq_id IN (
+                        SELECT clm.clm_uniq_id FROM {claim_table} clm
+                        WHERE {non_latest_non_part_d_claim_filter}
+                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+                    )
+                """,
+            (prune_cutoff_date,),
+        )
+
     return True
 
 
