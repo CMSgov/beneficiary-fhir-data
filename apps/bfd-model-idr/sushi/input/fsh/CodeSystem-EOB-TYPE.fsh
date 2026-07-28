@@ -1,6 +1,6 @@
-CodeSystem: CLM-EOB-TYPE
+CodeSystem: EOB-TYPE
 Title: "Blue Button EOB Type"
-Id: CLM-EOB-TYPE
+Id: EOB-TYPE
 Description: "This is the EOB type code for Blue Button."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE"
 * ^status = #active

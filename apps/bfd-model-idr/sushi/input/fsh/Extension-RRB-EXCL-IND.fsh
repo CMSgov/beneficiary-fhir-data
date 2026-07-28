@@ -1,6 +1,6 @@
-Extension: RRB-EXCL-IND
-Title: "RRB Exclusion Indicator"
-Description: "RRB Exclusion Indicator."
+Extension: RRB_EXCL_IND
+Title: "Railroad Retirement Board Exclusion Indicator"
+Description: "Railroad Retirement Board Exclusion Indicator."
 Id: RRB-EXCL-IND
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND"
 * ^context[+].type = #element
