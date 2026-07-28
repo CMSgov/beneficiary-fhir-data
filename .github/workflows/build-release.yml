@@ -452,7 +452,8 @@ jobs:
         bfd-platform-pipeline-ccw-runner,
         bfd-platform-consume-idr-events,
         bfd-platform-run-idr-pipeline,
-        bfd-platform-codebuild-runner
+        bfd-platform-codebuild-runner,
+        bfd-platform-idr-bfd-validator
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
