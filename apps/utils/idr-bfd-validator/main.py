@@ -34,6 +34,9 @@ _ALLOW_SENSITIVE_LOGS = os.environ.get("ALLOW_SENSITIVE_LOGS", "false").lower() 
 _TABLES_TO_LOAD = [
     y for x in os.environ.get("IDR_TABLES", "").split(",") if (y := x.lower().strip())
 ]
+_TABLES_TO_EXCLUDE = [
+    y for x in os.environ.get("IDR_EXCLUDE_TABLES", "").split(",") if (y := x.lower().strip())
+]
 _ROW_LIMIT = int(os.environ.get("ROW_LIMIT", "1000"))
 _MAX_PARALLELISM = int(os.environ.get("MAX_PARALLELISM", "12"))
 
@@ -258,11 +261,15 @@ def _compare_all() -> Stage[bool]:
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
     all_models_set = set(_ALL_MODELS)
-    filtered_models = (
-        {x for x in all_models_set if x.table() in _TABLES_TO_LOAD}
-        if _TABLES_TO_LOAD
-        else all_models_set
-    )
+    filtered_models = {
+        y
+        for y in (
+            {x for x in all_models_set if x.table() in _TABLES_TO_LOAD}
+            if _TABLES_TO_LOAD
+            else all_models_set
+        )
+        if y.table() not in _TABLES_TO_EXCLUDE
+    }
     models_to_compare = filtered_models - immutable_models
 
     models_and_partitions = [
