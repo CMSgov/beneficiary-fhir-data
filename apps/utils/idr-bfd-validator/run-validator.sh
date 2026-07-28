@@ -24,4 +24,4 @@ db_cluster="bfd-${BFD_ENV}-aurora-cluster"
 BFD_DB_ENDPOINT="$(aws rds describe-db-clusters --db-cluster-identifier $db_cluster --query "DBClusters[0].Endpoint" --output text)"
 export BFD_DB_ENDPOINT
 
-uv run idr_bfd_compare.py
+uv run main.py

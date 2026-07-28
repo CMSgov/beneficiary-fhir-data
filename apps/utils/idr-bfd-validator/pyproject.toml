@@ -1,50 +1,17 @@
 [project]
-name = "idr-pipeline"
+name = "idr-bfd-validator"
 version = "0.1.0"
-description = "ETL Pipeline to load data from the IDR into BFD's database"
+description = "Validates that data is correctly loaded incrementally from IDR"
+readme = "README.md"
 requires-python = ">=3.14.3"
-dependencies = [
-    "cryptography>=46.0.5",
-    "psycopg[binary,pool]>=3.3.3",
-    "snowflake-connector-python>=4.4.0",
-    "snowflake-snowpark-python>=1.50.0",
-    "python-dateutil>=2.9.0",
-    "pydantic>=2.13.3",
-    "usaddress>=0.5.16",
-    "unidecode>=1.4.0",
-    "click>=8.3.3",
-    "anyio",
-    "loguru",
-]
-
-[dependency-groups]
-dev = [
-    "ruff>=0.14.6",
-    "uv>=0.11.15",
-    "pytest>=9.0.1",
-    "testcontainers>=4.13.3",
-    "pyright>=1.1.407",
-]
-
-[project.scripts]
-idr-pipeline = "idr_pipeline:main"
-
-[build-system]
-requires = ["uv_build<=0.12"]
-build-backend = "uv_build"
+dependencies = ["idr-pipeline", "anyio", "loguru", "pydantic-partial"]
 
 [tool.uv]
 exclude-newer = "7 days"
 
-[tool.uv.build-backend]
-module-name = "idr_pipeline"
-
 [tool.uv.sources]
+idr-pipeline = { path = "packages/bfd-pipeline-idr", editable = true }
 loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }
-
-# [[tool.mypy.overrides]]
-# module = ["testcontainers.*"]
-# follow_untyped_imports = true
 
 [tool.ruff]
 # Set the maximum line length to 100.
