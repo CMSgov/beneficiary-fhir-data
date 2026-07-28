@@ -72,6 +72,12 @@ def main(
     seed_from: str | None,
     truncate: bool,
 ) -> None:
+    # Required to have loguru logging consistently configured across parallel pipeline nodes and
+    # batch worker
+    multiprocessing.set_start_method("spawn")
+    # Setup the root logger _once_
+    configure_logger()
+
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
@@ -161,13 +167,3 @@ def resolve_test_date(load_mode: LoadMode) -> datetime:
     if test_date and load_mode != LoadMode.PROD:
         return test_date
     return datetime.now(UTC)
-
-
-if __name__ == "__main__":
-    # Required to have loguru logging consistently configured across parallel pipeline nodes and
-    # batch worker
-    multiprocessing.set_start_method("spawn")
-    # Setup the root logger _once_
-    configure_logger()
-
-    main()
