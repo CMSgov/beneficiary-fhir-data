@@ -385,6 +385,7 @@ jobs:
         database,
         migrator-ng,
         idr-pipeline,
+        idr-bfd-validator,
         idr-pipeline-metrics,
         idr-pipeline-alarms,
         server-ng,
