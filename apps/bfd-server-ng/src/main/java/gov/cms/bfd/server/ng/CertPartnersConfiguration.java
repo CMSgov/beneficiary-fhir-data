@@ -50,7 +50,7 @@ public class CertPartnersConfiguration {
     private String partnerCertificateJson = "[]";
   }
 
-  /** Partner certificate configuration from certs.yml. */
+  /** Partner certificate configuration from cert_partners properties. */
   @Data
   private static class Partner {
     private String name;
