@@ -861,6 +861,7 @@ def stale_phase_1_claims_query(
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
+            ORDER BY clm.clm_uniq_id
             LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
         """,
         (cutoff_date, cutoff_date),
