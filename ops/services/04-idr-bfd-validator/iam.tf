@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "service_assume_role" {
 
 data "aws_iam_policy_document" "kms" {
   statement {
-    sid = "AllowEnvCMKAccess"
+    sid = "AllowPlatformAndEnvCMKAccess"
     actions = [
       "kms:Decrypt",
       "kms:GenerateDataKey",
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "kms" {
       "kms:DescribeKey",
       "kms:Encrypt"
     ]
-    resources = [local.env_key_arn]
+    resources = [local.env_key_arn, local.platform_key_arn]
   }
 }
 
