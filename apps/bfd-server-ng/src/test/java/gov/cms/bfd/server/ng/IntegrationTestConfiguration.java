@@ -80,7 +80,7 @@ public class IntegrationTestConfiguration {
             date,
             "uv",
             "run",
-            "pipeline.py",
+            "idr-pipeline",
             "--source",
             "postgres",
             "--load-mode",
