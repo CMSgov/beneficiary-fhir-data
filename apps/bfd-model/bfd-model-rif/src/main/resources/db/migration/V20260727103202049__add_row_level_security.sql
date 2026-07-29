@@ -6,6 +6,18 @@ IF EXISTS (
 	SELECT FROM pg_catalog.pg_roles
 	WHERE rolname = 'svc_bfd_pipeline_1') THEN
 
+	ALTER TABLE ccw.beneficiaries ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.beneficiaries_history ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.beneficiary_monthly ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.carrier_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.dme_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.hha_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.hospice_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.inpatient_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.outpatient_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.snf_claims ENABLE ROW LEVEL SECURITY;
+	ALTER TABLE ccw.partd_events ENABLE ROW LEVEL SECURITY;
+
 	DROP POLICY IF EXISTS allow_bene ON ccw.beneficiaries;
 
 	CREATE POLICY allow_bene ON ccw.beneficiaries TO svc_bfd_pipeline_1, rds_iam
