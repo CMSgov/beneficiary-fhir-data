@@ -278,7 +278,7 @@ jobs:
         if: ${{ !inputs.skipBasePull }}
         id: gen-build-contexts
         env:
-          NAMED_CONTEXTS: ${{ matrix.image.namedContexts || '{}' }}
+          NAMED_CONTEXTS: ${{ toJSON(matrix.image.namedContexts) || '{}' }}
         run: |
           build_contexts=()
 
