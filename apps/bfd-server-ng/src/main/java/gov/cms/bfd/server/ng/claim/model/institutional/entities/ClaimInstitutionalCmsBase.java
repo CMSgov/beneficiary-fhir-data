@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Optional;
@@ -14,7 +16,18 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
-    return Optional.ofNullable(claimIdrLoadDate);
+    return Optional.of(claimIdrLoadDate);
   }
+
+  // endregion
+
+  // region PaymentComponent
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
+
+  @Override
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
+  }
+
   // endregion
 }

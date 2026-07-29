@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
@@ -9,6 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.Embedded;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -77,4 +80,16 @@ public abstract class ClaimInstitutionalBasisBase extends ClaimInstitutionalBase
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
   }
+
+  // region PaymentComponent
+
+  // Basis does not have a payment amount, just the date
+  @Embedded private ClaimPaymentComponent paymentComponent;
+
+  @Override
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
+  }
+
+  // endregion
 }

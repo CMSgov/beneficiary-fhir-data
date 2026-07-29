@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Embeddable
 @Getter
-public class ClaimPaymentComponent {
+public class ClaimPaymentComponent implements ClaimPaymentComponentBase {
   @Column(name = "clm_pd_dt")
   private Optional<LocalDate> paymentDate;
 
@@ -22,6 +22,7 @@ public class ClaimPaymentComponent {
    *
    * @return an optional PaymentComponent if a date exists
    */
+  @Override
   public Optional<ExplanationOfBenefit.PaymentComponent> toFhir() {
     return paymentDate.map(
         d -> new ExplanationOfBenefit.PaymentComponent().setDate(DateUtil.toDate(d)));

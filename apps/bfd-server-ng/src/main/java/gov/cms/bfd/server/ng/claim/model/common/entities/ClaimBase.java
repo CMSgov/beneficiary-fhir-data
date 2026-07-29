@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -45,8 +46,8 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @Getter
 @MappedSuperclass
-@SuppressWarnings({"JpaAttributeTypeInspection"})
 public abstract class ClaimBase {
+
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
@@ -138,6 +139,13 @@ public abstract class ClaimBase {
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
   }
+
+  /**
+   * Hook method for payment component information, shared across all claims.
+   *
+   * @return The class data for a PaymentComponent
+   */
+  public abstract ClaimPaymentComponentBase getPaymentComponent();
 
   /**
    * Return the claim source id.

@@ -8,7 +8,6 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
@@ -54,7 +53,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
-  @Embedded private ClaimPaymentComponentAmount paymentComponent;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
   @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
