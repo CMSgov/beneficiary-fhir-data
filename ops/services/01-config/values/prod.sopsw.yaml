@@ -749,6 +749,7 @@
   -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
 /bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json: '["bluebutton_backend_prod_data_server_client_test", "bluebutton_backend_test_samhsa"]'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/partner_certificate_json: '[{"name":"BBAPI","certificate_aliases":["bluebutton_backend_prod_data_server_client_test","bluebutton_root_ca","bluebutton_root_ca_sbx","bb2_local_client","bluebutton_backend_dpr_data_server_client_test","bluebutton_root_ca_test","bluebutton_backend_test_samhsa"]},{"name":"AB2D","certificate_aliases":["ab2d_cms_gov","ab2d_cms_gov_non_prod","ab2d_prod_client","ab2d_prod_validation_client","ab2d_dev_prod_sbx_client","ab2d_sbx_client","ab2d_imp_client","ab2d_cms_gov_non_prod"]},{"name":"BCDA","certificate_aliases":["bcda_prod_client","bcda_sbx_client","bcda_dev_client","bcda_test_client","bcda_local_client"]},{"name":"DPC","certificate_aliases":["dpc_local_client","dpc_prod_client","dpc_prod_sbx_client","dpc_test_client","dpc_dev_client"]}]'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 24
 /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096

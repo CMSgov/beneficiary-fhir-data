@@ -191,11 +191,13 @@ public class IntegrationTestConfiguration {
   public AuditLogger testAuditLogger(
       AuditEventRepository repository,
       ObjectMapper objectMapper,
-      CertConfiguration certConfiguration) {
+      CertPartnersConfiguration certPartnersConfiguration) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
     var dynamoLogger =
         new DynamoDbAuditLogger(
-            repository, objectMapper, certConfiguration.getPartnerNamesByCertificateAlias());
+            repository,
+            objectMapper,
+            certPartnersConfiguration.getPartnerNamesByCertificateAlias());
 
     return auditRecord -> {
       logStreamLogger.log(auditRecord);
