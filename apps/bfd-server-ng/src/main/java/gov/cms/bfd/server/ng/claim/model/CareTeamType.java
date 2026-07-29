@@ -7,17 +7,27 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.*;
 
+/** Represents the enum Care Team Type. */
 @AllArgsConstructor
 @Getter
-enum CareTeamType {
+public enum CareTeamType {
+  /** Attending care team type. */
   ATTENDING("attending", "Attending"),
+  /** Operating care team type. */
   OPERATING("operating", "Operating"),
+  /** Rendering care team type. */
   RENDERING("rendering", "Rendering provider"),
+  /** Other operating care team type. */
   OTHER("otheroperating", "Other Operating"),
+  /** Prescribing care team type. */
   PRESCRIBING("prescribing", "Prescribing provider"),
+  /** Referring care team type. */
   REFERRING("referring", "Referring"),
+  /** Service care team type. */
   SERVICE("service", "Service provider"),
+  /** Billing care team type. */
   BILLING("billing", "Billing provider"),
+  /** Supervisor care team type. */
   SUPERVISOR("supervisor", "Supervisor provider");
 
   private final String roleCode;
@@ -54,6 +64,6 @@ enum CareTeamType {
     return new CareTeamComponents(practitioner, component);
   }
 
-  public record CareTeamComponents(
+  private record CareTeamComponents(
       Practitioner practitioner, ExplanationOfBenefit.CareTeamComponent careTeam) {}
 }

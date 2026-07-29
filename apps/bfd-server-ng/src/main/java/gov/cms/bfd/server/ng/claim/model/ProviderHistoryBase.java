@@ -29,6 +29,13 @@ public abstract class ProviderHistoryBase {
     UNKNOWN("");
 
     private final String type;
+
+    static NpiType fromNpiTypeCode(Optional<Integer> npiTypeCode) {
+      if (npiTypeCode.isPresent() && npiTypeCode.get().equals(2)) {
+        return ORGANIZATION;
+      }
+      return INDIVIDUAL;
+    }
   }
 
   protected abstract CareTeamType getCareTeamType();

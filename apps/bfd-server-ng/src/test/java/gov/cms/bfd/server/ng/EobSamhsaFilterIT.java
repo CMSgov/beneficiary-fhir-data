@@ -17,21 +17,17 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,6 +67,19 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long BENE_SK4 = 167719446;
   private static final long BENE_SK5 = 27590072;
 
+  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK2 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK2), "-0Y2K7HP0Y71BO");
+  private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH_BENE_SK2 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK2), "-Z7E63N3ROZJC9");
+  private static final PriorAuthIdentifier NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK4), "-5HYJ8PUF9JCGR");
+  private static final PriorAuthIdentifier SAMHSA_PRIOR_AUTH_BENE_SK5 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK5), "-NFR7SQYED0KG2");
+  private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK5 =
+      new PriorAuthIdentifier(String.valueOf(BENE_SK5), "-QB7ER58LECEVG");
+
+  private record PriorAuthIdentifier(String beneSk, String utn) {}
+
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
   private static final String ICD10_DIAGNOSIS2 = "F55.2";
@@ -87,7 +96,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String ICD9_PROCEDURE = "94.45";
   private static final String ICD9_PROCEDURE2 = "94.66";
 
-  // System: HCPCS [clm_line_hcpcs_cd]
+  // System: HCPCS [clm_line_hcpcs_cd, hcpcs_or_cpt_or_hipps]
   private static final String HCPCS = "H0005";
   private static final String HCPCS2 = "H0050";
   private static final String FUTURE_HCPCS = "G0534";
@@ -98,9 +107,14 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String DRG_EXPIRED1 = "522";
   private static final String DRG_EXPIRED2 = "523";
 
-  // System: CPT [clm_line_hcpcs_cd]
+  // System: CPT [clm_line_hcpcs_cd, hcpcs_or_cpt_or_hipps]
   private static final String CPT = "99408";
   private static final String CPT2 = "0078U";
+
+  // System: HIPPS [hcpcs_or_cpt_or_hipps]
+  // Although prior authorization can have a HIPPS code, HIPPS codes are not samhsa, but we still
+  // verify for it here
+  private static final String HIPPS = "A0101";
 
   protected final List<List<String>> samhsaCodesToCheck =
       List.of(
@@ -139,7 +153,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
     if (samhsaCertType != SamhsaCertType.NO_CERT) {
       final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.certValue);
+      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.getCertValue());
 
       fhirClient.registerInterceptor(headersInterceptor);
     }
@@ -167,8 +181,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     return getEobFromBundle(claims);
   }
 
-  private List<Long> getClaimIdsByBene(long beneSk, ClaimFilterOptions options) {
-    return getClaimsByBene(beneSk, options).stream().map(c -> Long.parseLong(c.getId())).toList();
+  private List<String> getClaimIdsByBene(long beneSk, ClaimFilterOptions options) {
+    return getClaimsByBene(beneSk, options).stream().map(Resource::getIdPart).toList();
   }
 
   @Test
@@ -196,15 +210,58 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                 CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
                 CLAIM_UNIQUE_ID_WITH_NO_SAMHSA,
                 CLAIM_WITH_HCPCS_IN_ICD),
-            List.of(CLAIM_WITH_HCPCS_IN_ICD)),
-        Arguments.of(BENE_SK2, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS), List.of(), List.of()),
-        Arguments.of(BENE_SK3, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE), List.of(), List.of()),
-        Arguments.of(BENE_SK4, List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS), List.of(), List.of()),
+            List.of(CLAIM_WITH_HCPCS_IN_ICD),
+            List.of(),
+            List.of()),
+        Arguments.of(
+            BENE_SK2,
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS),
+            List.of(),
+            List.of(),
+            List.of(SAMHSA_PRIOR_AUTH_BENE_SK2),
+            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK2)),
+        Arguments.of(
+            BENE_SK3,
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of()),
+        Arguments.of(
+            BENE_SK4,
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4)),
         Arguments.of(
             BENE_SK5,
             List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, CLAIM_UNIQUE_ID_FOR_DRG),
             List.of(),
-            List.of()));
+            List.of(),
+            List.of(SAMHSA_PRIOR_AUTH_BENE_SK5),
+            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK5)));
+  }
+
+  private boolean isPriorAuthorization(ExplanationOfBenefit eob) {
+    return eob.hasUse() && eob.getUse() == ExplanationOfBenefit.Use.PREAUTHORIZATION;
+  }
+
+  private boolean isSkippedFromBundleCheck(
+      ExplanationOfBenefit eob, List<Long> skipBundleVerification) {
+    // Prior-authorization EOBs don't have Long claim unique ids. Its ID is a UUID that represents
+    // the resource ID and we do not want to skip verification for them.
+    if (isPriorAuthorization(eob)) {
+      return false;
+    }
+    return skipBundleVerification.contains(Long.parseLong(eob.getIdPart()));
+  }
+
+  private boolean matchesPriorAuth(ExplanationOfBenefit eob, PriorAuthIdentifier identifier) {
+    var hasMatchingUtn =
+        eob.getIdentifier().stream().anyMatch(id -> identifier.utn().equals(id.getValue()));
+    var hasMatchingBeneSk = eob.getPatient().getReference().contains(identifier.beneSk());
+    return hasMatchingUtn && hasMatchingBeneSk;
   }
 
   private void shouldFilterSamhsa(
@@ -212,32 +269,69 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       long beneSk,
       List<Long> samhsaClaimIds,
       List<Long> nonSamhsaClaimIds,
-      List<Long> skipBundleVerification) {
+      List<Long> skipBundleVerification,
+      List<PriorAuthIdentifier> samhsaPriorAuth,
+      List<PriorAuthIdentifier> nonSamhsaPriorAuth) {
     var bundle = searchBundle(beneSk, samhsaCertType).execute();
     // Before checking for SAMHSA codes, filter any cases that won't pass
-    // verification due to
-    // system/code mismatches.
+    // verification due to system/code mismatches
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()
-            .filter(c -> !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
+            .filter(c -> !isSkippedFromBundleCheck(c, skipBundleVerification))
             .toList();
     // Bundle from endpoint should not contain any sensitive codes
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));
 
-    // Ensure listed claims are valid
-    var foundClaimIds = getClaimIdsByBene(beneSk, foundIncludeOptions);
-    for (var claimId :
-        Stream.concat(samhsaClaimIds.stream(), nonSamhsaClaimIds.stream()).toList()) {
-      assertTrue(foundClaimIds.contains(claimId));
+    var allEobs = getClaimsByBene(beneSk, foundIncludeOptions);
+    var priorAuthEobs = allEobs.stream().filter(this::isPriorAuthorization).toList();
+    if (!samhsaPriorAuth.isEmpty()) {
+      var containsAllSamhsaPriorAuths =
+          samhsaPriorAuth.stream()
+              .allMatch(
+                  expected ->
+                      priorAuthEobs.stream().anyMatch(eob -> matchesPriorAuth(eob, expected)));
+      assertTrue(containsAllSamhsaPriorAuths);
     }
 
-    var foundSamhsaClaims =
-        getClaimsByBene(beneSk, foundIncludeOptions).stream()
-            .filter(c -> samhsaClaimIds.contains(Long.parseLong(c.getIdPart())))
+    if (!nonSamhsaPriorAuth.isEmpty()) {
+      var containsAnyNonSamhsaPriorAuths =
+          nonSamhsaPriorAuth.stream()
+              .anyMatch(
+                  unexpected ->
+                      priorAuthEobs.stream().anyMatch(eob -> matchesPriorAuth(eob, unexpected)));
+
+      assertTrue(containsAnyNonSamhsaPriorAuths);
+    }
+
+    // Ensure listed claims are valid
+    var actualClaimIds = getClaimIdsByBene(beneSk, foundIncludeOptions);
+    var allExpectedIds =
+        Stream.of(
+                samhsaClaimIds.stream().map(String::valueOf),
+                nonSamhsaClaimIds.stream().map(String::valueOf),
+                priorAuthEobs.stream().map(Resource::getIdPart))
+            .flatMap(s -> s)
             .toList();
-    assertFalse(foundSamhsaClaims.isEmpty());
-    // All claims marked as SAMHSA should contain at least one valid code.
-    assertTrue(allClaimsContainSamhsaCode(foundSamhsaClaims, false));
+    for (var eobId : allExpectedIds) {
+      assertTrue(actualClaimIds.contains(eobId));
+    }
+
+    var samhsaPriorAuthIds =
+        priorAuthEobs.stream()
+            .filter(
+                eob ->
+                    samhsaPriorAuth.stream().anyMatch(expected -> matchesPriorAuth(eob, expected)))
+            .map(ExplanationOfBenefit::getIdPart)
+            .toList();
+
+    var samhsaIdStrings =
+        Stream.concat(samhsaClaimIds.stream().map(String::valueOf), samhsaPriorAuthIds.stream())
+            .toList();
+    var allSamhsaEobs =
+        allEobs.stream().filter(c -> samhsaIdStrings.contains(c.getIdPart())).toList();
+    assertFalse(allSamhsaEobs.isEmpty());
+    // All eobs marked as SAMHSA should contain at least one valid code.
+    assertTrue(allClaimsContainSamhsaCode(allSamhsaEobs, false));
 
     var foundExcludeOptions =
         ClaimFilterOptions.builder()
@@ -246,17 +340,39 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             .build();
 
     var foundClaimIdsNoSamhsa = getClaimIdsByBene(beneSk, foundExcludeOptions);
-    // Ensure non-SAMHSA claims don't contain SAMHSA claim IDs
+    // Ensure SAMHSA prior authorizations EOBs are excluded.
+    for (var id : samhsaPriorAuthIds) {
+      assertFalse(foundClaimIdsNoSamhsa.contains(id));
+    }
+    // Ensure SAMHSA claims are excluded.
     for (var claimId : samhsaClaimIds) {
-      assertFalse(foundClaimIdsNoSamhsa.contains(claimId));
-      var read = eobRead().withId(claimId);
+      assertFalse(foundClaimIdsNoSamhsa.contains(String.valueOf(claimId)));
+      var read =
+          eobRead()
+              .withId(claimId); // prior authorizations are not supported by our read endpoint yet
       assertThrows(ResourceNotFoundException.class, read::execute);
     }
 
-    // Ensure non-SAMHSA claims contain all valid non-SAMHSA claim IDs.
+    // Ensure only non-SAMHSA prior authorizations EOBs are included.
+    var nonSamhsaPriorAuthIds =
+        priorAuthEobs.stream()
+            .filter(
+                eob ->
+                    nonSamhsaPriorAuth.stream()
+                        .anyMatch(expected -> matchesPriorAuth(eob, expected)))
+            .map(ExplanationOfBenefit::getIdPart)
+            .toList();
+    for (var id : nonSamhsaPriorAuthIds) {
+      assertTrue(foundClaimIdsNoSamhsa.contains(id));
+    }
+
+    // Ensure non-SAMHSA claims are included.
     for (var claimId : nonSamhsaClaimIds) {
-      assertTrue(foundClaimIdsNoSamhsa.contains(claimId));
-      var read = eobRead().withId(claimId).execute();
+      assertTrue(foundClaimIdsNoSamhsa.contains(String.valueOf(claimId)));
+      var read =
+          eobRead()
+              .withId(claimId)
+              .execute(); // prior authorizations are not supported by our read endpoint yet
       assertEquals(claimId.toString(), read.getIdPart());
     }
 
@@ -269,9 +385,17 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       long beneSk,
       List<Long> samhsaClaimIds,
       List<Long> nonSamhsaClaimIds,
-      List<Long> skipBundleVerification) {
+      List<Long> skipBundleVerification,
+      List<PriorAuthIdentifier> samhsaPriorAuth,
+      List<PriorAuthIdentifier> nonSamhsaPriorAuth) {
     shouldFilterSamhsa(
-        SamhsaCertType.NO_CERT, beneSk, samhsaClaimIds, nonSamhsaClaimIds, skipBundleVerification);
+        SamhsaCertType.NO_CERT,
+        beneSk,
+        samhsaClaimIds,
+        nonSamhsaClaimIds,
+        skipBundleVerification,
+        samhsaPriorAuth,
+        nonSamhsaPriorAuth);
   }
 
   @MethodSource({"shouldFilterSamhsa"})
@@ -280,13 +404,17 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       long beneSk,
       List<Long> samhsaClaimIds,
       List<Long> nonSamhsaClaimIds,
-      List<Long> skipBundleVerification) {
+      List<Long> skipBundleVerification,
+      List<PriorAuthIdentifier> samhsaPriorAuth,
+      List<PriorAuthIdentifier> nonSamhsaPriorAuth) {
     shouldFilterSamhsa(
         SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT,
         beneSk,
         samhsaClaimIds,
         nonSamhsaClaimIds,
-        skipBundleVerification);
+        skipBundleVerification,
+        samhsaPriorAuth,
+        nonSamhsaPriorAuth);
   }
 
   @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5})
@@ -437,6 +565,32 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     assertTrue(drg.isPresent());
   }
 
+  private static Stream<Arguments> ensureHcpcsCptHipps() {
+    return Stream.of(
+        Arguments.of(BENE_SK2, SAMHSA_PRIOR_AUTH_BENE_SK2, HCPCS, SystemUrls.CMS_HCPCS),
+        Arguments.of(BENE_SK5, SAMHSA_PRIOR_AUTH_BENE_SK5, CPT, SystemUrls.AMA_CPT),
+        Arguments.of(BENE_SK4, NO_SAMHSA_HIPPS_PRIOR_AUTH_BENE_SK4, HIPPS, SystemUrls.CMS_HIPPS));
+  }
+
+  @MethodSource
+  @ParameterizedTest
+  void ensureHcpcsCptHipps(
+      long beneSk, PriorAuthIdentifier priorAuthIdentifier, String code, String system) {
+    var allEobs = getClaimsByBene(beneSk, foundIncludeOptions);
+    var priorAuth =
+        allEobs.stream()
+            .filter(this::isPriorAuthorization)
+            .filter(eob -> matchesPriorAuth(eob, priorAuthIdentifier))
+            .findFirst();
+    assertTrue(priorAuth.isPresent());
+    var hcpcsCptHipps =
+        priorAuth.get().getItem().stream()
+            .flatMap(i -> i.getProductOrService().getCoding().stream())
+            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .findFirst();
+    assertTrue(hcpcsCptHipps.isPresent());
+  }
+
   /**
    * Verifies that the security_labels.yml file loads, serializes, and contains expected SAMHSA
    * codes. Ensures the file has the correct number of items and key codes are present.
@@ -492,24 +646,37 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   }
 
   private boolean containsAnySamhsaCode(ExplanationOfBenefit eob, boolean validateDates) {
-    var eobEnd = eob.getBillablePeriod().getEnd();
     var json = normalize(context.newJsonParser().encodeResourceToString(eob));
+
     for (var entry : SECURITY_LABELS.values().stream().flatMap(Collection::stream).toList()) {
-      var eobAfter = eobEnd.after(DateUtil.toDate(entry.getEndDate()));
-      var eobBefore = eobEnd.before(DateUtil.toDate(entry.getStartDate()));
-      if (validateDates && (eobAfter || eobBefore)) {
+      if (!matchesCode(json, entry)) {
         continue;
       }
-
-      var target = normalize(entry.getCode());
-      // This can produce false positives, but it will be safer to set up the test data to avoid
-      // this than to try to limit the fields we check against
-      if (json.contains("\"code\":" + target)
-          || json.contains(String.format("\"code\":\"%s\"", target))) {
+      if (!validateDates) {
+        return true;
+      }
+      var eobEnd = getSamhsaValidationDate(eob);
+      var eobAfter = eobEnd.after(DateUtil.toDate(entry.getEndDate()));
+      var eobBefore = eobEnd.before(DateUtil.toDate(entry.getStartDate()));
+      if (!eobAfter && !eobBefore) {
         return true;
       }
     }
     return false;
+  }
+
+  private Date getSamhsaValidationDate(ExplanationOfBenefit eob) {
+    return (isPriorAuthorization(eob))
+        ? eob.getPreAuthRefPeriod().getFirst().getEnd()
+        : eob.getBillablePeriod().getEnd();
+  }
+
+  private boolean matchesCode(String json, SecurityLabel entry) {
+    var target = normalize(entry.getCode());
+    // This can produce false positives, but it will be safer to set up the test data to avoid
+    // this than to try to limit the fields we check against
+    return json.contains("\"code\":" + target)
+        || json.contains(String.format("\"code\":\"%s\"", target));
   }
 
   private boolean checkSamhsaCode(String samhsaCode) {
@@ -520,15 +687,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private String normalize(String val) {
     return val.trim().replace(".", "").toLowerCase();
-  }
-
-  @AllArgsConstructor
-  private enum SamhsaCertType {
-    NO_CERT(null),
-    SAMHSA_ALLOWED_CERT("samhsa_allowed"),
-    SAMHSA_NOT_ALLOWED_CERT("samhsa_not_allowed");
-
-    private final String certValue;
   }
 
   static Stream<Arguments> provideSecurityScenarios() {

@@ -92,7 +92,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1065725636"
       },
-      "display" : "Indiana"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
@@ -117,7 +117,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "2601139399"
       },
-      "display" : "Jones, Gromit"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
@@ -142,7 +142,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1248968152"
       },
-      "display" : "Tiana"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
@@ -155,7 +155,7 @@
   {
     "sequence" : 4,
     "provider" : {
-      "type" : "Organization",
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -167,7 +167,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1118124233"
       },
-      "display" : "CBS Health Corporation"
+      "display" : "Practitioner"
     },
     "role" : {
       "coding" : [{
@@ -255,7 +255,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 13
+      "valueUnsignedInt" : 13
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -266,7 +266,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 43
+      "valueUnsignedInt" : 43
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -318,7 +318,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 4
+      "valueUnsignedInt" : 4
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -329,7 +329,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 14
+      "valueUnsignedInt" : 14
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -381,7 +381,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 1
+      "valueUnsignedInt" : 1
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -392,7 +392,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 94
+      "valueUnsignedInt" : 94
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -448,7 +448,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 8
+      "valueUnsignedInt" : 8
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -459,7 +459,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 54
+      "valueUnsignedInt" : 54
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -511,7 +511,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 9
+      "valueUnsignedInt" : 9
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -522,7 +522,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 45
+      "valueUnsignedInt" : 45
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -580,7 +580,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 15
+      "valueUnsignedInt" : 15
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -591,7 +591,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 58
+      "valueUnsignedInt" : 58
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -655,7 +655,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 2
+      "valueUnsignedInt" : 2
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -666,7 +666,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 74
+      "valueUnsignedInt" : 74
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -718,7 +718,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 8
+      "valueUnsignedInt" : 8
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -729,7 +729,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 85
+      "valueUnsignedInt" : 85
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -787,7 +787,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 14
+      "valueUnsignedInt" : 14
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -798,7 +798,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 11
+      "valueUnsignedInt" : 11
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",
@@ -850,7 +850,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS",
-      "valueDecimal" : 9
+      "valueUnsignedInt" : 9
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST",
@@ -861,7 +861,7 @@
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND",
-      "valueDecimal" : 1
+      "valueUnsignedInt" : 1
     },
     {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT",

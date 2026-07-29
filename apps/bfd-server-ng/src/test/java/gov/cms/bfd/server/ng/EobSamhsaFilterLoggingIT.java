@@ -19,7 +19,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
 
   private static final long CLAIM_ID_WITH_SAMHSA_DIAGNOSIS = 4146709784142L;
   private static final long CLAIM_ID_WITH_NO_SAMHSA = 566745788569L;
-  private static final String SAMHSA_FILTERED_LOG_MESSAGE = "SAMHSA claim filtered";
+  private static final String SAMHSA_FILTERED_LOG_MESSAGE = "SAMHSA eob filtered";
   private final EobHandler eobHandler;
 
   private static final ClaimFilterOptions excludeOptions =

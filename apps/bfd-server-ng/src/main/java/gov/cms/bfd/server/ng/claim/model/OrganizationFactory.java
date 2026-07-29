@@ -11,7 +11,7 @@ class OrganizationFactory {
     var organization = new Organization();
     organization.setMeta(
         new Meta()
-            .addProfile(SystemUrls.PROFILE_CARIN_BB_ORGANIZATION_2_2_0)
+            .addProfile(SystemUrls.PROFILE_C4BB_ORGANIZATION_2_2_0)
             .addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION_7_0_0));
     organization.setActive(true);
     return organization;

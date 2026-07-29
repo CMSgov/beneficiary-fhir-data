@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng.util;
 
 import static gov.cms.bfd.server.ng.util.LoggerConstants.LOG_TYPE;
 
+import gov.cms.bfd.server.ng.claim.model.ClaimBase;
+import java.util.Collection;
 import org.slf4j.LoggerFactory;
 
 /** Utility class used for logging. */
@@ -26,5 +28,20 @@ public class LogUtil {
         .addKeyValue(LOG_TYPE, "beneFound")
         .addKeyValue("beneSk", beneSk)
         .log();
+  }
+
+  /**
+   * For logging distinct bene_sk from claims.
+   *
+   * @param claims the claims
+   */
+  public static void logUniqueBeneficiaries(Collection<? extends ClaimBase> claims) {
+    if (claims.isEmpty()) {
+      return;
+    }
+    claims.stream()
+        .map(claim -> claim.getBeneficiary().getBeneSk())
+        .distinct()
+        .forEach(LogUtil::logBeneSk);
   }
 }
