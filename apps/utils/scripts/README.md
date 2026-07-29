@@ -197,6 +197,11 @@ Option defaults:
   -d localhost:5432
 ```
 
+### Adding a DB migration
+
+Migrations go under `bfd-model/bfd-model-rif/resources/db/migration`.
+To create a new migration, create a file with two leading underscores (`__your_migration_name.sql`) and then run `./rename-migration-script.py path/to/your/migration.sql` to apply the timestamp prefix to the migration name.
+
 ## Running BFD Server
 
 To run the BFD FHIR server you must first have a database for it to connect to.
