@@ -189,7 +189,7 @@ resource "aws_codebuild_project" "runner" {
   logs_config {
     cloudwatch_logs {
       status     = "ENABLED"
-      group_name = module.runner[each.key].name
+      group_name = module.log_group_runner[each.key].name
     }
   }
 
