@@ -157,7 +157,7 @@ resource "aws_codebuild_source_credential" "github" {
   token       = aws_codestarconnections_connection.github.arn
 }
 
-module "runner" {
+module "log_group_runner" {
   source   = "../../terraform-modules/general/high-retention-log-group"
   for_each = local.codebuild_runner_config
 
