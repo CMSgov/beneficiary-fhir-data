@@ -184,7 +184,7 @@ def prune_non_latest_non_part_d_ss_claims(
         AND clm.clm_idr_ld_dt < %s
     """
 
-    logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
+   logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
 
                     if res.rowcount == 0:
                         logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
@@ -212,7 +212,6 @@ def prune_non_latest_non_part_d_ss_claims(
                 break
 
     return True
-
 
 def prune_non_latest_non_part_d_ss_parent_claims(
     cls: type[T],

@@ -40,8 +40,8 @@ from pipeline_utils import (
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
     prune_bene_ma_part_d_rx,
-    prune_non_latest_non_part_d_ss_claim_items,
-    prune_non_latest_non_part_d_ss_parent_claims,
+    prune_non_latest_part_d_ss_claim_items,
+    prune_non_latest_part_d_ss_parent_claims,
     prune_phase_1_ss_claims,
 )
 from settings import enable_prior_auth_ingestion
@@ -177,13 +177,13 @@ class StagedIdrPipeline:
                 self.start_time,
             )
             yield functools.partial(
-                prune_non_latest_non_part_d_ss_claim_items,
+                prune_non_latest_part_d_ss_claim_items,
                 model,
                 self.load_mode,
                 self.start_time,
             )
             yield functools.partial(
-                prune_non_latest_non_part_d_ss_parent_claims,
+                prune_non_latest_part_d_ss_parent_claims,
                 model,
                 self.load_mode,
                 self.start_time,
