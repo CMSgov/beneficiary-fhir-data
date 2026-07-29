@@ -34,12 +34,6 @@ locals {
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
-  ssm_hierarchies = [
-    "/bfd/${local.env}/${local.service}/sensitive/",
-    "/bfd/${local.env}/${local.service}/nonsensitive/",
-    "/bfd/${local.env}/common/nonsensitive/",
-  ]
-
   container_repository_name = coalesce(var.container_repository_override, "bfd-platform-${local.service}")
   container_version         = coalesce(var.container_version_override, local.bfd_version)
 

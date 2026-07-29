@@ -30,34 +30,6 @@ resource "aws_iam_policy" "kms" {
   policy      = data.aws_iam_policy_document.kms.json
 }
 
-data "aws_iam_policy_document" "ssm_params" {
-  statement {
-    sid = "AllowGetPipelineAndCommonParameters"
-    actions = [
-      "ssm:GetParametersByPath",
-      "ssm:GetParameters",
-      "ssm:GetParameter"
-    ]
-    resources = [
-      for hierarchy in local.ssm_hierarchies
-      : "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*"
-    ]
-  }
-
-  statement {
-    sid       = "AllowDecryptParametersWithEnvCMK"
-    actions   = ["kms:Decrypt"]
-    resources = [local.env_key_arn]
-  }
-}
-
-resource "aws_iam_policy" "ssm_params" {
-  name        = "${local.name_prefix}-ssm-params-policy"
-  path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.service} ECS task containers to get required SSM parameeters"
-  policy      = data.aws_iam_policy_document.ssm_params.json
-}
-
 data "aws_iam_policy_document" "rds" {
   statement {
     sid       = "AllowDescribeRDSCluster"
@@ -102,10 +74,9 @@ resource "aws_iam_role" "task" {
 
 resource "aws_iam_role_policy_attachment" "task" {
   for_each = {
-    kms        = aws_iam_policy.kms.arn
-    rds        = aws_iam_policy.rds.arn
-    ssm_params = aws_iam_policy.ssm_params.arn
-    sns        = aws_iam_policy.sns.arn
+    kms = aws_iam_policy.kms.arn
+    rds = aws_iam_policy.rds.arn
+    sns = aws_iam_policy.sns.arn
   }
 
   role       = aws_iam_role.task.name
