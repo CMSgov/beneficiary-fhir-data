@@ -33,7 +33,7 @@ public class DynamoDbAuditLogger implements AuditLogger {
         auditEvent.setClientId(auditRecord.clientId());
         auditEvent.setClientName(auditRecord.clientName());
         auditEvent.setPartnerAppName(
-            partnerAliases.getOrDefault(auditRecord.certAlias(), auditRecord.certAlias()));
+            partnerAliases.getOrDefault(auditRecord.certAlias(), "Unknown"));
         auditEvent.setClientIp(auditRecord.clientIp());
         auditEvent.setCombinationsEvaluated(
             objectMapper.writeValueAsString(auditRecord.combinationsEvaluated()));

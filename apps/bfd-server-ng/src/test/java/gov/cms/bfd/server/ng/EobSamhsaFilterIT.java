@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -139,7 +140,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
     if (samhsaCertType != SamhsaCertType.NO_CERT) {
       final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.certValue);
+      headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, samhsaCertType.certValue);
 
       fhirClient.registerInterceptor(headersInterceptor);
     }

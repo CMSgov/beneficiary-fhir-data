@@ -19,6 +19,7 @@ import gov.cms.bfd.server.ng.audit.AuditEventBase;
 import gov.cms.bfd.server.ng.audit.AuditEventId;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.*;
@@ -45,7 +46,7 @@ class PatientMatchIT extends IntegrationTestBase {
     var params = ParametersUtil.newInstance(ctx);
     ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
     var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "good_cert");
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "good_cert");
     var fhirClient = getFhirClient(ctx);
     fhirClient.registerInterceptor(headersInterceptor);
     var res =
@@ -430,7 +431,7 @@ class PatientMatchIT extends IntegrationTestBase {
     var params = ParametersUtil.newInstance(ctx);
     ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
     var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "good_cert");
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "good_cert");
     var fhirClient = getFhirClient(ctx);
     fhirClient.registerInterceptor(headersInterceptor);
     var res =
