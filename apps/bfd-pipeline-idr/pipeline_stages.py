@@ -34,13 +34,14 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
-from model.idr_prior_auth_item import IdrPriorAuthItem
 from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import (
     extract_and_load,
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
     prune_bene_ma_part_d_rx,
+    prune_non_latest_non_part_d_ss_claim_items,
+    prune_non_latest_non_part_d_ss_parent_claims,
     prune_phase_1_ss_claims,
 )
 from settings import enable_prior_auth_ingestion
@@ -176,7 +177,13 @@ class StagedIdrPipeline:
                 self.start_time,
             )
             yield functools.partial(
-                prune_non_latest_non_part_d_ss_claims,
+                prune_non_latest_non_part_d_ss_claim_items,
+                model,
+                self.load_mode,
+                self.start_time,
+            )
+            yield functools.partial(
+                prune_non_latest_non_part_d_ss_parent_claims,
                 model,
                 self.load_mode,
                 self.start_time,

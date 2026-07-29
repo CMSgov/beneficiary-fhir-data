@@ -205,22 +205,47 @@ def prune_non_latest_non_part_d_ss_claims(
                         LIMIT {PRUNE_BATCH_MAX_SIZE}
                     )
                 """,
-            (prune_cutoff_date,),
-        )
+                (prune_cutoff_date, PHASE_1_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, item_table)
+            if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
+                break
 
-        _prune_table_in_batches(
-            conn,
-            claim_table,
-            f"""
-                    DELETE FROM {claim_table}
-                    WHERE clm_uniq_id IN (
-                        SELECT clm.clm_uniq_id FROM {claim_table} clm
-                        WHERE {non_latest_non_part_d_claim_filter}
-                        LIMIT {PRUNE_BATCH_MAX_SIZE}
-                    )
-                """,
-            (prune_cutoff_date,),
-        )
+    return True
+
+
+def prune_non_latest_non_part_d_ss_parent_claims(
+    cls: type[T],
+    load_mode: LoadMode,
+    job_start: datetime,
+) -> bool:
+    claim_table = cls.table()
+    if claim_table not in _SHARED_SYSTEM_CLAIM_ITEM_TABLES:
+        return True
+
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+
+    logger.info("pruning non-latest non-Part-D ss parent claims older than {}", prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {claim_table}
+                WHERE clm_uniq_id IN (
+                    SELECT clm.clm_uniq_id FROM {claim_table} clm
+                    WHERE clm.clm_ltst_clm_ind = 'N'
+                    AND clm.clm_type_cd NOT IN ({part_d_codes})
+                    AND clm.clm_idr_ld_dt < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (prune_cutoff_date, PHASE_1_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, claim_table)
+            if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
+                break
 
     return True
 
