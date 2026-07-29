@@ -239,7 +239,7 @@ resource "aws_scheduler_schedule" "this" {
       network_configuration {
         assign_public_ip = false
         security_groups  = [aws_security_group.this.id]
-        subnets          = local.private_subnets
+        subnets          = local.private_subnets[*].id
       }
     }
   }
