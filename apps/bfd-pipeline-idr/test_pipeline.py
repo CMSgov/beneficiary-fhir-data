@@ -93,6 +93,42 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         rows = cur.fetchmany(1)
         assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
+    # Seed a parent claim so the prune job has a row to delete.
+    # CSV covers item pruning because non-latest parents do not load.
+    if load_type == LoadType.INCREMENTAL:
+        claim_table = sql.Identifier("idr", "claim_institutional_ss")
+        cur = conn.execute(
+            "select * from idr.claim_institutional_ss where clm_uniq_id = 123359318723"
+        )
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        non_latest_parent_claim = dict(row)
+        non_latest_parent_claim["clm_uniq_id"] = 999999434801
+        non_latest_parent_claim["clm_ltst_clm_ind"] = "N"
+        non_latest_parent_claim["clm_type_cd"] = 2081
+        # Make the seeded claim old enough to be picked up by the prune job.
+        non_latest_parent_claim["clm_idr_ld_dt"] = datetime(2019, 6, 13, tzinfo=UTC).date()
+
+        if "bfd_row_id" in non_latest_parent_claim:
+            non_latest_parent_claim["bfd_row_id"] = 999999434801
+
+        if "clm_dt_sgntr_sk" in non_latest_parent_claim:
+            non_latest_parent_claim["clm_dt_sgntr_sk"] = 999999434801
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in non_latest_parent_claim):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(non_latest_parent_claim.values()):q}
+            )
+            """
+        )
+        conn.commit()
+
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
     assert row is not None
@@ -215,21 +251,16 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
-    # Phase 1 SS (PAC) claims older than 60 days will be pruned on incremental loads
-    if load_type == LoadType.INITIAL:
-        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 21
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 123359318723
-    else:
-        cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 9
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 849348853948
-
     # Non-latest non-Part-D SS parent claims are filtered before final claim-table load
     cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 999999434800")
     assert cur.rowcount == 0
+
+    # Existing non-latest non-Part-D SS parent claims are pruned on incremental loads
+    if load_type == LoadType.INCREMENTAL:
+        cur = conn.execute(
+            "select * from idr.claim_institutional_ss where clm_uniq_id = 999999434801"
+        )
+        assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 51
@@ -250,6 +281,15 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 795
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
+
+    # Items for non-latest non-Part-D SS claims are pruned on incremental loads
+    cur = conn.execute(
+        "select * from idr.claim_item_institutional_ss where clm_uniq_id = 999999434800"
+    )
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 1
+    else:
+        assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 442

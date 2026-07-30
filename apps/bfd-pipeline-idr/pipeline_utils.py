@@ -28,6 +28,8 @@ from loader import LoadType, PostgresLoader, get_connection_string, should_track
 from model.base_model import (
     LoadMode,
     T,
+    non_latest_non_part_d_claim_items_query,
+    non_latest_non_part_d_parent_claims_query,
     stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
@@ -210,8 +212,24 @@ def prune_non_latest_non_part_d_ss_claims(
             logger.info("pruned {} rows from {}", res.rowcount, item_table)
             if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
                 break
+    prune_query, params = non_latest_non_part_d_claim_items_query(item_table, prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        while True:
+            with conn.transaction():
+                res = conn.execute(
+                    f"""
+                    DELETE FROM {item_table}
+                    WHERE (clm_uniq_id, bfd_row_id) IN ({prune_query})
+                    """,  # type: ignore
+                    params,
+                )
+                logger.info("pruned {} rows from {}", res.rowcount, item_table)
+                if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
+                    break
 
     return True
+
 
 def prune_non_latest_non_part_d_ss_parent_claims(
     cls: type[T],
@@ -223,28 +241,24 @@ def prune_non_latest_non_part_d_ss_parent_claims(
         return True
 
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
-    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
 
     logger.info("pruning non-latest non-Part-D ss parent claims older than {}", prune_cutoff_date)
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+    prune_query, params = non_latest_non_part_d_parent_claims_query(claim_table, prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
         while True:
-            res = conn.execute(
-                f"""
-                DELETE FROM {claim_table}
-                WHERE clm_uniq_id IN (
-                    SELECT clm.clm_uniq_id FROM {claim_table} clm
-                    WHERE clm.clm_ltst_clm_ind = 'N'
-                    AND clm.clm_type_cd NOT IN ({part_d_codes})
-                    AND clm.clm_idr_ld_dt < %s
-                    LIMIT %s
+            with conn.transaction():
+                res = conn.execute(
+                    f"""
+                    DELETE FROM {claim_table}
+                    WHERE clm_uniq_id IN ({prune_query})
+                    """,  # type: ignore
+                    params,
                 )
-                """,  # type: ignore
-                (prune_cutoff_date, PHASE_1_PRUNE_BATCH_LIMIT),
-            )
-            logger.info("pruned {} rows from {}", res.rowcount, claim_table)
-            if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
-                break
+                logger.info("pruned {} rows from {}", res.rowcount, claim_table)
+                if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
+                    break
 
     return True
 

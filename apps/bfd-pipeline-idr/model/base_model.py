@@ -870,3 +870,44 @@ def stale_phase_1_claims_query(
         """,
         (cutoff_date, cutoff_date),
     )
+
+
+def non_latest_non_part_d_claim_items_query(
+    item_table: str,
+    cutoff_date: datetime,
+) -> tuple[str, tuple[datetime]]:
+    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+
+    return (
+        f"""
+            SELECT item.clm_uniq_id, item.bfd_row_id
+            FROM {item_table} item
+            JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
+            WHERE clm.clm_ltst_clm_ind = 'N'
+            AND clm.clm_type_cd NOT IN ({part_d_codes})
+            AND clm.clm_idr_ld_dt < %s
+            ORDER BY item.clm_uniq_id, item.bfd_row_id
+            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+        """,
+        (cutoff_date,),
+    )
+
+
+def non_latest_non_part_d_parent_claims_query(
+    claim_table: str,
+    cutoff_date: datetime,
+) -> tuple[str, tuple[datetime]]:
+    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+
+    return (
+        f"""
+            SELECT clm.clm_uniq_id
+            FROM {claim_table} clm
+            WHERE clm.clm_ltst_clm_ind = 'N'
+            AND clm.clm_type_cd NOT IN ({part_d_codes})
+            AND clm.clm_idr_ld_dt < %s
+            ORDER BY clm.clm_uniq_id
+            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+        """,
+        (cutoff_date,),
+    )
