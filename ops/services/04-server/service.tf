@@ -77,45 +77,45 @@ data "aws_ecr_image" "server" {
   image_tag       = local.server_version
 }
 
-module "certstores_messages" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
-  kms_key_id      = local.env_key_arn
+module "log_group_certstores_messages" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
-module "log_router_messages" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id      = local.env_key_arn
+module "log_group_log_router_messages" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
-module "server_messages" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id      = local.env_key_arn
+module "log_group_server_messages" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
-module "server_access" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id      = local.env_key_arn
+module "log_group_server_access" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
-module "adot_messages" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
-  kms_key_id      = local.env_key_arn
+module "log_group_adot_messages" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
-module "adot_metrics" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name  = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
-  kms_key_id      = local.env_key_arn
+module "log_group_adot_metrics" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
@@ -198,7 +198,7 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.certstores_messages.name
+            awslogs-group         = module.log_group_certstores_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
@@ -241,7 +241,7 @@ resource "aws_ecs_task_definition" "server" {
             value = templatefile(
               "${path.module}/adot/collector.yaml", {
                 cluster_name   = data.aws_ecs_cluster.main.cluster_name
-                log_group_name = module.adot_metrics.name
+                log_group_name = module.log_group_adot_metrics.name
                 region         = local.region
                 service        = local.service
                 name_prefix    = local.name_prefix
@@ -256,7 +256,7 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.adot_messages.name
+            awslogs-group         = module.log_group_adot_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
           }
@@ -277,11 +277,11 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "MESSAGES_LOG_GROUP"
-            value = module.server_messages.name
+            value = module.log_group_server_messages.name
           },
           {
             name  = "ACCESS_LOG_GROUP"
-            value = module.server_access.name
+            value = module.log_group_server_access.name
           },
         ]
         firelensConfiguration = {
@@ -295,7 +295,7 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.log_router_messages.name
+            awslogs-group         = module.log_group_log_router_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"

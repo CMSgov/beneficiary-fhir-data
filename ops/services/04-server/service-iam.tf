@@ -63,9 +63,9 @@ data "aws_iam_policy_document" "logs" {
     sid     = "AllowFireLensPutLogEventsAndCreateStream"
     actions = ["logs:PutLogEvents", "logs:CreateLogStream"]
     resources = [
-      "${module.server_access.arn}:log-stream:*",
-      "${module.server_messages.arn}:log-stream:*",
-      "${module.adot_metrics.arn}:log-stream:*"
+      "${module.log_group_server_access.arn}:log-stream:*",
+      "${module.log_group_server_messages.arn}:log-stream:*",
+      "${module.log_group_adot_metrics.arn}:log-stream:*"
     ]
   }
 }
@@ -181,11 +181,11 @@ data "aws_iam_policy_document" "execution_logs" {
     sid     = "AllowLogStreamControl"
     actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = [
-      "${module.certstores_messages.arn}:*",
-      "${module.log_router_messages.arn}:*",
-      "${module.server_messages.arn}:*",
-      "${module.server_access.arn}:*",
-      "${module.adot_messages.arn}:*"
+      "${module.log_group_certstores_messages.arn}:*",
+      "${module.log_group_log_router_messages.arn}:*",
+      "${module.log_group_server_messages.arn}:*",
+      "${module.log_group_server_access.arn}:*",
+      "${module.log_group_adot_messages.arn}:*"
     ]
   }
 }

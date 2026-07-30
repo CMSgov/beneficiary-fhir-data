@@ -32,7 +32,7 @@ resource "aws_scheduler_schedule" "checker" {
   }
 }
 
-module "checker" {
+module "log_group_checker" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/lambda/${local.checker_lambda_full_name}"
   log_retention_days = local.required_retention_in_days

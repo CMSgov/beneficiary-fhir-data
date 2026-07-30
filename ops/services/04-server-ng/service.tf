@@ -55,7 +55,7 @@ data "aws_ecr_image" "server" {
   image_tag       = local.server_version
 }
 
-module "log_router_messages" {
+module "log_group_log_router_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
   kms_key_id         = local.env_key_arn
@@ -63,7 +63,7 @@ module "log_router_messages" {
   skip_destroy       = true
 }
 
-module "service_connect_messages" {
+module "log_group_service_connect_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
   kms_key_id         = local.env_key_arn
@@ -71,7 +71,7 @@ module "service_connect_messages" {
   skip_destroy       = true
 }
 
-module "server_messages" {
+module "log_group_server_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id         = local.env_key_arn
@@ -79,7 +79,7 @@ module "server_messages" {
   skip_destroy       = true
 }
 
-module "server_healthchecks" {
+module "log_group_server_healthchecks" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
   kms_key_id         = local.env_key_arn
@@ -87,7 +87,7 @@ module "server_healthchecks" {
   skip_destroy       = true
 }
 
-module "server_nonjson" {
+module "log_group_server_nonjson" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
   kms_key_id         = local.env_key_arn
@@ -142,15 +142,15 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "MESSAGES_LOG_GROUP"
-            value = module.server_messages.name
+            value = module.log_group_server_messages.name
           },
           {
             name  = "HEALTHCHECK_LOG_GROUP"
-            value = module.server_healthchecks.name
+            value = module.log_group_server_healthchecks.name
           },
           {
             name  = "NONJSON_LOG_GROUP"
-            value = module.server_nonjson.name
+            value = module.log_group_server_nonjson.name
           }
         ]
         firelensConfiguration = {
@@ -164,7 +164,7 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.log_router_messages.name
+            awslogs-group         = module.log_group_log_router_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
@@ -383,7 +383,7 @@ resource "aws_ecs_service" "server" {
     log_configuration {
       log_driver = "awslogs"
       options = {
-        "awslogs-group"         = module.service_connect_messages.name
+        "awslogs-group"         = module.log_group_service_connect_messages.name
         "awslogs-region"        = local.region
         "awslogs-stream-prefix" = "${local.service}-${local.bfd_version}"
       }

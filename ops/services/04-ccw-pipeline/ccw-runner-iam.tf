@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "ccw_runner_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${module.ccw_runner.arn}:*"]
+    resources = ["${module.log_group_ccw_runner.arn}:*"]
   }
 }
 

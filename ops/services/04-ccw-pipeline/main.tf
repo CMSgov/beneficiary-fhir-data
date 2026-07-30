@@ -60,7 +60,7 @@ locals {
   ccw_thread_multiple_claims       = 25
 }
 
-module "ccw_messages" {
+module "log_group_ccw_messages" {
   source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id   = local.env_key_arn
@@ -160,7 +160,7 @@ resource "aws_ecs_task_definition" "ccw" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.ccw_messages.name
+            awslogs-group         = module.log_group_ccw_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"

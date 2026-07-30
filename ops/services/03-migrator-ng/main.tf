@@ -56,7 +56,7 @@ locals {
   }
 }
 
-module "messages" {
+module "log_group_messages" {
   source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id   = local.env_key_arn
@@ -115,7 +115,7 @@ resource "aws_ecs_task_definition" "this" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = module.messages.name
+            awslogs-group         = module.log_group_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
@@ -199,7 +199,7 @@ resource "null_resource" "start_migrator" {
           subnets        = local.writer_adjacent_subnets
         }
       })
-      LOG_GROUP_NAME = module.messages.name
+      LOG_GROUP_NAME = module.log_group_messages.name
     }
     interpreter = ["/usr/bin/env", "bash"]
     quiet       = true

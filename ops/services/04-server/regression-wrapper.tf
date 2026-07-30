@@ -40,11 +40,11 @@ data "archive_file" "regression_wrapper_src" {
   }
 }
 
-module "regression_wrapper" {
+module "log_group_regression_wrapper" {
   source = "../../terraform-modules/general/high-retention-log-group"
   count  = local.regression_wrapper_enabled ? 1 : 0
 
-  name  = "/aws/lambda/${local.rw_lambda_full_name}"
+  name            = "/aws/lambda/${local.rw_lambda_full_name}"
   kms_key_id      = local.env_key_arn
   prevent_destroy = true
 }

@@ -9,8 +9,8 @@ data "aws_iam_policy_document" "splunk_topic_logs" {
       "logs:PutRetentionPolicy"
     ]
     resources = [
-      module.splunk_incident_success.arn,
-      module.splunk_incident_failure.arn
+      module.log_group_splunk_incident_success.arn,
+      module.log_group_splunk_incident_failure.arn
     ]
   }
 }
@@ -56,8 +56,8 @@ data "aws_iam_policy_document" "slack_topic_logs" {
       "logs:PutRetentionPolicy"
     ]
     resources = [
-      "${module.slack_failure[each.key].arn}:*",
-      "${module.slack_success[each.key].arn}:*"
+      "${module.log_group_slack_failure[each.key].arn}:*",
+      "${module.log_group_slack_success[each.key].arn}:*"
     ]
   }
 }

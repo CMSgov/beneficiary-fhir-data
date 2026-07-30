@@ -36,7 +36,7 @@ locals {
   full_name = "bfd-${local.env}-${local.service}"
 }
 
-module "this" {
+module "log_group_this" {
   source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/ecs/${local.full_name}"
   kms_key_id   = local.env_key_arn
@@ -69,7 +69,7 @@ resource "aws_ecs_cluster" "this" {
       logging    = "OVERRIDE"
 
       log_configuration {
-        cloud_watch_log_group_name = module.this.name
+        cloud_watch_log_group_name = module.log_group_this.name
       }
     }
   }
@@ -109,10 +109,10 @@ resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
   ]
 
   rule = aws_cloudwatch_event_rule.ecs_events[0].name
-  arn  = module.ecs_events[0].arn
+  arn  = module.log_group_ecs_events[0].arn
 }
 
-module "ecs_events" {
+module "log_group_ecs_events" {
   source = "../../terraform-modules/general/high-retention-log-group"
   count  = local.is_ephemeral_env ? 0 : 1
 

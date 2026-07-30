@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "run_locust_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${module.run_locust.arn}:*"]
+    resources = ["${module.log_group_run_locust.arn}:*"]
   }
 }
 
