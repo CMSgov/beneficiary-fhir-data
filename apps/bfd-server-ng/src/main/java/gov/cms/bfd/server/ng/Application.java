@@ -4,8 +4,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
+import java.util.concurrent.Executor;
 import javax.sql.DataSource;
 import org.slf4j.MDC;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +18,6 @@ import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -115,14 +117,17 @@ public class Application {
   }
 
   /**
-   * Creates the custom task executor.
+   * Creates the custom task executor. Wraps and measures metrics from SimpleAsyncTaskExecutor.
    *
    * @param builder builder
+   * @param meterRegistry the meter registry
    * @return task executor
    */
   @Bean
-  public SimpleAsyncTaskExecutor taskExecutor(SimpleAsyncTaskExecutorBuilder builder) {
-    return builder.taskDecorator(Application::wrapWithMdcContext).build();
+  public Executor taskExecutor(
+      SimpleAsyncTaskExecutorBuilder builder, MeterRegistry meterRegistry) {
+    var executor = builder.taskDecorator(Application::wrapWithMdcContext).build();
+    return ExecutorServiceMetrics.monitor(meterRegistry, executor, "executor");
   }
 
   private static Runnable wrapWithMdcContext(Runnable task) {

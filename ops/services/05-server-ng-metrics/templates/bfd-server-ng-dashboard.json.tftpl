@@ -175,7 +175,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.samhsa_filter.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Latency", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.transform.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Latency", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.results.size.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Bundle Size", "id": "e2", "yAxis": "right", "period": 60, "region": "${region}" } ]
                 ],
                 "view": "timeSeries",

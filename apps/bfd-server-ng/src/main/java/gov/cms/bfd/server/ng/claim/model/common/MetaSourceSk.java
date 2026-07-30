@@ -21,7 +21,9 @@ public enum MetaSourceSk {
   /** 1002 - VMS. */
   VMS(1002, "V", "VMS", IdrConstants.SYSTEM_TYPE_SHARED),
   /** 1003 - FISS. */
-  FISS(1003, "F", "FISS", IdrConstants.SYSTEM_TYPE_SHARED);
+  FISS(1003, "F", "FISS", IdrConstants.SYSTEM_TYPE_SHARED),
+  /** 237 - CWF. */
+  CWF(237, "", "CWF", IdrConstants.SYSTEM_TYPE_SHARED);
 
   private final int sourceSk;
   private final String prefix;
