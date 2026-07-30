@@ -118,9 +118,8 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         self.batch_start = datetime.now(UTC)
         self.insert_cols = list(model.insert_keys())
         self.insert_cols.sort()
-        self.immutable = model.is_immutable()
         self.meta_keys = (
-            ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
+            ["bfd_created_ts"] if model.is_immutable() else ["bfd_created_ts", "bfd_updated_ts"]
         )
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
@@ -139,7 +138,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         # Additionally, if there are no extra columns to update, we can skip it.
         self.on_conflict_clause = (
             "DO NOTHING"
-            if self.immutable or not self.update_set
+            if model.is_immutable() or not self.update_set
             else (
                 f"DO UPDATE SET {self.update_set_str}, bfd_updated_ts=%(timestamp)s "
                 f"{self.on_conflict_where_clause}"
