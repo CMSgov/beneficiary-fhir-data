@@ -388,7 +388,8 @@ jobs:
         idr-pipeline-metrics,
         idr-pipeline-alarms,
         server-ng,
-        server-ng-metrics
+        server-ng-metrics,
+        server-ng-alarms
       git-ref: ${{ github.ref_name }}
       per-service-vars-json: >-
         {

@@ -41,6 +41,19 @@
     - Basis
     - Regular
     - CMS
+- inputPath: ExplanationOfBenefit-Pharmacy.EOB_TYPE
+  appliesTo:
+    - Pharmacy
+  sources:
+    - DDPS
+  bfdDerived: True
+  nameOverride: Claim Stream
+  definitionOverride: This field can be used to determine which CMS claim stream the claim was processed under.
+  fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE').code
+  profiles:
+    - Basis
+    - Regular
+    - CMS
 - inputPath: ExplanationOfBenefit-Pharmacy.BENE_SK
   appliesTo:
     - Pharmacy

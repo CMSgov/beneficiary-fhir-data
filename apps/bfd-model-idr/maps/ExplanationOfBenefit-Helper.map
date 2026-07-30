@@ -358,58 +358,6 @@ conceptmap "CLM_PD_STUS_CD" {
   s:"T" == t:"partial"
 }
 
-conceptmap "CLM_AUDT_TRL_STUS_CD_MCS" {
-  prefix s = "https://hl7.org/fhir/string"
-  prefix t = "https://hl7.org/fhir/string"
-
-  s:"A" = t:"queued"
-  s:"B" = t:"queued"
-  s:"C" = t:"partial"
-  s:"D" = t:"complete"
-  s:"E" = t:"complete"
-  s:"F" = t:"complete"
-  s:"G" = t:"complete"
-  s:"J" = t:"queued"
-  s:"K" = t:"queued"
-  s:"L" = t:"partial"
-  s:"M" = t:"complete"
-  s:"N" = t:"complete"
-  s:"P" = t:"complete"
-  s:"Q" = t:"complete"
-  s:"R" = t:"complete"
-  s:"U" = t:"complete"
-  s:"V" = t:"complete"
-  s:"W" = t:"complete"
-  s:"X" = t:"complete"
-  s:"Y" = t:"complete"
-  s:"Z" = t:"complete"
-  s:"1" = t:"queued"
-  s:"2" = t:"queued"
-  s:"3" = t:"partial"
-  s:"4" = t:"complete"
-  s:"5" = t:"complete"
-  s:"6" = t:"error"
-  s:"8" = t:"complete"
-  s:"9" = t:"complete"
-}
-
-// Separate concept map for FISS since outcome differs for codes F & M
-conceptmap "CLM_AUDT_TRL_STUS_CD_FISS" {
-  prefix s = "https://hl7.org/fhir/string"
-  prefix t = "https://hl7.org/fhir/string"
-
-  s:"A" == t:"queued"
-  s:"F" == t:"partial"
-  s:"I" == t:"partial"
-  s:"S" == t:"partial"
-  s:"M" == t:"partial"
-  s:"P" == t:"complete"
-  s:"R" == t:"complete"
-  s:"D" == t:"complete"
-  s:"T" == t:"partial"
-  s:"U" == t:"complete"
-}
-
 conceptmap "CLM_DGNS_PRCDR_ICD_IND_PROCEDURE" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"

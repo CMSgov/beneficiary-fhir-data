@@ -132,6 +132,7 @@ public class IntegrationTestConfiguration {
     env.put("BFD_TEST_DATE", date.toString());
     env.put("IDR_PER_BATCH_MIN_CONNECTIONS", "1");
     env.put("IDR_PER_BATCH_MAX_CONNECTIONS", "1");
+    env.put("IDR_ENABLE_PRIOR_AUTH", "1");
     // Suppress noisy output unless the log level is explicitly set
     env.putIfAbsent("IDR_LOG_LEVEL", "WARNING");
 
