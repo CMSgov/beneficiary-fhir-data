@@ -1,8 +1,9 @@
+import functools
 import itertools
 import operator
 from collections.abc import Awaitable, Callable, Iterator, Sequence
 from datetime import UTC, datetime
-from typing import Any, cast
+from typing import Any, Generic, cast, override
 
 import anyio
 import psycopg
@@ -78,9 +79,7 @@ class PostgresLoader:
             timeout=600,
         ) as pool:
             await pool.wait()
-            loader_cls = (
-                FullSyncBatchLoader if model.should_fully_sync_delete_diff() else BatchLoader
-            )
+            loader_cls = FullSyncBatchLoader if model.should_delete_missing() else BatchLoader
             return await loader_cls(
                 fetch_results,
                 model,
@@ -94,7 +93,7 @@ class PostgresLoader:
             ).load()
 
 
-class BatchLoader:
+class BatchLoader(Generic[T]):  # noqa: UP046
     def __init__(
         self,
         fetch_results: Iterator[list[T]],
@@ -175,28 +174,15 @@ class BatchLoader:
 
     async def load(self) -> bool:
         timestamp = datetime.now(UTC)
-
         self.full_load_timer.start()
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-            self.progress_start_timer.start()
-            await self._insert_batch_start(cur)
-            await conn.commit()
-            self.progress_start_timer.stop()
+            await self._record_batch_start(conn, cur, commit=True)
 
-        data_loaded = False
-        num_rows = 0
         batch_num = 1
-        while True:
-            self.idr_query_timer.start()
-            # We unfortunately need to use a while true loop here since we need to wrap the
-            # iterator with the timer calls.
-            results = next(self.fetch_results, None)
-            self.idr_query_timer.stop()
-            if not results:
-                break
 
+        async def _process_batch(results: list[T]) -> None:
+            nonlocal batch_num
             self.full_batch_timer.start()
-            data_loaded = True
             logger.info(
                 "{}-{}-{}: loading next {} results concurrently {} row(s) at a time",
                 self.table,
@@ -205,8 +191,6 @@ class BatchLoader:
                 len(results),
                 PER_BATCH_CONCURRENT_ROWS,
             )
-            num_rows += len(results)
-
             self.sort_batch_timer.start()
             results.sort(key=operator.attrgetter(*self.ordered_pkeys))
             self.sort_batch_timer.stop()
@@ -261,6 +245,9 @@ class BatchLoader:
 
             batch_num += 1
             self.full_batch_timer.stop()
+
+        num_rows = await self._stage_all_batches(_process_batch)
+        data_loaded = num_rows > 0
 
         # Wait until the background worker signals that all pending loading tasks are completed
         # for the current partition before marking it totally complete
@@ -421,29 +408,54 @@ class BatchLoader:
                     [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
                 )
 
+    async def _record_batch_start(
+        self, conn: psycopg.AsyncConnection, cur: psycopg.AsyncCursor[Any], commit: bool
+    ) -> None:
+        self.progress_start_timer.start()
+        await self._insert_batch_start(cur)
+        if commit:
+            await conn.commit()
+        self.progress_start_timer.stop()
 
-class FullSyncBatchLoader(BatchLoader):
+    def _next_batch(self) -> list[T] | None:
+        self.idr_query_timer.start()
+        results = next(self.fetch_results, None)
+        self.idr_query_timer.stop()
+        return results
+
+    async def _stage_all_batches(self, process_batch: Callable[[list[T]], Awaitable[None]]) -> int:
+        num_rows = 0
+
+        while True:
+            # We unfortunately need to use a while true loop here since we need to wrap the
+            # iterator with the timer calls.
+            self.idr_query_timer.start()
+            results = next(self.fetch_results, None)
+            self.idr_query_timer.stop()
+            if not results:
+                break
+
+            num_rows += len(results)
+            await process_batch(results)
+
+        return num_rows
+
+
+class FullSyncBatchLoader(BatchLoader[T]):
+    @override
     async def load(self) -> bool:
         timestamp = datetime.now(UTC)
         self.full_load_timer.start()
-        num_rows = 0
+        data_loaded = False
 
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-            self.progress_start_timer.start()
-            await self._insert_batch_start(cur)
-            self.progress_start_timer.stop()
-
+            await self._record_batch_start(conn, cur, commit=False)
             full_temp_table = await self._setup_temp_table(cur, "full_temp")
 
-            while True:
-                self.idr_query_timer.start()
-                results = next(self.fetch_results, None)
-                self.idr_query_timer.stop()
-                if not results:
-                    break
-                num_rows += len(results)
-                await self._copy_data(cur, full_temp_table, results)
-
+            num_rows = await self._stage_all_batches(
+                functools.partial(self._copy_data, cur, full_temp_table)
+            )
+            data_loaded = num_rows > 0
             logger.info(
                 "{}-{}: staged {} row(s) for full sync",
                 self.table,
@@ -472,19 +484,22 @@ class FullSyncBatchLoader(BatchLoader):
             self.table,
             self.partition.name,
         )
-        return True
+        return data_loaded
 
     async def _delete_missing(self, cur: psycopg.AsyncCursor[Any], temp_tablename: str) -> int:
         # We have to exclude our synthetic data that also exists in prod from deletion
-        synthetic_data_filter = (
-            "" if self.load_mode == LoadMode.SYNTHETIC else "WHERE utn NOT LIKE '-%'"
+        synthetic_data_filter = self.model.synthetic_data_filter()
+        synthetic_where_clause = (
+            f"WHERE {synthetic_data_filter}"
+            if synthetic_data_filter and self.load_mode != LoadMode.SYNTHETIC
+            else ""
         )
         result = await cur.execute(  # type: ignore
             f'''
             DELETE FROM {self.table}
             WHERE ({self.primary_keys_str}) IN (
                 SELECT {self.primary_keys_str} FROM {self.table}
-                {synthetic_data_filter}
+                {synthetic_where_clause}
                 EXCEPT
                 SELECT {self.primary_keys_str} FROM "{temp_tablename}"
             )
@@ -506,5 +521,5 @@ def _remove_null_bytes(val: DbType) -> DbType:
 
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
-    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    # Whether to read/write load progress, which is disabled for synthetic and testing loads.
     return load_mode == LoadMode.PROD or force_load_progress()

@@ -491,13 +491,18 @@ class IdrBaseModel(BaseModel, ABC):
         return False
 
     @staticmethod
-    def should_fully_sync_delete_diff() -> bool:
+    def should_delete_missing() -> bool:
         """Whether upstream data deletion requires manual cleanup on our end.
 
         Upstream data can be deleted with no indicator like an obsolete timestamp, requiring
         us to delete it on our end.
         """
         return False
+
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        """Expression used to exclude synthetic data from being deleted in FullSyncBatchLoader."""
+        return ""
 
     @classmethod
     @abstractmethod

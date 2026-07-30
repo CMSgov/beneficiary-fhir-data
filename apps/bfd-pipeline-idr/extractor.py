@@ -197,7 +197,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         fetch_query = self.get_query(start_time, source)
         logger.info("extracting full {}", self.cls.table())
         return self.extract_many(
-            fetch_query.replace("{LAST_TS}", "%(timestamp)s"), {"timestamp": start_time}
+            fetch_query.replace("{MIN_TS}", "%(timestamp)s"), {"timestamp": start_time}
         )
 
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:

@@ -89,7 +89,7 @@ def extract_and_load(
 
             data_iter = (
                 data_extractor.extract_full_idr_data(source)
-                if cls.should_fully_sync_delete_diff()
+                if cls.should_delete_missing()
                 else data_extractor.extract_idr_data(progress, job_start, source)
             )
             res = loader.load(

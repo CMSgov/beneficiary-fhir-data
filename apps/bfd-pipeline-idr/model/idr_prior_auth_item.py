@@ -57,13 +57,18 @@ class IdrPriorAuthItem(IdrBaseModel):
 
     @override
     @staticmethod
-    def should_fully_sync_delete_diff() -> bool:
+    def should_delete_missing() -> bool:
         return True
 
     @override
     @classmethod
     def is_immutable(cls) -> bool:
         return False
+
+    @override
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        return "utn NOT LIKE '-%'"
 
     @override
     @classmethod
@@ -75,7 +80,7 @@ class IdrPriorAuthItem(IdrBaseModel):
                 SELECT *, ROW_NUMBER() 
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > {{LAST_TS}}
+                WHERE pa_req_rec_dt > {{MIN_TS}}
             )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
             WHERE row_order = 1;
