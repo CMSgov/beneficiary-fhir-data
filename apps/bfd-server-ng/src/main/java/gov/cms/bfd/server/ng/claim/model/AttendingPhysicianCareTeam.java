@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
+import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -16,18 +20,18 @@ class AttendingPhysicianCareTeam extends ProviderHistoryBase {
   private Optional<Integer> npiType;
 
   @Override
-  protected CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType() {
     return CareTeamType.ATTENDING;
   }
 
   @Override
   @Transient
-  protected ProviderHistoryBase.NpiType getNpiType() {
+  public ProviderHistoryBase.NpiType getNpiType() {
     return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   @Override
-  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
+  public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
       Integer sequence, Optional<ClaimContext> claimContext) {
     return getProviderNpiNumber()
         .flatMap(

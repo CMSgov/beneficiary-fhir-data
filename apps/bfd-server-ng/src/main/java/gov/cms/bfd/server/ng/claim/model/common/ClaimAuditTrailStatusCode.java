@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import static gov.cms.bfd.server.ng.claim.model.BlueButtonSupportingInfoCategory.CLM_AUDT_TRL_STUS_CD;
+import static gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory.CLM_AUDT_TRL_STUS_CD;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -937,7 +937,13 @@ public enum ClaimAuditTrailStatusCode {
     return Optional.ofNullable(CLAIM_STATUS_LOOKUP.get(new Key(source, statusCode, locationCode)));
   }
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  /**
+   * Create a SupportingInfomrationComponent from the claim audit trail status code.
+   *
+   * @param supportingInfoFactory the factory
+   * @return the SupportingInformationComponent
+   */
+  public ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()

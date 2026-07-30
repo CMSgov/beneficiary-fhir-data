@@ -6,6 +6,7 @@ import static gov.cms.bfd.server.ng.util.MetricRecorder.CLAIM_TYPE;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.PriorAuthorization;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
