@@ -26,7 +26,6 @@ from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
-from settings import enable_prior_auth_ingestion
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -82,16 +81,15 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_xref_efctv_sk"] == 353816021
 
-    if enable_prior_auth_ingestion():
-        cur = conn.execute("select * from idr.prior_auth order by mbi_num")
-        assert cur.rowcount == 21
-        rows = cur.fetchmany(1)
-        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+    cur = conn.execute("select * from idr.prior_auth order by mbi_num")
+    assert cur.rowcount == 21
+    rows = cur.fetchmany(1)
+    assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
-        cur = conn.execute("select * from idr.prior_auth_item order by mbi_num")
-        assert cur.rowcount == 64
-        rows = cur.fetchmany(1)
-        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+    cur = conn.execute("select * from idr.prior_auth_item order by mbi_num")
+    assert cur.rowcount == 64
+    rows = cur.fetchmany(1)
+    assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -546,9 +544,6 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
 
 def _do_test_prior_auth_update_and_delete(conn: Connection[DictRow], load_type: LoadType) -> None:
-    if not enable_prior_auth_ingestion():
-        return
-
     cur = conn.execute(
         "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-OTENCJLOQRAKA'"
     )
@@ -676,7 +671,6 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
-    os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
 
 
 @pytest.fixture(scope="module")

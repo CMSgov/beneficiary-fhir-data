@@ -27,7 +27,7 @@ def bfd_test_date() -> datetime | None:
 
 
 def enable_prior_auth_ingestion() -> bool:
-    return _parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+    return _parse_bool_default_true("IDR_ENABLE_PRIOR_AUTH")
 
 
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
