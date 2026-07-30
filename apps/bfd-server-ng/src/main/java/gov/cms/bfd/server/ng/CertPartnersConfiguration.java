@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -18,21 +19,18 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("bfd.nonsensitive")
 public class CertPartnersConfiguration {
   private CertPartnerProperties certPartners = new CertPartnerProperties();
-  private List<Partner> partners;
 
-  /**
-   * Map for certificate alias mapped to their partner name.
-   *
-   * @return Map
-   */
-  public Map<String, String> getPartnerNamesByCertificateAlias() {
-    if (partners == null) {
-      this.partners =
-          new Gson()
-              .fromJson(
-                  certPartners.getPartnerCertificateJson(),
-                  new TypeToken<List<Partner>>() {}.getType());
-    }
+  @Getter(lazy = true)
+  private final Map<String, String> partnerNamesByCertificateAlias =
+      getPartnerNamesByCertificateAliasInternal();
+
+  private Map<String, String> getPartnerNamesByCertificateAliasInternal() {
+    List<Partner> partners =
+        new Gson()
+            .fromJson(
+                certPartners.getPartnerCertificateJson(),
+                new TypeToken<List<Partner>>() {}.getType());
+
     return partners.stream()
         .flatMap(
             partner ->
