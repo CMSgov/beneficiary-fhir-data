@@ -333,7 +333,10 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         )
 
     async def _setup_temp_table(
-        self, cur: psycopg.AsyncCursor[Any], suffix: str | None = None, copy_indexes: bool = False
+        self,
+        cur: psycopg.AsyncCursor[Any],
+        suffix: str | None = None,
+        copy_primary_key: bool = False,
     ) -> str:
         # Load each batch into a temp table
         # This is necessary because we want to use COPY to quickly
@@ -345,10 +348,12 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         # For simplicity's sake, we'll create our temp tables using the existing schema and
         # just drop the columns we need to ignore.
         full_tablename = f"{self.temp_table}_{suffix or ''}"
-        copy_indexes_option = "INCLUDING INDEXES" if copy_indexes else ""
+        copy_primary_key_option = (
+            f", PRIMARY KEY ({self.primary_keys_str})" if copy_primary_key else ""
+        )
         await cur.execute(
-            f'CREATE TEMPORARY TABLE "{full_tablename}" (LIKE {self.table} {copy_indexes_option}) '  # type: ignore
-            "ON COMMIT DROP"
+            f'CREATE TEMPORARY TABLE "{full_tablename}" '  # type: ignore
+            f"(LIKE {self.table} {copy_primary_key_option}) ON COMMIT DROP"
         )
         # Created/updated columns don't need to be loaded from the source.
         for col in self.meta_keys:
@@ -451,7 +456,7 @@ class FullSyncBatchLoader(BatchLoader[T]):
 
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             await self._record_batch_start(conn, cur, commit=False)
-            full_temp_table = await self._setup_temp_table(cur, "full_temp", True)
+            full_temp_table = await self._setup_temp_table(cur, "full_temp", copy_primary_key=True)
 
             num_rows = await self._stage_all_batches(
                 functools.partial(self._copy_data, cur, full_temp_table)
