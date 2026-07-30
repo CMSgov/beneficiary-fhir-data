@@ -113,6 +113,13 @@ public class ProviderFhirHelper {
     return reference;
   }
 
+  /**
+   * Creates a FHIR {@link Identifier} for a provider (Practitioner or Organization), or member of
+   * the care-team.
+   *
+   * @param npiNumber the provider's identifier value
+   * @return a simple FHIR provider {@link Identifier} instance
+   */
   private static Identifier createNpiIdentifier(String npiNumber) {
     return new Identifier()
         .setSystem(SystemUrls.NPI)
