@@ -42,16 +42,18 @@ import org.hl7.fhir.r4.model.Reference;
 @SuppressWarnings("java:S6539")
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
+  // TODO - move down to CMS
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
 
+  // TODO - move down to CMS
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode; // TODO - move down to CMS
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
@@ -60,8 +62,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
-  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
+  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional; // TODO - move down to CMS
+  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes; // TODO - move down to CMS
 
   // region Hook Methods
 
@@ -128,7 +130,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-
     getItems()
         .forEach(
             item -> {

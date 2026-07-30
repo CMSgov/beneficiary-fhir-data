@@ -6,6 +6,7 @@
 # ///
 
 import re
+import sys
 from pathlib import Path
 
 import yaml
@@ -22,21 +23,34 @@ CLASS_RE = re.compile(
 )
 TABLE_RE = re.compile(r'@Table\(.*?name\s*=\s*"([^"]+)"', re.DOTALL)
 COLUMN_RE = re.compile(
-    r'(?s)@Column\(.*?name\s*=\s*"([^"]+)".*?\).*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);'
+    r'(?s)@Column\(.*?name\s*=\s*"([^"]+)".*?\)'
+    r'(?!(?:(?!;).)*?@Embedded)'  # bail if an @Embedded annotation sits between here and the field
+    r'(?:(?!;).)*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);'
 )
 EMBEDDED_RE = re.compile(
-    r"(?s)@Embedded.*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
+    r"(?s)@Embedded(?:(?!;).)*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
 )
 ATTRIBUTE_OVERRIDE_RE = re.compile(
-    r'@AttributeOverride\(\s*name\s*=\s*"([^"]+)"\s*,\s*column\s*=\s*@Column\(\s*name\s*=\s*"([^"]+)"\s*\)\s*\)'
+    r'@AttributeOverride\(\s*(?:'
+    r'name\s*=\s*"(?P<name1>[^"]+)"\s*,\s*column\s*=\s*@Column\(\s*name\s*=\s*"(?P<col1>[^"]+)"\s*\)'
+    r'|'
+    r'column\s*=\s*@Column\(\s*name\s*=\s*"(?P<col2>[^"]+)"\s*\)\s*,\s*name\s*=\s*"(?P<name2>[^"]+)"'
+    r')\s*\)'
 )
 
 JAVA_ENTITY_RE = re.compile(
-    r"Claim(?P<domain>Institutional|Professional)?(?P<profile>Cms|Basis|Regular)(?P<source>Nch|SharedSystems|Rx)?",
+    r"Claim(?P<domain>Institutional|Professional|Rx)?(?P<profile>Cms|Basis|Regular)(?P<source>Nch|SharedSystems|Rx)?",
     re.IGNORECASE,
 )
 
 DEFAULT_PROFILES = ["Basis", "Regular", "CMS (Default)"]
+
+# Populated during print_tree() with every db_col that had no entry in the
+# YAML dictionaries at all. These silently default to "valid for all
+# profiles" today -- this set lets main() report them separately so a
+# missing/typo'd dictionary entry isn't confused with a genuinely
+# unrestricted column.
+UNMATCHED_COLUMNS: set[str] = set()
 
 
 def parse_yaml_map(yaml_dir: Path) -> dict:
@@ -52,7 +66,8 @@ def parse_yaml_map(yaml_dir: Path) -> dict:
                         mappings[source_col.upper()] = [
                             p.split()[0].upper() for p in profiles
                         ]
-            except yaml.YAMLError:
+            except yaml.YAMLError as e:
+                print(f"[WARN] Failed to parse {file_path}: {e}")
                 continue
     return mappings
 
@@ -69,17 +84,35 @@ def parse_java_graph(src_dir: Path) -> dict:
         name = class_match.group("name")
         table_match = TABLE_RE.search(content)
 
+        override_matches = list(ATTRIBUTE_OVERRIDE_RE.finditer(content))
+        # Span of each @AttributeOverride(...) match, so we can recognize
+        # (and skip) any @Column(...) that COLUMN_RE finds nested inside
+        # one of these -- that @Column belongs to the override and is
+        # already captured below via its 'name' attribute, not via a
+        # field declaration.
+        override_spans = [(m.start(), m.end()) for m in override_matches]
+
+        def _inside_override(pos: int) -> bool:
+            return any(start <= pos < end for start, end in override_spans)
+
+        plain_columns = [
+            {"db_col": m.group(1), "java_var": m.group(3)}
+            for m in COLUMN_RE.finditer(content)
+            if not _inside_override(m.start())
+        ]
+        override_columns = [
+            {
+                "db_col": m.group("col1") or m.group("col2"),
+                "java_var": m.group("name1") or m.group("name2"),
+            }
+            for m in override_matches
+        ]
+
         graph[name] = {
             "type": class_match.group("type").replace("@", ""),
             "parent": class_match.group("parent"),
             "table": table_match.group(1) if table_match else None,
-            "columns": [
-                {"db_col": c[0], "java_var": c[2]} for c in COLUMN_RE.findall(content)
-            ]
-            + [
-                {"db_col": c[1], "java_var": c[0]}
-                for c in ATTRIBUTE_OVERRIDE_RE.findall(content)
-            ],
+            "columns": plain_columns + override_columns,
             "embeddeds": [
                 {
                     "type": re.sub(
@@ -96,8 +129,7 @@ def parse_java_graph(src_dir: Path) -> dict:
 def get_class_profile(class_name: str) -> str | None:
     """Extracts base profile from class naming conventions."""
     if match := JAVA_ENTITY_RE.search(class_name):
-        prof = match.group("profile").upper()
-        return "CMS" if prof == "CMS" else prof
+        return match.group("profile").upper()
     return None
 
 
@@ -129,13 +161,15 @@ def resolve_inherited(graph: dict, class_name: str) -> tuple[list, list]:
 
 
 def print_tree(
-    graph: dict,
-    profile_map: dict,
-    class_name: str,
-    class_profile: str | None,
-    indent: str = "",
-    visited: set = None,
-    check_flags: bool = True,
+        graph: dict,
+        profile_map: dict,
+        class_name: str,
+        class_profile: str | None,
+        indent: str = "",
+        visited: set = None,
+        check_flags: bool = True,
+        is_claim_class: bool | None = None,
+        debug_col: str | None = None,
 ):
     visited = visited or set()
     if class_name in visited or class_name not in graph:
@@ -143,11 +177,31 @@ def print_tree(
     visited.add(class_name)
 
     columns, embeddeds = resolve_inherited(graph, class_name)
-    is_claim_class = class_name.startswith("Claim")
+    # NOTE: this used to be gated on class_name.startswith("Claim"), which
+    # silently exempted every non-Claim family (Beneficiary*, Contract*,
+    # ...) from push-down detection even though the same profile-scoping
+    # logic applies to them. The check is now generic; is_claim_class is
+    # kept only as the name propagated through recursion (see the note
+    # on the print_tree signature) so the embedded-traversal fix above
+    # continues to carry a stable flag down the tree.
+    if is_claim_class is None:
+        is_claim_class = True
 
     for col in columns:
         db_col = col["db_col"]
+        if db_col.upper() not in profile_map:
+            UNMATCHED_COLUMNS.add(db_col.upper())
         allowed_profiles = profile_map.get(db_col.upper(), ["BASIS", "REGULAR", "CMS"])
+
+        if debug_col and db_col.upper() == debug_col:
+            print(
+                f"[DEBUG] {db_col} found on class={class_name!r} "
+                f"class_profile={class_profile!r} is_claim_class={is_claim_class!r} "
+                f"check_flags={check_flags!r} col_own={col['own']!r} "
+                f"allowed_profiles={allowed_profiles!r} "
+                f"in_profile_map={db_col.upper() in profile_map!r}",
+                file=sys.stderr,
+            )
 
         action_flag = ""
         if check_flags and col["own"]:
@@ -156,9 +210,9 @@ def print_tree(
             elif class_profile and set(allowed_profiles) >= {"BASIS", "REGULAR", "CMS"}:
                 action_flag = " ▲ [PULL UP candidate]"
             elif (
-                not class_profile
-                and is_claim_class
-                and set(allowed_profiles) < {"BASIS", "REGULAR", "CMS"}
+                    not class_profile
+                    and is_claim_class
+                    and set(allowed_profiles) < {"BASIS", "REGULAR", "CMS"}
             ):
                 action_flag = (
                     f" ▼ [PUSH DOWN candidate] Only valid for {allowed_profiles}, "
@@ -179,11 +233,17 @@ def print_tree(
             class_profile,
             indent + "    │",
             visited.copy(),
-            check_flags=False,
-        )
+            check_flags=check_flags,
+            is_claim_class=is_claim_class,
+            debug_col=debug_col,
+            )
 
 
 def main():
+    debug_col = None
+    if len(sys.argv) >= 3 and sys.argv[1] == "--debug-column":
+        debug_col = sys.argv[2].upper()
+
     profile_map = parse_yaml_map(Path(YAML_DICTS_DIR))
     graph = parse_java_graph(JAVA_SRC_DIR)
 
@@ -196,8 +256,18 @@ def main():
         table_info = f" ──► Table: {node['table']}" if node["table"] else ""
 
         print(f"[{node['type']}] {name}{inheritance}{table_info}")
-        print_tree(graph, profile_map, name, get_class_profile(name), indent=" ")
+        print_tree(
+            graph, profile_map, name, get_class_profile(name), indent=" ",
+            debug_col=debug_col,
+        )
         print(f"\n{'-' * 80}\n")
+
+    if UNMATCHED_COLUMNS:
+        print(f"[WARN] {len(UNMATCHED_COLUMNS)} column(s) had no YAML dictionary "
+              "entry and defaulted to 'all profiles valid' -- verify these aren't "
+              "typos or missing dictionary files:")
+        for col in sorted(UNMATCHED_COLUMNS):
+            print(f"    - {col}")
 
 
 if __name__ == "__main__":
