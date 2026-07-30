@@ -34,8 +34,15 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
+from model.idr_prior_auth_item import IdrPriorAuthItem
 from parallel_executor import ParallelStagesExecutor, Stage
-from pipeline_utils import extract_and_load
+from pipeline_utils import (
+    extract_and_load,
+    prune_bene_lis_cmbnd,
+    prune_bene_ma_part_d,
+    prune_bene_ma_part_d_rx,
+    prune_phase_1_ss_claims,
+)
 from settings import enable_prior_auth_ingestion
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
@@ -44,6 +51,10 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
     IdrClaimInstitutionalNch,
+    IdrClaimProfessionalSs,
+    IdrClaimInstitutionalSs,
+]
+CLAIM_SS_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
 ]
@@ -70,7 +81,7 @@ BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
 BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
-PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth]
+PRIOR_AUTH_TABLES: list[type[IdrBaseModel]] = [IdrPriorAuth, IdrPriorAuthItem]
 _LOAD_ALL_TABLES = {"all"}
 
 
@@ -102,6 +113,7 @@ class StagedIdrPipeline:
                         self._stage2_do_claims_and_benes_tbls(),
                         self._stage3_do_parent_claims_tbls(),
                         self._stage4_do_beneficiary(),
+                        self._stage5_prune_obsolete_rows(),
                     ],
                 )
             )
@@ -115,7 +127,7 @@ class StagedIdrPipeline:
         if self.load_type == LoadType.INITIAL:
             tables.extend([*CLAIM_TABLES, *BENE_TABLES])
         if enable_prior_auth_ingestion():
-            tables.append(*PRIOR_AUTH_TABLES)
+            tables.extend(PRIOR_AUTH_TABLES)
 
         filtered_tables = self._filter_tables(tables)
 
@@ -136,6 +148,33 @@ class StagedIdrPipeline:
         yield from self._extract_and_load_stage(
             self._gen_partitioned_node_inputs(self._filter_tables(BENE_TABLES))
         )
+
+    def _stage5_prune_obsolete_rows(self) -> Stage[bool]:
+        if self.load_type == LoadType.INITIAL:
+            return
+
+        yield functools.partial(
+            prune_bene_lis_cmbnd,
+            self.load_mode,
+        )
+
+        yield functools.partial(
+            prune_bene_ma_part_d,
+            self.load_mode,
+        )
+
+        yield functools.partial(
+            prune_bene_ma_part_d_rx,
+            self.load_mode,
+        )
+
+        for model in self._filter_tables(CLAIM_SS_TABLES):
+            yield functools.partial(
+                prune_phase_1_ss_claims,
+                model,
+                self.load_mode,
+                self.start_time,
+            )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
         return [

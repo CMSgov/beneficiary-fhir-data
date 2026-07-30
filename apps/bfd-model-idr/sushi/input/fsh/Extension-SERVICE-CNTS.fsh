@@ -5,4 +5,4 @@ Id: SERVICE-CNTS
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS"
 * ^context[+].type = #element
 * ^context[=].expression = "ExplanationOfBenefit.item"
-* value[x] only decimal
+* value[x] only unsignedInt

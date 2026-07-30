@@ -2523,6 +2523,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -3896,6 +3935,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -5269,6 +5347,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -6642,6 +6759,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -8015,6 +8171,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -9388,6 +9583,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
           } ]
         },
         "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "T",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V0008",
+            "display" : "Void/Entry Code 3 Claim",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -23692,6 +23926,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -23706,7 +23959,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -23724,7 +23977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -23741,7 +23994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -23761,7 +24014,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -23781,7 +24034,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -23795,7 +24048,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -25121,6 +25374,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -25135,7 +25427,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -25153,7 +25445,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -25170,7 +25462,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -25190,7 +25482,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -25210,7 +25502,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -25224,7 +25516,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -26536,6 +26828,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -31341,6 +31672,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -31355,7 +31705,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -31373,7 +31723,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -31390,7 +31740,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -31410,7 +31760,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -31430,7 +31780,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -31444,7 +31794,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -32770,6 +33120,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -32784,7 +33173,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -32802,7 +33191,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -32819,7 +33208,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -32839,7 +33228,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -32859,7 +33248,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -32873,7 +33262,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -34185,6 +34574,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -38990,6 +39418,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -39004,7 +39451,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -39022,7 +39469,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -39039,7 +39486,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -39059,7 +39506,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -39079,7 +39526,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -39093,7 +39540,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -40419,6 +40866,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -40433,7 +40919,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -40451,7 +40937,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -40468,7 +40954,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -40488,7 +40974,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -40508,7 +40994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -40522,7 +41008,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -41834,6 +42320,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -47919,6 +48444,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -47933,7 +48477,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -47951,7 +48495,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -47968,7 +48512,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -47988,7 +48532,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -48008,7 +48552,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -48022,7 +48566,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -49348,6 +49892,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -49362,7 +49945,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -49380,7 +49963,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -49397,7 +49980,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -49417,7 +50000,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -49437,7 +50020,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -49451,7 +50034,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -55537,6 +56120,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -55551,7 +56153,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -55569,7 +56171,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -55586,7 +56188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -55606,7 +56208,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -55626,7 +56228,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -55640,7 +56242,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -56966,6 +57568,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -56980,7 +57621,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -56998,7 +57639,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -57015,7 +57656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -57035,7 +57676,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -57055,7 +57696,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -57069,7 +57710,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -63155,6 +63796,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -63169,7 +63829,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -63187,7 +63847,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -63204,7 +63864,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -63224,7 +63884,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -63244,7 +63904,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -63258,7 +63918,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -64584,6 +65244,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -64598,7 +65297,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -64616,7 +65315,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -64633,7 +65332,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -64653,7 +65352,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -64673,7 +65372,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -64687,7 +65386,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -73687,6 +74386,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -73701,7 +74439,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -73719,7 +74457,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -73736,7 +74474,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -73756,7 +74494,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -73776,7 +74514,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -73790,7 +74528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -75102,6 +75840,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -79973,6 +80750,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -79987,7 +80803,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -80005,7 +80821,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -80022,7 +80838,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -80042,7 +80858,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -80062,7 +80878,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -80076,7 +80892,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -81388,6 +82204,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -82731,6 +83586,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -82745,7 +83639,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -82763,7 +83657,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -82780,7 +83674,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -82800,7 +83694,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -82820,7 +83714,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -82834,7 +83728,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -83532,6 +84426,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -85457,6 +86390,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -85471,7 +86423,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -85489,7 +86441,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -85506,7 +86458,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -85526,7 +86478,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -85546,7 +86498,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -85560,7 +86512,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -86886,6 +87838,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -86900,7 +87891,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -86918,7 +87909,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -86935,7 +87926,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -86955,7 +87946,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -86975,7 +87966,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -86989,7 +87980,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -87687,6 +88678,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -96686,6 +97716,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -96700,7 +97769,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -96718,7 +97787,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -96735,7 +97804,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -96755,7 +97824,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -96775,7 +97844,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -96789,7 +97858,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -98101,6 +99170,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -102972,6 +104080,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -102986,7 +104133,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -103004,7 +104151,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -103021,7 +104168,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -103041,7 +104188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -103061,7 +104208,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -103075,7 +104222,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -104387,6 +105534,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -105730,6 +106916,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -105744,7 +106969,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -105762,7 +106987,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -105779,7 +107004,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -105799,7 +107024,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -105819,7 +107044,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -105833,7 +107058,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -106531,6 +107756,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -108456,6 +109720,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -108470,7 +109753,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -108488,7 +109771,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -108505,7 +109788,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -108525,7 +109808,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -108545,7 +109828,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -108559,7 +109842,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -109885,6 +111168,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -109899,7 +111221,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -109917,7 +111239,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -109934,7 +111256,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -109954,7 +111276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -109974,7 +111296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -109988,7 +111310,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -110686,6 +112008,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -119685,6 +121046,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -119699,7 +121099,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -119717,7 +121117,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -119734,7 +121134,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -119754,7 +121154,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -119774,7 +121174,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -119788,7 +121188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -121100,6 +122500,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -125971,6 +127410,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -125985,7 +127463,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -126003,7 +127481,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -126020,7 +127498,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -126040,7 +127518,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -126060,7 +127538,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -126074,7 +127552,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -127386,6 +128864,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -128729,6 +130246,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -128743,7 +130299,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -128761,7 +130317,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -128778,7 +130334,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -128798,7 +130354,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -128818,7 +130374,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -128832,7 +130388,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -129530,6 +131086,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -131455,6 +133050,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -131469,7 +133083,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -131487,7 +133101,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -131504,7 +133118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -131524,7 +133138,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -131544,7 +133158,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -131558,7 +133172,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -132884,6 +134498,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -132898,7 +134551,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -132916,7 +134569,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -132933,7 +134586,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -132953,7 +134606,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -132973,7 +134626,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -132987,7 +134640,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -133685,6 +135338,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -136732,6 +138424,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -136746,7 +138457,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -136764,7 +138475,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -136781,7 +138492,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -136801,7 +138512,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -136821,7 +138532,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -136835,7 +138546,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -138161,6 +139872,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -138175,7 +139925,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -138193,7 +139943,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -138210,7 +139960,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -138230,7 +139980,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -138250,7 +140000,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -138264,7 +140014,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -143070,6 +144820,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -143084,7 +144853,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -143102,7 +144871,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -143119,7 +144888,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -143139,7 +144908,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -143159,7 +144928,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -143173,7 +144942,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -144499,6 +146268,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -144513,7 +146321,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -144531,7 +146339,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -144548,7 +146356,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -144568,7 +146376,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -144588,7 +146396,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -144602,7 +146410,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -149408,6 +151216,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -149422,7 +151249,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -149440,7 +151267,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -149457,7 +151284,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -149477,7 +151304,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -149497,7 +151324,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -149511,7 +151338,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -150837,6 +152664,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -150851,7 +152717,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -150869,7 +152735,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -150886,7 +152752,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -150906,7 +152772,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -150926,7 +152792,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -150940,7 +152806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -152252,6 +154118,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -155299,6 +157204,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -155313,7 +157237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -155331,7 +157255,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -155348,7 +157272,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -155368,7 +157292,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -155388,7 +157312,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -155402,7 +157326,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -156728,6 +158652,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -156742,7 +158705,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -156760,7 +158723,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -156777,7 +158740,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -156797,7 +158760,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -156817,7 +158780,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -156831,7 +158794,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -161637,6 +163600,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -161651,7 +163633,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -161669,7 +163651,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -161686,7 +163668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -161706,7 +163688,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -161726,7 +163708,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -161740,7 +163722,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -163066,6 +165048,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -163080,7 +165101,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -163098,7 +165119,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -163115,7 +165136,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -163135,7 +165156,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -163155,7 +165176,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -163169,7 +165190,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -167975,6 +169996,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -167989,7 +170029,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -168007,7 +170047,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -168024,7 +170064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -168044,7 +170084,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -168064,7 +170104,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -168078,7 +170118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -169404,6 +171444,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -169418,7 +171497,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -169436,7 +171515,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -169453,7 +171532,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -169473,7 +171552,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -169493,7 +171572,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -169507,7 +171586,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -170819,6 +172898,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {
@@ -173866,6 +175984,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -173880,7 +176017,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -173898,7 +176035,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -173915,7 +176052,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -173935,7 +176072,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -173955,7 +176092,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -173969,7 +176106,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -175295,6 +177432,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -175309,7 +177485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -175327,7 +177503,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -175344,7 +177520,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -175364,7 +177540,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -175384,7 +177560,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -175398,7 +177574,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -180204,6 +182380,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -180218,7 +182413,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -180236,7 +182431,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -180253,7 +182448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -180273,7 +182468,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -180293,7 +182488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -180307,7 +182502,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -181633,6 +183828,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -181647,7 +183881,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -181665,7 +183899,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -181682,7 +183916,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -181702,7 +183936,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -181722,7 +183956,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -181736,7 +183970,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -186542,6 +188776,25 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -186556,7 +188809,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -186574,7 +188827,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -186591,7 +188844,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -186611,7 +188864,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -186631,7 +188884,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -186645,7 +188898,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -187971,6 +190224,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 11
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "FA",
+            "display" : "Accept",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 12
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -187985,7 +190277,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -188003,7 +190295,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -188020,7 +190312,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -188040,7 +190332,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -188060,7 +190352,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -188074,7 +190366,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -189386,6 +191678,45 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           } ]
         },
         "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PD_STUS_CD",
+            "display" : "Claim Paid Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "S",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_AUDT_TRL_STUS_CD",
+            "display" : "Claim Status Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "MA",
+            "display" : "Current active claim. This is an internal MCS MPAP status, and will only display online in related history.",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+          } ]
+        },
+        "sequence" : 7
       } ],
       "total" : [ {
         "amount" : {

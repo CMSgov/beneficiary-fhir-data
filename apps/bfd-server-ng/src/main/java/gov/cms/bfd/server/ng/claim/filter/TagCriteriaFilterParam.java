@@ -91,6 +91,21 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
         .anyMatch(systemType::isCompatibleWith);
   }
 
+  @Override
+  public boolean shouldQueryPriorAuth() {
+    return tagCriteria.stream()
+        .allMatch(
+            orList ->
+                orList.stream()
+                    .anyMatch(
+                        criterion ->
+                            switch (criterion) {
+                              case TagCriterion.FinalActionCriterion _ -> true;
+                              case TagCriterion.MetaSourceSkCriterion(var source) ->
+                                  SystemType.SS.isCompatibleWith(source);
+                            }));
+  }
+
   private void extractSourceId(TagCriterion criterion, Consumer<MetaSourceSk> consumer) {
     if (criterion instanceof TagCriterion.MetaSourceSkCriterion(MetaSourceSk metaSourceSk)) {
       consumer.accept(metaSourceSk);

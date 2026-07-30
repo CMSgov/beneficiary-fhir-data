@@ -56,4 +56,11 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
     }
     return metaSourceSk.stream().flatMap(List::stream).anyMatch(systemType::isCompatibleWith);
   }
+
+  @Override
+  public boolean shouldQueryPriorAuth() {
+    return metaSourceSk.stream()
+        .filter(orList -> !orList.isEmpty())
+        .allMatch(orList -> orList.contains(MetaSourceSk.CWF));
+  }
 }

@@ -8,17 +8,28 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
-from constants import DEFAULT_PARTITION
+from constants import (
+    CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE,
+    DEFAULT_MAX_DATE,
+    DEFAULT_PARTITION,
+    PHASE_1_CUTOFF,
+)
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
 from model.base_model import (
     LoadMode,
     T,
+    stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
+from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
+from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.load_progress import LoadProgress
-from settings import BENEFICIARY_PRUNE_BATCH_LIMIT
+from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
 
 
 def get_progress(
@@ -115,14 +126,51 @@ def extract_and_load(
             raise ex
 
 
-def prune_bene_lis_cmbnd(
+def prune_phase_1_ss_claims(
+    cls: type[T],
     load_mode: LoadMode,
     job_start: datetime,
 ) -> bool:
+    shared_claim_tables = {
+        CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+        CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    }
+
+    claim_table = cls.table()
+    item_table = shared_claim_tables.get(claim_table)
+    if item_table is None:
+        return True
+
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
+    logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
+
+    prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn:
+        for target_table in [item_table, claim_table]:
+            total_row_count = 0
+            while True:
+                with conn.transaction():
+                    res = conn.execute(
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
+                        params,
+                    )
+
+                    total_row_count += res.rowcount
+                    logger.info("pruned {} rows from {}", res.rowcount, item_table)
+
+                    if res.rowcount == 0:
+                        logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
+                        break
+    return True
+
+
+def prune_bene_lis_cmbnd(
+    load_mode: LoadMode,
+) -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
-    prune_cutoff_date = job_start - timedelta(days=60)
-    logger.info("pruning obsolete lis beneficiaries", prune_cutoff_date)
+    logger.info("pruning obsolete lis beneficiaries")
 
     with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
         while True:
@@ -136,10 +184,75 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (prune_cutoff_date, BENEFICIARY_PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, BENEFICIARY_PRUNE_BATCH_LIMIT),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
             if res.rowcount < BENEFICIARY_PRUNE_BATCH_LIMIT:
+                break
+
+    return True
+
+
+def prune_bene_ma_part_d(
+    load_mode: LoadMode,
+) -> bool:
+    bene_table = IdrBeneficiaryMaPartDEnrollment.table()
+
+    logger.info("pruning obsolete part d beneficiaries", DEFAULT_MAX_DATE)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, bene_enrlmt_bgn_dt, bene_enrlmt_pgm_type_cd) IN (
+                    SELECT bene_sk, bene_enrlmt_bgn_dt, bene_enrlmt_pgm_type_cd
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (DEFAULT_MAX_DATE, BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT:
+                break
+
+    return True
+
+
+def prune_bene_ma_part_d_rx(
+    load_mode: LoadMode,
+) -> bool:
+    bene_table = IdrBeneficiaryMaPartDEnrollmentRx.table()
+
+    logger.info("pruning obsolete part d rx beneficiaries", DEFAULT_MAX_DATE)
+
+    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+        while True:
+            res = conn.execute(
+                f"""
+                DELETE FROM {bene_table}
+                WHERE (bene_sk, 
+                       bene_cntrct_num, 
+                       bene_pbp_num, 
+                       bene_enrlmt_bgn_dt, 
+                       bene_enrlmt_pdp_rx_info_bgn_dt
+                    ) IN (
+                    SELECT bene_sk, 
+                           bene_cntrct_num, 
+                           bene_pbp_num, 
+                           bene_enrlmt_bgn_dt, 
+                           bene_enrlmt_pdp_rx_info_bgn_dt
+                    FROM {bene_table}
+                    WHERE idr_trans_obslt_ts < %s
+                    LIMIT %s
+                )
+                """,  # type: ignore
+                (DEFAULT_MAX_DATE, BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT),
+            )
+            logger.info("pruned {} rows from {}", res.rowcount, bene_table)
+            if res.rowcount < BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT:
                 break
 
     return True
