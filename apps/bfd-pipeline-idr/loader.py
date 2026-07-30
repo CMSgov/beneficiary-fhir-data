@@ -125,11 +125,11 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         self.meta_keys_str = ", ".join(self.meta_keys)
         self.ordered_pkeys = model.ordered_pkeys()
         self.primary_keys_str = ", ".join(self.ordered_pkeys)
-        self.update_set = [v for v in self.insert_cols if v not in model.ordered_pkeys()]
-        self.update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in self.update_set])
-        self.on_conflict_where_clause = (
-            f"WHERE ({', '.join(f't.{v}' for v in self.update_set)}) IS "
-            f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in self.update_set)})"
+        update_set = [v for v in self.insert_cols if v not in self.ordered_pkeys]
+        update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in update_set])
+        on_conflict_where_clause = (
+            f"WHERE ({', '.join(f't.{v}' for v in update_set)}) IS "
+            f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in update_set)})"
         )
         # For immutable tables, we may still be attempting to re-load some data
         # due to a batch cancellation.
@@ -138,10 +138,10 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         # Additionally, if there are no extra columns to update, we can skip it.
         self.on_conflict_clause = (
             "DO NOTHING"
-            if model.is_immutable() or not self.update_set
+            if model.is_immutable() or not update_set
             else (
-                f"DO UPDATE SET {self.update_set_str}, bfd_updated_ts=%(timestamp)s "
-                f"{self.on_conflict_where_clause}"
+                f"DO UPDATE SET {update_set_str}, bfd_updated_ts=%(timestamp)s "
+                f"{on_conflict_where_clause}"
             )
         )
         # Used in _upsert so that relevant primary/last updated timestamp columns are returned for
@@ -151,7 +151,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             {
                 col
                 for col in [
-                    *self.model.ordered_pkeys(),
+                    *self.ordered_pkeys,
                     self.model.last_updated_timestamp_col(),
                 ]
                 if col
