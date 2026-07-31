@@ -28,8 +28,7 @@ from loader import LoadType, PostgresLoader, get_connection_string, should_track
 from model.base_model import (
     LoadMode,
     T,
-    non_latest_non_part_d_claim_items_query,
-    non_latest_non_part_d_parent_claims_query,
+    non_latest_non_part_d_claims_query,
     stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
@@ -37,6 +36,7 @@ from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnro
 from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.load_progress import LoadProgress
 from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
+
 
 _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
