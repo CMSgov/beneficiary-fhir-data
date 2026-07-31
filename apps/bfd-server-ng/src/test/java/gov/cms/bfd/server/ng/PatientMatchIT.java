@@ -719,7 +719,7 @@ class PatientMatchIT extends IntegrationTestBase {
         getFhirClient().read().resource(AuditEvent.class).withId(auditIds.getFirst()).execute();
     assertEquals(auditIds.getFirst(), audit.getIdPart());
     // Tests that the mapping from a cert to a partner app name works
-    assertEquals("BBAPI", auditRecords.getFirst().partnerName());
+    assertEquals("Blue Button API", auditRecords.getFirst().partnerName());
   }
 
   @Test
