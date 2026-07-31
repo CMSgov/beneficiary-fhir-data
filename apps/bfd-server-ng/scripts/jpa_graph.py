@@ -5,7 +5,7 @@
 # ]
 # ///
 
-# Run using uv jpa_grapy.py
+# Run using uv jpa_graph.py
 
 import re
 from pathlib import Path
