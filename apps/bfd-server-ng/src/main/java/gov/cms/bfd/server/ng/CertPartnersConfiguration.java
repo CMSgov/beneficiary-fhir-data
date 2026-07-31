@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng;
 
 import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +32,7 @@ public class CertPartnersConfiguration {
                   .filter(Objects::nonNull)
                   .map(alias -> Map.entry(alias, partner.getName()));
             })
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey, Map.Entry::getValue, (existing, ignored) -> existing));
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   /** bfd.nonsensitive.cert_partners properties. */
@@ -49,7 +46,6 @@ public class CertPartnersConfiguration {
   private static class Partner {
     private String name;
 
-    @SerializedName("certificate_aliases")
     private List<String> certificateAliases = new ArrayList<>();
   }
 }
