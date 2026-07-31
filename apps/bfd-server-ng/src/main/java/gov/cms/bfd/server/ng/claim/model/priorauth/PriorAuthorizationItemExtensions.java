@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -11,8 +11,9 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.*;
 
+/** Extensions for a Prior Auth ExplanationOfBenefit. */
 @Embeddable
-class PriorAuthorizationItemExtensions {
+public class PriorAuthorizationItemExtensions {
 
   @Getter
   @Column(name = "pa_decision")

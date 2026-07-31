@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import static gov.cms.bfd.server.ng.util.SystemUrls.CMS_HCPCS;
 
@@ -7,7 +7,8 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-class PriceModifierCode {
+/** LineComponent CodeableConcept related to price modifiers. */
+public class PriceModifierCode {
 
   @Column(name = "price_mod1")
   private Optional<String> priceModifier1;

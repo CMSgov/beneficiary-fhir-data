@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import static gov.cms.bfd.server.ng.util.SystemUrls.PROFILE_PRIOR_AUTH;
 
@@ -10,13 +10,16 @@ import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 
+/** Meta for a prior auth ExplanationOfBenefit. */
 @Embeddable
 @Getter
-class PriorAuthorizationMeta {
+public class PriorAuthorizationMeta {
   @Column(name = "bfd_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;
 
-  org.hl7.fhir.r4.model.Meta toFhir(MetaSourceSk metaSourceSk, ClaimSecurityStatus securityStatus) {
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
+  public org.hl7.fhir.r4.model.Meta toFhir(
+      MetaSourceSk metaSourceSk, ClaimSecurityStatus securityStatus) {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     meta.addProfile(PROFILE_PRIOR_AUTH);
     meta.addTag(metaSourceSk.toFhirSystemType());

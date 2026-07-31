@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.claim.model.common.CarinSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
@@ -9,13 +9,15 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** SupportingInformationComponent for a type of bill in a prior auth ExplanationOfBenefit. */
 @Embeddable
-class PriorAuthorizationTypeOfBill {
+public class PriorAuthorizationTypeOfBill {
 
   @Column(name = "tob")
   private String typeOfBill;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
+  public ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()

@@ -25,10 +25,13 @@ TABLE_RE = re.compile(r'@Table\(.*?name\s*=\s*"([^"]+)"', re.DOTALL)
 COLUMN_RE = re.compile(
     r'(?s)@Column\(.*?name\s*=\s*"([^"]+)".*?\)'
     r'(?!(?:(?!;).)*?@Embedded)'  # bail if an @Embedded annotation sits between here and the field
-    r'(?:(?!;).)*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);'
+    r'(?:(?!;|\{|@Column|@AttributeOverride).)*?'  # never tunnel past a semicolon, a class/body brace, or another Column/override annotation
+    r'(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);'
 )
 EMBEDDED_RE = re.compile(
-    r"(?s)@Embedded(?:(?!;).)*?(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
+    r"(?s)@Embedded"
+    r"(?:(?!;|\{|@Column|@AttributeOverride|@Embedded).)*?"
+    r"(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
 )
 ATTRIBUTE_OVERRIDE_RE = re.compile(
     r'@AttributeOverride\(\s*(?:'
@@ -51,6 +54,18 @@ DEFAULT_PROFILES = ["Basis", "Regular", "CMS (Default)"]
 # missing/typo'd dictionary entry isn't confused with a genuinely
 # unrestricted column.
 UNMATCHED_COLUMNS: set[str] = set()
+
+# Populated during parse_java_graph() with every (class_name, db_col) pair
+# where that class's OWN (non-inherited) columns bind the same db_col to
+# more than one distinct java_var. This can be legitimate -- a single raw
+# column intentionally exposed under two field names (e.g. a generic
+# "trackingNumber" alias alongside a more specific business name) -- but
+# it is also the exact signature of a regex mis-attribution bug (see the
+# ClaimInstitutionalCmsNch / clm_nrln_ric_cd incident, where a class-level
+# @AttributeOverride's inner @Column got misattributed to an unrelated
+# field). Surfaced at the end of the run so each can be manually reviewed
+# rather than silently trusted either way.
+DUPLICATE_COLUMN_BINDINGS: dict[tuple[str, str], set[str]] = {}
 
 
 def parse_yaml_map(yaml_dir: Path) -> dict:
@@ -85,20 +100,32 @@ def parse_java_graph(src_dir: Path) -> dict:
         table_match = TABLE_RE.search(content)
 
         override_matches = list(ATTRIBUTE_OVERRIDE_RE.finditer(content))
-        # Span of each @AttributeOverride(...) match, so we can recognize
-        # (and skip) any @Column(...) that COLUMN_RE finds nested inside
-        # one of these -- that @Column belongs to the override and is
-        # already captured below via its 'name' attribute, not via a
-        # field declaration.
-        override_spans = [(m.start(), m.end()) for m in override_matches]
 
-        def _inside_override(pos: int) -> bool:
-            return any(start <= pos < end for start, end in override_spans)
+        # Blank out every @AttributeOverride(...) span before running
+        # COLUMN_RE. Merely discouraging COLUMN_RE from matching inside
+        # these via a negative lookahead is not reliable: the lookahead
+        # only guards the point *after* the inner @Column(...)'s own
+        # closing paren is found, but that closing-paren search is itself
+        # lazy and unguarded, so on backtracking it can tunnel straight
+        # through nested @Column/@AttributeOverride text (and even a
+        # class body's opening brace) to find a *later* ")" that lets
+        # the rest of the pattern succeed -- silently binding the
+        # override's db_col to some unrelated field further down the
+        # file. Replacing the matched text with spaces removes it
+        # structurally, so no amount of backtracking can reach it, while
+        # preserving every other character's position (so line/column
+        # numbers implied by this content stay meaningful if ever needed).
+        masked_content = content
+        for m in override_matches:
+            masked_content = (
+                    masked_content[: m.start()]
+                    + " " * (m.end() - m.start())
+                    + masked_content[m.end() :]
+            )
 
         plain_columns = [
             {"db_col": m.group(1), "java_var": m.group(3)}
-            for m in COLUMN_RE.finditer(content)
-            if not _inside_override(m.start())
+            for m in COLUMN_RE.finditer(masked_content)
         ]
         override_columns = [
             {
@@ -108,11 +135,20 @@ def parse_java_graph(src_dir: Path) -> dict:
             for m in override_matches
         ]
 
+        columns = plain_columns + override_columns
+
+        vars_by_col: dict[str, set[str]] = {}
+        for c in columns:
+            vars_by_col.setdefault(c["db_col"].upper(), set()).add(c["java_var"])
+        for db_col, java_vars in vars_by_col.items():
+            if len(java_vars) > 1:
+                DUPLICATE_COLUMN_BINDINGS[(name, db_col)] = java_vars
+
         graph[name] = {
             "type": class_match.group("type").replace("@", ""),
             "parent": class_match.group("parent"),
             "table": table_match.group(1) if table_match else None,
-            "columns": plain_columns + override_columns,
+            "columns": columns,
             "embeddeds": [
                 {
                     "type": re.sub(
@@ -120,7 +156,7 @@ def parse_java_graph(src_dir: Path) -> dict:
                     ).strip(),
                     "java_var": e[1],
                 }
-                for e in EMBEDDED_RE.findall(content)
+                for e in EMBEDDED_RE.findall(masked_content)
             ],
         }
     return graph
@@ -268,6 +304,14 @@ def main():
               "typos or missing dictionary files:")
         for col in sorted(UNMATCHED_COLUMNS):
             print(f"    - {col}")
+
+    if DUPLICATE_COLUMN_BINDINGS:
+        print(f"\n[WARN] {len(DUPLICATE_COLUMN_BINDINGS)} class/column pair(s) bind "
+              "the same db column to multiple distinct Java field names. This can be "
+              "intentional (one raw column exposed under two names) but is also the "
+              "exact signature of a parsing mis-attribution bug -- review each:")
+        for (cls, db_col), java_vars in sorted(DUPLICATE_COLUMN_BINDINGS.items()):
+            print(f"    - {cls}.{db_col}: {', '.join(sorted(java_vars))}")
 
 
 if __name__ == "__main__":

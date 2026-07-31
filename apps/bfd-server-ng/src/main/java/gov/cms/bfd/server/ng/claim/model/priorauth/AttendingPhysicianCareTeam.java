@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
@@ -9,19 +9,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.*;
 
-/** Prior Auth Rendering Provider History. * */
+/** CareTeamComponent for an attending physician. * */
 @Embeddable
-@AttributeOverride(name = "providerNpiNumber", column = @Column(name = "render_npi"))
-@AttributeOverride(name = "providerName", column = @Column(name = "bfd_render_careteam_name"))
-class PriorAuthRenderingCareTeam extends ProviderHistoryBase {
-  @Column(name = "bfd_render_npi_type")
+@AttributeOverride(name = "providerNpiNumber", column = @Column(name = "att_phy_npi"))
+@AttributeOverride(name = "providerName", column = @Column(name = "bfd_att_phy_careteam_name"))
+public class AttendingPhysicianCareTeam extends ProviderHistoryBase {
+
+  @Column(name = "bfd_att_phy_npi_type")
   private Optional<Integer> npiType;
 
   @Override
   public CareTeamType getCareTeamType() {
-    return CareTeamType.RENDERING;
+    return CareTeamType.ATTENDING;
   }
 
   @Override

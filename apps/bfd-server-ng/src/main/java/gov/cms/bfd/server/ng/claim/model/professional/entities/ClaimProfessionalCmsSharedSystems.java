@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
@@ -127,10 +126,6 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase 
         // Line-level: Rx number from each claim item.
         getClaimItems().stream()
             .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory)));
-  }
-
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
   }
 
   /** SS adjudication: provider account-receivable offset amount. */

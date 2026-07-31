@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
@@ -13,7 +12,6 @@ import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessiona
 import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.*;
@@ -27,15 +25,21 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 public abstract class ClaimProfessionalBase extends ClaimBase {
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
+
+  /**
+   * Hook method to get a ClaimContractorNumber from some data sources.
+   *
+   * @return the ClaimContractorNumber
+   */
+  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
 
   /**
    * Returns supporting-info components that are specific to the subclass.
@@ -58,8 +62,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    * @param sequenceGenerator shared sequence generator for care-team entries
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
-
-  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
 
   /** {@inheritDoc} */
   @Override
@@ -144,9 +146,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var sharedHeaderSupportingInfo =
         Stream.of(
                 claimSubmissionDate.toFhir(supportingInfoFactory),
-                Optional.of(claimContractorNumber)
-                    .flatMap(opt -> opt)
-                    .map(c -> c.toFhir(supportingInfoFactory)),
+                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)),
                 clinicalTrialNumber.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)
             .toList();

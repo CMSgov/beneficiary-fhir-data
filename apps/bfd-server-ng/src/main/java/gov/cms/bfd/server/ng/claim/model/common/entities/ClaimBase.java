@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -183,12 +184,11 @@ public abstract class ClaimBase {
   public abstract Optional<ClaimRelatedCondition> getClaimRelatedCondition();
 
   /**
-   * Returns the claim paid status code if applicable to this claim source type. Defaults to empty
-   * for base claims (like NCH/DDPS) that do not track this field.
+   * Returns the ClaimRecordType, if relevant to the claim source type. Defaults to empty.
    *
-   * @return an optional containing the claim paid status code
+   * @return the ClaimRecordType
    */
-  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.empty();
   }
 
@@ -202,8 +202,19 @@ public abstract class ClaimBase {
   }
 
   /**
+   * Hook method to return the claim paid status code if applicable to this claim source type.
+   * Defaults to empty for base claims (like NCH/DDPS) that do not track this field.
+   *
+   * @return an optional containing the claim paid status code
+   */
+  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
+    return Optional.empty();
+  }
+
+  /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail
-   * logic. Standard base claims with no status code will ignore this.
+   * logic. Standard base claims with no status code will ignore this, default implementation is to
+   * return empty, and only Shared Systems wil override getClaimPaidStatusCode().
    *
    * @param eob the EOB being built
    */

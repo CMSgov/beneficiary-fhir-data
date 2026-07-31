@@ -10,7 +10,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
@@ -43,10 +42,6 @@ import org.hl7.fhir.r4.model.Reference;
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   // TODO - move down to CMS
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
-  // TODO - move down to CMS
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
@@ -62,7 +57,11 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional; // TODO - move down to CMS
+
+  @Embedded
+  private AdjudicationChargeInstitutional
+      adjudicationChargeInstitutional; // TODO - move down to CMS
+
   @Embedded private BenefitEnhancementCodes benefitEnhancementCodes; // TODO - move down to CMS
 
   // region Hook Methods
@@ -73,9 +72,16 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
-  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
-
   abstract List<ClaimValue> getClaimValues();
+
+  /**
+   * Hook method to get a ClaimContractorNumber from some data sources.
+   *
+   * @return the ClaimContractorNumber
+   */
+  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
 
   // endregion
 
@@ -122,7 +128,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
       buildSubclassInitialSupportingInfo() {
     return Stream.of(
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
+            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)),
             nchPrimaryPayorCode.toFhir(supportingInfoFactory),
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)

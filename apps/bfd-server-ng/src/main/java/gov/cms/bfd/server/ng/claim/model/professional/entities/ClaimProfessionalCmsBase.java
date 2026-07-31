@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Optional;
@@ -27,6 +29,17 @@ public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
   @Override
   public ClaimPaymentComponentBase getPaymentComponent() {
     return paymentComponent;
+  }
+
+  // endregion
+
+  // region Claim Contractor Number
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Override
+  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return claimContractorNumber;
   }
 
   // endregion

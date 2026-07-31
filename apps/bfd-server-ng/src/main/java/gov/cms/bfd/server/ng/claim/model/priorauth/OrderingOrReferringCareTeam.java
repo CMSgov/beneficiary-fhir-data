@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "order_refer_npi"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_order_refer_careteam_name"))
-class OrderingOrReferringCareTeam extends ProviderHistoryBase {
+public class OrderingOrReferringCareTeam extends ProviderHistoryBase {
 
   @Column(name = "bfd_order_refer_npi_type")
   private Optional<Integer> npiType;

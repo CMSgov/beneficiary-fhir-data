@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -40,11 +39,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
     return List.of();
-  }
-
-  @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
   }
 
   @Override

@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

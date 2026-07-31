@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,12 +10,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+/** ExplanationOfBeneift.Identifier for Prior Auth. */
 @EqualsAndHashCode
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
 @Embeddable
-class PriorAuthorizationId implements Serializable, Comparable<PriorAuthorizationId> {
+public class PriorAuthorizationId implements Serializable, Comparable<PriorAuthorizationId> {
   @Column(name = "mbi_num", insertable = false, updatable = false)
   private String mbi;
 

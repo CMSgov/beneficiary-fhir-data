@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth.entities;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
@@ -8,6 +8,16 @@ import gov.cms.bfd.server.ng.claim.model.common.OrganizationFactory;
 import gov.cms.bfd.server.ng.claim.model.common.PatientReferenceFactory;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
+import gov.cms.bfd.server.ng.claim.model.priorauth.AttendingPhysicianCareTeam;
+import gov.cms.bfd.server.ng.claim.model.priorauth.ClaimTypePriorAuth;
+import gov.cms.bfd.server.ng.claim.model.priorauth.OrderingOrReferringCareTeam;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthRenderingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationDecision;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationId;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationItem;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationMeta;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationTypeOfBill;
+import gov.cms.bfd.server.ng.claim.model.priorauth.UniqueTrackingNumberPeriod;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;

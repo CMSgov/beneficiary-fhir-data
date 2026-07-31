@@ -77,7 +77,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 

@@ -81,7 +81,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase {
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 

@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.util.SystemUrls;

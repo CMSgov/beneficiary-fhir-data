@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRevenueCenterCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPlaceOfServiceCode;
@@ -30,7 +30,8 @@ public class PriorAuthorizationItem implements Comparable<PriorAuthorizationItem
   @Column(name = "rev_code_1")
   private Optional<ClaimLineRevenueCenterCode> revenueCode1;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       Optional<ClaimTypePriorAuth> claimType) {
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(currentSegment);
