@@ -28,7 +28,7 @@ public class CertPartnersConfiguration {
     return certPartners.getPartnerCertificate().entrySet().stream()
         .flatMap(
             entry -> {
-              Partner partner = new Gson().fromJson(entry.getValue(), Partner.class);
+              var partner = new Gson().fromJson(entry.getValue(), Partner.class);
               return partner.getCertificateAliases().stream()
                   .filter(Objects::nonNull)
                   .map(alias -> Map.entry(alias, partner.getName()));
