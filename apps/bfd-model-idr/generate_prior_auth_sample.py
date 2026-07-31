@@ -26,6 +26,25 @@ def find_bene_sk(mbi_num: str) -> str:
     return "123456789"
 
 
+def ensure_provider_history_exists(npis: set[str]) -> None:
+    poc_path = "sample-data/PRVDR_HSTRY_POC.csv"
+    synth_path = "out/SYNTHETIC_PRVDR_HSTRY.csv"
+    if not os.path.exists(poc_path) or not os.path.exists(synth_path):
+        return
+
+    df_poc = pd.read_csv(poc_path, dtype=str, keep_default_na=False)
+    existing_npis = set(df_poc["PRVDR_SK"])
+    missing_npis = {n for n in npis if n} - existing_npis
+    if not missing_npis:
+        return
+
+    df_synth = pd.read_csv(synth_path, dtype=str, keep_default_na=False)
+    matches = df_synth[df_synth["PRVDR_SK"].isin(missing_npis)]
+    if not matches.empty:
+        new_rows = matches[df_poc.columns].drop_duplicates(subset=["PRVDR_SK"])
+        pd.concat([df_poc, new_rows], ignore_index=True).to_csv(poc_path, index=False)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generate a prior auth sample JSON from SYNTHETIC_PRAUC.csv based on UTN."
@@ -57,6 +76,11 @@ def main():
     # Sort matching rows by CURRENT_SEGMENT (cast to int to sort correctly)
     matching_rows_df["CURRENT_SEGMENT"] = matching_rows_df["CURRENT_SEGMENT"].astype(int)
     matching_rows_df = matching_rows_df.sort_values(by="CURRENT_SEGMENT")
+
+    # Collect provider NPIs and ensure they exist in sample-data/PRVDR_HSTRY_POC.csv
+    npi_cols = [c for c in matching_rows_df.columns if "NPI" in c]
+    npis = set(matching_rows_df[npi_cols].to_numpy().ravel())
+    ensure_provider_history_exists(npis)
 
     # Get bene_sk
     bene_sk = find_bene_sk(target_mbi)
