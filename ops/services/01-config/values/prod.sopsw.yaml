@@ -749,6 +749,9 @@
   -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
 /bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json: '["bluebutton_backend_prod_data_server_client_test", "bluebutton_backend_test_samhsa"]'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi: '{"name":"Blue Button API","certificateAliases":["bluebutton_backend_prod_data_server_client_test","bluebutton_backend_test_samhsa","bluebutton_root_ca"]}'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bcda: '{"name":"BCDA","certificateAliases":["bcda_prod_client"]}'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d: '{"name":"AB2D","certificateAliases":["ab2d_cms_gov"]}'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 24
 /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096

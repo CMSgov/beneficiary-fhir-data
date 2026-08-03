@@ -70,6 +70,9 @@ public class LoggerConstants {
   /** Name of the current match algorithm version used. */
   public static final String MATCH_ALGORITHM_VERSION = "matchAlgorithmVersion";
 
+  /** Name of the partner application that sent a request. */
+  public static final String PARTNER_APP_NAME = "partnerAppName";
+
   /** Current match algorithm version. */
   public static final String CURRENT_MATCH_ALGORITHM_VERSION = "3.2.2";
 
