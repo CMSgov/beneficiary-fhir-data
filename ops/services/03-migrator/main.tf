@@ -55,10 +55,10 @@ locals {
 }
 
 module "log_group_messages" {
-  source          = "../../terraform-modules/general/high-retention-log-group"
-  name            = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id      = local.env_key_arn
-  prevent_destroy = true
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 # TODO: Migrator should not run in Spot to avoid the possibility of Spot Termination
