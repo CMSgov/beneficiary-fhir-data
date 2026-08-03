@@ -34,6 +34,7 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from model.idr_prior_auth import IdrPriorAuth
+from model.idr_prior_auth_item import IdrPriorAuthItem
 from parallel_executor import ParallelStagesExecutor, Stage
 from pipeline_utils import (
     extract_and_load,

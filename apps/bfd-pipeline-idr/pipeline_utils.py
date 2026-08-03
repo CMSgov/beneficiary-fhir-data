@@ -1,6 +1,5 @@
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 import psycopg
 from loguru import logger
@@ -16,10 +15,6 @@ from constants import (
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
     DEFAULT_PARTITION,
-    FISS_CLM_SOURCE,
-    IDR_CLAIM_TABLE,
-    MCS_CLM_SOURCE,
-    PART_D_CLAIM_TYPE_CODES,
     PHASE_1_CUTOFF,
 )
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
@@ -35,8 +30,10 @@ from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowInco
 from model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from model.load_progress import LoadProgress
-from settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
-
+from settings import (
+    BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT,
+    BENEFICIARY_PRUNE_BATCH_LIMIT,
+)
 
 _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
@@ -147,8 +144,8 @@ def prune_phase_1_ss_claims(
     item_table = _SHARED_SYSTEM_CLAIM_ITEM_TABLES.get(claim_table)
     if item_table is None:
         return True
-    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
 
+    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
     logger.info("pruning phase 1 ss claims older than {}", prune_cutoff_date)
 
     prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
@@ -165,6 +162,10 @@ def prune_phase_1_ss_claims(
 
                     total_row_count += res.rowcount
                     logger.info("pruned {} rows from {}", res.rowcount, item_table)
+
+                    if res.rowcount == 0:
+                        logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
+                        break
     return True
 
 
@@ -177,88 +178,41 @@ def prune_non_latest_non_part_d_ss_claims(
     item_table = _SHARED_SYSTEM_CLAIM_ITEM_TABLES.get(claim_table)
     if item_table is None:
         return True
+
     prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
-    part_d_codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+    logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
 
-    non_latest_non_part_d_claim_filter = f"""
-        clm.clm_ltst_clm_ind = 'N'
-        AND clm.clm_type_cd NOT IN ({part_d_codes})
-        AND clm.clm_idr_ld_dt < %s
-    """
+    prune_query, params = non_latest_non_part_d_claims_query(claim_table, prune_cutoff_date)
 
-   logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
+    total_row_counts = {
+        item_table: 0,
+        claim_table: 0,
+    }
 
-                    if res.rowcount == 0:
-                        logger.info("Total rows pruned from {}: {}", item_table, total_row_count)
-                        break
     with psycopg.connect(get_connection_string(load_mode)) as conn:
-        # Claim items can exist even when the non-latest parent claim was filtered
-        # before final claim-table load, so use the source claim table.
-        _prune_table_in_batches(
-            conn,
-            item_table,
-            f"""
-                    DELETE FROM {item_table}
-                    WHERE (clm_uniq_id, bfd_row_id) IN (
-                        SELECT item.clm_uniq_id, item.bfd_row_id
-                        FROM {item_table} item
-                        JOIN {IDR_CLAIM_TABLE} clm ON clm.clm_uniq_id = item.clm_uniq_id
-                        WHERE {non_latest_non_part_d_claim_filter}
-                        LIMIT {PRUNE_BATCH_MAX_SIZE}
+        while True:
+            claim_row_count = 0
+            with conn.transaction():
+                for target_table in [item_table, claim_table]:
+                    res = conn.execute(
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
+                        params,
                     )
-                """,
-                (prune_cutoff_date, PHASE_1_PRUNE_BATCH_LIMIT),
-            )
-            logger.info("pruned {} rows from {}", res.rowcount, item_table)
-            if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
+
+                    total_row_counts[target_table] += res.rowcount
+                    logger.info("pruned {} rows from {}", res.rowcount, target_table)
+
+                    if target_table == claim_table:
+                        claim_row_count = res.rowcount
+
+            if claim_row_count == 0:
+                for target_table in [item_table, claim_table]:
+                    logger.info(
+                        "Total rows pruned from {}: {}",
+                        target_table,
+                        total_row_counts[target_table],
+                    )
                 break
-    prune_query, params = non_latest_non_part_d_claim_items_query(item_table, prune_cutoff_date)
-
-    with psycopg.connect(get_connection_string(load_mode)) as conn:
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                    DELETE FROM {item_table}
-                    WHERE (clm_uniq_id, bfd_row_id) IN ({prune_query})
-                    """,  # type: ignore
-                    params,
-                )
-                logger.info("pruned {} rows from {}", res.rowcount, item_table)
-                if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
-                    break
-
-    return True
-
-
-def prune_non_latest_non_part_d_ss_parent_claims(
-    cls: type[T],
-    load_mode: LoadMode,
-    job_start: datetime,
-) -> bool:
-    claim_table = cls.table()
-    if claim_table not in _SHARED_SYSTEM_CLAIM_ITEM_TABLES:
-        return True
-
-    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
-
-    logger.info("pruning non-latest non-Part-D ss parent claims older than {}", prune_cutoff_date)
-
-    prune_query, params = non_latest_non_part_d_parent_claims_query(claim_table, prune_cutoff_date)
-
-    with psycopg.connect(get_connection_string(load_mode)) as conn:
-        while True:
-            with conn.transaction():
-                res = conn.execute(
-                    f"""
-                    DELETE FROM {claim_table}
-                    WHERE clm_uniq_id IN ({prune_query})
-                    """,  # type: ignore
-                    params,
-                )
-                logger.info("pruned {} rows from {}", res.rowcount, claim_table)
-                if res.rowcount < PHASE_1_PRUNE_BATCH_LIMIT:
-                    break
 
     return True
 
@@ -276,7 +230,7 @@ def prune_bene_lis_cmbnd(
                 f"""
                 DELETE FROM {bene_table}
                 WHERE (bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts) IN (
-                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts
+                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts 
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
                     LIMIT %s
@@ -331,16 +285,16 @@ def prune_bene_ma_part_d_rx(
             res = conn.execute(
                 f"""
                 DELETE FROM {bene_table}
-                WHERE (bene_sk,
-                       bene_cntrct_num,
-                       bene_pbp_num,
-                       bene_enrlmt_bgn_dt,
+                WHERE (bene_sk, 
+                       bene_cntrct_num, 
+                       bene_pbp_num, 
+                       bene_enrlmt_bgn_dt, 
                        bene_enrlmt_pdp_rx_info_bgn_dt
                     ) IN (
-                    SELECT bene_sk,
-                           bene_cntrct_num,
-                           bene_pbp_num,
-                           bene_enrlmt_bgn_dt,
+                    SELECT bene_sk, 
+                           bene_cntrct_num, 
+                           bene_pbp_num, 
+                           bene_enrlmt_bgn_dt, 
                            bene_enrlmt_pdp_rx_info_bgn_dt
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
