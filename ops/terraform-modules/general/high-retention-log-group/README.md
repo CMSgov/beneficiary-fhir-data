@@ -29,7 +29,6 @@ This module exports the full properties of the created `log_group` resource for 
 | <a name="input_name"></a> [name](#input\_name) | n/a | `string` | n/a | yes |
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | Optional KMS key ARN for encrypting the log group. | `string` | `null` | no |
 | <a name="input_log_retention_days"></a> [log\_retention\_days](#input\_log\_retention\_days) | n/a | `number` | `2557` | no |
-| <a name="input_prevent_destroy"></a> [prevent\_destroy](#input\_prevent\_destroy) | Set true to prevent accidental deletion of the log group. | `bool` | `true` | no |
 | <a name="input_skip_destroy"></a> [skip\_destroy](#input\_skip\_destroy) | Set true to skip destroying the log group. | `bool` | `true` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to the CloudWatch log group. | `map(string)` | `{}` | no |
 

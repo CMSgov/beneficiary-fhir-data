@@ -46,11 +46,11 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_slack_alerter"></a> [slack\_alerter](#module\_slack\_alerter) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_slack_failure"></a> [slack\_failure](#module\_slack\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_slack_success"></a> [slack\_success](#module\_slack\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_splunk_incident_failure"></a> [splunk\_incident\_failure](#module\_splunk\_incident\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_splunk_incident_success"></a> [splunk\_incident\_success](#module\_splunk\_incident\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_slack_alerter"></a> [log\_group\_slack\_alerter](#module\_log\_group\_slack\_alerter) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_slack_failure"></a> [log\_group\_slack\_failure](#module\_log\_group\_slack\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_slack_success"></a> [log\_group\_slack\_success](#module\_log\_group\_slack\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_splunk_incident_failure"></a> [log\_group\_splunk\_incident\_failure](#module\_log\_group\_splunk\_incident\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_splunk_incident_success"></a> [log\_group\_splunk\_incident\_success](#module\_log\_group\_splunk\_incident\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-platform-service | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

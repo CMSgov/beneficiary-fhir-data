@@ -34,9 +34,9 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_ecs_events"></a> [ecs\_events](#module\_ecs\_events) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_ecs_events"></a> [log\_group\_ecs\_events](#module\_log\_group\_ecs\_events) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_this"></a> [log\_group\_this](#module\_log\_group\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
-| <a name="module_this"></a> [this](#module\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

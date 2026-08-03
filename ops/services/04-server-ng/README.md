@@ -56,12 +56,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ------ | ------- |
 | <a name="module_bucket_s3logs"></a> [bucket\_s3logs](#module\_bucket\_s3logs) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
-| <a name="module_log_router_messages"></a> [log\_router\_messages](#module\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_s3logs_log_group"></a> [s3logs\_log\_group](#module\_s3logs\_log\_group) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_server_healthchecks"></a> [server\_healthchecks](#module\_server\_healthchecks) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_server_messages"></a> [server\_messages](#module\_server\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_server_nonjson"></a> [server\_nonjson](#module\_server\_nonjson) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_service_connect_messages"></a> [service\_connect\_messages](#module\_service\_connect\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_log_router_messages"></a> [log\_group\_log\_router\_messages](#module\_log\_group\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_s3logs"></a> [log\_group\_s3logs](#module\_log\_group\_s3logs) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_server_healthchecks"></a> [log\_group\_server\_healthchecks](#module\_log\_group\_server\_healthchecks) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_server_messages"></a> [log\_group\_server\_messages](#module\_log\_group\_server\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_server_nonjson"></a> [log\_group\_server\_nonjson](#module\_log\_group\_server\_nonjson) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_service_connect_messages"></a> [log\_group\_service\_connect\_messages](#module\_log\_group\_service\_connect\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

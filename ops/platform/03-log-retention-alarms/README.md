@@ -33,7 +33,7 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_checker"></a> [checker](#module\_checker) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_checker"></a> [log\_group\_checker](#module\_log\_group\_checker) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-platform-service | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

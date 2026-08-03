@@ -55,10 +55,10 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_bucket_ccw"></a> [bucket\_ccw](#module\_bucket\_ccw) | ../../terraform-modules/general/secure-bucket | n/a |
-| <a name="module_ccw_messages"></a> [ccw\_messages](#module\_ccw\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
-| <a name="module_ccw_runner"></a> [ccw\_runner](#module\_ccw\_runner) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_data_db_writer_instance"></a> [data\_db\_writer\_instance](#module\_data\_db\_writer\_instance) | ../../terraform-modules/general/data-db-writer-instance | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
+| <a name="module_log_group_ccw_messages"></a> [log\_group\_ccw\_messages](#module\_log\_group\_ccw\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_ccw_runner"></a> [log\_group\_ccw\_runner](#module\_log\_group\_ccw\_runner) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
