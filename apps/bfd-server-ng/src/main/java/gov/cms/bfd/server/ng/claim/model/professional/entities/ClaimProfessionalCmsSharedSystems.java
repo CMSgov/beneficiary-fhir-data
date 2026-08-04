@@ -91,16 +91,20 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase 
    */
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo() {
+  buildSubclassSupportingInfo() {
+    Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>> optionalInfo =
+      Stream.concat(
+        Stream.of(
+          nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+          providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
+          Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+          buildAuditStatusSupportingInfo()),
+        buildRxSupportingInfo());
+
     return Stream.concat(
-            Stream.of(
-                nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-                buildAuditStatusSupportingInfo()),
-            buildRxSupportingInfo())
-        .flatMap(Optional::stream)
-        .toList();
+      super.buildSubclassSupportingInfo().stream(), // Clinical trial number comes from cms base
+      optionalInfo.flatMap(Optional::stream))
+    .toList();
   }
 
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
