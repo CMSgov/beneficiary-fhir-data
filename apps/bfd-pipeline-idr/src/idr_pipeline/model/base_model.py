@@ -851,17 +851,21 @@ def stale_phase_1_claims_query(
 ) -> tuple[str, tuple[datetime, datetime]]:
     return (
         f"""
-            SELECT clm.clm_uniq_id
-            FROM {header_table} clm
-            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-            AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-            AND clm.bfd_updated_ts < %s
-            AND NOT EXISTS (
+            WITH claims AS (
+                SELECT clm.clm_uniq_id 
+                FROM {header_table} clm
+                WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+                AND clm.bfd_updated_ts < %s
+                ORDER BY clm.bfd_updated_ts, clm.clm_uniq_id
+            )
+            SELECT clm.clm_uniq_id 
+            FROM claims clm
+            WHERE NOT EXISTS (
                 SELECT 1 FROM {item_table} item
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
-            ORDER BY clm.clm_uniq_id
             LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
         """,
         (cutoff_date, cutoff_date),

@@ -19,7 +19,9 @@ public class CertificateUtil {
   private final Configuration configuration;
   private final Environment environment;
 
-  private static final String LEAF_CERT_HEADER = "X-Amzn-Mtls-Clientcert";
+  /** Header name for the leaf certificate in the request. */
+  public static final String LEAF_CERT_HEADER = "X-Amzn-Mtls-Clientcert";
+
   private static final String CLIENT_CERT_ALIAS_ATTRIBUTE = "CLIENT_CERT_ALIAS";
 
   /**
