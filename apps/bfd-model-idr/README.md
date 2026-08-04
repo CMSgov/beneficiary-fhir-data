@@ -92,6 +92,17 @@ python generate_prior_auth_sample.py --utn=<utn-here>
 
 This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
 
+#### EOB Sample Generator
+
+To generate a EOB sample that is not prior authorization.
+
+```sh
+python generate_eob_sample.py --clm_uniq_id <clm_uniq_id_here> --eob_type <eob_type_here> 
+```
+This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
+
+This will currently only work for Pharmacy types but will be continued to work on other types.
+
 ### Create FHIR files with synthetic data
 
 Requires Matchbox to be active.
