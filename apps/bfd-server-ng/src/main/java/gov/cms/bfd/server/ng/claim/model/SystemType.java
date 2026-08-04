@@ -1,17 +1,21 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 
 /** The type of system for a given claim. Used to group various systems under SS together. */
+@AllArgsConstructor
 public enum SystemType {
   /** National Claims History. */
-  NCH,
+  NCH(List.of(MetaSourceSk.NCH)),
   /** Shared Systems. */
-  SS,
+  SS(List.of(MetaSourceSk.FISS, MetaSourceSk.MCS, MetaSourceSk.VMS, MetaSourceSk.CWF)),
   /** Drug Data Processing systems. */
-  DDPS,
+  DDPS(List.of(MetaSourceSk.DDPS)),
   /** Unknown (used for bene data). */
-  UNKNOWN;
+  UNKNOWN(List.of());
+
+  private final List<MetaSourceSk> compatibleSources;
 
   /**
    * Checks if the system type is compatible with any of the given meta_src_sk values.
@@ -30,12 +34,7 @@ public enum SystemType {
    * @return boolean
    */
   public boolean isCompatibleWith(MetaSourceSk source) {
-    return switch (this) {
-      case NCH -> source == MetaSourceSk.NCH;
-      case DDPS -> source == MetaSourceSk.DDPS;
-      case SS -> source != MetaSourceSk.NCH && source != MetaSourceSk.DDPS;
-      case UNKNOWN -> false;
-    };
+    return compatibleSources.contains(source);
   }
 
   /**

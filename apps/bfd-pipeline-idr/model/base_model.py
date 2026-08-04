@@ -161,6 +161,16 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
+def provider_npi_type_expr(alias: str) -> str:
+    return f"""
+        CASE 
+            WHEN {alias}.prvdr_lgl_name IS NOT NULL THEN 2
+            WHEN {alias}.prvdr_lgl_name IS NULL AND {alias}.prvdr_1st_name IS NOT NULL THEN 1
+            ELSE NULL 
+        END
+    """
+
+
 MEDICARE_EXHAUSTED_CD = "A3"
 ACTIVE_CARE_CD = "22"
 QUALIFYING_STAY_CD = "70"
@@ -378,6 +388,10 @@ ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
 ALIAS_PRVDR_ATNDG = "prvdr_atndg"
 ALIAS_PRVDR_OPRTG = "prvdr_oprtg"
 ALIAS_PRVDR_OTHR = "prvdr_othr"
+ALIAS_PRVDR_ATT_PHY = "prvdr_att"
+ALIAS_PRVDR_RENDER = "prvdr_render"
+ALIAS_PRVDR_ORDER_REFER = "prvdr_order_refer"
+ALIAS_PRIOR_AUTH = "prior_auth"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
@@ -836,13 +850,18 @@ def stale_phase_1_claims_query(
     cutoff_date: datetime,
 ) -> tuple[str, tuple[datetime, datetime]]:
     return (
-        f""" 
+        f"""
+            WITH claims AS (
+                SELECT clm.clm_uniq_id 
+                FROM {header_table} clm
+                WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
+                AND clm.bfd_updated_ts < %s
+                ORDER BY clm.bfd_updated_ts, clm.clm_uniq_id
+            )
             SELECT clm.clm_uniq_id 
-            FROM {header_table} clm
-            WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
-            AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
-            AND clm.bfd_updated_ts < %s
-            AND NOT EXISTS (
+            FROM claims clm
+            WHERE NOT EXISTS (
                 SELECT 1 FROM {item_table} item
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s

@@ -82,6 +82,15 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization";
 
   /**
+   * URL for the Prior Auth Resource Profile, version 2.1.0. Used for the referenced Prior Auth
+   * Explanation of Benefit. <a
+   * href="http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization">Prior
+   * Auth 2.1.0</a>
+   */
+  public static final String PROFILE_PRIOR_AUTH =
+      "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization";
+
+  /**
    * System URL for the HL7 Subscriber Relationship code system. Used for {@code
    * Coverage.relationship.coding.system}. <a
    * href="http://terminology.hl7.org/CodeSystem/subscriber-relationship">Subscriber
@@ -448,6 +457,118 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID";
 
   /**
+   * Extension URL for Prior Auth Date Added. Source: PRAUC.PA-DT-ADDED <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED">PA-DT-ADDED
+   * Extension</a>
+   */
+  public static final String EXT_PA_DT_ADDED_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-ADDED";
+
+  /**
+   * Extension URL for Prior Auth Date Updated. Source: PRAUC.PA-DT-UPDATED <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED">PA-DT-UPDATED
+   * Extension</a>
+   */
+  public static final String EXT_PA_DT_UPDATED_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DT-UPDATED";
+
+  /**
+   * Extension URL for Prior Auth Request Submit Date. Source: PRAUC.PA-REQ-SUB-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT">PA-REQ-SUB-DT
+   * Extension</a>
+   */
+  public static final String EXT_PA_REQ_SUB_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-SUB-DT";
+
+  /**
+   * Extension URL for Prior Auth Request Received Date. Source: PRAUC.PA-REQ-REC-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT">PA-REQ-REC-DT
+   * Extension</a>
+   */
+  public static final String EXT_PA_REQ_REC_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-REQ-REC-DT";
+
+  /**
+   * Extension URL for Prior Auth Decision Date. Source: PRAUC.PA-DECISION-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT">PA-DECISION-DT
+   * Extension</a>
+   */
+  public static final String EXT_PA_DECISION_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-DT";
+
+  /**
+   * Extension URL for Prior Auth Decision Expired Date. Source: PRAUC.PA-DECISION-EXP-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT">PA-DECISION-EXP-DT
+   * Extension</a>
+   */
+  public static final String EXT_PA_DECISION_EXP_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION-EXP-DT";
+
+  /**
+   * Extension URL for Prior Auth Number of Services Count. Source: PRAUC.SERVICE-CNTS <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS">SERVICE-CNTS
+   * Extension</a>
+   */
+  public static final String EXT_PA_SERVICE_CNTS_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/SERVICE-CNTS";
+
+  /**
+   * Extension URL for Prior Auth MR Count Indicator. Source: PRAUC.MR-COUNT-IND <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND">MR-COUNT-IND
+   * Extension</a>
+   */
+  public static final String EXT_PA_MR_COUNT_INDICATOR_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-IND";
+
+  /**
+   * Extension URL for Prior Auth MR Count Start Date. Source: PRAUC.MR-COUNT-ST-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT">MR-COUNT-ST-DT
+   * Extension</a>
+   */
+  public static final String EXT_MR_COUNT_ST_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-ST-DT";
+
+  /**
+   * Extension URL for Prior Auth MR Count End Date. Source: PRAUC.MR-COUNT-END-DT <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT">MR-COUNT-END-DT
+   * Extension</a>
+   */
+  public static final String EXT_MR_COUNT_END_DT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/MR-COUNT-END-DT";
+
+  /**
+   * Extension URL for Prior Auth RRB Exclude Indicator. Source: PRAUC.RRB-EXCL-IND <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND">RRB-EXCL-IND
+   * Extension</a>
+   */
+  public static final String EXT_RRB_EXCL_IND_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND";
+
+  /**
+   * Extension URL for Prior Auth Servicing or Rendering Status. Source: PRAUC.SVC-RENDER-ST <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST">SVC-RENDER-ST
+   * Extension</a>
+   */
+  public static final String EXT_SVC_RENDER_ST_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/SVC-RENDER-ST";
+
+  /**
+   * Extension URL for Prior Auth Decision. Source: PRAUC.PA-DECISION <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION">PA-DECISION
+   * Extension</a>
+   */
+  public static final String EXT_PA_DECISION_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION";
+
+  /**
+   * System URL for the BFD/BlueButton Prior Auth Decision Code system. Used for the coding in the
+   * PA-DECISION extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION">PA-DECISION CodeSystem</a>
+   */
+  public static final String SYS_PA_DECISION =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION";
+
+  /**
    * System URL for the BFD/BlueButton Medicare Status Code system. Used for the coding in the
    * BENE-MDCR-STUS-CD extension. <a
    * href="https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD">BENE-MDCR-STUS-CD
@@ -611,10 +732,6 @@ public class SystemUrls {
 
   // Carin Blue Button
 
-  /** CARIN Blue Button - Organization. */
-  public static final String PROFILE_CARIN_BB_ORGANIZATION_2_2_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0";
-
   /** CARIN Blue Button - Practitioner. */
   public static final String PROFILE_CARIN_BB_PRACTITIONER_2_2_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0";
@@ -684,6 +801,10 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CLAIM_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD";
 
+  /** Blue Button code system - Code system for clm type. */
+  public static final String BLUEBUTTON_CLAIM_TYPE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE";
+
   // CMS Blue Button
   /** Blue Button code system - Code system for eob-type. */
   public static final String BLUE_BUTTON_EOB_TYPE_CODE =
@@ -745,9 +866,21 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_AUDIT_TRAIL_STATUS_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD";
 
+  /** Blue Button code system - Code system for claim paid status code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PAID_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD";
+
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
+
+  /** Blue Button identifier - unique tracking number. */
+  public static final String BLUE_BUTTON_UNIQUE_TRACKING_NUMBER =
+      "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number";
+
+  /** Blue Button identifier - internal control number or DCN. */
+  public static final String BLUE_BUTTON_INTERNAL_CONTROL_NUMBER_OR_DCN =
+      "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN";
 
   /** Blue Button code system - claim query code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_QUERY_CODE =

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim;
 
+import static gov.cms.bfd.server.ng.util.LogUtil.logUniqueBeneficiaries;
 import static gov.cms.bfd.server.ng.util.MetricRecorder.CLAIM_TYPE;
 
 import gov.cms.bfd.server.ng.DbFilter;
@@ -8,7 +9,6 @@ import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
-import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
@@ -31,6 +31,7 @@ public class ClaimAsyncService {
   private final EntityManagerFactory entityManagerFactory;
   private final MetricRecorder metricRecorder;
   private final QueryTelemetryUtil queryTelemetryUtil;
+  private final PriorAuthorizationRepository priorAuthorizationRepository;
 
   @Async
   @SuppressWarnings("java:S2077")
@@ -63,9 +64,7 @@ public class ClaimAsyncService {
                         entityManager.createQuery(jpql, claimClass), filters.params())
                     .setParameter("claimUniqueIds", claimUniqueIds);
             var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
-            result.stream()
-                .findFirst()
-                .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+            logUniqueBeneficiaries(result);
             return CompletableFuture.completedFuture(result);
           }
         });
@@ -101,9 +100,7 @@ public class ClaimAsyncService {
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);
-            result.stream()
-                .findFirst()
-                .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+            logUniqueBeneficiaries(result);
             return CompletableFuture.completedFuture(result);
           });
     }
@@ -130,6 +127,12 @@ public class ClaimAsyncService {
       queryParams.addAll(params.params());
     }
     return new DbFilter(sb.toString(), queryParams);
+  }
+
+  @Async
+  protected CompletableFuture<List<PriorAuthorization>> fetchPriorAuth(String mbi) {
+    return CompletableFuture.completedFuture(
+        priorAuthorizationRepository.getPriorAuthorizationFromMbi(mbi));
   }
 
   private EntityManager readonly(EntityManager entityManager) {
