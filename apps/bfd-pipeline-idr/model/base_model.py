@@ -872,22 +872,11 @@ def stale_phase_1_claims_query(
     )
 
 
-def non_latest_non_part_d_claims_query(
-    claim_table: str,
-    cutoff_date: datetime,
-) -> tuple[str, tuple[datetime]]:
-    return (
-        f"""
-            WITH claims AS (
-                SELECT clm.clm_uniq_id
-                FROM {claim_table} clm
-                WHERE clm.clm_ltst_clm_ind = 'N'
-                AND clm.clm_idr_ld_dt < %s
-                ORDER BY clm.clm_idr_ld_dt, clm.clm_uniq_id
-            )
-            SELECT clm.clm_uniq_id
-            FROM claims clm
-            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
-        """,
-        (cutoff_date,),
-    )
+def stale_non_part_d_claims_query(claim_table: str) -> str:
+    return f"""
+        SELECT clm.clm_uniq_id
+        FROM {claim_table} clm
+        WHERE clm.clm_ltst_clm_ind = 'N'
+        ORDER BY clm.clm_uniq_id
+        LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+    """

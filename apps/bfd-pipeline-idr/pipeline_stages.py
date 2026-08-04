@@ -41,8 +41,8 @@ from pipeline_utils import (
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
     prune_bene_ma_part_d_rx,
-    prune_non_latest_non_part_d_ss_claims,
     prune_phase_1_ss_claims,
+    prune_stale_non_part_d_claims,
 )
 from settings import enable_prior_auth_ingestion
 
@@ -176,11 +176,12 @@ class StagedIdrPipeline:
                 self.load_mode,
                 self.start_time,
             )
+
+        for model in self._filter_tables(CLAIM_TABLES):
             yield functools.partial(
-                prune_non_latest_non_part_d_ss_claims,
+                prune_stale_non_part_d_claims,
                 model,
                 self.load_mode,
-                self.start_time,
             )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:

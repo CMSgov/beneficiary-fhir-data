@@ -9,9 +9,13 @@ from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from batch_worker import LoadingBatchWorkerClient
 from constants import (
+    CLAIM_INSTITUTIONAL_ITEM_NCH_TABLE,
     CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_INSTITUTIONAL_NCH_TABLE,
     CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_ITEM_NCH_TABLE,
     CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
     DEFAULT_PARTITION,
@@ -23,7 +27,7 @@ from loader import LoadType, PostgresLoader, get_connection_string, should_track
 from model.base_model import (
     LoadMode,
     T,
-    non_latest_non_part_d_claims_query,
+    stale_non_part_d_claims_query,
     stale_phase_1_claims_query,
 )
 from model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
@@ -37,6 +41,15 @@ from settings import (
 
 _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
+}
+
+
+# Keep this mapping explicit so stale non-Part-D pruning remains independent of Phase 1 SS pruning.
+_NON_PART_D_CLAIM_ITEM_TABLES = {
+    CLAIM_INSTITUTIONAL_NCH_TABLE: CLAIM_INSTITUTIONAL_ITEM_NCH_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
+    CLAIM_PROFESSIONAL_NCH_TABLE: CLAIM_PROFESSIONAL_ITEM_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE: CLAIM_PROFESSIONAL_ITEM_SS_TABLE,
 }
 
@@ -169,20 +182,18 @@ def prune_phase_1_ss_claims(
     return True
 
 
-def prune_non_latest_non_part_d_ss_claims(
+def prune_stale_non_part_d_claims(
     cls: type[T],
     load_mode: LoadMode,
-    job_start: datetime,
 ) -> bool:
     claim_table = cls.table()
-    item_table = _SHARED_SYSTEM_CLAIM_ITEM_TABLES.get(claim_table)
+    item_table = _NON_PART_D_CLAIM_ITEM_TABLES.get(claim_table)
     if item_table is None:
         return True
 
-    prune_cutoff_date = job_start - timedelta(days=PHASE_1_CUTOFF)
-    logger.info("pruning non-latest non-Part-D ss claims older than {}", prune_cutoff_date)
+    logger.info("pruning stale non-Part-D claims")
 
-    prune_query, params = non_latest_non_part_d_claims_query(claim_table, prune_cutoff_date)
+    prune_query = stale_non_part_d_claims_query(claim_table)
 
     total_row_counts = {
         item_table: 0,
@@ -195,8 +206,7 @@ def prune_non_latest_non_part_d_ss_claims(
             with conn.transaction():
                 for target_table in [item_table, claim_table]:
                     res = conn.execute(
-                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
-                        params,
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})"""  # type: ignore
                     )
 
                     total_row_counts[target_table] += res.rowcount
