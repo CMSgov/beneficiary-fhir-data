@@ -195,7 +195,7 @@ def prune_stale_non_part_d_claims(
 
     prune_query = stale_non_part_d_claims_query(claim_table)
 
-    total_row_counts = {
+    total_row_counts: dict[str, int] = {
         item_table: 0,
         claim_table: 0,
     }
@@ -206,7 +206,8 @@ def prune_stale_non_part_d_claims(
             with conn.transaction():
                 for target_table in [item_table, claim_table]:
                     res = conn.execute(
-                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})"""  # type: ignore
+                        f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
+                        (),
                     )
 
                     total_row_counts[target_table] += res.rowcount
