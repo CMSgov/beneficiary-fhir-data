@@ -216,21 +216,26 @@ class BatchLoader:
             ) -> None:
                 updated_rows.extend(await load_func())
 
-            async with anyio.create_task_group() as tg:
-                for idx, chunk in enumerate(
-                    itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
-                ):
+            try:
+                async with anyio.create_task_group() as tg:
+                    for idx, chunk in enumerate(
+                        itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                    ):
 
-                    async def _wrap_batch_chunk(
-                        idx: int = idx, chunk: Sequence[T] = chunk
-                    ) -> list[dict[str, DbType]]:
-                        return await self._load_batch_chunk(idx, chunk, timestamp)
+                        async def _wrap_batch_chunk(
+                            idx: int = idx, chunk: Sequence[T] = chunk
+                        ) -> list[dict[str, DbType]]:
+                            return await self._load_batch_chunk(idx, chunk, timestamp)
 
-                    tg.start_soon(
-                        _store_updated_keys,
-                        _wrap_batch_chunk,
-                        name=f"{self.table}-{self.partition.name}-{idx}",
-                    )
+                        tg.start_soon(
+                            _store_updated_keys,
+                            _wrap_batch_chunk,
+                            name=f"{self.table}-{self.partition.name}-{idx}",
+                        )
+            except* Exception as ex_group:
+                for ex in ex_group.exceptions:
+                    raise ex from None
+
             self.insert_batch_timer.stop()
             logger.info(
                 "{}-{}-{}: upserted {} new/changed row(s) out of {}",
