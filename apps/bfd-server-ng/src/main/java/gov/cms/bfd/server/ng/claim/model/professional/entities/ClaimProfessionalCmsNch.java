@@ -70,13 +70,15 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return Stream.of(
-            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            bloodPints.toFhir(supportingInfoFactory),
-            claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
+    return Stream.concat(
+            super.buildSubclassSupportingInfo().stream(),
+            Stream.of(
+                    claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    bloodPints.toFhir(supportingInfoFactory),
+                    claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
+                .flatMap(Optional::stream))
         .toList();
   }
 

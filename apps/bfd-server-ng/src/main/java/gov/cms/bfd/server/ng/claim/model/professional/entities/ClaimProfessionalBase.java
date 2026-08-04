@@ -9,7 +9,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
-import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
@@ -28,7 +27,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
-  @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
@@ -146,8 +144,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var sharedHeaderSupportingInfo =
         Stream.of(
                 claimSubmissionDate.toFhir(supportingInfoFactory),
-                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)),
-                clinicalTrialNumber.toFhir(supportingInfoFactory))
+                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 

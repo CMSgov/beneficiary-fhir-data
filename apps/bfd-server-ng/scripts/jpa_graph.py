@@ -5,6 +5,7 @@
 # ]
 # ///
 
+import difflib
 import re
 import sys
 from pathlib import Path
@@ -22,23 +23,30 @@ CLASS_RE = re.compile(
     r"(?s)(?P<type>@Entity|@MappedSuperclass|@Embeddable).*?class\s+(?P<name>\w+)(?:\s+(?:extends|implements)\s+(?P<parent>\w+))?"
 )
 TABLE_RE = re.compile(r'@Table\(.*?name\s*=\s*"([^"]+)"', re.DOTALL)
+
+# The two negative lookaheads keep this from binding a column to the wrong
+# field: one bails if an @Embedded sits between the annotation and the
+# field, the other refuses to skip past a semicolon, brace, or another
+# Column/override annotation (otherwise it can tunnel clean through a
+# class boundary and grab an unrelated field further down the file).
 COLUMN_RE = re.compile(
     r'(?s)@Column\(.*?name\s*=\s*"([^"]+)".*?\)'
-    r'(?!(?:(?!;).)*?@Embedded)'  # bail if an @Embedded annotation sits between here and the field
-    r'(?:(?!;|\{|@Column|@AttributeOverride).)*?'  # never tunnel past a semicolon, a class/body brace, or another Column/override annotation
-    r'(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);'
+    r"(?!(?:(?!;).)*?@Embedded)"
+    r"(?:(?!;|\{|@Column|@AttributeOverride).)*?"
+    r"(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
 )
 EMBEDDED_RE = re.compile(
     r"(?s)@Embedded"
     r"(?:(?!;|\{|@Column|@AttributeOverride|@Embedded).)*?"
     r"(?:private|protected|public)?\s+([\w<>(),.? ]+)\s+(\w+);"
 )
+# Java lets name= and column= appear in either order, so both are matched.
 ATTRIBUTE_OVERRIDE_RE = re.compile(
     r'@AttributeOverride\(\s*(?:'
     r'name\s*=\s*"(?P<name1>[^"]+)"\s*,\s*column\s*=\s*@Column\(\s*name\s*=\s*"(?P<col1>[^"]+)"\s*\)'
-    r'|'
+    r"|"
     r'column\s*=\s*@Column\(\s*name\s*=\s*"(?P<col2>[^"]+)"\s*\)\s*,\s*name\s*=\s*"(?P<name2>[^"]+)"'
-    r')\s*\)'
+    r")\s*\)"
 )
 
 JAVA_ENTITY_RE = re.compile(
@@ -47,24 +55,19 @@ JAVA_ENTITY_RE = re.compile(
 )
 
 DEFAULT_PROFILES = ["Basis", "Regular", "CMS (Default)"]
+ALL_PROFILES = {"BASIS", "REGULAR", "CMS"}
+ALL_PROFILES_ORDERED = ["BASIS", "REGULAR", "CMS"]
 
-# Populated during print_tree() with every db_col that had no entry in the
-# YAML dictionaries at all. These silently default to "valid for all
-# profiles" today -- this set lets main() report them separately so a
-# missing/typo'd dictionary entry isn't confused with a genuinely
-# unrestricted column.
+# Columns with no YAML entry at all (silently treated as valid for every
+# profile). Reported separately at the end so a missing dictionary entry
+# isn't confused with a genuinely unrestricted column.
 UNMATCHED_COLUMNS: set[str] = set()
 
-# Populated during parse_java_graph() with every (class_name, db_col) pair
-# where that class's OWN (non-inherited) columns bind the same db_col to
-# more than one distinct java_var. This can be legitimate -- a single raw
-# column intentionally exposed under two field names (e.g. a generic
-# "trackingNumber" alias alongside a more specific business name) -- but
-# it is also the exact signature of a regex mis-attribution bug (see the
-# ClaimInstitutionalCmsNch / clm_nrln_ric_cd incident, where a class-level
-# @AttributeOverride's inner @Column got misattributed to an unrelated
-# field). Surfaced at the end of the run so each can be manually reviewed
-# rather than silently trusted either way.
+# (class, db_col) -> the distinct java_vars it's bound to, when a class's
+# own columns bind the same db_col to more than one field. Sometimes
+# intentional (one column exposed under two names); also the exact
+# signature of a mis-parsed @AttributeOverride, so both get surfaced for
+# review rather than trusted either way.
 DUPLICATE_COLUMN_BINDINGS: dict[tuple[str, str], set[str]] = {}
 
 
@@ -78,122 +81,129 @@ def parse_yaml_map(yaml_dir: Path) -> dict:
                 for entry in yaml.safe_load(f) or []:
                     if source_col := entry.get("sourceColumn"):
                         profiles = entry.get("profiles") or DEFAULT_PROFILES
-                        mappings[source_col.upper()] = [
-                            p.split()[0].upper() for p in profiles
-                        ]
+                        mappings[source_col.upper()] = [p.split()[0].upper() for p in profiles]
             except yaml.YAMLError as e:
                 print(f"[WARN] Failed to parse {file_path}: {e}")
-                continue
     return mappings
+
+
+def _hide_attribute_overrides(content: str, override_matches: list) -> str:
+    """Blank out each @AttributeOverride(...) span so COLUMN_RE can't see
+    (or backtrack into) the @Column nested inside it."""
+    for match in override_matches:
+        start, end = match.span()
+        content = content[:start] + " " * (end - start) + content[end:]
+    return content
+
+
+def _extract_columns(content: str) -> tuple[list, str]:
+    override_matches = list(ATTRIBUTE_OVERRIDE_RE.finditer(content))
+    clean_content = _hide_attribute_overrides(content, override_matches)
+
+    plain_columns = [
+        {"db_col": match.group(1), "java_var": match.group(3)}
+        for match in COLUMN_RE.finditer(clean_content)
+    ]
+    override_columns = [
+        {
+            "db_col": match.group("col1") or match.group("col2"),
+            "java_var": match.group("name1") or match.group("name2"),
+        }
+        for match in override_matches
+    ]
+    return plain_columns + override_columns, clean_content
+
+
+def _extract_embeddeds(content: str) -> list:
+    embeds = []
+    for type_blob, java_var in EMBEDDED_RE.findall(content):
+        clean_type = re.sub(r"^(?:private|protected|public)\s+", "", type_blob).strip()
+        embeds.append({"type": clean_type, "java_var": java_var})
+    return embeds
+
+
+def _record_duplicate_bindings(class_name: str, columns: list) -> None:
+    java_vars_by_column: dict[str, set[str]] = {}
+    for col in columns:
+        java_vars_by_column.setdefault(col["db_col"].upper(), set()).add(col["java_var"])
+    for db_col, java_vars in java_vars_by_column.items():
+        if len(java_vars) > 1:
+            DUPLICATE_COLUMN_BINDINGS[(class_name, db_col)] = java_vars
 
 
 def parse_java_graph(src_dir: Path) -> dict:
     graph = {}
     if not src_dir.exists():
         return graph
+
     for file_path in src_dir.rglob("*.java"):
         content = file_path.read_text(encoding="utf-8")
-        if not (class_match := CLASS_RE.search(content)):
+        class_match = CLASS_RE.search(content)
+        if not class_match:
             continue
 
         name = class_match.group("name")
         table_match = TABLE_RE.search(content)
-
-        override_matches = list(ATTRIBUTE_OVERRIDE_RE.finditer(content))
-
-        # Blank out every @AttributeOverride(...) span before running
-        # COLUMN_RE. Merely discouraging COLUMN_RE from matching inside
-        # these via a negative lookahead is not reliable: the lookahead
-        # only guards the point *after* the inner @Column(...)'s own
-        # closing paren is found, but that closing-paren search is itself
-        # lazy and unguarded, so on backtracking it can tunnel straight
-        # through nested @Column/@AttributeOverride text (and even a
-        # class body's opening brace) to find a *later* ")" that lets
-        # the rest of the pattern succeed -- silently binding the
-        # override's db_col to some unrelated field further down the
-        # file. Replacing the matched text with spaces removes it
-        # structurally, so no amount of backtracking can reach it, while
-        # preserving every other character's position (so line/column
-        # numbers implied by this content stay meaningful if ever needed).
-        masked_content = content
-        for m in override_matches:
-            masked_content = (
-                    masked_content[: m.start()]
-                    + " " * (m.end() - m.start())
-                    + masked_content[m.end() :]
-            )
-
-        plain_columns = [
-            {"db_col": m.group(1), "java_var": m.group(3)}
-            for m in COLUMN_RE.finditer(masked_content)
-        ]
-        override_columns = [
-            {
-                "db_col": m.group("col1") or m.group("col2"),
-                "java_var": m.group("name1") or m.group("name2"),
-            }
-            for m in override_matches
-        ]
-
-        columns = plain_columns + override_columns
-
-        vars_by_col: dict[str, set[str]] = {}
-        for c in columns:
-            vars_by_col.setdefault(c["db_col"].upper(), set()).add(c["java_var"])
-        for db_col, java_vars in vars_by_col.items():
-            if len(java_vars) > 1:
-                DUPLICATE_COLUMN_BINDINGS[(name, db_col)] = java_vars
+        columns, clean_content = _extract_columns(content)
+        _record_duplicate_bindings(name, columns)
 
         graph[name] = {
             "type": class_match.group("type").replace("@", ""),
             "parent": class_match.group("parent"),
             "table": table_match.group(1) if table_match else None,
             "columns": columns,
-            "embeddeds": [
-                {
-                    "type": re.sub(
-                        r"^(?:private|protected|public)\s+", "", e[0]
-                    ).strip(),
-                    "java_var": e[1],
-                }
-                for e in EMBEDDED_RE.findall(masked_content)
-            ],
+            "embeddeds": _extract_embeddeds(clean_content),
         }
     return graph
 
 
 def get_class_profile(class_name: str) -> str | None:
-    """Extracts base profile from class naming conventions."""
+    """Profile implied by naming convention, e.g. ClaimProfessionalCmsBase -> CMS."""
     if match := JAVA_ENTITY_RE.search(class_name):
         return match.group("profile").upper()
     return None
 
 
 def resolve_inherited(graph: dict, class_name: str) -> tuple[list, list]:
-    """Walk the parent chain and merge columns/embeddeds from all ancestors.
-
-    Without this, a subclass like ClaimInstitutionalCmsNch is only checked
-    against its own directly-declared columns, and never against fields
-    declared on ClaimInstitutionalBase / ClaimBase -- which is where most
-    real profile mismatches live.
-
-    Each column is tagged with "own" (True only for columns declared
-    directly on `class_name` itself) so callers can avoid flagging
-    inherited columns as move candidates -- they're already declared at
-    whatever level a prior pull-up put them at.
-    """
-    columns, embeddeds = [], []
+    """Merge columns/embeddeds up the parent chain, so a subclass is checked
+    against inherited fields too, not just its own. Each column is tagged
+    declared_here=True only where it's actually written, so callers don't
+    re-flag something a previous pull-up already moved."""
+    columns, embeds = [], []
     seen = set()
-    node_name = class_name
-    is_self = True
-    while node_name and node_name in graph and node_name not in seen:
-        seen.add(node_name)
-        node = graph[node_name]
-        columns.extend({**c, "own": is_self} for c in node["columns"])
-        embeddeds.extend(node["embeddeds"])
-        node_name = node["parent"]
-        is_self = False
-    return columns, embeddeds
+    current = class_name
+    is_declaring_class = True
+    while current and current in graph and current not in seen:
+        seen.add(current)
+        node = graph[current]
+        columns.extend({**col, "declared_here": is_declaring_class} for col in node["columns"])
+        embeds.extend(node["embeddeds"])
+        current = node["parent"]
+        is_declaring_class = False
+    return columns, embeds
+
+
+def _column_flag(class_profile: str | None, allowed_profiles: list, declared_here: bool) -> str:
+    if not declared_here:
+        return ""
+    if class_profile and class_profile not in allowed_profiles:
+        return f" ⚠️  [WARNING] Column not valid for profile '{class_profile}'! Push Down/Move."
+    if class_profile and set(allowed_profiles) >= ALL_PROFILES:
+        return " ▲ [PULL UP candidate]"
+    if not class_profile and set(allowed_profiles) < ALL_PROFILES:
+        return (
+            f" ▼ [PUSH DOWN candidate] Only valid for {allowed_profiles}, "
+        )
+    return ""
+
+
+def _debug_column(col: dict, class_name: str, class_profile, allowed_profiles, in_dict: bool) -> None:
+    print(
+        f"[DEBUG] {col['db_col']} found on class={class_name!r} "
+        f"class_profile={class_profile!r} declared_here={col['declared_here']!r} "
+        f"allowed_profiles={allowed_profiles!r} in_profile_map={in_dict!r}",
+        file=sys.stderr,
+    )
 
 
 def print_tree(
@@ -203,8 +213,6 @@ def print_tree(
         class_profile: str | None,
         indent: str = "",
         visited: set = None,
-        check_flags: bool = True,
-        is_claim_class: bool | None = None,
         debug_col: str | None = None,
 ):
     visited = visited or set()
@@ -212,67 +220,63 @@ def print_tree(
         return
     visited.add(class_name)
 
-    columns, embeddeds = resolve_inherited(graph, class_name)
-    # NOTE: this used to be gated on class_name.startswith("Claim"), which
-    # silently exempted every non-Claim family (Beneficiary*, Contract*,
-    # ...) from push-down detection even though the same profile-scoping
-    # logic applies to them. The check is now generic; is_claim_class is
-    # kept only as the name propagated through recursion (see the note
-    # on the print_tree signature) so the embedded-traversal fix above
-    # continues to carry a stable flag down the tree.
-    if is_claim_class is None:
-        is_claim_class = True
+    columns, embeds = resolve_inherited(graph, class_name)
 
     for col in columns:
-        db_col = col["db_col"]
-        if db_col.upper() not in profile_map:
-            UNMATCHED_COLUMNS.add(db_col.upper())
-        allowed_profiles = profile_map.get(db_col.upper(), ["BASIS", "REGULAR", "CMS"])
+        db_col = col["db_col"].upper()
+        in_dict = db_col in profile_map
+        if not in_dict:
+            UNMATCHED_COLUMNS.add(db_col)
+        allowed_profiles = profile_map.get(db_col, ALL_PROFILES_ORDERED)
 
-        if debug_col and db_col.upper() == debug_col:
-            print(
-                f"[DEBUG] {db_col} found on class={class_name!r} "
-                f"class_profile={class_profile!r} is_claim_class={is_claim_class!r} "
-                f"check_flags={check_flags!r} col_own={col['own']!r} "
-                f"allowed_profiles={allowed_profiles!r} "
-                f"in_profile_map={db_col.upper() in profile_map!r}",
-                file=sys.stderr,
-            )
+        if debug_col and db_col == debug_col:
+            _debug_column(col, class_name, class_profile, allowed_profiles, in_dict)
 
-        action_flag = ""
-        if check_flags and col["own"]:
-            if class_profile and class_profile not in allowed_profiles:
-                action_flag = f" ⚠️  [WARNING] Column not valid for profile '{class_profile}'! Push Down/Move."
-            elif class_profile and set(allowed_profiles) >= {"BASIS", "REGULAR", "CMS"}:
-                action_flag = " ▲ [PULL UP candidate]"
-            elif (
-                    not class_profile
-                    and is_claim_class
-                    and set(allowed_profiles) < {"BASIS", "REGULAR", "CMS"}
-            ):
-                action_flag = (
-                    f" ▼ [PUSH DOWN candidate] Only valid for {allowed_profiles}, "
-                    "not all profiles -- move to profile-specific subclass(es)."
-                )
-
+        flag = _column_flag(class_profile, allowed_profiles, col["declared_here"])
         print(
-            f"{indent}├── [Column] {db_col} ({col['java_var']}) "
-            f"[profiles: {', '.join(allowed_profiles)}]{action_flag}"
+            f"{indent}├── [Column] {col['db_col']} ({col['java_var']}) "
+            f"[profiles: {', '.join(allowed_profiles)}]{flag}"
         )
 
-    for emb in embeddeds:
-        print(f"{indent}└── [Embedded] {emb['java_var']} ──► Type: {emb['type']}")
+    for embed in embeds:
+        print(f"{indent}└── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
         print_tree(
             graph,
             profile_map,
-            emb["type"],
+            embed["type"],
             class_profile,
             indent + "    │",
             visited.copy(),
-            check_flags=check_flags,
-            is_claim_class=is_claim_class,
             debug_col=debug_col,
             )
+
+
+def _print_unmatched_columns(profile_map: dict) -> None:
+    if not UNMATCHED_COLUMNS:
+        return
+    known_columns = list(profile_map.keys())
+    print(
+        f"[WARN] {len(UNMATCHED_COLUMNS)} column(s) had no YAML dictionary entry "
+        "and defaulted to 'all profiles valid' -- check for typos or missing "
+        "dictionary files. A suggested match means it's likely a naming "
+        "mismatch rather than a real gap:"
+    )
+    for col in sorted(UNMATCHED_COLUMNS):
+        close = difflib.get_close_matches(col, known_columns, n=3, cutoff=0.6)
+        suggestion = f" (possible match: {', '.join(close)})" if close else ""
+        print(f"    - {col}{suggestion}")
+
+
+def _print_duplicate_bindings() -> None:
+    if not DUPLICATE_COLUMN_BINDINGS:
+        return
+    print(
+        f"\n[WARN] {len(DUPLICATE_COLUMN_BINDINGS)} class/column pair(s) bind the "
+        "same db column to multiple field names. Could be intentional aliasing, "
+        "or a parsing mis-attribution -- review each:"
+    )
+    for (cls, db_col), java_vars in sorted(DUPLICATE_COLUMN_BINDINGS.items()):
+        print(f"    - {cls}.{db_col}: {', '.join(sorted(java_vars))}")
 
 
 def main():
@@ -292,26 +296,11 @@ def main():
         table_info = f" ──► Table: {node['table']}" if node["table"] else ""
 
         print(f"[{node['type']}] {name}{inheritance}{table_info}")
-        print_tree(
-            graph, profile_map, name, get_class_profile(name), indent=" ",
-            debug_col=debug_col,
-        )
+        print_tree(graph, profile_map, name, get_class_profile(name), indent=" ", debug_col=debug_col)
         print(f"\n{'-' * 80}\n")
 
-    if UNMATCHED_COLUMNS:
-        print(f"[WARN] {len(UNMATCHED_COLUMNS)} column(s) had no YAML dictionary "
-              "entry and defaulted to 'all profiles valid' -- verify these aren't "
-              "typos or missing dictionary files:")
-        for col in sorted(UNMATCHED_COLUMNS):
-            print(f"    - {col}")
-
-    if DUPLICATE_COLUMN_BINDINGS:
-        print(f"\n[WARN] {len(DUPLICATE_COLUMN_BINDINGS)} class/column pair(s) bind "
-              "the same db column to multiple distinct Java field names. This can be "
-              "intentional (one raw column exposed under two names) but is also the "
-              "exact signature of a parsing mis-attribution bug -- review each:")
-        for (cls, db_col), java_vars in sorted(DUPLICATE_COLUMN_BINDINGS.items()):
-            print(f"    - {cls}.{db_col}: {', '.join(sorted(java_vars))}")
+    _print_unmatched_columns(profile_map)
+    _print_duplicate_bindings()
 
 
 if __name__ == "__main__":

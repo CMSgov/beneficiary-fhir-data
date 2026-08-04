@@ -4,10 +4,13 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
+import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for CMS profile professional claim types (NCH and Shared Systems). */
 @MappedSuperclass
@@ -18,7 +21,7 @@ public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
-    return Optional.ofNullable(claimIdrLoadDate);
+    return Optional.of(claimIdrLoadDate);
   }
 
   // endregion
@@ -43,4 +46,16 @@ public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
   }
 
   // endregion
+
+  // region Clinical Trial Number
+  @Embedded private ClinicalTrialNumber clinicalTrialNumber;
+
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassSupportingInfo() {
+    return clinicalTrialNumber.toFhir(supportingInfoFactory).stream().toList();
+  }
+
+  // endregion
+
 }
