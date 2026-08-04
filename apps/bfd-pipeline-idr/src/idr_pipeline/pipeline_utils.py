@@ -34,6 +34,10 @@ from .model.load_progress import LoadProgress
 from .settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BATCH_LIMIT
 
 
+class ModelExtractError(Exception):
+    pass
+
+
 def get_progress(
     load_mode: LoadMode,
     source: Source,
@@ -124,8 +128,7 @@ def extract_and_load(
                 raise ex
             time.sleep(1)
         except Exception as ex:
-            logger.opt(exception=True).error("error loading {}", cls.table())
-            raise ex
+            raise ModelExtractError(f"error loading {cls.table()}-{partition.name}") from ex
 
 
 def prune_phase_1_ss_claims(
