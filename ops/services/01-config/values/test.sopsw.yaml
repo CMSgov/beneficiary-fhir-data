@@ -835,7 +835,7 @@
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/alb/high_alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-slack-bfd-internal-alerts
