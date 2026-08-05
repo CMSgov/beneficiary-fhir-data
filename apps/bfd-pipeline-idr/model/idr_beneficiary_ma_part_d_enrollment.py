@@ -34,7 +34,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
     bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
+    idr_trans_obslt_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 3}]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
