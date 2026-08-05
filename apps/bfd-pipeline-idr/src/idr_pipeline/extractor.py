@@ -1,0 +1,418 @@
+import csv
+from abc import ABC, abstractmethod
+from collections import OrderedDict
+from collections.abc import Iterator
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Generic, override
+
+import psycopg
+import snowflake.connector
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from loguru import logger
+from psycopg.rows import dict_row
+from pydantic import TypeAdapter
+from snowflake.connector import DictCursor, SnowflakeConnection
+from snowflake.snowpark import Session
+
+from .constants import DEFAULT_MIN_DATE
+from .db_utils import get_connection_string
+from .load_partition import LoadPartition
+from .model.base_model import (
+    DbType,
+    LoadMode,
+    Source,
+    T,
+    format_date_opt,
+)
+from .model.load_progress import LoadProgress
+from .settings import (
+    ALLOW_EXTRACTOR_QUERY_LOGGING,
+    BATCH_MULTIPLIER,
+    ENABLE_DATE_PARTITIONS,
+    IDR_ACCOUNT,
+    IDR_DATABASE,
+    IDR_PRIVATE_KEY,
+    IDR_SCHEMA,
+    IDR_USERNAME,
+    IDR_WAREHOUSE,
+    MIN_BATCH_COMPLETION_DATE,
+)
+from .timer import Timer
+
+
+@dataclass
+class CsvFile:
+    cols: list[str]
+    table: str
+    csv_file: Path
+
+    def cols_str(self) -> str:
+        return ",".join(self.cols)
+
+
+# TODO: UP046 seems to cause issues with pyright
+class Extractor(ABC, Generic[T]):  # noqa: UP046
+    def __init__(self, cls: type[T], partition: LoadPartition) -> None:
+        self.cls = cls
+        self.type_adapter = TypeAdapter(list[self.cls])
+        self.partition = partition
+        self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
+        self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)
+        self.transform_timer = Timer("transform", cls, partition)
+
+    @abstractmethod
+    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+        pass
+
+    @abstractmethod
+    def reconnect(self) -> None:
+        pass
+
+    @abstractmethod
+    def close(self) -> None:
+        pass
+
+    def _coalesce_dates(self, cols: list[str]) -> list[str]:
+        return [f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cols]
+
+    def _greatest_col(self, cols: list[str]) -> str:
+        return f"GREATEST({','.join(cols)})"
+
+    def _get_batch_size(self) -> int:
+        if ENABLE_DATE_PARTITIONS:
+            # Larger tables take up more memory, so we'll try to normalize
+            # the total memory used here based on the number of columns
+            return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
+        # If date partitioning is not enabled, the number of concurrent jobs will be small
+        return 100_000
+
+    def get_query(self, start_time: datetime, source: Source) -> str:
+        query = self.cls.fetch_query(self.partition, start_time, source)
+        columns = ",".join(self.cls.column_aliases())
+        columns_raw = ",".join(self.cls.columns_raw())
+        return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
+
+    def build_filter_columns(self, progress: LoadProgress | None) -> str:
+        is_historical = progress is None or progress.is_historical()
+        # GREATEST doesn't work with nulls so we need to coalesce here
+        batch_timestamp_cols = self._coalesce_dates(
+            self.cls.format_aliases(self.cls.batch_timestamp_col(is_historical))
+        )
+        update_timestamp_cols = self._coalesce_dates(
+            self.cls.format_aliases(self.cls.update_timestamp_col())
+        )
+        # We need to create batches using the most recent timestamp from all of the
+        # insert/update timestamps
+        return self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+
+    def extract_idr_data(
+        self, progress: LoadProgress | None, start_time: datetime, source: Source
+    ) -> Iterator[list[T]]:
+        fetch_query = self.get_query(start_time, source)
+
+        # We need to create batches using the most recent timestamp from all of the
+        # insert/update timestamps
+        batch_timestamp_clause = self.build_filter_columns(progress)
+        min_transaction_date = self.cls.model_type().min_transaction_date
+
+        batch_id_clause = ""
+        batch_id_col = self.cls.batch_id_col_alias()
+        additional_order_by = list(
+            OrderedDict.fromkeys(
+                [x for x in [batch_id_col, *self.cls.ordered_pkeys()] if x is not None]
+            )  # Use an OrderedDict as an ordered set because there is no ordered set in stdlib
+        )
+        logger.info("extracting {}", self.cls.table())
+        order_by = f"ORDER BY {', '.join([batch_timestamp_clause, *additional_order_by])}"
+        if progress is None:
+            # No saved progress, process the whole table from the beginning
+            return self.extract_many(
+                fetch_query.replace(
+                    "{WHERE_CLAUSE}",
+                    f"WHERE ({batch_timestamp_clause} >= %(timestamp)s)",
+                )
+                .replace("{FILTER_OP}", ">=")
+                .replace("{LAST_TS}", "%(timestamp)s")
+                .replace("{ORDER_BY}", order_by)
+                .replace("{TABLESAMPLE}", "")
+                .replace("{LIMIT}", "")
+                .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
+                {"timestamp": min_transaction_date},
+            )
+
+        previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
+        min_batch_completion_date = format_date_opt(MIN_BATCH_COMPLETION_DATE)
+        if (
+            previous_batch_complete
+            and min_batch_completion_date
+            and progress.batch_complete_ts > min_batch_completion_date
+        ):
+            # If we've set a min completion date, we don't need to reprocess any batches that have
+            # already completed within the given timeframe.
+            # This helps for large loads that may have been interrupted recently.
+            return iter([])
+
+        # If we've completed the last batch, there shouldn't be any additional records
+        # with the same timestamp/id.
+        # Additionally, if there's a batch_id column, records with the same timestamp will be
+        # filtered by the batch_id filter.
+        filter_op = ">" if previous_batch_complete or batch_id_col is not None else ">="
+        # insertion timestamps aren't always representative of the time the data is available in
+        # Snowflake, so we should always start loading from the most recent timestamp
+        # that we've already fetched
+        compare_timestamp = max(min_transaction_date, progress.last_ts)
+
+        if batch_id_col is not None:
+            batch_id_clause = f"""
+                OR (
+                    {batch_timestamp_clause} = %(timestamp)s
+                    AND {batch_id_col} {filter_op} {progress.last_id}
+                )"""
+
+        # Saved progress found, start processing from where we left off
+        return self.extract_many(
+            fetch_query.replace(
+                "{WHERE_CLAUSE}",
+                f"""
+                    WHERE (
+                        {batch_timestamp_clause} {filter_op} %(timestamp)s
+                        {batch_id_clause}
+                    )
+                    """,
+            )
+            .replace("{FILTER_OP}", filter_op)
+            .replace("{LAST_TS}", "%(timestamp)s")
+            .replace("{ORDER_BY}", order_by)
+            .replace("{TABLESAMPLE}", "")
+            .replace("{LIMIT}", "")
+            .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
+            {"timestamp": compare_timestamp},
+        )
+
+    def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
+        self.transform_timer.start()
+        res = self.type_adapter.validate_python(
+            [{k.lower(): v for k, v in row.items()} for row in batch]
+        )
+        self.transform_timer.stop()
+        return res
+
+
+class DbExecutor(ABC):
+    @abstractmethod
+    def copy(self, file: CsvFile) -> None:
+        pass
+
+    @abstractmethod
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        pass
+
+    @abstractmethod
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        pass
+
+    @abstractmethod
+    def commit(self) -> None:
+        pass
+
+
+class PostgresExtractor(Extractor[T]):
+    def __init__(self, cls: type[T], partition: LoadPartition, load_mode: LoadMode) -> None:
+        super().__init__(cls, partition)
+        self.connection_string = get_connection_string(load_mode)
+        self.conn = psycopg.connect(self.connection_string)
+
+    @override
+    def reconnect(self) -> None:
+        self.conn = psycopg.connect(self.connection_string)
+
+    @override
+    def extract_many(
+        self,
+        sql: str,
+        params: dict[str, DbType],
+    ) -> Iterator[list[T]]:
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
+        batch_size = self._get_batch_size()
+        with self.conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, params)  # type: ignore
+            batch = cur.fetchmany(batch_size)
+            while len(batch) > 0:
+                yield self._transform(batch)
+                batch = cur.fetchmany(batch_size)
+
+    def extract_single(self, sql: str, params: dict[str, DbType]) -> T | None:
+        with self.conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, params)  # type: ignore
+            res = cur.fetchone()
+            if res:
+                return self._transform([res])[0]
+            return None
+
+    @override
+    def close(self) -> None:
+        self.conn.close()
+
+
+class PostgresExecutor(DbExecutor):
+    def __init__(self, conn: psycopg.connection.Connection) -> None:
+        self.conn = conn
+
+    @override
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        cur = self.conn.cursor(row_factory=dict_row)
+        cur.execute(sql, params)  # type: ignore
+
+    @override
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        cur = self.conn.cursor(row_factory=dict_row)
+        res = cur.execute(sql, params)  # type: ignore
+        return res.fetchall()  # type: ignore
+
+    @override
+    def commit(self) -> None:
+        self.conn.commit()
+
+    @override
+    def copy(self, file: CsvFile) -> None:
+        with self.conn.cursor(row_factory=dict_row) as cur, file.csv_file.open() as f:
+            reader = csv.DictReader(f)
+            # skip empty files
+            if reader.fieldnames is None:
+                return
+
+            with cur.copy(
+                f"COPY {file.table} ({file.cols_str()}) FROM STDIN"  # type: ignore
+            ) as copy:
+                for row in reader:
+                    copy.write_row([row[c] or None for c in file.cols])
+
+
+class SnowflakeExtractor(Extractor[T]):
+    def __init__(self, cls: type[T], partition: LoadPartition) -> None:
+        super().__init__(cls, partition)
+        self.conn = SnowflakeExtractor.connect()
+
+    @override
+    def reconnect(self) -> None:
+        self.conn = SnowflakeExtractor.connect()
+
+    @staticmethod
+    def connect() -> SnowflakeConnection:
+        private_key = serialization.load_pem_private_key(
+            IDR_PRIVATE_KEY.encode(),
+            password=None,
+            backend=default_backend(),
+        )
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        return snowflake.connector.connect(  # type: ignore
+            user=IDR_USERNAME,
+            private_key=private_key_bytes,
+            account=IDR_ACCOUNT,
+            warehouse=IDR_WAREHOUSE,
+            database=IDR_DATABASE,
+            schema=IDR_SCHEMA,
+        )
+
+    @override
+    def extract_many(
+        self,
+        sql: str,
+        params: dict[str, DbType],
+    ) -> Iterator[list[T]]:
+        cur = None
+        if ALLOW_EXTRACTOR_QUERY_LOGGING:
+            logger.debug(sql)
+        try:
+            self.cursor_execute_timer.start()
+            cur = self.conn.cursor(DictCursor)
+            cur.execute(sql, params)
+            self.cursor_execute_timer.stop()
+
+            self.cursor_fetch_timer.start()
+            # fetchmany can return list[dict] or list[tuple] but we'll only use
+            # queries that return dicts
+            batch_size = self._get_batch_size()
+            batch: list[dict[str, DbType]] = cur.fetchmany(batch_size)
+            self.cursor_fetch_timer.stop()
+
+            while len(batch) > 0:  # type: ignore
+                yield self._transform(batch)
+
+                self.cursor_fetch_timer.start()
+                batch = cur.fetchmany(batch_size)
+                self.cursor_fetch_timer.stop()
+            return
+
+        finally:
+            if cur:
+                cur.close()
+
+    @override
+    def close(self) -> None:
+        self.conn.close()
+
+
+class SnowflakeExecutor(DbExecutor):
+    def __init__(self) -> None:
+        private_key = serialization.load_pem_private_key(
+            IDR_PRIVATE_KEY.encode(),
+            password=None,
+            backend=default_backend(),
+        )
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        self.session = Session.builder.configs(
+            {
+                "account": IDR_ACCOUNT,
+                "user": IDR_USERNAME,
+                "private_key": private_key_bytes,  # type: ignore
+                "warehouse": IDR_WAREHOUSE,
+                "database": IDR_DATABASE,
+                "schema": IDR_SCHEMA,
+            }
+        ).create()
+        self.conn = SnowflakeExtractor.connect()
+
+    @override
+    def commit(self) -> None:
+        self.conn.commit()
+
+    @override
+    def copy(self, file: CsvFile) -> None:
+        self.session.sql("create or replace temp stage source_stage").collect()
+        self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
+        self.session.sql(f"""COPY INTO
+                            {file.table}
+                            FROM @source_stage/{file.csv_file.name}
+                            FILE_FORMAT = (
+                                TYPE = 'CSV',
+                                PARSE_HEADER = TRUE
+                                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+                            )
+                            MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+                            """).collect()
+        self.session.commit()
+
+    @override
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        cur = self.conn.cursor(DictCursor)
+        cur.execute(sql, params)
+
+    @override
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        cur = self.conn.cursor(DictCursor)
+        res = cur.execute(sql, params).fetchall()  # type: ignore
+        return [{k.lower(): r[k] for k in r} for r in res]  # type: ignore
