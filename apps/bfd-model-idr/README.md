@@ -97,7 +97,7 @@ This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the
 To generate a EOB sample that is not prior authorization.
 
 ```sh
-python generate_eob_sample.py --clm_uniq_id <clm_uniq_id_here> --eob_type <eob_type_here> 
+uv run generate_eob_sample.py --clm_uniq_id <clm_uniq_id_here> --eob_type <eob_type_here> 
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
