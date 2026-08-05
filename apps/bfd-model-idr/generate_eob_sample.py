@@ -1,25 +1,30 @@
-import argparse
 import json
 import sys
 from pathlib import Path
 from typing import Any
 
+import click
 import pandas as pd
 
 
-def main():
-    parser = argparse.ArgumentParser(
-            description="Generate EOB sample JSON from SYNTHETIC_EOB.csv based on claim unique ID."
-        )
-    parser.add_argument("--clm_uniq_id", required=True, help="Pass the claim unique ID ")
-    parser.add_argument("--eob_type", required=True, help="EOB Type")
-    args = parser.parse_args()
+@click.command
+@click.option(
+    '--clm_uniq_id',
+    type=str, 
+    required=True, 
+    help='Pass the claim unique ID.'
+)
+def main(clm_uniq_id:str):
+    """Generate EOB sample JSON from SYNTHETIC_EOB.csv based on claim unique ID."""
+    claim_row = read_clm(clm_uniq_id)
+    claim_type = int(claim_row.get("CLM_TYPE_CD"))
 
-    if args.eob_type == "Pharmacy":
-        result = create_pharmacy(args.clm_uniq_id)
-    else:
-        print("Unknown Type")
-        sys.exit(1)
+    match claim_type:
+        case 1 | 2 | 3 | 4:
+            result = create_pharmacy(clm_uniq_id,claim_row)
+        case _:
+            print("Unknown Type")
+            sys.exit(1)
     
     with Path(result.output_file).open(mode="w", encoding="utf-8") as f:
         json.dump(result.result_json, f, indent=2)
@@ -31,8 +36,7 @@ class Result:
     output_file: str
 
 
-def create_pharmacy(clm_uniq_id: Any) -> Result:
-    claim_row = read_clm(clm_uniq_id)
+def create_pharmacy(clm_uniq_id: Any,claim_row: Any) -> Result:
     
     provider_npi = str(claim_row.get("PRVDR_PRSCRBNG_PRVDR_NPI_NUM", "")).strip()
 
@@ -54,99 +58,95 @@ def create_pharmacy(clm_uniq_id: Any) -> Result:
     output_json = {
         "resourceType": "ExplanationOfBenefit-Pharmacy",
         "id": str(clm_uniq_id.replace('-', '')).strip(),
-        "lastUpdated": str(claim_row.get("IDR_UPDT_TS", "")).strip(),
-        "CLM_FINL_ACTN_IND": str(claim_row.get("CLM_FINL_ACTN_IND", "")).strip(),
-        "CLM_SRC_ID": str(claim_row.get("CLM_SRC_ID", "")).strip(),
-        "BENE_SK": str(claim_row.get("BENE_SK", "")).strip(),
-        "CLM_TYPE_CD": int(str(claim_row.get("CLM_TYPE_CD", "")).strip()),
-        "CLM_UNIQ_ID": str(claim_row.get("CLM_UNIQ_ID", "")).strip(),
-        "CLM_CNTL_NUM": str(claim_row.get("CLM_CNTL_NUM", "")).strip(),
-        "CLM_ORIG_CNTL_NUM": str(claim_row.get("CLM_ORIG_CNTL_NUM", "")).strip(),
-        "CLM_FROM_DT": str(claim_row.get("CLM_FROM_DT", "")).strip(),
-        "CLM_THRU_DT": str(claim_row.get("CLM_THRU_DT", "")).strip(),
-        "CLM_EFCTV_DT": str(claim_row.get("CLM_EFCTV_DT", "")).strip(),
-        "CLM_SRVC_PRVDR_GNRC_ID_NUM": str(claim_row.get("CLM_SRVC_PRVDR_GNRC_ID_NUM", "")).strip(),
-        "CLM_PD_DT": str(claim_row.get("CLM_PD_DT", "")).strip(),
+        "lastUpdated": extract_col_str(claim_row,"IDR_UPDT_TS"),
+        "CLM_FINL_ACTN_IND": extract_col_str(claim_row,"CLM_FINL_ACTN_IND"),
+        "CLM_SRC_ID": extract_col_str(claim_row,"CLM_SRC_ID"),
+        "BENE_SK": extract_col_str(claim_row,"BENE_SK"),
+        "CLM_TYPE_CD": int(extract_col_str(claim_row,"CLM_TYPE_CD")),
+        "CLM_UNIQ_ID": extract_col_str(claim_row,"CLM_UNIQ_ID"),
+        "CLM_CNTL_NUM": extract_col_str(claim_row,"CLM_CNTL_NUM"),
+        "CLM_ORIG_CNTL_NUM": extract_col_str(claim_row,"CLM_ORIG_CNTL_NUM"),
+        "CLM_FROM_DT": extract_col_str(claim_row,"CLM_FROM_DT"),
+        "CLM_THRU_DT": extract_col_str(claim_row,"CLM_THRU_DT"),
+        "CLM_EFCTV_DT": extract_col_str(claim_row,"CLM_EFCTV_DT"),
+        "CLM_SRVC_PRVDR_GNRC_ID_NUM": extract_col_str(claim_row,"CLM_SRVC_PRVDR_GNRC_ID_NUM"),
+        "CLM_PD_DT": extract_col_str(claim_row,"CLM_PD_DT"),
         "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": provider_npi,
-        "CLM_PRSBNG_PRVDR_GNRC_ID_NUM": str(claim_row.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM", ""))
-            .strip(),
-        "PRVDR_PRSBNG_ID_QLFYR_CD": str(claim_row.get("PRVDR_PRSBNG_ID_QLFYR_CD", "")).strip(),
-        "PRVDR_LAST_NAME": str(prov_row.get("PRVDR_LAST_NAME", "")).strip(),
-        "CNTRCT_PBP_NAME": str(ctr_pmp_row.get("CNTRCT_PBP_NAME", "")).strip(),
-        "CLM_BENE_PMT_AMT": str(claim_row.get("CLM_BENE_PMT_AMT", "")).strip(),
-        "CLM_OTHR_TP_PD_AMT": str(claim_row.get("CLM_OTHR_TP_PD_AMT", "")).strip(),
-        "META_SRC_SK": str(claim_row.get("META_SRC_SK", "")).strip(),
-        "PRVDR_SRVC_ID_QLFYR_CD": str(claim_row.get("PRVDR_SRVC_ID_QLFYR_CD", "")).strip(),
+        "CLM_PRSBNG_PRVDR_GNRC_ID_NUM": extract_col_str(claim_row,"CLM_PRSBNG_PRVDR_GNRC_ID_NUM"),
+        "PRVDR_PRSBNG_ID_QLFYR_CD": extract_col_str(claim_row,"PRVDR_PRSBNG_ID_QLFYR_CD"),
+        "PRVDR_LAST_NAME": extract_col_str(prov_row,"PRVDR_LAST_NAME"),
+        "CNTRCT_PBP_NAME": extract_col_str(ctr_pmp_row,"CNTRCT_PBP_NAME"),
+        "CLM_BENE_PMT_AMT": extract_col_str(claim_row,"CLM_BENE_PMT_AMT"),
+        "CLM_OTHR_TP_PD_AMT": extract_col_str(claim_row,"CLM_OTHR_TP_PD_AMT"),
+        "META_SRC_SK": extract_col_str(claim_row,"META_SRC_SK"),
+        "PRVDR_SRVC_ID_QLFYR_CD": extract_col_str(claim_row,"PRVDR_SRVC_ID_QLFYR_CD"),
         "supportingInfoComponents": [],
         "lineItemComponents": [
             {
-                "CLM_LINE_NUM": str(clm_line.get("CLM_LINE_NUM", "")).strip(),
-                "CLM_LINE_FROM_DT": str(clm_line.get("CLM_LINE_FROM_DT", "")).strip(),
-                "CLM_LINE_NDC_CD": str(clm_line.get("CLM_LINE_NDC_CD", "")).strip(),
-                "CLM_LINE_NDC_QTY": str(clm_line.get("CLM_LINE_NDC_QTY", "")).strip(),
-                "CLM_LINE_NDC_QTY_QLFYR_CD": str(clm_line.get("CLM_LINE_NDC_QTY_QLFYR_CD", ""))
-                    .strip(),
-                "CLM_LINE_CVRD_PD_AMT": str(clm_line.get("CLM_LINE_CVRD_PD_AMT", "")).strip(),
-                "CLM_LINE_GRS_ABOVE_THRSHLD_AMT": str(rx_line.get(
-                    "CLM_LINE_GRS_ABOVE_THRSHLD_AMT", "")).strip(),
-                "CLM_LINE_GRS_BLW_THRSHLD_AMT": str(rx_line.get(
-                    "CLM_LINE_GRS_BLW_THRSHLD_AMT", "")).strip(),
-                "CLM_LINE_LIS_AMT": str(rx_line.get("CLM_LINE_LIS_AMT", "")).strip(),
-                "CLM_LINE_TROOP_TOT_AMT": str(rx_line.get("CLM_LINE_TROOP_TOT_AMT", "")).strip(),
-                "CLM_LINE_PLRO_AMT": str(rx_line.get("CLM_LINE_PLRO_AMT", "")).strip(),
-                "CLM_RPTD_MFTR_DSCNT_AMT": str(rx_line.get("CLM_RPTD_MFTR_DSCNT_AMT", "")).strip(),
-                "CLM_LINE_INGRDNT_CST_AMT": str(rx_line.get("CLM_LINE_INGRDNT_CST_AMT", "")).strip(),
-                "CLM_LINE_SRVC_CST_AMT": str(rx_line.get("CLM_LINE_SRVC_CST_AMT", "")).strip(),
-                "CLM_LINE_SLS_TAX_AMT": str(rx_line.get("CLM_LINE_SLS_TAX_AMT", "")).strip(),
-                "CLM_LINE_VCCN_ADMIN_FEE_AMT": str(rx_line.get("CLM_LINE_VCCN_ADMIN_FEE_AMT", ""))
-                    .strip(),
-                "CLM_PRCNG_EXCPTN_CD": str(rx_line.get("CLM_PRCNG_EXCPTN_CD", "")).strip(),
-                "CLM_LINE_BENE_PMT_AMT": str(clm_line.get("CLM_LINE_BENE_PMT_AMT", "")).strip(),
-                "CLM_CMS_CALCD_MFTR_DSCNT_AMT": str(rx_line.get(
-                    "CLM_CMS_CALCD_MFTR_DSCNT_AMT", "")).strip(),
-                "CLM_LINE_GRS_CVRD_CST_TOT_AMT": str(rx_line.get(
-                    "CLM_LINE_GRS_CVRD_CST_TOT_AMT", "")).strip(),
-                "CLM_LINE_REBT_PASSTHRU_POS_AMT": str(rx_line.get(
-                    "CLM_LINE_REBT_PASSTHRU_POS_AMT", "")).strip(),
-                "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT": str(rx_line.get(
-                    "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT", "")).strip(),
-                "CLM_LINE_OTHR_TP_PD_AMT": str(clm_line.get(
-                    "CLM_LINE_OTHR_TP_PD_AMT", "")).strip(),
-                "CLM_LINE_NCVRD_PD_AMT": str(clm_line.get(
-                    "CLM_LINE_NCVRD_PD_AMT", "")).strip(),
-                "CLM_LINE_RPTD_GAP_DSCNT_AMT": str(rx_line.get(
-                    "CLM_LINE_RPTD_GAP_DSCNT_AMT", "")).strip(),    
-                "CLM_LINE_AUTHRZD_FILL_NUM": str(rx_line.get(
-                    "CLM_LINE_AUTHRZD_FILL_NUM", "")).strip(),     
-                "CLM_PHRMCY_SRVC_TYPE_CD": str(rx_line.get(
-                    "CLM_PHRMCY_SRVC_TYPE_CD", "")).strip(),  
-                "CLM_LINE_RX_ORGN_CD": str(rx_line.get(
-                    "CLM_LINE_RX_ORGN_CD", "")).strip(), 
-                "CLM_BRND_GNRC_CD": str(rx_line.get(
-                    "CLM_BRND_GNRC_CD", "")).strip(), 
-                "CLM_PTNT_RSDNC_CD": str(rx_line.get(
-                    "CLM_PTNT_RSDNC_CD", "")).strip(), 
-                "CLM_LTC_DSPNSNG_MTHD_CD": str(rx_line.get(
-                    "CLM_LTC_DSPNSNG_MTHD_CD", "")).strip(), 
-                "CLM_CMPND_CD": str(rx_line.get("CLM_CMPND_CD", "")).strip(), 
-                "CLM_LINE_DAYS_SUPLY_QTY": str(rx_line.get("CLM_LINE_DAYS_SUPLY_QTY", "")).strip(), 
-                "CLM_LINE_RX_FILL_NUM": str(rx_line.get("CLM_LINE_RX_FILL_NUM", "")).strip(), 
-                "CLM_DAW_PROD_SLCTN_CD": str(rx_line.get("CLM_DAW_PROD_SLCTN_CD", "")).strip(), 
-                "CLM_DRUG_CVRG_STUS_CD": str(rx_line.get("CLM_DRUG_CVRG_STUS_CD", "")).strip(), 
-                "CLM_CTSTRPHC_CVRG_IND_CD": str(rx_line.get("CLM_CTSTRPHC_CVRG_IND_CD", ""))
-                    .strip(), 
-                "CLM_LINE_RX_NUM": str(clm_line.get(
-                    "CLM_LINE_RX_NUM", "")).strip(),
-                "CLM_DSPNSNG_STUS_CD": str(rx_line.get("CLM_DSPNSNG_STUS_CD", "")).strip(), 
+                "CLM_LINE_NUM": extract_col_str(clm_line,"CLM_LINE_NUM"),
+                "CLM_LINE_FROM_DT": extract_col_str(clm_line,"CLM_LINE_FROM_DT"),
+                "CLM_LINE_NDC_CD": extract_col_str(clm_line,"CLM_LINE_NDC_CD"),
+                "CLM_LINE_NDC_QTY": extract_col_str(clm_line,"CLM_LINE_NDC_QTY"),
+                "CLM_LINE_NDC_QTY_QLFYR_CD": extract_col_str(
+                    clm_line,"CLM_LINE_NDC_QTY_QLFYR_CD"),
+                "CLM_LINE_CVRD_PD_AMT": extract_col_str(clm_line,"CLM_LINE_CVRD_PD_AMT"),
+                "CLM_LINE_GRS_ABOVE_THRSHLD_AMT": extract_col_str(rx_line,
+                    "CLM_LINE_GRS_ABOVE_THRSHLD_AMT"),
+                "CLM_LINE_GRS_BLW_THRSHLD_AMT": extract_col_str(
+                    rx_line,"CLM_LINE_GRS_BLW_THRSHLD_AMT"),
+                "CLM_LINE_LIS_AMT": extract_col_str(rx_line,"CLM_LINE_LIS_AMT"),
+                "CLM_LINE_TROOP_TOT_AMT": extract_col_str(rx_line,"CLM_LINE_TROOP_TOT_AMT"),
+                "CLM_LINE_PLRO_AMT": extract_col_str(rx_line,"CLM_LINE_PLRO_AMT"),
+                "CLM_RPTD_MFTR_DSCNT_AMT": extract_col_str(rx_line,"CLM_RPTD_MFTR_DSCNT_AMT"),
+                "CLM_LINE_INGRDNT_CST_AMT": extract_col_str(rx_line,"CLM_LINE_INGRDNT_CST_AMT"),
+                "CLM_LINE_SRVC_CST_AMT": extract_col_str(rx_line,"CLM_LINE_SRVC_CST_AMT"),
+                "CLM_LINE_SLS_TAX_AMT": extract_col_str(rx_line,"CLM_LINE_SLS_TAX_AMT"),
+                "CLM_LINE_VCCN_ADMIN_FEE_AMT": extract_col_str(rx_line,"CLM_LINE_VCCN_ADMIN_FEE_AMT"),
+                "CLM_PRCNG_EXCPTN_CD": extract_col_str(rx_line,"CLM_PRCNG_EXCPTN_CD"),
+                "CLM_LINE_BENE_PMT_AMT": extract_col_str(clm_line,"CLM_LINE_BENE_PMT_AMT"),
+                "CLM_CMS_CALCD_MFTR_DSCNT_AMT": extract_col_str(rx_line,
+                    "CLM_CMS_CALCD_MFTR_DSCNT_AMT"),
+                "CLM_LINE_GRS_CVRD_CST_TOT_AMT": extract_col_str(rx_line,
+                    "CLM_LINE_GRS_CVRD_CST_TOT_AMT"),
+                "CLM_LINE_REBT_PASSTHRU_POS_AMT": extract_col_str(rx_line,
+                    "CLM_LINE_REBT_PASSTHRU_POS_AMT"),
+                "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT": extract_col_str(rx_line,
+                    "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"),
+                "CLM_LINE_OTHR_TP_PD_AMT": extract_col_str(clm_line,
+                    "CLM_LINE_OTHR_TP_PD_AMT"),
+                "CLM_LINE_NCVRD_PD_AMT": extract_col_str(clm_line,
+                    "CLM_LINE_NCVRD_PD_AMT"),
+                "CLM_LINE_RPTD_GAP_DSCNT_AMT": extract_col_str(rx_line,
+                    "CLM_LINE_RPTD_GAP_DSCNT_AMT"),    
+                "CLM_LINE_AUTHRZD_FILL_NUM": extract_col_str(rx_line,
+                    "CLM_LINE_AUTHRZD_FILL_NUM"),     
+                "CLM_PHRMCY_SRVC_TYPE_CD": extract_col_str(rx_line,
+                    "CLM_PHRMCY_SRVC_TYPE_CD"),  
+                "CLM_LINE_RX_ORGN_CD": extract_col_str(rx_line,
+                    "CLM_LINE_RX_ORGN_CD"), 
+                "CLM_BRND_GNRC_CD": extract_col_str(rx_line,
+                    "CLM_BRND_GNRC_CD"), 
+                "CLM_PTNT_RSDNC_CD": extract_col_str(rx_line,
+                    "CLM_PTNT_RSDNC_CD"), 
+                "CLM_LTC_DSPNSNG_MTHD_CD": extract_col_str(rx_line,
+                    "CLM_LTC_DSPNSNG_MTHD_CD"), 
+                "CLM_CMPND_CD": extract_col_str(rx_line,"CLM_CMPND_CD"), 
+                "CLM_LINE_DAYS_SUPLY_QTY": extract_col_str(rx_line,"CLM_LINE_DAYS_SUPLY_QTY"), 
+                "CLM_LINE_RX_FILL_NUM": extract_col_str(rx_line,"CLM_LINE_RX_FILL_NUM"), 
+                "CLM_DAW_PROD_SLCTN_CD": extract_col_str(rx_line,"CLM_DAW_PROD_SLCTN_CD"), 
+                "CLM_DRUG_CVRG_STUS_CD": extract_col_str(rx_line,"CLM_DRUG_CVRG_STUS_CD"), 
+                "CLM_CTSTRPHC_CVRG_IND_CD": extract_col_str(rx_line,"CLM_CTSTRPHC_CVRG_IND_CD"), 
+                "CLM_LINE_RX_NUM": extract_col_str(clm_line,"CLM_LINE_RX_NUM"),
+                "CLM_DSPNSNG_STUS_CD": extract_col_str(rx_line,"CLM_DSPNSNG_STUS_CD"), 
             }
         ],
-        "CLM_CMS_PROC_DT": str(clm_sig_row.get("CLM_CMS_PROC_DT", "")).strip(),
-        "CLM_IDR_LD_DT ": str(claim_row.get("CLM_IDR_LD_DT", "")).strip(),
-        "CLM_ADJSTMT_TYPE_CD": str(claim_row.get("CLM_ADJSTMT_TYPE_CD", "")).strip(),
-        "CLM_SBMT_FRMT_CD": str(claim_row.get("CLM_SBMT_FRMT_CD", "")).strip(),
-        "CLM_SBMTR_CNTRCT_NUM": str(claim_row.get("CLM_SBMTR_CNTRCT_NUM", "")).strip(),
-        "CLM_SBMTR_CNTRCT_PBP_NUM": str(claim_row.get("CLM_SBMTR_CNTRCT_PBP_NUM", "")).strip(),
-        "CLM_DT_SGNTR_SK": str(clm_sig_row.get("CLM_DT_SGNTR_SK", "")).strip(),
+        "CLM_CMS_PROC_DT": extract_col_str(clm_sig_row,"CLM_CMS_PROC_DT"),
+        "CLM_IDR_LD_DT ": extract_col_str(claim_row,"CLM_IDR_LD_DT"),
+        "CLM_ADJSTMT_TYPE_CD": extract_col_str(claim_row,"CLM_ADJSTMT_TYPE_CD"),
+        "CLM_SBMT_FRMT_CD": extract_col_str(claim_row,"CLM_SBMT_FRMT_CD"),
+        "CLM_SBMTR_CNTRCT_NUM": extract_col_str(claim_row,"CLM_SBMTR_CNTRCT_NUM"),
+        "CLM_SBMTR_CNTRCT_PBP_NUM": extract_col_str(claim_row,"CLM_SBMTR_CNTRCT_PBP_NUM"),
+        "CLM_DT_SGNTR_SK": extract_col_str(clm_sig_row,"CLM_DT_SGNTR_SK"),
     }
 
     result = Result()
@@ -247,6 +247,9 @@ def read_rx_line(clm_line:Any) -> Any:
 
     return {} if line_rx_matches.empty else line_rx_matches.iloc[0]
 
+
+def extract_col_str(row: Any,name: str) -> str:
+    return str(row.get(name, "")).strip()
 
     
 if __name__ == "__main__":
