@@ -9,7 +9,7 @@ import pandas as pd
 
 @click.command
 @click.option(
-    '--clm_uniq_id',
+    '--clm-uniq-id',
     type=str, 
     required=True, 
     help='Pass the claim unique ID.'
