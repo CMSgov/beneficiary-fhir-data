@@ -43,7 +43,7 @@ EOF
   ])
 
   slos_metrics = {
-    all_latency         = "http-requests.latency.all.max"
+    all_latency         = "http-requests.latency.all.avg"
     all_responses_count = "http-requests.count.all.count"
     all_http500s_count  = "http-requests.count.5xx-responses.count"
   }
