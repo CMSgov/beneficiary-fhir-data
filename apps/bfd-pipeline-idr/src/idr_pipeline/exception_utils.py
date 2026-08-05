@@ -58,18 +58,15 @@ def rebuild_exception_chain(chain: SerializedExceptionChain) -> BaseException:
     if not chain:
         raise ValueError("Chain must contain at least one exception")
 
-    # Materialise each entry into a (BaseException, tb_dict) pair so the
-    # linking loop below stays uniform.
     resolved: list[tuple[BaseException, dict[str, Any]]] = []
-
     for entry in chain:
         if isinstance(entry, SerializedExceptionGroup):
             # Restore tracebacks on every inner exception.
-            restored_inners: list[Exception] = []
+            restored_inners: list[BaseException] = []
             for serialized_inner in entry.exceptions:
                 inner_exc = serialized_inner.ex
                 inner_exc.__traceback__ = get_traceback_from_dict(serialized_inner.tb_dict)
-                restored_inners.append(inner_exc)  # type: ignore[arg-type]
+                restored_inners.append(inner_exc)
 
             # Re-create the group with the restored inner exceptions so that
             # the group's own .exceptions tuple reflects the restored state.
@@ -78,7 +75,8 @@ def rebuild_exception_chain(chain: SerializedExceptionChain) -> BaseException:
         else:
             resolved.append((entry.ex, entry.tb_dict))
 
-    # Re-link the chain (cause → effect) and restore top-level tracebacks.
+    # Re-create the "exception chain" (of __cause__s) and restore top-level (non-inner Exception)
+    # tracebacks
     for i, (exc, tb_dict) in enumerate(resolved):
         exc.__traceback__ = get_traceback_from_dict(tb_dict)
         exc.__cause__ = resolved[i + 1][0] if i < len(resolved) - 1 else None
