@@ -129,8 +129,8 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
         async with anyio.create_task_group() as tg:
             await tg.start(worker_manager.start, stop_worker)
             # We don't submit staged_pipeline.start to the task group because we want to set the
-            # stop signal for the background worker once it's complete. If we don't do it this
-            # way the pipeline process will run forever
+            # stop signal for the background worker once it's complete. If we don't do it this way
+            # the pipeline process will run forever
             await staged_pipeline.start()
             stop_worker.set()
 
