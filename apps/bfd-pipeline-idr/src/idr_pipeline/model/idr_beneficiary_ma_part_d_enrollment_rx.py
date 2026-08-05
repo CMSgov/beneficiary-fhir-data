@@ -34,7 +34,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
     bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 4}]
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
+    idr_trans_obslt_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 5}]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)

@@ -50,20 +50,24 @@ class IdrContractPbpNumber(IdrBaseModel):
         pbp_num = ALIAS_PBP_NUM
         # We need to include obsolete records since some bene_mapd records are tied to
         # obsolete pbp_sks.
+        # Include all contracts but don't join on the segment table when >1 segment exists
+        # since we can't map those yet.
         return f"""
-            WITH sgmt as (
+            WITH sgmt_count AS (
                 SELECT
-                    cntrct_pbp_sk,
-                    cntrct_pbp_sgmt_num
-                FROM {IDR_CONTRACT_PBP_SEGMENT_TABLE}
-                GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
-                HAVING COUNT(*) = 1
+                    {pbp_num}.cntrct_pbp_sk,
+                    COUNT(*) AS cntrct_count
+                FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
+                LEFT JOIN {IDR_CONTRACT_PBP_SEGMENT_TABLE} sgmt 
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
+                GROUP BY {pbp_num}.cntrct_pbp_sk
             )
             SELECT
                 {{COLUMNS}}
             FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num} {{TABLESAMPLE}}
-            LEFT JOIN sgmt
-                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
+            JOIN sgmt_count ON {pbp_num}.cntrct_pbp_sk = sgmt_count.cntrct_pbp_sk
+            LEFT JOIN {IDR_CONTRACT_PBP_SEGMENT_TABLE} sgmt
+                ON sgmt.cntrct_pbp_sk = {pbp_num}.cntrct_pbp_sk AND sgmt_count.cntrct_count = 1
             WHERE {pbp_num}.cntrct_pbp_sk != 0
             {{LIMIT}}
             """

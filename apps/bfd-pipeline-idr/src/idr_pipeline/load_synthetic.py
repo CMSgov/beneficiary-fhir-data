@@ -37,6 +37,7 @@ from .constants import (
     IDR_CLAIM_VAL_TABLE,
     IDR_CONTRACT_PBP_CONTACT_TABLE,
     IDR_CONTRACT_PBP_NUM_TABLE,
+    IDR_CONTRACT_PBP_SEGMENT_TABLE,
     IDR_PRIOR_AUTH_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
 )
@@ -103,6 +104,7 @@ tables = [
     },
     {"csv_name": "SYNTHETIC_PRVDR_HSTRY.csv", "table": IDR_PROVIDER_HISTORY_TABLE},
     {"csv_name": "SYNTHETIC_CNTRCT_PBP_NUM.csv", "table": IDR_CONTRACT_PBP_NUM_TABLE},
+    {"csv_name": "SYNTHETIC_CNTRCT_PBP_SGMT.csv", "table": IDR_CONTRACT_PBP_SEGMENT_TABLE},
     {
         "csv_name": "SYNTHETIC_CNTRCT_PBP_CNTCT.csv",
         "table": IDR_CONTRACT_PBP_CONTACT_TABLE,
