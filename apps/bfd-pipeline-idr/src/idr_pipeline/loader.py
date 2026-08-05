@@ -231,7 +231,6 @@ class BatchLoader:
                         _wrap_batch_chunk,
                         name=f"{self.table}-{self.partition.name}-{idx}",
                     )
-
             self.insert_batch_timer.stop()
             logger.info(
                 "{}-{}-{}: upserted {} new/changed row(s) out of {}",
