@@ -34,7 +34,7 @@ from .exception_utils import (
     SerializedExceptionChain,
     rebuild_exception_chain,
     serialize_exception_chain,
-)  # type: ignore
+)
 from .load_partition import LoadPartition
 from .model.base_model import DbType, IdrBaseModel
 from .model.load_progress import LoadProgress
