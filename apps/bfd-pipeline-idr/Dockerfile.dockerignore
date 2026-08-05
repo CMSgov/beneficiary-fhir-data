@@ -2,6 +2,6 @@
 !pyproject.toml
 !uv.lock
 !.python-version
-!model/*.py
-!matching/*.py
-!*.py
+!src/idr_pipeline/model/*.py
+!src/idr_pipeline/matching/*.py
+!src/idr_pipeline/*.py

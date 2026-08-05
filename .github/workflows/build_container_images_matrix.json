@@ -84,6 +84,15 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-idr-bfd-validator",
+    "dockerfile": "apps/utils/idr-bfd-validator/Dockerfile",
+    "contextDir": "apps/utils/idr-bfd-validator",
+    "namedContexts": {
+      "idr-pipeline": "apps/bfd-pipeline-idr"
+    },
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-server-datadog-agent",
     "dockerfile": "ops/images/bfd-platform-server-datadog-agent/Dockerfile",
     "contextDir": "ops/images/bfd-platform-server-datadog-agent",
