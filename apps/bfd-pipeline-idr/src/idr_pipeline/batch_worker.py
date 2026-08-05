@@ -3,6 +3,7 @@ import os
 import random
 import signal
 import string
+import sys
 import threading
 import uuid
 from collections import Counter, OrderedDict
@@ -13,6 +14,7 @@ from itertools import batched
 from math import ceil
 from multiprocessing import Manager, Process
 from multiprocessing.managers import SyncManager
+from pathlib import Path
 from queue import Empty, Queue
 from threading import Event
 from types import FrameType
@@ -28,6 +30,11 @@ from psycopg import sql
 from psycopg.errors import DeadlockDetected, InFailedSqlTransaction
 from psycopg_pool.abc import ACT
 
+from .exception_utils import (
+    SerializedExceptionChain,
+    rebuild_exception_chain,
+    serialize_exception_chain,
+)  # type: ignore
 from .load_partition import LoadPartition
 from .model.base_model import DbType, IdrBaseModel
 from .model.load_progress import LoadProgress
@@ -183,7 +190,7 @@ class _LoadingBatchWorker(Process):
     def __init__(
         self,
         task_queue: Queue[_TaskSequence],
-        errors_queue: Queue[BaseException],
+        errors_queue: Queue[SerializedExceptionChain],
         started_signal: Event,
         cancel_signal: Event,
         root_logger: Logger,
@@ -200,24 +207,31 @@ class _LoadingBatchWorker(Process):
         self._running_tasks: set[_Task] = set()
 
     def run(self) -> None:
-        self._logger.reinstall()
+        sys.unraisablehook = lambda _: None
+        sys.excepthook = lambda _, __, ___: None
+        with Path(os.devnull).open("w") as devnull:
+            sys.stderr = devnull
 
-        def _watch_for_parent_cancel(stop_signal: Event) -> None:
-            stop_signal.wait()
-            os.kill(os.getpid(), signal.SIGUSR1)
+            self._logger.reinstall()
 
-        def sigusr1_handler(signum: int, frame: FrameType | None) -> Never:  # noqa: ARG001
-            raise ExternallyCanceled("Externally canceled, interrupting")
+            def _watch_for_parent_cancel(stop_signal: Event) -> None:
+                stop_signal.wait()
+                os.kill(os.getpid(), signal.SIGUSR1)
 
-        signal.signal(signal.SIGUSR1, sigusr1_handler)
-        threading.Thread(
-            target=lambda: _watch_for_parent_cancel(self._cancel_signal), daemon=True
-        ).start()
+            def sigusr1_handler(signum: int, frame: FrameType | None) -> Never:  # noqa: ARG001
+                raise ExternallyCanceled("Externally canceled, interrupting")
 
-        try:
-            anyio.run(self._worker_main)
-        except BaseException as ex:
-            self.errors_queue.put(ex)
+            signal.signal(signal.SIGUSR1, sigusr1_handler)
+            threading.Thread(
+                target=lambda: _watch_for_parent_cancel(self._cancel_signal), daemon=True
+            ).start()
+
+            try:
+                anyio.run(self._worker_main)
+            except ExternallyCanceled:
+                pass
+            except BaseException as ex:
+                self.errors_queue.put(serialize_exception_chain(ex))
 
     async def _worker_main(self) -> None:
         task_send, task_receive = anyio.create_memory_object_stream[_TaskSequence](
@@ -508,7 +522,7 @@ class LoadingBatchWorkerManager:
             return
 
         self._started_signal.clear()
-        errors_queue: Queue[BaseException] = self._manager.Queue()
+        errors_queue: Queue[SerializedExceptionChain] = self._manager.Queue()
         cancel_signal = self._manager.Event()
 
         self._worker = _LoadingBatchWorker(
@@ -532,17 +546,16 @@ class LoadingBatchWorkerManager:
         async def watch_queue() -> None:
             while not stop.is_set():
                 with contextlib.suppress(Empty):
-                    errors = errors_queue.get_nowait()
-                    raise errors
+                    raise rebuild_exception_chain(errors_queue.get_nowait())
 
                 await anyio.sleep(0.01)
 
-        async with anyio.create_task_group() as tg:
-            try:
+        try:
+            async with anyio.create_task_group() as tg:
                 tg.start_soon(watch_queue)
-            except BaseException:
-                cancel_signal.set()
-                raise
+        except* Exception:
+            cancel_signal.set()
+            raise
 
     def cleanup(self, timeout: float = 5.0) -> None:
         if self._worker is None:

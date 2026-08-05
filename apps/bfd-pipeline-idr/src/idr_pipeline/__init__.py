@@ -126,17 +126,13 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
 
     async def run_worker_and_stages() -> None:
         stop_worker = anyio.Event()
-        try:
-            async with anyio.create_task_group() as tg:
-                await tg.start(worker_manager.start, stop_worker)
-                # We don't submit staged_pipeline.start to the task group because we want to set the
-                # stop signal for the background worker once it's complete. If we don't do it this
-                # way the pipeline process will run forever
-                await staged_pipeline.start()
-                stop_worker.set()
-        except* Exception as ex_group:
-            for ex in ex_group.exceptions:
-                raise ex from ex.__cause__
+        async with anyio.create_task_group() as tg:
+            await tg.start(worker_manager.start, stop_worker)
+            # We don't submit staged_pipeline.start to the task group because we want to set the
+            # stop signal for the background worker once it's complete. If we don't do it this
+            # way the pipeline process will run forever
+            await staged_pipeline.start()
+            stop_worker.set()
 
     try:
         anyio.run(run_worker_and_stages)
