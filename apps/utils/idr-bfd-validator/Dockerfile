@@ -43,6 +43,7 @@ USER nonroot
 WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
+COPY --from=idr-pipeline . /app/packages/idr-pipeline
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --locked --no-install-project
@@ -61,5 +62,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Stop Python from generating bytecode at runtime
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Run the pipeline in IDR mode by default
-CMD ["uv", "run", "--no-sync", "idr-pipeline"]
+# Run the validator
+CMD ["uv", "run", "--no-sync", "main.py"]

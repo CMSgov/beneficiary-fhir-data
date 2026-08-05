@@ -90,7 +90,7 @@ source ./load-credentials.sh
 Run the app (optionally specify a minimum transaction date)
 
 ```sh
-PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run pipeline.py
+PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run idr-pipeline
 ```
 
 ## Adding data to the model
