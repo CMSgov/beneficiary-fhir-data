@@ -116,6 +116,7 @@ def create_pharmacy(clm_uniq_id: Any,claim_row: Any) -> Result:
                     "CLM_LINE_OTHR_TP_PD_AMT"),
                 "CLM_LINE_NCVRD_PD_AMT": extract_col_str(clm_line,
                     "CLM_LINE_NCVRD_PD_AMT"),
+                "isCompound": str(extract_col_str(rx_line,"CLM_CMPND_CD") == "2").lower(),
                 "CLM_LINE_RPTD_GAP_DSCNT_AMT": extract_col_str(rx_line,
                     "CLM_LINE_RPTD_GAP_DSCNT_AMT"),    
                 "CLM_LINE_AUTHRZD_FILL_NUM": extract_col_str(rx_line,
