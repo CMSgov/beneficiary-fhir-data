@@ -104,7 +104,11 @@ WITH report_params AS (
       'app_sdk_requests_node_count',
       'app_access_grant_enabled',
       'app_access_grant_category',
-      'app_internal_application_labels'
+      'app_internal_application_labels',
+      'app_successful_client_credentials_call',
+      'app_unsuccessful_client_credentials_call',
+      'app_successful_patient_match_call',
+      'app_unsuccessful_patient_match_call'
     ] as enabled_metrics_list 
 ),
 
@@ -189,7 +193,8 @@ request_response_middleware_events AS (
           OR path LIKE '/v1/fhir%'
           OR path LIKE '/v2/fhir%'
           OR path LIKE '/v3/fhir%'
-          OR path LIKE '/v%/o/token%/'
+          OR path LIKE '/v%/o/token/'
+          OR path LIKE '/v%/o/token'
         )
     )
 ),
@@ -534,7 +539,15 @@ SELECT
   COALESCE(t228.app_sdk_requests_python_count, 0)
     app_sdk_requests_python_count,
   COALESCE(t229.app_sdk_requests_node_count, 0)
-    app_sdk_requests_node_count
+    app_sdk_requests_node_count,
+  COALESCE(t230.app_successful_client_credentials_call, 0)
+    app_successful_client_credentials_call,
+  COALESCE(t231.app_unsuccessful_client_credentials_call, 0)
+    app_unsuccessful_client_credentials_call,
+  COALESCE(t232.app_successful_patient_match_call, 0)
+    app_successful_patient_match_call,
+  COALESCE(t233.app_unsuccessful_patient_match_call, 0)
+    app_unsuccessful_patient_match_call
 
 FROM
   (
@@ -2911,3 +2924,117 @@ FROM
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
   ) t229 ON t229.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_successful_client_credentials_call
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_successful_client_credentials_call')
+        AND
+        (
+          path = '/v3/o/token'
+          OR path = '/v3/o/token/'
+        )
+        AND response_code = 200
+        AND req_grant_type = 'client_credentials'
+        AND (
+          try_cast(fhir_id_v2 as BIGINT) > 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
+        )
+        AND request_method = 'POST'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t230 ON t230.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_unsuccessful_client_credentials_call
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_unsuccessful_client_credentials_call')
+        AND
+        (
+          path = '/v3/o/token'
+          OR path = '/v3/o/token/'
+        )
+        AND response_code != 200
+        AND req_grant_type = 'client_credentials'
+        AND (
+          try_cast(fhir_id_v2 as BIGINT) > 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
+        )
+        AND request_method = 'POST'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t231 ON t231.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_successful_patient_match_call
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_successful_patient_match_call')
+        AND
+        (
+          path = '/v3/o/token'
+          OR path = '/v3/o/token/'
+        )
+        AND patient_match_found = True
+        AND try_cast(patient as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t232 ON t232.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_unsuccessful_patient_match_call
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_unsuccessful_patient_match_call')
+        AND
+        (
+          path = '/v3/o/token'
+          OR path = '/v3/o/token/'
+        )
+        AND patient_match_found = False
+        AND try_cast(patient as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t233 ON t233.app_name = t0.name 
