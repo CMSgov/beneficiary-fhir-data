@@ -335,8 +335,8 @@
     - CST_SHR_GRP_CD_12
   referenceTable: BENE_LIS_EFCTV_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD').value.code
-  sourceView: V2_MDCR_BENE_LIS
-  sourceColumn: BENE_LIS_EFCTV_CD
+  sourceView: V2_MDCR_BENE_CMBND_LIS
+  sourceColumn: BENE_CMBND_DEEMD_IND
 - inputPath: Coverage-Base.BENE_LIS_COPMT_LVL_CD
   appliesTo:
     - PartD
@@ -355,8 +355,8 @@
     - CST_SHR_GRP_CD_12
   referenceTable: BENE_LIS_COPMT_LVL_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD').value.code
-  sourceView: V2_MDCR_BENE_LIS
-  sourceColumn: BENE_LIS_COPMT_LVL_CD
+  sourceView: V2_MDCR_BENE_CMBND_LIS
+  sourceColumn: BENE_CMBND_DEEMD_COPMT_LVL_ID
 - inputPath: Coverage-Base.BENE_LIS_PTD_PRM_PCT
   appliesTo:
     - PartD
@@ -374,8 +374,8 @@
     - CST_SHR_GRP_CD_11
     - CST_SHR_GRP_CD_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT').value
-  sourceView: V2_MDCR_BENE_LIS
-  sourceColumn: BENE_LIS_PTD_PRM_PCT
+  sourceView: V2_MDCR_BENE_CMBND_LIS
+  sourceColumn: BENE_CMBND_DEEMD_PRM_PCT
 - inputPath: Coverage-Base.CNTRCT_PBP_SGMT_NUM
   appliesTo:
     - PartD
