@@ -535,10 +535,12 @@ class LoadingBatchWorkerManager:
         )
         self._worker.start()
 
-        # Block until the worker signals it has started
-        self._started_signal.wait()
-
-        logger.info("LoadingBatchWorker signaled startup")
+        # Block until the worker signals it has started, or 10 seconds have passed
+        self._started_signal.wait(10)
+        if self._started_signal.is_set():
+            logger.info("LoadingBatchWorker signaled startup")
+        else:
+            logger.error("LoadingBatchWorker start signal never set. See exception for detail")
 
         if task_status:
             task_status.started()
