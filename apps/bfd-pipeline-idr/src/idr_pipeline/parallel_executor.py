@@ -41,6 +41,9 @@ class ParallelStagesExecutor:
         errors_queue: Queue[SerializedExceptionChain],
         cancel_signal: Event,
     ) -> tuple[int, T | None]:
+        # The next four lines suppress unhandled/unraised Exception output to prevent noise when
+        # the ExternallyCanceled signal is used to stop this worker. Without this, Python's default
+        # behavior prints the full trace and Exception context to stderr, cluttering the logs.
         sys.unraisablehook = lambda _: None
         sys.excepthook = lambda _, __, ___: None
         with Path(os.devnull).open("w") as devnull:
