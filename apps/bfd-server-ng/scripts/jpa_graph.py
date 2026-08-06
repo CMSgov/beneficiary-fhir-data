@@ -50,13 +50,13 @@ ATTRIBUTE_OVERRIDE_RE = re.compile(
 )
 
 JAVA_ENTITY_RE = re.compile(
-    r"Claim(?P<domain>Institutional|Professional|Rx)?(?P<profile>Cms|Basis|Regular)(?P<source>Nch|SharedSystems|Rx)?",
+    r"Claim\w*?(?P<profile>Cms|Basis|Regular)\w*",
     re.IGNORECASE,
 )
 
 DEFAULT_PROFILES = ["Basis", "Regular", "CMS (Default)"]
-ALL_PROFILES = {"BASIS", "REGULAR", "CMS"}
 ALL_PROFILES_ORDERED = ["BASIS", "REGULAR", "CMS"]
+ALL_PROFILES_SET = set(ALL_PROFILES_ORDERED)
 
 # Columns with no YAML entry at all (silently treated as valid for every
 # profile). Reported separately at the end so a missing dictionary entry
@@ -158,71 +158,73 @@ def parse_java_graph(src_dir: Path) -> dict:
 
 
 def get_class_profile(class_name: str) -> str | None:
-    """Profile implied by naming convention, e.g. ClaimProfessionalCmsBase -> CMS."""
+    """Profile implied by naming convention, e.g. ClaimProfessionalCmsBase -> CMS.
+    Returns None if the name doesn't encode a profile at all."""
     if match := JAVA_ENTITY_RE.search(class_name):
         return match.group("profile").upper()
     return None
 
 
-def resolve_inherited(graph: dict, class_name: str) -> tuple[list, list]:
-    """Merge columns/embeddeds up the parent chain, so a subclass is checked
-    against inherited fields too, not just its own. Each column is tagged
-    declared_here=True only where it's actually written, so callers don't
-    re-flag something a previous pull-up already moved."""
-    columns, embeds = [], []
-    seen = set()
-    current = class_name
-    is_declaring_class = True
-    while current and current in graph and current not in seen:
-        seen.add(current)
-        node = graph[current]
-        columns.extend({**col, "declared_here": is_declaring_class} for col in node["columns"])
-        embeds.extend(node["embeddeds"])
-        current = node["parent"]
-        is_declaring_class = False
-    return columns, embeds
+def entity_profile(class_name: str) -> tuple[str, bool]:
+    """(profile, was_inferred). Most entities outside the claim family
+    aren't profile-scoped at all, so when the name doesn't tell us,
+    default to CMS -- it's the superset profile, and flagging the
+    default keeps this honest rather than silently guessing."""
+    detected = get_class_profile(class_name)
+    if detected:
+        return detected, False
+    return "CMS", True
 
 
-def _column_flag(class_profile: str | None, allowed_profiles: list, declared_here: bool) -> str:
-    if not declared_here:
-        return ""
-    if class_profile and class_profile not in allowed_profiles:
-        return f" ⚠️  [WARNING] Column not valid for profile '{class_profile}'! Push Down/Move."
-    if class_profile and set(allowed_profiles) >= ALL_PROFILES:
-        return " ▲ [PULL UP candidate]"
-    if not class_profile and set(allowed_profiles) < ALL_PROFILES:
-        return (
-            f" ▼ [PUSH DOWN candidate] Only valid for {allowed_profiles}, "
-        )
-    return ""
+def entity_exposed_columns(graph: dict, class_name: str, visited: set = None) -> set[str]:
+    """Every db_col reachable from this entity through inheritance and
+    nested @Embedded types, flattened into one set. Used only for the
+    profile-completeness check, which doesn't care where a column lives,
+    just whether the entity exposes it somewhere."""
+    visited = visited if visited is not None else set()
+    if class_name in visited or class_name not in graph:
+        return set()
+    visited.add(class_name)
+
+    node = graph[class_name]
+    cols = {col["db_col"].upper() for col in node["columns"]}
+    for embed in node["embeddeds"]:
+        cols |= entity_exposed_columns(graph, embed["type"], visited.copy())
+    if node["parent"]:
+        cols |= entity_exposed_columns(graph, node["parent"], visited.copy())
+    return cols
 
 
-def _debug_column(col: dict, class_name: str, class_profile, allowed_profiles, in_dict: bool) -> None:
+def _debug_field(col: dict, declaring_class: str, profile: str, allowed_profiles: list, in_dict: bool) -> None:
     print(
-        f"[DEBUG] {col['db_col']} found on class={class_name!r} "
-        f"class_profile={class_profile!r} declared_here={col['declared_here']!r} "
+        f"[DEBUG] {col['db_col']} declared on {declaring_class!r} entity_profile={profile!r} "
         f"allowed_profiles={allowed_profiles!r} in_profile_map={in_dict!r}",
         file=sys.stderr,
     )
 
 
-def print_tree(
+def print_entity_tree(
         graph: dict,
         profile_map: dict,
         class_name: str,
-        class_profile: str | None,
+        profile: str,
         indent: str = "",
         visited: set = None,
         debug_col: str | None = None,
-):
-    visited = visited or set()
+) -> None:
+    """Print this class's own columns and embeds, then recurse into its
+    parent as its own 'extends' branch one level deeper -- so the
+    inheritance chain shows up in the tree the same way embeds do,
+    instead of being pre-merged and hidden. `profile` stays fixed to the
+    owning entity throughout, since that's what actually gets exposed."""
+    visited = visited if visited is not None else set()
     if class_name in visited or class_name not in graph:
         return
     visited.add(class_name)
 
-    columns, embeds = resolve_inherited(graph, class_name)
+    node = graph[class_name]
 
-    for col in columns:
+    for col in node["columns"]:
         db_col = col["db_col"].upper()
         in_dict = db_col in profile_map
         if not in_dict:
@@ -230,25 +232,106 @@ def print_tree(
         allowed_profiles = profile_map.get(db_col, ALL_PROFILES_ORDERED)
 
         if debug_col and db_col == debug_col:
-            _debug_column(col, class_name, class_profile, allowed_profiles, in_dict)
+            _debug_field(col, class_name, profile, allowed_profiles, in_dict)
 
-        flag = _column_flag(class_profile, allowed_profiles, col["declared_here"])
+        flag = ""
+        if profile not in allowed_profiles:
+            flag = f"  ❌ MISMATCH: entity is {profile}, column only valid for {allowed_profiles}"
+
         print(
             f"{indent}├── [Column] {col['db_col']} ({col['java_var']}) "
             f"[profiles: {', '.join(allowed_profiles)}]{flag}"
         )
 
-    for embed in embeds:
+    for embed in node["embeddeds"]:
         print(f"{indent}└── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
-        print_tree(
-            graph,
-            profile_map,
-            embed["type"],
-            class_profile,
-            indent + "    │",
-            visited.copy(),
-            debug_col=debug_col,
-            )
+        print_entity_tree(
+            graph, profile_map, embed["type"], profile, indent + "    │", visited.copy(), debug_col
+        )
+
+    parent = node["parent"]
+    if parent and parent in graph:
+        print(f"{indent}└── extends {parent}")
+        print_entity_tree(graph, profile_map, parent, profile, indent + "    │", visited.copy(), debug_col)
+
+
+def print_entity(graph: dict, profile_map: dict, entity_name: str, debug_col: str | None = None) -> tuple[str, list]:
+    node = graph[entity_name]
+    profile, inferred = entity_profile(entity_name)
+
+    table_info = f" ──► Table: {node['table']}" if node["table"] else ""
+    profile_label = f"{profile} (default, no profile in name)" if inferred else profile
+    print(f"[Entity] {entity_name}{table_info}  [profile: {profile_label}]")
+
+    print_entity_tree(graph, profile_map, entity_name, profile, indent=" ", debug_col=debug_col)
+    print()
+
+    return profile, entity_exposed_columns(graph, entity_name)
+
+
+def _shared_class_flag(class_profile: str | None, allowed_profiles: list) -> str:
+    if class_profile and class_profile not in allowed_profiles:
+        return f"  ⚠️  WARNING: not valid for this class's own profile '{class_profile}'!"
+    if class_profile and set(allowed_profiles) >= ALL_PROFILES_SET:
+        return "  ▲ PULL UP candidate: valid for all profiles, could move to a shared base"
+    if not class_profile and set(allowed_profiles) < ALL_PROFILES_SET:
+        return f"  ▼ PUSH DOWN candidate: only valid for {allowed_profiles}, move to profile-specific subclass(es)"
+    return ""
+
+
+def print_shared_class(graph: dict, profile_map: dict, class_name: str) -> None:
+    """Print a MappedSuperclass/Embeddable's own declared columns (not
+    resolved through inheritance or embeds -- those types get their own
+    section) with a push-down/pull-up flag: a shared class with a
+    profile-restricted column should push it down; a profile-named class
+    with an all-profiles column could pull it up."""
+    node = graph[class_name]
+    class_profile = get_class_profile(class_name)
+    profile_label = class_profile or "shared, no profile in name"
+    inheritance = f" extends {node['parent']}" if node["parent"] else ""
+
+    print(f"[{node['type']}] {class_name}{inheritance}  [profile: {profile_label}]")
+
+    for col in node["columns"]:
+        db_col = col["db_col"].upper()
+        if db_col not in profile_map:
+            UNMATCHED_COLUMNS.add(db_col)
+        allowed_profiles = profile_map.get(db_col, ALL_PROFILES_ORDERED)
+        flag = _shared_class_flag(class_profile, allowed_profiles)
+        print(
+            f"    ├── [Column] {col['db_col']} ({col['java_var']}) "
+            f"[profiles: {', '.join(allowed_profiles)}]{flag}"
+        )
+
+    for embed in node["embeddeds"]:
+        print(f"    └── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
+    print()
+
+
+def print_shared_classes(graph: dict, profile_map: dict) -> None:
+    shared = sorted(
+        (n for n, d in graph.items() if d["type"] in ("MappedSuperclass", "Embeddable")),
+        key=lambda n: (graph[n]["type"], n),
+    )
+    for name in shared:
+        print_shared_class(graph, profile_map, name)
+
+
+def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
+    """For every db_col the dictionary says a profile can see, confirm at
+    least one concrete entity for that profile actually exposes it. Flags
+    dictionary entries with no matching entity -- either the entity model
+    is missing the field, or the dictionary is over-scoped."""
+    exposed_by_profile: dict[str, set[str]] = {p: set() for p in ALL_PROFILES_ORDERED}
+    for profile, cols in entity_index.values():
+        exposed_by_profile.setdefault(profile, set()).update(cols)
+
+    gaps: dict[str, list[str]] = {}
+    for db_col, profiles in profile_map.items():
+        for profile in profiles:
+            if db_col not in exposed_by_profile.get(profile, set()):
+                gaps.setdefault(profile, []).append(db_col)
+    return gaps
 
 
 def _print_unmatched_columns(profile_map: dict) -> None:
@@ -279,6 +362,19 @@ def _print_duplicate_bindings() -> None:
         print(f"    - {cls}.{db_col}: {', '.join(sorted(java_vars))}")
 
 
+def _print_completeness_gaps(gaps: dict) -> None:
+    if not gaps:
+        return
+    print(
+        "\n[WARN] The dictionary says these profiles can see these columns, but "
+        "no concrete entity for that profile actually exposes them:"
+    )
+    for profile in sorted(gaps):
+        print(f"  {profile}:")
+        for db_col in sorted(gaps[profile]):
+            print(f"    - {db_col}")
+
+
 def main():
     debug_col = None
     if len(sys.argv) >= 3 and sys.argv[1] == "--debug-column":
@@ -287,20 +383,22 @@ def main():
     profile_map = parse_yaml_map(Path(YAML_DICTS_DIR))
     graph = parse_java_graph(JAVA_SRC_DIR)
 
-    roots = [n for n, d in graph.items() if d["type"] in ("Entity", "MappedSuperclass")]
-    roots.sort(key=lambda x: (graph[x]["parent"] or "", x))
+    entity_names = sorted(n for n, d in graph.items() if d["type"] == "Entity")
 
-    for name in roots:
-        node = graph[name]
-        inheritance = f" extends {node['parent']}" if node["parent"] else ""
-        table_info = f" ──► Table: {node['table']}" if node["table"] else ""
+    entity_index = {}
+    for name in entity_names:
+        profile, fields = print_entity(graph, profile_map, name, debug_col)
+        entity_index[name] = (profile, fields)
 
-        print(f"[{node['type']}] {name}{inheritance}{table_info}")
-        print_tree(graph, profile_map, name, get_class_profile(name), indent=" ", debug_col=debug_col)
-        print(f"\n{'-' * 80}\n")
+    print("-" * 80)
+    print("MappedSuperclass / Embeddable review (push-down / pull-up candidates)")
+    print("-" * 80)
+    print()
+    print_shared_classes(graph, profile_map)
 
     _print_unmatched_columns(profile_map)
     _print_duplicate_bindings()
+    _print_completeness_gaps(check_profile_completeness(profile_map, entity_index))
 
 
 if __name__ == "__main__":

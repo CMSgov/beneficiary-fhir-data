@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -91,20 +92,16 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase 
    */
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-  buildSubclassSupportingInfo() {
-    Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>> optionalInfo =
-      Stream.concat(
-        Stream.of(
-          nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-          providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-          Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-          buildAuditStatusSupportingInfo()),
-        buildRxSupportingInfo());
-
-    return Stream.concat(
-      super.buildSubclassSupportingInfo().stream(), // Clinical trial number comes from cms base
-      optionalInfo.flatMap(Optional::stream))
-    .toList();
+      buildSubclassSupportingInfo() {
+    return Stream.of(
+            super.buildSubclassSupportingInfo().stream(),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory).stream(),
+            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)).stream(),
+            Stream.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+            buildAuditStatusSupportingInfo().stream(),
+            buildRxSupportingInfo().flatMap(Optional::stream))
+        .flatMap(Function.identity())
+        .toList();
   }
 
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
