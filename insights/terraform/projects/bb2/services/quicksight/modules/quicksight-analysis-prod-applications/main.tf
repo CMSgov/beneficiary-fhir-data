@@ -73,7 +73,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
     }
     calculated_fields {
       data_set_identifier = "prod_global_state_per_app"
-      expression          = "ifelse($${DYNAMICFIELD} = 'APP Enrollees Served (all-time)', {calc_app_grant_and_archived_real_bene_deduped_count},\n$${DYNAMICFIELD} = 'APP Enrollees Served WoW (gains this week)', {calc_app_grant_and_archived_real_bene_deduped_wow_count},\n$${DYNAMICFIELD} = 'APP Requires Demographic Scopes', {calc_app_require_demographic_scopes},\n$${DYNAMICFIELD} = 'APP Is Enabled?', {calc_app_active},\n$${DYNAMICFIELD} = 'APP Is Grant Enabled?', {calc_app_access_grant_enabled},\n$${DYNAMICFIELD} = 'APP Synth Enrollee Served', {calc_app_grant_and_archived_synthetic_bene_deduped_count},\n$${DYNAMICFIELD} = 'Auth Status OK Real Enrollee', {calc_app_auth_ok_real_bene_count},\n$${DYNAMICFIELD} = 'Auth Status Deny Real Enrollee', {calc_app_auth_fail_or_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Share Real', {calc_app_auth_demoscope_required_choice_sharing_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Not Share Real', {calc_app_auth_demoscope_required_choice_not_sharing_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Deny Real', {calc_app_auth_demoscope_required_choice_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Not Want Demographic Enrollee Not Share Real', {calc_app_auth_demoscope_not_required_not_sharing_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Not want Demographic Enrollee Deny Real', {calc_app_auth_demoscope_not_required_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests Real Enrollee', {calc_app_token_authorization_code_for_real_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests Synth Enrollee', {calc_app_token_authorization_code_for_synthetic_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 2xx', {calc_app_token_authorization_code_2xx_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 4xx', {calc_app_token_authorization_code_4xx_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 5xx', {calc_app_token_authorization_code_5xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests Real Enrollee', {calc_app_token_refresh_for_real_bene_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests Synth Enrollee', {calc_app_token_refresh_for_synthetic_bene_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 2xx', {calc_app_token_refresh_response_2xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 4xx', {calc_app_token_refresh_response_4xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 5xx', {calc_app_token_refresh_response_5xx_count},\n$${DYNAMICFIELD} = 'FHIR Total Requests', {calc_app_fhir_call_real_count},\n$${DYNAMICFIELD} = 'FHIR EOB Requests', {calc_app_fhir_eob_real_count},\n$${DYNAMICFIELD} = 'FHIR Coverage Requests', {calc_app_fhir_coverage_real_count},\n$${DYNAMICFIELD} = 'FHIR Patient Requests', {calc_app_fhir_patient_real_count},\n$${DYNAMICFIELD} = 'FHIR EOB With Since Requests', {calc_app_fhir_eob_since_real_count},\n$${DYNAMICFIELD} = 'FHIR Coverage With Since Requests', {calc_app_fhir_coverage_since_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Total Requests', {calc_app_fhir_v1_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 EOB Requests', {calc_app_fhir_v1_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Coverage Requests', {calc_app_fhir_v1_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Patient Requests', {calc_app_fhir_v1_patient_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 EOB With Since Requests', {calc_app_fhir_v1_eob_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Coverage With Since Requests', {calc_app_fhir_v1_coverage_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Total Requests', {calc_app_fhir_v2_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 EOB Requests', {calc_app_fhir_v2_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Coverage Requests', {calc_app_fhir_v2_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Patient Requests', {calc_app_fhir_v2_patient_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 EOB With Since Requests', {calc_app_fhir_v2_eob_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Coverage With Since Requests', {calc_app_fhir_v2_coverage_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Coverage Requests', {calc_app_fhir_v3_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 EOB Requests', {calc_app_fhir_v3_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Patient Requests', {calc_app_fhir_v3_patient_call_real_count},\n $${DYNAMICFIELD} = 'FHIR V3 Generate DIC Requests', {calc_app_fhir_v3_generate_insurance_card_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Total Requests', {calc_app_fhir_v3_call_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Authorize Initial' , {calc_app_authorize_initial_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Medicare Login Redirect OK', {calc_app_medicare_login_redirect_ok_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Medicare Login Redirect FAIL', {calc_app_medicare_login_redirect_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Start OK', {calc_app_authentication_start_ok_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Start FAIL', {calc_app_authentication_start_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched New Enrollee Real', {calc_app_authentication_matched_new_bene_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched New Enrollee Synthetic', {calc_app_authentication_matched_new_bene_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched Returning Enrollee Real', {calc_app_authentication_matched_returning_bene_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched Returning Enrollee Synthetic', {calc_app_authentication_matched_returning_bene_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack OK Real', {calc_app_sls_callback_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack OK Synthetic', {calc_app_sls_callback_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack FAIL', {calc_app_sls_callback_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET OK Real', {calc_app_approval_view_get_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET OK Synthetic', {calc_app_approval_view_get_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET FAIL', {calc_app_approval_view_get_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST OK Real', {calc_app_approval_view_post_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST OK Synthetic', {calc_app_approval_view_post_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST FAIL', {calc_app_approval_view_post_fail_count},\n {calc_app_grant_and_archived_real_bene_deduped_count})"
+      expression          = "ifelse($${DYNAMICFIELD} = 'APP Enrollees Served (all-time)', {calc_app_grant_and_archived_real_bene_deduped_count},\n$${DYNAMICFIELD} = 'APP Enrollees Served WoW (gains this week)', {calc_app_grant_and_archived_real_bene_deduped_wow_count},\n$${DYNAMICFIELD} = 'APP Requires Demographic Scopes', {calc_app_require_demographic_scopes},\n$${DYNAMICFIELD} = 'APP Is Enabled?', {calc_app_active},\n$${DYNAMICFIELD} = 'APP Is Grant Enabled?', {calc_app_access_grant_enabled},\n$${DYNAMICFIELD} = 'APP Synth Enrollee Served', {calc_app_grant_and_archived_synthetic_bene_deduped_count},\n$${DYNAMICFIELD} = 'Auth Status OK Real Enrollee', {calc_app_auth_ok_real_bene_count},\n$${DYNAMICFIELD} = 'Auth Status Deny Real Enrollee', {calc_app_auth_fail_or_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Share Real', {calc_app_auth_demoscope_required_choice_sharing_real_bene_count},\n$${DYNAMICFIELD} = '# of Successful CAN Requests', {calc_app_successful_client_credentials_call},\n$${DYNAMICFIELD} = '# of Failed CAN Requests', {calc_app_unsuccessful_client_credentials_call},\n$${DYNAMICFIELD} = 'Total # of CAN Requests', {calc_total_can_requests},\n$${DYNAMICFIELD} = '# of Successful Patient Matches', {calc_app_successful_patient_match_call},\n$${DYNAMICFIELD} = '# of Failed Patient Matches', {calc_app_unsuccessful_patient_match_call},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Not Share Real', {calc_app_auth_demoscope_required_choice_not_sharing_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Wants Demographic Enrollee Deny Real', {calc_app_auth_demoscope_required_choice_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Not Want Demographic Enrollee Not Share Real', {calc_app_auth_demoscope_not_required_not_sharing_real_bene_count},\n$${DYNAMICFIELD} = 'Auth App Not want Demographic Enrollee Deny Real', {calc_app_auth_demoscope_not_required_deny_real_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests Real Enrollee', {calc_app_token_authorization_code_for_real_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests Synth Enrollee', {calc_app_token_authorization_code_for_synthetic_bene_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 2xx', {calc_app_token_authorization_code_2xx_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 4xx', {calc_app_token_authorization_code_4xx_count},\n$${DYNAMICFIELD} = 'Token Auth-Code Requests 5xx', {calc_app_token_authorization_code_5xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests Real Enrollee', {calc_app_token_refresh_for_real_bene_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests Synth Enrollee', {calc_app_token_refresh_for_synthetic_bene_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 2xx', {calc_app_token_refresh_response_2xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 4xx', {calc_app_token_refresh_response_4xx_count},\n$${DYNAMICFIELD} = 'Token Refresh Requests 5xx', {calc_app_token_refresh_response_5xx_count},\n$${DYNAMICFIELD} = 'FHIR Total Requests', {calc_app_fhir_call_real_count},\n$${DYNAMICFIELD} = 'FHIR EOB Requests', {calc_app_fhir_eob_real_count},\n$${DYNAMICFIELD} = 'FHIR Coverage Requests', {calc_app_fhir_coverage_real_count},\n$${DYNAMICFIELD} = 'FHIR Patient Requests', {calc_app_fhir_patient_real_count},\n$${DYNAMICFIELD} = 'FHIR EOB With Since Requests', {calc_app_fhir_eob_since_real_count},\n$${DYNAMICFIELD} = 'FHIR Coverage With Since Requests', {calc_app_fhir_coverage_since_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Total Requests', {calc_app_fhir_v1_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 EOB Requests', {calc_app_fhir_v1_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Coverage Requests', {calc_app_fhir_v1_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Patient Requests', {calc_app_fhir_v1_patient_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 EOB With Since Requests', {calc_app_fhir_v1_eob_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V1 Coverage With Since Requests', {calc_app_fhir_v1_coverage_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Total Requests', {calc_app_fhir_v2_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 EOB Requests', {calc_app_fhir_v2_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Coverage Requests', {calc_app_fhir_v2_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Patient Requests', {calc_app_fhir_v2_patient_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 EOB With Since Requests', {calc_app_fhir_v2_eob_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V2 Coverage With Since Requests', {calc_app_fhir_v2_coverage_since_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Coverage Requests', {calc_app_fhir_v3_coverage_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 EOB Requests', {calc_app_fhir_v3_eob_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Patient Requests', {calc_app_fhir_v3_patient_call_real_count},\n $${DYNAMICFIELD} = 'FHIR V3 Generate DIC Requests', {calc_app_fhir_v3_generate_insurance_card_call_real_count},\n$${DYNAMICFIELD} = 'FHIR V3 Total Requests', {calc_app_fhir_v3_call_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Authorize Initial' , {calc_app_authorize_initial_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Medicare Login Redirect OK', {calc_app_medicare_login_redirect_ok_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Medicare Login Redirect FAIL', {calc_app_medicare_login_redirect_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Start OK', {calc_app_authentication_start_ok_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Start FAIL', {calc_app_authentication_start_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched New Enrollee Real', {calc_app_authentication_matched_new_bene_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched New Enrollee Synthetic', {calc_app_authentication_matched_new_bene_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched Returning Enrollee Real', {calc_app_authentication_matched_returning_bene_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Auth Matched Returning Enrollee Synthetic', {calc_app_authentication_matched_returning_bene_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack OK Real', {calc_app_sls_callback_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack OK Synthetic', {calc_app_sls_callback_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW SLS CallBack FAIL', {calc_app_sls_callback_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET OK Real', {calc_app_approval_view_get_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET OK Synthetic', {calc_app_approval_view_get_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View GET FAIL', {calc_app_approval_view_get_fail_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST OK Real', {calc_app_approval_view_post_ok_real_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST OK Synthetic', {calc_app_approval_view_post_ok_synthetic_count},\n$${DYNAMICFIELD} = 'AUTH-FLOW Approval View POST FAIL', {calc_app_approval_view_post_fail_count},\n {calc_app_grant_and_archived_real_bene_deduped_count})"
       name                = "Dynamic Field"
     }
     calculated_fields {
@@ -430,6 +430,47 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
       data_set_identifier = "prod_global_state_per_app"
       expression          = "ifelse( isNull(substring({app_access_grant_category}, 1, 10)) , 'N/A',  substring({app_access_grant_category}, 1, 10))"
       name                = "calc_app_access_grant_category"
+    }
+
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_successful_client_credentials_call})"
+      name                = "calc_app_successful_client_credentials_call"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_unsuccessful_client_credentials_call})"
+      name                = "calc_app_unsuccessful_client_credentials_call"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_successful_client_credentials_call}) + sum({app_unsuccessful_client_credentials_call})"
+      name                = "calc_total_can_requests"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_unsuccessful_client_credentials_call})"
+      name                = "calc_app_unsuccessful_client_credentials_call"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_successful_patient_match_call})"
+      name                = "calc_app_successful_patient_match_call"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "sum({app_unsuccessful_patient_match_call})"
+      name                = "calc_app_unsuccessful_patient_match_call"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "round({app_successful_client_credentials_call} / ({app_successful_client_credentials_call} + {app_unsuccessful_client_credentials_call}) , 3)"
+      name                = "percentage_of_app_client_credentials_calls_that_were_successful"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state_per_app"
+      expression          = "round({app_successful_patient_match_call} / ({app_successful_patient_match_call} + {app_unsuccessful_patient_match_call}) , 3)"
+      name                = "percentage_of_app_patient_matches_that_were_successful"
     }
 
 
@@ -2002,6 +2043,41 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                 field_id     = "61d0594b-45be-485a-ad06-19d1145f484f.20.1666277609552"
                 visibility   = "VISIBLE"
               }
+              selected_field_options {
+                custom_label = "# of Successful CAN Requests"
+                field_id     = "305b0908-ca5d-4b2a-b578-7696bb70115b.21.1785950895132"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Failed CAN Requests"
+                field_id     = "d0742015-b754-4271-ab67-a74c5035b88f.22.1785950922369"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "Total # of CAN Requests"
+                field_id     = "e06ea34e-46c3-4233-be84-a251ece57f84.23.1785950929793"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "% of CAN Requests that were Successful"
+                field_id     = "f4215b91-85d1-49ec-98ca-d8689b2dcf5a.24.1785950936620"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Successful Patient Matches"
+                field_id     = "b6b9c11a-1295-4660-be98-cace16d9424c.25.1785950946328"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Failed Patient Matches"
+                field_id     = "ed2e72f6-89cc-4d06-91de-9ffbca391032.26.1785950956836"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "% of Patient Matches that were Successful"
+                field_id     = "3f1c955f-ffe4-4e83-9fe3-74ec1bc6aee0.27.1785950962012"
+                visibility   = "VISIBLE"
+              }
             }
             field_wells {
               pivot_table_aggregated_field_wells {
@@ -2207,10 +2283,80 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                 }
                 values {
                   numerical_measure_field {
-                    field_id = "61d0594b-45be-485a-ad06-19d1145f484f.20.1666277609552"
+                    field_id = "305b0908-ca5d-4b2a-b578-7696bb70115b.21.1785950895132"
 
                     column {
-                      column_name         = "calc_app_token_authorization_code_for_synthetic_bene_count"
+                      column_name         = "calc_app_successful_client_credentials_call"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "d0742015-b754-4271-ab67-a74c5035b88f.22.1785950922369"
+
+                    column {
+                      column_name         = "calc_app_unsuccessful_client_credentials_call"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "e06ea34e-46c3-4233-be84-a251ece57f84.23.1785950929793"
+
+                    column {
+                      column_name         = "calc_total_can_requests"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "f4215b91-85d1-49ec-98ca-d8689b2dcf5a.24.1785950936620"
+
+                    column {
+                      column_name         = "percentage_of_app_client_credentials_calls_that_were_successful"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "b6b9c11a-1295-4660-be98-cace16d9424c.25.1785950946328"
+
+                    column {
+                      column_name         = "calc_app_successful_patient_match_call"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "ed2e72f6-89cc-4d06-91de-9ffbca391032.26.1785950956836"
+
+                    column {
+                      column_name         = "calc_app_unsuccessful_patient_match_call"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "ed2e72f6-89cc-4d06-91de-9ffbca391032.26.1785950956836"
+
+                    column {
+                      column_name         = "calc_app_unsuccessful_patient_match_call"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "3f1c955f-ffe4-4e83-9fe3-74ec1bc6aee0.27.1785950962012"
+
+                    column {
+                      column_name         = "percentage_of_app_patient_matches_that_were_successful"
                       data_set_identifier = "prod_global_state_per_app"
                     }
                   }
