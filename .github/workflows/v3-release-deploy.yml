@@ -358,7 +358,8 @@ jobs:
         bfd-platform-idr-pipeline,
         bfd-platform-migrator-ng,
         bfd-platform-consume-idr-events,
-        bfd-platform-run-idr-pipeline
+        bfd-platform-run-idr-pipeline,
+        bfd-platform-idr-bfd-validator
       baseImagesVersion: latest
       cleanupImageArtifacts: false # We'll cleanup at the end, so don't do anything
       tagLatest: false
