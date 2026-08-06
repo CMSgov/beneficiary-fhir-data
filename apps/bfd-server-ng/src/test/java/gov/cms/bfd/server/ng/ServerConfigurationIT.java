@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,7 @@ class ServerConfigurationIT extends IntegrationTestBase {
   void disabledEndpointAcceptsAllowedCert() {
     var fhirClient = getFhirClient();
     var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "good_cert");
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "good_cert");
     fhirClient.registerInterceptor(headersInterceptor);
     assertDoesNotThrow(
         () -> fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED));
@@ -75,7 +76,7 @@ class ServerConfigurationIT extends IntegrationTestBase {
   void disabledEndpointRejectsNotAllowedCert() {
     var fhirClient = getFhirClient();
     var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "bad_cert");
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "bad_cert");
     fhirClient.registerInterceptor(headersInterceptor);
     var readRequest =
         fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED);
