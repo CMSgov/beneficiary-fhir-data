@@ -19,4 +19,5 @@ public record PatientMatchAuditRecord(
     String clientId,
     Instant timestamp,
     List<MatchCombinationResult> combinationsEvaluated,
-    Optional<FinalDetermination> finalDetermination) {}
+    Optional<FinalDetermination> finalDetermination,
+    String certAlias) {}

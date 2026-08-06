@@ -80,7 +80,7 @@ public class IntegrationTestConfiguration {
             date,
             "uv",
             "run",
-            "pipeline.py",
+            "idr-pipeline",
             "--source",
             "postgres",
             "--load-mode",
@@ -189,9 +189,16 @@ public class IntegrationTestConfiguration {
 
   @Bean
   @Primary
-  public AuditLogger testAuditLogger(AuditEventRepository repository, ObjectMapper objectMapper) {
+  public AuditLogger testAuditLogger(
+      AuditEventRepository repository,
+      ObjectMapper objectMapper,
+      CertPartnersConfiguration certPartnersConfiguration) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
-    var dynamoLogger = new DynamoDbAuditLogger(repository, objectMapper);
+    var dynamoLogger =
+        new DynamoDbAuditLogger(
+            repository,
+            objectMapper,
+            certPartnersConfiguration.getPartnerNamesByCertificateAlias());
 
     return auditRecord -> {
       logStreamLogger.log(auditRecord);
