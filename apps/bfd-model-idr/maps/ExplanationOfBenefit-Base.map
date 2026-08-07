@@ -17,7 +17,7 @@ uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper"
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
@@ -189,6 +189,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.profComponents as profComponents -> tgt as profTgt then addProfessionalItems(src, profTgt) "Add professional components";
     
+    src.claimValues as claimValues -> tgt as cvSiTgt where ($cvSiTgt in ('73')) then addSupportingClmVal(src, cvSiTgt) "Add Supporting info claim vals";
+    src.claimValues as claimValues -> tgt as cvAdTgt where ($cvAdTgt in ('A1' | 'Q0' | 'Q1' | 'QM' | '05' | '17' | '18' | '19' | '73' | '74' | '77')) then {
+      addAdjudicationClmVal(src, cvAdTgt) "Add Adjudication claim vals";
+    }
+
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
@@ -250,17 +255,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
      } "Add codeable concept";
      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
     } "Add total charge amount";
-  
-    //for all practical purposes, these will only be present on institutional claims. 
-  src.CLM_OPRTNL_DSPRTNT_AMT as amt -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_OPRTNL_DSPRTNT_AMT") "Add url";
-      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
-    } "CLM_OPRTNL_DSPRTNT_AMT";
-
-  src.CLM_OPRTNL_IME_AMT as amt -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_OPRTNL_IME_AMT") "Add url";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
-  } "CLM_OPRTNL_IME_AMT";
 
   //CLM_MDCR_DDCTBL_AMT
   src.CLM_MDCR_DDCTBL_AMT as amtUsed -> tgt.total = create('BackboneElement') as tgtBBElement then {
@@ -455,10 +449,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_INSTNL_PRMRY_PYR_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_INSTNL_PRMRY_PYR_AMT";
-  institutionalComponents.CLM_INSTNL_PRFNL_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_PRFNL_AMT") "Add codeable concept";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-  } "Add CLM_INSTNL_PRFNL_AMT";
   institutionalComponents.CLM_INSTNL_DRG_OUTLIER_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_DRG_OUTLIER_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
@@ -475,7 +465,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_HAC_RDCTN_PYMT_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_HAC_RDCTN_PYMT_AMT";
-
   institutionalComponents.CLM_HIPPS_MODEL_BNDLD_PMT_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_HIPPS_MODEL_BNDLD_PMT_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
@@ -488,10 +477,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_HIPPS_VBP_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_HIPPS_VBP_AMT";
-  institutionalComponents.CLM_INSTNL_LOW_VOL_PMT_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_LOW_VOL_PMT_AMT") "Add codeable concept";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-  } "Add CLM_INSTNL_LOW_VOL_PMT_AMT";
   institutionalComponents.CLM_MDCR_IP_1ST_YR_RATE_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_IP_1ST_YR_RATE_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
@@ -516,10 +501,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_SS_OUTLIER_STD_PYMT_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_SS_OUTLIER_STD_PYMT_AMT";
-  institutionalComponents.CLM_MDCR_IP_BENE_DDCTBL_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_IP_BENE_DDCTBL_AMT") "Add codeable concept";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-  } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
   } "Add wrapper for institutional components";
 }
 
@@ -570,6 +551,107 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
     } "set coding";
   } "Set procedure, including code";
 
+}
+
+
+group addSupportingClmVal(source src: ExplanationOfBenefitBase, target tgt: BackboneElement){
+  src.claimValues as pintsFurnished where claimValues="73" -> tgt then addBloodPintsFurnished(src, tgt) "Add blood pints furnished";
+}
+
+group addAdjudicationClmVal(source src: ExplanationOfBenefitBase, target tgt: BackboneElement){
+  src.claimValues as claimValues -> tgt then {
+
+    claimValues.CLM_VAL_CD as valCode where valCode="18" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_OPRTNL_DSPRTNT_AMT") "Add url";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_OPRTNL_DSPRTNT_AMT";
+
+    claimValues.CLM_VAL_CD as valCode where valCode="19" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","Add CLM_OPRTNL_IME_AMT") "Add url";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_OPRTNL_IME_AMT";
+
+    claimValues.CLM_VAL_CD as valCode where valCode="A1" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_IP_BENE_DDCTBL_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
+
+    claimValues.CLM_VAL_CD as valCode where valCode="74" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_LOW_VOL_PMT_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_INSTNL_LOW_VOL_PMT_AMT";  
+
+    claimValues.CLM_VAL_CD as valCode where valCode="05" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_PRFNL_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_INSTNL_PRFNL_AMT";
+
+    claimValues.CLM_VAL_CD as valCode where valCode="Q0" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_PBP_INCLSN_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_PBP_INCLSN_AMT";
+
+    claimValues.CLM_VAL_CD as valCode where valCode="Q1" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_PBP_RDCTN_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_PBP_RDCTN_AMT";
+    
+    claimValues.CLM_VAL_CD as valCode where valCode="17" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_OPRTNL_OUTLR_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_OPRTNL_OUTLR_AMT";
+    
+    claimValues.CLM_VAL_CD as valCode where valCode="77" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_NEW_TECH_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_MDCR_NEW_TECH_AMT";
+    
+    claimValues.CLM_VAL_CD as valCode where valCode="73" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_SQSTRTN_RDCTN_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_SQSTRTN_RDCTN_AMT";
+    
+    claimValues.CLM_VAL_CD as valCode where valCode="QM" -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MIPS_PMT_AMT") "Add codeable concept";
+      src -> tgtBBElement.amount = create('Money') as tgtMoney then {
+        claimValues.CLM_VAL_AMT as amt addMoney(amt, tgtMoney) 
+      } "Add Money";
+    } "Add CLM_MIPS_PMT_AMT";    
+  }
+}
+
+//value
+group addBloodPintsFurnished(source src: ExplanationOfBenefitBase, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BLOOD_PT_FRNSH_QTY") "Add Coding";
+    } "Add category";
+    src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
+        src.CLM_BLOOD_PT_FRNSH_QTY as val -> tgtQuantity.value = cast(val,"decimal") "Set value";
+        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
+        src -> tgtQuantity.unit = "pint" "Set unit";
+        src -> tgtQuantity.code = "[pt_us]" "Set code";
+    } "Add blood Furnished";
 }
 
 group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg: Organization){

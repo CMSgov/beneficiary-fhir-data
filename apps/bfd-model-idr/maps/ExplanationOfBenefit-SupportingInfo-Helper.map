@@ -9,7 +9,6 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.DGNS_DRG_CD as drgCode -> tgt then addMSDRG(src, tgt) "Add DRG code";
     src.BENE_PTNT_STUS_CD as ptntStusCd -> tgt then addDischargeStatus(src, tgt) "Add discharge status";
     src.CLM_ADMSN_TYPE_CD as admitTypeCode -> tgt then addAdmitType(src, tgt) "Add admission type";
-    src.CLM_BLOOD_PT_FRNSH_QTY as pintsFurnished -> tgt then addBloodPintsFurnished(src, tgt) "Add blood pints furnished";
     src.CLM_MDCR_INSTNL_MCO_PD_SW as mcoPdSw -> tgt then addMCOPdSw(src, tgt) "Add primary payer switch";
     src.CLM_PPS_IND_CD as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
     src.TYPE_OF_BILL_CD as tobCode -> tgt then addTypeOfBill(src, tgt) "Add type of bill code";
@@ -235,19 +234,6 @@ group addRecordIdentificationCode(source src: SupportingInfoComponent, target tg
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.CLM_RIC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",val) "Add coding";
     } "Add CC";
-}
-//value
-group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: BackboneElement){
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BLOOD_PT_FRNSH_QTY") "Add Coding";
-    } "Add category";
-    src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
-        src.CLM_BLOOD_PT_FRNSH_QTY as val -> tgtQuantity.value = cast(val,"decimal") "Set value";
-        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-        src -> tgtQuantity.unit = "pint" "Set unit";
-        src -> tgtQuantity.code = "[pt_us]" "Set code";
-    } "Add blood Furnished";
 }
 //code
 group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneElement){
