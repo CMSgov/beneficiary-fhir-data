@@ -2928,7 +2928,9 @@ FROM
   LEFT JOIN
   (
     SELECT
-      NULLIF(req_app_name,'') as app_name,
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_successful_client_credentials_call
     FROM
       request_response_middleware_events
@@ -2945,13 +2947,17 @@ FROM
         AND req_grant_type = 'client_credentials'
         AND request_method = 'POST'
       )
-    GROUP BY NULLIF(req_app_name,'')
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
   ) t230 ON t230.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      NULLIF(req_app_name,'') as app_name,
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_unsuccessful_client_credentials_call
     FROM
       request_response_middleware_events
@@ -2968,13 +2974,17 @@ FROM
         AND req_grant_type = 'client_credentials'
         AND request_method = 'POST'
       )
-    GROUP BY NULLIF(req_app_name,'')
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
   ) t231 ON t231.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      NULLIF(app_name,'') as app_name,
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_successful_patient_match_call
     FROM
       request_response_middleware_events
@@ -2989,13 +2999,17 @@ FROM
         )
         AND patient_match_found = True
       )
-    GROUP BY NULLIF(app_name,'')
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
   ) t232 ON t232.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      NULLIF(app_name,'') as app_name,
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_unsuccessful_patient_match_call
     FROM
       request_response_middleware_events
@@ -3010,5 +3024,7 @@ FROM
         )
         AND patient_match_found = False
       )
-    GROUP BY NULLIF(app_name,'')
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
   ) t233 ON t233.app_name = t0.name 
