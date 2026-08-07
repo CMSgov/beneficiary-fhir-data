@@ -2928,9 +2928,7 @@ FROM
   LEFT JOIN
   (
     SELECT
-      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,'')) as app_name,
+      NULLIF(req_app_name,'') as app_name,
       count(*) as app_successful_client_credentials_call
     FROM
       request_response_middleware_events
@@ -2945,23 +2943,15 @@ FROM
         )
         AND response_code = 200
         AND req_grant_type = 'client_credentials'
-        AND (
-          try_cast(fhir_id_v2 as BIGINT) > 0
-          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
-        )
         AND request_method = 'POST'
       )
-    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,''))
+    GROUP BY NULLIF(req_app_name,'')
   ) t230 ON t230.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,'')) as app_name,
+      NULLIF(req_app_name,'') as app_name,
       count(*) as app_unsuccessful_client_credentials_call
     FROM
       request_response_middleware_events
@@ -2976,23 +2966,15 @@ FROM
         )
         AND response_code != 200
         AND req_grant_type = 'client_credentials'
-        AND (
-          try_cast(fhir_id_v2 as BIGINT) > 0
-          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
-        )
         AND request_method = 'POST'
       )
-    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,''))
+    GROUP BY NULLIF(req_app_name,'')
   ) t231 ON t231.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,'')) as app_name,
+      NULLIF(app_name,'') as app_name,
       count(*) as app_successful_patient_match_call
     FROM
       request_response_middleware_events
@@ -3006,19 +2988,14 @@ FROM
           OR path = '/v3/o/token/'
         )
         AND patient_match_found = True
-        AND try_cast(patient as BIGINT) > 0
       )
-    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,''))
+    GROUP BY NULLIF(app_name,'')
   ) t232 ON t232.app_name = t0.name 
 
   LEFT JOIN
   (
     SELECT
-      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,'')) as app_name,
+      NULLIF(app_name,'') as app_name,
       count(*) as app_unsuccessful_patient_match_call
     FROM
       request_response_middleware_events
@@ -3032,9 +3009,6 @@ FROM
           OR path = '/v3/o/token/'
         )
         AND patient_match_found = False
-        AND try_cast(patient as BIGINT) > 0
       )
-    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
-        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
-        NULLIF(resp_app_name,''))
+    GROUP BY NULLIF(app_name,'')
   ) t233 ON t233.app_name = t0.name 
