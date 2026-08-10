@@ -279,18 +279,21 @@ def _shared_class_flag(class_profile: str | None, allowed_profiles: list) -> str
     return ""
 
 
-def print_shared_class(graph: dict, profile_map: dict, class_name: str) -> None:
-    """Print a MappedSuperclass/Embeddable's own declared columns (not
-    resolved through inheritance or embeds -- those types get their own
-    section) with a push-down/pull-up flag: a shared class with a
-    profile-restricted column should push it down; a profile-named class
-    with an all-profiles column could pull it up."""
+def _print_shared_fields(
+        graph: dict,
+        profile_map: dict,
+        class_name: str,
+        indent: str,
+        expand_embeds: bool,
+        visited: set = None,
+) -> None:
+    visited = visited if visited is not None else set()
+    if class_name in visited or class_name not in graph:
+        return
+    visited.add(class_name)
+
     node = graph[class_name]
     class_profile = get_class_profile(class_name)
-    profile_label = class_profile or "shared, no profile in name"
-    inheritance = f" extends {node['parent']}" if node["parent"] else ""
-
-    print(f"[{node['type']}] {class_name}{inheritance}  [profile: {profile_label}]")
 
     for col in node["columns"]:
         db_col = col["db_col"].upper()
@@ -299,22 +302,63 @@ def print_shared_class(graph: dict, profile_map: dict, class_name: str) -> None:
         allowed_profiles = profile_map.get(db_col, ALL_PROFILES_ORDERED)
         flag = _shared_class_flag(class_profile, allowed_profiles)
         print(
-            f"    ├── [Column] {col['db_col']} ({col['java_var']}) "
+            f"{indent}├── [Column] {col['db_col']} ({col['java_var']}) "
             f"[profiles: {', '.join(allowed_profiles)}]{flag}"
         )
 
     for embed in node["embeddeds"]:
-        print(f"    └── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
+        print(f"{indent}└── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
+        if expand_embeds:
+            _print_shared_fields(
+                graph, profile_map, embed["type"], indent + "    │", expand_embeds, visited.copy()
+            )
+
+
+def print_shared_class(graph: dict, profile_map: dict, class_name: str, expand_embeds: bool = False) -> None:
+    """Print a MappedSuperclass/Embeddable's own declared columns (not
+    resolved through inheritance -- the parent gets its own section) with
+    a push-down/pull-up flag: a shared class with a profile-restricted
+    column should push it down; a profile-named class with an all-profiles
+    column could pull it up. Embedded types print as a pointer by default
+    (they get their own section further down); pass expand_embeds to
+    recurse into them inline instead."""
+    node = graph[class_name]
+    class_profile = get_class_profile(class_name)
+    profile_label = class_profile or "shared, no profile in name"
+    inheritance = f" extends {node['parent']}" if node["parent"] else ""
+
+    print(f"[{node['type']}] {class_name}{inheritance}  [profile: {profile_label}]")
+    _print_shared_fields(graph, profile_map, class_name, indent="    ", expand_embeds=expand_embeds)
     print()
 
 
-def print_shared_classes(graph: dict, profile_map: dict) -> None:
+def print_shared_classes(graph: dict, profile_map: dict, expand_embeds: bool = False, group_embeds: bool = False) -> None:
     shared = sorted(
         (n for n, d in graph.items() if d["type"] in ("MappedSuperclass", "Embeddable")),
         key=lambda n: (graph[n]["type"], n),
     )
+
+    if not group_embeds:
+        for name in shared:
+            print_shared_class(graph, profile_map, name, expand_embeds)
+        return
+
+    # Print each embed type right after the class that references it,
+    # instead of strict alphabetical order -- makes it easier to trace an
+    # embed's contents without scrolling to find its section, without
+    # duplicating anything the way expand_embeds does.
+    printed: set[str] = set()
+
+    def visit(name: str) -> None:
+        if name in printed or name not in graph or graph[name]["type"] not in ("MappedSuperclass", "Embeddable"):
+            return
+        printed.add(name)
+        print_shared_class(graph, profile_map, name, expand_embeds)
+        for embed in graph[name]["embeddeds"]:
+            visit(embed["type"])
+
     for name in shared:
-        print_shared_class(graph, profile_map, name)
+        visit(name)
 
 
 def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
@@ -376,9 +420,14 @@ def _print_completeness_gaps(gaps: dict) -> None:
 
 
 def main():
+    args = sys.argv[1:]
     debug_col = None
-    if len(sys.argv) >= 3 and sys.argv[1] == "--debug-column":
-        debug_col = sys.argv[2].upper()
+    if "--debug-column" in args:
+        idx = args.index("--debug-column")
+        if idx + 1 < len(args):
+            debug_col = args[idx + 1].upper()
+    expand_embeds = "--expand-embeds" in args
+    group_embeds = "--group-embeds" in args
 
     profile_map = parse_yaml_map(Path(YAML_DICTS_DIR))
     graph = parse_java_graph(JAVA_SRC_DIR)
@@ -394,7 +443,7 @@ def main():
     print("MappedSuperclass / Embeddable review (push-down / pull-up candidates)")
     print("-" * 80)
     print()
-    print_shared_classes(graph, profile_map)
+    print_shared_classes(graph, profile_map, expand_embeds=expand_embeds, group_embeds=group_embeds)
 
     _print_unmatched_columns(profile_map)
     _print_duplicate_bindings()

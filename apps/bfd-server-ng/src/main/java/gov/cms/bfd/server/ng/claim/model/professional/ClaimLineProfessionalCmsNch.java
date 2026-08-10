@@ -33,7 +33,8 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @SuppressWarnings("java:S2201")
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
-public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implements ClaimLineBase {
+public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCmsBase
+    implements ClaimLineBase {
 
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
