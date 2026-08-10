@@ -930,7 +930,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "revenue" : {
       "coding" : [ {
         "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
       }, {
         "code" : "0929",
@@ -2331,7 +2330,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "revenue" : {
       "coding" : [ {
         "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
       }, {
         "code" : "0929",
@@ -5541,7 +5539,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "revenue" : {
       "coding" : [ {
         "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
       }, {
         "code" : "0929",
@@ -7302,7 +7299,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "revenue" : {
       "coding" : [ {
         "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
       }, {
         "code" : "0929",
