@@ -91,5 +91,11 @@
       "idr-pipeline": "apps/bfd-pipeline-idr"
     },
     "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-platform-server-datadog-agent",
+    "dockerfile": "ops/images/bfd-platform-server-datadog-agent/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-server-datadog-agent",
+    "platform": "linux/arm64"
   }
 ]
