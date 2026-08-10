@@ -13,10 +13,10 @@ from pathlib import Path
 import yaml
 
 JAVA_SRC_DIR = Path(
-    "/Users/lewellync/Projects/BFD/git/beneficiary-fhir-data/apps/bfd-server-ng/src/main/java/gov/cms/bfd/server/ng"
+    "../src/main/java/gov/cms/bfd/server/ng"
 )
 YAML_DICTS_DIR = Path(
-    "/Users/lewellync/Projects/BFD/git/beneficiary-fhir-data/apps/bfd-server-ng/src/main/resources/dictionary-support-files"
+    "../../bfd-model-idr/dictionary-support-files"
 )
 
 CLASS_RE = re.compile(
