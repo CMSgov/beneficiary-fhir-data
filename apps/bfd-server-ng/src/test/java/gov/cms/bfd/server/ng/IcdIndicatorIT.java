@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
-import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;

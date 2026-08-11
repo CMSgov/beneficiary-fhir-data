@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
