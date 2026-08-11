@@ -27,9 +27,6 @@ npm --version
 brew install npm
 ```
 
-```sh
-npm install -g fsh-sushi fhirpath
-```
 
 ### Install packages  (via uv)
 
@@ -51,7 +48,7 @@ uv sync
 To compile the .fsh files from this folder
 
 ```sh
-cd sushi && sushi build && cd ..
+npm run sushi-build
 ```
 
 This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data.
