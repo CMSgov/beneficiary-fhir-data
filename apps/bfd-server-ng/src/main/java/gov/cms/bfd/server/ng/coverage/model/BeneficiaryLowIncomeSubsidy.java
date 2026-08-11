@@ -41,7 +41,7 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
   private double partDPremiumPercentage;
 
   @Column(name = "bene_cmbnd_deemd_ind")
-  private String beneDeemInd;
+  private String beneDeemedInd;
 
   /**
    * Create copay level code and part D premium percentage extensions.
