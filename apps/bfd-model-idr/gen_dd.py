@@ -49,6 +49,21 @@ sample_resources_by_profile = {}
 dd_df = []
 structure_def_names_descriptions = {}
 
+
+def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        args,
+        cwd=Path().parent,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+if not Path("./sushi/fsh-generated/resources").exists():
+    print("Generating sushi files")
+    run_subprocess(["npm", "install"])
+    run_subprocess(["npm", "run", "sushi-build"])
+
 for resource_type in sample_sources_by_profile:
     with Path(sample_sources_by_profile[resource_type]).open() as file:
         sample_resources_by_profile[resource_type] = json.load(file)
@@ -85,17 +100,6 @@ claim_profiles = [
     "PriorAuth",
 ]
 
-
-def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
-    return subprocess.run(
-        args,
-        cwd=Path().parent,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
-
-
-run_subprocess(["npm", "install"])
 
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))

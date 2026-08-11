@@ -338,6 +338,7 @@ class GeneratorUtil:
 
         # Check if the resources directory exists, if not run sushi build
         if not Path(relative_path).exists():
+            run_command("npm install")
             run_command("npm run sushi-build")
 
         try:
