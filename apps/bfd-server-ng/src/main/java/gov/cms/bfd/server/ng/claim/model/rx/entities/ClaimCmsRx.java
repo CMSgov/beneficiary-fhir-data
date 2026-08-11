@@ -22,6 +22,7 @@ import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractPBPNumber;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -103,11 +104,12 @@ public class ClaimCmsRx extends ClaimBase {
   private void addServiceProvider(ExplanationOfBenefit eob) {
     serviceProviderHistory
         .toFhirNpiType()
-        .ifPresent(
+        .ifPresentOrElse(
             p -> {
-              eob.addContained(p);
               eob.setProvider(new Reference("#" + p.getId()));
-            });
+              eob.addContained(p);
+            },
+            () -> eob.setProvider(FhirUtil.setDataAbsentReasonUnknown(new Reference())));
   }
 
   private void addSupportingInfo(ExplanationOfBenefit eob) {
