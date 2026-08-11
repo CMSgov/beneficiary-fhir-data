@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
+import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.coverage.converter.StringToDoubleConverter;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -41,7 +42,8 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
   private double partDPremiumPercentage;
 
   @Column(name = "bene_cmbnd_deemd_ind")
-  private String beneDeemedInd;
+  @Convert(converter = DefaultFalseBooleanConverter.class)
+  private boolean beneDeemedInd;
 
   /**
    * Create copay level code and part D premium percentage extensions.
@@ -61,11 +63,10 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
                 Optional.of(extPartDPremiumPercentage),
                 copayLevelCode.map(BeneficiaryLISCopaymentLevelCode::toFhir)));
 
-    if (Optional.ofNullable(beneDeemInd).isPresent() && !beneDeemInd.isEmpty()) {
+    if (beneDeemedInd) {
       stream.add(
           Optional.of(
-              new Extension(SystemUrls.EXT_BENE_CMBND_DEEMD_IND)
-                  .setValue(new StringType(beneDeemInd))));
+              new Extension(SystemUrls.EXT_BENE_CMBND_DEEMD_IND).setValue(new StringType("Y"))));
     }
 
     return stream.stream().flatMap(Optional::stream).toList();
