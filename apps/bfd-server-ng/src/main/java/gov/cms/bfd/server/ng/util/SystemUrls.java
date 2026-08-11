@@ -431,6 +431,15 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT";
 
   /**
+   * Extension URL for BFD Low Income Subsidy Part D Premium Percentage. Source:
+   * V2_MDCR_BENE_CMBND_LIS.BENE_CMBND_DEEMD_IND (from v2_mdcr_bene_cmbnd_lis) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD">BENE-LIS-EFCTV-CD
+   * Extension</a>
+   */
+  public static final String EXT_BENE_CMBND_DEEMD_IND =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD";
+
+  /**
    * Extension URL for BFD Medicare Current Entitlement Reason Code. Source:
    * V2_BENE_MDCR_ENTLMT_RSN.BENE_MDCR_ENTLMT_RSN_CD (from v2_mdcr_bene_mdcr_entlmt_rsn) <a
    * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD">BENE-MDCR-ENTLMT-RSN-CD

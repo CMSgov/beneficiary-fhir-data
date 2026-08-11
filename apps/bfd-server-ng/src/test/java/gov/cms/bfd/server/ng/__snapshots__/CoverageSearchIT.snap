@@ -922,6 +922,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-405764107-H1234-003",
       "identifier" : [ {
@@ -1524,6 +1527,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-405764107-H1234-003",
       "identifier" : [ {
@@ -2126,6 +2132,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-405764107-H1234-003",
       "identifier" : [ {
@@ -3759,6 +3768,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-971050241-G1234-003",
       "identifier" : [ {
@@ -4011,6 +4023,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-971050241-G1234-003",
       "identifier" : [ {
@@ -4263,6 +4278,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-971050241-G1234-003",
       "identifier" : [ {
@@ -6866,6 +6884,9 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchForBeneWithSingleP
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+        "valueString" : "Y"
       } ],
       "id" : "part-d-547437476-S0001-003",
       "identifier" : [ {

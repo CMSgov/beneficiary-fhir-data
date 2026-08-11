@@ -58,11 +58,18 @@ public sealed interface BeneficiaryLISCopaymentLevelCode
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
+  @SuppressWarnings("java:S115")
   enum Valid implements BeneficiaryLISCopaymentLevelCode {
     /** 1 - High. */
     _1("1", "High"),
+    /** 2 - Low. */
+    _2("2", "Low"),
+    /** 3 - 0 (no copay). */
+    _3("3", "0 (no copay)"),
     /** 4 - 15% Copayment. */
-    _4("4", "15% Copayment");
+    _4("4", "15% Copayment"),
+    /** 5 - Unknown. */
+    _5("5", "Unknown");
 
     private final String code;
     private final String display;
