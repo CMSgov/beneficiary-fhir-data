@@ -32,10 +32,6 @@ jobs:
       - name: Sync UV in bfd-model-idr
         run: uv sync
         working-directory: apps/bfd-model-idr
-      - name: Build sushi
-        run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
-          npm run sushi-build
       - name: Generate v3 Data Dictionary
         run: uv run gen_dd.py
         working-directory: apps/bfd-model-idr
