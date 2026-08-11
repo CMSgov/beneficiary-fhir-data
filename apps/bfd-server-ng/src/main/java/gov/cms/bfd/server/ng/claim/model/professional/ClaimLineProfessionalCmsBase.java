@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 
-/** ExplanationOfBenefit.Item component Professional-CMS attributes. */
+/** ExplanationOfBenefit.Item component Professional domain, CMS profile. */
 @MappedSuperclass
 @Getter
 abstract class ClaimLineProfessionalCmsBase extends ClaimLineProfessionalBase {
+
+  @Embedded ClaimLineExtensionsCms extensions;
 
   @Column(name = "clm_pos_cd")
   private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
@@ -54,5 +57,10 @@ abstract class ClaimLineProfessionalCmsBase extends ClaimLineProfessionalBase {
     var supportingInfo = new ArrayList<>(super.toFhirSupportingInfo(supportingInfoFactory));
     supportingInfo.addAll(lineBenefitEnhancementCodes.toFhir(supportingInfoFactory));
     return supportingInfo;
+  }
+
+  @Override
+  public List<Extension> getExtensions(ClaimFilterOptions options) {
+    return extensions.toFhir(options);
   }
 }

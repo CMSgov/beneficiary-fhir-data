@@ -50,8 +50,6 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
-  @Embedded private ClaimLineProfessionalExtensions extensions;
-
   @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       ClaimFilterOptions options) {
@@ -73,7 +71,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
         () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
 
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
-    getFhirExtensions(options).forEach(line::addExtension);
+    getExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -100,9 +98,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();
 
-  abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
+  abstract List<Extension> getExtensions(ClaimFilterOptions options);
 
-  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
-    return getExtensions().toFhir(options);
-  }
+  abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
 }

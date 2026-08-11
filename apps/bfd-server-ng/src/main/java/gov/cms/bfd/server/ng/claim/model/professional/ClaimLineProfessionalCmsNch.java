@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.model.Reference;
 /** Claim line info. */
 @Embeddable
 @Getter
-@SuppressWarnings("java:S2201")
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
 public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCmsBase
     implements ClaimLineBase {
@@ -144,8 +143,8 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCmsBase
   }
 
   @Override
-  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
-    var extensions = new ArrayList<>(super.getFhirExtensions(options));
+  public List<Extension> getExtensions(ClaimFilterOptions options) {
+    var extensions = new ArrayList<>(super.getExtensions(options));
     extensions.addAll(claimLineProfessionalNchExtensions.toFhir());
     return extensions;
   }

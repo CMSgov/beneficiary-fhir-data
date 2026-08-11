@@ -2,11 +2,13 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /** The "Revenue Package Indicator Code" for a claim. */
+@Embeddable
 public class ClaimRevenuePackageIndicatorCode {
   @Column(name = "clm_rev_packg_ind_cd")
   private Optional<String> revenuePackageIndicatorCode;

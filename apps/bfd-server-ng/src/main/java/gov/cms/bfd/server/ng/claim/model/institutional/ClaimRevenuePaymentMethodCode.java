@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.converter.WhitespaceTrimConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
@@ -12,6 +13,7 @@ import org.hl7.fhir.r4.model.Extension;
  * Represents the "Revenue Payment Method Code" for a claim. This code indicates the method by which
  * revenue-related payments are processed.
  */
+@Embeddable
 public class ClaimRevenuePaymentMethodCode {
   @Column(name = "clm_rev_pmt_mthd_cd")
   @Convert(converter = WhitespaceTrimConverter.class)
