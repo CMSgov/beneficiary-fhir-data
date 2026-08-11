@@ -1,5 +1,5 @@
-CodeSystem: BENE_LIS_EFCTV_CD
-Id: BENE-LIS-EFCTV-CD
+CodeSystem: BENE_CMBND_DEEMD_IND
+Id: BENE-CMBND-DEEMD-IND
 Title: "Beneficiary LIS Effective Code"
 Description: "Codes indicating the effective status of Low Income Subsidy (LIS) for a beneficiary"
 * ^version = "1.0.0"
@@ -7,8 +7,6 @@ Description: "Codes indicating the effective status of Low Income Subsidy (LIS) 
 * ^experimental = false
 * ^caseSensitive = true
 * ^content = #complete
-* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-EFCTV-CD"
+* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-IND"
 
 * #Y "Yes"
-* #N "No"
-* #U "Unknown"

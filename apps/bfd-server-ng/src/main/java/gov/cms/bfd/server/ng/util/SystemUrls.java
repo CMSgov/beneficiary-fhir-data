@@ -433,11 +433,11 @@ public class SystemUrls {
   /**
    * Extension URL for BFD Low Income Subsidy Part D Premium Percentage. Source:
    * V2_MDCR_BENE_CMBND_LIS.BENE_CMBND_DEEMD_IND (from v2_mdcr_bene_cmbnd_lis) <a
-   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD">BENE-LIS-EFCTV-CD
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND">BENE-CMBND-DEEMD-IND
    * Extension</a>
    */
   public static final String EXT_BENE_CMBND_DEEMD_IND =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD";
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND";
 
   /**
    * Extension URL for BFD Medicare Current Entitlement Reason Code. Source:
