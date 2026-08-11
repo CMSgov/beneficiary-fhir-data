@@ -51,9 +51,9 @@
     }
   },
   {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND",
     "valueCoding" : {
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-EFCTV-CD",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-IND",
       "code" : "Y"
     }
   },
