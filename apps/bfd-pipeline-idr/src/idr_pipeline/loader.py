@@ -39,6 +39,7 @@ class PostgresLoader:
         load_type: LoadType,
         load_mode: LoadMode,
         worker_client: LoadingBatchWorkerClient,
+        job_id: int,
     ) -> bool:
         return anyio.run(
             self._async_load,
@@ -50,6 +51,7 @@ class PostgresLoader:
             load_type,
             load_mode,
             worker_client,
+            job_id
         )
 
     async def _async_load(
@@ -62,6 +64,7 @@ class PostgresLoader:
         load_type: LoadType,
         load_mode: LoadMode,
         worker_client: LoadingBatchWorkerClient,
+        job_id: int,
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
@@ -88,6 +91,7 @@ class PostgresLoader:
                 load_type,
                 load_mode,
                 worker_client,
+                job_id,
             ).load()
 
 
@@ -103,6 +107,7 @@ class BatchLoader:
         load_type: LoadType,
         load_mode: LoadMode,
         worker_client: LoadingBatchWorkerClient,
+        job_id: int,
     ) -> None:
         self.pool = pool
         self.fetch_results = fetch_results
@@ -168,6 +173,7 @@ class BatchLoader:
         self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
         self.enable_load_progress = should_track_load_progress(load_mode)
+        self.job_id = job_id
 
     async def load(self) -> bool:
         timestamp = datetime.now(UTC)
@@ -297,36 +303,58 @@ class BatchLoader:
         return []
 
     async def _insert_batch_start(self, cur: psycopg.AsyncCursor) -> None:
+        sql = f"""
+        INSERT INTO idr.load_progress(
+            table_name,
+            last_ts,
+            last_id,
+            batch_partition,
+            job_start_ts,
+            batch_start_ts,
+            batch_complete_ts,
+            job_id,
+            max_run_ts)
+        VALUES(
+            %(table)s,
+            '{DEFAULT_MIN_DATE}',
+            0,
+            %(partition)s,
+            %(job_start_ts)s,
+            %(batch_start_ts)s,
+            '{DEFAULT_MIN_DATE}',
+            %(job_id)s,
+        """
+
+        if self.job_id == 1:
+            sql += """
+                null
+            """
+        else:
+            sql += """
+            (SELECT last_ts 
+             FROM idr.load_progress
+             WHERE job_id = 1
+               AND table_name = %(table)s
+               AND batch_partition = %(partition)s
+            )
+            """
+
+        sql += """
+        )
+        ON CONFLICT (table_name, batch_partition, job_id) DO UPDATE
+        SET
+            job_start_ts = EXCLUDED.job_start_ts,
+            batch_start_ts = EXCLUDED.batch_start_ts
+        """
         await self._update_load_progress(
             cur,
-            f"""
-            INSERT INTO idr.load_progress(
-                table_name,
-                last_ts,
-                last_id,
-                batch_partition,
-                job_start_ts,
-                batch_start_ts,
-                batch_complete_ts)
-            VALUES(
-                %(table)s,
-                '{DEFAULT_MIN_DATE}',
-                0,
-                %(partition)s,
-                %(job_start_ts)s,
-                %(batch_start_ts)s,
-                '{DEFAULT_MIN_DATE}'
-            )
-            ON CONFLICT (table_name, batch_partition) DO UPDATE
-            SET
-                job_start_ts = EXCLUDED.job_start_ts,
-                batch_start_ts = EXCLUDED.batch_start_ts
-            """,
+            sql,
             {
                 "table": self.table,
                 "partition": self.partition.name,
                 "job_start_ts": self.job_start,
                 "batch_start_ts": self.batch_start,
+                "job_id": self.job_id,
             },
         )
 
@@ -336,9 +364,10 @@ class BatchLoader:
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
-            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s
+            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s 
+                    AND job_id = %(job_id)s
             """,
-            {"table": self.table, "batch_partition": self.partition.name},
+            {"table": self.table, "batch_partition": self.partition.name, "job_id": self.job_id},
         )
 
     async def _setup_temp_table(

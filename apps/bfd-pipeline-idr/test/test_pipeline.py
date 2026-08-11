@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
+from concurrent.futures import ThreadPoolExecutor
 
 import psycopg
 import pytest
@@ -55,8 +56,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType, job_id:int) -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, job_id)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 29
@@ -110,7 +111,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, job_id)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -615,20 +616,25 @@ def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
         yield postgres, conninfo
 
 
-def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
+def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType, 
+                        job_id:int, reset_db: bool) -> None:
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
-        _reset_db(conn, sample_dir, postgres)
+        if reset_db:
+            _reset_db(conn, sample_dir, postgres)
         _setup_pipeline_environment(conn.info)
-        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+        _do_test_pipeline(cast(Connection[DictRow], conn), load_type, job_id)
     logger.remove()
 
 
 def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_pipeline_load(postgres_db, LoadType.INITIAL)
-
+    _test_pipeline_load(postgres_db, LoadType.INITIAL,1, True)
 
 def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
+    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL,1, True)
+
+def test_incremental_pipeline_load2(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL,2, True)
+

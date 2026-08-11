@@ -1,6 +1,7 @@
 import atexit
 import multiprocessing
 from datetime import UTC, datetime
+import random
 
 import anyio
 import click
@@ -65,19 +66,27 @@ from .settings import (
     show_default=True,
     help="Truncate tables before reloading",
 )
+@click.option(
+    "--job-id",
+    envvar="IDR_JOB_ID",
+    type=int,
+    default=1,
+    show_default=True,
+    help="Job Id for the pipeline run. This is used to have concurrent runs.",
+)
 def main(
     source: Source,
     load_mode: LoadMode,
     load_type: LoadType,
     seed_from: str | None,
     truncate: bool,
+    job_id: int,
 ) -> None:
     # Required to have loguru logging consistently configured across parallel pipeline nodes and
     # batch worker
     multiprocessing.set_start_method("spawn")
     # Setup the root logger _once_
     configure_logger()
-
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
@@ -86,13 +95,14 @@ def main(
             seed_from,
             truncate,
         )
-    run(source, load_mode, load_type)
+    run(source, load_mode, load_type, job_id)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
+
+def run(source: Source, load_mode: LoadMode, load_type: LoadType, job_id: int = 1) -> None:
     logger.info("load start")
     logger.info("load_type {}", load_type)
-
+    logger.info("job_id {}", job_id)
     start_time = resolve_test_date(load_mode)
 
     tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
@@ -121,6 +131,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
         load_type=load_type,
         source=source,
         worker_client=worker_manager.client,
+        job_id=job_id,
         tables_to_load=tables_to_load,
     )
 

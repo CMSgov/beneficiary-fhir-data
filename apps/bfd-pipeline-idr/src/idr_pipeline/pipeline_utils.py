@@ -40,6 +40,7 @@ def get_progress(
     table_name: str,
     start_time: datetime,
     partition: LoadPartition,
+    job_id: int,
 ) -> LoadProgress | None:
     if not should_track_load_progress(load_mode):
         return None
@@ -47,7 +48,7 @@ def get_progress(
     return PostgresExtractor(
         load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(
-        LoadProgress.fetch_query(partition, start_time, source),
+        LoadProgress.fetch_query(partition, start_time, source, job_id),
         {LoadProgress.query_placeholder(): table_name},
     )
 
@@ -59,6 +60,7 @@ def extract_and_load(
     job_start: datetime,
     load_type: LoadType,
     worker_client: LoadingBatchWorkerClient,
+    job_id: int,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
@@ -75,16 +77,19 @@ def extract_and_load(
 
     while True:
         try:
-            progress = get_progress(load_mode, source, cls.table(), job_start, partition)
+            progress = get_progress(load_mode, source, cls.table(), job_start, partition, job_id)
 
             if progress:
                 logger.info(
-                    "progress for {} {} - last_ts: {} job_start_ts: {} batch_complete_ts: {}",
+                    "progress for {} {} - last_ts: {} job_start_ts: {} " \
+                    "batch_complete_ts: {} job_id: {} max_run_ts: {}",
                     cls.table(),
                     progress.batch_partition,
                     progress.last_ts,
                     progress.job_start_ts,
                     progress.batch_complete_ts,
+                    progress.job_id,
+                    progress.max_run_ts,
                 )
             else:
                 logger.info("no previous progress for {} - {}", cls.table(), partition.name)
@@ -99,6 +104,7 @@ def extract_and_load(
                 load_type,
                 load_mode,
                 worker_client,
+                job_id,
             )
             data_extractor.close()
             return res
