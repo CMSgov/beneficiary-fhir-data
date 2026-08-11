@@ -202,6 +202,9 @@ export_columns = [
     "profiles",
 ]
 export_df = dd_df[export_columns]
+
+export_df.to_json("out/bfd_data_dictionary.json", orient="records", indent=2)
+
 tips_df = pd.read_csv(dd_support_folder + "/tips.csv")
 
 with pd.ExcelWriter("out/bfd_data_dictionary.xlsx", engine="xlsxwriter") as writer:
