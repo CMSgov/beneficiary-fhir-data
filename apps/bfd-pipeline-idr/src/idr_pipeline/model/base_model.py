@@ -855,6 +855,7 @@ def stale_phase_1_claims_query(
                 SELECT clm.clm_uniq_id 
                 FROM {header_table} clm
                 WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                AND clm.clm_uniq_id > 0
                 AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                 AND clm.bfd_updated_ts < %s
                 ORDER BY clm.bfd_updated_ts, clm.clm_uniq_id
