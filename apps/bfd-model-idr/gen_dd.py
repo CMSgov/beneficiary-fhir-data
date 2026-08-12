@@ -49,6 +49,21 @@ sample_resources_by_profile = {}
 dd_df = []
 structure_def_names_descriptions = {}
 
+
+def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        args,
+        cwd=Path().parent,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+if not Path("./sushi/fsh-generated/resources").exists():
+    print("Generating sushi files")
+    run_subprocess(["npm", "install"])
+    run_subprocess(["npm", "run", "sushi-build"])
+
 for resource_type in sample_sources_by_profile:
     with Path(sample_sources_by_profile[resource_type]).open() as file:
         sample_resources_by_profile[resource_type] = json.load(file)
@@ -84,10 +99,13 @@ claim_profiles = [
     "Pharmacy",
     "PriorAuth",
 ]
+
+
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
     for file_name in files:
         with Path(str(dd_support_folder) + "/" + str(file_name)).open() as file:
+            print("Generating", file_name)
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
@@ -110,16 +128,13 @@ for walk_info in os.walk(dd_support_folder):
                         entry["FHIR Resource"] = "AuditEvent"
 
                     # This opportunistically populates examples based upon the samples created from executing FML
-                    result = subprocess.run(
+                    result = run_subprocess(
                         [
                             "node",
                             "eval_fhirpath.js",
                             json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
                             entry["fhirPath"],
-                        ],
-                        cwd=os.path.dirname(__file__),
-                        check=True,
-                        stdout=subprocess.PIPE,
+                        ]
                     )
                     entry["example"] = json.loads(result.stdout)
                     if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
@@ -134,20 +149,20 @@ for walk_info in os.walk(dd_support_folder):
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
-                        entry["Field Name"] = structure_def_names_descriptions[
-                            entry["inputPath"]
-                        ]["name"]
+                        entry["Field Name"] = structure_def_names_descriptions[entry["inputPath"]][
+                            "name"
+                        ]
                         if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
                             entry["Description"] = structure_def_names_descriptions[
                                 entry["inputPath"]
-                            ]["definition"]                    
-                    #nameOverride and definitionOverride only exist when a field is derived IN fml.
+                            ]["definition"]
+                    # nameOverride and definitionOverride only exist when a field is derived IN fml.
                     if "nameOverride" in entry:
                         entry["Field Name"] = entry["nameOverride"]
                         entry["Description"] = entry["definitionOverride"]
                     elif "Description" not in entry or not entry["Description"]:
                         raise ValueError(
-                            f"Entry {entry.get("inputPath", 'Unknown')} has no definition. "
+                            f"Entry {entry.get('inputPath', 'Unknown')} has no definition. "
                         )
                     entry.pop("inputPath")
                     dd_df.append(entry)
@@ -156,8 +171,7 @@ dd_df = pd.DataFrame(dd_df)
 
 
 def replace_str(input_str):
-    # Yes, the below is intentional.
-    if input_str == input_str and len(str(input_str)) > 0:
+    if isinstance(input_str, str) and len(str(input_str)) > 0:
         return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
     return ""
 
