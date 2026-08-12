@@ -2436,6 +2436,21 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').exists()).amount.value
   profiles:
     - CMS
+- inputPath: SupportingInfoComponent.CLM_PPS_IND
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+  sources:
+    - FISS
+  referenceTable: CLM_PPS_IND_CD
+  sourceView: V2_MDCR_CLM_FISS
+  sourceColumn: CLM_PPS_IND
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
+  profiles:
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
