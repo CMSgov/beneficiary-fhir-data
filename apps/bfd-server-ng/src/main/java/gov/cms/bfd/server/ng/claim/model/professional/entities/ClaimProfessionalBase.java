@@ -10,6 +10,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -133,11 +134,12 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addProviders(ExplanationOfBenefit eob) {
     getBillingProviderHistory()
         .toFhirNpiType()
-        .ifPresent(
+        .ifPresentOrElse(
             p -> {
-              eob.addContained(p);
               eob.setProvider(new Reference("#" + p.getId()));
-            });
+              eob.addContained(p);
+            },
+            () -> eob.setProvider(FhirUtil.setDataAbsentReasonUnknown(new Reference())));
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {

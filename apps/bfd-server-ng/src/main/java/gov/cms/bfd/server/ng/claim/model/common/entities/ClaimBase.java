@@ -223,7 +223,6 @@ public abstract class ClaimBase {
     // status codes are resolved as PARTIAL to match the outcome search filter behavior.
     if (this instanceof ClaimInstitutionalCmsSharedSystems
         || this instanceof ClaimProfessionalCmsSharedSystems) {
-
       ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
     }
   }

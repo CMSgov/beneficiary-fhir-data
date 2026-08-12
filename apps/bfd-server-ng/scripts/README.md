@@ -8,8 +8,8 @@ becomes more sophisticated, it is possible for them to be moved over.
 Because we don't have IntelliJ pro, we have to write our own JPA mapping scripts. This script is a self contained uv script
 that runs via:
 
-```aiignore
-uv run jpa_grapy.py
+```
+uv run jpa_graph.py
 ```
 
 At the moment, this script is still being updated, but the goal of this script is to read in the mapping YAML files for

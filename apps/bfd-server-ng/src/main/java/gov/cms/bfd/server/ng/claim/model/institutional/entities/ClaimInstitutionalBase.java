@@ -24,12 +24,15 @@ import gov.cms.bfd.server.ng.claim.model.institutional.OtherInstitutionalCareTea
 import gov.cms.bfd.server.ng.claim.model.institutional.ReferringInstitutionalCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.RenderingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.TypeOfBillCode;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -186,11 +189,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private void addProviders(ExplanationOfBenefit eob) {
     getBillingProviderHistory()
         .toFhirNpiType()
-        .ifPresent(
+        .ifPresentOrElse(
             p -> {
-              eob.addContained(p);
               eob.setProvider(new Reference("#" + p.getId()));
-            });
+              eob.addContained(p);
+            },
+            () -> eob.setProvider(FhirUtil.setDataAbsentReasonUnknown(new Reference())));
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {

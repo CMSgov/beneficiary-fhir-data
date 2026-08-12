@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 public class ClaimIdrLoadDate {
+
   @Column(name = "clm_idr_ld_dt")
   private LocalDate idrLoadDate;
 

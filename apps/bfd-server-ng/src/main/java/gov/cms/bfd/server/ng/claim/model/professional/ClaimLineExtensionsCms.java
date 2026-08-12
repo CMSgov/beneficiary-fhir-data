@@ -12,15 +12,12 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Embedded container for professional claim line extensions. Resource -
- * Resource - ExplanationOfBenefit.ItemComponent.Extension
- * Domain   - [ Professional ]
- * Profile  - [ CMS ]
- * Source   - [ SS, NCH ]
+ * Embedded container for professional claim line extensions. Resource - Resource -
+ * ExplanationOfBenefit.ItemComponent.Extension Domain - [ Professional ] Profile - [ CMS ] Source -
+ * [ SS, NCH ]
  */
 public class ClaimLineExtensionsCms {
-  @Embedded
-  ClaimLineExtensions base;
+  @Embedded ClaimLineExtensions base;
 
   @Column(name = "clm_fed_type_srvc_cd")
   private Optional<ClaimFederalTypeOfServiceCode> federalTypeOfServiceCode;
