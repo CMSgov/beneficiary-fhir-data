@@ -1,0 +1,1936 @@
+package gov.cms.bfd.server.ng.claim.model.common;
+
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
+
+/** Revenue center ANSI adjustment reason codes for claims. */
+public sealed interface RevenueCenterAnsiReasonCode
+    permits RevenueCenterAnsiReasonCode.Valid, RevenueCenterAnsiReasonCode.Invalid {
+
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
+
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
+
+  /**
+   * Convert from a database code.
+   *
+   * @param code database code
+   * @return ANSI adjustment reason code
+   */
+  static Optional<RevenueCenterAnsiReasonCode> tryFromCode(String code) {
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(Valid.values())
+            .filter(v -> v.code.equals(code))
+            .map(v -> (RevenueCenterAnsiReasonCode) v)
+            .findFirst()
+            .orElseGet(() -> new Invalid(code)));
+  }
+
+  /**
+   * Converts this ANSI reason code into a list of FHIR {@link Coding} objects for multiple code
+   * systems.
+   *
+   * @return list of FHIR codings
+   */
+  default Optional<List<Coding>> toFhirCodings() {
+    return Optional.of(
+        List.of(
+            new Coding().setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES).setCode(getCode()),
+            new Coding()
+                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE)
+                .setCode(getCode())));
+  }
+
+  /** Enum for all known, valid revenue center ANSI reason codes. */
+  @Getter
+  @AllArgsConstructor
+  enum Valid implements RevenueCenterAnsiReasonCode {
+    /** 1 - Deductible Amount. */
+    _1("1", "Deductible Amount"),
+    /** 2 - Coinsurance Amount. */
+    _2("2", "Coinsurance Amount"),
+    /** 3 - Co-pay Amount. */
+    _3("3", "Co-pay Amount"),
+    /**
+     * 4 - The procedure code is inconsistent with the modifier used or a required modifier is
+     * missing.
+     */
+    _4(
+        "4",
+        "The procedure code is inconsistent with the modifier used or a required modifier is missing."),
+    /** 5 - The procedure code/bill type is inconsistent with the place of service. */
+    _5("5", "The procedure code/bill type is inconsistent with the place of service."),
+    /** 6 - The procedure code is inconsistent with the patient's age. */
+    _6("6", "The procedure code is inconsistent with the patient's age."),
+    /** 7 - The procedure code is inconsistent with the patient's gender. */
+    _7("7", "The procedure code is inconsistent with the patient's gender."),
+    /** 8 - The procedure code is inconsistent with the provider type. */
+    _8("8", "The procedure code is inconsistent with the provider type."),
+    /** 9 - The diagnosis is inconsistent with the patient's age. */
+    _9("9", "The diagnosis is inconsistent with the patient's age."),
+    /** 10 - The diagnosis is inconsistent with the patient's gender. */
+    _10("10", "The diagnosis is inconsistent with the patient's gender."),
+    /** 11 - The diagnosis is inconsistent with the procedure. */
+    _11("11", "The diagnosis is inconsistent with the procedure."),
+    /** 12 - The diagnosis is inconsistent with the provider type. */
+    _12("12", "The diagnosis is inconsistent with the provider type."),
+    /** 13 - The date of death precedes the date of service. */
+    _13("13", "The date of death precedes the date of service."),
+    /** 14 - The date of birth follows the date of service. */
+    _14("14", "The date of birth follows the date of service."),
+    /**
+     * 15 - Claim/service adjusted because the submitted authorization number is missing, invalid,
+     * or does not apply to the billed services or provider.
+     */
+    _15(
+        "15",
+        "Claim/service adjusted because the submitted authorization number is missing, invalid, or does not apply to the billed services or provider."),
+    /** 16 - Claim/service lacks information which is needed for adjudication. */
+    _16("16", "Claim/service lacks information which is needed for adjudication."),
+    /**
+     * 17 - Claim/service adjusted because requested information was not provided or was
+     * insufficient/incomplete.
+     */
+    _17(
+        "17",
+        "Claim/service adjusted because requested information was not provided or was insufficient/incomplete."),
+    /** 18 - Duplicate claim/service. */
+    _18("18", "Duplicate claim/service."),
+    /**
+     * 19 - Claim denied because this is a work-related injury/illness and thus the liability of the
+     * Worker's Compensation Carrier.
+     */
+    _19(
+        "19",
+        "Claim denied because this is a work-related injury/illness and thus the liability of the Worker's Compensation Carrier."),
+    /** 20 - Claim denied because this injury/illness is covered by the liability carrier. */
+    _20("20", "Claim denied because this injury/illness is covered by the liability carrier."),
+    /** 21 - Claim denied because this injury/illness is the liability of the no-fault carrier. */
+    _21("21", "Claim denied because this injury/illness is the liability of the no-fault carrier."),
+    /**
+     * 22 - Claim adjusted because this care may be covered by another payer per coordination of
+     * benefits.
+     */
+    _22(
+        "22",
+        "Claim adjusted because this care may be covered by another payer per coordination of benefits."),
+    /** 23 - Claim adjusted because charges have been paid by another payer. */
+    _23("23", "Claim adjusted because charges have been paid by another payer."),
+    /**
+     * 24 - Payment for charges adjusted. Charges are covered under a capitation agreement/managed
+     * care plan.
+     */
+    _24(
+        "24",
+        "Payment for charges adjusted. Charges are covered under a capitation agreement/managed care plan."),
+    /** 25 - Payment denied. Your Stop loss deductible has not been met. */
+    _25("25", "Payment denied. Your Stop loss deductible has not been met."),
+    /** 26 - Expenses incurred prior to coverage. */
+    _26("26", "Expenses incurred prior to coverage."),
+    /** 27 - Expenses incurred after coverage terminated. */
+    _27("27", "Expenses incurred after coverage terminated."),
+    /** 28 - Coverage not in effect at the time the service was provided. */
+    _28("28", "Coverage not in effect at the time the service was provided."),
+    /** 29 - The time limit for filing has expired. */
+    _29("29", "The time limit for filing has expired."),
+    /**
+     * 30 - Claim/service adjusted because the patient has not met the required eligibility, spend
+     * down, waiting, or residency requirements.
+     */
+    _30(
+        "30",
+        "Claim/service adjusted because the patient has not met the required eligibility, spend down, waiting, or residency requirements."),
+    /** 31 - Claim denied as patient cannot be identified as our insured. */
+    _31("31", "Claim denied as patient cannot be identified as our insured."),
+    /** 32 - Our records indicate that this dependent is not an eligible dependent as defined. */
+    _32("32", "Our records indicate that this dependent is not an eligible dependent as defined."),
+    /** 33 - Claim denied. Insured has no dependent coverage. */
+    _33("33", "Claim denied. Insured has no dependent coverage."),
+    /** 34 - Claim denied. Insured has no coverage for newborns. */
+    _34("34", "Claim denied. Insured has no coverage for newborns."),
+    /** 35 - Benefit maximum has been reached. */
+    _35("35", "Benefit maximum has been reached."),
+    /** 36 - Balance does not exceed copayment amount. */
+    _36("36", "Balance does not exceed copayment amount."),
+    /** 37 - Balance does not exceed deductible amount. */
+    _37("37", "Balance does not exceed deductible amount."),
+    /** 38 - Services not provided or authorized by designated (network) providers. */
+    _38("38", "Services not provided or authorized by designated (network) providers."),
+    /** 39 - Services denied at the time authorization/pre-certification was requested. */
+    _39("39", "Services denied at the time authorization/pre-certification was requested."),
+    /** 40 - Charges do not meet qualifications for emergency/urgent care. */
+    _40("40", "Charges do not meet qualifications for emergency/urgent care."),
+    /** 41 - Discount agreed to in Preferred Provider contract. */
+    _41("41", "Discount agreed to in Preferred Provider contract."),
+    /** 42 - Charges exceed our fee schedule or maximum allowable amount. */
+    _42("42", "Charges exceed our fee schedule or maximum allowable amount."),
+    /** 43 - Gramm-Rudman reduction. */
+    _43("43", "Gramm-Rudman reduction."),
+    /** 44 - Prompt-pay discount. */
+    _44("44", "Prompt-pay discount."),
+    /** 45 - Charges exceed your contracted/legislated fee arrangement. */
+    _45("45", "Charges exceed your contracted/legislated fee arrangement."),
+    /** 46 - This (these) service(s) is(are) not covered. */
+    _46("46", "This (these) service(s) is(are) not covered."),
+    /** 47 - This (these) diagnosis(es) is(are) not covered, missing, or are invalid. */
+    _47("47", "This (these) diagnosis(es) is(are) not covered, missing, or are invalid."),
+    /** 48 - This (these) procedure(s) is(are) not covered. */
+    _48("48", "This (these) procedure(s) is(are) not covered."),
+    /**
+     * 49 - These are non-covered services because this is a routine exam or screening procedure
+     * done in conjunction with a routine exam.
+     */
+    _49(
+        "49",
+        "These are non-covered services because this is a routine exam or screening procedure done in conjunction with a routine exam."),
+    /**
+     * 50 - These are non-covered services because this is not deemed a 'medical necessity' by the
+     * payer.
+     */
+    _50(
+        "50",
+        "These are non-covered services because this is not deemed a 'medical necessity' by the payer."),
+    /** 51 - These are non-covered services because this a pre-existing condition. */
+    _51("51", "These are non-covered services because this a pre-existing condition."),
+    /**
+     * 52 - The referring/prescribing/rendering provider is not eligible to
+     * refer/prescribe/order/perform the service billed.
+     */
+    _52(
+        "52",
+        "The referring/prescribing/rendering provider is not eligible to refer/prescribe/order/perform the service billed."),
+    /** 53 - Services by an immediate relative or a member of the same household are not covered. */
+    _53(
+        "53",
+        "Services by an immediate relative or a member of the same household are not covered."),
+    /** 54 - Multiple physicians/assistants are not covered in this case. */
+    _54("54", "Multiple physicians/assistants are not covered in this case."),
+    /**
+     * 55 - Claim/service denied because procedure/treatment is deemed experimental/investigational
+     * by the payer.
+     */
+    _55(
+        "55",
+        "Claim/service denied because procedure/treatment is deemed experimental/investigational by the payer."),
+    /**
+     * 56 - Claim/service denied because procedure/treatment has not been deemed 'proven to be
+     * effective' by payer.
+     */
+    _56(
+        "56",
+        "Claim/service denied because procedure/treatment has not been deemed 'proven to be effective' by payer."),
+    /**
+     * 57 - Claim/service adjusted because the payer deems the information submitted does not
+     * support this level of service, this many services, this length of service, or this dosage.
+     */
+    _57(
+        "57",
+        "Claim/service adjusted because the payer deems the information submitted does not support this level of service, this many services, this length of service, or this dosage."),
+    /**
+     * 58 - Claim/service adjusted because treatment was deemed by the payer to have been rendered
+     * in an inappropriate or invalid place of service.
+     */
+    _58(
+        "58",
+        "Claim/service adjusted because treatment was deemed by the payer to have been rendered in an inappropriate or invalid place of service."),
+    /** 59 - Charges are adjusted based on multiple surgery rules or concurrent anesthesia rules. */
+    _59(
+        "59",
+        "Charges are adjusted based on multiple surgery rules or concurrent anesthesia rules."),
+    /**
+     * 60 - Charges for outpatient services with the proximity to inpatient services are not
+     * covered.
+     */
+    _60(
+        "60",
+        "Charges for outpatient services with the proximity to inpatient services are not covered."),
+    /** 61 - Charges adjusted as penalty for failure to obtain second surgical opinion. */
+    _61("61", "Charges adjusted as penalty for failure to obtain second surgical opinion."),
+    /**
+     * 62 - Claim/service denied/reduced for absence of, or exceeded,
+     * precertification/authorization.
+     */
+    _62(
+        "62",
+        "Claim/service denied/reduced for absence of, or exceeded, precertification/authorization."),
+    /** 63 - Correction to a prior claim. INACTIVE. */
+    _63("63", "Correction to a prior claim. INACTIVE"),
+    /** 64 - Denial reversed per Medical Review. INACTIVE. */
+    _64("64", "Denial reversed per Medical Review. INACTIVE"),
+    /** 65 - Procedure code was incorrect. This payment reflects the correct code. INACTIVE. */
+    _65("65", "Procedure code was incorrect. This payment reflects the correct code. INACTIVE"),
+    /** 66 - Blood Deductible. */
+    _66("66", "Blood Deductible."),
+    /** 67 - Lifetime reserve days. INACTIVE. */
+    _67("67", "Lifetime reserve days. INACTIVE"),
+    /** 68 - DRG weight. INACTIVE. */
+    _68("68", "DRG weight. INACTIVE"),
+    /** 69 - Day outlier amount. */
+    _69("69", "Day outlier amount."),
+    /** 70 - Cost outlier amount. */
+    _70("70", "Cost outlier amount."),
+    /** 71 - Primary Payer amount. */
+    _71("71", "Primary Payer amount."),
+    /** 72 - Coinsurance day. INACTIVE. */
+    _72("72", "Coinsurance day. INACTIVE"),
+    /** 73 - Administrative days. INACTIVE. */
+    _73("73", "Administrative days. INACTIVE"),
+    /** 74 - Indirect Medical Education Adjustment. */
+    _74("74", "Indirect Medical Education Adjustment."),
+    /** 75 - Direct Medical Education Adjustment. */
+    _75("75", "Direct Medical Education Adjustment."),
+    /** 76 - Disproportionate Share Adjustment. */
+    _76("76", "Disproportionate Share Adjustment."),
+    /** 77 - Covered days. INACTIVE. */
+    _77("77", "Covered days. INACTIVE"),
+    /** 78 - Non-covered days/room charge adjustment. */
+    _78("78", "Non-covered days/room charge adjustment."),
+    /** 79 - Cost report days. INACTIVE. */
+    _79("79", "Cost report days. INACTIVE"),
+    /** 80 - Outlier days. INACTIVE. */
+    _80("80", "Outlier days. INACTIVE"),
+    /** 81 - Discharges. INACTIVE. */
+    _81("81", "Discharges. INACTIVE"),
+    /** 82 - PIP days. INACTIVE. */
+    _82("82", "PIP days. INACTIVE"),
+    /** 83 - Total visits. INACTIVE. */
+    _83("83", "Total visits. INACTIVE"),
+    /** 84 - Capital adjustments. INACTIVE. */
+    _84("84", "Capital adjustments. INACTIVE"),
+    /** 85 - Interest amount. INACTIVE. */
+    _85("85", "Interest amount. INACTIVE"),
+    /** 86 - Statutory adjustment. INACTIVE. */
+    _86("86", "Statutory adjustment. INACTIVE"),
+    /** 87 - Transfer amounts. */
+    _87("87", "Transfer amounts."),
+    /**
+     * 88 - Adjustment amount represents collection against receivable created in prior overpayment.
+     */
+    _88(
+        "88",
+        "Adjustment amount represents collection against receivable created in prior overpayment."),
+    /** 89 - Professional fees removed from charges. */
+    _89("89", "Professional fees removed from charges."),
+    /** 90 - Ingredient cost adjustment. */
+    _90("90", "Ingredient cost adjustment."),
+    /** 91 - Dispensing fee adjustment. */
+    _91("91", "Dispensing fee adjustment."),
+    /** 92 - Claim paid in full. INACTIVE. */
+    _92("92", "Claim paid in full. INACTIVE"),
+    /** 93 - No claim level adjustment. INACTIVE. */
+    _93("93", "No claim level adjustment. INACTIVE"),
+    /** 94 - Process in excess of charges. */
+    _94("94", "Process in excess of charges."),
+    /** 95 - Benefits adjusted. Plan procedures not followed. */
+    _95("95", "Benefits adjusted. Plan procedures not followed."),
+    /** 96 - Non-covered charges. */
+    _96("96", "Non-covered charges."),
+    /** 97 - Payment is included in allowance for another service/procedure. */
+    _97("97", "Payment is included in allowance for another service/procedure."),
+    /**
+     * 98 - The hospital must file the Medicare claim for this inpatient non-physician service.
+     * INACTIVE.
+     */
+    _98(
+        "98",
+        "The hospital must file the Medicare claim for this inpatient non-physician service. INACTIVE"),
+    /** 99 - Medicare Secondary Payer Adjustment Amount. INACTIVE. */
+    _99("99", "Medicare Secondary Payer Adjustment Amount. INACTIVE"),
+    /** 100 - Payment made to patient/insured/responsible party. */
+    _100("100", "Payment made to patient/insured/responsible party."),
+    /**
+     * 101 - Predetermination: anticipated payment upon completion of services or claim
+     * adjudication.
+     */
+    _101(
+        "101",
+        "Predetermination: anticipated payment upon completion of services or claim adjudication."),
+    /** 102 - Major medical adjustment. */
+    _102("102", "Major medical adjustment."),
+    /** 103 - Provider promotional discount (i.e. Senior citizen discount). */
+    _103("103", "Provider promotional discount (i.e. Senior citizen discount)."),
+    /** 104 - Managed care withholding. */
+    _104("104", "Managed care withholding."),
+    /** 105 - Tax withholding. */
+    _105("105", "Tax withholding."),
+    /** 106 - Patient payment option/election not in effect. */
+    _106("106", "Patient payment option/election not in effect."),
+    /**
+     * 107 - Claim/service denied because the related or qualifying claim/service was not paid or
+     * identified on the claim.
+     */
+    _107(
+        "107",
+        "Claim/service denied because the related or qualifying claim/service was not paid or identified on the claim."),
+    /** 108 - Claim/service reduced because rent/purchase guidelines were not met. */
+    _108("108", "Claim/service reduced because rent/purchase guidelines were not met."),
+    /**
+     * 109 - Claim not covered by this payer/contractor. You must send the claim to the correct
+     * payer/contractor.
+     */
+    _109(
+        "109",
+        "Claim not covered by this payer/contractor. You must send the claim to the correct payer/contractor."),
+    /** 110 - Billing date predates service date. */
+    _110("110", "Billing date predates service date."),
+    /** 111 - Not covered unless the provider accepts assignment. */
+    _111("111", "Not covered unless the provider accepts assignment."),
+    /**
+     * 112 - Claim/service adjusted as not furnished directly to the patient and/or not documented.
+     */
+    _112(
+        "112",
+        "Claim/service adjusted as not furnished directly to the patient and/or not documented."),
+    /**
+     * 113 - Claim denied because service/procedure was provided outside the United States or as a
+     * result of war.
+     */
+    _113(
+        "113",
+        "Claim denied because service/procedure was provided outside the United States or as a result of war."),
+    /** 114 - Procedure/PRODuct not approved by the Food and Drug Administration. */
+    _114("114", "Procedure/PRODuct not approved by the Food and Drug Administration."),
+    /** 115 - Claim/service adjusted as procedure postponed or canceled. */
+    _115("115", "Claim/service adjusted as procedure postponed or canceled."),
+    /**
+     * 116 - Claim/service denied. The advance indemnification notice signed by the patient did not
+     * comply with requirements.
+     */
+    _116(
+        "116",
+        "Claim/service denied. The advance indemnification notice signed by the patient did not comply with requirements."),
+    /**
+     * 117 - Claim/service adjusted because transportation is only covered to the closest facility
+     * that can provide the necessary care.
+     */
+    _117(
+        "117",
+        "Claim/service adjusted because transportation is only covered to the closest facility that can provide the necessary care."),
+    /** 118 - Charges reduced for ESRD network support. */
+    _118("118", "Charges reduced for ESRD network support."),
+    /** 119 - Benefit maximum for this time period has been reached. */
+    _119("119", "Benefit maximum for this time period has been reached."),
+    /** 120 - Patient is covered by a managed care plan. INACTIVE. */
+    _120("120", "Patient is covered by a managed care plan. INACTIVE"),
+    /** 121 - Indemnification adjustment. */
+    _121("121", "Indemnification adjustment."),
+    /** 122 - Psychiatric reduction. */
+    _122("122", "Psychiatric reduction."),
+    /** 123 - Payer refund due to overpayment. INACTIVE. */
+    _123("123", "Payer refund due to overpayment. INACTIVE"),
+    /** 124 - Payer refund amount - not our patient. INACTIVE. */
+    _124("124", "Payer refund amount - not our patient. INACTIVE"),
+    /** 125 - Claim/service adjusted due to a submission/billing error(s). */
+    _125("125", "Claim/service adjusted due to a submission/billing error(s)."),
+    /** 126 - Deductible - Major Medical. */
+    _126("126", "Deductible - Major Medical."),
+    /** 127 - Coinsurance - Major Medical. */
+    _127("127", "Coinsurance - Major Medical."),
+    /** 128 - Newborn's services are covered in the mother's allowance. */
+    _128("128", "Newborn's services are covered in the mother's allowance."),
+    /** 129 - Claim denied - prior processing information appears incorrect. */
+    _129("129", "Claim denied - prior processing information appears incorrect."),
+    /** 130 - Paper claim submission fee. */
+    _130("130", "Paper claim submission fee."),
+    /** 131 - Claim specific negotiated discount. */
+    _131("131", "Claim specific negotiated discount."),
+    /** 132 - Prearranged demonstration project adjustment. */
+    _132("132", "Prearranged demonstration project adjustment."),
+    /** 133 - The disposition of this claim/service is pending further review. */
+    _133("133", "The disposition of this claim/service is pending further review."),
+    /** 134 - Technical fees removed from charges. */
+    _134("134", "Technical fees removed from charges."),
+    /** 135 - Claim denied. Interim bills cannot be processed. */
+    _135("135", "Claim denied. Interim bills cannot be processed."),
+    /** 136 - Claim adjusted. Plan procedures of a prior payer were not followed. */
+    _136("136", "Claim adjusted. Plan procedures of a prior payer were not followed."),
+    /**
+     * 137 - Payment/Reduction for Regulatory Surcharges, Assessments, Allowances or Health Related
+     * Taxes.
+     */
+    _137(
+        "137",
+        "Payment/Reduction for Regulatory Surcharges, Assessments, Allowances or Health Related Taxes."),
+    /** 138 - Claim/service denied. Appeal procedures not followed or time limits not met. */
+    _138("138", "Claim/service denied. Appeal procedures not followed or time limits not met."),
+    /** 139 - Contracted funding agreement - subscriber is employed by the provider of services. */
+    _139(
+        "139",
+        "Contracted funding agreement - subscriber is employed by the provider of services."),
+    /** 140 - Patient/Insured health identification number and name do not match. */
+    _140("140", "Patient/Insured health identification number and name do not match."),
+    /** 141 - Claim spans eligible and ineligible periods of coverage. */
+    _141("141", "Claim spans eligible and ineligible periods of coverage."),
+    /** 142 - Monthly Medicaid patient liability amount. */
+    _142("142", "Monthly Medicaid patient liability amount."),
+    /** 143 - Portion of payment deferred. */
+    _143("143", "Portion of payment deferred."),
+    /** 144 - Incentive adjustment, e.g. preferred product/service. */
+    _144("144", "Incentive adjustment, e.g. preferred product/service."),
+    /** 145 - Premium payment withholding. */
+    _145("145", "Premium payment withholding"),
+    /** 146 - Diagnosis was invalid for the date(s) of service reported. */
+    _146("146", "Diagnosis was invalid for the date(s) of service reported."),
+    /** 147 - Provider contracted/negotiated rate expired or not on file. */
+    _147("147", "Provider contracted/negotiated rate expired or not on file."),
+    /**
+     * 148 - Information from another provider was not provided or was insufficient/incomplete. At
+     * least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason
+     * Code, or Remittance Advice Remark Code that is not an ALERT.).
+     */
+    _148(
+        "148",
+        "Information from another provider was not provided or was insufficient/incomplete. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /** 149 - Lifetime benefit maximum has been reached for this service/benefit category. */
+    _149("149", "Lifetime benefit maximum has been reached for this service/benefit category."),
+    /** 150 - Payer deems the information submitted does not support this level of service. */
+    _150("150", "Payer deems the information submitted does not support this level of service."),
+    /**
+     * 151 - Payment adjusted because the payer deems the information submitted does not support
+     * this many/frequency of services.
+     */
+    _151(
+        "151",
+        "Payment adjusted because the payer deems the information submitted does not support this many/frequency of services."),
+    /**
+     * 152 - Payer deems the information submitted does not support this length of service. Usage:
+     * Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment
+     * Information REF), if present.
+     */
+    _152(
+        "152",
+        "Payer deems the information submitted does not support this length of service. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 153 - Payer deems the information submitted does not support this dosage. */
+    _153("153", "Payer deems the information submitted does not support this dosage."),
+    /** 154 - Payer deems the information submitted does not support this day's supply. */
+    _154("154", "Payer deems the information submitted does not support this day's supply."),
+    /** 155 - Patient refused the service/procedure. */
+    _155("155", "Patient refused the service/procedure."),
+    /** 156 - Flexible spending account payments. Note: Use code 187. */
+    _156("156", "Flexible spending account payments. Note: Use code 187."),
+    /** 157 - Service/procedure was provided as a result of an act of war. */
+    _157("157", "Service/procedure was provided as a result of an act of war."),
+    /** 158 - Service/procedure was provided outside of the United States. */
+    _158("158", "Service/procedure was provided outside of the United States."),
+    /** 159 - Service/procedure was provided as a result of terrorism. */
+    _159("159", "Service/procedure was provided as a result of terrorism."),
+    /** 160 - Injury/illness was the result of an activity that is a benefit exclusion. */
+    _160("160", "Injury/illness was the result of an activity that is a benefit exclusion."),
+    /** 161 - Provider performance bonus. */
+    _161("161", "Provider performance bonus"),
+    /**
+     * 162 - State-mandated Requirement for Property and Casualty, see Claim Payment Remarks Code
+     * for specific explanation.
+     */
+    _162(
+        "162",
+        "State-mandated Requirement for Property and Casualty, see Claim Payment Remarks Code for specific explanation."),
+    /** 163 - Attachment/other documentation referenced on the claim was not received. */
+    _163("163", "Attachment/other documentation referenced on the claim was not received."),
+    /**
+     * 164 - Attachment/other documentation referenced on the claim was not received in a timely
+     * fashion.
+     */
+    _164(
+        "164",
+        "Attachment/other documentation referenced on the claim was not received in a timely fashion."),
+    /** 165 - Referral absent or exceeded. */
+    _165("165", "Referral absent or exceeded."),
+    /**
+     * 166 - These services were submitted after this payers responsibility for processing claims
+     * under this plan ended.
+     */
+    _166(
+        "166",
+        "These services were submitted after this payers responsibility for processing claims under this plan ended."),
+    /**
+     * 167 - This (these) diagnosis(es) is (are) not covered. Usage: Refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment Information REF), if present.
+     */
+    _167(
+        "167",
+        "This (these) diagnosis(es) is (are) not covered. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 168 - Service(s) have been considered under the patient's medical plan. Benefits are not
+     * available under this dental plan.
+     */
+    _168(
+        "168",
+        "Service(s) have been considered under the patient's medical plan. Benefits are not available under this dental plan."),
+    /** 169 - Alternate benefit has been provided. */
+    _169("169", "Alternate benefit has been provided."),
+    /**
+     * 170 - Payment is denied when performed/billed by this type of provider. Usage: Refer to the
+     * 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _170(
+        "170",
+        "Payment is denied when performed/billed by this type of provider. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 171 - Payment is denied when performed/billed by this type of provider in this type of
+     * facility. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service
+     * Payment Information REF), if present.
+     */
+    _171(
+        "171",
+        "Payment is denied when performed/billed by this type of provider in this type of facility. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 172 - Payment is adjusted when performed/billed by a provider of this specialty. Usage: Refer
+     * to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information
+     * REF), if present.
+     */
+    _172(
+        "172",
+        "Payment is adjusted when performed/billed by a provider of this specialty. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 173 - Service/equipment was not prescribed by a physician. */
+    _173("173", "Service/equipment was not prescribed by a physician."),
+    /** 174 - Service was not prescribed prior to delivery. */
+    _174("174", "Service was not prescribed prior to delivery."),
+    /** 175 - Prescription is incomplete. */
+    _175("175", "Prescription is incomplete."),
+    /** 176 - Prescription is not current. */
+    _176("176", "Prescription is not current."),
+    /** 177 - Patient has not met the required eligibility requirements. */
+    _177("177", "Patient has not met the required eligibility requirements."),
+    /** 178 - Patient has not met the required spend down requirements. */
+    _178("178", "Patient has not met the required spend down requirements."),
+    /**
+     * 179 - Patient has not met the required waiting requirements. Usage: Refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _179(
+        "179",
+        "Patient has not met the required waiting requirements. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 180 - Patient has not met the required residency requirements. */
+    _180("180", "Patient has not met the required residency requirements."),
+    /** 181 - Procedure code was invalid on the date of service. */
+    _181("181", "Procedure code was invalid on the date of service."),
+    /** 182 - Procedure modifier was invalid on the date of service. */
+    _182("182", "Procedure modifier was invalid on the date of service."),
+    /**
+     * 183 - The referring provider is not eligible to refer the service billed. Usage: Refer to the
+     * 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _183(
+        "183",
+        "The referring provider is not eligible to refer the service billed. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 184 - The prescribing/ordering provider is not eligible to prescribe/order the service
+     * billed. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service
+     * Payment Information REF), if present.
+     */
+    _184(
+        "184",
+        "The prescribing/ordering provider is not eligible to prescribe/order the service billed. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 185 - The rendering provider is not eligible to perform the service billed. Usage: Refer to
+     * the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF),
+     * if present.
+     */
+    _185(
+        "185",
+        "The rendering provider is not eligible to perform the service billed. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 186 - Level of care change adjustment. */
+    _186("186", "Level of care change adjustment."),
+    /**
+     * 187 - Consumer Spending Account payments (includes but is not limited to Flexible Spending
+     * Account, Health Savings Account, Health Reimbursement Account, etc.).
+     */
+    _187(
+        "187",
+        "Consumer Spending Account payments (includes but is not limited to Flexible Spending Account, Health Savings Account, Health Reimbursement Account, etc.)"),
+    /** 188 - This product/procedure is only covered when used according to FDA recommendations. */
+    _188(
+        "188",
+        "This product/procedure is only covered when used according to FDA recommendations."),
+    /**
+     * 189 - 'Not otherwise classified' or 'unlisted' procedure code (CPT/HCPCS) was billed when
+     * there is a specific procedure code for this procedure/service.
+     */
+    _189(
+        "189",
+        "'Not otherwise classified' or 'unlisted' procedure code (CPT/HCPCS) was billed when there is a specific procedure code for this procedure/service"),
+    /**
+     * 190 - Payment is included in the allowance for a Skilled Nursing Facility (SNF) qualified
+     * stay.
+     */
+    _190(
+        "190",
+        "Payment is included in the allowance for a Skilled Nursing Facility (SNF) qualified stay."),
+    /**
+     * 191 - Not a work related injury/illness and thus not the liability of the workers'
+     * compensation carrier Note: If adjustment is at the Claim Level, the payer must send and the
+     * provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim
+     * Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is
+     * at the Line Level, the payer must send and the provider should refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment information REF).
+     */
+    _191(
+        "191",
+        "Not a work related injury/illness and thus not the liability of the workers' compensation carrier Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF)"),
+    /**
+     * 192 - Non standard adjustment code from paper remittance. Usage: This code is to be used by
+     * providers/payers providing Coordination of Benefits information to another payer in the 837
+     * transaction only. This code is only used when the non-standard code cannot be reasonably
+     * mapped to an existing Claims Adjustment Reason Code, specifically Deductible, Coinsurance and
+     * Co-payment.
+     */
+    _192(
+        "192",
+        "Non standard adjustment code from paper remittance. Usage: This code is to be used by providers/payers providing Coordination of Benefits information to another payer in the 837 transaction only. This code is only used when the non-standard code cannot be reasonably mapped to an existing Claims Adjustment Reason Code, specifically Deductible, Coinsurance and Co-payment."),
+    /**
+     * 193 - Original payment decision is being maintained. Upon review, it was determined that this
+     * claim was processed properly.
+     */
+    _193(
+        "193",
+        "Original payment decision is being maintained. Upon review, it was determined that this claim was processed properly."),
+    /**
+     * 194 - Anesthesia performed by the operating physician, the assistant surgeon or the attending
+     * physician.
+     */
+    _194(
+        "194",
+        "Anesthesia performed by the operating physician, the assistant surgeon or the attending physician."),
+    /** 195 - Refund issued to an erroneous priority payer for this claim/service. */
+    _195("195", "Refund issued to an erroneous priority payer for this claim/service."),
+    /** 196 - Claim/service denied based on prior payer's coverage determination. */
+    _196("196", "Claim/service denied based on prior payer's coverage determination."),
+    /** 197 - Precertification/authorization/notification/pre-treatment absent. */
+    _197("197", "Precertification/authorization/notification/pre-treatment absent."),
+    /** 198 - Precertification/notification/authorization/pre-treatment exceeded. */
+    _198("198", "Precertification/notification/authorization/pre-treatment exceeded."),
+    /** 199 - Revenue code and Procedure code do not match. */
+    _199("199", "Revenue code and Procedure code do not match."),
+    /** 200 - Expenses incurred during lapse in coverage. */
+    _200("200", "Expenses incurred during lapse in coverage"),
+    /**
+     * 201 - Patient is responsible for amount of this claim/service through 'set aside arrangement'
+     * or other agreement. (Use only with Group Code PR) At least one Remark Code must be provided
+     * (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code
+     * that is not an ALERT.).
+     */
+    _201(
+        "201",
+        "Patient is responsible for amount of this claim/service through 'set aside arrangement' or other agreement. (Use only with Group Code PR) At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /** 202 - Non-covered personal comfort or convenience services. */
+    _202("202", "Non-covered personal comfort or convenience services."),
+    /** 203 - Discontinued or reduced service. */
+    _203("203", "Discontinued or reduced service."),
+    /**
+     * 204 - This service/equipment/drug is not covered under the patient's current benefit plan.
+     */
+    _204(
+        "204",
+        "This service/equipment/drug is not covered under the patient's current benefit plan"),
+    /** 205 - Pharmacy discount card processing fee. */
+    _205("205", "Pharmacy discount card processing fee"),
+    /** 206 - National Provider Identifier - missing. */
+    _206("206", "National Provider Identifier - missing."),
+    /** 207 - National Provider identifier - Invalid format. */
+    _207("207", "National Provider identifier - Invalid format"),
+    /** 208 - National Provider Identifier - Not matched. */
+    _208("208", "National Provider Identifier - Not matched."),
+    /**
+     * 209 - Per regulatory or other agreement. The provider cannot collect this amount from the
+     * patient. However, this amount may be billed to subsequent payer. Refund to patient if
+     * collected. (Use only with Group code OA).
+     */
+    _209(
+        "209",
+        "Per regulatory or other agreement. The provider cannot collect this amount from the patient. However, this amount may be billed to subsequent payer. Refund to patient if collected. (Use only with Group code OA)"),
+    /**
+     * 210 - Payment adjusted because pre-certification/authorization not received in a timely
+     * fashion.
+     */
+    _210(
+        "210",
+        "Payment adjusted because pre-certification/authorization not received in a timely fashion"),
+    /** 211 - National Drug Codes (NDC) not eligible for rebate, are not covered. */
+    _211("211", "National Drug Codes (NDC) not eligible for rebate, are not covered."),
+    /** 212 - Administrative surcharges are not covered. */
+    _212("212", "Administrative surcharges are not covered"),
+    /**
+     * 213 - Non-compliance with the physician self referral prohibition legislation or payer
+     * policy.
+     */
+    _213(
+        "213",
+        "Non-compliance with the physician self referral prohibition legislation or payer policy."),
+    /**
+     * 214 - Workers' Compensation claim adjudicated as non-compensable. This Payer not liable for
+     * claim or service/treatment. Note: If adjustment is at the Claim Level, the payer must send
+     * and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other
+     * Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be
+     * used for Workers' Compensation only.
+     */
+    _214(
+        "214",
+        "Workers' Compensation claim adjudicated as non-compensable. This Payer not liable for claim or service/treatment. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Workers' Compensation only"),
+    /** 215 - Based on subrogation of a third party settlement. */
+    _215("215", "Based on subrogation of a third party settlement"),
+    /** 216 - Based on the findings of a review organization or the payer's findings. */
+    _216("216", "Based on the findings of a review organization or the payer's findings."),
+    /**
+     * 217 - Based on payer reasonable and customary fees. No maximum allowable defined by
+     * legislated fee arrangement. (Note: To be used for Property and Casualty only).
+     */
+    _217(
+        "217",
+        "Based on payer reasonable and customary fees. No maximum allowable defined by legislated fee arrangement. (Note: To be used for Property and Casualty only)"),
+    /**
+     * 218 - Based on entitlement to benefits. Note: If adjustment is at the Claim Level, the payer
+     * must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100
+     * Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be
+     * used for Workers' Compensation only.
+     */
+    _218(
+        "218",
+        "Based on entitlement to benefits. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Workers' Compensation only"),
+    /**
+     * 219 - Based on extent of injury. Usage: If adjustment is at the Claim Level, the payer must
+     * send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100
+     * Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF).
+     */
+    _219(
+        "219",
+        "Based on extent of injury. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF)."),
+    /**
+     * 220 - The applicable fee schedule/fee database does not contain the billed code. Please
+     * resubmit a bill with the appropriate fee schedule/fee database code(s) that best describe the
+     * service(s) provided and supporting documentation if required. (Note: To be used for Property
+     * and Casualty only).
+     */
+    _220(
+        "220",
+        "The applicable fee schedule/fee database does not contain the billed code. Please resubmit a bill with the appropriate fee schedule/fee database code(s) that best describe the service(s) provided and supporting documentation if required. (Note: To be used for Property and Casualty only)"),
+    /**
+     * 221 - Claim is under investigation. Note: If adjustment is at the Claim Level, the payer must
+     * send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100
+     * Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). (Note:
+     * To be used by Property &amp; Casualty only).
+     */
+    _221(
+        "221",
+        "Claim is under investigation. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). (Note: To be used by Property & Casualty only)"),
+    /**
+     * 222 - Exceeds the contracted maximum number of hours/days/units by this provider for this
+     * period. This is not patient specific. Usage: Refer to the 835 Healthcare Policy
+     * Identification Segment (loop 2110 Service Payment Information REF), if present.
+     */
+    _222(
+        "222",
+        "Exceeds the contracted maximum number of hours/days/units by this provider for this period. This is not patient specific. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 223 - Adjustment code for mandated federal, state or local law/regulation that is not already
+     * covered by another code and is mandated before a new code can be created.
+     */
+    _223(
+        "223",
+        "Adjustment code for mandated federal, state or local law/regulation that is not already covered by another code and is mandated before a new code can be created."),
+    /**
+     * 224 - Patient identification compromised by identity theft. Identity verification required
+     * for processing this and future claims.
+     */
+    _224(
+        "224",
+        "Patient identification compromised by identity theft. Identity verification required for processing this and future claims."),
+    /**
+     * 225 - Penalty or Interest Payment by Payer (Only used for plan to plan encounter reporting
+     * within the 837).
+     */
+    _225(
+        "225",
+        "Penalty or Interest Payment by Payer (Only used for plan to plan encounter reporting within the 837)"),
+    /**
+     * 226 - Information requested from the Billing/Rendering Provider was not provided or not
+     * provided timely or was insufficient/incomplete. At least one Remark Code must be provided
+     * (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code
+     * that is not an ALERT.).
+     */
+    _226(
+        "226",
+        "Information requested from the Billing/Rendering Provider was not provided or not provided timely or was insufficient/incomplete. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /**
+     * 227 - Information requested from the patient/insured/responsible party was not provided or
+     * was insufficient/incomplete. At least one Remark Code must be provided (may be comprised of
+     * either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.).
+     */
+    _227(
+        "227",
+        "Information requested from the patient/insured/responsible party was not provided or was insufficient/incomplete. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /**
+     * 228 - Denied for failure of this provider, another provider or the subscriber to supply
+     * requested information to a previous payer for their adjudication.
+     */
+    _228(
+        "228",
+        "Denied for failure of this provider, another provider or the subscriber to supply requested information to a previous payer for their adjudication"),
+    /**
+     * 229 - Partial charge amount not considered by Medicare due to the initial claim Type of Bill
+     * being 12X. Usage: This code can only be used in the 837 transaction to convey Coordination of
+     * Benefits information when the secondary payer's cost avoidance policy allows providers to
+     * bypass claim submission to a prior payer. (Use only with Group Code PR).
+     */
+    _229(
+        "229",
+        "Partial charge amount not considered by Medicare due to the initial claim Type of Bill being 12X. Usage: This code can only be used in the 837 transaction to convey Coordination of Benefits information when the secondary payer's cost avoidance policy allows providers to bypass claim submission to a prior payer. (Use only with Group Code PR)"),
+    /**
+     * 230 - No available or correlating CPT/HCPCS code to describe this service. Note: Used only by
+     * Property and Casualty.
+     */
+    _230(
+        "230",
+        "No available or correlating CPT/HCPCS code to describe this service. Note: Used only by Property and Casualty."),
+    /**
+     * 231 - Mutually exclusive procedures cannot be done in the same day/setting. Usage: Refer to
+     * the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF),
+     * if present.
+     */
+    _231(
+        "231",
+        "Mutually exclusive procedures cannot be done in the same day/setting. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 232 - Institutional Transfer Amount. Usage: Applies to institutional claims only and explains
+     * the DRG amount difference when the patient care crosses multiple institutions.
+     */
+    _232(
+        "232",
+        "Institutional Transfer Amount. Usage: Applies to institutional claims only and explains the DRG amount difference when the patient care crosses multiple institutions."),
+    /**
+     * 233 - Services/charges related to the treatment of a hospital-acquired condition or
+     * preventable medical error.
+     */
+    _233(
+        "233",
+        "Services/charges related to the treatment of a hospital-acquired condition or preventable medical error."),
+    /**
+     * 234 - This procedure is not paid separately. At least one Remark Code must be provided (may
+     * be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is
+     * not an ALERT.).
+     */
+    _234(
+        "234",
+        "This procedure is not paid separately. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /** 235 - Sales Tax. */
+    _235("235", "Sales Tax"),
+    /**
+     * 236 - This procedure or procedure/modifier combination is not compatible with another
+     * procedure or procedure/modifier combination provided on the same day according to the
+     * National Correct Coding Initiative or workers compensation state regulations/ fee schedule
+     * requirements.
+     */
+    _236(
+        "236",
+        "This procedure or procedure/modifier combination is not compatible with another procedure or procedure/modifier combination provided on the same day according to the National Correct Coding Initiative or workers compensation state regulations/ fee schedule requirements."),
+    /**
+     * 237 - Legislated/Regulatory Penalty. At least one Remark Code must be provided (may be
+     * comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is
+     * not an ALERT.).
+     */
+    _237(
+        "237",
+        "Legislated/Regulatory Penalty. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /**
+     * 238 - Claim spans eligible and ineligible periods of coverage, this is the reduction for the
+     * ineligible period. (Use only with Group Code PR).
+     */
+    _238(
+        "238",
+        "Claim spans eligible and ineligible periods of coverage, this is the reduction for the ineligible period. (Use only with Group Code PR)"),
+    /** 239 - Claim spans eligible and ineligible periods of coverage. Rebill separate claims. */
+    _239("239", "Claim spans eligible and ineligible periods of coverage. Rebill separate claims."),
+    /**
+     * 240 - The diagnosis is inconsistent with the patient's birth weight. Usage: Refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _240(
+        "240",
+        "The diagnosis is inconsistent with the patient's birth weight. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 241 - Low Income Subsidy (LIS) Co-payment Amount. */
+    _241("241", "Low Income Subsidy (LIS) Co-payment Amount"),
+    /** 242 - Services not provided by network/primary care providers. */
+    _242("242", "Services not provided by network/primary care providers."),
+    /** 243 - Services not authorized by network/primary care providers. */
+    _243("243", "Services not authorized by network/primary care providers."),
+    /**
+     * 244 - Payment reduced to zero due to litigation. Additional information will be sent
+     * following the conclusion of litigation. To be used for Property &amp; Casualty only.
+     */
+    _244(
+        "244",
+        "Payment reduced to zero due to litigation. Additional information will be sent following the conclusion of litigation. To be used for Property & Casualty only."),
+    /** 245 - Provider performance program withhold. */
+    _245("245", "Provider performance program withhold."),
+    /** 246 - This non-payable code is for required reporting only. */
+    _246("246", "This non-payable code is for required reporting only."),
+    /**
+     * 247 - Deductible for Professional service rendered in an Institutional setting and billed on
+     * an Institutional claim.
+     */
+    _247(
+        "247",
+        "Deductible for Professional service rendered in an Institutional setting and billed on an Institutional claim."),
+    /**
+     * 248 - Coinsurance for Professional service rendered in an Institutional setting and billed on
+     * an Institutional claim.
+     */
+    _248(
+        "248",
+        "Coinsurance for Professional service rendered in an Institutional setting and billed on an Institutional claim."),
+    /** 249 - This claim has been identified as a readmission. (Use only with Group Code CO). */
+    _249("249", "This claim has been identified as a readmission. (Use only with Group Code CO)"),
+    /**
+     * 250 - The attachment/other documentation that was received was the incorrect
+     * attachment/document. The expected attachment/document is still missing. At least one Remark
+     * Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance
+     * Advice Remark Code that is not an ALERT).
+     */
+    _250(
+        "250",
+        "The attachment/other documentation that was received was the incorrect attachment/document. The expected attachment/document is still missing. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT)."),
+    /**
+     * 251 - The attachment/other documentation that was received was incomplete or deficient. The
+     * necessary information is still needed to process the claim. At least one Remark Code must be
+     * provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice
+     * Remark Code that is not an ALERT.).
+     */
+    _251(
+        "251",
+        "The attachment/other documentation that was received was incomplete or deficient. The necessary information is still needed to process the claim. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /**
+     * 252 - An attachment/other documentation is required to adjudicate this claim/service. At
+     * least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason
+     * Code, or Remittance Advice Remark Code that is not an ALERT.).
+     */
+    _252(
+        "252",
+        "An attachment/other documentation is required to adjudicate this claim/service. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /** 253 - Sequestration - reduction in federal payment. */
+    _253("253", "Sequestration - reduction in federal payment"),
+    /**
+     * 254 - Claim received by the dental plan, but benefits not available under this plan. Submit
+     * these services to the patient's medical plan for further consideration.
+     */
+    _254(
+        "254",
+        "Claim received by the dental plan, but benefits not available under this plan. Submit these services to the patient's medical plan for further consideration."),
+    /**
+     * 255 - The disposition of the related Property &amp; Casualty claim (injury or illness) is
+     * pending due to litigation. (Use only with Group Code OA).
+     */
+    _255(
+        "255",
+        "The disposition of the related Property & Casualty claim (injury or illness) is pending due to litigation. (Use only with Group Code OA)"),
+    /** 256 - Service not payable per managed care contract. */
+    _256("256", "Service not payable per managed care contract."),
+    /**
+     * 257 - The disposition of the claim/service is undetermined during the premium payment grace
+     * period, per Health Insurance Exchange requirements. This claim/service will be reversed and
+     * corrected when the grace period ends (due to premium payment or lack of premium payment).
+     * (Use only with Group Code OA).
+     */
+    _257(
+        "257",
+        "The disposition of the claim/service is undetermined during the premium payment grace period, per Health Insurance Exchange requirements. This claim/service will be reversed and corrected when the grace period ends (due to premium payment or lack of premium payment). (Use only with Group Code OA)"),
+    /**
+     * 258 - Claim/service not covered when patient is in custody/incarcerated. Applicable federal,
+     * state or local authority may cover the claim/service.
+     */
+    _258(
+        "258",
+        "Claim/service not covered when patient is in custody/incarcerated. Applicable federal, state or local authority may cover the claim/service."),
+    /** 259 - Additional payment for Dental/Vision service utilization. */
+    _259("259", "Additional payment for Dental/Vision service utilization."),
+    /** 260 - Processed under Medicaid ACA Enhanced Fee Schedule. */
+    _260("260", "Processed under Medicaid ACA Enhanced Fee Schedule"),
+    /** 261 - The procedure or service is inconsistent with the patient's history. */
+    _261("261", "The procedure or service is inconsistent with the patient's history."),
+    /** 262 - Adjustment for delivery cost. Usage: To be used for pharmaceuticals only. */
+    _262("262", "Adjustment for delivery cost. Usage: To be used for pharmaceuticals only."),
+    /** 263 - Adjustment for shipping cost. Usage: To be used for pharmaceuticals only. */
+    _263("263", "Adjustment for shipping cost. Usage: To be used for pharmaceuticals only."),
+    /** 264 - Adjustment for postage cost. Usage: To be used for pharmaceuticals only. */
+    _264("264", "Adjustment for postage cost. Usage: To be used for pharmaceuticals only."),
+    /** 265 - Adjustment for administrative cost. Usage: To be used for pharmaceuticals only. */
+    _265("265", "Adjustment for administrative cost. Usage: To be used for pharmaceuticals only."),
+    /**
+     * 266 - Adjustment for compound preparation cost. Usage: To be used for pharmaceuticals only.
+     */
+    _266(
+        "266",
+        "Adjustment for compound preparation cost. Usage: To be used for pharmaceuticals only."),
+    /**
+     * 267 - Claim/service spans multiple months. At least one Remark Code must be provided (may be
+     * comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is
+     * not an ALERT.).
+     */
+    _267(
+        "267",
+        "Claim/service spans multiple months. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /** 268 - The Claim spans two calendar years. Please resubmit one claim per calendar year. */
+    _268("268", "The Claim spans two calendar years. Please resubmit one claim per calendar year."),
+    /**
+     * 269 - Anesthesia not covered for this service/procedure. Usage: Refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment Information REF), if present.
+     */
+    _269(
+        "269",
+        "Anesthesia not covered for this service/procedure. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 270 - Claim received by the medical plan, but benefits not available under this plan. Submit
+     * these services to the patient's dental plan for further consideration.
+     */
+    _270(
+        "270",
+        "Claim received by the medical plan, but benefits not available under this plan. Submit these services to the patient's dental plan for further consideration."),
+    /**
+     * 271 - Prior contractual reductions related to a current periodic payment as part of a
+     * contractual payment schedule when deferred amounts have been previously reported. (Use only
+     * with Group Code OA).
+     */
+    _271(
+        "271",
+        "Prior contractual reductions related to a current periodic payment as part of a contractual payment schedule when deferred amounts have been previously reported. (Use only with Group Code OA)"),
+    /** 272 - Coverage/program guidelines were not met. */
+    _272("272", "Coverage/program guidelines were not met."),
+    /** 273 - Coverage/program guidelines were exceeded. */
+    _273("273", "Coverage/program guidelines were exceeded."),
+    /** 274 - Fee/Service not payable per patient Care Coordination arrangement. */
+    _274("274", "Fee/Service not payable per patient Care Coordination arrangement."),
+    /**
+     * 275 - Prior payer's (or payers') patient responsibility (deductible, coinsurance, co-payment)
+     * not covered. (Use only with Group Code PR).
+     */
+    _275(
+        "275",
+        "Prior payer's (or payers') patient responsibility (deductible, coinsurance, co-payment) not covered. (Use only with Group Code PR)"),
+    /** 276 - Services denied by the prior payer(s) are not covered by this payer. */
+    _276("276", "Services denied by the prior payer(s) are not covered by this payer."),
+    /**
+     * 277 - The disposition of the claim/service is undetermined during the premium payment grace
+     * period, per Health Insurance SHOP Exchange requirements. This claim/service will be reversed
+     * and corrected when the grace period ends (due to premium payment or lack of premium payment).
+     * (Use only with Group Code OA).
+     */
+    _277(
+        "277",
+        "The disposition of the claim/service is undetermined during the premium payment grace period, per Health Insurance SHOP Exchange requirements. This claim/service will be reversed and corrected when the grace period ends (due to premium payment or lack of premium payment). (Use only with Group Code OA)"),
+    /**
+     * 278 - Performance program proficiency requirements not met. (Use only with Group Codes CO or
+     * PI) Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service
+     * Payment Information REF), if present.
+     */
+    _278(
+        "278",
+        "Performance program proficiency requirements not met. (Use only with Group Codes CO or PI) Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 279 - Services not provided by Preferred network providers. Usage: Use this code when there
+     * are member network limitations. For example, using contracted providers not in the member's
+     * 'narrow' network.
+     */
+    _279(
+        "279",
+        "Services not provided by Preferred network providers. Usage: Use this code when there are member network limitations. For example, using contracted providers not in the member's 'narrow' network."),
+    /**
+     * 280 - Claim received by the medical plan, but benefits not available under this plan. Submit
+     * these services to the patient's Pharmacy plan for further consideration.
+     */
+    _280(
+        "280",
+        "Claim received by the medical plan, but benefits not available under this plan. Submit these services to the patient's Pharmacy plan for further consideration."),
+    /** 281 - Deductible waived per contractual agreement. Use only with Group Code CO. */
+    _281("281", "Deductible waived per contractual agreement. Use only with Group Code CO."),
+    /**
+     * 282 - The procedure/revenue code is inconsistent with the type of bill. Usage: Refer to the
+     * 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _282(
+        "282",
+        "The procedure/revenue code is inconsistent with the type of bill. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** 283 - Attending provider is not eligible to provide direction of care. */
+    _283("283", "Attending provider is not eligible to provide direction of care."),
+    /**
+     * 284 - Precertification/authorization/notification/pre-treatment number may be valid but does
+     * not apply to the billed services.
+     */
+    _284(
+        "284",
+        "Precertification/authorization/notification/pre-treatment number may be valid but does not apply to the billed services."),
+    /** 285 - Appeal procedures not followed. */
+    _285("285", "Appeal procedures not followed"),
+    /** 286 - Appeal time limits not met. */
+    _286("286", "Appeal time limits not met"),
+    /** 287 - Referral exceeded. */
+    _287("287", "Referral exceeded"),
+    /** 288 - Referral absent. */
+    _288("288", "Referral absent"),
+    /** 289 - Services considered under the dental and medical plans, benefits not available. */
+    _289("289", "Services considered under the dental and medical plans, benefits not available."),
+    /**
+     * 290 - Claim received by the dental plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's medical plan for further consideration.
+     */
+    _290(
+        "290",
+        "Claim received by the dental plan, but benefits not available under this plan. Claim has been forwarded to the patient's medical plan for further consideration."),
+    /**
+     * 291 - Claim received by the medical plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's dental plan for further consideration.
+     */
+    _291(
+        "291",
+        "Claim received by the medical plan, but benefits not available under this plan. Claim has been forwarded to the patient's dental plan for further consideration."),
+    /**
+     * 292 - Claim received by the medical plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's pharmacy plan for further consideration.
+     */
+    _292(
+        "292",
+        "Claim received by the medical plan, but benefits not available under this plan. Claim has been forwarded to the patient's pharmacy plan for further consideration."),
+    /** 293 - Payment made to employer. */
+    _293("293", "Payment made to employer."),
+    /** 294 - Payment made to attorney. */
+    _294("294", "Payment made to attorney."),
+    /** 295 - Pharmacy Direct/Indirect Remuneration (DIR). */
+    _295("295", "Pharmacy Direct/Indirect Remuneration (DIR)"),
+    /**
+     * 296 - Precertification/authorization/notification/pre-treatment number may be valid but does
+     * not apply to the provider.
+     */
+    _296(
+        "296",
+        "Precertification/authorization/notification/pre-treatment number may be valid but does not apply to the provider."),
+    /**
+     * 297 - Claim received by the medical plan, but benefits not available under this plan. Submit
+     * these services to the patient's vision plan for further consideration.
+     */
+    _297(
+        "297",
+        "Claim received by the medical plan, but benefits not available under this plan. Submit these services to the patient's vision plan for further consideration."),
+    /**
+     * 298 - Claim received by the medical plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's vision plan for further consideration.
+     */
+    _298(
+        "298",
+        "Claim received by the medical plan, but benefits not available under this plan. Claim has been forwarded to the patient's vision plan for further consideration."),
+    /** 299 - The billing provider is not eligible to receive payment for the service billed. */
+    _299("299", "The billing provider is not eligible to receive payment for the service billed."),
+    /**
+     * 300 - Claim received by the Medical Plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's Behavioral Health Plan for further consideration.
+     */
+    _300(
+        "300",
+        "Claim received by the Medical Plan, but benefits not available under this plan. Claim has been forwarded to the patient's Behavioral Health Plan for further consideration."),
+    /**
+     * 301 - Claim received by the Medical Plan, but benefits not available under this plan. Submit
+     * these services to the patient's Behavioral Health Plan for further consideration.
+     */
+    _301(
+        "301",
+        "Claim received by the Medical Plan, but benefits not available under this plan. Submit these services to the patient's Behavioral Health Plan for further consideration."),
+    /** 302 - Precertification/notification/authorization/pre-treatment time limit has expired. */
+    _302(
+        "302", "Precertification/notification/authorization/pre-treatment time limit has expired."),
+    /**
+     * 303 - Prior payer's (or payers') patient responsibility (deductible, coinsurance, co-payment)
+     * not covered for Qualified Medicare and Medicaid Beneficiaries. (Use only with Group Code CO).
+     */
+    _303(
+        "303",
+        "Prior payer's (or payers') patient responsibility (deductible, coinsurance, co-payment) not covered for Qualified Medicare and Medicaid Beneficiaries. (Use only with Group Code CO)"),
+    /**
+     * 304 - Claim received by the medical plan, but benefits not available under this plan. Submit
+     * these services to the patient's hearing plan for further consideration.
+     */
+    _304(
+        "304",
+        "Claim received by the medical plan, but benefits not available under this plan. Submit these services to the patient's hearing plan for further consideration."),
+    /**
+     * 305 - Claim received by the medical plan, but benefits not available under this plan. Claim
+     * has been forwarded to the patient's hearing plan for further consideration.
+     */
+    _305(
+        "305",
+        "Claim received by the medical plan, but benefits not available under this plan. Claim has been forwarded to the patient's hearing plan for further consideration."),
+    /**
+     * 306 - Type of bill is inconsistent with the patient status. Usage: Refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if
+     * present.
+     */
+    _306(
+        "306",
+        "Type of bill is inconsistent with the patient status. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /**
+     * 307 - Medicare Maximum Fair Price Standard Default Refund Amount Adjustment. At least one
+     * Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or
+     * Remittance Advice Remark Code that is not an ALERT.) Usage: To be used only for the Medicare
+     * Drug Price Negotiation Program.
+     */
+    _307(
+        "307",
+        "Medicare Maximum Fair Price Standard Default Refund Amount Adjustment. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.) Usage: To be used only for the Medicare Drug Price Negotiation Program."),
+    /**
+     * 308 - Payment is adjusted due to contracted funding agreement between the payer and provider.
+     */
+    _308(
+        "308",
+        "Payment is adjusted due to contracted funding agreement between the payer and provider."),
+    /** A0 - Patient refund amount. */
+    A0("A0", "Patient refund amount."),
+    /**
+     * A1 - Claim/Service denied. At least one Remark Code must be provided (may be comprised of
+     * either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)
+     * Usage: Use this code only when a more specific Claim Adjustment Reason Code is not available.
+     */
+    A1(
+        "A1",
+        "Claim/Service denied. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.) Usage: Use this code only when a more specific Claim Adjustment Reason Code is not available."),
+    /** A2 - Contractual adjustment. */
+    A2("A2", "Contractual adjustment."),
+    /** A3 - Medicare Secondary Payer liability met. INACTIVE. */
+    A3("A3", "Medicare Secondary Payer liability met. INACTIVE"),
+    /** A4 - Medicare Claim PPS Capital Day Outlier Amount. */
+    A4("A4", "Medicare Claim PPS Capital Day Outlier Amount."),
+    /** A5 - Medicare Claim PPS Capital Cost Outlier Amount. */
+    A5("A5", "Medicare Claim PPS Capital Cost Outlier Amount."),
+    /** A6 - Prior hospitalization or 30 day transfer requirement not met. */
+    A6("A6", "Prior hospitalization or 30 day transfer requirement not met."),
+    /** A7 - Presumptive Payment Adjustment. */
+    A7("A7", "Presumptive Payment Adjustment."),
+    /** A8 - Claim denied; ungroupable DRG. */
+    A8("A8", "Claim denied; ungroupable DRG."),
+    /** B1 - Non-covered visits. */
+    B1("B1", "Non-covered visits."),
+    /** B2 - Covered visits. INACTIVE. */
+    B2("B2", "Covered visits. INACTIVE"),
+    /** B3 - Covered charges. INACTIVE. */
+    B3("B3", "Covered charges. INACTIVE"),
+    /** B4 - Late filing penalty. */
+    B4("B4", "Late filing penalty."),
+    /**
+     * B5 - Claim/service adjusted because coverage/program guidelines were not met or were
+     * exceeded.
+     */
+    B5(
+        "B5",
+        "Claim/service adjusted because coverage/program guidelines were not met or were exceeded."),
+    /**
+     * B6 - This service/procedure is adjusted when performed/billed by this type of provider, by
+     * this type of facility, or by a provider of this specialty.
+     */
+    B6(
+        "B6",
+        "This service/procedure is adjusted when performed/billed by this type of provider, by this type of facility, or by a provider of this specialty."),
+    /**
+     * B7 - This provider was not certified/eligible to be paid for this procedure/service on this
+     * date of service.
+     */
+    B7(
+        "B7",
+        "This provider was not certified/eligible to be paid for this procedure/service on this date of service."),
+    /**
+     * B8 - Claim/service not covered/reduced because alternative services were available, and
+     * should have been utilized.
+     */
+    B8(
+        "B8",
+        "Claim/service not covered/reduced because alternative services were available, and should have been utilized."),
+    /** B9 - Services not covered because the patient is enrolled in a Hospice. */
+    B9("B9", "Services not covered because the patient is enrolled in a Hospice."),
+    /**
+     * B10 - Allowed amount has been reduced because a component of the basic procedure/test was
+     * paid. The beneficiary is not liable for more than the charge limit for the basic
+     * procedure/test.
+     */
+    B10(
+        "B10",
+        "Allowed amount has been reduced because a component of the basic procedure/test was paid. The beneficiary is not liable for more than the charge limit for the basic procedure/test."),
+    /**
+     * B11 - The claim/service has been transferred to the proper payer/processor for processing.
+     * Claim/service not covered by this payer/processor.
+     */
+    B11(
+        "B11",
+        "The claim/service has been transferred to the proper payer/processor for processing. Claim/service not covered by this payer/processor."),
+    /** B12 - Services not documented in patients' medical records. */
+    B12("B12", "Services not documented in patients' medical records."),
+    /**
+     * B13 - Previously paid. Payment for this claim/service may have been provided in a previous
+     * payment.
+     */
+    B13(
+        "B13",
+        "Previously paid. Payment for this claim/service may have been provided in a previous payment."),
+    /** B14 - Only one visit or consultation per physician per day is covered. */
+    B14("B14", "Only one visit or consultation per physician per day is covered."),
+    /**
+     * B15 - This service/procedure requires that a qualifying service/procedure be received and
+     * covered. The qualifying other service/procedure has not been received/adjudicated. Usage:
+     * Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment
+     * Information REF), if present.
+     */
+    B15(
+        "B15",
+        "This service/procedure requires that a qualifying service/procedure be received and covered. The qualifying other service/procedure has not been received/adjudicated. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present."),
+    /** B16 - 'New Patient' qualifications were not met. */
+    B16("B16", "'New Patient' qualifications were not met."),
+    /**
+     * B17 - Payment adjusted because this service was not prescribed by a physician, not prescribed
+     * prior to delivery, the prescription is incomplete, or the prescription is not current.
+     */
+    B17(
+        "B17",
+        "Payment adjusted because this service was not prescribed by a physician, not prescribed prior to delivery, the prescription is incomplete, or the prescription is not current."),
+    /** B18 - This procedure code and modifier were invalid on the date of service. */
+    B18("B18", "This procedure code and modifier were invalid on the date of service."),
+    /** B19 - Claim/service adjusted because of the finding of a Review Organization. */
+    B19("B19", "Claim/service adjusted because of the finding of a Review Organization."),
+    /** B20 - Procedure/service was partially or fully furnished by another provider. */
+    B20("B20", "Procedure/service was partially or fully furnished by another provider."),
+    /**
+     * B21 - The charges were reduced because the service/care was partially furnished by another
+     * physician.
+     */
+    B21(
+        "B21",
+        "The charges were reduced because the service/care was partially furnished by another physician."),
+    /** B22 - This payment is adjusted based on the diagnosis. */
+    B22("B22", "This payment is adjusted based on the diagnosis."),
+    /**
+     * B23 - Procedure billed is not authorized per your Clinical Laboratory Improvement Amendment
+     * (CLIA) proficiency test.
+     */
+    B23(
+        "B23",
+        "Procedure billed is not authorized per your Clinical Laboratory Improvement Amendment (CLIA) proficiency test."),
+    /** D1 - Claim/service denied. Level of subluxation is missing or inadequate. */
+    D1("D1", "Claim/service denied. Level of subluxation is missing or inadequate."),
+    /** D2 - Claim lacks the name, strength, or dosage of the drug furnished. */
+    D2("D2", "Claim lacks the name, strength, or dosage of the drug furnished."),
+    /**
+     * D3 - Claim/service denied because information to indicate if the patient owns the equipment
+     * that requires the part or supply was missing.
+     */
+    D3(
+        "D3",
+        "Claim/service denied because information to indicate if the patient owns the equipment that requires the part or supply was missing."),
+    /** D4 - Claim/service does not indicate the period of time for which this will be needed. */
+    D4("D4", "Claim/service does not indicate the period of time for which this will be needed."),
+    /** D5 - Claim/service denied. Claim lacks individual lab codes included in the test. */
+    D5("D5", "Claim/service denied. Claim lacks individual lab codes included in the test."),
+    /**
+     * D6 - Claim/service denied. Claim did not include patient's medical record for the service.
+     */
+    D6(
+        "D6",
+        "Claim/service denied. Claim did not include patient's medical record for the service."),
+    /** D7 - Claim/service denied. Claim lacks date of patient's most recent physician visit. */
+    D7("D7", "Claim/service denied. Claim lacks date of patient's most recent physician visit."),
+    /** D8 - Claim/service denied. Claim lacks indicator that 'x-ray is available for review.'. */
+    D8("D8", "Claim/service denied. Claim lacks indicator that 'x-ray is available for review.'"),
+    /**
+     * D9 - Claim/service denied. Claim lacks invoice or statement certifying the actual cost of the
+     * lens, less discounts or the type of intraocular lens used.
+     */
+    D9(
+        "D9",
+        "Claim/service denied. Claim lacks invoice or statement certifying the actual cost of the lens, less discounts or the type of intraocular lens used."),
+    /** D10 - Claim/service denied. Completed physician financial relationship form not on file. */
+    D10(
+        "D10",
+        "Claim/service denied. Completed physician financial relationship form not on file."),
+    /** D11 - Claim lacks completed pacemaker registration form. */
+    D11("D11", "Claim lacks completed pacemaker registration form."),
+    /**
+     * D12 - Claim/service denied. Claim does not identify who performed the purchased diagnostic
+     * test or the amount you were charged for the test.
+     */
+    D12(
+        "D12",
+        "Claim/service denied. Claim does not identify who performed the purchased diagnostic test or the amount you were charged for the test."),
+    /**
+     * D13 - Claim/service denied. Performed by a facility/supplier in which the ordering/referring
+     * physician has a financial interest.
+     */
+    D13(
+        "D13",
+        "Claim/service denied. Performed by a facility/supplier in which the ordering/referring physician has a financial interest."),
+    /** D14 - Claim lacks indication that plan of treatment is on file. */
+    D14("D14", "Claim lacks indication that plan of treatment is on file."),
+    /** D15 - Claim lacks indication that service was supervised or evaluated by a physician. */
+    D15("D15", "Claim lacks indication that service was supervised or evaluated by a physician."),
+    /** D16 - Claim lacks prior payer payment information. */
+    D16("D16", "Claim lacks prior payer payment information."),
+    /** D17 - Claim/Service has invalid non-covered days. */
+    D17("D17", "Claim/Service has invalid non-covered days."),
+    /** D18 - Claim/Service has missing diagnosis information. */
+    D18("D18", "Claim/Service has missing diagnosis information."),
+    /** D19 - Claim/Service lacks Physician/Operative or other supporting documentation. */
+    D19("D19", "Claim/Service lacks Physician/Operative or other supporting documentation"),
+    /** D20 - Claim/Service missing service/product information. */
+    D20("D20", "Claim/Service missing service/product information."),
+    /** D21 - This (these) diagnosis(es) is (are) missing or are invalid. */
+    D21("D21", "This (these) diagnosis(es) is (are) missing or are invalid"),
+    /**
+     * D22 - Reimbursement was adjusted for the reasons to be provided in separate correspondence.
+     * (Note: To be used for Workers' Compensation only) - Temporary code to be added for timeframe
+     * only until 01/01/2009. Another code to be established and/or for 06/2008 meeting for a
+     * revised code to replace or strategy to use another existing code.
+     */
+    D22(
+        "D22",
+        "Reimbursement was adjusted for the reasons to be provided in separate correspondence. (Note: To be used for Workers' Compensation only) - Temporary code to be added for timeframe only until 01/01/2009. Another code to be established and/or for 06/2008 meeting for a revised code to replace or strategy to use another existing code"),
+    /**
+     * D23 - This dual eligible patient is covered by Medicare Part D per Medicare
+     * Retro-Eligibility. At least one Remark Code must be provided (may be comprised of either the
+     * NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.).
+     */
+    D23(
+        "D23",
+        "This dual eligible patient is covered by Medicare Part D per Medicare Retro-Eligibility. At least one Remark Code must be provided (may be comprised of either the NCPDP Reject Reason Code, or Remittance Advice Remark Code that is not an ALERT.)"),
+    /**
+     * P1 - State-mandated Requirement for Property and Casualty, see Claim Payment Remarks Code for
+     * specific explanation. To be used for Property and Casualty only.
+     */
+    P1(
+        "P1",
+        "State-mandated Requirement for Property and Casualty, see Claim Payment Remarks Code for specific explanation. To be used for Property and Casualty only."),
+    /**
+     * P2 - Not a work related injury/illness and thus not the liability of the workers'
+     * compensation carrier Usage: If adjustment is at the Claim Level, the payer must send and the
+     * provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim
+     * Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is
+     * at the Line Level, the payer must send and the provider should refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment information REF). To be used for
+     * Workers' Compensation only.
+     */
+    P2(
+        "P2",
+        "Not a work related injury/illness and thus not the liability of the workers' compensation carrier Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Workers' Compensation only."),
+    /**
+     * P3 - Workers' Compensation case settled. Patient is responsible for amount of this
+     * claim/service through WC 'Medicare set aside arrangement' or other agreement. To be used for
+     * Workers' Compensation only. (Use only with Group Code PR).
+     */
+    P3(
+        "P3",
+        "Workers' Compensation case settled. Patient is responsible for amount of this claim/service through WC 'Medicare set aside arrangement' or other agreement. To be used for Workers' Compensation only. (Use only with Group Code PR)"),
+    /**
+     * P4 - Workers' Compensation claim adjudicated as non-compensable. This Payer not liable for
+     * claim or service/treatment. Usage: If adjustment is at the Claim Level, the payer must send
+     * and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other
+     * Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be
+     * used for Workers' Compensation only.
+     */
+    P4(
+        "P4",
+        "Workers' Compensation claim adjudicated as non-compensable. This Payer not liable for claim or service/treatment. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Workers' Compensation only"),
+    /**
+     * P5 - Based on payer reasonable and customary fees. No maximum allowable defined by legislated
+     * fee arrangement. To be used for Property and Casualty only.
+     */
+    P5(
+        "P5",
+        "Based on payer reasonable and customary fees. No maximum allowable defined by legislated fee arrangement. To be used for Property and Casualty only."),
+    /**
+     * P6 - Based on entitlement to benefits. Usage: If adjustment is at the Claim Level, the payer
+     * must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100
+     * Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be
+     * used for Property and Casualty only.
+     */
+    P6(
+        "P6",
+        "Based on entitlement to benefits. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Property and Casualty only."),
+    /**
+     * P7 - The applicable fee schedule/fee database does not contain the billed code. Please
+     * resubmit a bill with the appropriate fee schedule/fee database code(s) that best describe the
+     * service(s) provided and supporting documentation if required. To be used for Property and
+     * Casualty only.
+     */
+    P7(
+        "P7",
+        "The applicable fee schedule/fee database does not contain the billed code. Please resubmit a bill with the appropriate fee schedule/fee database code(s) that best describe the service(s) provided and supporting documentation if required. To be used for Property and Casualty only."),
+    /**
+     * P8 - Claim is under investigation. Usage: If adjustment is at the Claim Level, the payer must
+     * send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100
+     * Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be
+     * used for Property and Casualty only.
+     */
+    P8(
+        "P8",
+        "Claim is under investigation. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') for the jurisdictional regulation. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF). To be used for Property and Casualty only."),
+    /**
+     * P9 - No available or correlating CPT/HCPCS code to describe this service. To be used for
+     * Property and Casualty only.
+     */
+    P9(
+        "P9",
+        "No available or correlating CPT/HCPCS code to describe this service. To be used for Property and Casualty only."),
+    /**
+     * P10 - Payment reduced to zero due to litigation. Additional information will be sent
+     * following the conclusion of litigation. To be used for Property and Casualty only.
+     */
+    P10(
+        "P10",
+        "Payment reduced to zero due to litigation. Additional information will be sent following the conclusion of litigation. To be used for Property and Casualty only."),
+    /**
+     * P11 - The disposition of the related Property &amp; Casualty claim (injury or illness) is
+     * pending due to litigation. To be used for Property and Casualty only. (Use only with Group
+     * Code OA).
+     */
+    P11(
+        "P11",
+        "The disposition of the related Property & Casualty claim (injury or illness) is pending due to litigation. To be used for Property and Casualty only. (Use only with Group Code OA)"),
+    /**
+     * P12 - Workers' compensation jurisdictional fee schedule adjustment. Usage: If adjustment is
+     * at the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Workers' Compensation only.
+     */
+    P12(
+        "P12",
+        "Workers' compensation jurisdictional fee schedule adjustment. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Workers' Compensation only."),
+    /**
+     * P13 - Payment reduced or denied based on workers' compensation jurisdictional regulations or
+     * payment policies, use only if no other code is applicable. Usage: If adjustment is at the
+     * Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy
+     * Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the
+     * jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send
+     * and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110
+     * Service Payment information REF) if the regulations apply. To be used for Workers'
+     * Compensation only.
+     */
+    P13(
+        "P13",
+        "Payment reduced or denied based on workers' compensation jurisdictional regulations or payment policies, use only if no other code is applicable. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Workers' Compensation only."),
+    /**
+     * P14 - The Benefit for this Service is included in the payment/allowance for another
+     * service/procedure that has been performed on the same day. Usage: Refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment Information REF), if present. To be
+     * used for Property and Casualty only.
+     */
+    P14(
+        "P14",
+        "The Benefit for this Service is included in the payment/allowance for another service/procedure that has been performed on the same day. Usage: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present. To be used for Property and Casualty only."),
+    /**
+     * P15 - Workers' Compensation Medical Treatment Guideline Adjustment. To be used for Workers'
+     * Compensation only.
+     */
+    P15(
+        "P15",
+        "Workers' Compensation Medical Treatment Guideline Adjustment. To be used for Workers' Compensation only."),
+    /**
+     * P16 - Medical provider not authorized/certified to provide treatment to injured workers in
+     * this jurisdiction. To be used for Workers' Compensation only. (Use with Group Code CO or OA).
+     */
+    P16(
+        "P16",
+        "Medical provider not authorized/certified to provide treatment to injured workers in this jurisdiction. To be used for Workers' Compensation only. (Use with Group Code CO or OA)"),
+    /**
+     * P17 - Referral not authorized by attending physician per regulatory requirement. To be used
+     * for Property and Casualty only.
+     */
+    P17(
+        "P17",
+        "Referral not authorized by attending physician per regulatory requirement. To be used for Property and Casualty only."),
+    /**
+     * P18 - Procedure is not listed in the jurisdiction fee schedule. An allowance has been made
+     * for a comparable service. To be used for Property and Casualty only.
+     */
+    P18(
+        "P18",
+        "Procedure is not listed in the jurisdiction fee schedule. An allowance has been made for a comparable service. To be used for Property and Casualty only."),
+    /**
+     * P19 - Procedure has a relative value of zero in the jurisdiction fee schedule, therefore no
+     * payment is due. To be used for Property and Casualty only.
+     */
+    P19(
+        "P19",
+        "Procedure has a relative value of zero in the jurisdiction fee schedule, therefore no payment is due. To be used for Property and Casualty only."),
+    /**
+     * P20 - Service not paid under jurisdiction allowed outpatient facility fee schedule. To be
+     * used for Property and Casualty only.
+     */
+    P20(
+        "P20",
+        "Service not paid under jurisdiction allowed outpatient facility fee schedule. To be used for Property and Casualty only."),
+    /**
+     * P21 - Payment denied based on the Medical Payments Coverage (MPC) and/or Personal Injury
+     * Protection (PIP) Benefits jurisdictional regulations, or payment policies. Usage: If
+     * adjustment is at the Claim Level, the payer must send and the provider should refer to the
+     * 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier
+     * 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer
+     * must send and the provider should refer to the 835 Healthcare Policy Identification Segment
+     * (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property
+     * and Casualty Auto only.
+     */
+    P21(
+        "P21",
+        "Payment denied based on the Medical Payments Coverage (MPC) and/or Personal Injury Protection (PIP) Benefits jurisdictional regulations, or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P22 - Payment adjusted based on the Medical Payments Coverage (MPC) and/or Personal Injury
+     * Protection (PIP) Benefits jurisdictional regulations, or payment policies. Usage: If
+     * adjustment is at the Claim Level, the payer must send and the provider should refer to the
+     * 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier
+     * 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer
+     * must send and the provider should refer to the 835 Healthcare Policy Identification Segment
+     * (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property
+     * and Casualty Auto only.
+     */
+    P22(
+        "P22",
+        "Payment adjusted based on the Medical Payments Coverage (MPC) and/or Personal Injury Protection (PIP) Benefits jurisdictional regulations, or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P23 - Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits
+     * jurisdictional fee schedule adjustment. Usage: If adjustment is at the Claim Level, the payer
+     * must send and the provider should refer to the 835 Class of Contract Code Identification
+     * Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level,
+     * the payer must send and the provider should refer to the 835 Healthcare Policy Identification
+     * Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for
+     * Property and Casualty Auto only.
+     */
+    P23(
+        "P23",
+        "Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits jurisdictional fee schedule adjustment. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P24 - Payment adjusted based on Preferred Provider Organization (PPO). Usage: If adjustment
+     * is at the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty only. Use only with Group Code CO.
+     */
+    P24(
+        "P24",
+        "Payment adjusted based on Preferred Provider Organization (PPO). Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty only. Use only with Group Code CO."),
+    /**
+     * P25 - Payment adjusted based on Medical Provider Network (MPN). Usage: If adjustment is at
+     * the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty only. (Use only with Group Code CO).
+     */
+    P25(
+        "P25",
+        "Payment adjusted based on Medical Provider Network (MPN). Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty only. (Use only with Group Code CO)."),
+    /**
+     * P26 - Payment adjusted based on Voluntary Provider network (VPN). Usage: If adjustment is at
+     * the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty only. (Use only with Group Code CO).
+     */
+    P26(
+        "P26",
+        "Payment adjusted based on Voluntary Provider network (VPN). Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty only. (Use only with Group Code CO)."),
+    /**
+     * P27 - Payment denied based on the Liability Coverage Benefits jurisdictional regulations
+     * and/or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and
+     * the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim
+     * Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty Auto only.
+     */
+    P27(
+        "P27",
+        "Payment denied based on the Liability Coverage Benefits jurisdictional regulations and/or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P28 - Payment adjusted based on the Liability Coverage Benefits jurisdictional regulations
+     * and/or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and
+     * the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim
+     * Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty Auto only.
+     */
+    P28(
+        "P28",
+        "Payment adjusted based on the Liability Coverage Benefits jurisdictional regulations and/or payment policies. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P29 - Liability Benefits jurisdictional fee schedule adjustment. Usage: If adjustment is at
+     * the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply. To be used for Property and Casualty Auto only.
+     */
+    P29(
+        "P29",
+        "Liability Benefits jurisdictional fee schedule adjustment. Usage: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Property and Casualty Auto only."),
+    /**
+     * P30 - Payment denied for exacerbation when supporting documentation was not complete. To be
+     * used for Property and Casualty only.
+     */
+    P30(
+        "P30",
+        "Payment denied for exacerbation when supporting documentation was not complete. To be used for Property and Casualty only."),
+    /**
+     * P31 - Payment denied for exacerbation when treatment exceeds time allowed. To be used for
+     * Property and Casualty only.
+     */
+    P31(
+        "P31",
+        "Payment denied for exacerbation when treatment exceeds time allowed. To be used for Property and Casualty only."),
+    /** P32 - Payment adjusted due to Apportionment. */
+    P32("P32", "Payment adjusted due to Apportionment."),
+    /**
+     * W1 - Workers' compensation jurisdictional fee schedule adjustment. Note: If adjustment is at
+     * the Claim Level, the payer must send and the provider should refer to the 835 Class of
+     * Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If
+     * adjustment is at the Line Level, the payer must send and the provider should refer to the 835
+     * Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the
+     * regulations apply.
+     */
+    W1(
+        "W1",
+        "Workers' compensation jurisdictional fee schedule adjustment. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply."),
+    /**
+     * W2 - Payment reduced or denied based on workers' compensation jurisdictional regulations or
+     * payment policies, use only if no other code is applicable. Note: If adjustment is at the
+     * Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy
+     * Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the
+     * jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send
+     * and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110
+     * Service Payment information REF) if the regulations apply. To be used for Workers'
+     * Compensation only.
+     */
+    W2(
+        "W2",
+        "Payment reduced or denied based on workers' compensation jurisdictional regulations or payment policies, use only if no other code is applicable. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for Workers' Compensation only."),
+    /**
+     * W3 - The Benefit for this Service is included in the payment/allowance for another
+     * service/procedure that has been performed on the same day. Note: Refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment Information REF), if present. For
+     * use by Property and Casualty only.
+     */
+    W3(
+        "W3",
+        "The Benefit for this Service is included in the payment/allowance for another service/procedure that has been performed on the same day. Note: Refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment Information REF), if present. For use by Property and Casualty only."),
+    /** W4 - Workers' Compensation Medical Treatment Guideline Adjustment. */
+    W4("W4", "Workers' Compensation Medical Treatment Guideline Adjustment."),
+    /**
+     * W5 - Medical provider not authorized/certified to provide treatment to injured workers in
+     * this jurisdiction. (Use with Group Code CO or OA).
+     */
+    W5(
+        "W5",
+        "Medical provider not authorized/certified to provide treatment to injured workers in this jurisdiction. (Use with Group Code CO or OA)"),
+    /** W6 - Referral not authorized by attending physician per regulatory requirement. */
+    W6("W6", "Referral not authorized by attending physician per regulatory requirement."),
+    /**
+     * W7 - Procedure is not listed in the jurisdiction fee schedule. An allowance has been made for
+     * a comparable service.
+     */
+    W7(
+        "W7",
+        "Procedure is not listed in the jurisdiction fee schedule. An allowance has been made for a comparable service."),
+    /**
+     * W8 - Procedure has a relative value of zero in the jurisdiction fee schedule, therefore no
+     * payment is due.
+     */
+    W8(
+        "W8",
+        "Procedure has a relative value of zero in the jurisdiction fee schedule, therefore no payment is due."),
+    /** W9 - Service not paid under jurisdiction allowed outpatient facility fee schedule. */
+    W9("W9", "Service not paid under jurisdiction allowed outpatient facility fee schedule."),
+    /**
+     * Y1 - Payment denied based on Medical Payments Coverage (MPC) or Personal Injury Protection
+     * (PIP) Benefits jurisdictional regulations or payment policies, use only if no other code is
+     * applicable. Note: If adjustment is at the Claim Level, the payer must send and the provider
+     * should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related
+     * Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at
+     * the Line Level, the payer must send and the provider should refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations
+     * apply. To be used for P&amp;C Auto only.
+     */
+    Y1(
+        "Y1",
+        "Payment denied based on Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits jurisdictional regulations or payment policies, use only if no other code is applicable. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for P&C Auto only."),
+    /**
+     * Y2 - Payment adjusted based on Medical Payments Coverage (MPC) or Personal Injury Protection
+     * (PIP) Benefits jurisdictional regulations or payment policies, use only if no other code is
+     * applicable. Note: If adjustment is at the Claim Level, the payer must send and the provider
+     * should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related
+     * Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at
+     * the Line Level, the payer must send and the provider should refer to the 835 Healthcare
+     * Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations
+     * apply. To be used for P&amp;C Auto only.
+     */
+    Y2(
+        "Y2",
+        "Payment adjusted based on Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits jurisdictional regulations or payment policies, use only if no other code is applicable. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Insurance Policy Number Segment (Loop 2100 Other Claim Related Information REF qualifier 'IG') if the jurisdictional regulation applies. If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for P&C Auto only."),
+    /**
+     * Y3 - Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits
+     * jurisdictional fee schedule adjustment. Note: If adjustment is at the Claim Level, the payer
+     * must send and the provider should refer to the 835 Class of Contract Code Identification
+     * Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level,
+     * the payer must send and the provider should refer to the 835 Healthcare Policy Identification
+     * Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for
+     * P&amp;C Auto only.
+     */
+    Y3(
+        "Y3",
+        "Medical Payments Coverage (MPC) or Personal Injury Protection (PIP) Benefits jurisdictional fee schedule adjustment. Note: If adjustment is at the Claim Level, the payer must send and the provider should refer to the 835 Class of Contract Code Identification Segment (Loop 2100 Other Claim Related Information REF). If adjustment is at the Line Level, the payer must send and the provider should refer to the 835 Healthcare Policy Identification Segment (loop 2110 Service Payment information REF) if the regulations apply. To be used for P&C Auto only.");
+
+    private final String code;
+    private final String display;
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements RevenueCenterAnsiReasonCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
+  }
+}

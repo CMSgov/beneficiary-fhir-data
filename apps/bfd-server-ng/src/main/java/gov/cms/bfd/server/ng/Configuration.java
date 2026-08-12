@@ -118,13 +118,17 @@ public class Configuration implements Serializable {
    *
    * @param auditEventRepository used for logging to DynamoDB
    * @param objectMapper used for serializing patient audit records
+   * @param partnerAliases used for mapping certificate aliases to partner names
    * @return audit logger
    */
   public AuditLogger getAuditLogger(
-      AuditEventRepository auditEventRepository, ObjectMapper objectMapper) {
+      AuditEventRepository auditEventRepository,
+      ObjectMapper objectMapper,
+      Map<String, String> partnerAliases) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
     if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
-      var dynamoLogger = new DynamoDbAuditLogger(auditEventRepository, objectMapper);
+      var dynamoLogger =
+          new DynamoDbAuditLogger(auditEventRepository, objectMapper, partnerAliases);
 
       return auditRecord -> {
         logStreamLogger.log(auditRecord);

@@ -1,8 +1,7 @@
 [project]
-name = "bfd-pipeline-idr"
+name = "idr-pipeline"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "ETL Pipeline to load data from the IDR into BFD's database"
 requires-python = ">=3.14.3"
 dependencies = [
     "cryptography>=46.0.5",
@@ -16,7 +15,7 @@ dependencies = [
     "click>=8.3.3",
     "anyio",
     "loguru",
-    "pydantic-partial" # TODO: remove when idr_bfd_compare is moved
+    "tblib>=3.2.2",
 ]
 
 [dependency-groups]
@@ -28,8 +27,18 @@ dev = [
     "pyright>=1.1.407",
 ]
 
+[project.scripts]
+idr-pipeline = "idr_pipeline:main"
+
+[build-system]
+requires = ["uv_build<=0.12"]
+build-backend = "uv_build"
+
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.build-backend]
+module-name = "idr_pipeline"
 
 [tool.uv.sources]
 loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }

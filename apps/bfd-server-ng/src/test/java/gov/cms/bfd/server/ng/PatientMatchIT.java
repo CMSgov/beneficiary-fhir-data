@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -18,6 +19,7 @@ import gov.cms.bfd.server.ng.audit.AuditEventBase;
 import gov.cms.bfd.server.ng.audit.AuditEventId;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.*;
@@ -43,9 +45,12 @@ class PatientMatchIT extends IntegrationTestBase {
     var ctx = FhirContext.forR4();
     var params = ParametersUtil.newInstance(ctx);
     ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
-
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "good_cert");
+    var fhirClient = getFhirClient(ctx);
+    fhirClient.registerInterceptor(headersInterceptor);
     var res =
-        getFhirClient(ctx)
+        fhirClient
             .operation()
             .onType(Patient.class)
             .named("idi-match")
@@ -425,9 +430,12 @@ class PatientMatchIT extends IntegrationTestBase {
     var ctx = FhirContext.forR4();
     var params = ParametersUtil.newInstance(ctx);
     ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
-
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue(CertificateUtil.LEAF_CERT_HEADER, "good_cert");
+    var fhirClient = getFhirClient(ctx);
+    fhirClient.registerInterceptor(headersInterceptor);
     var res =
-        getFhirClient(ctx)
+        fhirClient
             .operation()
             .onType(Patient.class)
             .named("idi-match")
@@ -710,6 +718,8 @@ class PatientMatchIT extends IntegrationTestBase {
     var audit =
         getFhirClient().read().resource(AuditEvent.class).withId(auditIds.getFirst()).execute();
     assertEquals(auditIds.getFirst(), audit.getIdPart());
+    // Tests that the mapping from a cert to a partner app name works
+    assertEquals("Blue Button API", auditRecords.getFirst().partnerName());
   }
 
   @Test
@@ -799,7 +809,12 @@ class PatientMatchIT extends IntegrationTestBase {
   }
 
   @BeforeAll
-  void setupDynamoDbTable() {
+  void beforeAll() {
+    setupDynamoDbTable();
+    setupLogAppender();
+  }
+
+  private void setupDynamoDbTable() {
     dynamoDbClient.createTable(
         CreateTableRequest.builder()
             .tableName(configuration.getPatientMatchAuditTableName())
@@ -825,8 +840,7 @@ class PatientMatchIT extends IntegrationTestBase {
             .build());
   }
 
-  @BeforeAll
-  void setupLogAppender() {
+  private void setupLogAppender() {
     var logger = (Logger) LoggerFactory.getLogger(LogStreamAuditLogger.class);
     logAppender = new ListAppender<>();
     logAppender.start();

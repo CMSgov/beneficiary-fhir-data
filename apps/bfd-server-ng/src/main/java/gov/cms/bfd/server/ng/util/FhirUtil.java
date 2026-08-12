@@ -9,11 +9,14 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.codesystems.DataAbsentReason;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** FHIR-related utility methods. */
@@ -25,20 +28,42 @@ public class FhirUtil {
   private static final String START_INDEX_PARAM = "startIndex";
 
   /**
-   * Adds a data absent reason of the coding is empty.
+   * Adds a data absent reason if the coding is empty.
    *
    * @param codeableConcept codeable concept
    * @return modified codeable concept
    */
   public static CodeableConcept checkDataAbsent(CodeableConcept codeableConcept) {
     if (codeableConcept.getCoding().isEmpty()) {
-      return codeableConcept.addCoding(
-          new Coding()
-              .setSystem(SystemUrls.HL7_DATA_ABSENT)
-              .setCode("not-applicable")
-              .setDisplay("Not Applicable"));
+      setDataAbsentReason(codeableConcept, DataAbsentReason.NOTAPPLICABLE);
     }
     return codeableConcept;
+  }
+
+  /**
+   * Convenience method for Reference calls for data-absent-reason. prior logic should determine
+   * data-absent-reason is necessary.
+   *
+   * @param ref fhir CodeableConcept IBaseHasExtensions is common throughout FHIR elements.
+   * @return modified Reference
+   */
+  public static Reference setDataAbsentReasonUnknown(Reference ref) {
+    setDataAbsentReason(ref, DataAbsentReason.UNKNOWN);
+    return ref;
+  }
+
+  /**
+   * Adds a data absent reason extension with valueCode to the fhirElement; prior logic should
+   * determine data-absent-reason is necessary.
+   *
+   * @param fhirElement implements IBaseHasExtensions is common throughout FHIR elements.
+   * @param dataAbsentReason selected DataAbsentReason
+   */
+  public static void setDataAbsentReason(
+      IBaseHasExtensions fhirElement, DataAbsentReason dataAbsentReason) {
+    var extension = fhirElement.addExtension();
+    extension.setUrl(SystemUrls.HL7_STRUCTURE_DEFINITION_DATA_ABSENT);
+    extension.setValue(new CodeType().setValue(dataAbsentReason.toCode()));
   }
 
   /**

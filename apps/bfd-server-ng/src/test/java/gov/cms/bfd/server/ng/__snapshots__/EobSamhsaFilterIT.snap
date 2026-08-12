@@ -3928,6 +3928,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         } ]
       } ],
+      "provider" : {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode" : "unknown"
+        } ]
+      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -11252,6 +11258,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "value" : 254072.03
         }
       },
+      "provider" : {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode" : "unknown"
+        } ]
+      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -13229,6 +13241,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "currency" : "USD",
           "value" : 2690.19
         }
+      },
+      "provider" : {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode" : "unknown"
+        } ]
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -20896,6 +20914,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "value" : 254072.03
         }
       },
+      "provider" : {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode" : "unknown"
+        } ]
+      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -22873,6 +22897,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "currency" : "USD",
           "value" : 2690.19
         }
+      },
+      "provider" : {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode" : "unknown"
+        } ]
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",

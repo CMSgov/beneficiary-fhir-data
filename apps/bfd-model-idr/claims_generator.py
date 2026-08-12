@@ -35,8 +35,8 @@ from generator_util import (
     CLM_RLT_COND_SGNTR_MBR,
     CLM_VAL,
     CNTRCT_PBP_NUM,
-    PRVDR_HSTRY,
     PRAUC,
+    PRVDR_HSTRY,
     GeneratorUtil,
     RowAdapter,
     adapters_to_dicts,
@@ -788,7 +788,7 @@ def generate(
 
     if sushi:
         print("Running sushi build")
-        _, stderr = run_command(["sushi", "build"], cwd="./sushi")
+        _, stderr = run_command("npm run sushi-build", cwd=".")
         if stderr:
             print("SUSHI errors:")
             print(stderr)
@@ -828,11 +828,11 @@ def generate(
 
     other_util = OtherGeneratorUtil()
 
-    generated_provider_histories, generated_type_1_npis, generated_type_2_npis = other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
-
-    out_tables[PRVDR_HSTRY].extend(
-        generated_provider_histories
+    generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
+        other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
     )
+
+    out_tables[PRVDR_HSTRY].extend(generated_provider_histories)
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
@@ -1051,7 +1051,7 @@ def generate(
                     else idx,
                     diagnoses=diagnoses,
                     init_clm_line=init_clm_line,
-                    type_1_npis= generated_type_1_npis
+                    type_1_npis=generated_type_1_npis,
                 )
                 adj_clms_tbls[CLM_LINE].append(clm_line)
 

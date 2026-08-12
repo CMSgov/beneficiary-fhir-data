@@ -83,12 +83,13 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "executor.queued.value", "name", "taskExecutor", { "region": "${region}", "label": "Queued Tasks" } ],
-                    [ ".", "executor.active.value", ".", ".", { "label": "Active Threads", "yAxis": "right", "region": "${region}" } ]
+                    [ "${namespace}", "executor.idle.avg", "name", "taskExecutor", { "region": "${region}", "label": "Idle Time Avg (ms)" } ],
+                    [ ".", "executor.idle.max", ".", ".", { "label": "Idle Time Max (ms)", "yAxis": "right", "region": "${region}" } ],
+                    [ ".", "executor.execution.count", ".", ".", { "label": "Completed Tasks", "yAxis": "right", "region": "${region}", "stat": "Sum" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "title": "Executor Queue Depth",
+                "title": "Executor Idle Time & Throughput",
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,

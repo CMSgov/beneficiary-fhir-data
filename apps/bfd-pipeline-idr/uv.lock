@@ -37,59 +37,6 @@ wheels = [
 ]
 
 [[package]]
-name = "bfd-pipeline-idr"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "anyio" },
-    { name = "click" },
-    { name = "cryptography" },
-    { name = "loguru" },
-    { name = "psycopg", extra = ["binary", "pool"] },
-    { name = "pydantic" },
-    { name = "pydantic-partial" },
-    { name = "python-dateutil" },
-    { name = "snowflake-connector-python" },
-    { name = "snowflake-snowpark-python" },
-    { name = "unidecode" },
-    { name = "usaddress" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "testcontainers" },
-    { name = "uv" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio" },
-    { name = "click", specifier = ">=8.3.3" },
-    { name = "cryptography", specifier = ">=46.0.5" },
-    { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
-    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
-    { name = "pydantic", specifier = ">=2.13.3" },
-    { name = "pydantic-partial" },
-    { name = "python-dateutil", specifier = ">=2.9.0" },
-    { name = "snowflake-connector-python", specifier = ">=4.4.0" },
-    { name = "snowflake-snowpark-python", specifier = ">=1.50.0" },
-    { name = "unidecode", specifier = ">=1.4.0" },
-    { name = "usaddress", specifier = ">=0.5.16" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pyright", specifier = ">=1.1.407" },
-    { name = "pytest", specifier = ">=9.0.1" },
-    { name = "ruff", specifier = ">=0.14.6" },
-    { name = "testcontainers", specifier = ">=4.13.3" },
-    { name = "uv", specifier = ">=0.11.15" },
-]
-
-[[package]]
 name = "boto3"
 version = "1.43.31"
 source = { registry = "https://pypi.org/simple" }
@@ -313,6 +260,59 @@ wheels = [
 ]
 
 [[package]]
+name = "idr-pipeline"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "anyio" },
+    { name = "click" },
+    { name = "cryptography" },
+    { name = "loguru" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic" },
+    { name = "python-dateutil" },
+    { name = "snowflake-connector-python" },
+    { name = "snowflake-snowpark-python" },
+    { name = "tblib" },
+    { name = "unidecode" },
+    { name = "usaddress" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "testcontainers" },
+    { name = "uv" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio" },
+    { name = "click", specifier = ">=8.3.3" },
+    { name = "cryptography", specifier = ">=46.0.5" },
+    { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
+    { name = "pydantic", specifier = ">=2.13.3" },
+    { name = "python-dateutil", specifier = ">=2.9.0" },
+    { name = "snowflake-connector-python", specifier = ">=4.4.0" },
+    { name = "snowflake-snowpark-python", specifier = ">=1.50.0" },
+    { name = "tblib", specifier = ">=3.2.2" },
+    { name = "unidecode", specifier = ">=1.4.0" },
+    { name = "usaddress", specifier = ">=0.5.16" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pyright", specifier = ">=1.1.407" },
+    { name = "pytest", specifier = ">=9.0.1" },
+    { name = "ruff", specifier = ">=0.14.6" },
+    { name = "testcontainers", specifier = ">=4.13.3" },
+    { name = "uv", specifier = ">=0.11.15" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -512,18 +512,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/30/a6/9f9f380dbb301f67023bf8f707aaa75daadf84f7152d95c410fd7e81d994/pydantic_core-2.46.4-cp314-cp314t-win32.whl", hash = "sha256:e846ae7835bf0703ae43f534ab79a867146dadd59dc9ca5c8b53d5c8f7c9ef02", size = 1955575, upload-time = "2026-05-06T13:38:51.116Z" },
     { url = "https://files.pythonhosted.org/packages/40/1f/f1eb9eb350e795d1af8586289746f5c5677d16043040d63710e22abc43c9/pydantic_core-2.46.4-cp314-cp314t-win_amd64.whl", hash = "sha256:2108ba5c1c1eca18030634489dc544844144ee36357f2f9f780b93e7ddbb44b5", size = 2051624, upload-time = "2026-05-06T13:38:21.672Z" },
     { url = "https://files.pythonhosted.org/packages/f6/d2/42dd53d0a85c27606f316d3aa5d2869c4e8470a5ed6dec30e4a1abe19192/pydantic_core-2.46.4-cp314-cp314t-win_arm64.whl", hash = "sha256:4fcbe087dbc2068af7eda3aa87634eba216dbda64d1ae73c8684b621d33f6596", size = 2017325, upload-time = "2026-05-06T13:40:52.723Z" },
-]
-
-[[package]]
-name = "pydantic-partial"
-version = "0.11.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/65/28/92f47cdece522436ca4d55a77f3b8f7f41795a270bb1698833c77d8709c2/pydantic_partial-0.11.1.tar.gz", hash = "sha256:172874d96144eb947f7b11f3669888560bf11ee353f45edf129554bca634862a", size = 6027, upload-time = "2026-06-26T18:54:53.699Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/02/f9c7b99aca4e3e1d836f92b2fe31399f404e16a29ace420f13dd973099a3/pydantic_partial-0.11.1-py3-none-any.whl", hash = "sha256:8b3ddfbb68430b8a98829efb2f5146691df09a05de609c4fcf3e8e20971462bd", size = 7464, upload-time = "2026-06-26T18:54:52.787Z" },
 ]
 
 [[package]]
@@ -805,6 +793,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
+name = "tblib"
+version = "3.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/8a/14c15ae154895cc131174f858c707790d416c444fc69f93918adfd8c4c0b/tblib-3.2.2.tar.gz", hash = "sha256:e9a652692d91bf4f743d4a15bc174c0b76afc750fe8c7b6d195cc1c1d6d2ccec", size = 35046, upload-time = "2025-11-12T12:21:16.572Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/be/5d2d47b1fb58943194fb59dcf222f7c4e35122ec0ffe8c36e18b5d728f0b/tblib-3.2.2-py3-none-any.whl", hash = "sha256:26bdccf339bcce6a88b2b5432c988b266ebbe63a4e593f6b578b1d2e723d2b76", size = 12893, upload-time = "2025-11-12T12:21:14.407Z" },
 ]
 
 [[package]]

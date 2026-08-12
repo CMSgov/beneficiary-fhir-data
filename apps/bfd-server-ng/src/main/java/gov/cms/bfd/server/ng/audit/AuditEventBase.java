@@ -9,6 +9,7 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.CURRENT_MATCH_ALGORITHM
 import static gov.cms.bfd.server.ng.util.LoggerConstants.FINAL_DETERMINATION;
 import static gov.cms.bfd.server.ng.util.LoggerConstants.MATCHED_BENE_SK;
 import static gov.cms.bfd.server.ng.util.LoggerConstants.MATCH_ALGORITHM_VERSION;
+import static gov.cms.bfd.server.ng.util.LoggerConstants.PARTNER_APP_NAME;
 import static gov.cms.bfd.server.ng.util.LoggerConstants.TIMESTAMP;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -41,6 +42,7 @@ public class AuditEventBase {
   private String combinationsEvaluated;
   private String finalDetermination;
   private String matchAlgorithmVersion;
+  private String partnerAppName;
 
   /**
    * Create Audit Table Schema For DynamoDB. We use this rather than @DynamoDbBean. This annotation
@@ -106,6 +108,12 @@ public class AuditEventBase {
                   a.name(MATCH_ALGORITHM_VERSION)
                       .getter(AuditEventBase::getMatchAlgorithmVersion)
                       .setter(AuditEventBase::setMatchAlgorithmVersion))
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name(PARTNER_APP_NAME)
+                      .getter(AuditEventBase::getPartnerAppName)
+                      .setter(AuditEventBase::setPartnerAppName))
           .build();
 
   /**

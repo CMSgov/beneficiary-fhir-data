@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.claim.model.Contract;
+import gov.cms.bfd.server.ng.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;

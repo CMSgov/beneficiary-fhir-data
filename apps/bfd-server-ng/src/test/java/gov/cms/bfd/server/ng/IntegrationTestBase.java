@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
+import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,8 +14,8 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -267,7 +267,8 @@ public class IntegrationTestBase {
       String clientId,
       String clientName,
       String clientIp,
-      String timestamp) {}
+      String timestamp,
+      String partnerName) {}
 
   protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(
       Long beneSk, String testClientId) {
@@ -292,8 +293,15 @@ public class IntegrationTestBase {
               var clientName = item.get("clientName").s();
               var clientIP = item.get("clientIp").s();
               var timestamp = item.get("timestamp").s();
+              var partnerName = item.get("partnerAppName").s();
               return new PatientMatchTestAuditRecord(
-                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP, timestamp);
+                  matchedBeneSk,
+                  successfulCombination,
+                  clientId,
+                  clientName,
+                  clientIP,
+                  timestamp,
+                  partnerName);
             })
         .toList();
   }

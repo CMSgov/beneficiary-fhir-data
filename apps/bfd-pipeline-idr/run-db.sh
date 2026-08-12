@@ -21,7 +21,7 @@ function do_load() {
   BFD_DB_PASSWORD="$DB_PASSWORD" \
   BFD_DB_ENDPOINT="$DB_ENDPOINT" \
   IDR_ENABLE_DATE_PARTITIONS=0 \
-  uv run pipeline.py \
+  uv run idr-pipeline \
   --source postgres \
   --load-mode synthetic \
   --load-type initial \
@@ -84,4 +84,3 @@ else
   do_load "$1"
   echo "Done loading full tables from $1"
 fi
-

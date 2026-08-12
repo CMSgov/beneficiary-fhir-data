@@ -3,13 +3,11 @@
 set -e
 
 read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? [yn] " -n 1 -r
-echo    # (optional) move to a new line
-if ! [[ $REPLY =~ ^[Yy]$ ]]
-then
-    echo 'exiting'
-    exit 0
+echo # (optional) move to a new line
+if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo 'exiting'
+  exit 0
 fi
-
 
 DB_CLUSTER="bfd-${BFD_ENV}-aurora-cluster"
 readonly DB_CLUSTER
@@ -43,7 +41,7 @@ export IDR_SCHEMA
 
 args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
 if [[ -n "$1" ]]; then
-    args+=('--seed-from' "$1")
+  args+=('--seed-from' "$1")
 fi
 
-IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py "${args[@]}"
+IDR_ENABLE_DATE_PARTITIONS=0 uv run idr-pipeline "${args[@]}"
