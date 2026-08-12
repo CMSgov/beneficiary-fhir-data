@@ -248,7 +248,7 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
     //only populate the following when there is a LIS, otherwise it's confusing.
 
     //LIS Copayment Level Code Extension 
-    src.BENE_CMBND_DEEMD_IND as lisEfctvCd where lisEfctvCd = "Y" -> tgt.extension = create('Extension') as tgtExtension then{
+    src.BENE_CMBND_DEEMD_IND as deemdInd where deemdInd = "Y" -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD" "add system";
