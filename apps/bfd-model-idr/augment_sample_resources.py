@@ -150,7 +150,7 @@ cur_sample_data["profileType"] = profile_type #in case it's not specified, we re
 
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 
-
+# todo, delete blood pt, will have to remove blood_pt_qty from generated csvs
 line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
