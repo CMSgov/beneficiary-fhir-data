@@ -62,4 +62,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run the pipeline in IDR mode by default
-CMD ["uv", "run", "--no-sync", "pipeline.py"]
+CMD ["uv", "run", "--no-sync", "idr-pipeline"]

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for ICD code formatting rules implemented in IcdIndicator. */

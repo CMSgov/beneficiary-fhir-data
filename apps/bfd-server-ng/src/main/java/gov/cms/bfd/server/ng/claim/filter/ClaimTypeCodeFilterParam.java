@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,10 +25,5 @@ public record ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes)
     return new DbFilter(
         String.format(" AND %s.claimTypeCode IN :claimTypeCodes", tableAlias),
         List.of(new DbFilterParam("claimTypeCodes", claimTypeCodes)));
-  }
-
-  @Override
-  public boolean matchesSystemType(@NotNull SystemType systemType) {
-    return true;
   }
 }

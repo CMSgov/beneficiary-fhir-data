@@ -769,6 +769,22 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state" {
         name = "sdk_requests_node_count"
         type = "INTEGER"
       }
+      input_columns {
+        name = "app_all_successful_client_credentials_call"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "app_all_unsuccessful_client_credentials_call"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "app_all_successful_patient_match_call"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "app_all_unsuccessful_patient_match_call"
+        type = "INTEGER"
+      }
     }
   }
 

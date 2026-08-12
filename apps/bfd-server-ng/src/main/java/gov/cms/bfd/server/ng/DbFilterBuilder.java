@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 
 /** Used by classes that create database filters. */
 public interface DbFilterBuilder {
@@ -20,5 +20,17 @@ public interface DbFilterBuilder {
    * @param systemType system type which indicates a claim's source
    * @return boolean
    */
-  boolean matchesSystemType(SystemType systemType);
+  default boolean matchesSystemType(SystemType systemType) {
+    return true;
+  }
+
+  /**
+   * Determine whether prior authorizations should be queried based on the specified source from the
+   * search criteria. Only source CWF corresponds to prior authorizations.
+   *
+   * @return boolean
+   */
+  default boolean shouldQueryPriorAuth() {
+    return true;
+  }
 }

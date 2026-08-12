@@ -1,13 +1,12 @@
 import argparse
-import boto3
 
+import boto3
 from utils.utils import (
     get_report_dates_from_target_date,
-    run_athena_query_using_template,
     output_results_list_to_csv_file,
+    run_athena_query_using_template,
     update_or_create_metrics_table,
 )
-
 
 """
 Summary:
@@ -88,7 +87,7 @@ parser.add_argument(
 parser.add_argument(
     "--update-per-app-table",
     default=False,
-    action='store_true',
+    action="store_true",
     help="Update or create table for per-app table basename.",
 )
 

@@ -157,7 +157,8 @@ request_response_middleware_events AS (
           OR path LIKE '/v1/fhir%'
           OR path LIKE '/v2/fhir%'
           OR path LIKE '/v3/fhir%'
-          OR path LIKE '/v%/o/token%/'
+          OR path LIKE '/v%/o/token/'
+          OR path LIKE '/v%/o/token'
         )
     )
 ),
@@ -668,7 +669,19 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
       ) app_all_sdk_requests_python_count,
       "sum"(
        app_sdk_requests_node_count
-      ) app_all_sdk_requests_node_count
+      ) app_all_sdk_requests_node_count,
+      "sum"(
+        app_successful_client_credentials_call
+      ) app_all_successful_client_credentials_call,
+      "sum"(
+        app_unsuccessful_client_credentials_call
+      ) app_all_unsuccessful_client_credentials_call,
+      "sum"(
+        app_successful_patient_match_call
+      ) app_all_successful_patient_match_call,
+      "sum"(
+        app_unsuccessful_patient_match_call
+      ) app_all_unsuccessful_patient_match_call
     FROM
       ${ENV}_${BASENAME_PER_APP}
     WHERE

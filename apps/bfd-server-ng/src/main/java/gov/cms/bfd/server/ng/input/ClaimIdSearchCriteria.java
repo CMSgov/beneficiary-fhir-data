@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.input;
 
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;

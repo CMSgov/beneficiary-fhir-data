@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +89,21 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
         .flatMap(List::stream)
         .mapMulti(this::extractSourceId)
         .anyMatch(systemType::isCompatibleWith);
+  }
+
+  @Override
+  public boolean shouldQueryPriorAuth() {
+    return tagCriteria.stream()
+        .allMatch(
+            orList ->
+                orList.stream()
+                    .anyMatch(
+                        criterion ->
+                            switch (criterion) {
+                              case TagCriterion.FinalActionCriterion _ -> true;
+                              case TagCriterion.MetaSourceSkCriterion(var source) ->
+                                  SystemType.SS.isCompatibleWith(source);
+                            }));
   }
 
   private void extractSourceId(TagCriterion criterion, Consumer<MetaSourceSk> consumer) {

@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -55,5 +55,12 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
       return true;
     }
     return metaSourceSk.stream().flatMap(List::stream).anyMatch(systemType::isCompatibleWith);
+  }
+
+  @Override
+  public boolean shouldQueryPriorAuth() {
+    return metaSourceSk.stream()
+        .filter(orList -> !orList.isEmpty())
+        .allMatch(orList -> orList.contains(MetaSourceSk.CWF));
   }
 }

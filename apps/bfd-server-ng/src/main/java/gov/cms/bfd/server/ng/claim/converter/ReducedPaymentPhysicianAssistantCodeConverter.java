@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.ReducedPaymentPhysicianAssistantCode;
+import gov.cms.bfd.server.ng.claim.model.common.ReducedPaymentPhysicianAssistantCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;

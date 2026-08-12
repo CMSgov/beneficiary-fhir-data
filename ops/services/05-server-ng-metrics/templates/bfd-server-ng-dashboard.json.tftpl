@@ -83,12 +83,13 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "executor.queued.value", "name", "taskExecutor", { "region": "${region}", "label": "Queued Tasks" } ],
-                    [ ".", "executor.active.value", ".", ".", { "label": "Active Threads", "yAxis": "right", "region": "${region}" } ]
+                    [ "${namespace}", "executor.idle.avg", "name", "taskExecutor", { "region": "${region}", "label": "Idle Time Avg (ms)" } ],
+                    [ ".", "executor.idle.max", ".", ".", { "label": "Idle Time Max (ms)", "yAxis": "right", "region": "${region}" } ],
+                    [ ".", "executor.execution.count", ".", ".", { "label": "Completed Tasks", "yAxis": "right", "region": "${region}", "stat": "Sum" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "title": "Executor Queue Depth",
+                "title": "Executor Idle Time & Throughput",
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,
@@ -175,7 +176,7 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.samhsa_filter.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Latency", "id": "e1", "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.transform.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Latency", "id": "e1", "region": "${region}" } ],
                     [ { "expression": "SEARCH('{${namespace},samhsa_filter_mode} MetricName=\"application.eob.handler.results.size.avg\"', 'Average', 60)", "label": "$${PROP('Dim.samhsa_filter_mode')} Bundle Size", "id": "e2", "yAxis": "right", "period": 60, "region": "${region}" } ]
                 ],
                 "view": "timeSeries",

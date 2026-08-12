@@ -11,10 +11,10 @@ import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
-import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.Instant;
@@ -308,7 +308,7 @@ class EobSearchIT extends IntegrationTestBase {
                 .createQuery(
                     """
                 SELECT billablePeriod.claimThroughDate
-                FROM ClaimInstitutionalNch c
+                FROM ClaimInstitutionalCmsNch c
                 WHERE c.claimUniqueId = :id
                 """,
                     Optional.class)
@@ -439,18 +439,6 @@ class EobSearchIT extends IntegrationTestBase {
         expectedCount,
         eobBundle.getEntry().size(),
         "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
-  }
-
-  private static Coding tag(String system, String code) {
-    return new Coding(system, code, null);
-  }
-
-  private static Coding systemType(MetaSourceSk metaSourceSk) {
-    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, metaSourceSk.getSystemType());
-  }
-
-  private static Coding finalAction(ClaimFinalAction finalAction) {
-    return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
   }
 
   @ParameterizedTest
@@ -843,12 +831,12 @@ class EobSearchIT extends IntegrationTestBase {
             .createQuery(
                 """
                 SELECT c
-                FROM ClaimProfessionalNch c
+                FROM ClaimProfessionalCmsNch c
                 JOIN FETCH c.beneficiary b
                 JOIN FETCH c.claimItems cl
                 WHERE c.claimUniqueId = :claimId
                 """,
-                ClaimProfessionalNch.class)
+                ClaimProfessionalCmsNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
     // Precondition - claim should be available in the db

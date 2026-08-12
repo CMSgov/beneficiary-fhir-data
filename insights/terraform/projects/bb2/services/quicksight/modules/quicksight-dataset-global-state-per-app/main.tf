@@ -686,6 +686,22 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state_per_app" {
           name = "app_access_grant_enabled"
           type = "BOOLEAN"
       }
+      input_columns {
+          name = "app_successful_client_credentials_call"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_unsuccessful_client_credentials_call"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_successful_patient_match_call"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_unsuccessful_patient_match_call"
+          type = "INTEGER"
+      }
     }
   }
 }

@@ -5,6 +5,7 @@ import java.time.*;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.springframework.stereotype.Component;
 
 /** Date utility methods. */
@@ -58,6 +59,17 @@ public class DateUtil {
     DateTimeType fhirDate = new DateTimeType(utilDate);
     fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
     return fhirDate;
+  }
+
+  /**
+   * Converts a {@link LocalDate} to a FHIR {@link DateType} object.
+   *
+   * @param localDate The LocalDate to convert.
+   * @return A FHIR DateType, or null if input is null.
+   */
+  public static DateType toFhirDateType(LocalDate localDate) {
+    Date utilDate = toDate(localDate);
+    return new DateType(utilDate);
   }
 
   /**

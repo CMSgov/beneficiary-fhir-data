@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
+import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.ArrayList;
 import org.jetbrains.annotations.NotNull;
@@ -41,10 +41,5 @@ public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFil
               params.add(new DbFilterParam("lastUpdatedUpperBound", d));
             });
     return new DbFilter(filterClause.toString(), params);
-  }
-
-  @Override
-  public boolean matchesSystemType(@NotNull SystemType systemType) {
-    return true;
   }
 }
