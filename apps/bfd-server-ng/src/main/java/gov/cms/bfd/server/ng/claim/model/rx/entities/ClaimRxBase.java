@@ -36,8 +36,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /**
- * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
- * reduced from 21 to the max 20. Ignore. Class itself is relatively short in lines of code.
+ * Base claim table for pharmacy ExplanationOfBenefits. Resource - ExplanationOfBenefit Domain - [
+ * Rx ] Profile - [ CMS ] Source - [ Rx ]
  */
 @MappedSuperclass
 @Getter

@@ -20,7 +20,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The CMS profile of a Rx Claim. */
+/**
+ * The CMS profile of a Rx Claim. Resource - ExplanationOfBenefit Varied Domain - [ Rx ] Profile - [
+ * CMS ] Source - [ Rx ]
+ */
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")

@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimFederalTypeOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderSpecialtyCode;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +13,11 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Embedded container for professional claim line extensions. Resource - Resource -
+ * Embedded container for professional claim line extensions. Resource -
  * ExplanationOfBenefit.ItemComponent.Extension Domain - [ Professional ] Profile - [ CMS ] Source -
  * [ SS, NCH ]
  */
+@Embeddable
 public class ClaimLineExtensionsCms {
   @Embedded ClaimLineExtensions base;
 
