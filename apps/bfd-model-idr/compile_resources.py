@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-MATCHBOX_SERVER = "http://localhost:8080/matchboxv3"
+MATCHBOX_SERVER = "http://localhost:18080/matchboxv3"
 
 
 def run_command(cmd, cwd=None):
