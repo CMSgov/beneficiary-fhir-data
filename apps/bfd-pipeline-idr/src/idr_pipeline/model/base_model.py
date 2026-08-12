@@ -877,6 +877,7 @@ def stale_non_part_d_claims_query(claim_table: str) -> str:
         SELECT clm.clm_uniq_id
         FROM {claim_table} clm
         WHERE clm.clm_ltst_clm_ind = 'N'
+        AND clm.clm_uniq_id > 0
         ORDER BY clm.clm_uniq_id
         LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
     """
