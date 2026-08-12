@@ -31,22 +31,16 @@ public abstract class ProviderHistoryBase {
     private final String type;
 
     static NpiType fromNpiTypeCode(Optional<Integer> npiTypeCode) {
-      if (npiTypeCode.isPresent() && npiTypeCode.get().equals(2)) {
-        return ORGANIZATION;
-      }
-      return INDIVIDUAL;
+      return switch (npiTypeCode.orElse(1)) {
+        case 2 -> ORGANIZATION;
+        default -> INDIVIDUAL;
+      };
     }
   }
 
   protected abstract CareTeamType getCareTeamType();
 
-  protected ProviderHistoryBase.NpiType getNpiType() {
-    if (getProviderName().isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
-  }
+  protected abstract NpiType getNpiType();
 
   Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
       Integer sequence, Optional<ClaimContext> claimContext) {
@@ -55,12 +49,10 @@ public abstract class ProviderHistoryBase {
     }
     var providerReference =
         ProviderFhirHelper.createProviderReference(providerNpiNumber.get(), providerName);
-    claimContext.ifPresent(
-        claimType -> {
-          if (claimType == ClaimContext.INSTITUTIONAL) {
-            providerReference.setType(NpiType.INDIVIDUAL.getType());
-          }
-        });
+    var npiType = getNpiType();
+    if (npiType != NpiType.UNKNOWN) {
+      providerReference.setType(npiType.getType());
+    }
 
     return getCareTeamComponent(sequence, providerReference);
   }

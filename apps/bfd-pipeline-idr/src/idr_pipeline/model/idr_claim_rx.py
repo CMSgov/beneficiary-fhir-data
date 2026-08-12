@@ -42,6 +42,7 @@ from ..model.base_model import (
     clm_query,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -239,6 +240,11 @@ class IdrClaimRx(IdrBaseModel):
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_PRSCRBNG, None)},
         BeforeValidator(transform_default_string),
+    ]
+
+    bfd_prvdr_prscrbng_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)},
     ]
 
     @override

@@ -15,6 +15,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
     name = "providerName",
     column = @Column(name = "bfd_prvdr_prscrbng_careteam_name"))
 public class PrescribingCareTeam extends ProviderHistoryBase {
+  @Column(name = "bfd_prvdr_prscrbng_npi_type")
+  private Optional<Integer> npiType;
 
   @Column(name = "prvdr_prsbng_id_qlfyr_cd")
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
@@ -22,6 +24,11 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
   @Override
   protected CareTeamType getCareTeamType() {
     return CareTeamType.PRESCRIBING;
+  }
+
+  @Override
+  protected NpiType getNpiType() {
+    return NpiType.fromNpiTypeCode(npiType);
   }
 
   @Override
@@ -36,7 +43,11 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
                       var providerReference =
                           ProviderFhirHelper.createProviderReferenceWithQualifier(
                               npi, qualifier, getProviderName());
-                      providerReference.setType(NpiType.INDIVIDUAL.getType());
+
+                      var npiType = getNpiType();
+                      if (npiType != NpiType.UNKNOWN) {
+                        providerReference.setType(npiType.getType());
+                      }
 
                       return getCareTeamComponent(sequence, providerReference);
                     }));

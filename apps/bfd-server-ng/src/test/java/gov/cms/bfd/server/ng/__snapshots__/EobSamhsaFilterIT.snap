@@ -547,7 +547,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             },
             "value" : "1003488552"
           },
-          "type" : "Practitioner"
+          "type" : "Organization"
         },
         "role" : {
           "coding" : [ {
@@ -8225,7 +8225,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             },
             "value" : "1003488552"
           },
-          "type" : "Practitioner"
+          "type" : "Organization"
         },
         "role" : {
           "coding" : [ {
@@ -17869,7 +17869,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             },
             "value" : "1003488552"
           },
-          "type" : "Practitioner"
+          "type" : "Organization"
         },
         "role" : {
           "coding" : [ {
