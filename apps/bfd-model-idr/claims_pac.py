@@ -127,6 +127,7 @@ class PacGeneratorUtil:
 
         if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
             clm[f.CLM_RIC_CD] = get_ric_cd_for_clm_type_cd(pac_clm_type_cd)
+            clm[f.CLM_PPS_IND] = random.choice(["N", "Y"])
 
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
 
@@ -160,6 +161,7 @@ class PacGeneratorUtil:
         clm_fiss[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_fiss[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_fiss[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_fiss[f.CLM_PPS_IND] = clm[f.CLM_PPS_IND]
 
         add_meta_timestamps(clm_fiss, clm)
 
