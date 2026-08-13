@@ -197,7 +197,9 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             .replace("{TABLESAMPLE}", "")
             .replace("{LIMIT}", "")
             .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
-            {"timestamp": compare_timestamp, "max_runs_ts": progress.max_run_ts},
+            {"timestamp": compare_timestamp, "max_runs_ts": progress.max_run_ts}
+            if progress.max_run_ts is not None
+            else {"timestamp": compare_timestamp},
         )
 
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
