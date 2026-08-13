@@ -39,7 +39,7 @@ public abstract class ProviderHistoryBase {
     }
   }
 
-  public abstract CareTeamType getCareTeamType();
+  public abstract CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode);
 
   public ProviderHistoryBase.NpiType getNpiType() {
     if (getProviderName().isEmpty()) {
@@ -50,39 +50,43 @@ public abstract class ProviderHistoryBase {
   }
 
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
-      Integer sequence, Optional<ClaimContext> claimContext) {
+      Integer sequence, Optional<ClaimTypeCode> claimTypeCode) {
     if (providerNpiNumber.isEmpty()) {
       return Optional.empty();
     }
     var providerReference =
         ProviderFhirHelper.createProviderReference(providerNpiNumber.get(), providerName);
-    claimContext.ifPresent(
-        claimType -> {
-          if (claimType == ClaimContext.INSTITUTIONAL) {
-            providerReference.setType(NpiType.INDIVIDUAL.getType());
-          }
-        });
+    claimTypeCode
+        .flatMap(ClaimTypeCode::toContext)
+        .ifPresent(
+            claimContext -> {
+              if (claimContext == ClaimContext.INSTITUTIONAL) {
+                providerReference.setType(NpiType.INDIVIDUAL.getType());
+              }
+            });
 
-    return getCareTeamComponent(sequence, providerReference);
+    return getCareTeamComponent(sequence, providerReference, claimTypeCode);
   }
 
   public Optional<ExplanationOfBenefit.CareTeamComponent> getCareTeamComponent(
-      Integer sequence, Reference providerReference) {
+      Integer sequence, Reference providerReference, Optional<ClaimTypeCode> claimTypeCode) {
     CodeableConcept roleConcept = new CodeableConcept();
+    var role = getCareTeamType(claimTypeCode).getRoleCode();
+    var display = getCareTeamType(claimTypeCode).getRoleDisplay();
     // Always add THO coding
     roleConcept.addCoding(
         new Coding()
             .setSystem(SystemUrls.HL7_THO_CLAIM_CARE_TEAM_ROLE)
-            .setCode(getCareTeamType().getRoleCode())
-            .setDisplay(getCareTeamType().getRoleDisplay()));
+            .setCode(role)
+            .setDisplay(display));
 
     // Add legacy C4BB coding unless supervisor
-    if (CareTeamType.SUPERVISOR != getCareTeamType()) {
+    if (CareTeamType.SUPERVISOR != getCareTeamType(claimTypeCode)) {
       roleConcept.addCoding(
           new Coding()
               .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
-              .setCode(getCareTeamType().getRoleCode())
-              .setDisplay(getCareTeamType().getRoleDisplay()));
+              .setCode(role)
+              .setDisplay(display));
     }
 
     return Optional.of(

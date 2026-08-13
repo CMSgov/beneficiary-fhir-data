@@ -130,6 +130,43 @@ class BatchLoader:
             f"WHERE ({', '.join(f't.{v}' for v in self.update_set)}) IS "
             f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in self.update_set)})"
         )
+        self.npi_type_backfill_map = model.npi_type_backfill_compare_cols()
+        self.npi_type_backfill_cutoff = model.npi_type_backfill_cutoff_ts()
+        self.npi_type_backfill_enabled = (
+            bool(self.npi_type_backfill_map) and self.npi_type_backfill_cutoff is not None
+        )
+        self.temp_only_cols = (
+            list(self.npi_type_backfill_map) if self.npi_type_backfill_enabled else []
+        )
+        self.insert_and_temp_cols = self.insert_cols + self.temp_only_cols
+        self.insert_and_temp_cols_str = ", ".join(self.insert_and_temp_cols)
+
+        if self.npi_type_backfill_enabled:
+            npi_type_real_cols = set(self.npi_type_backfill_map.values())
+            non_npi_cols = [c for c in self.update_set if c not in npi_type_real_cols]
+            other_changed_clause = (
+                " OR ".join(f"t.{c} IS DISTINCT FROM EXCLUDED.{c}" for c in non_npi_cols)
+                if non_npi_cols
+                else "FALSE"
+            )
+            pkey_join = " AND ".join(f"tmp.{k} = EXCLUDED.{k}" for k in self.ordered_pkeys)
+            legacy_versus_real_npi_types_check = " OR ".join(
+                f"tmp.{legacy_col} IS DISTINCT FROM EXCLUDED.{real_col}"
+                for legacy_col, real_col in self.npi_type_backfill_map.items()
+            )
+            updated_ts_expr = f"""
+                CASE
+                    WHEN ({other_changed_clause}) THEN %(timestamp)s
+                    WHEN t.bfd_updated_ts >= %(npi_type_backfill_cutoff)s THEN %(timestamp)s
+                    WHEN EXISTS (
+                        SELECT 1 FROM "{{temp_tablename}}" tmp
+                        WHERE {pkey_join} AND ({legacy_versus_real_npi_types_check})
+                    ) THEN %(timestamp)s
+                    ELSE t.bfd_updated_ts
+                END
+            """
+        else:
+            updated_ts_expr = "%(timestamp)s"
         # For immutable tables, we may still be attempting to re-load some data
         # due to a batch cancellation.
         # In these cases, we can assume any conflicting rows have already been loaded so
@@ -139,7 +176,7 @@ class BatchLoader:
             "DO NOTHING"
             if self.immutable or not self.update_set
             else (
-                f"DO UPDATE SET {self.update_set_str}, bfd_updated_ts=%(timestamp)s "
+                f"DO UPDATE SET {self.update_set_str}, bfd_updated_ts={updated_ts_expr} "
                 f"{self.on_conflict_where_clause}"
             )
         )
@@ -362,6 +399,9 @@ class BatchLoader:
         for col in self.meta_keys:
             await cur.execute(f'ALTER TABLE "{full_tablename}" DROP COLUMN {col}')  # type: ignore
 
+        for col in self.temp_only_cols:
+            await cur.execute(f'ALTER TABLE "{full_tablename}" ADD COLUMN {col} integer')  # type: ignore
+
         return full_tablename
 
     async def _update_load_progress(
@@ -386,6 +426,11 @@ class BatchLoader:
             await cur.execute(f"DELETE FROM {self.table}")  # type: ignore
         await cur.execute("SET LOCAL synchronous_commit TO OFF")
 
+        params: dict[str, DbType] = {"timestamp": timestamp}
+        if self.npi_type_backfill_enabled:
+            params["npi_type_backfill_cutoff"] = cast(DbType, self.npi_type_backfill_cutoff)
+            self.on_conflict_clause = self.on_conflict_clause.format(temp_tablename=temp_tablename)
+
         await cur.execute(
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
@@ -393,7 +438,7 @@ class BatchLoader:
             ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
             RETURNING {self.updated_keys_returning_str}
             ''',  # type: ignore
-            {"timestamp": timestamp},
+            params,
         )
 
         return await cur.fetchall()
@@ -410,11 +455,11 @@ class BatchLoader:
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
         async with cur.copy(
-            f'COPY "{temp_tablename}" ({self.cols_str}) FROM STDIN'  # type: ignore
+            f'COPY "{temp_tablename}" ({self.insert_and_temp_cols_str}) FROM STDIN'  # type: ignore
         ) as copy:
             for row in data:
                 await copy.write_row(
-                    [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
+                    [_remove_null_bytes(getattr(row, k)) for k in self.insert_and_temp_cols]
                 )
 
 

@@ -1,9 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
-import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
-import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
-import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
-import gov.cms.bfd.server.ng.claim.model.common.ProviderIdQualifierCode;
+import gov.cms.bfd.server.ng.claim.model.common.*;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -31,7 +28,7 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.SERVICE;
   }
 

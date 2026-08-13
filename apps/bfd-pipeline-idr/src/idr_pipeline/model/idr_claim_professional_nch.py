@@ -11,6 +11,7 @@ from ..constants import (
     IDR_CLAIM_PROFESSIONAL_TABLE,
     IDR_CLAIM_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
+    NPI_TYPE_LOADED_DATE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -28,8 +29,10 @@ from ..model.base_model import (
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -45,8 +48,12 @@ from ..model.base_model import (
     clm_orig_cntl_num_expr,
     clm_query,
     clm_rlt_ocrnc_clause,
+    legacy_billing_npi_type_expr,
+    legacy_professional_no_specialty_npi_type_expr,
+    legacy_service_npi_type_expr_for_context,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -60,7 +67,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True},
     ]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
-    bene_sk: Annotated[int, ALIAS:ALIAS_CLM]
+    bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_orig_cntl_num: Annotated[
         str,
@@ -157,6 +164,13 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
+    prvdr_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
+    legacy_prvdr_blg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_billing_npi_type_expr()},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_blg_prvdr_npi_type"},
+    ]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -173,6 +187,15 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
+    prvdr_rfrg_prvdr_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}
+    ]
+    legacy_prvdr_rfrg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_professional_no_specialty_npi_type_expr()},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_rfrg_prvdr_npi_type"},
+    ]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
@@ -183,6 +206,15 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_prvdr_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)}
+    ]
+    legacy_prvdr_srvc_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_service_npi_type_expr_for_context(False)},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_srvc_prvdr_npi_type"},
     ]
     bfd_prvdr_srvc_careteam_name: Annotated[
         str,
@@ -243,6 +275,11 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
+
+    @override
+    @classmethod
+    def npi_type_backfill_cutoff_ts(cls) -> datetime | None:
+        return NPI_TYPE_LOADED_DATE  # todo change once other ticket deployed
 
     @override
     @staticmethod

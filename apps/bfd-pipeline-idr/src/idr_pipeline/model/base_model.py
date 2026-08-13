@@ -171,6 +171,12 @@ def provider_npi_type_expr(alias: str) -> str:
     """
 
 
+# using this to resolve npi type 2 for inst + prof
+PROVIDER_ORG_SPECIALTY_CODES = (
+    "('45', '47', '49', '51', '52', '53', '54', '58', '59', '60', '61', '63', '69', '70', '73', "
+    "'74', '75', '87', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B1', 'B3', "
+    "'B4', 'C1', 'C2', 'C4', 'D1', 'D5', 'D6', 'Z1', 'Z2', 'Z3', 'Z4', 'Z5')"
+)
 MEDICARE_EXHAUSTED_CD = "A3"
 ACTIVE_CARE_CD = "22"
 QUALIFYING_STAY_CD = "70"
@@ -360,6 +366,7 @@ LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 EXPR = "expr"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
+NPI_TYPE_BACKFILL_COMPARE = "npi_type_backfill_compare"
 
 
 ALIAS_CLM = "clm"
@@ -623,6 +630,19 @@ class IdrBaseModel(BaseModel, ABC):
             key for key in cls.model_fields if not cls._extract_meta(key, INSERT_EXCLUDE)
         ] + list(cls.model_computed_fields)
 
+    @classmethod
+    def npi_type_backfill_compare_cols(cls) -> dict[str, str]:
+        # map to legacy npi-type column to check the real npi_type against so {legacy : actual}
+        return {
+            key: cast(str, meta)
+            for key in cls.model_fields
+            if (meta := cls._extract_meta(key, NPI_TYPE_BACKFILL_COMPARE)) is not None
+        }
+
+    @classmethod
+    def npi_type_backfill_cutoff_ts(cls) -> datetime | None:
+        return None
+
 
 T = TypeVar("T", bound=IdrBaseModel)
 
@@ -870,3 +890,53 @@ def stale_phase_1_claims_query(
         """,
         (cutoff_date, cutoff_date),
     )
+
+
+def legacy_billing_npi_type_expr() -> str:
+    # billing did not have its npi type set before when it should have
+    return "NULL"
+
+
+def legacy_institutional_specialty_npi_type_expr(specialty_col: str) -> str:
+    # claim_context = INSTITUTIONAL
+    # Unknown / Default specialty codes / NULL resolve to npi type 1
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            ELSE 1
+        END
+    """
+
+
+def legacy_professional_specialty_npi_type_expr(specialty_col: str) -> str:
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            WHEN {specialty_col} IS NULL OR TRIM({specialty_col}) = '' OR {specialty_col} IN ('31',
+              '95', '96', '99', 'D2') THEN NULL
+            ELSE 1
+        END
+    """
+
+
+def legacy_professional_no_specialty_npi_type_expr() -> str:
+    # some of the professional npis don't use specialty code and no other logic exists to determine
+    # type so always NULL
+    return "NULL"
+
+
+def legacy_service_npi_type_expr_for_context(is_institutional: bool) -> str:
+    return "1" if is_institutional else "NULL"
+
+
+def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
+    return f"""
+        CASE
+            WHEN {provider_qualifier_code} <> '' THEN 1
+            ELSE NULL
+        END
+    """
+
+
+def legacy_rx_service_npi_type_expr() -> str:
+    return "NULL"
