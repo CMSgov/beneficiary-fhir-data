@@ -103,7 +103,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         UPDATE {IDR_BENE_HISTORY_TABLE}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
-        """,
+        """,  # type: ignore
         {"timestamp": datetime_now},
     )
     conn.commit()
