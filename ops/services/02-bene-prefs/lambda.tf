@@ -7,7 +7,7 @@ locals {
   lambda_runtime     = "python${trimspace(file("${local.lambda_source_path}/.python-version"))}"
 }
 
-module "this" {
+module "log_group_this" {
   source = "../../terraform-modules/general/high-retention-log-group"
   count  = local.conditional_count
 
