@@ -100,16 +100,8 @@ PER_BATCH_MAX_CONNECTIONS = int(getenv("IDR_PER_BATCH_MAX_CONNECTIONS", "20"))
 """Number of minimum connections to hold in the pool concurrently per-batch for non-LOCAL loads.
 Defaults to 20."""
 
-BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT = int(
-    getenv("IDR_BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT", "100000")
-)
-"""Maximum rows to delete per prune statement for Part D beneficiary records."""
-
-CLAIM_PRUNE_BATCH_LIMIT = int(getenv("CLAIM_PRUNE_BATCH_LIMIT", "10_000"))
-"""The maximum batch size for pruning claims on INCREMENTAL loads. Defaults to 10000."""
-
-BENEFICIARY_PRUNE_BATCH_LIMIT = int(getenv("IDR_BENEFICIARY_PRUNE_BATCH_LIMIT", "1000"))
-"""Maximum rows to delete per prune statement for LIS combined beneficiary records."""
+PRUNE_BATCH_LIMIT = int(getenv("IDR_PRUNE_BATCH_LIMIT", "10000"))
+"""The maximum batch size for pruning rows on INCREMENTAL loads. Defaults to 10000."""
 
 ALLOW_EXTRACTOR_QUERY_LOGGING = _parse_bool_default_true("IDR_ALLOW_EXTRACTOR_QUERY_LOGGING")
 """Allow logging of Snowflake and Postgres SQL queries at the DEBUG level."""
