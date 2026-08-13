@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRevenueCenterCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPlaceOfServiceCode;
 import jakarta.persistence.*;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;

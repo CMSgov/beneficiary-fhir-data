@@ -185,6 +185,21 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       expression          = "round({auth_v3_user_clicks_connect_bene_count} / {auth_v3_user_makes_it_to_permission_screen_bene_count} , 3)"
       name                = "auth_v3_user_makes_it_to_permission_screen_and_clicks_connect_percent"
     }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({app_all_successful_client_credentials_call} / ({app_all_successful_client_credentials_call} + {app_all_unsuccessful_client_credentials_call}) , 3)"
+      name                = "percentage_of_client_credentials_calls_that_were_successful"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({app_all_successful_patient_match_call} / ({app_all_successful_patient_match_call} + {app_all_unsuccessful_patient_match_call}) , 3)"
+      name                = "percentage_of_patient_matches_that_were_successful"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "{app_all_successful_client_credentials_call} + {app_all_unsuccessful_client_credentials_call}"
+      name                = "total_client_credential_calls"
+    }
 
     filter_groups {
       cross_dataset   = "SINGLE_DATASET"
@@ -1180,6 +1195,42 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.sdk_requests_python_count.15.1691762513768"
                 visibility   = "VISIBLE"
               }
+
+              selected_field_options {
+                custom_label = "# of Successful CAN Requests"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_successful_client_credentials_call.17.1785944467396"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Failed CAN Requests"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_unsuccessful_client_credentials_call.18.1785944479755"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "Total # of CAN Requests"
+                field_id     = "7f18f35e-ff0a-4dd8-9879-7389e634b385.19.1785944491420"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "% of CAN Requests that were Successful"
+                field_id     = "46a69930-177c-488d-a195-79dc837157d2.20.1785944498427"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Successful Patient Matches"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_successful_patient_match_call.21.1785944513820"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "# of Failed Patient Matches"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_unsuccessful_patient_match_call.22.1785944520744"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "% of Patient Matches that were Successful"
+                field_id     = "320850f4-fac1-4a0a-b90b-5d86f6fa43c6.23.1785944526956"
+                visibility   = "VISIBLE"
+              }
             }
             field_wells {
               pivot_table_aggregated_field_wells {
@@ -1481,6 +1532,125 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                     column {
                       column_name         = "sdk_requests_python_count"
                       data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_successful_client_credentials_call.17.1785944467396"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_successful_client_credentials_call"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_unsuccessful_client_credentials_call.18.1785944479755"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_unsuccessful_client_credentials_call"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "7f18f35e-ff0a-4dd8-9879-7389e634b385.19.1785944491420"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "total_client_credential_calls"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "46a69930-177c-488d-a195-79dc837157d2.20.1785944498427"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "percentage_of_client_credentials_calls_that_were_successful"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_successful_patient_match_call.21.1785944513820"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_successful_patient_match_call"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_unsuccessful_patient_match_call.22.1785944520744"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_unsuccessful_patient_match_call"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "320850f4-fac1-4a0a-b90b-5d86f6fa43c6.23.1785944526956"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "percentage_of_patient_matches_that_were_successful"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
                     }
                   }
                 }

@@ -93,6 +93,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "72",
       "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (DMEPOS)"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "CARRIER"
     }]
   },
   "use" : "claim",

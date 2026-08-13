@@ -28,6 +28,9 @@ class EobValidityIT extends IntegrationTestBase {
     assertTrue(eob.hasStatus(), "EOB should have status");
     assertTrue(eob.hasCreated(), "EOB should have created");
     assertTrue(eob.hasUse(), "EOB should have use");
+    assertTrue(
+        eob.hasProvider(),
+        "EOB should have provider, or data-absent-reason when provider/org npi is not provided");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
     assertFalse(eob.hasExtension());

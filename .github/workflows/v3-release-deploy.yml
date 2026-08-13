@@ -355,10 +355,12 @@ jobs:
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: >-
         bfd-platform-server-fluent-bit,
+        bfd-platform-server-datadog-agent,
         bfd-platform-idr-pipeline,
         bfd-platform-migrator-ng,
         bfd-platform-consume-idr-events,
-        bfd-platform-run-idr-pipeline
+        bfd-platform-run-idr-pipeline,
+        bfd-platform-idr-bfd-validator
       baseImagesVersion: latest
       cleanupImageArtifacts: false # We'll cleanup at the end, so don't do anything
       tagLatest: false
@@ -408,14 +410,3 @@ jobs:
           }
         }
     secrets: inherit
-
-  cleanup-artifacts:
-    if: ${{ !cancelled() }}
-    needs: [build-other-images]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6.0.0
-        with:
-          name: "*"
-          failOnError: false

@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.util;
 
 import static gov.cms.bfd.server.ng.util.LoggerConstants.LOG_TYPE;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import java.util.Collection;
 import org.slf4j.LoggerFactory;
 
