@@ -632,14 +632,16 @@ def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: L
 
 
 def _test_load_progress_concurrent(conn: Connection) -> None:
-    cur = conn.execute("select * from idr.load_progress where job_id = 1")
+    cur = conn.execute(
+        "select max_run_ts from idr.load_progress where job_id = 1 and max_run_ts is not null"
+    )
     rows = cur.fetchmany(1)
-    assert rows[0]["max_run_ts"] is None
+    assert len(rows) == 0
     cur = conn.execute(
         "select * from idr.load_progress where job_id = 2 and max_run_ts is not null"
     )
     rows_2 = cur.fetchmany(1)
-    assert rows_2[0]["max_run_ts"] is not None
+    assert len(rows_2) == 1
     cur = conn.execute(
         """select * from idr.load_progress where job_id = 1 
         and batch_partition = %(batch_partition)s 
