@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.HealthProfessionalShortageAreaScarcityCode;
+import gov.cms.bfd.server.ng.claim.model.professional.HealthProfessionalShortageAreaScarcityCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;

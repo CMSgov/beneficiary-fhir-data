@@ -91,6 +91,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "82",
       "display" : "MEDICARE PART B DME REGIONAL CARRIER (DMERC) CLAIM (DMEPOS)"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "DME"
     }]
   },
   "use" : "claim",

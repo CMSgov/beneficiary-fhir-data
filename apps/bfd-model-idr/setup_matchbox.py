@@ -78,7 +78,7 @@ def upload_resource(base_url, resource_json, session):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default="http://localhost:8080/matchboxv3/fhir")
+    parser.add_argument("--url", default="http://localhost:18080/matchboxv3/fhir")
     parser.add_argument("--manifest", default="matchbox_profiles.txt")
     args = parser.parse_args()
 
@@ -88,7 +88,7 @@ def main():
     logger.info("Waiting for local matchbox server to start...")
     for _ in range(30):
         try:
-            if requests.get("http://matchbox:8080/matchboxv3/actuator/health", timeout=5).ok:
+            if requests.get("http://matchbox:18080/matchboxv3/actuator/health", timeout=5).ok:
                 break
         except requests.RequestException:
             pass

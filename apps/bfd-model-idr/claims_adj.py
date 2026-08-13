@@ -102,9 +102,7 @@ class AdjudicatedGeneratorUtil:
             )
             clm[f.PRVDR_SRVC_PRVDR_NPI_NUM] = clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_PD_DT] = random_date(clm[f.CLM_FROM_DT], clm[f.CLM_THRU_DT])
-            clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = random.choice(
-                gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
-            )
+            clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = "01"
             clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = random.choice(type_1_npis)
             clm[f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM] = clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)

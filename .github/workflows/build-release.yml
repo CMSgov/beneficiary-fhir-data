@@ -291,18 +291,6 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Sushi
-        run: |
-          npm install -g fsh-sushi
-          sushi build
-          echo "Installed + run sushi"
-        working-directory: apps/bfd-model-idr/sushi
-
-      - name: Install fhirpath
-        run: |
-          npm install fhirpath
-        working-directory: apps/bfd-model-idr
-
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
@@ -444,6 +432,7 @@ jobs:
         bfd-platform-server-regression,
         bfd-platform-mount-certstores,
         bfd-platform-server-fluent-bit,
+        bfd-platform-server-datadog-agent,
         bfd-platform-idr-pipeline,
         bfd-platform-migrator-ng,
         bfd-platform-run-locust,
@@ -455,7 +444,7 @@ jobs:
         bfd-platform-codebuild-runner,
         bfd-platform-idr-bfd-validator
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
-      cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
+      cleanupImageArtifacts: false
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
     secrets: inherit
 
@@ -487,14 +476,3 @@ jobs:
           tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
           name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
-
-  cleanup-artifacts:
-    if: ${{ !cancelled() }}
-    needs: [build-other-images, create-gh-release]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
-        with:
-          name: '*'
-          failOnError: false

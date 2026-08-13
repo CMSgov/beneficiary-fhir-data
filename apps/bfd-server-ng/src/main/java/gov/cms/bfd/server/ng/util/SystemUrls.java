@@ -717,6 +717,13 @@ public class SystemUrls {
   public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 
+  /**
+   * <a href="http://hl7.org/fhir/extensions/StructureDefinition-data-absent-reason.html">HL7
+   * Structure Definition Data Absent Reason.</a>
+   */
+  public static final String HL7_STRUCTURE_DEFINITION_DATA_ABSENT =
+      "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+
   // US Core
   /**
    * <a href="https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-ethnicity.html">US Core

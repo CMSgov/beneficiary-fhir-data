@@ -15,6 +15,7 @@ dependencies = [
     "click>=8.3.3",
     "anyio",
     "loguru",
+    "tblib>=3.2.2",
 ]
 
 [dependency-groups]
