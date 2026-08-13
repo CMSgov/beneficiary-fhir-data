@@ -33,9 +33,7 @@ from .settings import (
     BATCH_MULTIPLIER,
     ENABLE_DATE_PARTITIONS,
     IDR_ACCOUNT,
-    IDR_DATABASE,
     IDR_PRIVATE_KEY,
-    IDR_SCHEMA,
     IDR_USERNAME,
     IDR_WAREHOUSE,
     MIN_BATCH_COMPLETION_DATE,
@@ -326,8 +324,6 @@ class SnowflakeExtractor(Extractor[T]):
             private_key=private_key_bytes,
             account=IDR_ACCOUNT,
             warehouse=IDR_WAREHOUSE,
-            database=IDR_DATABASE,
-            schema=IDR_SCHEMA,
         )
 
     @override
@@ -387,8 +383,6 @@ class SnowflakeExecutor(DbExecutor):
                 "user": IDR_USERNAME,
                 "private_key": private_key_bytes,  # type: ignore
                 "warehouse": IDR_WAREHOUSE,
-                "database": IDR_DATABASE,
-                "schema": IDR_SCHEMA,
             }
         ).create()
         self.conn = SnowflakeExtractor.connect()

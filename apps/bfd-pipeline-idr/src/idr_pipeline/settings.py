@@ -122,7 +122,7 @@ IDR_USERNAME = getenv("IDR_USERNAME", "")
 IDR_ACCOUNT = getenv("IDR_ACCOUNT", "")
 IDR_WAREHOUSE = getenv("IDR_WAREHOUSE", "")
 IDR_DATABASE = getenv("IDR_DATABASE", "")
-IDR_SCHEMA = getenv("IDR_SCHEMA", "")
+IDR_EDP_DATABASE = getenv("IDR_EDP_DATABASE", "") or IDR_DATABASE
 
 # These need to be lazy-loaded since we override them in the tests
 
