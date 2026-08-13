@@ -1,5 +1,6 @@
 import atexit
 import multiprocessing
+import sys
 from datetime import UTC, datetime
 
 import anyio
@@ -158,7 +159,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, job_id: int = 
                 failure_time=resolve_test_date(load_mode),
             )
         logger.opt(exception=True).error("Unrecoverable exception raised during pipeline load:")
-        raise
+        sys.exit(1)
     finally:
         if idr_job_events:
             update_completion_times(

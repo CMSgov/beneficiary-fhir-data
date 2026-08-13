@@ -134,7 +134,7 @@ def partition_rows[T](
     return bucketed_rows
 
 
-def run_command(cmd: list[str], cwd: str | None = None):
+def run_command(cmd: list[str] | str, cwd: str | None = None):
     try:
         result = subprocess.run(
             cmd, cwd=cwd, shell=True, check=True, text=True, capture_output=True
@@ -182,14 +182,16 @@ def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
 def gen_multipart_id(field: str, parts: list[tuple[str, int]]) -> str:
     return __gen_id(
         field=field,
-        gen_func=lambda: f"-{
-            ''.join(
-                [
-                    ''.join(random.choices(population=allowed_chars, k=length))
-                    for (allowed_chars, length) in parts
-                ]
-            )
-        }",
+        gen_func=lambda: (
+            f"-{
+                ''.join(
+                    [
+                        ''.join(random.choices(population=allowed_chars, k=length))
+                        for (allowed_chars, length) in parts
+                    ]
+                )
+            }"
+        ),
     )
 
 
@@ -336,20 +338,8 @@ class GeneratorUtil:
 
         # Check if the resources directory exists, if not run sushi build
         if not Path(relative_path).exists():
-            print("Running sushi build")
-            try:
-                sushi_dir = "./sushi"
-                result = subprocess.run(
-                    ["sushi", "build"], check=True, cwd=sushi_dir, capture_output=True, text=True
-                )
-                if result.returncode == 0:
-                    print("Sushi build completed successfully")
-                else:
-                    print(f"Sushi build failed with error: {result.stderr}")
-                    sys.exit(1)
-            except Exception as e:
-                print(f"Error running sushi build: {e}")
-                sys.exit(1)
+            run_command("npm install")
+            run_command("npm run sushi-build")
 
         try:
             for path in Path(relative_path).iterdir():
@@ -807,26 +797,26 @@ class GeneratorUtil:
         self.bene_lis.append(lis_row.kv)
 
     def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
-            lis_start_date = self.fake.date_between_dates(
-                datetime.date(year=2017, month=5, day=20),
-                datetime.date(year=2021, month=1, day=1),
-            )
-            lis_end_date = "9999-12-31"
-            copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
-            ptd_prm_pct = random.choice(["025", "050", "075", "100"])
+        lis_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
+        lis_end_date = "9999-12-31"
+        copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
+        ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
-            lis_row["IDR_LTST_TRANS_FLG"] = "Y"
-            lis_row["BENE_CMBND_DEEMD_IND"] = random.choice(["Y", " "])
-            lis_row["BENE_CMBND_DEEMD_COPMT_LVL_ID"] = copmt_lvl_cd
-            lis_row["BENE_CMBND_DEEMD_PRM_PCT"] = str(ptd_prm_pct)
-            lis_row["BENE_CMBND_DEEMD_EFCTV_DT"] = str(lis_start_date)
-            lis_row["BENE_CMBND_DEEMD_TRMNTN_DT"] = lis_end_date
-            lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000"
-            lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000"
-            lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000"
-            lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        lis_row["IDR_LTST_TRANS_FLG"] = "Y"
+        lis_row["BENE_CMBND_DEEMD_IND"] = random.choice(["Y", " "])
+        lis_row["BENE_CMBND_DEEMD_COPMT_LVL_ID"] = copmt_lvl_cd
+        lis_row["BENE_CMBND_DEEMD_PRM_PCT"] = str(ptd_prm_pct)
+        lis_row["BENE_CMBND_DEEMD_EFCTV_DT"] = str(lis_start_date)
+        lis_row["BENE_CMBND_DEEMD_TRMNTN_DT"] = lis_end_date
+        lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
-            self.bene_lis_cmbnd.append(lis_row.kv)
+        self.bene_lis_cmbnd.append(lis_row.kv)
 
     def generate_bene_mapd_enrlmt_rx(
         self, rx_row: RowAdapter, contract_pbp_sk: str, contract_num: str, pbp_num: str

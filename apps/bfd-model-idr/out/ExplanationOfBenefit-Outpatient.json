@@ -73,6 +73,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "40",
       "display" : "MEDICARE OUTPATIENT CLAIM"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "OUTPATIENT"
     }]
   },
   "subType" : {

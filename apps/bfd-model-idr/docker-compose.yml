@@ -4,12 +4,30 @@ services:
     container_name: matchbox
     restart: on-failure
     ports:
-      - "8080:8080"
+      - "18080:8080"
     depends_on:
       - matchbox-db
-    entrypoint: ["java", "-Xms1G", "-Xmx4G", "-XX:+UseG1GC", "-XX:+UseCompressedOops", "-Xss512k", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml", "-jar", "/matchbox.jar"]
+    entrypoint:
+      [
+        "java",
+        "-Xms1G",
+        "-Xmx4G",
+        "-XX:+UseG1GC",
+        "-XX:+UseCompressedOops",
+        "-Xss512k",
+        "-Dfhir.settings.path=/config/fhir-settings.json",
+        "-Dspring.config.additional-location=optional:file:/config/application.yaml",
+        "-jar",
+        "/matchbox.jar",
+      ]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/actuator/health"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8080/matchboxv3/actuator/health",
+        ]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -34,8 +52,8 @@ services:
     ports:
       - "15432:5432"
     environment:
-      POSTGRES_DB: 'matchbox'
-      POSTGRES_USER: 'matchbox'
-      POSTGRES_PASSWORD: 'matchbox'     
+      POSTGRES_DB: "matchbox"
+      POSTGRES_USER: "matchbox"
+      POSTGRES_PASSWORD: "matchbox"
     volumes:
       - ./data:/var/lib/postgresql/data

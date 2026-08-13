@@ -2945,10 +2945,6 @@ FROM
         )
         AND response_code = 200
         AND req_grant_type = 'client_credentials'
-        AND (
-          try_cast(fhir_id_v2 as BIGINT) > 0
-          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
-        )
         AND request_method = 'POST'
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
@@ -2976,10 +2972,6 @@ FROM
         )
         AND response_code != 200
         AND req_grant_type = 'client_credentials'
-        AND (
-          try_cast(fhir_id_v2 as BIGINT) > 0
-          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
-        )
         AND request_method = 'POST'
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
@@ -3006,7 +2998,6 @@ FROM
           OR path = '/v3/o/token/'
         )
         AND patient_match_found = True
-        AND try_cast(patient as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -3032,7 +3023,6 @@ FROM
           OR path = '/v3/o/token/'
         )
         AND patient_match_found = False
-        AND try_cast(patient as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
