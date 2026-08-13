@@ -80,7 +80,7 @@ class PostgresLoader:
             # TODO: Investigate pool timeout further so that this can be removed
             timeout=600,
         ) as pool:
-            await pool.wait()
+            await pool.wait(timeout=600)
             return await BatchLoader(
                 fetch_results,
                 model,

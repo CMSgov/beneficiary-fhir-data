@@ -234,7 +234,7 @@ class _LoadingBatchWorker(Process):
                 timeout=600,  # See loader.py for explanation on timeout length
             ) as pool,
         ):
-            await pool.wait()
+            await pool.wait(timeout=600)
 
             stop = anyio.Event()
             tg.start_soon(self._run_queue_bridge, task_send, stop)
