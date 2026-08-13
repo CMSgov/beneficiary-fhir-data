@@ -1,7 +1,6 @@
 import atexit
 import multiprocessing
 from datetime import UTC, datetime
-import random
 
 import anyio
 import click
