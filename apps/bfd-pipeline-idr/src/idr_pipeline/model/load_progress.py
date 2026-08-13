@@ -1,9 +1,9 @@
 from datetime import UTC, datetime
 from typing import override
 
+from ..constants import DEFAULT_JOB_ID
 from ..load_partition import LoadPartition
 from ..model.base_model import IdrBaseModel, ModelType, Source
-from ..constants import DEFAULT_JOB_ID
 
 
 class LoadProgress(IdrBaseModel):
@@ -38,7 +38,7 @@ class LoadProgress(IdrBaseModel):
     @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
-        return cls.fetch_query_by_job(partition, DEFAULT_JOB_ID) 
+        return cls.fetch_query_by_job(partition, DEFAULT_JOB_ID)
 
     @classmethod
     def fetch_query_by_job(cls, partition: LoadPartition, job_id: int) -> str:
