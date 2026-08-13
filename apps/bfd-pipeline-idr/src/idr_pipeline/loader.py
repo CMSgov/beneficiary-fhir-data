@@ -51,7 +51,7 @@ class PostgresLoader:
             load_type,
             load_mode,
             worker_client,
-            job_id
+            job_id,
         )
 
     async def _async_load(

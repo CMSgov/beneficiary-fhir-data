@@ -81,7 +81,7 @@ def extract_and_load(
 
             if progress:
                 logger.info(
-                    "progress for {} {} - last_ts: {} job_start_ts: {} " \
+                    "progress for {} {} - last_ts: {} job_start_ts: {} "
                     "batch_complete_ts: {} job_id: {} max_run_ts: {}",
                     cls.table(),
                     progress.batch_partition,

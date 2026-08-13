@@ -630,22 +630,26 @@ def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: L
         _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
     logger.remove()
 
+
 def _test_load_progress_concurrent(conn: Connection[DictRow]) -> None:
     cur = conn.execute("select * from idr.load_progress where job_id = 1")
     rows = cur.fetchmany(1)
     assert rows[0]["max_run_ts"] is None
-    cur = conn.execute("select * from idr.load_progress " \
-        "where job_id = 2 and max_run_ts is not null")
+    cur = conn.execute(
+        "select * from idr.load_progress where job_id = 2 and max_run_ts is not null"
+    )
     rows_2 = cur.fetchmany(1)
     assert rows_2[0]["max_run_ts"] is not None
-    cur = conn.execute("""select * from idr.load_progress where job_id = 1 
+    cur = conn.execute(
+        """select * from idr.load_progress where job_id = 1 
         and batch_partition = %(batch_partition)s 
         and table_name = %(table_name)s
     """,
-    {
-        "batch_partition": rows_2[0]["batch_partition"],
-        "table_name": rows_2[0]["table_name"],
-    })
+        {
+            "batch_partition": rows_2[0]["batch_partition"],
+            "table_name": rows_2[0]["table_name"],
+        },
+    )
     rows = cur.fetchmany(1)
     assert rows_2[0]["max_run_ts"] == rows[0]["last_ts"]
 
@@ -653,14 +657,18 @@ def _test_load_progress_concurrent(conn: Connection[DictRow]) -> None:
 def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     _test_pipeline_load(postgres_db, LoadType.INITIAL)
 
+
 def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
+
 
 def run_1() -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL)
 
+
 def run_2() -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL,2)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, 2)
+
 
 def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     postgres, conninfo = postgres_db
@@ -674,9 +682,9 @@ def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) ->
                 executor.submit(run_1),
                 executor.submit(run_2),
             ]
-            
+
             # This will now correctly catch any real pipeline failures
             for future in futures:
-                future.result() 
+                future.result()
 
         _test_load_progress_concurrent(conn=conn)

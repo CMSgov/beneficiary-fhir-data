@@ -36,8 +36,9 @@ class LoadProgress(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source,
-                     job_id: int) -> str:
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, source: Source, job_id: int
+    ) -> str:
         return f"""
         SELECT table_name, last_ts, last_id, batch_partition, job_start_ts,
           batch_complete_ts, job_id, max_run_ts
