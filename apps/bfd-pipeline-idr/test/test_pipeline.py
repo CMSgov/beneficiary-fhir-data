@@ -5,7 +5,7 @@ import subprocess
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 from uuid import uuid4
 
 import psycopg
