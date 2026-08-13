@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,6 +25,9 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
   @Column(name = "prvdr_blg_1st_name")
   private Optional<String> providerFirstName;
 
+  @Column(name = "bfd_blg_prvdr_npi_type")
+  private Optional<Integer> npiType;
+
   @Column(name = "clm_blg_prvdr_tax_num")
   private Optional<String> providerTaxNumber;
 
@@ -34,21 +36,9 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
     return CareTeamType.BILLING;
   }
 
-  /**
-   * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = INDIVIDUAL
-   * means the NPI is for an individual (legal name is null/empty). NPI_TYPE = ORGANIZATION means
-   * the NPI is for an organization (legal name is present).
-   *
-   * @return the NPI type
-   */
-  @Transient
   @Override
   public ProviderHistoryBase.NpiType getNpiType() {
-    if (providerFirstName.isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
+    return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   /**

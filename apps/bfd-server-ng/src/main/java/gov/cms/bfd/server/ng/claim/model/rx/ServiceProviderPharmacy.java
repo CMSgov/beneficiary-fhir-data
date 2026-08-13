@@ -8,7 +8,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.HumanName;
@@ -27,6 +26,12 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   @Column(name = "prvdr_srvc_1st_name")
   private Optional<String> providerFirstName;
 
+  @Column(name = "bfd_srvc_prvdr_npi_type")
+  private Optional<Integer> npiType;
+
+  @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type")
+  private Optional<Integer> genericIdNpiType;
+
   @Column(name = "prvdr_srvc_id_qlfyr_cd")
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
@@ -36,13 +41,9 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   }
 
   @Override
-  @Transient
   public ProviderHistoryBase.NpiType getNpiType() {
-    if (providerFirstName.isEmpty() || getProviderNpiNumber().isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
+    return ProviderHistoryBase.NpiType.fromNpiTypeCode(
+        npiType.isPresent() ? npiType : genericIdNpiType);
   }
 
   /**

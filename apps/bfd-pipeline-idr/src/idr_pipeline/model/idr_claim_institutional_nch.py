@@ -424,6 +424,11 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    bfd_blg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)},
+    ]
+
     # Columns from V2_MDCR_CLM_RLT_COND_SGNTR_MBR
     clm_rlt_cond_cd: Annotated[
         str, {ALIAS: ALIAS_RLT_COND}, BeforeValidator(transform_default_string)

@@ -26489,6 +26489,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -26502,13 +26503,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -34237,6 +34235,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -34250,13 +34249,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -41985,6 +41981,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -41998,13 +41995,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -75507,6 +75501,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -75520,13 +75515,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -81873,6 +81865,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -81886,13 +81879,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -84097,6 +84087,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -84110,13 +84101,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -88351,6 +88339,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -88364,13 +88353,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -98845,6 +98831,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -98858,13 +98845,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -105211,6 +105195,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -105224,13 +105209,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -107435,6 +107417,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -107448,13 +107431,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -111689,6 +111669,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -111702,13 +111683,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -122183,6 +122161,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -122196,13 +122175,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -128549,6 +128525,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -128562,13 +128539,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -130773,6 +130747,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -130786,13 +130761,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -135027,6 +134999,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -135040,13 +135013,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -153809,6 +153779,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -153822,13 +153793,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -172591,6 +172559,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -172604,13 +172573,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -191373,6 +191339,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -191386,13 +191353,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",

@@ -231,6 +231,15 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    bfd_srvc_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
+    ]
+    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
+    ]
+
     prvdr_prscrbng_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
