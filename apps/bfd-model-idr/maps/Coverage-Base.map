@@ -233,15 +233,15 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
         src -> tgtBBElement.value = pdpEnrlmtBankIdNum "Add bank ID value";
     } "Add Bank ID class";
 
-    //LIS Effective Code Extension
+    //LIS Deemed Code Extension
     //For all of the LIS fields, the assumption is that we've already determined the row is effective at the time the 
-    //resource is generated. Eg LIS_EFCTV_CD='Y' and current date is
+    //resource is generated. Eg BENE-CMBND-DEEMD-IND='Y' and current date is
     //between BENE_RNG_BGN_DT and BENE_RNG_END_DT 
-    src.BENE_CMBND_DEEMD_IND as lisEfctvCd -> tgt.extension = create('Extension') as tgtExtension then{
+    src.BENE_CMBND_DEEMD_IND as deemdInd -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-IND" "add system";
-            src -> tgtCoding.code = lisEfctvCd "Add code";
+            src -> tgtCoding.code = deemdInd "Add code";
         } "Add coding";
     } "Add LIS effective code";
 
