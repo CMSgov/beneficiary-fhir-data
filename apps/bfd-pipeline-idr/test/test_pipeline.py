@@ -643,8 +643,8 @@ def _test_load_progress_concurrent(conn: Connection) -> None:
     rows_2 = cur.fetchmany(1)
     assert len(rows_2) == 1
     job_row = rows_2[0]
-    partition = job_row["batch_partition"]
-    table = job_row["table_name"]
+    partition: str = job_row["batch_partition"]
+    table: str = job_row["table_name"]
     cur = conn.execute(
         """select * from idr.load_progress where job_id = 1 
         and batch_partition = %(batch_partition)s 
