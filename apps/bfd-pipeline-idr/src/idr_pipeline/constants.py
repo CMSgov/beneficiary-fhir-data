@@ -255,3 +255,5 @@ NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.ALL, None,
 # Need to declare this separately because python struggles
 # with type-hinting empty arrays :(
 EMPTY_PARTITION: list[LoadPartitionGroup] = []
+
+DEFAULT_JOB_ID = 1

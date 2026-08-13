@@ -3,6 +3,7 @@ from typing import override
 
 from ..load_partition import LoadPartition
 from ..model.base_model import IdrBaseModel, ModelType, Source
+from ..constants import DEFAULT_JOB_ID
 
 
 class LoadProgress(IdrBaseModel):
@@ -37,14 +38,7 @@ class LoadProgress(IdrBaseModel):
     @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
-        return f"""
-        SELECT table_name, last_ts, last_id, batch_partition, job_start_ts,
-          batch_complete_ts, job_id, max_run_ts
-        FROM idr.load_progress
-        WHERE table_name = %({LoadProgress.query_placeholder()})s 
-        AND batch_partition = '{partition.name}'
-        AND job_id = 1
-        """
+        return cls.fetch_query_by_job(partition, DEFAULT_JOB_ID) 
 
     @classmethod
     def fetch_query_by_job(cls, partition: LoadPartition, job_id: int) -> str:
