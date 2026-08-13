@@ -105,9 +105,8 @@ BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT = int(
 )
 """Maximum rows to delete per prune statement for Part D beneficiary records."""
 
-PHASE_1_PRUNE_BATCH_LIMIT = int(getenv("PHASE_1_PRUNE_BATCH_LIMIT", "10_000"))
-"""The maximum batch size for pruning old claims (phase 1 claims from shared systems) on
-INCREMENTAL loads. Defaults to 10000."""
+CLAIM_PRUNE_BATCH_LIMIT = int(getenv("CLAIM_PRUNE_BATCH_LIMIT", "10_000"))
+"""The maximum batch size for pruning claims on INCREMENTAL loads. Defaults to 10000."""
 
 BENEFICIARY_PRUNE_BATCH_LIMIT = int(getenv("IDR_BENEFICIARY_PRUNE_BATCH_LIMIT", "1000"))
 """Maximum rows to delete per prune statement for LIS combined beneficiary records."""
