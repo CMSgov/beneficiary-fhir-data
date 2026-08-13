@@ -303,6 +303,7 @@ class BatchLoader:
         return []
 
     async def _insert_batch_start(self, cur: psycopg.AsyncCursor) -> None:
+        logger.info("loader insert job_id {}", self.job_id)
         sql = f"""
         INSERT INTO idr.load_progress(
             table_name,
@@ -346,6 +347,17 @@ class BatchLoader:
             job_start_ts = EXCLUDED.job_start_ts,
             batch_start_ts = EXCLUDED.batch_start_ts
         """
+
+        if self.job_id != 1:
+            sql += """
+            ,max_run_ts = (SELECT last_ts 
+                         FROM idr.load_progress
+                         WHERE job_id = 1
+                           AND table_name = %(table)s
+                           AND batch_partition = %(partition)s
+                        )
+            """
+
         await self._update_load_progress(
             cur,
             sql,

@@ -1,12 +1,12 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import shutil
 import subprocess
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 from uuid import uuid4
-from concurrent.futures import ThreadPoolExecutor
 
 import psycopg
 import pytest
@@ -56,8 +56,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType, job_id:int) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, job_id)
+def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 29
@@ -111,7 +111,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType, job_id:int
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, job_id)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -611,30 +611,72 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
 
 @pytest.fixture(scope="module")
 def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
-    with PostgresContainer("postgres:16", driver="") as postgres:
+    with PostgresContainer(
+        "postgres:16",
+        driver="",
+        command="postgres -c max_connections=200",
+    ) as postgres:
         conninfo = postgres.get_connection_url()
         yield postgres, conninfo
 
 
-def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType, 
-                        job_id:int, reset_db: bool) -> None:
+def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
-        if reset_db:
-            _reset_db(conn, sample_dir, postgres)
+        _reset_db(conn, sample_dir, postgres)
         _setup_pipeline_environment(conn.info)
-        _do_test_pipeline(cast(Connection[DictRow], conn), load_type, job_id)
+        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
     logger.remove()
+
+def _test_load_progress_concurrent(conn: Connection[DictRow]) -> None:
+    cur = conn.execute("select * from idr.load_progress where job_id = 1")
+    rows = cur.fetchmany(1)
+    assert rows[0]["max_run_ts"] is None
+    cur = conn.execute("select * from idr.load_progress " \
+        "where job_id = 2 and max_run_ts is not null")
+    rows_2 = cur.fetchmany(1)
+    assert rows_2[0]["max_run_ts"] is not None
+    cur = conn.execute("""select * from idr.load_progress where job_id = 1 
+        and batch_partition = %(batch_partition)s 
+        and table_name = %(table_name)s
+    """,
+    {
+        "batch_partition": rows_2[0]["batch_partition"],
+        "table_name": rows_2[0]["table_name"],
+    })
+    rows = cur.fetchmany(1)
+    assert rows_2[0]["max_run_ts"] == rows[0]["last_ts"]
 
 
 def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_pipeline_load(postgres_db, LoadType.INITIAL,1, True)
+    _test_pipeline_load(postgres_db, LoadType.INITIAL)
 
 def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL,1, True)
+    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
 
-def test_incremental_pipeline_load2(postgres_db: tuple[PostgresContainer, str]) -> None:
-    _test_pipeline_load(postgres_db, LoadType.INCREMENTAL,2, True)
+def run_1() -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL)
 
+def run_2() -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL,2)
+
+def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = [
+                executor.submit(run_1),
+                executor.submit(run_2),
+            ]
+            
+            # This will now correctly catch any real pipeline failures
+            for future in futures:
+                future.result() 
+
+        _test_load_progress_concurrent(conn=conn)
