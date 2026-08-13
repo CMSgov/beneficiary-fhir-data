@@ -4,6 +4,7 @@ from typing import Annotated, override
 from pydantic import BeforeValidator
 
 from ..constants import (
+    CLAIM_PROFESSIONAL_ITEM_NCH_TABLE,
     DEFAULT_MAX_DATE,
     IDR_CLAIM_LINE_DOCUMENTATION_TABLE,
     IDR_CLAIM_LINE_PROFESSIONAL_TABLE,
@@ -256,7 +257,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     @override
     @staticmethod
     def table() -> str:
-        return "idr.claim_item_professional_nch"
+        return CLAIM_PROFESSIONAL_ITEM_NCH_TABLE
 
     @override
     @staticmethod
