@@ -653,12 +653,15 @@ def _test_load_progress_concurrent(conn: Connection) -> None:
     rows = cur.fetchmany(1)
     assert rows_2[0]["max_run_ts"] == rows[0]["last_ts"]
     # test table counts
-    cur = conn.execute("select DISTINCT table_name from idr.load_progress where job_id = 1" \
-                        " EXCEPT " \
-                        "select DISTINCT table_name from idr.load_progress where job_id = 2")
+    cur = conn.execute(
+        "select DISTINCT table_name from idr.load_progress where job_id = 1"
+        " EXCEPT "
+        "select DISTINCT table_name from idr.load_progress where job_id = 2"
+    )
     rows = cur.fetchmany(1)
     cur = conn.execute("select count(*) as row_count from idr.load_progress where job_id = 2")
     assert len(rows) == 0
+
 
 def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     _test_pipeline_load(postgres_db, LoadType.INITIAL)
