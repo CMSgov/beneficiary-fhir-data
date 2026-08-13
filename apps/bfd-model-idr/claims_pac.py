@@ -125,6 +125,7 @@ class PacGeneratorUtil:
             clm[f.CLM_SRC_ID] = 23000  # VMS
             clm[f.META_SRC_SK] = 1002  # VMS
 
+        clm[f.CLM_PPS_IND] = None
         if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
             clm[f.CLM_RIC_CD] = get_ric_cd_for_clm_type_cd(pac_clm_type_cd)
             clm[f.CLM_PPS_IND] = random.choice(["N", "Y"])
