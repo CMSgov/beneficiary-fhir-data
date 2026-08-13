@@ -1,7 +1,7 @@
 Extension: BENE_CMBND_DEEMD_IND
 Id: BENE-CMBND-DEEMD-IND
 Title: "Beneficiary LIS Deemed Code"
-Description: "Indicates whether the beneficiary has effective Low Income Subsidy (LIS) coverage"
+Description: "Indicates whether the beneficiary has been deemed for Low Income Subsidy (LIS) coverage"
 * ^version = "1.0.0"
 * ^status = #active
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND"
