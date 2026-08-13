@@ -50,6 +50,13 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 
 CLAIM_TABLES: list[type[IdrBaseModel]] = [
+    IdrClaimRx,
+    IdrClaimProfessionalNch,
+    IdrClaimInstitutionalNch,
+    IdrClaimProfessionalSs,
+    IdrClaimInstitutionalSs,
+]
+CLAIM_NON_PART_D_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
     IdrClaimInstitutionalNch,
     IdrClaimProfessionalSs,
@@ -60,8 +67,6 @@ CLAIM_SS_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimInstitutionalSs,
 ]
 CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
-    # RX/Part D is special because we combine claim + claim line
-    IdrClaimRx,
     IdrClaimItemProfessionalNch,
     IdrClaimItemInstitutionalNch,
     IdrClaimItemProfessionalSs,
@@ -177,7 +182,7 @@ class StagedIdrPipeline:
                 self.start_time,
             )
 
-        for model in self._filter_tables(CLAIM_TABLES):
+        for model in self._filter_tables(CLAIM_NON_PART_D_TABLES):
             yield functools.partial(
                 prune_stale_non_part_d_claims,
                 model,
