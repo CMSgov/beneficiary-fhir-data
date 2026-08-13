@@ -631,7 +631,7 @@ def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: L
     logger.remove()
 
 
-def _test_load_progress_concurrent(conn: Connection) -> None:
+def _test_load_progress_concurrent(conn: Connection[DictRow]) -> None:
     cur = conn.execute(
         "select max_run_ts from idr.load_progress where job_id = 1 and max_run_ts is not null"
     )
@@ -701,4 +701,4 @@ def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) ->
             for future in futures:
                 future.result()
 
-        _test_load_progress_concurrent(conn=conn)
+        _test_load_progress_concurrent(conn=cast(Connection[DictRow], conn))
