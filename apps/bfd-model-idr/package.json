@@ -1,0 +1,11 @@
+{
+    "name": "bfd-model-idr",
+    "dependencies": {
+        "fhirpath": "^5.1.1",
+        "fsh-sushi": "^3.20.0"
+    },
+    "scripts": {
+        "sushi": "sushi",
+        "sushi-build": "sushi build ./sushi"
+    }
+}
