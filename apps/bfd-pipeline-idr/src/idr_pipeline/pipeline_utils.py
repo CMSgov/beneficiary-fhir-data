@@ -36,9 +36,7 @@ from .settings import BENEFICIARY_PART_D_PRUNE_BATCH_LIMIT, BENEFICIARY_PRUNE_BA
 
 def get_progress(
     load_mode: LoadMode,
-    source: Source,
     table_name: str,
-    start_time: datetime,
     partition: LoadPartition,
     job_id: int,
 ) -> LoadProgress | None:
@@ -48,7 +46,7 @@ def get_progress(
     return PostgresExtractor(
         load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(
-        LoadProgress.fetch_query(partition, start_time, source, job_id),
+        LoadProgress.fetch_query_by_job(partition, job_id),
         {LoadProgress.query_placeholder(): table_name},
     )
 
@@ -77,7 +75,7 @@ def extract_and_load(
 
     while True:
         try:
-            progress = get_progress(load_mode, source, cls.table(), job_start, partition, job_id)
+            progress = get_progress(load_mode, cls.table(), partition, job_id)
 
             if progress:
                 logger.info(
