@@ -36,8 +36,8 @@
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_buckets"></a> [buckets](#module\_buckets) | ../../terraform-modules/general/secure-bucket | n/a |
+| <a name="module_log_group_this"></a> [log\_group\_this](#module\_log\_group\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
-| <a name="module_this"></a> [this](#module\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_topics"></a> [topics](#module\_topics) | ../../terraform-modules/general/logging-sns-topic | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
