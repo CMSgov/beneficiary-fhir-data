@@ -2436,7 +2436,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND
+- inputPath: SupportingInfoComponent.CLM_PPS_IND
   appliesTo:
     - Inpatient
     - Outpatient
