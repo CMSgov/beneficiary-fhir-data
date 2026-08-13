@@ -642,18 +642,21 @@ def _test_load_progress_concurrent(conn: Connection) -> None:
     )
     rows_2 = cur.fetchmany(1)
     assert len(rows_2) == 1
+    job_row = rows_2[0]
+    partition = job_row["batch_partition"]
+    table = job_row["table_name"]
     cur = conn.execute(
         """select * from idr.load_progress where job_id = 1 
         and batch_partition = %(batch_partition)s 
         and table_name = %(table_name)s
     """,
         {
-            "batch_partition": rows_2[0]["batch_partition"],
-            "table_name": rows_2[0]["table_name"],
+            "batch_partition": partition,
+            "table_name": table,
         },
     )
     rows = cur.fetchmany(1)
-    assert rows_2[0]["max_run_ts"] == rows[0]["last_ts"]
+    assert job_row["max_run_ts"] == rows[0]["last_ts"]
     # test table counts
     cur = conn.execute(
         "select DISTINCT table_name from idr.load_progress where job_id = 1"
