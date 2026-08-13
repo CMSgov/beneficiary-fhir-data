@@ -176,7 +176,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         if progress.max_run_ts is not None:
             max_runs_ts_clause = f"""
             AND (
-                {batch_timestamp_clause} < %(max_runs_ts)s
+                {batch_timestamp_clause} <= %(max_runs_ts)s
             )"""
 
         # Saved progress found, start processing from where we left off
