@@ -13,11 +13,12 @@ from typing import TYPE_CHECKING, Any, cast
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_PARTITION
+from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
+from idr_pipeline.model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from idr_pipeline.model.load_progress import LoadProgress
 from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
 from idr_pipeline.pipeline_stages import (
@@ -65,6 +66,9 @@ _REDACTED_PKEYS_PER_MODEL = {
     k: v
     for keys, v in {(*BENE_TABLES, *BENE_AUX_TABLES): {"bene_mbi_id", "bene_ssm_num"}}.items()
     for k in keys
+}
+_ADDITIONAL_WHERE_CLAUSES_PER_MODEL: dict[type[IdrBaseModel], tuple[str, list[DbType]]] = {
+    IdrBeneficiaryMaPartDEnrollment: ("idr_trans_obslt_ts = {}", [DEFAULT_MAX_DATE])
 }
 _BFD_ENV = os.environ.get("BFD_ENV")
 _ALERT_SNS_TOPIC_ARN = os.environ.get("ALERT_SNS_TOPIC_ARN")
@@ -142,10 +146,18 @@ def _compare_table(
         columns_raw = _comma_list(model.columns_raw())
 
         idr_pkeys_str = _comma_list(model.format_aliases(model.ordered_pkeys()))
-        where_clause = (
+        base_where_clause = (
             "WHERE TRUE"
             if progress is None
             else f"WHERE ({batch_timestamp_clause} < {_escape_sql_val(progress.last_ts)})"
+        )
+        where_clause = " AND ".join(
+            query_template.format(*[_escape_sql_val(param) for param in query_params])
+            for x in [
+                (base_where_clause, cast(list[DbType], [])),
+                _ADDITIONAL_WHERE_CLAUSES_PER_MODEL.get(model),
+            ]
+            if x and (query_template := x[0]) and (query_params := x[1])
         )
         base_claims_where_filters = (
             ""
