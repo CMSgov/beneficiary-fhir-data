@@ -791,11 +791,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
 
 @pytest.fixture(scope="module")
 def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
-    with PostgresContainer(
-        "postgres:16",
-        driver="",
-        command="postgres -c max_connections=200",
-    ) as postgres:
+    with PostgresContainer("postgres:16", driver="") as postgres:
         conninfo = postgres.get_connection_url()
         yield postgres, conninfo
 
