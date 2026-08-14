@@ -23,6 +23,7 @@ from .settings import (
     PER_BATCH_CONCURRENT_ROWS,
     PER_BATCH_MAX_CONNECTIONS,
     PER_BATCH_MIN_CONNECTIONS,
+    bfd_test_date,
     force_load_progress,
 )
 from .timer import Timer
@@ -131,10 +132,7 @@ class BatchLoader:
             f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in self.update_set)})"
         )
         self.npi_type_backfill_map = model.npi_type_backfill_compare_cols()
-        self.npi_type_backfill_cutoff = model.npi_type_backfill_cutoff_ts()
-        self.npi_type_backfill_enabled = (
-            bool(self.npi_type_backfill_map) and self.npi_type_backfill_cutoff is not None
-        )
+        self.npi_type_backfill_enabled = bool(self.npi_type_backfill_map)
         self.temp_only_cols = (
             list(self.npi_type_backfill_map) if self.npi_type_backfill_enabled else []
         )
@@ -156,15 +154,15 @@ class BatchLoader:
             )
             updated_ts_expr = f"""
                 CASE
-                    WHEN ({other_changed_clause}) THEN %(timestamp)s
-                    WHEN t.bfd_updated_ts >= %(npi_type_backfill_cutoff)s THEN %(timestamp)s
                     WHEN EXISTS (
                         SELECT 1 FROM "{{temp_tablename}}" tmp
                         WHERE {pkey_join} AND ({legacy_versus_real_npi_types_check})
                     ) THEN %(timestamp)s
+                    WHEN ({other_changed_clause}) THEN %(timestamp)s
                     ELSE t.bfd_updated_ts
                 END
             """
+
         else:
             updated_ts_expr = "%(timestamp)s"
         # For immutable tables, we may still be attempting to re-load some data
@@ -204,10 +202,11 @@ class BatchLoader:
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
+        self.load_mode = load_mode
         self.enable_load_progress = should_track_load_progress(load_mode)
 
     async def load(self) -> bool:
-        timestamp = datetime.now(UTC)
+        timestamp = resolve_test_date(self.load_mode)
 
         self.full_load_timer.start()
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
@@ -428,7 +427,6 @@ class BatchLoader:
 
         params: dict[str, DbType] = {"timestamp": timestamp}
         if self.npi_type_backfill_enabled:
-            params["npi_type_backfill_cutoff"] = cast(DbType, self.npi_type_backfill_cutoff)
             self.on_conflict_clause = self.on_conflict_clause.format(temp_tablename=temp_tablename)
 
         await cur.execute(
@@ -478,3 +476,11 @@ def _remove_null_bytes(val: DbType) -> DbType:
 def should_track_load_progress(load_mode: LoadMode) -> bool:
     # Whether to read/write load progress, which is diabled for synthetic and testing loads.
     return load_mode == LoadMode.PROD or force_load_progress()
+
+
+def resolve_test_date(load_mode: LoadMode) -> datetime:
+    test_date = bfd_test_date()
+
+    if test_date and load_mode != LoadMode.PROD:
+        return test_date
+    return datetime.now(UTC)

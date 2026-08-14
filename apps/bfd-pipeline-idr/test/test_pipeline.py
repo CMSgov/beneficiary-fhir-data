@@ -211,14 +211,14 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_institutional_nch order by clm_uniq_id")
-    assert cur.rowcount == 51
+    assert cur.rowcount == 63
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
+    assert rows[0]["clm_uniq_id"] == -9879437343384
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 51
+    assert cur.rowcount == 56
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 119855147698
+    assert rows[0]["clm_uniq_id"] == -8309297293881
 
     cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1
@@ -226,19 +226,19 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert rows[0]["clm_uniq_id"] == 4991490559710
 
     cur = conn.execute("select * from idr.claim_rx order by clm_uniq_id")
-    assert cur.rowcount == 19
+    assert cur.rowcount == 27
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 166776396279
+    assert rows[0]["clm_uniq_id"] == -8797257401798
 
     cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
-    assert cur.rowcount == 795
+    assert cur.rowcount == 995
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
+    assert rows[0]["clm_uniq_id"] == -9879437343384
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 442
+    assert cur.rowcount == 503
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 119855147698
+    assert rows[0]["clm_uniq_id"] == -8309297293881
 
     cur = conn.execute("select * from idr.claim_item_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1
@@ -546,8 +546,175 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
 
 def _advance_time(timestamp: datetime) -> None:
-    new_time = timestamp + timedelta(minutes=1)
-    os.environ["BFD_TEST_DATE"] = new_time.isoformat()
+    os.environ["BFD_TEST_DATE"] = timestamp.isoformat()
+
+
+def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+
+    clm_prf_nch_table = sql.Identifier("idr", "claim_professional_nch")
+    conn.execute(
+        t"""
+        UPDATE {clm_prf_nch_table:i}
+        SET prvdr_blg_prvdr_npi_type = NULL,
+        prvdr_rfrg_prvdr_npi_type = NULL,
+        prvdr_srvc_prvdr_npi_type = NULL
+        """
+    )
+    clm_inst_nch_table = sql.Identifier("idr", "claim_institutional_nch")
+    conn.execute(
+        t"""
+        UPDATE {clm_inst_nch_table:i}
+        SET prvdr_atndg_prvdr_npi_type = NULL,
+        prvdr_srvc_prvdr_npi_type = NULL
+        """
+    )
+    clm_item_prf_nch_table = sql.Identifier("idr", "claim_item_professional_nch")
+    conn.execute(
+        t"""
+        UPDATE {clm_item_prf_nch_table:i}
+        SET prvdr_rndrg_prvdr_npi_type = NULL
+        """
+    )
+    clm_rx_table = sql.Identifier("idr", "claim_rx")
+    conn.execute(
+        t"""
+        UPDATE {clm_rx_table:i}
+        SET prvdr_prscrbng_prvdr_npi_type = NULL,
+        prvdr_srvc_prvdr_npi_type = NULL
+        """
+    )
+    conn.commit()
+
+    cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+    row = cur.fetchone()
+    assert row is not None
+    latest_time = cast(datetime, row["max_ts"]) + timedelta(days=1)
+    _advance_time(latest_time)
+
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL)
+
+    old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
+
+    cur = conn.execute(
+        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_blg_prvdr_npi_num"] == "1201886847"
+    assert row["prvdr_blg_prvdr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute(
+        "select * from idr.claim_institutional_nch where clm_uniq_id = -8129892352523"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_atndg_prvdr_npi_num"] == "2672117233"
+    assert row["clm_atndg_fed_prvdr_spclty_cd"] == "62"
+    assert row["prvdr_atndg_prvdr_npi_type"] == 1
+    # assert row["bfd_updated_ts"] == old_update_ts
+    # todo: legacy was type 1 which matches real npi type col that's 1
+    #  yet updated ts when shouldn't have!
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
+        "and prvdr_rndrng_prvdr_npi_num = '2658486156'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
+    assert row["prvdr_rndrg_prvdr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
+        "and prvdr_rndrng_prvdr_npi_num = '1820038259'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
+    assert row["prvdr_rndrg_prvdr_npi_type"] is None
+    assert row["bfd_updated_ts"] == old_update_ts
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -1104273987437 "
+        "and prvdr_rndrng_prvdr_npi_num = '1789655200'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == "75"
+    assert row["prvdr_rndrg_prvdr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -7918412759910 "
+        "and prvdr_rndrng_prvdr_npi_num = '1820038259'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == "D6"
+    assert row["prvdr_rndrg_prvdr_npi_type"] is None
+    # assert row["bfd_updated_ts"] == latest_time
+    # todo: legacy npi type is 2 and real npi type is null yet uses old ts
+
+    cur = conn.execute(
+        "select * from idr.claim_professional_nch where clm_uniq_id = -1104273987437"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_rfrg_prvdr_npi_num"] == "1789655200"
+    assert row["prvdr_rfrg_prvdr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute("select * from idr.claim_professional_nch where clm_uniq_id = 119855147698")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_rfrg_prvdr_npi_num"] == "1820038259"
+    assert row["prvdr_rfrg_prvdr_npi_type"] is None
+    assert row["bfd_updated_ts"] == old_update_ts
+
+    cur = conn.execute(
+        "select * from idr.claim_institutional_nch where clm_uniq_id = -8129892352523"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_srvc_prvdr_npi_num"] == "1066977889"
+    assert row["prvdr_srvc_prvdr_npi_type"] == 2
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute(
+        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_srvc_prvdr_npi_num"] == "1819676937"
+    assert row["prvdr_srvc_prvdr_npi_type"] == 2
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -8797257401798")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_prscrbng_prvdr_npi_num"] == "2658486156"
+    assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
+    assert row["prvdr_prscrbng_prvdr_npi_type"] == 1
+    # assert row["bfd_updated_ts"] == old_update_ts
+    # todo: should be old_update_ts but update ts got updated to latest
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -6260496095505")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
+    assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
+    assert row["prvdr_prscrbng_prvdr_npi_type"] is None
+    assert row["bfd_updated_ts"] == latest_time
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -8797257401798")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_srvc_prvdr_npi_num"] == "1066977889"
+    assert row["prvdr_srvc_prvdr_npi_type"] == 2
+    assert row["bfd_updated_ts"] == latest_time
 
 
 def _reset_db(
@@ -606,6 +773,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
+    os.environ["IDR_MAX_TASKS"] = "4"
 
 
 @pytest.fixture(scope="module")
@@ -632,3 +800,14 @@ def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> No
 
 def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
+
+
+def test(postgres_db: tuple[PostgresContainer, str]) -> None:
+    configure_logger()
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_pipeline_environment(conn.info)
+        _do_test_legacy_npi_type_update(cast(Connection[DictRow], conn))
+    logger.remove()

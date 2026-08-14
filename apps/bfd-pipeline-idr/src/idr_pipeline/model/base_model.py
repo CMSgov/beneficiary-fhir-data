@@ -171,7 +171,6 @@ def provider_npi_type_expr(alias: str) -> str:
     """
 
 
-# using this to resolve npi type 2 for inst + prof
 PROVIDER_ORG_SPECIALTY_CODES = (
     "('45', '47', '49', '51', '52', '53', '54', '58', '59', '60', '61', '63', '69', '70', '73', "
     "'74', '75', '87', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B1', 'B3', "
@@ -638,10 +637,6 @@ class IdrBaseModel(BaseModel, ABC):
             for key in cls.model_fields
             if (meta := cls._extract_meta(key, NPI_TYPE_BACKFILL_COMPARE)) is not None
         }
-
-    @classmethod
-    def npi_type_backfill_cutoff_ts(cls) -> datetime | None:
-        return None
 
 
 T = TypeVar("T", bound=IdrBaseModel)

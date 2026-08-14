@@ -72,11 +72,6 @@ MIN_BATCH_COMPLETION_DATE = getenv("IDR_MIN_BATCH_COMPLETION_DATE")
 This is useful if you've already loaded some data and you do not want to reprocess
 any batches that have already completed before this date."""
 
-MAX_TASKS = int(getenv("IDR_MAX_TASKS", "32"))
-"""Maximum concurrent tasks to run.
-Changing this has a drastic effect on the runtime.
-In prod, we want to run as many tasks as possible without running out of memory."""
-
 _IDR_TABLES = getenv("IDR_TABLES", None)
 TABLES_TO_LOAD = {t.strip().lower() for t in _IDR_TABLES.split(",")} if _IDR_TABLES else None
 """List of tables to include - any table not included will be skipped.
@@ -128,6 +123,10 @@ IDR_SCHEMA = getenv("IDR_SCHEMA", "")
 
 
 # Database credentials/settings
+
+
+def max_tasks() -> int:
+    return int(getenv("IDR_MAX_TASKS", "32"))
 
 
 def bfd_db_port() -> str:

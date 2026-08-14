@@ -12,7 +12,6 @@ from ..constants import (
     IDR_CLAIM_TABLE,
     IDR_CONTRACT_PBP_NUM_TABLE,
     IDR_PROVIDER_HISTORY_TABLE,
-    NPI_TYPE_LOADED_DATE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -275,11 +274,6 @@ class IdrClaimRx(IdrBaseModel):
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
-
-    @override
-    @classmethod
-    def npi_type_backfill_cutoff_ts(cls) -> datetime | None:
-        return NPI_TYPE_LOADED_DATE  # todo change once other ticket deployed
 
     @override
     @staticmethod
