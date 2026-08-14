@@ -144,7 +144,14 @@ def _compare_table(
         logger.debug(idr_query)
 
         idr_values = idr_extractor.extract_many(idr_query, {})
-        idr_rows = [row.model_dump() for batch in idr_values for row in batch]
+        idr_rows = [
+            {
+                k: v if not isinstance(v, datetime) or v.tzinfo else v.replace(tzinfo=UTC)
+                for k, v in row.model_dump().items()
+            }
+            for batch in idr_values
+            for row in batch
+        ]
 
         log_redact_pkeys: set[str] = (
             _REDACTED_PKEYS_PER_MODEL.get(model, set()) if not _ALLOW_SENSITIVE_LOGS else set()
@@ -209,9 +216,6 @@ def _compare_table(
             for col in cols_to_check:
                 idr_val = idr_row[col]
                 bfd_val = bfd_row[col]
-
-                if isinstance(idr_val, datetime) and not idr_val.tzinfo:
-                    bfd_val = idr_val.replace(tzinfo=None)
 
                 if idr_val != bfd_val:
                     mismatched_cols.append(col)
