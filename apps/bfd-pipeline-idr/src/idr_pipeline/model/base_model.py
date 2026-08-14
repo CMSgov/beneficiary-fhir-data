@@ -48,7 +48,7 @@ from ..settings import (
     MIN_CLAIM_NCH_TRANSACTION_DATE,
     MIN_CLAIM_SS_TRANSACTION_DATE,
     MIN_PRIOR_AUTH_TRANSACTION_DATE,
-    PHASE_1_PRUNE_BATCH_LIMIT,
+    PRUNE_BATCH_LIMIT,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -867,7 +867,18 @@ def stale_phase_1_claims_query(
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
-            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+            LIMIT {PRUNE_BATCH_LIMIT}
         """,
         (cutoff_date, cutoff_date),
     )
+
+
+def stale_non_part_d_claims_query(claim_table: str) -> str:
+    return f"""
+        SELECT clm.clm_uniq_id
+        FROM {claim_table} clm
+        WHERE clm.clm_ltst_clm_ind = 'N'
+        AND clm.clm_uniq_id > 0
+        ORDER BY clm.clm_uniq_id
+        LIMIT {PRUNE_BATCH_LIMIT}
+    """
