@@ -25,6 +25,9 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
+  // todo ask if we can add professional nch and ss or needs to be kept as is for both professionals
+  // @Embedded private BloodPints bloodPints;
+
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
   /**
@@ -138,6 +141,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                     .flatMap(opt -> opt)
                     .map(c -> c.toFhir(supportingInfoFactory)),
                 clinicalTrialNumber.toFhir(supportingInfoFactory))
+            // SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory), would go here but it's not currently in ss prof
             .flatMap(Optional::stream)
             .toList();
 

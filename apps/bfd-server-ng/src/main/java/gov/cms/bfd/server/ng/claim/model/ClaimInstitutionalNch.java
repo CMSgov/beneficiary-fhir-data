@@ -39,7 +39,6 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
 
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
-  @Embedded private BloodPints bloodPints;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;
 
@@ -58,7 +57,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
-            bloodPints.toFhir(supportingInfoFactory).stream().toList(),
+            SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory),
             nchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .toList();

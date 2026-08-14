@@ -130,7 +130,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                   .toFhirSupportingInfo(supportingInfoFactory)
                   .forEach(
                       si -> {
-                        eob.addSupportingInfo(si);
+                        eob.addSupportingInfo(
+                            si); // this calls supporting info, but doesn't populate for ss?
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
                       });
               item.getProcedure()
@@ -209,7 +210,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutional().toFhir(getClaimValues()).forEach(eob::addAdjudication);
+    getAdjudicationChargeInstitutional().toFhir().forEach(eob::addAdjudication);
+    AdjudicationChargeClaimValue.toFhir(getClaimValues()).forEach(eob::addAdjudication);
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)

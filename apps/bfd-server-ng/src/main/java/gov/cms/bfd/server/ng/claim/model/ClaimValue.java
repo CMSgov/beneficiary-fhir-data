@@ -21,17 +21,11 @@ class ClaimValue {
   @Column(name = "clm_val_amt")
   private BigDecimal claimValueAmount;
 
-  private static final String VALUE_CODE_DISPROPORTIONATE = "18";
-  private static final String VALUE_CODE_IME = "19";
-
-  Optional<BigDecimal> getDisproportionateAmount() {
-    return getAmountForCode(VALUE_CODE_DISPROPORTIONATE);
+  Optional<BigDecimal> getClaimValueAmount(String code) {
+    return getAmountForCode(code);
   }
 
-  Optional<BigDecimal> getImeAmount() {
-    return getAmountForCode(VALUE_CODE_IME);
-  }
-
+  // todo integer version for blood type etc
   private Optional<BigDecimal> getAmountForCode(String code) {
     return claimValueCode.flatMap(
         c -> {

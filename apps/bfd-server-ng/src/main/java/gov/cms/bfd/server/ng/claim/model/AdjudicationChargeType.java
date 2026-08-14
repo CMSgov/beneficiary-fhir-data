@@ -198,10 +198,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_MDCR_INSTNL_PRMRY_PYR_AMT",
       "Primary Payer (if not Medicare) Claim Paid Amount"),
-  PROFESSIONAL_COMPONENT_CHARGE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_INSTNL_PRFNL_AMT",
-      "Professional Component Charge Amount"),
   DRUG_OUTLIER_APPROVED_PAYMENT_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_INSTNL_DRG_OUTLIER_AMT",
@@ -210,10 +206,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_HIPPS_UNCOMPD_CARE_AMT",
       "Claim Uncompensated Care Payment Amount"),
-  BENE_INPATIENT_DEDUCTIBLE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-      "Beneficiary Inpatient (or other Part A) Deductible Amount"),
   BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",
@@ -240,10 +232,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_HIPPS_VBP_AMT",
       "HIPPS Value Based Purchasing Amount"),
-  LOW_VOLUME_PAYMENT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_INSTNL_LOW_VOL_PMT_AMT",
-      "Low Volume Payment Amount"),
   FIRST_YEAR_RATE_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_MDCR_IP_1ST_YR_RATE_AMT",
@@ -268,14 +256,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_SS_OUTLIER_STD_PYMT_AMT",
       "Short Stay Outlier Payment Amount"),
-  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_DSPRTNT_AMT",
-      "Operating Disproportionate Share Amount"),
-  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_IME_AMT",
-      "Operating Indirect Medical Education Amount"),
   BENE_PART_B_DEDUCTIBLE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "deductible",
@@ -415,7 +395,34 @@ enum AdjudicationChargeType {
       "coinsurance",
       "Co-insurance",
       "CLM_LINE_MDCR_COINSRNC_AMT",
-      "Coinsurance Amount");
+      "Coinsurance Amount"),
+  // begin clm val categories
+  BENE_INPATIENT_DEDUCTIBLE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+      "Beneficiary Inpatient (or other Part A) Deductible Amount"),
+  LOW_VOLUME_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_INSTNL_LOW_VOL_PMT_AMT",
+      "Low Volume Payment Amount"),
+  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_DSPRTNT_AMT",
+      "Operating Disproportionate Share Amount"),
+  PROFESSIONAL_COMPONENT_CHARGE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_INSTNL_PRFNL_AMT",
+      "Professional Component Charge Amount"),
+  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_IME_AMT",
+      "Operating Indirect Medical Education Amount");
+
+  // todo rest of the new fields
+  //   SEQUESTRATION_REDUCTION_AMOUNT(
+  //       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+  //       "CLM_SQSTRTN_RDCTN_AMT",
+  //       "sequestration todo");
 
   private final String coding1System;
   private final String coding1Code;

@@ -44,7 +44,6 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
 
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
-  @Embedded private BloodPints bloodPints;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
@@ -61,7 +60,7 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
             nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            bloodPints.toFhir(supportingInfoFactory),
+            // SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory),
             claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
