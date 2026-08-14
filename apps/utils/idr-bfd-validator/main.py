@@ -192,11 +192,13 @@ def _compare_table(
             "received {} rows from BFD DB and {} rows from IDR", len(bfd_rows), len(idr_rows)
         )
 
-        if len(bfd_rows) != len(idr_rows):
-            logger.error("row length does not match; {} != {}", len(bfd_rows), len(idr_rows))
-            return False
-
-        any_mismatch = False
+        row_lengths_match = len(bfd_rows) == len(idr_rows)
+        if not row_lengths_match:
+            logger.error(
+                "returned row lengths do not match; (IDR) {} != (BFD) {}",
+                len(idr_rows),
+                len(bfd_rows),
+            )
 
         per_model_ignore_cols = _IGNORED_COLS_PER_MODEL.get(model, set())
         insert_keyset = set(model.insert_keys())
