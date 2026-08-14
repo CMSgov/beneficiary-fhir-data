@@ -91,6 +91,127 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
+    # Seed stale non-Part-D parent claims so the prune job has rows to delete.
+    # CSVs cover item pruning because stale non-Part-D parents do not load.
+    if load_type == LoadType.INCREMENTAL:
+        claim_table = sql.Identifier("idr", "claim_institutional_nch")
+        cur = conn.execute(
+            "select * from idr.claim_institutional_nch where clm_uniq_id = 113370100080"
+        )
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        stale_institutional_nch_parent_claim = dict(row)
+        stale_institutional_nch_parent_claim["clm_uniq_id"] = 999999434801
+        stale_institutional_nch_parent_claim["clm_ltst_clm_ind"] = "N"
+        stale_institutional_nch_parent_claim["clm_type_cd"] = 40
+
+        columns = sql.SQL(", ").join(
+            sql.Identifier(k) for k in stale_institutional_nch_parent_claim
+        )
+        values = sql.SQL(", ").join(stale_institutional_nch_parent_claim.values())
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i}
+            (
+                {columns:q}
+            )
+            VALUES
+            (
+                {values:q}
+            )
+            """
+        )
+
+        claim_table = sql.Identifier("idr", "claim_professional_nch")
+        cur = conn.execute(
+            "select * from idr.claim_professional_nch where clm_uniq_id = 119855147698"
+        )
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        stale_professional_nch_parent_claim = dict(row)
+        stale_professional_nch_parent_claim["clm_uniq_id"] = 999999434802
+        stale_professional_nch_parent_claim["clm_ltst_clm_ind"] = "N"
+        stale_professional_nch_parent_claim["clm_type_cd"] = 81
+
+        columns = sql.SQL(", ").join(sql.Identifier(k) for k in stale_professional_nch_parent_claim)
+        values = sql.SQL(", ").join(stale_professional_nch_parent_claim.values())
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i}
+            (
+                {columns:q}
+            )
+            VALUES
+            (
+                {values:q}
+            )
+            """
+        )
+
+        claim_table = sql.Identifier("idr", "claim_institutional_ss")
+        cur = conn.execute(
+            "select * from idr.claim_institutional_ss where clm_uniq_id = 123359318723"
+        )
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        stale_institutional_ss_parent_claim = dict(row)
+        stale_institutional_ss_parent_claim["clm_uniq_id"] = 999999434800
+        stale_institutional_ss_parent_claim["clm_ltst_clm_ind"] = "N"
+        stale_institutional_ss_parent_claim["clm_type_cd"] = 2081
+
+        columns = sql.SQL(", ").join(sql.Identifier(k) for k in stale_institutional_ss_parent_claim)
+        values = sql.SQL(", ").join(stale_institutional_ss_parent_claim.values())
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i}
+            (
+                {columns:q}
+            )
+            VALUES
+            (
+                {values:q}
+            )
+            """
+        )
+
+        claim_table = sql.Identifier("idr", "claim_professional_ss")
+        cur = conn.execute(
+            "select * from idr.claim_professional_ss where clm_uniq_id = 4991490559710"
+        )
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        stale_professional_ss_parent_claim = dict(row)
+        stale_professional_ss_parent_claim["clm_uniq_id"] = 999999434803
+        stale_professional_ss_parent_claim["clm_ltst_clm_ind"] = "N"
+        stale_professional_ss_parent_claim["clm_type_cd"] = 2800
+
+        columns = sql.SQL(", ").join(sql.Identifier(k) for k in stale_professional_ss_parent_claim)
+        values = sql.SQL(", ").join(stale_professional_ss_parent_claim.values())
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i}
+            (
+                {columns:q}
+            )
+            VALUES (
+                {values:q}
+            )
+            """
+        )
+        conn.commit()
+
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
     assert row is not None
@@ -213,6 +334,19 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
+    # Stale non-Part-D parent claims do not remain in the final claim tables
+    cur = conn.execute("select * from idr.claim_institutional_nch where clm_uniq_id = 999999434801")
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr.claim_professional_nch where clm_uniq_id = 999999434802")
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 999999434800")
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr.claim_professional_ss where clm_uniq_id = 999999434803")
+    assert cur.rowcount == 0
+
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 51
     rows = cur.fetchmany(1)
@@ -229,19 +363,64 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert rows[0]["clm_uniq_id"] == 166776396279
 
     cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
-    assert cur.rowcount == 795
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 796
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 795
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
+    # Items for stale non-Part-D claims are pruned on incremental loads
+    cur = conn.execute(
+        "select * from idr.claim_item_institutional_nch where clm_uniq_id = 999999434801"
+    )
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 1
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 0
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = 999999434802"
+    )
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 1
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 0
+
+    cur = conn.execute(
+        "select * from idr.claim_item_institutional_ss where clm_uniq_id = 999999434800"
+    )
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 1
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 0
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_ss where clm_uniq_id = 999999434803"
+    )
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 1
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 0
+
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 442
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 443
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 442
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 119855147698
 
     cur = conn.execute("select * from idr.claim_item_professional_ss order by clm_uniq_id")
+    if load_type == LoadType.INITIAL:
+        assert cur.rowcount == 2
+    elif load_type == LoadType.INCREMENTAL:
+        assert cur.rowcount == 1
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_ss where clm_uniq_id = 4991490559710"
+    )
     assert cur.rowcount == 1
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 4991490559710
 
     conn.commit()
 
@@ -253,7 +432,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert rows[0]["clm_uniq_id"] == 123359318723
 
         cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-        assert cur.rowcount == 327
+        assert cur.rowcount == 328
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 123359318723
 
