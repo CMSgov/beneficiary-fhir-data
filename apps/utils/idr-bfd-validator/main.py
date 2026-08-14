@@ -312,8 +312,24 @@ def _compare_table(
                 len(idr_rows),
             )
 
-        if not any_mismatch:
-            logger.info("no mismatches, verification passed")
+        Path(f"./generated/{model.table().split('.')[-1]}.{partition.name}.json").write_text(
+            json.dumps(
+                asdict(
+                    OverallResult(
+                        model=model.table(),
+                        partition=partition.name,
+                        num_idr_rows=len(idr_rows),
+                        num_bfd_rows=len(bfd_rows),
+                        num_success=sum(x.result == RowValidationResult.SUCCESS for x in results),
+                        num_failed=sum(x.result != RowValidationResult.SUCCESS for x in results),
+                        per_row_results=results,
+                    )
+                ),
+                default=str,
+                skipkeys=True,
+                indent=2,
+            )
+        )
 
         return all(x.result == RowValidationResult.SUCCESS for x in results) and row_lengths_match
 
