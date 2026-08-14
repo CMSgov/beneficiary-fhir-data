@@ -4,8 +4,11 @@ import json
 import os
 import sys
 from collections.abc import Iterable
+from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING, Any
+from enum import StrEnum, auto
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
 
 import anyio
 import boto3
@@ -76,6 +79,32 @@ _BOTO_CONFIG = Config(
     # Double the read timeout for some extra safety
     read_timeout=120,
 )
+
+
+class RowValidationResult(StrEnum):
+    SUCCESS = auto()
+    BFD_ROW_DOES_NOT_EXIST = auto()
+    MISMATCHED_COLUMNS = auto()
+
+
+@dataclass(eq=True, frozen=True)
+class RowResult:
+    pkey: dict[str, Any]
+    result: RowValidationResult
+    result_metadata: dict[str, Any] | None = None
+    idr_row: dict[str, Any] | None = None
+    bfd_row: dict[str, Any] | None = None
+
+
+@dataclass(eq=True, frozen=True)
+class OverallResult:
+    model: str
+    partition: str
+    num_idr_rows: int
+    num_bfd_rows: int
+    num_success: int
+    num_failed: int
+    per_row_results: list[RowResult]
 
 
 def _compare_table(
@@ -210,8 +239,27 @@ def _compare_table(
         per_model_ignore_cols = _IGNORED_COLS_PER_MODEL.get(model, set())
         insert_keyset = set(model.insert_keys())
         cols_to_check = insert_keyset - per_model_ignore_cols
+        bucketed_bfd_rows = bucket_rows(bfd_rows, model_pkeys)
+        bucketed_idr_rows = bucket_rows(idr_rows, model_pkeys)
+        results: list[RowResult] = []
         logger.info("verifying {} row(s)...", len(bfd_rows))
-        for bfd_row, idr_row in zip(bfd_rows, idr_rows, strict=True):
+        for pkey_tupl, idr_row in bucketed_idr_rows.items():
+            bfd_row = bucketed_bfd_rows.get(pkey_tupl)
+            row_pkey = _get_row_pkey(idr_row, model_pkeys)
+            if not bfd_row:
+                logger.error(
+                    "IDR row ({}) does not exist in BFD",
+                    json.dumps(_get_row_pkey(idr_row, model_pkeys, log_redact_pkeys), default=str),
+                )
+                results.append(
+                    RowResult(
+                        pkey=row_pkey,
+                        result=RowValidationResult.BFD_ROW_DOES_NOT_EXIST,
+                        idr_row=idr_row,
+                    )
+                )
+                continue
+
             mismatched_cols: list[str] = []
             for col in cols_to_check:
                 idr_val = idr_row[col]
@@ -243,12 +291,31 @@ def _compare_table(
                         json.dumps(idr_row, default=str),
                         json.dumps(bfd_row, default=str),
                     )
-                any_mismatch = True
+                results.append(
+                    RowResult(
+                        pkey=row_pkey,
+                        result=RowValidationResult.MISMATCHED_COLUMNS,
+                        result_metadata={"cols": mismatched_cols},
+                        idr_row=idr_row,
+                        bfd_row=bfd_row,
+                    )
+                )
+            else:
+                results.append(RowResult(row_pkey, RowValidationResult.SUCCESS))
+
+        if all(x.result == RowValidationResult.SUCCESS for x in results):
+            logger.info("all {} row(s) successfully validated, verification passed", len(idr_rows))
+        else:
+            logger.error(
+                "{}/{} row(s) failed validation, verification failed",
+                sum(x.result != RowValidationResult.SUCCESS for x in results),
+                len(idr_rows),
+            )
 
         if not any_mismatch:
             logger.info("no mismatches, verification passed")
 
-        return not any_mismatch
+        return all(x.result == RowValidationResult.SUCCESS for x in results) and row_lengths_match
 
 
 def _get_row_pkey(
@@ -275,6 +342,18 @@ def _escape_sql_val(val: DbType) -> str:
 
 def _comma_list(vals: Iterable[str]) -> str:
     return ",".join(vals)
+
+
+def bucket_rows(
+    rows: list[dict[str, Any]], pkeys: list[str]
+) -> dict[tuple[Any, ...], dict[str, Any]]:
+    buckets: dict[tuple[Any, ...], dict[str, Any]] = {}
+
+    for row in rows:
+        key = tuple(row[pk] for pk in pkeys)
+        buckets[key] = row
+
+    return buckets
 
 
 def _wrap_compare(
