@@ -159,7 +159,7 @@ def _compare_table(
         logger.opt(lazy=True).debug(
             "idr rows: \n{}",
             lambda: json.dumps(
-                [_prep_row_for_log(idr_row, model_pkeys, log_redact_pkeys) for idr_row in idr_rows],
+                [_get_row_pkey(idr_row, model_pkeys, log_redact_pkeys) for idr_row in idr_rows],
                 default=str,
             ),
         )
@@ -190,7 +190,7 @@ def _compare_table(
         logger.opt(lazy=True).debug(
             "bfd rows: \n{}",
             lambda: json.dumps(
-                [_prep_row_for_log(bfd_row, model_pkeys, log_redact_pkeys) for bfd_row in bfd_rows],
+                [_get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys) for bfd_row in bfd_rows],
                 default=str,
             ),
         )
@@ -223,7 +223,7 @@ def _compare_table(
                         logger.debug(
                             "({}) {}: (IDR) {} != (BFD) {}",
                             json.dumps(
-                                _prep_row_for_log(bfd_row, model_pkeys, log_redact_pkeys),
+                                _get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys),
                                 default=str,
                             ),
                             col,
@@ -234,9 +234,7 @@ def _compare_table(
             if mismatched_cols:
                 logger.error(
                     "mismatched columns for row ({}): {}",
-                    json.dumps(
-                        _prep_row_for_log(bfd_row, model_pkeys, log_redact_pkeys), default=str
-                    ),
+                    json.dumps(_get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys), default=str),
                     ", ".join(x for x in mismatched_cols),
                 )
                 if _ALLOW_SENSITIVE_LOGS:
@@ -253,14 +251,16 @@ def _compare_table(
         return not any_mismatch
 
 
-def _prep_row_for_log(
-    row: dict[str, Any], pkeys: Iterable[str], redact: Iterable[str]
+def _get_row_pkey(
+    row: dict[str, Any], pkeys: Iterable[str], redact: Iterable[str] | None = None
 ) -> dict[str, Any]:
     # Some tables have primary keys that are sensitive and cannot be stored in any log store. For
     # example, idr.beneficiary_mbi_id's composite key contains the column bene_mbi_id which _is_
     # sensitive. If the operator has not specified ALLOW_SENSITIVE_LOGS to be true, then redact
     # the value. This also removes any keys that aren't primary keys so that only the primary key
     # is logged for a row.
+    if not redact:
+        redact = []
     return {k: (v if k not in redact else "<redacted>") for k, v in row.items() if k in pkeys}
 
 
