@@ -27,9 +27,9 @@ from .model.base_model import LoadMode, Source
 from .pipeline_stages import StagedIdrPipeline
 from .settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    max_tasks,
     TABLES_TO_LOAD,
     bfd_test_date,
+    max_tasks,
 )
 
 
