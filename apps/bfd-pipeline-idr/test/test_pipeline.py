@@ -786,6 +786,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
+    os.environ["IDR_MAX_TASKS"] = "4"
 
 
 @pytest.fixture(scope="module")

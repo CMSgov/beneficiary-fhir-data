@@ -27,7 +27,7 @@ from .model.base_model import LoadMode, Source
 from .pipeline_stages import StagedIdrPipeline
 from .settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    MAX_TASKS,
+    max_tasks,
     TABLES_TO_LOAD,
     bfd_test_date,
 )
@@ -124,7 +124,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, job_id: int = 
     atexit.register(worker_manager.cleanup)
 
     staged_pipeline = StagedIdrPipeline(
-        max_workers=MAX_TASKS,
+        max_workers=max_tasks(),
         load_mode=load_mode,
         start_time=start_time,
         load_type=load_type,
