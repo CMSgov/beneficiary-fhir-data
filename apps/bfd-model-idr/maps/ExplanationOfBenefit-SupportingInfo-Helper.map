@@ -298,7 +298,7 @@ group addPPSInd(source src: SupportingInfoComponent, target tgt: BackboneElement
     } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.CLM_PPS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",val) "Add coding";
-        src.CLM_PPS_IND as val -> tgtCC.coding = translate(val,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PPS_IND_CD','coding') "Add coding";
+        src.CLM_PPS_IND as val -> tgtCC.coding = translate(val,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PPS_IND','coding') "Add coding";
     } "Add CC";
 }
 //code. Not necessary, duplicative with BENE_PTNT_STUS_CD. 

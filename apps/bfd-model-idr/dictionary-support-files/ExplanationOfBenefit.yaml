@@ -2445,12 +2445,10 @@
     - SNF
   sources:
     - FISS
-  ccwMapping:
-    - CLM_PPS_IND
   referenceTable: CLM_PPS_IND
   sourceView: V2_MDCR_CLM_FISS
   sourceColumn: CLM_PPS_IND
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND').exists()).code.coding.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
   profiles:
     - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
