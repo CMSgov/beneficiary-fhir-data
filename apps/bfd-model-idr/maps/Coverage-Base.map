@@ -248,7 +248,7 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
     //only populate the following when there is a LIS, otherwise it's confusing.
 
     //LIS Copayment Level Code Extension 
-    src.BENE-LIS-COPMT-LVL-CD -> tgt.extension = create('Extension') as tgtExtension then{
+    src.BENE_CMBND_DEEMD_IND -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD" "add system";
@@ -257,7 +257,7 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
     } "Add LIS copayment level code when LIS is effective";
 
     //LIS Part D Premium Percentage Extension 
-    src.BENE_CMBND_DEEMD_PRM_PCT -> tgt.extension = create('Extension') as tgtExtension then{
+    src.BENE_CMBND_DEEMD_IND -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT" "Add url";
         src.BENE_CMBND_DEEMD_PRM_PCT as lisPtdPrmPct -> tgtExtension.value = cast(lisPtdPrmPct,'decimal')  "Add value";
     } "Add LIS Part D premium percentage when LIS is effective";
