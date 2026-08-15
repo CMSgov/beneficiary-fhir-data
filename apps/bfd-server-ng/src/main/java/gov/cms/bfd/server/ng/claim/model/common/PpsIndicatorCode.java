@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -45,6 +46,20 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
   }
 
   /**
+   * Convert using clm_fiss.clm_pps_ind to PpsIndicatorCode.
+   *
+   * @param code clm_pps_ind to be converted
+   * @return matching enum constant
+   */
+  static Optional<PpsIndicatorCode> fromFISSCode(String code) {
+    return Optional.of(
+        Stream.of(Valid.fromFISSIndicator(code.charAt(0)))
+            .map(v -> (PpsIndicatorCode) v)
+            .findFirst()
+            .orElseGet(() -> new Invalid(code)));
+  }
+
+  /**
    * Maps interface to FHIR spec.
    *
    * @param supportingInfoFactory the supportingInfoFactory containing the other mappings.
@@ -74,6 +89,20 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
 
     private final String code;
     private final String display;
+
+    /**
+     * Character level conversion mapping clm_fiss.clm_pps_ind to PpsIndicatorCode.
+     *
+     * @param indicator clm_pps_ind to be converted
+     * @return matching enum constant
+     */
+    public static Valid fromFISSIndicator(char indicator) {
+      return switch (indicator) {
+        case 'Y' -> PPS;
+        case 'N' -> NOT_PPS;
+        default -> NOT_PPS;
+      };
+    }
   }
 
   /** Captures unknown/invalid codes. */
