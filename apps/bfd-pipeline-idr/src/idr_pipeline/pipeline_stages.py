@@ -35,7 +35,7 @@ from .model.idr_contract_pbp_contact import IdrContractPbpContact
 from .model.idr_contract_pbp_number import IdrContractPbpNumber
 from .model.idr_prior_auth import IdrPriorAuth
 from .model.idr_prior_auth_item import IdrPriorAuthItem
-from .parallel_executor import ParallelStagesExecutor, Stage
+from .parallel_executor import MultithreadingExecutor, Stage
 from .pipeline_utils import (
     extract_and_load,
     prune_bene_lis_cmbnd,
@@ -102,7 +102,7 @@ class StagedIdrPipeline:
         self.source = source
         self.worker_client = worker_client
         self.tables_to_load = tables_to_load
-        self._executor = ParallelStagesExecutor(max_workers)
+        self._executor = MultithreadingExecutor(max_workers)
 
     async def start(self) -> bool:
         return all(
