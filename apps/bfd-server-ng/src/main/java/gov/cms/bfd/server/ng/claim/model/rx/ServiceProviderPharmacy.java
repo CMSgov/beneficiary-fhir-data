@@ -41,9 +41,14 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   }
 
   @Override
-  public ProviderHistoryBase.NpiType getNpiType() {
-    return ProviderHistoryBase.NpiType.fromNpiTypeCode(
-        npiType.isPresent() ? npiType : genericIdNpiType);
+  public NpiType getNpiType() {
+    // If it's not an NPI -> Organization
+    if (providerQualifierCode.isEmpty()
+        || providerQualifierCode.get() != ProviderIdQualifierCode._01) {
+      return NpiType.ORGANIZATION;
+    }
+
+    return NpiType.fromNpiTypeCode(genericIdNpiType);
   }
 
   /**
