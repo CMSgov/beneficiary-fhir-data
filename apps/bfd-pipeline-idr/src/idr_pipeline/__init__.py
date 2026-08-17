@@ -99,8 +99,9 @@ def main(
     run(source, load_mode, load_type, job_id)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType, 
-        job_id: int = DEFAULT_JOB_ID) -> None:
+def run(
+    source: Source, load_mode: LoadMode, load_type: LoadType, job_id: int = DEFAULT_JOB_ID
+) -> None:
     logger.info("load start")
     logger.info("load_type {}", load_type)
     logger.info("job_id {}", job_id)
