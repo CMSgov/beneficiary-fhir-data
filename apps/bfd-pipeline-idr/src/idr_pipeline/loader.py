@@ -331,10 +331,10 @@ class BatchLoader:
                 null
             """
         else:
-            sql += f"""
+            sql += """
             (SELECT last_ts 
              FROM idr.load_progress
-             WHERE job_id = {DEFAULT_JOB_ID}
+             WHERE job_id = %(default_job_id)s
                AND table_name = %(table)s
                AND batch_partition = %(partition)s
             )
@@ -367,6 +367,7 @@ class BatchLoader:
                 "job_start_ts": self.job_start,
                 "batch_start_ts": self.batch_start,
                 "job_id": self.job_id,
+                "default_job_id": DEFAULT_JOB_ID,
             },
         )
 
