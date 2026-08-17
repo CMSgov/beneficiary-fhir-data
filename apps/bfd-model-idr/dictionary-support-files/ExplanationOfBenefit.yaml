@@ -2445,7 +2445,7 @@
     - SNF
   sources:
     - FISS
-  referenceTable: CLM_PPS_IND
+  referenceTable: CLM_PPS_IND_CD
   sourceView: V2_MDCR_CLM_FISS
   sourceColumn: CLM_PPS_IND
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
