@@ -348,7 +348,7 @@ class BatchLoader:
             batch_start_ts = EXCLUDED.batch_start_ts
         """
 
-        if self.job_id != 1:
+        if self.job_id != DEFAULT_JOB_ID:
             sql += """
             ,max_run_ts = (SELECT last_ts 
                          FROM idr.load_progress
