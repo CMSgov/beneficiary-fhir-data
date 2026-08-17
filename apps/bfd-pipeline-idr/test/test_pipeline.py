@@ -28,7 +28,7 @@ from idr_pipeline.load_synthetic import load_from_csv
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import LoadMode, Source
 from idr_pipeline.pydantic_utils import fields
-from idr_pipeline.settings import enable_prior_auth_ingestion
+from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, enable_prior_auth_ingestion
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -781,6 +781,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["BFD_DB_NAME"] = info.dbname
     os.environ["BFD_DB_USERNAME"] = info.user
     os.environ["BFD_DB_PASSWORD"] = info.password
+    # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
     os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
@@ -788,6 +789,8 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
     os.environ["IDR_MAX_TASKS"] = "4"
+    os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
+    os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
 
 
 @pytest.fixture(scope="module")
