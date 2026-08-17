@@ -416,13 +416,31 @@ enum AdjudicationChargeType {
   OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_OPRTNL_IME_AMT",
-      "Operating Indirect Medical Education Amount");
-
-  // todo rest of the new fields
-  //   SEQUESTRATION_REDUCTION_AMOUNT(
-  //       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-  //       "CLM_SQSTRTN_RDCTN_AMT",
-  //       "sequestration todo");
+      "Operating Indirect Medical Education Amount"),
+  OPERATING_OUTLIER_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_OUTLR_AMT",
+      "Operating Outlier Amount"),
+  SEQUESTRATION_REDUCTION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_SQSTRTN_RDCTN_AMT",
+      "Sequestration Adjustment Amount"),
+  NEW_TECH_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MDCR_NEW_TECH_AMT",
+      "New Technology Add-On Payment Amount"),
+  PBP_INCLUSION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_PBP_INCLSN_AMT",
+      "Medicare Payment Before Model Reduction Amount"),
+  PBP_REDUCTION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_PBP_RDCTN_AMT",
+      "Actual Model Reduction Amount"),
+  MIPS_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MIPS_PMT_AMT",
+      "Incentive Payment Adjustment Amount");
 
   private final String coding1System;
   private final String coding1Code;

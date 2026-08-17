@@ -1,53 +1,51 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-// todo, applies only to institutional claims, so rename file
 class AdjudicationChargeClaimValue {
   private AdjudicationChargeClaimValue() {}
 
   @AllArgsConstructor
   enum AdjudicationValueCodes {
+    INSTNL_PRFNL("05", AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT),
+    OPRTNL_OUTLR("17", AdjudicationChargeType.OPERATING_OUTLIER_AMOUNT),
     OPRTNL_DSPRPRTNT("18", AdjudicationChargeType.OPERATING_DISPROPORTIONATE_SHARE_AMOUNT),
     OPRTNL_IME("19", AdjudicationChargeType.OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT),
-    INSTNL_PRFNL("05", AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT),
+    SQSTRTN_RDCTN("73", AdjudicationChargeType.SEQUESTRATION_REDUCTION_AMOUNT),
     INSTNL_LOW_VOL_PMT("74", AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT),
-    // todo
-    // PBP_INCLSN("Q0", "CLM_PBP_INCLSN_AMT", AdjudicationChargeType.CLM_PBP_INCLSN_AMT),
-    // PBP_RDCTN("Q1", "CLM_PBP_RDCTN_AMT", AdjudicationChargeType.CLM_PBP_RDCTN_AMT),
-    // OPRTNL_OUTLR("17", "CLM_OPRTNL_OUTLR_AMT", AdjudicationChargeType.CLM_OPRTNL_OUTLR_AMT),
-    // MDCR_NEW_TECH("77", "CLM_MDCR_NEW_TECH_AMT", AdjudicationChargeType.CLM_MDCR_NEW_TECH_AMT),
-    // SQSTRTN_RDCTN("73", "CLM_SQSTRTN_RDCTN_AMT", AdjudicationChargeType.CLM_SQSTRTN_RDCTN_AMT),
-    // MIPS_PMT("QM", "CLM_MIPS_PMT_AMT", AdjudicationChargeType.CLM_MIPS_PMT_AMT);
-    MDCR_IP_BENE_DDCTBL("A1", AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT);
+    MDCR_NEW_TECH("77", AdjudicationChargeType.NEW_TECH_PAYMENT_AMOUNT),
+    MDCR_IP_BENE_DDCTBL("A1", AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT),
+    PBP_INCLSN("Q0", AdjudicationChargeType.PBP_INCLUSION_AMOUNT),
+    PBP_RDCTN("Q1", AdjudicationChargeType.PBP_REDUCTION_AMOUNT),
+    MIPS_PMT("QM", AdjudicationChargeType.MIPS_PAYMENT_AMOUNT);
 
     final String code;
     final AdjudicationChargeType category;
   }
 
   static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+    var sumsByCode = new HashMap<String, BigDecimal>();
 
-    var claimValueAmounts = new HashMap<AdjudicationValueCodes, BigDecimal>();
-
-    for (AdjudicationValueCodes valueCode : AdjudicationValueCodes.values()) {
-      claimValueAmounts.put(
-          valueCode, mapSum(claimValues.stream().map(c -> c.getClaimValueAmount(valueCode.code))));
+    for (ClaimValue claimValue : claimValues) {
+      claimValue
+          .getClaimValueCode()
+          .ifPresent(
+              claimValueCode ->
+                  claimValue
+                      .getClaimValueAmount(claimValueCode)
+                      .ifPresent(
+                          claimValueAmount ->
+                              sumsByCode.merge(claimValueCode, claimValueAmount, BigDecimal::add)));
     }
 
-    return claimValueAmounts.entrySet().stream()
-        .map(cv -> cv.getKey().category.toFhirAdjudication(cv.getValue()))
+    return Arrays.stream(AdjudicationValueCodes.values())
+        .filter(valueCode -> sumsByCode.containsKey(valueCode.code))
+        .map(valueCode -> valueCode.category.toFhirAdjudication(sumsByCode.get(valueCode.code)))
         .toList();
-  }
-
-  private static BigDecimal mapSum(Stream<Optional<BigDecimal>> inputStream) {
-    return inputStream
-        .flatMap(Optional::stream)
-        .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
   }
 }

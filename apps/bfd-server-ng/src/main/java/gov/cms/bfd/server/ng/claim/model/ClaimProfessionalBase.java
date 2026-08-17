@@ -141,7 +141,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                     .flatMap(opt -> opt)
                     .map(c -> c.toFhir(supportingInfoFactory)),
                 clinicalTrialNumber.toFhir(supportingInfoFactory))
-            // SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory), would go here but it's not currently in ss prof
             .flatMap(Optional::stream)
             .toList();
 

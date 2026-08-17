@@ -10,7 +10,7 @@ enum BlueButtonSupportingInfoCategory {
   /** CLM_NCH_WKLY_PROC_DT - Weekly Process Date. */
   CLM_NCH_WKLY_PROC_DT("CLM_NCH_WKLY_PROC_DT", "Weekly Process Date"),
   /** CLM_BLOOD_PT_FRNSH_QTY - Blood Pints Furnished Quantity. */
-  CLM_BLOOD_PT_FRNSH_QTY("CLM_BLOOD_PT_FRNSH_QTY", "final fhir display Pints Furnished Quantity"), // todo displays
+  CLM_BLOOD_PT_FRNSH_QTY("CLM_BLOOD_PT_FRNSH_QTY", "Pints Furnished Quantity"), // todo displays
   /** CLM_MDCR_INSTNL_MCO_PD_SW - MCO Paid Switch. */
   CLM_MDCR_INSTNL_MCO_PD_SW("CLM_MDCR_INSTNL_MCO_PD_SW", "MCO Paid Switch"),
   /** CLM_MDCR_NCH_PTNT_STUS_IND_CD - Patient Status Code. */

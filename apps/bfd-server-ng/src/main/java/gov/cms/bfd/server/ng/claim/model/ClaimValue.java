@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -19,21 +20,21 @@ class ClaimValue {
   private Optional<String> claimValueCode;
 
   @Column(name = "clm_val_amt")
-  private BigDecimal claimValueAmount;
+  private Optional<BigDecimal> claimValueAmount;
 
   Optional<BigDecimal> getClaimValueAmount(String code) {
     return getAmountForCode(code);
   }
 
-  // todo integer version for blood type etc
+  Optional<Integer> getClaimValueQuantity(String code) {
+    return getQuantityForCode(code);
+  }  
+
   private Optional<BigDecimal> getAmountForCode(String code) {
-    return claimValueCode.flatMap(
-        c -> {
-          if (c.equals(code)) {
-            return Optional.of(claimValueAmount);
-          } else {
-            return Optional.empty();
-          }
-        });
+    return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount);
+  }
+
+  private Optional<Integer> getQuantityForCode(String code) {
+    return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount).map(BigDecimal::intValue);
   }
 }
