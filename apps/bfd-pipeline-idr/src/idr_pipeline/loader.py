@@ -14,7 +14,7 @@ from psycopg.rows import DictRow, dict_row
 from psycopg_pool.abc import ACT
 
 from .batch_worker import LoadingBatch, LoadingBatchWorkerClient
-from .constants import DEFAULT_MIN_DATE
+from .constants import DEFAULT_JOB_ID, DEFAULT_MIN_DATE
 from .db_utils import get_connection_string
 from .load_partition import LoadPartition, LoadType
 from .model.base_model import DbType, IdrBaseModel, LoadMode, T
