@@ -126,7 +126,7 @@
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.5.12</spring-data-jpa.version>
-        <spring-framework.version>6.2.18</spring-framework.version>
+        <spring-framework.version>6.2.19</spring-framework.version>
         <spring-retry.version>2.0.13</spring-retry.version>
         <spring-boot.version>3.5.15</spring-boot.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
@@ -182,7 +182,7 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <netty.version>4.1.135.Final</netty.version>
+        <netty.version>4.1.136.Final</netty.version>
         <jetty.version>12.1.7</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
