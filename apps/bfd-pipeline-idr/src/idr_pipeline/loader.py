@@ -334,7 +334,7 @@ class BatchLoader:
             sql += """
             (SELECT last_ts 
              FROM idr.load_progress
-             WHERE job_id = 1
+             WHERE job_id = {DEFAULT_JOB_ID}
                AND table_name = %(table)s
                AND batch_partition = %(partition)s
             )
