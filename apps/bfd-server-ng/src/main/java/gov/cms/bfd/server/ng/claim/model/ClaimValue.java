@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -28,13 +27,16 @@ class ClaimValue {
 
   Optional<Integer> getClaimValueQuantity(String code) {
     return getQuantityForCode(code);
-  }  
+  }
 
   private Optional<BigDecimal> getAmountForCode(String code) {
     return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount);
   }
 
   private Optional<Integer> getQuantityForCode(String code) {
-    return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount).map(BigDecimal::intValue);
+    return claimValueCode
+        .filter(c -> c.equals(code))
+        .flatMap(c -> claimValueAmount)
+        .map(BigDecimal::intValue);
   }
 }

@@ -25,9 +25,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
-  // todo ask if we can add professional nch and ss or needs to be kept as is for both professionals
-  // @Embedded private BloodPints bloodPints;
-
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
   /**

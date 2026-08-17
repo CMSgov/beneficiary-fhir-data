@@ -189,8 +189,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.profComponents as profComponents -> tgt as profTgt then addProfessionalItems(src, profTgt) "Add professional components";
     
-    src.claimValues as claimValues -> tgt as cvSiTgt where ($cvSiTgt in ('73')) then addSupportingClmVal(src, cvSiTgt) "Add Supporting info claim vals";
-    src.claimValues as claimValues -> tgt as cvAdTgt where ($cvAdTgt in ('A1' | 'Q0' | 'Q1' | 'QM' | '05' | '17' | '18' | '19' | '73' | '74' | '77')) then {
+    src.claimValues as claimValues -> tgt as cvSiTgt where ($cvSiTgt in ('37')) then addSupportingClmVal(src, cvSiTgt) "Add Supporting info claim vals";
+    src.claimValues as claimValues -> tgt as cvAdTgt where ($cvAdTgt in ('05' | '17' | '18' | '19' | '73' | '74' | '77' | 'A1' | 'Q0' | 'Q1' | 'QM')) then {
       addAdjudicationClmVal(src, cvAdTgt) "Add Adjudication claim vals";
     }
 

@@ -60,7 +60,6 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
             nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            // SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory),
             claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();

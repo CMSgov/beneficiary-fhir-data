@@ -130,8 +130,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                   .toFhirSupportingInfo(supportingInfoFactory)
                   .forEach(
                       si -> {
-                        eob.addSupportingInfo(
-                            si); // this calls supporting info, but doesn't populate for ss?
+                        eob.addSupportingInfo(si);
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
                       });
               item.getProcedure()
