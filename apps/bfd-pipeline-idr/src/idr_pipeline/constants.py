@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from .load_partition import LoadPartition, LoadPartitionGroup, PartitionType
-from .settings import PARTITION_TYPE
+from .settings import SETTINGS
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
@@ -70,7 +70,7 @@ IDR_PRIOR_AUTH_TABLE = f"{IDR_PRIOR_AUTH_PREFIX}.prauc"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
-match PARTITION_TYPE:
+match SETTINGS.partition_type:
     case "year" | "years":
         partition_range = relativedelta(years=1)
     case "month" | "months":
@@ -78,7 +78,7 @@ match PARTITION_TYPE:
     case "day" | "days":
         partition_range = relativedelta(days=1)
     case _:
-        raise ValueError("invalid partition type " + PARTITION_TYPE)
+        raise ValueError("invalid partition type " + SETTINGS.partition_type)
 
 PART_D_CLAIM_TYPE_CODES = [1, 2, 3, 4]
 

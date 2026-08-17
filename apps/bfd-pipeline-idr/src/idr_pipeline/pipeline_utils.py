@@ -34,7 +34,7 @@ from .model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowInc
 from .model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from .model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from .model.load_progress import LoadProgress
-from .settings import PRUNE_BATCH_LIMIT
+from .settings import SETTINGS
 
 _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
@@ -247,10 +247,10 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
@@ -275,10 +275,10 @@ def prune_bene_ma_part_d(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
@@ -312,10 +312,10 @@ def prune_bene_ma_part_d_rx(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
