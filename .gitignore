@@ -29,3 +29,5 @@
 *.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform/
+node_modules/
+

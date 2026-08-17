@@ -52,7 +52,8 @@ resource "aws_scheduler_schedule" "verifier" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "verifier" {
+module "log_group_verifier" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/lambda/${local.verifier_lambda_full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -83,7 +84,7 @@ resource "aws_lambda_function" "verifier" {
 
   logging_config {
     log_format = "Text"
-    log_group  = aws_cloudwatch_log_group.verifier.name
+    log_group  = module.log_group_verifier.name
   }
 
   environment {
