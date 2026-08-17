@@ -83,7 +83,7 @@ public final class TransformerConstants {
   public static final String BASE_URL_BBAPI_RESOURCES = "https://bluebutton.cms.gov/resources";
 
   /**
-   * The base URL/URI/system for FHIR output related to {@link CcwCodebookVariable}:
+   * The base URL/URI/system for FHIR output related to {@link CcwCodebookVariable}.
    *
    * <ul>
    *   <li>{@link Extension#getUrl()}
