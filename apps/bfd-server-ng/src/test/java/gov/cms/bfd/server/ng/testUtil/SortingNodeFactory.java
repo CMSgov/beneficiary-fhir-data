@@ -17,7 +17,9 @@ import java.util.TreeMap;
  */
 public class SortingNodeFactory extends JsonNodeFactory {
 
-  private static final Set<String> COMPONENT_ARRAYS = Set.of("supportingInfo", "careTeam", "procedure", "diagnosis", "item", "extension");
+  // List of component arrays (only for ExplanationOfBenefits at the moment) to be sorted
+  private static final Set<String> COMPONENT_ARRAYS =
+      Set.of("supportingInfo", "careTeam", "procedure", "diagnosis", "item", "extension");
 
   @Override
   public ObjectNode objectNode() {
@@ -31,7 +33,7 @@ public class SortingNodeFactory extends JsonNodeFactory {
 
     @Override
     public <T extends JsonNode> T set(String fieldName, JsonNode value) {
-      // only sort the lists of components we know / care about across all FHIR resources
+      // only sort the lists of components we care about across all FHIR resources
       if (COMPONENT_ARRAYS.contains(fieldName) && value instanceof ArrayNode) {
         sortArray((ArrayNode) value);
       }
