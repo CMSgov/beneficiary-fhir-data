@@ -71,7 +71,7 @@ from .settings import (
     "--job-id",
     envvar="IDR_JOB_ID",
     type=int,
-    default=1,
+    default=DEFAULT_JOB_ID,
     show_default=True,
     help="Job Id for the pipeline run. This is used to have concurrent runs.",
 )

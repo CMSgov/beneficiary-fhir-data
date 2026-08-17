@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_PARTITION
+from idr_pipeline.constants import DEFAULT_JOB_ID, DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
@@ -82,6 +82,7 @@ def _compare_table(
     model: type[T],
     partition: LoadPartition,
     num_rows: int,
+    job_id: int,
 ) -> bool:
     idr_extractor = SnowflakeExtractor(model, partition)
     # We must use pydantic-partial to create a partial model for some model types because not all
@@ -99,9 +100,10 @@ def _compare_table(
             FROM {LoadProgress.table()}
             WHERE batch_partition IN ({", ".join(_escape_sql_val(x) for x in partition_list)})
             AND table_name = %(table)s
+            AND job_id = %(job_id)s
             ORDER BY last_ts
             """,
-            {"table": model.table()},
+            {"table": model.table(), "job_id": job_id},
         )
 
         if progress:
@@ -129,6 +131,12 @@ def _compare_table(
                 """
             )
         )
+        if progress and progress.max_run_ts is not None:
+            base_claims_where_filters += f"""
+            AND (
+                {batch_timestamp_clause} <= '{progress.max_run_ts}'
+            )"""
+
         idr_query = (
             model.fetch_query(partition, datetime.now(UTC), Source.SNOWFLAKE)
             .replace("{COLUMNS}", columns)
@@ -272,12 +280,12 @@ def _comma_list(vals: Iterable[str]) -> str:
 
 
 def _wrap_compare(
-    model: type[IdrBaseModel], partition: LoadPartition, row_limit: int
+    model: type[IdrBaseModel], partition: LoadPartition, row_limit: int, job_id: int
 ) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
-    return (_compare_table(model, partition, row_limit), model, partition)
+    return (_compare_table(model, partition, row_limit), model, partition, job_id)
 
 
-def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
+def _compare_all(job_id: int) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
     now = datetime.now(UTC)
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
@@ -317,13 +325,16 @@ def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
             model,
             partition,
             _ROW_LIMIT,
+            job_id,
         )
 
 
 async def main() -> bool:
+
+    job_id = os.environ.get("IDR_JOB_ID",default=DEFAULT_JOB_ID)
     executor = ParallelStagesExecutor(max_workers=_MAX_PARALLELISM)
     results = [
-        x for x in itertools.chain.from_iterable(await executor.execute([_compare_all()])) if x
+        x for x in itertools.chain.from_iterable(await executor.execute([_compare_all(job_id)])) if x
     ]
     mismatches = [x for x in results if not x[0]]
 

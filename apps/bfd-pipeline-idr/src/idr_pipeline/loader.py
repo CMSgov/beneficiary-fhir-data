@@ -331,7 +331,7 @@ class BatchLoader:
                 null
             """
         else:
-            sql += """
+            sql += f"""
             (SELECT last_ts 
              FROM idr.load_progress
              WHERE job_id = {DEFAULT_JOB_ID}
@@ -352,7 +352,7 @@ class BatchLoader:
             sql += """
             ,max_run_ts = (SELECT last_ts 
                          FROM idr.load_progress
-                         WHERE job_id = {DEFAULT_JOB_ID}
+                         WHERE job_id = %(job_id)s
                            AND table_name = %(table)s
                            AND batch_partition = %(partition)s
                         )
