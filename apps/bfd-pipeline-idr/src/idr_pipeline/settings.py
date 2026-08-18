@@ -2,8 +2,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 from os import getenv
 
-MIN_CLAIM_LOAD_DATE = "2014-06-30"
-MIN_PRIOR_AUTH_LOAD_DATE = "2024-01-01"
+from .constants import MIN_CLAIM_LOAD_DATE, MIN_PRIOR_AUTH_LOAD_DATE
 
 
 class _Settings:
@@ -174,9 +173,12 @@ class _Settings:
         return int(getenv("IDR_PRUNE_BATCH_LIMIT", "10000"))
 
     @cached_property
-    def allow_extractor_query_logging(self) -> bool:
-        """Allow logging of Snowflake and Postgres SQL queries at the DEBUG level."""
-        return self._parse_bool_default_true("IDR_ALLOW_EXTRACTOR_QUERY_LOGGING")
+    def log_level(self) -> str:
+        return getenv("IDR_LOG_LEVEL", "INFO").upper()
+
+    @cached_property
+    def sql_log(self) -> bool:
+        return self._parse_bool_default_false("IDR_SQL_LOG")
 
     # IDR credentials, these are pulled from SSM in prod.
     # You likely don't want to touch these otherwise.

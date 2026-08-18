@@ -17,7 +17,7 @@ from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
 from snowflake.snowpark import Session
 
-from .constants import DEFAULT_MIN_DATE
+from .constants import DEFAULT_MIN_DATE, SQL_LOG_TYPE
 from .db_utils import get_connection_string
 from .load_partition import LoadPartition
 from .model.base_model import (
@@ -224,8 +224,7 @@ class PostgresExtractor(Extractor[T]):
         sql: str,
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
-        if SETTINGS.allow_extractor_query_logging:
-            logger.debug(sql)
+        logger.log(SQL_LOG_TYPE, sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -318,8 +317,7 @@ class SnowflakeExtractor(Extractor[T]):
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
         cur = None
-        if SETTINGS.allow_extractor_query_logging:
-            logger.debug(sql)
+        logger.log(SQL_LOG_TYPE, sql)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)

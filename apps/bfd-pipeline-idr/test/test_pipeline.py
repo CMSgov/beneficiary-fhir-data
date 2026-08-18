@@ -781,15 +781,10 @@ def _reset_db(
     load_from_csv(PostgresExecutor(conn), sample_path)  # type: ignore
 
 
-def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
+def _setup_pipeline_environment() -> None:
     # Info level logs obscure the error output when running tests
     # so we want to override this unless the calling process has set this explicitly
     os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-    os.environ["BFD_DB_ENDPOINT"] = info.host
-    os.environ["BFD_DB_PORT"] = str(info.port)
-    os.environ["BFD_DB_NAME"] = info.dbname
-    os.environ["BFD_DB_USERNAME"] = info.user
-    os.environ["BFD_DB_PASSWORD"] = info.password
     # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
     os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
@@ -801,6 +796,14 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
 
 
+def _setup_db_config(info: psycopg.ConnectionInfo) -> None:
+    os.environ["BFD_DB_ENDPOINT"] = info.host
+    os.environ["BFD_DB_PORT"] = str(info.port)
+    os.environ["BFD_DB_NAME"] = info.dbname
+    os.environ["BFD_DB_USERNAME"] = info.user
+    os.environ["BFD_DB_PASSWORD"] = info.password
+
+
 @pytest.fixture(scope="module")
 def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
     with PostgresContainer("postgres:16", driver="") as postgres:
@@ -809,12 +812,13 @@ def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
 
 
 def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
+    _setup_pipeline_environment()
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
-        _setup_pipeline_environment(conn.info)
+        _setup_db_config(conn.info)
         _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
     logger.remove()
 

@@ -18,11 +18,10 @@ from .constants import (
     CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    DEFAULT_PARTITION,
     PHASE_1_CUTOFF,
 )
 from .extractor import PostgresExtractor, SnowflakeExtractor, Source
-from .load_partition import LoadPartition
+from .load_partition import DEFAULT_PARTITION, LoadPartition
 from .loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
 from .model.base_model import (
     LoadMode,

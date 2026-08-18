@@ -10,9 +10,8 @@ from typing import TYPE_CHECKING, Any
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
-from idr_pipeline.load_partition import LoadPartition, LoadType
+from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
 from idr_pipeline.model.load_progress import LoadProgress
