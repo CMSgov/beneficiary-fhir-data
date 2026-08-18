@@ -9,6 +9,7 @@ on:
       - ".github/workflows/ci-python.yml"
 
   merge_group:
+  push:
 
 env:
   BASE_COMMIT: ""

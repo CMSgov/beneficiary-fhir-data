@@ -10,13 +10,12 @@ from typing import TYPE_CHECKING, Any
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
-from idr_pipeline.load_partition import LoadPartition, LoadType
+from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
 from idr_pipeline.model.load_progress import LoadProgress
-from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
+from idr_pipeline.parallel_executor import MultiprocessingExecutor, Stage
 from idr_pipeline.pipeline_stages import (
     BENE_AUX_TABLES,
     BENE_TABLES,
@@ -321,7 +320,7 @@ def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
 
 
 async def main() -> bool:
-    executor = ParallelStagesExecutor(max_workers=_MAX_PARALLELISM)
+    executor = MultiprocessingExecutor(max_workers=_MAX_PARALLELISM)
     results = [
         x for x in itertools.chain.from_iterable(await executor.execute([_compare_all()])) if x
     ]
