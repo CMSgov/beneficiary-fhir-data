@@ -9,6 +9,7 @@ import psycopg  # type: ignore
 from loguru import logger
 
 from .batch_worker import LoadingBatchWorkerManager
+from .constants import DEFAULT_JOB_ID
 from .db_utils import get_connection_string
 from .extractor import PostgresExecutor, SnowflakeExecutor
 from .load_events import (
@@ -27,9 +28,9 @@ from .model.base_model import LoadMode, Source
 from .pipeline_stages import StagedIdrPipeline
 from .settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    MAX_TASKS,
     TABLES_TO_LOAD,
     bfd_test_date,
+    max_tasks,
 )
 
 
@@ -66,19 +67,27 @@ from .settings import (
     show_default=True,
     help="Truncate tables before reloading",
 )
+@click.option(
+    "--job-id",
+    envvar="IDR_JOB_ID",
+    type=int,
+    default=DEFAULT_JOB_ID,
+    show_default=True,
+    help="Job Id for the pipeline run. This is used to have concurrent runs.",
+)
 def main(
     source: Source,
     load_mode: LoadMode,
     load_type: LoadType,
     seed_from: str | None,
     truncate: bool,
+    job_id: int,
 ) -> None:
     # Required to have loguru logging consistently configured across parallel pipeline nodes and
     # batch worker
     multiprocessing.set_start_method("spawn")
     # Setup the root logger _once_
     configure_logger()
-
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
@@ -87,13 +96,15 @@ def main(
             seed_from,
             truncate,
         )
-    run(source, load_mode, load_type)
+    run(source, load_mode, load_type, job_id)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
+def run(
+    source: Source, load_mode: LoadMode, load_type: LoadType, job_id: int = DEFAULT_JOB_ID
+) -> None:
     logger.info("load start")
     logger.info("load_type {}", load_type)
-
+    logger.info("job_id {}", job_id)
     start_time = resolve_test_date(load_mode)
 
     tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
@@ -116,12 +127,13 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     atexit.register(worker_manager.cleanup)
 
     staged_pipeline = StagedIdrPipeline(
-        max_workers=MAX_TASKS,
+        max_workers=max_tasks(),
         load_mode=load_mode,
         start_time=start_time,
         load_type=load_type,
         source=source,
         worker_client=worker_manager.client,
+        job_id=job_id,
         tables_to_load=tables_to_load,
     )
 

@@ -72,7 +72,11 @@ MIN_BATCH_COMPLETION_DATE = getenv("IDR_MIN_BATCH_COMPLETION_DATE")
 This is useful if you've already loaded some data and you do not want to reprocess
 any batches that have already completed before this date."""
 
-MAX_TASKS = int(getenv("IDR_MAX_TASKS", "32"))
+
+def max_tasks() -> int:
+    return int(getenv("IDR_MAX_TASKS", "32"))
+
+
 """Maximum concurrent tasks to run.
 Changing this has a drastic effect on the runtime.
 In prod, we want to run as many tasks as possible without running out of memory."""
