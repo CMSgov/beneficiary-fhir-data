@@ -152,7 +152,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Is the result set going to be empty for this beneficiary and time period?
+   * Returns if the result set going to be empty for this beneficiary and time period.
    *
    * <p>This result is eventually consistent with the state of the BFD database. The FilterManager's
    * knowledge of the state of the database lags the writes to the database by as much as a second.

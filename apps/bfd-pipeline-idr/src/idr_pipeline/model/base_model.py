@@ -48,7 +48,7 @@ from ..settings import (
     MIN_CLAIM_NCH_TRANSACTION_DATE,
     MIN_CLAIM_SS_TRANSACTION_DATE,
     MIN_PRIOR_AUTH_TRANSACTION_DATE,
-    PHASE_1_PRUNE_BATCH_LIMIT,
+    PRUNE_BATCH_LIMIT,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -869,6 +869,7 @@ def stale_phase_1_claims_query(
                 SELECT clm.clm_uniq_id 
                 FROM {header_table} clm
                 WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
+                AND clm.clm_uniq_id > 0
                 AND clm.clm_src_id IN ('{FISS_CLM_SOURCE}', '{MCS_CLM_SOURCE}', '{VMS_CLM_SOURCE}')
                 AND clm.bfd_updated_ts < %s
                 ORDER BY clm.bfd_updated_ts, clm.clm_uniq_id
@@ -880,7 +881,7 @@ def stale_phase_1_claims_query(
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
-            LIMIT {PHASE_1_PRUNE_BATCH_LIMIT}
+            LIMIT {PRUNE_BATCH_LIMIT}
         """,
         (cutoff_date, cutoff_date),
     )
@@ -916,4 +917,15 @@ def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
             WHEN {provider_qualifier_code} != '' THEN 1
             ELSE NULL
         END
+    """
+
+
+def stale_non_part_d_claims_query(claim_table: str) -> str:
+    return f"""
+        SELECT clm.clm_uniq_id
+        FROM {claim_table} clm
+        WHERE clm.clm_ltst_clm_ind = 'N'
+        AND clm.clm_uniq_id > 0
+        ORDER BY clm.clm_uniq_id
+        LIMIT {PRUNE_BATCH_LIMIT}
     """

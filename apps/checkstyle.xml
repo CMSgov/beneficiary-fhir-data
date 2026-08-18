@@ -27,15 +27,14 @@ checks and options -->
              Only allowed html tags exist
              Javadoc descriptions are not empty
         -->
-        <module name="JavadocStyle">
-            <property name="checkEmptyJavadoc" value="true" />
-        </module>
+        <module name="SummaryJavadoc" />
+
         <!-- Ensures non-local variables have docs.
              Note that ignoreNamePattern can be used to ignore patterns of names
              via RegEx if we want to avoid documenting certain variable names.
         -->
         <module name="JavadocVariable">
-            <property name="scope" value="public" />
+            <property name="accessModifiers" value="public" />
         </module>
 
         <!-- Ensures @Override is present when using @InheritDoc.

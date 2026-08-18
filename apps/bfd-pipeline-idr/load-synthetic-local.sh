@@ -2,24 +2,6 @@
 
 set -e
 
-read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? [yn] " -n 1 -r
-echo # (optional) move to a new line
-if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-  echo 'exiting'
-  exit 0
-fi
-
-DB_CLUSTER="bfd-${BFD_ENV}-aurora-cluster"
-readonly DB_CLUSTER
-BFD_DB_USERNAME="$(aws ssm get-parameter --name "/bfd/${BFD_ENV}/idr-pipeline/sensitive/db/username" --with-decryption --query "Parameter.Value" --output text)"
-readonly BFD_DB_USERNAME
-export BFD_DB_USERNAME
-BFD_DB_PASSWORD="$(aws ssm get-parameter --name "/bfd/${BFD_ENV}/idr-pipeline/sensitive/db/password" --with-decryption --query "Parameter.Value" --output text)"
-readonly BFD_DB_PASSWORD
-export BFD_DB_PASSWORD
-BFD_DB_ENDPOINT="$(aws rds describe-db-clusters --db-cluster-identifier "$DB_CLUSTER" --query "DBClusters[0].Endpoint" --output text)"
-readonly BFD_DB_ENDPOINT
-export BFD_DB_ENDPOINT
 IDR_USERNAME="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_username --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_USERNAME
 export IDR_USERNAME
@@ -39,7 +21,7 @@ IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitiv
 readonly IDR_SCHEMA
 export IDR_SCHEMA
 
-args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
+args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'local')
 if [[ -n "$1" ]]; then
   args+=('--seed-from' "$1")
 fi

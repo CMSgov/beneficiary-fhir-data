@@ -87,6 +87,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "60",
       "display" : "MEDICARE INPATIENT CLAIM"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "INPATIENT"
     }]
   },
   "subType" : {
