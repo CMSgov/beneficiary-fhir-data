@@ -11,7 +11,7 @@ class AdjudicationChargeClaimValue {
   private AdjudicationChargeClaimValue() {}
 
   @AllArgsConstructor
-  enum AdjudicationValueCodes {
+  enum AdjudicationClaimValueCodes {
     INSTNL_PRFNL("05", AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT),
     OPRTNL_OUTLR("17", AdjudicationChargeType.OPERATING_OUTLIER_AMOUNT),
     OPRTNL_DSPRPRTNT("18", AdjudicationChargeType.OPERATING_DISPROPORTIONATE_SHARE_AMOUNT),
@@ -43,7 +43,7 @@ class AdjudicationChargeClaimValue {
                               sumsByCode.merge(claimValueCode, claimValueAmount, BigDecimal::add)));
     }
 
-    return Arrays.stream(AdjudicationValueCodes.values())
+    return Arrays.stream(AdjudicationClaimValueCodes.values())
         .filter(valueCode -> sumsByCode.containsKey(valueCode.code))
         .map(valueCode -> valueCode.category.toFhirAdjudication(sumsByCode.get(valueCode.code)))
         .toList();

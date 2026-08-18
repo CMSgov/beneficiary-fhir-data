@@ -397,38 +397,38 @@ enum AdjudicationChargeType {
       "CLM_LINE_MDCR_COINSRNC_AMT",
       "Coinsurance Amount"),
   // begin clm val categories
-  BENE_INPATIENT_DEDUCTIBLE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-      "Beneficiary Inpatient (or other Part A) Deductible Amount"),
-  LOW_VOLUME_PAYMENT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_INSTNL_LOW_VOL_PMT_AMT",
-      "Low Volume Payment Amount"),
-  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_DSPRTNT_AMT",
-      "Operating Disproportionate Share Amount"),
   PROFESSIONAL_COMPONENT_CHARGE_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_INSTNL_PRFNL_AMT",
       "Professional Component Charge Amount"),
-  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_IME_AMT",
-      "Operating Indirect Medical Education Amount"),
   OPERATING_OUTLIER_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_OPRTNL_OUTLR_AMT",
       "Operating Outlier Amount"),
+  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_DSPRTNT_AMT",
+      "Operating Disproportionate Share Amount"),
+  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_IME_AMT",
+      "Operating Indirect Medical Education Amount"),
   SEQUESTRATION_REDUCTION_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_SQSTRTN_RDCTN_AMT",
       "Sequestration Adjustment Amount"),
+  LOW_VOLUME_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_INSTNL_LOW_VOL_PMT_AMT",
+      "Low Volume Payment Amount"),
   NEW_TECH_PAYMENT_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_MDCR_NEW_TECH_AMT",
       "New Technology Add-On Payment Amount"),
+  BENE_INPATIENT_DEDUCTIBLE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+      "Beneficiary Inpatient (or other Part A) Deductible Amount"),
   PBP_INCLUSION_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_PBP_INCLSN_AMT",
