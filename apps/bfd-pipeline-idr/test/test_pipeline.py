@@ -739,6 +739,11 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
 
     conn.execute("truncate table idr.load_progress")
     conn.commit()
+
+    cur = conn.execute("select * from idr.load_progress")
+    row = cur.fetchone()
+    assert row is None
+
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
@@ -763,8 +768,8 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
     assert row["bfd_prvdr_prscrbng_npi_type"] is None
-    assert row["bfd_claim_updated_ts"] >= latest_time
-    assert row["bfd_updated_ts"] >= latest_time
+    assert row["bfd_updated_ts"] == latest_time
+    assert row["bfd_claim_updated_ts"] == latest_time
 
     cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 580550863030")
     row = cur.fetchone()
@@ -874,6 +879,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
     os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
     os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
+    os.environ["IDR_MAX_TASKS"] = "1"
 
 
 @pytest.fixture(scope="module")
