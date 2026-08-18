@@ -53,7 +53,7 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
    */
   static Optional<PpsIndicatorCode> fromFISSCode(String code) {
     return Optional.of(
-        Stream.of(Valid.fromFISSIndicator(code.charAt(0)))
+        Stream.of(Valid.fromFISSIndicator(code != null && !code.isBlank() ? code.charAt(0) : 'N'))
             .map(v -> (PpsIndicatorCode) v)
             .findFirst()
             .orElseGet(() -> new Invalid(code)));
