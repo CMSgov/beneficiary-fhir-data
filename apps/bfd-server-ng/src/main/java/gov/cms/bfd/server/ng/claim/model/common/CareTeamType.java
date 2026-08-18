@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
@@ -36,6 +35,7 @@ public enum CareTeamType {
 
   /**
    * toFhir(), but returns a record with a practitioner and CareTeamComponent.
+   *
    * @param sequenceGenerator sequence generator
    * @param value value for practitioner
    * @param name name for practitioner
@@ -75,6 +75,7 @@ public enum CareTeamType {
 
   /**
    * Create a record from the careteam component.
+   *
    * @param practitioner associated practitioner
    * @param careTeam associated careteam component
    */
