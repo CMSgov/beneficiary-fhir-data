@@ -787,6 +787,7 @@ def _setup_pipeline_environment() -> None:
     os.environ.setdefault("IDR_LOG_LEVEL", "warning")
     # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
+    os.environ["IDR_MAX_TASKS"] = "4"
     os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
