@@ -754,7 +754,7 @@ def _advance_time(timestamp: datetime) -> None:
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor(), worker_manager)
-    worker_manager.cleanup()
+    worker_manager.cleanup(60)
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -766,7 +766,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     conn.commit()
     worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor(), worker_manager)
-    worker_manager.cleanup()
+    worker_manager.cleanup(60)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 
