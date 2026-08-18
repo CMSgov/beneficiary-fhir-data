@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess
-import time
+import sys
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -18,7 +18,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
-from idr_pipeline import Executor, run
+from idr_pipeline import Executor, LoadingBatchWorkerManager, get_connection_string, run
 from idr_pipeline.constants import IDR_BENE_HISTORY_TABLE
 from idr_pipeline.extractor import PostgresExecutor
 from idr_pipeline.load_events import IdrJobLoadEvent, IdrJobType
@@ -26,7 +26,7 @@ from idr_pipeline.load_partition import LoadType
 from idr_pipeline.load_synthetic import load_from_csv
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import LoadMode, Source
-from idr_pipeline.parallel_executor import MultithreadingExecutor
+from idr_pipeline.parallel_executor import MultiprocessingExecutor, MultithreadingExecutor
 from idr_pipeline.pydantic_utils import fields
 from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, SETTINGS
 
@@ -61,13 +61,15 @@ def _get_executor() -> Executor:
     # Only enable the multithreading executor if a debugger is attached
     # This makes debugging much simpler, but it is also a lot slower
     # So we only want to enable it when necessary
-
-    return MultithreadingExecutor(1)
-    # return MultiprocessingExecutor(SETTINGS.max_tasks)
+    if "pydevd" in sys.modules:
+        return MultithreadingExecutor(1)
+    return MultiprocessingExecutor(1)
 
 
 def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+    worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+    worker_manager.cleanup()
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 29
@@ -242,7 +244,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+    worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+    worker_manager.cleanup()
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -452,7 +456,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     else:
         make_it_stale_ts = datetime.now(UTC) + timedelta(days=60)
         _advance_time(make_it_stale_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL, _get_executor())
+        worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+        worker_manager.cleanup()
         cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
         assert cur.rowcount == 9
         rows = cur.fetchmany(1)
@@ -608,7 +614,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
         _advance_time(ss_clm_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+        worker_manager.cleanup()
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
         # in source_load_events nor has it been 24 hours since the last load of NCH data
@@ -646,7 +654,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
         _advance_time(nch_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+        worker_manager.cleanup()
 
         # Check for the NCH claim in the v3 idr schema
         cur = conn.execute(
@@ -707,7 +717,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
         _advance_time(ss_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), worker_manager)
+        worker_manager.cleanup()
 
         # Check for the SS claim in the v3 idr schema
         cur = conn.execute(
@@ -740,8 +752,9 @@ def _advance_time(timestamp: datetime) -> None:
 
 
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
-    time.sleep(5)
+    worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor(), worker_manager)
+    worker_manager.cleanup()
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -751,8 +764,9 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
 
     conn.execute("truncate table idr.load_progress")
     conn.commit()
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
-    time.sleep(5)
+    worker_manager = LoadingBatchWorkerManager(get_connection_string(LoadMode.SYNTHETIC))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor(), worker_manager)
+    worker_manager.cleanup()
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 

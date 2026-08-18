@@ -84,10 +84,18 @@ def main(
             seed_from,
             truncate,
         )
-    run(source, load_mode, load_type, MultiprocessingExecutor(SETTINGS.max_tasks))
+    worker_manager = LoadingBatchWorkerManager(get_connection_string(load_mode))
+    atexit.register(worker_manager.cleanup)
+    run(source, load_mode, load_type, MultiprocessingExecutor(SETTINGS.max_tasks), worker_manager)
 
 
-def run(source: Source, load_mode: LoadMode, load_type: LoadType, executor: Executor) -> None:
+def run(
+    source: Source,
+    load_mode: LoadMode,
+    load_type: LoadType,
+    executor: Executor,
+    worker_manager: LoadingBatchWorkerManager,
+) -> None:
     logger.info("load start")
     logger.info("load_type {}", load_type)
 
@@ -107,9 +115,6 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType, executor: Exec
         tables_to_load = get_tables_to_load(
             unreported_jobs | {event.job_type for event in idr_job_events}
         )
-
-    worker_manager = LoadingBatchWorkerManager(get_connection_string(load_mode))
-    atexit.register(worker_manager.cleanup)
 
     staged_pipeline = StagedIdrPipeline(
         executor=executor,
