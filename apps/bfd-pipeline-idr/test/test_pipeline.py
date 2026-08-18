@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import sys
 import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
@@ -27,7 +26,7 @@ from idr_pipeline.load_partition import LoadType
 from idr_pipeline.load_synthetic import load_from_csv
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import LoadMode, Source
-from idr_pipeline.parallel_executor import MultiprocessingExecutor, MultithreadingExecutor
+from idr_pipeline.parallel_executor import MultithreadingExecutor
 from idr_pipeline.pydantic_utils import fields
 from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, SETTINGS
 
@@ -62,9 +61,9 @@ def _get_executor() -> Executor:
     # Only enable the multithreading executor if a debugger is attached
     # This makes debugging much simpler, but it is also a lot slower
     # So we only want to enable it when necessary
-    if "pydevd" in sys.modules:
-        return MultithreadingExecutor(SETTINGS.max_tasks)
-    return MultiprocessingExecutor(SETTINGS.max_tasks)
+
+    return MultithreadingExecutor(1)
+    # return MultiprocessingExecutor(SETTINGS.max_tasks)
 
 
 def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
