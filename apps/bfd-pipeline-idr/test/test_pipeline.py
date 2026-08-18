@@ -861,7 +861,6 @@ def run_1() -> None:
 
 
 def run_2() -> None:
-    time.sleep(3)
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, 2)
 
 

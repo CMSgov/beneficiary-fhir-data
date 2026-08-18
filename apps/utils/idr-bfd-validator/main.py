@@ -282,7 +282,7 @@ def _comma_list(vals: Iterable[str]) -> str:
 def _wrap_compare(
     model: type[IdrBaseModel], partition: LoadPartition, row_limit: int, job_id: int
 ) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
-    return (_compare_table(model, partition, row_limit), model, partition, job_id)
+    return (_compare_table(model, partition, row_limit,job_id), model, partition, job_id)
 
 
 def _compare_all(job_id: int) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
