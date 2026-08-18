@@ -15,10 +15,10 @@ def _parse_bool_default_true(var_name: str) -> bool:
 
 # Tracking load progress is disabled for synthetic data loads.
 # Use this to force enabling load progress for testing.
-def force_load_progress() -> bool:
-    # We don't normally want to store the load progress info for synthetic data since the dates
-    # won't be in order like in prod. However, we need a way to override this for the tests.
-    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+def test_mode() -> bool:
+    # We don't normally want to perform some operations outside of production mode.
+    # However, we need a way to override this for the tests.
+    return _parse_bool_default_false("IDR_TEST_MODE")
 
 
 def bfd_test_date() -> datetime | None:

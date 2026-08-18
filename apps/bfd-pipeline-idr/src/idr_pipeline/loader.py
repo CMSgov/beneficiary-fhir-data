@@ -24,7 +24,7 @@ from .settings import (
     PER_BATCH_CONCURRENT_ROWS,
     PER_BATCH_MAX_CONNECTIONS,
     PER_BATCH_MIN_CONNECTIONS,
-    force_load_progress,
+    test_mode,
 )
 from .timer import Timer
 
@@ -492,6 +492,8 @@ class FullSyncBatchLoader(BatchLoader[T]):
         return data_loaded
 
     async def _delete_missing(self, cur: psycopg.AsyncCursor[Any], temp_tablename: str) -> int:
+        if self.load_mode != LoadMode.PROD and not test_mode():
+            return 0
         # We have to exclude our synthetic data that also exists in prod from deletion
         synthetic_data_filter = self.model.synthetic_data_filter()
         synthetic_where_clause = (
@@ -527,4 +529,4 @@ def _remove_null_bytes(val: DbType) -> DbType:
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
     # Whether to read/write load progress, which is disabled for synthetic and testing loads.
-    return load_mode == LoadMode.PROD or force_load_progress()
+    return load_mode == LoadMode.PROD or test_mode()

@@ -848,7 +848,7 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["BFD_DB_PASSWORD"] = info.password
     # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
-    os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+    os.environ["IDR_TEST_MODE"] = "1"
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
