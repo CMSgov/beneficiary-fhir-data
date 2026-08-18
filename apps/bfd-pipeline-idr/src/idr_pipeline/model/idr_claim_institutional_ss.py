@@ -57,7 +57,6 @@ from ..model.base_model import (
     clm_query,
     clm_rlt_cond_sgntr_query,
     clm_rlt_ocrnc_clause,
-    legacy_billing_npi_type_expr,
     legacy_institutional_specialty_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
@@ -418,12 +417,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
     prvdr_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
-    legacy_prvdr_blg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_billing_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_blg_prvdr_npi_type"},
-    ]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},

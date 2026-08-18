@@ -47,8 +47,6 @@ from ..model.base_model import (
     clm_orig_cntl_num_expr,
     clm_query,
     clm_rlt_ocrnc_clause,
-    legacy_billing_npi_type_expr,
-    legacy_professional_no_specialty_npi_type_expr,
     legacy_service_npi_type_expr_for_context,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
@@ -163,13 +161,6 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
-    legacy_prvdr_blg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_billing_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_blg_prvdr_npi_type"},
-    ]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -188,12 +179,6 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     ]
     prvdr_rfrg_prvdr_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}
-    ]
-    legacy_prvdr_rfrg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_professional_no_specialty_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_rfrg_prvdr_npi_type"},
     ]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,

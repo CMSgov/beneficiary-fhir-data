@@ -558,6 +558,8 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     latest_time = cast(datetime, row["max_ts"]) + timedelta(days=1)
     _advance_time(latest_time)
 
+    conn.execute("truncate table idr.load_progress")
+    conn.commit()
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
@@ -580,34 +582,14 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["bfd_updated_ts"] == latest_time
     assert row["bfd_claim_updated_ts"] == latest_time
 
-    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -8797257401798")
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 580550863030")
     row = cur.fetchone()
     assert row is not None
-    assert row["prvdr_srvc_prvdr_npi_num"] == "1066977889"
-    assert row["prvdr_srvc_prvdr_npi_type"] == 2
-    assert row["bfd_updated_ts"] == latest_time
-    assert row["bfd_claim_updated_ts"] == latest_time
-
-    cur = conn.execute("select * from idr.claim_professional_nch where clm_uniq_id = -506105595173")
-    row = cur.fetchone()
-    assert row is not None
-    assert row["prvdr_blg_prvdr_npi_num"] == "2672117233"
-    assert row["prvdr_blg_prvdr_npi_type"] == 1
-    # time.sleep(100000000)
-    # assert row["bfd_updated_ts"] == latest_time
-    # assert row["bfd_claim_updated_ts"] == latest_time
-    # Fix: should be latest_time but it's landing as old_update_ts instead. No update?
-    # Record not picked up?
-
-    cur = conn.execute(
-        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"
-    )
-    row = cur.fetchone()
-    assert row is not None
-    assert row["prvdr_blg_prvdr_npi_num"] == "1201886847"
-    assert row["prvdr_blg_prvdr_npi_type"] == 1
-    assert row["bfd_updated_ts"] == latest_time
-    assert row["bfd_claim_updated_ts"] == latest_time
+    assert row["prvdr_othr_prvdr_npi_num"] == "1320757457"
+    assert row["clm_othr_fed_prvdr_spclty_cd"] == "93"
+    assert row["prvdr_othr_prvdr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == old_update_ts
+    assert row["bfd_claim_updated_ts"] == old_update_ts
 
     cur = conn.execute(
         "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
@@ -637,16 +619,6 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["bfd_updated_ts"] == old_update_ts
     # bfd_claim_updated_ts updated in claim -8309297293881 header still since a different
     # npi_type (prvdr_rndrg_prvdr_npi_num) was actually updated. See above.
-
-    cur = conn.execute(
-        "select * from idr.claim_professional_nch where clm_uniq_id = -1104273987437"
-    )
-    row = cur.fetchone()
-    assert row is not None
-    assert row["prvdr_rfrg_prvdr_npi_num"] == "1789655200"
-    assert row["prvdr_rfrg_prvdr_npi_type"] == 1
-    assert row["bfd_updated_ts"] == latest_time
-    assert row["bfd_claim_updated_ts"] == latest_time
 
     cur = conn.execute(
         "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"

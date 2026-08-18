@@ -43,7 +43,6 @@ from ..model.base_model import (
     clm_orig_cntl_num_expr,
     clm_query,
     legacy_rx_prescribing_npi_type_expr,
-    legacy_rx_service_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     provider_npi_type_expr,
@@ -227,12 +226,6 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_srvc_prvdr_npi_type: Annotated[
         int | None,
         {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
-    ]
-    legacy_prvdr_srvc_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_rx_service_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_srvc_prvdr_npi_type"},
     ]
     prvdr_srvc_1st_name: Annotated[
         str,

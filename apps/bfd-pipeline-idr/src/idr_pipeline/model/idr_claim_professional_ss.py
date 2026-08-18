@@ -33,7 +33,6 @@ from ..model.base_model import (
     INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
-    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
@@ -49,8 +48,6 @@ from ..model.base_model import (
     clm_orig_cntl_num_expr,
     clm_query,
     clm_rlt_ocrnc_clause,
-    legacy_billing_npi_type_expr,
-    legacy_professional_no_specialty_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     provider_npi_type_expr,
@@ -212,12 +209,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
     prvdr_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
-    legacy_prvdr_blg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_billing_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_blg_prvdr_npi_type"},
-    ]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -237,12 +228,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     prvdr_rfrg_prvdr_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}
     ]
-    legacy_prvdr_rfrg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_professional_no_specialty_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_rfrg_prvdr_npi_type"},
-    ]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
@@ -256,12 +241,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     ]
     prvdr_othr_prvdr_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)}
-    ]
-    legacy_prvdr_othr_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: legacy_professional_no_specialty_npi_type_expr()},
-        {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_othr_prvdr_npi_type"},
     ]
     bfd_prvdr_othr_careteam_name: Annotated[
         str,

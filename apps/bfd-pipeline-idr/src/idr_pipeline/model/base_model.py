@@ -887,11 +887,6 @@ def stale_phase_1_claims_query(
     )
 
 
-def legacy_billing_npi_type_expr() -> str:
-    # billing did not have its npi type set before when it should have
-    return "NULL"
-
-
 def legacy_institutional_specialty_npi_type_expr(specialty_col: str) -> str:
     # claim_context = INSTITUTIONAL
     # Unknown / Default specialty codes / NULL resolve to npi type 1
@@ -914,12 +909,6 @@ def legacy_professional_specialty_npi_type_expr(specialty_col: str) -> str:
     """
 
 
-def legacy_professional_no_specialty_npi_type_expr() -> str:
-    # some of the professional npis don't use specialty code and no other logic exists to determine
-    # type so always NULL
-    return "NULL"
-
-
 def legacy_service_npi_type_expr_for_context(is_institutional: bool) -> str:
     return "1" if is_institutional else "NULL"
 
@@ -931,7 +920,3 @@ def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
             ELSE NULL
         END
     """
-
-
-def legacy_rx_service_npi_type_expr() -> str:
-    return "NULL"

@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from dateutil.relativedelta import relativedelta
 
 from .load_partition import LoadPartition, LoadPartitionGroup, PartitionType
@@ -8,7 +6,6 @@ from .settings import PARTITION_TYPE
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
 ALTERNATE_DEFAULT_DATE = "1000-01-01"
-NPI_TYPE_LOADED_DATE = datetime(2026, 8, 12, tzinfo=UTC)
 BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr.claim_rx"
 CLAIM_PROFESSIONAL_NCH_TABLE = "idr.claim_professional_nch"
