@@ -223,7 +223,7 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_srvc_prvdr_npi_type: Annotated[
+    bfd_srvc_prvdr_npi_type: Annotated[
         int | None,
         {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
     ]
@@ -243,14 +243,14 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_prscrbng_prvdr_npi_type: Annotated[
+    bfd_prvdr_prscrbng_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)}
     ]
     legacy_prvdr_prscrbng_prvdr_npi_type: Annotated[
         int | None,
         {EXPR: legacy_rx_prescribing_npi_type_expr("prvdr_prsbng_id_qlfyr_cd")},
         {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_prscrbng_prvdr_npi_type"},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_prscrbng_npi_type"},
     ]
     bfd_prvdr_prscrbng_careteam_name: Annotated[
         str,

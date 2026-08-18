@@ -161,6 +161,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -177,9 +178,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rfrg_prvdr_npi_type: Annotated[
-        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}
-    ]
+    bfd_prvdr_rfrg_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
@@ -191,14 +190,12 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_srvc_prvdr_npi_type: Annotated[
-        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)}
-    ]
+    bfd_prvdr_srvc_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)}]
     legacy_prvdr_srvc_prvdr_npi_type: Annotated[
         int | None,
         {EXPR: legacy_service_npi_type_expr_for_context(False)},
         {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_srvc_prvdr_npi_type"},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_srvc_npi_type"},
     ]
     bfd_prvdr_srvc_careteam_name: Annotated[
         str,

@@ -549,7 +549,7 @@ def _advance_time(timestamp: datetime) -> None:
     os.environ["BFD_TEST_DATE"] = timestamp.isoformat()
 
 
-def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
+def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
@@ -569,7 +569,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row is not None
     assert row["prvdr_prscrbng_prvdr_npi_num"] == "1789655200"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
-    assert row["prvdr_prscrbng_prvdr_npi_type"] == 1
+    assert row["bfd_prvdr_prscrbng_npi_type"] == 1
     assert row["bfd_updated_ts"] == old_update_ts
     assert row["bfd_claim_updated_ts"] == old_update_ts
 
@@ -578,7 +578,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row is not None
     assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
-    assert row["prvdr_prscrbng_prvdr_npi_type"] is None
+    assert row["bfd_prvdr_prscrbng_npi_type"] is None
     assert row["bfd_updated_ts"] == latest_time
     assert row["bfd_claim_updated_ts"] == latest_time
 
@@ -587,7 +587,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row is not None
     assert row["prvdr_othr_prvdr_npi_num"] == "1320757457"
     assert row["clm_othr_fed_prvdr_spclty_cd"] == "93"
-    assert row["prvdr_othr_prvdr_npi_type"] == 1
+    assert row["bfd_prvdr_othr_npi_type"] == 1
     assert row["bfd_updated_ts"] == old_update_ts
     assert row["bfd_claim_updated_ts"] == old_update_ts
 
@@ -598,7 +598,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     row = cur.fetchone()
     assert row is not None
     assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
-    assert row["prvdr_rndrg_prvdr_npi_type"] == 1
+    assert row["bfd_prvdr_rndrng_npi_type"] == 1
     assert row["bfd_updated_ts"] == latest_time
     # verify that bfd_claim_updated_ts on claim header table was updated as a result
     cur = conn.execute(
@@ -615,7 +615,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     row = cur.fetchone()
     assert row is not None
     assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
-    assert row["prvdr_rndrg_prvdr_npi_type"] is None
+    assert row["bfd_prvdr_rndrng_npi_type"] is None
     assert row["bfd_updated_ts"] == old_update_ts
     # bfd_claim_updated_ts updated in claim -8309297293881 header still since a different
     # npi_type (prvdr_rndrg_prvdr_npi_num) was actually updated. See above.
@@ -626,7 +626,7 @@ def _do_test_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     row = cur.fetchone()
     assert row is not None
     assert row["prvdr_srvc_prvdr_npi_num"] == "1819676937"
-    assert row["prvdr_srvc_prvdr_npi_type"] == 2
+    assert row["bfd_prvdr_srvc_npi_type"] == 2
     assert row["bfd_updated_ts"] == latest_time
     assert row["bfd_claim_updated_ts"] == latest_time
 
@@ -687,7 +687,6 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
-    os.environ["IDR_MAX_TASKS"] = "1"
 
 
 @pytest.fixture(scope="module")
@@ -716,12 +715,12 @@ def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -
     _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
 
 
-def test(postgres_db: tuple[PostgresContainer, str]) -> None:
+def test_legacy_npi_type_pipeline_update(postgres_db: tuple[PostgresContainer, str]) -> None:
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
         _setup_pipeline_environment(conn.info)
-        _do_test_legacy_npi_type_update(cast(Connection[DictRow], conn))
+        _do_legacy_npi_type_update(cast(Connection[DictRow], conn))
     logger.remove()

@@ -208,7 +208,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
+    bfd_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -225,9 +225,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rfrg_prvdr_npi_type: Annotated[
-        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}
-    ]
+    bfd_prvdr_rfrg_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
@@ -239,9 +237,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OTHR},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_othr_prvdr_npi_type: Annotated[
-        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)}
-    ]
+    bfd_prvdr_othr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)}]
     bfd_prvdr_othr_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OTHR, "OTHR")},

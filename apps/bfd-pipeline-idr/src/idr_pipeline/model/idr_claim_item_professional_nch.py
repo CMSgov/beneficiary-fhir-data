@@ -244,14 +244,14 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rndrg_prvdr_npi_type: Annotated[
+    bfd_prvdr_rndrng_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)}
     ]
-    legacy_prvdr_rndrg_prvdr_npi_type: Annotated[
+    legacy_prvdr_rndrng_prvdr_npi_type: Annotated[
         int | None,
         {EXPR: legacy_professional_specialty_npi_type_expr("clm_rndrg_fed_prvdr_spclty_cd")},
         {INSERT_EXCLUDE: True},
-        {NPI_TYPE_BACKFILL_COMPARE: "prvdr_rndrg_prvdr_npi_type"},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_rndrng_npi_type"},
     ]
     bfd_prvdr_rndrng_careteam_name: Annotated[
         str,

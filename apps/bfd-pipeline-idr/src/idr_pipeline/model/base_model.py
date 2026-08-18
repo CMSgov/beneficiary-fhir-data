@@ -631,7 +631,6 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def npi_type_backfill_compare_cols(cls) -> dict[str, str]:
-        # map to legacy npi-type column to check the real npi_type against so {legacy : actual}
         return {
             key: cast(str, meta)
             for key in cls.model_fields
@@ -888,8 +887,6 @@ def stale_phase_1_claims_query(
 
 
 def legacy_institutional_specialty_npi_type_expr(specialty_col: str) -> str:
-    # claim_context = INSTITUTIONAL
-    # Unknown / Default specialty codes / NULL resolve to npi type 1
     return f"""
         CASE
             WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
@@ -916,7 +913,7 @@ def legacy_service_npi_type_expr_for_context(is_institutional: bool) -> str:
 def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
     return f"""
         CASE
-            WHEN {provider_qualifier_code} <> '' THEN 1
+            WHEN {provider_qualifier_code} != '' THEN 1
             ELSE NULL
         END
     """
