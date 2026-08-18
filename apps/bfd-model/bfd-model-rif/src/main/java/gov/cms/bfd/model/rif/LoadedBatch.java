@@ -64,7 +64,7 @@ public class LoadedBatch {
 
   @Converter
   private static class BeneficiariesConverter implements AttributeConverter<List<Long>, String> {
-    public static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ",";
 
     public static String toBenesCsv(List<Long> benes) {
       if (benes == null) {

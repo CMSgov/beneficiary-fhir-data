@@ -72,6 +72,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "10",
       "display" : "MEDICARE HHA CLAIM"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "HHA"
     }]
   },
   "subType" : {
