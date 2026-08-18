@@ -2,9 +2,8 @@ import contextlib
 import os
 import signal
 import threading
-from abc import ABC, abstractmethod
 from collections.abc import Callable, Generator
-from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor
 from multiprocessing import Manager
 from queue import Empty, Queue
 from threading import Event
@@ -22,51 +21,7 @@ class ExternallyCanceled(Exception):
     pass
 
 
-class Executor(ABC):
-    @abstractmethod
-    async def execute[T](self, stages: list[Stage[T]]) -> list[list[T | None]]: ...
-
-    @staticmethod
-    async def _wait_for_future_result[T](future: Future[T]) -> T:
-        while not future.done():
-            await anyio.sleep(0.01)
-
-        return future.result()
-
-
-class MultithreadingExecutor(Executor):
-    """
-    Executor that uses multithreading instead of multiprocessing.
-
-    This is much slower than the multiprocessing executor due to blocking IO
-    so it should only be used for tests.
-    """
-
-    def __init__(self, max_workers: int | None = None) -> None:
-        self.max_workers: int | None = max_workers
-
-    async def execute[T](self, stages: list[Stage[T]]) -> list[list[T | None]]:
-        all_results: list[list[T | None]] = []
-        pool = ThreadPoolExecutor(self.max_workers)
-        for stage in stages:
-            results: dict[int, T | None] = {}
-            for i, task in enumerate(stage):
-
-                async def _task(
-                    task: StageTask[T] = task, idx: int = i, results: dict[int, T | None] = results
-                ) -> None:
-                    val = await self._wait_for_future_result(pool.submit(task))
-                    results[idx] = val
-
-                async with anyio.create_task_group() as tg:
-                    tg.start_soon(_task)
-
-            all_results.append([results[i] for i in range(len(results))])
-
-        return all_results
-
-
-class ParallelStagesExecutor(Executor):
+class ParallelStagesExecutor:
     def __init__(self, max_workers: int | None = None) -> None:
         self.max_workers: int | None = max_workers
         self._manager = Manager()
