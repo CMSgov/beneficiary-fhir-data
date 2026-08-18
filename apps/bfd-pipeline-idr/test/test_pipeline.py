@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -730,6 +731,7 @@ def _advance_time(timestamp: datetime) -> None:
 
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+    time.sleep(5)
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -740,6 +742,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     conn.execute("truncate table idr.load_progress")
     conn.commit()
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+    time.sleep(5)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 
