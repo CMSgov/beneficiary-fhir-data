@@ -38,7 +38,7 @@ jobs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
           ref: ${{ inputs.branch }}
@@ -54,12 +54,12 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
           ref: ${{ inputs.branch }}
       - name: 'Setup JDK'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           java-version: '25'
           distribution: 'corretto'
@@ -73,22 +73,22 @@ jobs:
     if: ${{ needs.workflow.outputs.files || (github.actor != 'actions-user' && github.ref_name == 'master') }}
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch }}
       - name: Node installation ISO sonarqube template analysis
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
       - name: 'Setup JDK'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           java-version: '25'
           distribution: 'corretto'
           cache: 'maven'
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
 
       - name: Mask sensitive AWS data
         id: mask-sensitive-aws-data
@@ -103,7 +103,7 @@ jobs:
           echo "::add-mask::$user_id"
 
       - name: Set env vars from AWS params
-        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        uses: cmsgov/cdap/actions/aws-params-env-action@e58035649536e98207b13977e894256f8c590be9 # main
         with:
           params: |
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key

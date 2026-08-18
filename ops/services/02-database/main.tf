@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6"
+      version = "6.52.0" # TODO: Replace with "~> 6" when ECS is fixed
     }
   }
 }
@@ -142,7 +142,7 @@ resource "aws_rds_cluster" "this" {
   allow_major_version_upgrade = false
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
-  engine_version              = "16.8"
+  engine_version              = "16.11"
   apply_immediately           = false
 
   backtrack_window                    = 0

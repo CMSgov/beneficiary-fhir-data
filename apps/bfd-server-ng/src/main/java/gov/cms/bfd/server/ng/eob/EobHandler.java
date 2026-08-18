@@ -9,12 +9,14 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
+import gov.cms.bfd.server.ng.claim.PriorAuthorizationRepository;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -46,11 +48,14 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
+  private final PriorAuthorizationRepository priorAuthorizationRepository;
   private final MetricRecorder metricRecorder;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
+
+  private static final Set<String> NONSENSITIVE_SYSTEMS = Set.of(SystemUrls.CMS_HIPPS);
 
   /**
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
@@ -86,15 +91,17 @@ public class EobHandler {
       Optional<RequestDetails> requestDetails) {
 
     var beneSk = criteria.beneSk();
-    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    var beneSimple = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
-    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+    if (beneSimple.isEmpty() || (beneSimple.get().getXrefSk() != beneSk)) {
       return new Bundle();
     }
+    var beneficiary = beneSimple.get();
 
     var repositoryCriteria =
         new ClaimSearchCriteria(
-            beneXrefSk.get(),
+            beneficiary.getXrefSk(),
+            beneficiary.getMbi(),
             criteria.claimThroughDate(),
             criteria.lastUpdated(),
             criteria.limit(),
@@ -104,7 +111,9 @@ public class EobHandler {
             criteria.outcomes(),
             criteria.sources());
 
-    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claimAndAuthResult = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claims = claimAndAuthResult.claims();
+    var priorAuths = claimAndAuthResult.priorAuths();
     var samhsaFilterMode = options.getSamhsaFilterMode();
 
     var bundle =
@@ -113,11 +122,16 @@ public class EobHandler {
             () -> {
               var filteredClaims =
                   filterSamhsaClaims(claims, samhsaFilterMode)
-                      .skip(repositoryCriteria.resolveOffset())
-                      .limit(repositoryCriteria.resolveLimitWithExtra(1))
                       .map(claim -> transformToFhir(claim, options));
+              var filteredPriorAuths =
+                  filterPriorAuthorizations(priorAuths, samhsaFilterMode)
+                      .map(priorAuth -> transformPriorAuthorizationToFhir(priorAuth, options));
+              var combinedResources =
+                  Stream.concat(filteredClaims, filteredPriorAuths)
+                      .skip(repositoryCriteria.resolveOffset())
+                      .limit(repositoryCriteria.resolveLimitWithExtra(1));
               return FhirUtil.bundleOrDefault(
-                  filteredClaims,
+                  combinedResources,
                   loadProgressRepository::lastUpdated,
                   requestDetails,
                   // we want the raw limit
@@ -153,6 +167,16 @@ public class EobHandler {
               .unordered()
               .filter(claim -> !claimHasSamhsa(claim))
               .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    };
+  }
+
+  private Stream<PriorAuthorization> filterPriorAuthorizations(
+      List<PriorAuthorization> priorAuths, SamhsaFilterMode samhsaFilterMode) {
+    var priorAuthStream = priorAuths.parallelStream();
+    return switch (samhsaFilterMode) {
+      case INCLUDE -> priorAuthStream;
+      case ONLY_SAMHSA -> priorAuthStream.filter(this::priorAuthorizationHasSamhsa);
+      case EXCLUDE -> priorAuthStream.filter(priorAuth -> !priorAuthorizationHasSamhsa(priorAuth));
     };
   }
 
@@ -201,12 +225,27 @@ public class EobHandler {
     return claim.toFhir(options, claimState);
   }
 
+  private ExplanationOfBenefit transformPriorAuthorizationToFhir(
+      PriorAuthorization priorAuth, ClaimFilterOptions options) {
+    var isSamhsa =
+        switch (options.getSamhsaFilterMode()) {
+          case ONLY_SAMHSA -> true;
+          case EXCLUDE -> false;
+          case INCLUDE -> priorAuthorizationHasSamhsa(priorAuth);
+        };
+
+    var securityStatus =
+        isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+    var claimState = ClaimState.builder().securityStatus(securityStatus).build();
+    return priorAuth.toFhir(claimState);
+  }
+
   private boolean isCodeSamhsa(
       String targetCode,
       LocalDate claimDate,
       SecurityLabel entry,
       String type,
-      long claimId,
+      String id,
       String system) {
     if (targetCode.isEmpty()) {
       return false;
@@ -215,9 +254,9 @@ public class EobHandler {
     if (isSamhsa) {
       LOGGER
           .atInfo()
-          .setMessage("SAMHSA claim filtered: type=" + type)
+          .setMessage("SAMHSA eob filtered: type=" + type)
           .addKeyValue("type", type)
-          .addKeyValue("claimId", claimId)
+          .addKeyValue("id", id)
           .addKeyValue("matchedCode", targetCode)
           .addKeyValue("system", system)
           .log();
@@ -246,11 +285,9 @@ public class EobHandler {
   }
 
   private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
-    var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
-    return entries.stream()
-        .anyMatch(
-            e -> isCodeSamhsa(drg, claimDate, e, "DRG", claimUniqueId, SystemUrls.CMS_MS_DRG));
+    return codeIsSamhsa(
+        drg, claimDate, String.valueOf(claimUniqueId), "DRG", List.of(SystemUrls.CMS_MS_DRG));
   }
 
   private boolean hcpcsIsSamhsa(
@@ -259,10 +296,12 @@ public class EobHandler {
       return false;
     }
     var hcpcs = hcpcsCode.get().getHcpcsCode().orElse("");
-    return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
-        .flatMap(s -> SECURITY_LABELS.get(s).stream().map(c -> Map.entry(s, c)))
-        .anyMatch(
-            e -> isCodeSamhsa(hcpcs, claimDate, e.getValue(), "HCPCS", claimUniqueId, e.getKey()));
+    return codeIsSamhsa(
+        hcpcs,
+        claimDate,
+        String.valueOf(claimUniqueId),
+        "HCPCS",
+        List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS));
   }
 
   // Checks ICDs.
@@ -280,32 +319,20 @@ public class EobHandler {
     // here.
     var icdIndicator = procedure.getIcdIndicator().orElse(IcdIndicator.ICD_10);
 
-    var procedureEntries = SECURITY_LABELS.get(icdIndicator.getProcedureSystem());
-    var diagnosisEntries = SECURITY_LABELS.get(icdIndicator.getDiagnosisSystem());
-
     var procedureHasSamhsa =
-        procedureEntries.stream()
-            .anyMatch(
-                pEntries ->
-                    isCodeSamhsa(
-                        procedureCode,
-                        claimDate,
-                        pEntries,
-                        "Procedure",
-                        claimUniqueId,
-                        icdIndicator.getProcedureSystem()));
-
+        codeIsSamhsa(
+            procedureCode,
+            claimDate,
+            String.valueOf(claimUniqueId),
+            "Procedure",
+            List.of(icdIndicator.getProcedureSystem()));
     var diagnosisHasSamhsa =
-        diagnosisEntries.stream()
-            .anyMatch(
-                dEntry ->
-                    isCodeSamhsa(
-                        diagnosisCode,
-                        claimDate,
-                        dEntry,
-                        "Diagnosis",
-                        claimUniqueId,
-                        icdIndicator.getDiagnosisSystem()));
+        codeIsSamhsa(
+            diagnosisCode,
+            claimDate,
+            String.valueOf(claimUniqueId),
+            "Diagnosis",
+            List.of(icdIndicator.getDiagnosisSystem()));
 
     return procedureHasSamhsa || diagnosisHasSamhsa;
   }
@@ -314,5 +341,35 @@ public class EobHandler {
     var entryStart = entry.getStartDate();
     var entryEnd = entry.getEndDate();
     return !entryStart.isAfter(claimDate) && !entryEnd.isBefore(claimDate);
+  }
+
+  private boolean codeIsSamhsa(
+      String code, LocalDate date, String id, String type, Collection<String> systems) {
+    return systems.stream()
+        .filter(system -> !NONSENSITIVE_SYSTEMS.contains(system))
+        .flatMap(
+            system -> SECURITY_LABELS.get(system).stream().map(label -> Map.entry(system, label)))
+        .anyMatch(entry -> isCodeSamhsa(code, date, entry.getValue(), type, id, entry.getKey()));
+  }
+
+  private boolean priorAuthorizationHasSamhsa(PriorAuthorization priorAuth) {
+    var priorAuthDate = priorAuth.getUniqueTrackingNumberPeriod().getStartDate();
+    return priorAuth.getItems().stream()
+        .anyMatch(item -> priorAuthorizationItemIsSamhsa(priorAuth, item, priorAuthDate));
+  }
+
+  private boolean priorAuthorizationItemIsSamhsa(
+      PriorAuthorization priorAuth, PriorAuthorizationItem item, LocalDate priorAuthDate) {
+    var code = item.getHcpcsOrCptOrHipps().getHcpcsOrCptOrHipps();
+    var claimType = priorAuth.getClaimType();
+
+    // Although PA can have a HIPPS code, HIPPS codes are not samhsa so we don't check HIPPS codes
+    // here.
+    return codeIsSamhsa(
+        code,
+        priorAuthDate,
+        priorAuth.getResourceId() + ":" + item.getCurrentSegment(),
+        "PriorAuth HCPCS/CPT/HIPPS",
+        List.of(item.getHcpcsOrCptOrHipps().getCodingSystem(claimType)));
   }
 }

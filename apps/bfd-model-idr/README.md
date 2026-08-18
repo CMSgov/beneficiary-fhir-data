@@ -27,9 +27,6 @@ npm --version
 brew install npm
 ```
 
-```sh
-npm install -g fsh-sushi fhirpath
-```
 
 ### Install packages  (via uv)
 
@@ -51,7 +48,7 @@ uv sync
 To compile the .fsh files from this folder
 
 ```sh
-cd sushi && sushi build && cd ..
+npm run sushi-build
 ```
 
 This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data.
@@ -91,6 +88,17 @@ python generate_prior_auth_sample.py --utn=<utn-here>
 ```
 
 This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
+
+#### EOB Sample Generator
+
+To generate a EOB sample that is not prior authorization.
+
+```sh
+uv run generate_eob_sample.py --clm-uniq-id <clm_uniq_id_here>
+```
+This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
+
+This will currently only work for Pharmacy types but will be continued to work on other types.
 
 ### Create FHIR files with synthetic data
 
@@ -191,6 +199,7 @@ The files output will be in the `out` folder:
 - `SYNTHETIC_BENE_XREF.csv`
 - `SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv`
 - `SYNTHETIC_BENE_LIS.csv`
+- `SYNTHETIC_BENE_LIS_CMBND.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT.csv`
 

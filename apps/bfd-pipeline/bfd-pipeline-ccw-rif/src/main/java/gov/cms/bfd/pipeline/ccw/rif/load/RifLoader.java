@@ -27,6 +27,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
@@ -457,7 +458,7 @@ public final class RifLoader {
     Optional<Beneficiary> oldBeneficiaryRecord = Optional.empty();
 
     /*
-     * Grab the the previous/current version of the Beneficiary (if any, as it exists in the
+     * Grab the previous/current version of the Beneficiary (if any, as it exists in the
      * database before applying the specified RifRecordEvent).
      */
     if (rifRecordEvent.getRecordAction() == RecordAction.UPDATE) {
@@ -475,8 +476,13 @@ public final class RifLoader {
           builder.equal(
               root.get(Beneficiary_.beneficiaryId), newBeneficiaryRecord.getBeneficiaryId()));
 
-      oldBeneficiaryRecord =
-          Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
+      try {
+        oldBeneficiaryRecord =
+            Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
+      } catch (NoResultException ex) {
+        LOGGER.error("Unable to find beneficiary {}", newBeneficiaryRecord.getBeneficiaryId());
+        throw ex;
+      }
     }
 
     /*

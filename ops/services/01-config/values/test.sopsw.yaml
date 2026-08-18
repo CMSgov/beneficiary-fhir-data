@@ -2,7 +2,7 @@
 /ab2d/${env}/bene-prefs/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:vQKgbhbybioDdfcjV7lrQ0D/ej1mB3jTD/qXje7c5acpMSKCMKrnOGGOWs/V/Gg3v3kA1Xb/pbERdTu6mcsu7831sBQayYwQ0T4sXRsGXOnBJyG4+kvOT8SN+qhwQYQTkFfzx1EeOAORDYKp3VlF821WZBL/LIvqJoN+mbJCi9lHE7SD5tWfLsSz8vi7WA==,iv:BZjVlnpwEPgCVAOULXxoKfBzXLcU/xXY8yjEo1mdWpw=,tag:p5Xt5iybNQsWZpKLqIb3zg==,type:str]
 /bb2/${env}/common/sensitive/account_id: ENC[AES256_GCM,data:E969h+qlIJTtfF9p,iv:n85zOmS43NRN9OS5UTRq9JA5PnwLbGvDBoZKA8YULCA=,tag:LLsOfRNqT8djWTKfGP0ybA==,type:str]
 /bb2/${env}/common/sensitive/legacy_account_id: ENC[AES256_GCM,data:8f+g1wiXPy/Gke53,iv:wqk3gBa4DBI0htsi4GVE1lvV02tq2jGqXTUIrBOFo9M=,tag:9mINhQ4Y8QAZXmGpJGz7Rg==,type:str]
-/bcda/${env}/bene-prefs/sensitive/bucket_iam_assumer_arns_json: ENC[AES256_GCM,data:mgWLZGLxQ2BiQO70DA3I/vIz93+7YeokkkqAAW0Z8xTshKpYVGKfXbwPhyErZHE0FNglMTaM1B0jMqNZFq2IQOvYYOQYrqaOOog9+EHjCS0hSpWe,iv:+tB6Aur6xTQquowpGVGhb1Fqm5yNmbsDvg4zM1hQrFI=,tag:7ZJde1ghRyalc1NTFvbpnQ==,type:str]
+/bcda/${env}/bene-prefs/sensitive/bucket_iam_assumer_arns_json: ENC[AES256_GCM,data:GQqeHRP26PfUcstsCCV4XuKjAzYULud97Ru5XN5MvunIbopDUtdCinU9ZOspcImkSMwlA247wYiaQTpd3Y/QmS8xyLs3r5vx7gihmLekGITY/tpuqBLy5qiRfKvg,iv:FEyIowto7dDsPOAzMjnD+o5bpzVtM7PkBsQZZQiDlZY=,tag:zidfwDSpdYsOtkq6YjH+4A==,type:str]
 /bcda/${env}/bene-prefs/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:ilu5+7kwh9RH0wYtVaDdsUTpGOhQyV0rjfU6+cjz6SHzKvhIgijZ1nG2dT1ghNhfmmewSXApMs8vJPhAbwCD9oDsa/+hBh4ELs9ApjviKwZK8bkN1StlXAQsHlvW99EhKOJEe16gGlU9grITQ/DAGhB/bv6rG1hYoNDH2TsF85+sFF4qDmhD8n8p,iv:CadeJ0Q/QjP9i5FKkmGPkI0qPSe3pqt3HX+ROie6h0s=,tag:+MkQrPf/J4gtsSoVibRyEA==,type:str]
 /bfd/${env}/common/sensitive/cloudbees_jenkins_subnets: ENC[AES256_GCM,data:SxWGZZXBjG4Pwa7C4+tf,iv:iyoPNH2abVXeWgk3OcmQQZBJRibdHeGiOXSHqjHIK8I=,tag:meLPJwBBJcc2VEMSHvyfkQ==,type:str]
 /bfd/${env}/common/sensitive/ec2_user_private_key: ENC[AES256_GCM,data:9ib+58Cf2CdV2o02uRmApfARLO7A24veEzYaxSGsLcuS5dScb/2XLQZO1VW6xOAYp0RcuvPOevn5iH/9E8s8V9tY3Xnhlm41CYal+AFy8mPFTKkH2KMkKKTfEGrjI6yVlWiok3PQS05kk3Io5Hp2ArqdTdjsbv8AOu1JFB81kYAEs08CXt8iDAcOzcK+BVUaPQbwJZzfl0cbtkXpspZndn67chRjepgFKRWp+lMHWTfZZoM9neWSFOJz9A96IbvhorpRzr/FB/fi08ovspZAXvmeQ7m+WK0py9B620PaYNml/zSFDIXZfgd0qT8QI0MIka4QUu1F0BTIsikvkcjR7FuAx18h4IArX7I4+NZawMM1fOQP1HaAAvYkb9m9GooWI1erfmcri0jrae6FgubHU+32Id/pPVX3B5u0NgJlGK3DNEcHGceE2vtzH5fjMYqTwwpkj4+dSyNXVIUAl5OQDyLdtLCpT7DSQfXckGugkx6oyrYAX+qM7SrCYYljIjK/PBKd/GvI0JT8JnQUAMK2Z1OSON2TqQGgXZzm8qME5gL+qUxCwf3CuW+W0G/2oayks2yp4OXzxc37jiwcvoGWpagngiQNpYH92Yg/yxdl+ooOnsLR89jxTTvDDBuQpCCzcT6YnjvxtsejVKnAuNjE8D1SxzOZvX5KTMvcoL/vfHxK42TIVDTkG2+mXUbP+XxPT0t+pKPVcKgHvcan7hlJYh1UCBQMWtvzpQNc2+dGVtQjN5wUpw4ZL4T42hR5VSbj2UmJWlsVJW7khMvhTDvDr1QiReFjRCE9vfR7LLi91WgXJYAiVqZXYd11eO4wXSNW4swpLgZMUEK/tOp1T1zLqw6OxxqfS73XhbqXgGV9WpBhlpR7mt04vpCzyEjSmr2kGO3YVDmJCXkdnwLf9Db0k89yeq4Cv0MY0iDkSms0ecg3pq2M02Twrj91yvAPpPqoEmZIq0pwN+TchAHImzWftNUpuz+TUAYo/cBAp/g+VgWLjHCVTJ6jlMdGfL4ZULoWkBi9T35Luin5mgsshlJWt0xuxpfDBTRKNsf6z4Iuu5i17LLwAXQKV9pImQgSSrKgtmGcIHY/dEorD9nirl4zSTnOVkBHURvm5pkBSORrkOGHG4UTuzDlEnrj1bNT1AdFstqv3VQsUG5YvAUwEV6o2FuDd60ukYuNc3J7zVceSoBe9NGEp7K1JGzqzjYH4w722BrhKyw1mzJ8KrRD7XNzzTd6j1rrta8pmjg+ZPBMVPkbKxEv/sXvq18mXk5Z3q9IpFYxZ+2xmFTvlAIjCE3AkoXIwGceO+RFoDOk/Dr8RNRo10qVcDWdnQPoCloGKWy7ZaH9Qs6Ew/fE7EQeNlSgtzJIOhSSyLoql2MwTSWrZ4GnT6TA5HFaLq+pvxf6xsWGo1fA7s9eg0eCb2mAG9tYBE95Xoft4Kuyk2osyxXuv/Ta9fwKhvHHZC4D1cg8/Ue0HBrRQK80jYjzMX2t/FprbOFyZVZ4cejRTPFZJCRWpDiQIeW5fXXea1wnXEWBSUWhL6rpk91y/cRUjwKdMzqxi9B5I6bWGlQ0W3MG3/oywlfGxi39g65r5jM7B3whZJLeVFw+oFVOVYs3QfBmqh5ArmDjsWYOmACPo/MUqE6TBFRhTHxdPc4J2fhYKEi5WZrPQPi5srG+XjCN+q/fjdGS4c8Vkn3E94tk6IEeBzLLMHdGdZz7e2M4RhJWxwvt7lkKPi8SRAuTgruwtb6Zb36FTI5fkqRiaTGs6GUjUM003jghydGH4MVRY+RAkuEE5wz3U6wuZ8YiVqsvJTKzRjml1sVCjOlOpv3X7Xg0Hk8SQIEnz8WpdKDCNDrQYXPDJoo4VmV1OmQ37MKlEMN+sGTZE2dDeEs302kA7nGXZtCGtH2uT7t77noBd/racEb1TaqiAMmp812Gn/PAb0TOrOf2rdpx5i1koslDLdkZltXnSwgA8JML+R7fT0J9oorjBxJL0TidtgQVhGaQKHWpQ7M2hWyaocw66ujwVYjbtR6077MyCTbw4kIBox5Kw4cciSMLAk+B9IP7xoi/MtFEo0c3CvHID79CrDOlhoutiY45EadjVhAslg7ejVgS2R5T/WoxJG4j46+6YZDXGbRSjw2cTsNA6TyPEbdnVLnUfPyqJMg8KNc5G4Fvd7dej5iI+3z0DYJvQ9YJcCAQSQt9WUbOFWSUZKhI92VWMZutihPkMirkJwgbM0d8,iv:sKYy2VOqUuZgVDGpbWt9KdFxrefugai7C29ehWYz5V8=,tag:xUTJID7YqF40t7nHvNpUug==,type:str]
@@ -145,6 +145,8 @@
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
@@ -231,6 +233,9 @@
 /bfd/${env}/server/nonsensitive/500_errors_alerter_log_lookback_seconds: "330"
 /bfd/${env}/server/nonsensitive/500_errors_alerter_slack_webhook: bfd_test
 /bfd/${env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_root_ca", "bluebutton_backend_test_data_server_client_test", "test_client_samhsa_cert", "regression_tests"]'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi: '{"name":"Blue Button API","certificateAliases":["bluebutton_backend_test_data_server_client_test", "bluebutton_root_ca","bb2_local_cert"]}'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bcda: '{"name":"BCDA","certificateAliases":["bcda_dev_client", "bcda_test_client", "bcda_local_client"]}'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d: '{"name":"AB2D","certificateAliases":["ab2d_cms_gov"]}'
 /bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test: |-
   -----BEGIN CERTIFICATE-----
   MIIFazCCA1OgAwIBAgIUURk0WIK7R+B9eXMNrSBDEuumRtIwDQYJKoZIhvcNAQEL
@@ -830,7 +835,7 @@
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-platform-slack-bfd-internal-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/alb/high_alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-slack-bfd-internal-alerts
@@ -855,4 +860,4 @@ sops:
       created_at: "2025-05-29T19:01:40Z"
       enc: AQICAHhpau57Qqqbkr+2cxoVjt0o2Zaxd2L7jNmxsbyVFDT0MQEqGU/PwMl3pk9IdqWUqI9CAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMmARy2S34ICP5wUvwAgEQgDvXh+WeKQmvwqEbtihdnqvHYoqiapk0lSt/inF43vO/fODplsEoO2X+n7ZpQI6ueNPLTpwgq85Ulyth4A==
   unencrypted_regex: /nonsensitive/
-  version: 3.13.1
+  version: 3.13.3

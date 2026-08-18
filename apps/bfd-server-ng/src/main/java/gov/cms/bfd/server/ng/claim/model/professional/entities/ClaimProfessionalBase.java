@@ -13,11 +13,17 @@ import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
 import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -135,11 +141,12 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addProviders(ExplanationOfBenefit eob) {
     getBillingProviderHistory()
         .toFhirNpiType()
-        .ifPresent(
+        .ifPresentOrElse(
             p -> {
-              eob.addContained(p);
               eob.setProvider(new Reference("#" + p.getId()));
-            });
+              eob.addContained(p);
+            },
+            () -> eob.setProvider(FhirUtil.setDataAbsentReasonUnknown(new Reference())));
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
+import gov.cms.bfd.server.ng.claim.model.PriorAuthorization;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
@@ -92,7 +93,7 @@ public class ClaimRepository {
   @Timed(value = "application.claim.search_by_id")
   public List<ClaimBase> findByIds(
       @MeterTag(key = "hasServiceUpdated", expression = "hasServiceUpdated()")
-          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimIdSearchCriteria criteria) {
@@ -172,9 +173,9 @@ public class ClaimRepository {
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
-  public List<ClaimBase> findByBeneXrefSk(
+  public ClaimAndAuthResult findByBeneXrefSk(
       @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
-          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
@@ -190,7 +191,7 @@ public class ClaimRepository {
             new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
-    var futures =
+    var claimFutures =
         ALL_CLAIM_TYPES.stream()
             .filter(claimTypeDefinition -> claimTypeDefinition.matchesSystemType(filterBuilders))
             .map(
@@ -199,10 +200,30 @@ public class ClaimRepository {
                         d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
             .toList();
 
-    metricRecorder.recordDistribution("application.claim.search_by_bene.fan_out", futures.size());
+    var includePriorAuth = filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
+    CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
+        includePriorAuth
+            ? asyncService.fetchPriorAuth(criteria.mbi())
+            : CompletableFuture.completedFuture(Collections.emptyList());
 
-    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-    Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());
-    return claims.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
+    List<CompletableFuture<?>> allFutures = new ArrayList<>(claimFutures);
+    allFutures.add(priorAuthFuture);
+    CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0])).join();
+
+    metricRecorder.recordDistribution(
+        "application.claim.search_by_bene.fan_out", allFutures.size());
+
+    Stream<ClaimBase> claimStream = claimFutures.stream().flatMap(f -> f.join().stream());
+    var claims = claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
+    var priorAuths = priorAuthFuture.join();
+    return new ClaimAndAuthResult(claims, priorAuths);
   }
+
+  /**
+   * Wrapper for the parallel results of claims and prior auth queries.
+   *
+   * @param claims list of claims found
+   * @param priorAuths list of prior authorizations found
+   */
+  public record ClaimAndAuthResult(List<ClaimBase> claims, List<PriorAuthorization> priorAuths) {}
 }

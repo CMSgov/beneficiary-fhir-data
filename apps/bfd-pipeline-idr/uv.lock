@@ -37,57 +37,6 @@ wheels = [
 ]
 
 [[package]]
-name = "bfd-pipeline-idr"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "anyio" },
-    { name = "click" },
-    { name = "cryptography" },
-    { name = "loguru" },
-    { name = "psycopg", extra = ["binary", "pool"] },
-    { name = "pydantic" },
-    { name = "python-dateutil" },
-    { name = "snowflake-connector-python" },
-    { name = "snowflake-snowpark-python" },
-    { name = "unidecode" },
-    { name = "usaddress" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "testcontainers" },
-    { name = "uv" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio" },
-    { name = "click", specifier = ">=8.3.3" },
-    { name = "cryptography", specifier = ">=46.0.5" },
-    { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
-    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
-    { name = "pydantic", specifier = ">=2.13.3" },
-    { name = "python-dateutil", specifier = ">=2.9.0" },
-    { name = "snowflake-connector-python", specifier = ">=4.4.0" },
-    { name = "snowflake-snowpark-python", specifier = ">=1.50.0" },
-    { name = "unidecode", specifier = ">=1.4.0" },
-    { name = "usaddress", specifier = ">=0.5.16" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pyright", specifier = ">=1.1.407" },
-    { name = "pytest", specifier = ">=9.0.1" },
-    { name = "ruff", specifier = ">=0.14.6" },
-    { name = "testcontainers", specifier = ">=4.13.3" },
-    { name = "uv", specifier = ">=0.11.15" },
-]
-
-[[package]]
 name = "boto3"
 version = "1.43.31"
 source = { registry = "https://pypi.org/simple" }
@@ -308,6 +257,59 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/cd/63/9496c57188a2ee585e0f1db071d75089a11e98aa86eb99d9d7618fc1edce/idna-3.18.tar.gz", hash = "sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848", size = 196711, upload-time = "2026-06-02T14:34:07.794Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl", hash = "sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2", size = 65455, upload-time = "2026-06-02T14:34:06.319Z" },
+]
+
+[[package]]
+name = "idr-pipeline"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "anyio" },
+    { name = "click" },
+    { name = "cryptography" },
+    { name = "loguru" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic" },
+    { name = "python-dateutil" },
+    { name = "snowflake-connector-python" },
+    { name = "snowflake-snowpark-python" },
+    { name = "tblib" },
+    { name = "unidecode" },
+    { name = "usaddress" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "testcontainers" },
+    { name = "uv" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio" },
+    { name = "click", specifier = ">=8.3.3" },
+    { name = "cryptography", specifier = ">=46.0.5" },
+    { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
+    { name = "pydantic", specifier = ">=2.13.3" },
+    { name = "python-dateutil", specifier = ">=2.9.0" },
+    { name = "snowflake-connector-python", specifier = ">=4.4.0" },
+    { name = "snowflake-snowpark-python", specifier = ">=1.50.0" },
+    { name = "tblib", specifier = ">=3.2.2" },
+    { name = "unidecode", specifier = ">=1.4.0" },
+    { name = "usaddress", specifier = ">=0.5.16" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pyright", specifier = ">=1.1.407" },
+    { name = "pytest", specifier = ">=9.0.1" },
+    { name = "ruff", specifier = ">=0.14.6" },
+    { name = "testcontainers", specifier = ">=4.13.3" },
+    { name = "uv", specifier = ">=0.11.15" },
 ]
 
 [[package]]
@@ -791,6 +793,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
+name = "tblib"
+version = "3.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/8a/14c15ae154895cc131174f858c707790d416c444fc69f93918adfd8c4c0b/tblib-3.2.2.tar.gz", hash = "sha256:e9a652692d91bf4f743d4a15bc174c0b76afc750fe8c7b6d195cc1c1d6d2ccec", size = 35046, upload-time = "2025-11-12T12:21:16.572Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/be/5d2d47b1fb58943194fb59dcf222f7c4e35122ec0ffe8c36e18b5d728f0b/tblib-3.2.2-py3-none-any.whl", hash = "sha256:26bdccf339bcce6a88b2b5432c988b266ebbe63a4e593f6b578b1d2e723d2b76", size = 12893, upload-time = "2025-11-12T12:21:14.407Z" },
 ]
 
 [[package]]

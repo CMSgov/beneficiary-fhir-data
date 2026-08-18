@@ -4,6 +4,7 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
@@ -45,7 +46,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
+public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -90,10 +91,24 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
     return Stream.concat(
             Stream.of(
                 nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory))),
+                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
+                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+                buildAuditStatusSupportingInfo()),
             buildRxSupportingInfo())
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  private Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      buildAuditStatusSupportingInfo() {
+    // since audit trail status codes can overlap between the different shared systems, we must
+    // specifically handle this code to use the actual corresponding display
+    return claimAuditTrailStatusCode
+        .flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, claimAuditTrailLocationCode))
+        .map(code -> code.toFhir(supportingInfoFactory));
   }
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>

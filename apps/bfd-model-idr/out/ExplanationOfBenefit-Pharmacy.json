@@ -61,6 +61,10 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "1",
       "display" : "MEDICARE PART D ORIGINAL CLAIM"
+    },
+    {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/EOB-TYPE",
+      "code" : "PDE"
     }]
   },
   "use" : "claim",

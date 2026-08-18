@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6"
+      version = "6.52.0" # TODO: Replace with "~> 6" when ECS is fixed
     }
   }
 }
@@ -35,6 +35,7 @@ locals {
     "bfd-platform-consume-idr-events",
     "bfd-platform-run-idr-pipeline",
     "bfd-platform-synthea-generation",
+    "bfd-platform-idr-bfd-validator",
     # base container image repositories
     "bfd-platform-base-python",
     "bfd-platform-base-java",
@@ -42,6 +43,7 @@ locals {
     # sidecar container image repositories
     "bfd-platform-mount-certstores",
     "bfd-platform-server-fluent-bit",
+    "bfd-platform-server-datadog-agent",
     # application container image repositories
     "bfd-platform-idr-pipeline",
     "bfd-platform-migrator-ng",

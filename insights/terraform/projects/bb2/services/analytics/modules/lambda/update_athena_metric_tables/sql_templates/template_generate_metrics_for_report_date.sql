@@ -157,7 +157,8 @@ request_response_middleware_events AS (
           OR path LIKE '/v1/fhir%'
           OR path LIKE '/v2/fhir%'
           OR path LIKE '/v3/fhir%'
-          OR path LIKE '/v%/o/token%/'
+          OR path LIKE '/v%/o/token/'
+          OR path LIKE '/v%/o/token'
         )
     )
 ),
@@ -668,7 +669,19 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
       ) app_all_sdk_requests_python_count,
       "sum"(
        app_sdk_requests_node_count
-      ) app_all_sdk_requests_node_count
+      ) app_all_sdk_requests_node_count,
+      "sum"(
+        app_successful_client_credentials_call
+      ) app_all_successful_client_credentials_call,
+      "sum"(
+        app_unsuccessful_client_credentials_call
+      ) app_all_unsuccessful_client_credentials_call,
+      "sum"(
+        app_successful_patient_match_call
+      ) app_all_successful_patient_match_call,
+      "sum"(
+        app_unsuccessful_patient_match_call
+      ) app_all_unsuccessful_patient_match_call
     FROM
       ${ENV}_${BASENAME_PER_APP}
     WHERE
@@ -1515,41 +1528,59 @@ SELECT
       )
   ) as auth_v3_user_makes_it_to_permission_screen_bene_count,
   (
-    select
-      count(*)
-    from
-      api_audit_events
-    WHERE
-      (
-        CONTAINS((SELECT enabled_metrics_list FROM report_params),
-          'auth_v1_v2_user_clicks_connect_bene_count')
-        AND (
-          try_cast(crosswalk_fhir_id as BIGINT) > 0
-          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
-        )
-        AND type = 'Authorization'
-        AND 
-        ( path LIKE '/v1/o/authorize%'
-          OR path LIKE '/v2/o/authorize%'
-        )
-      )
+    SELECT COUNT(*)
+    FROM (
+        SELECT
+            path,
+            crosswalk_fhir_id_v3,
+            crosswalk_fhir_id
+        FROM
+            api_audit_events
+        WHERE
+            (
+                CONTAINS((SELECT enabled_metrics_list FROM report_params),
+                    'auth_v1_v2_user_clicks_connect_bene_count')
+                AND (
+                    try_cast(crosswalk_fhir_id as BIGINT) > 0
+                    OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
+                )
+                AND type = 'Authorization'
+                AND (
+                    path LIKE '/v1/o/authorize%'
+                    OR path LIKE '/v2/o/authorize%'
+                )
+            )
+        GROUP BY
+            path,
+            crosswalk_fhir_id_v3,
+            crosswalk_fhir_id
+    ) AS grouped_results
   ) as auth_v1_v2_user_clicks_connect_bene_count,
   (
-    select
-      count(*)
-    from
-      api_audit_events
-    WHERE
-      (
-        CONTAINS((SELECT enabled_metrics_list FROM report_params),
-          'auth_v3_user_clicks_connect_bene_count')
-        AND (
-          try_cast(crosswalk_fhir_id as BIGINT) > 0
-          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
-        )
-        AND type = 'Authorization'
-        AND path LIKE '/v3/o/authorize%'
-      )
+    SELECT COUNT(*)
+    FROM (
+        SELECT
+            path,
+            crosswalk_fhir_id_v3,
+            crosswalk_fhir_id
+        FROM
+            api_audit_events
+        WHERE
+            (
+                CONTAINS((SELECT enabled_metrics_list FROM report_params),
+                    'auth_v3_user_clicks_connect_bene_count')
+                AND (
+                    try_cast(crosswalk_fhir_id as BIGINT) > 0
+                    OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
+                )
+                AND type = 'Authorization'
+                AND path LIKE '/v3/o/authorize%'
+            )
+        GROUP BY
+            path,
+            crosswalk_fhir_id_v3,
+            crosswalk_fhir_id
+    ) AS grouped_results
   ) as auth_v3_user_clicks_connect_bene_count,
   (
     select

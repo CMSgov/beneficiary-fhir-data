@@ -53,6 +53,10 @@ copy:
   - /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds
   - /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id
   - /bfd/${env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json
+  - /bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi
+  - /bfd/${env}/server-ng/nonsensitive/cert_partners/bcda
+  - /bfd/${env}/server-ng/nonsensitive/cert_partners/dpc
+  - /bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d
   - /bfd/${env}/server/sensitive/server_keystore_base64
   - /bfd/${env}/server/nonsensitive/client_certificates # copy all client_certificates recursively
   - /bfd/${env}/server/sensitive/service_port
@@ -108,6 +112,8 @@ values:
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: UNDEFINED
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
   /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
+  /bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
+  /bfd/${env}/idr-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
   /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21

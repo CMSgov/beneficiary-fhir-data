@@ -74,7 +74,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
      * that handler does not fire (say, due to a Jetty defect) clear it now before the request starts.
      */
     BfdMDC.clear();
-    ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request);
+    ContentCachingRequestWrapper reqWrapper = new ContentCachingRequestWrapper(request, 0);
     ContentCachingResponseWrapper resWrapper = new ContentCachingResponseWrapper(response);
     // Requests aren't cached until their parameters have been accessed.
     reqWrapper.getParameterMap();
