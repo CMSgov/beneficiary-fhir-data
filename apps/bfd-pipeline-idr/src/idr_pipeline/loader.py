@@ -450,13 +450,13 @@ class BatchLoader:
         await cur.execute("SET LOCAL synchronous_commit TO OFF")
 
         params: dict[str, DbType] = {"timestamp": timestamp}
-        self.on_conflict_clause = self.on_conflict_clause.format(temp_tablename=temp_tablename)
+        on_conflict_clause = self.on_conflict_clause.format(temp_tablename=temp_tablename)
 
         await cur.execute(
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
-            ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
+            ON CONFLICT ({self.primary_keys_str}) {on_conflict_clause}
             RETURNING {self.updated_keys_returning_str}
             ''',  # type: ignore
             params,
