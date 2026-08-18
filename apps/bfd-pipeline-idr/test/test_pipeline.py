@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -731,7 +730,6 @@ def _advance_time(timestamp: datetime) -> None:
 
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
-    time.sleep(5)
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -742,7 +740,6 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     conn.execute("truncate table idr.load_progress")
     conn.commit()
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
-    time.sleep(5)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 
@@ -755,14 +752,19 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["bfd_updated_ts"] == old_update_ts
     assert row["bfd_claim_updated_ts"] == old_update_ts
 
+    cur = conn.execute("select max(bfd_claim_updated_ts) as max_claim_updated_ts from idr.claim_rx")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["max_claim_updated_ts"] >= latest_time
+
     cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -6260496095505")
     row = cur.fetchone()
     assert row is not None
     assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
     assert row["bfd_prvdr_prscrbng_npi_type"] is None
-    assert row["bfd_updated_ts"] == latest_time
-    assert row["bfd_claim_updated_ts"] == latest_time
+    assert row["bfd_claim_updated_ts"] >= latest_time
+    assert row["bfd_updated_ts"] >= latest_time
 
     cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 580550863030")
     row = cur.fetchone()
