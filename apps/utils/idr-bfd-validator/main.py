@@ -17,7 +17,15 @@ from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
-from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
+from idr_pipeline.model.base_model import (
+    ALIAS_CLM,
+    DbType,
+    IdrBaseModel,
+    LoadMode,
+    Source,
+    T,
+    transform_default_date_to_null,
+)
 from idr_pipeline.model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from idr_pipeline.model.load_progress import LoadProgress
 from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
@@ -186,10 +194,7 @@ def _compare_table(
 
         idr_values = idr_extractor.extract_many(idr_query, {})
         idr_rows = [
-            {
-                k: v if not isinstance(v, datetime) or v.tzinfo else v.replace(tzinfo=UTC)
-                for k, v in row.model_dump().items()
-            }
+            {k: _fix_idr_val(v) for k, v in row.model_dump().items()}
             for batch in idr_values
             for row in batch
         ]
@@ -226,7 +231,11 @@ def _compare_table(
             ", ".join(log_redact_pkeys),
         )
         bfd_values = bfd_extractor.extract_many(bfd_query, {})
-        bfd_rows = [row.model_dump() for batch in bfd_values for row in batch]
+        bfd_rows = [
+            {k: _fix_bfd_val(model, k, v) for k, v in row.model_dump().items()}
+            for batch in bfd_values
+            for row in batch
+        ]
 
         logger.opt(lazy=True).debug(
             "bfd rows: \n{}",
@@ -344,6 +353,39 @@ def _compare_table(
         )
 
         return all(x.result == RowValidationResult.SUCCESS for x in results) and row_lengths_match
+
+
+def _fix_idr_val(val: DbType) -> DbType:
+    match val:
+        case str() as s:
+            return s.strip("\x00")  # Some columns somehow come back NUL-terminated
+        case datetime() as d:
+            return d.replace(tzinfo=UTC) if not d.tzinfo else d
+        case _:
+            return val
+
+
+def _fix_bfd_val(model: type[IdrBaseModel], col: str, val: DbType) -> DbType | None:
+    if model == IdrClaimItemInstitutionalNch:
+        match (col, val):
+            case ("clm_line_instnl_rev_ctr_dt", date() as d):
+                # Some rows in the BFD DB still have `1001-01-01` when the equivalent IDR row
+                # returns `null`. We need to replace those values with null as those are treated
+                # as null
+                return transform_default_date_to_null(d)
+            case _:
+                pass
+
+    match val:
+        case datetime() as d:
+            # Some primery key columns (specifically bene_cmbnd_deemd_efctv_dt for
+            # idr.beneficiary_low_income_subsidy_cmbnd) are stored in the BFD DB as dates but are
+            # represented in the model as datetimes. These columns have no tzinfo, and so when
+            # we try to compare IDR to BFD rows after fixing IDR datetimes the BFD rows are not
+            # found as they _technically_ are not the same due to missing the tzinfo.
+            return d.replace(tzinfo=UTC) if not d.tzinfo else d
+        case _:
+            return val
 
 
 def _get_row_pkey(
