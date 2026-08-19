@@ -492,14 +492,11 @@ class FullSyncBatchLoader(BatchLoader[T]):
         return data_loaded
 
     async def _delete_missing(self, cur: psycopg.AsyncCursor[Any], temp_tablename: str) -> int:
-        if self.load_mode != LoadMode.PROD and not test_mode():
-            return 0
-        # We have to exclude our synthetic data that also exists in prod from deletion
+        # We have to exclude our synthetic data that also exists in prod from deletion. We also want
+        # to do this for synthetic loads, expect for our pipeline tests
         synthetic_data_filter = self.model.synthetic_data_filter()
         synthetic_where_clause = (
-            f"WHERE {synthetic_data_filter}"
-            if synthetic_data_filter and self.load_mode != LoadMode.SYNTHETIC
-            else ""
+            f"WHERE {synthetic_data_filter}" if synthetic_data_filter and not test_mode() else ""
         )
         result = await cur.execute(  # type: ignore
             f'''
