@@ -33,6 +33,7 @@ from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, enable_prior_auth_ingesti
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
 
+# Forces runners to use spawn instead of the default fork when running tests
 multiprocessing.set_start_method("spawn", force=True)
 
 
@@ -742,10 +743,6 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
 
     conn.execute("truncate table idr.load_progress")
     conn.commit()
-
-    cur = conn.execute("select * from idr.load_progress")
-    row = cur.fetchone()
-    assert row is None
 
     run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
 
