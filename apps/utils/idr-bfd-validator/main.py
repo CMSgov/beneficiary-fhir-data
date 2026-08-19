@@ -134,12 +134,11 @@ def _compare_table(
     )
     load_progress_extractor = PostgresExtractor(LoadProgress, DEFAULT_PARTITION, LoadMode.PROD)
     with logger.contextualize(table=model.table(), part=partition.name):
-        partition_list = [p.name for p in model.model_type().partitions]
         progress = load_progress_extractor.extract_single(
             f"""
             SELECT DISTINCT ON (last_ts) *
             FROM {LoadProgress.table()}
-            WHERE batch_partition IN ({", ".join(_escape_sql_val(x) for x in partition_list)})
+            WHERE batch_partition = {_escape_sql_val(partition.name)}
             AND table_name = %(table)s
             ORDER BY last_ts
             """,
