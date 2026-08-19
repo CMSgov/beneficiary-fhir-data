@@ -30,6 +30,7 @@ from ..model.base_model import (
     INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -37,7 +38,9 @@ from ..model.base_model import (
     clm_base_query,
     clm_child_query,
     clm_query,
+    legacy_professional_specialty_npi_type_expr,
     provider_careteam_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -241,6 +244,15 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
+    ]
+    bfd_prvdr_rndrng_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)}
+    ]
+    legacy_prvdr_rndrng_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_professional_specialty_npi_type_expr("clm_rndrg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_rndrng_npi_type"},
     ]
     bfd_prvdr_rndrng_careteam_name: Annotated[
         str,

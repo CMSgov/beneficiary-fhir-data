@@ -1,7 +1,6 @@
 import atexit
 import multiprocessing
 import sys
-from datetime import UTC, datetime
 
 import anyio
 import click
@@ -22,14 +21,14 @@ from .load_events import (
 )
 from .load_partition import LoadType
 from .load_synthetic import load_from_csv
+from .loader import resolve_test_date
 from .logger_config import configure_logger
 from .model.base_model import LoadMode, Source
 from .pipeline_stages import StagedIdrPipeline
 from .settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    MAX_TASKS,
     TABLES_TO_LOAD,
-    bfd_test_date,
+    max_tasks,
 )
 
 
@@ -116,7 +115,7 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     atexit.register(worker_manager.cleanup)
 
     staged_pipeline = StagedIdrPipeline(
-        max_workers=MAX_TASKS,
+        max_workers=max_tasks(),
         load_mode=load_mode,
         start_time=start_time,
         load_type=load_type,
@@ -160,11 +159,3 @@ def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
             )
 
         logger.complete()
-
-
-def resolve_test_date(load_mode: LoadMode) -> datetime:
-    test_date = bfd_test_date()
-
-    if test_date and load_mode != LoadMode.PROD:
-        return test_date
-    return datetime.now(UTC)

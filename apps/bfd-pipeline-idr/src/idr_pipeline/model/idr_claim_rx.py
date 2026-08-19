@@ -27,8 +27,10 @@ from ..model.base_model import (
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -40,8 +42,10 @@ from ..model.base_model import (
     clm_dt_sgntr_query,
     clm_orig_cntl_num_expr,
     clm_query,
+    legacy_rx_prescribing_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -219,6 +223,10 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
+    bfd_srvc_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
+    ]
     prvdr_srvc_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_SRVC},
@@ -234,6 +242,15 @@ class IdrClaimRx(IdrBaseModel):
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_string),
+    ]
+    bfd_prvdr_prscrbng_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)}
+    ]
+    legacy_prvdr_prscrbng_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_rx_prescribing_npi_type_expr("prvdr_prsbng_id_qlfyr_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_prscrbng_npi_type"},
     ]
     bfd_prvdr_prscrbng_careteam_name: Annotated[
         str,
