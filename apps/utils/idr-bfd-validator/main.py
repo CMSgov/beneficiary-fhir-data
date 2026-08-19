@@ -62,6 +62,7 @@ _IGNORED_COLS_PER_MODEL = {
         # so they may differ. This is an accepted compromise, so we must avoid checking them
         (*CLAIM_TABLES, *CLAIM_AUX_TABLES): {
             "bfd_prvdr_prscrbng_careteam_name",
+            "bfd_prvdr_rndrng_careteam_name",
             "bfd_prvdr_blg_last_or_lgl_name",
             "bfd_prvdr_rfrg_careteam_name",
             "bfd_prvdr_srvc_careteam_name",
