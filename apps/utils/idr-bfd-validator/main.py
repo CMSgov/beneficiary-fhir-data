@@ -5,7 +5,7 @@ import os
 import sys
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum, auto
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, cast
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION
+from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
@@ -26,7 +26,22 @@ from idr_pipeline.model.base_model import (
     T,
     transform_default_date_to_null,
 )
+from idr_pipeline.model.idr_beneficiary_low_income_subsidy_cmbnd import (
+    IdrBeneficiaryLowIncomeSubsidyCmbnd,
+)
 from idr_pipeline.model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
+from idr_pipeline.model.idr_beneficiary_ma_part_d_enrollment_rx import (
+    IdrBeneficiaryMaPartDEnrollmentRx,
+)
+from idr_pipeline.model.idr_claim_institutional_nch import IdrClaimInstitutionalNch
+from idr_pipeline.model.idr_claim_institutional_ss import IdrClaimInstitutionalSs
+from idr_pipeline.model.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
+from idr_pipeline.model.idr_claim_item_institutional_ss import IdrClaimItemInstitutionalSs
+from idr_pipeline.model.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from idr_pipeline.model.idr_claim_item_professional_ss import IdrClaimItemProfessionalSs
+from idr_pipeline.model.idr_claim_professional_nch import IdrClaimProfessionalNch
+from idr_pipeline.model.idr_claim_professional_ss import IdrClaimProfessionalSs
+from idr_pipeline.model.idr_claim_rx import IdrClaimRx
 from idr_pipeline.model.load_progress import LoadProgress
 from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
 from idr_pipeline.pipeline_stages import (
@@ -76,8 +91,49 @@ _REDACTED_PKEYS_PER_MODEL = {
     for keys, v in {(*BENE_TABLES, *BENE_AUX_TABLES): {"bene_mbi_id", "bene_ssm_num"}}.items()
     for k in keys
 }
-_ADDITIONAL_WHERE_CLAUSES_PER_MODEL: dict[type[IdrBaseModel], tuple[str, list[DbType]]] = {
-    IdrBeneficiaryMaPartDEnrollment: ("idr_trans_obslt_ts = {}", [DEFAULT_MAX_DATE])
+_ADDITIONAL_WHERE_CLAUSES_PER_MODEL = {
+    k: v
+    for keys, v in cast(
+        dict[tuple[type[IdrBaseModel]], tuple[str, list[DbType]]],
+        {
+            (
+                IdrBeneficiaryMaPartDEnrollment,
+                IdrBeneficiaryMaPartDEnrollmentRx,
+                IdrBeneficiaryLowIncomeSubsidyCmbnd,
+            ): ("(idr_trans_obslt_ts = {} OR idr_trans_obslt_ts = null)", [DEFAULT_MAX_DATE]),
+        },
+    ).items()
+    for k in keys
+}
+_ADDITIONAL_BASE_CLAIM_WHERE_CLAUSES_PER_MODEL = {
+    k: v
+    for keys, v in cast(
+        dict[tuple[type[IdrBaseModel]], tuple[str, list[DbType]]],
+        {
+            (
+                IdrClaimProfessionalSs,
+                IdrClaimItemProfessionalSs,
+                IdrClaimInstitutionalSs,
+                IdrClaimItemInstitutionalSs,
+            ): (
+                f"{ALIAS_CLM}.idr_updt_ts > {{}}",
+                [(datetime.now(UTC) - timedelta(days=PHASE_1_CUTOFF)).date().isoformat()],
+            ),
+            (
+                IdrClaimProfessionalNch,
+                IdrClaimItemProfessionalNch,
+                IdrClaimInstitutionalNch,
+                IdrClaimItemInstitutionalNch,
+            ): (
+                f"""
+                {ALIAS_CLM}.clm_ltst_clm_ind = 'N'
+                AND {ALIAS_CLM}.clm_uniq_id > 0
+                """,
+                [],
+            ),
+        },
+    ).items()
+    for k in keys
 }
 _BFD_ENV = os.environ.get("BFD_ENV")
 _ALERT_SNS_TOPIC_ARN = os.environ.get("ALERT_SNS_TOPIC_ARN")
@@ -133,6 +189,7 @@ def _compare_table(
         create_partial_model(model), partition, LoadMode.PROD
     )
     load_progress_extractor = PostgresExtractor(LoadProgress, DEFAULT_PARTITION, LoadMode.PROD)
+
     with logger.contextualize(table=model.table(), part=partition.name):
         progress = load_progress_extractor.extract_single(
             f"""
@@ -159,25 +216,39 @@ def _compare_table(
             if progress is None
             else f"WHERE ({batch_timestamp_clause} < {_escape_sql_val(progress.last_ts)})"
         )
-        where_clause = " AND ".join(
-            query_template.format(*[_escape_sql_val(param) for param in query_params])
-            for x in [
-                (base_where_clause, cast(list[DbType], [])),
-                _ADDITIONAL_WHERE_CLAUSES_PER_MODEL.get(model),
-            ]
-            if x and (query_template := x[0]) and (query_params := x[1])
-        )
-        base_claims_where_filters = (
-            ""
-            if progress is None
-            else (
-                f"""
-                AND (
-                    {ALIAS_CLM}.idr_updt_ts < {_escape_sql_val(progress.last_ts)}
-                )
-                """
+        where_clauses = [base_where_clause]
+        if model in _ADDITIONAL_WHERE_CLAUSES_PER_MODEL:
+            additional_where_template, additional_where_params = (
+                _ADDITIONAL_WHERE_CLAUSES_PER_MODEL[model]
             )
-        )
+            where_clauses.append(
+                additional_where_template.format(
+                    *[_escape_sql_val(param) for param in additional_where_params]
+                )
+            )
+        where_clause = " AND ".join(where_clauses)
+
+        base_claims_where_filters = ""
+        if progress:
+            default_base_claim_where = (
+                f"{ALIAS_CLM}.idr_updt_ts < {_escape_sql_val(progress.last_ts)}"
+            )
+            base_claim_where_clauses = [default_base_claim_where]
+            if model in _ADDITIONAL_BASE_CLAIM_WHERE_CLAUSES_PER_MODEL:
+                addl_base_where_templ, addl_base_where_params = (
+                    _ADDITIONAL_BASE_CLAIM_WHERE_CLAUSES_PER_MODEL[model]
+                )
+                base_claim_where_clauses.append(
+                    addl_base_where_templ.format(
+                        *[_escape_sql_val(param) for param in addl_base_where_params]
+                    )
+                )
+            joined_base_claim_wheres = " AND ".join(base_claim_where_clauses)
+            base_claims_where_filters = f"""
+            AND (
+                {joined_base_claim_wheres}
+            )
+            """
         idr_query = (
             model.fetch_query(partition, datetime.now(UTC), Source.SNOWFLAKE)
             .replace("{COLUMNS}", columns)
