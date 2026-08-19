@@ -48,7 +48,6 @@ Id: ExplanationOfBenefit-Base
   * ^type.targetProfile = "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Professional-Base"
 * CLM_MDCR_DDCTBL_AMT 0..1 string "Inpatient/Outpatient Total Deduction Amount" "An amount identifying the portion applied toward the deductible a beneficiary is responsible for."
 * CLM_NRLN_RIC_CD 0..1 string "Near Line Record Identification Code" "A code defining the type of claim record being processed. [NCH]"
-* claimValues 0..* string "Claim Values List" "A list of claim values to filter CLM_VAL_CD"
 * CLM_INSTNL_PRFNL_AMT 0..1 string "Professional Component Charge" "For inpatient and outpatient claims, the amount of physician and other professional charges covered under Medicare Part B (e.g., if computing interim payment these charges are deducted)."
 * CLM_OPRTNL_OUTLR_AMT 0..1 string "Operating Outlier Amount" "Reports the amount of operating outlier payment amount made."
 * CLM_OPRTNL_DSPRTNT_AMT 0..1 string "Operating Disproportionate Share Amount" "This is one component of the total amount that is payable on prospective payment system (PPS) claims and reflects the DSH (disproportionate share hospital) payments for operating expenses (such as labor) for the claim. Note: This field is a sum of the CLM_VAL.CLM_VAL_AMT amounts where CLM_VAL_CD is the disproportionate share code."
