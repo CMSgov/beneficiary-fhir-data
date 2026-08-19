@@ -26,9 +26,6 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   @Column(name = "prvdr_srvc_1st_name")
   private Optional<String> providerFirstName;
 
-  @Column(name = "bfd_srvc_prvdr_npi_type")
-  private Optional<Integer> npiType;
-
   @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type")
   private Optional<Integer> genericIdNpiType;
 

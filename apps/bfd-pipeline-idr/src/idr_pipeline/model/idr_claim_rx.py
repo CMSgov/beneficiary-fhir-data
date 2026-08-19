@@ -328,7 +328,6 @@ class IdrClaimRx(IdrBaseModel):
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc_gnrc_id}
                 ON {prvdr_srvc_gnrc_id}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
-                AND {clm}.prvdr_srvc_id_qlfyr_cd = '01'
                 AND {prvdr_srvc_gnrc_id}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
