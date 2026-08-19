@@ -20,7 +20,7 @@ copy:
   - /bfd/${env}/idr-pipeline/sensitive/idr_account
   - /bfd/${env}/idr-pipeline/sensitive/idr_warehouse
   - /bfd/${env}/idr-pipeline/sensitive/idr_database
-  - /bfd/${env}/idr-pipeline/sensitive/idr_schema
+  - /bfd/${env}/idr-pipeline/sensitive/idr_edp_database
   - /bfd/${env}/idr-pipeline/sensitive/idr_private_key
   - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_username
   - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_account

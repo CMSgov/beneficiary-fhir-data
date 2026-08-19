@@ -18,15 +18,14 @@ function do_load() {
   PGPASSWORD="$DB_PASSWORD" psql "host=$DB_ENDPOINT port=5432 dbname=fhirdb user=$DB_USERNAME" -f "$SCRIPT_DIR/mock-idr.sql"
   docker exec -u postgres bfd-idr-db psql fhirdb bfd -c "VACUUM FULL ANALYZE"
   BFD_DB_USERNAME="$DB_USERNAME" \
-    BFD_DB_PASSWORD="$DB_PASSWORD" \
-    BFD_DB_ENDPOINT="$DB_ENDPOINT" \
-    IDR_ENABLE_DATE_PARTITIONS=0 \
-    IDR_ENABLE_PRIOR_AUTH=1 \
-    uv run idr-pipeline \
-    --source postgres \
-    --load-mode synthetic \
-    --load-type initial \
-    --seed-from "${1:-"${SCRIPT_DIR}/../bfd-model-idr/out"}"
+  BFD_DB_PASSWORD="$DB_PASSWORD" \
+  BFD_DB_ENDPOINT="$DB_ENDPOINT" \
+  IDR_ENABLE_DATE_PARTITIONS=0 \
+  uv run idr-pipeline \
+  --source postgres \
+  --load-mode synthetic \
+  --load-type initial \
+  --seed-from "${1:-"${SCRIPT_DIR}/../bfd-model-idr/out"}"
 }
 
 image=postgres:16.6

@@ -15,10 +15,10 @@ def _parse_bool_default_true(var_name: str) -> bool:
 
 # Tracking load progress is disabled for synthetic data loads.
 # Use this to force enabling load progress for testing.
-def force_load_progress() -> bool:
-    # We don't normally want to store the load progress info for synthetic data since the dates
-    # won't be in order like in prod. However, we need a way to override this for the tests.
-    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+def test_mode() -> bool:
+    # We don't normally want to perform some operations outside of production mode.
+    # However, we need a way to override this for the tests.
+    return _parse_bool_default_false("IDR_TEST_MODE")
 
 
 def bfd_test_date() -> datetime | None:
@@ -27,7 +27,7 @@ def bfd_test_date() -> datetime | None:
 
 
 def enable_prior_auth_ingestion() -> bool:
-    return _parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+    return _parse_bool_default_true("IDR_ENABLE_PRIOR_AUTH")
 
 
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
@@ -113,7 +113,7 @@ IDR_USERNAME = getenv("IDR_USERNAME", "")
 IDR_ACCOUNT = getenv("IDR_ACCOUNT", "")
 IDR_WAREHOUSE = getenv("IDR_WAREHOUSE", "")
 IDR_DATABASE = getenv("IDR_DATABASE", "")
-IDR_SCHEMA = getenv("IDR_SCHEMA", "")
+IDR_EDP_DATABASE = getenv("IDR_EDP_DATABASE", "") or IDR_DATABASE
 
 # These need to be lazy-loaded since we override them in the tests
 

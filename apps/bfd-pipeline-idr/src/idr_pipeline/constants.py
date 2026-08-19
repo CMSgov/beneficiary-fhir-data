@@ -1,7 +1,12 @@
 from dateutil.relativedelta import relativedelta
 
 from .load_partition import LoadPartition, LoadPartitionGroup, PartitionType
-from .settings import PARTITION_TYPE
+from .settings import IDR_DATABASE, IDR_EDP_DATABASE, PARTITION_TYPE
+
+
+def _period_delimited(*segments: str) -> str:
+    return ".".join(segment for segment in segments if segment)
+
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
@@ -25,7 +30,7 @@ FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
 
-IDR_PREFIX = "cms_vdm_view_mdcr_prd"
+IDR_PREFIX = _period_delimited(IDR_DATABASE, "cms_vdm_view_mdcr_prd")
 IDR_BENE_HISTORY_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_hstry"
 IDR_BENE_MBI_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_mbi_id"
 IDR_BENE_XREF_TABLE = f"{IDR_PREFIX}.v2_mdcr_bene_xref"
@@ -65,7 +70,7 @@ IDR_CONTRACT_PBP_NUM_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_num"
 IDR_CONTRACT_PBP_CONTACT_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_cntct"
 IDR_CONTRACT_PBP_SEGMENT_TABLE = f"{IDR_PREFIX}.v2_mdcr_cntrct_pbp_sgmt"
 
-IDR_PRIOR_AUTH_PREFIX = "cms_edp_view_cvm_prau_prd"
+IDR_PRIOR_AUTH_PREFIX = _period_delimited(IDR_EDP_DATABASE, "cms_edp_view_cvm_prau_prd")
 IDR_PRIOR_AUTH_TABLE = f"{IDR_PRIOR_AUTH_PREFIX}.prauc"
 
 DEATH_DATE_CUTOFF_YEARS = 4
