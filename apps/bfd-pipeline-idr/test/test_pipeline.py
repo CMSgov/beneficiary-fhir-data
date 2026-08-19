@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -31,6 +32,8 @@ from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, enable_prior_auth_ingesti
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
+
+multiprocessing.set_start_method("spawn", force=True)
 
 
 def _run_migrator(postgres: PostgresContainer) -> None:
