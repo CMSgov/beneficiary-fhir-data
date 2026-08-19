@@ -79,6 +79,10 @@ This will first _replace_ the contents in Snowflake with the given CSV data and 
 BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
 ```
 
+## Loading synthetic data into your local database
+
+The steps above also apply, but run `./load-synthetic-local.sh` instead.
+
 ## Running against production data
 
 Set up credentials
