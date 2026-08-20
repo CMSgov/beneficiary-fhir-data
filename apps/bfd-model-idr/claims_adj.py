@@ -653,7 +653,6 @@ class AdjudicatedGeneratorUtil:
         clm_instnl[f.CLM_MDCR_IP_PPS_OUTLIER_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_MDCR_IP_PPS_CPTL_TOT_AMT] = round(random.uniform(0, 25), 2)
-        clm_instnl[f.CLM_MDCR_IP_BENE_DDCTBL_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_PPS_IND_CD] = random.choice(["", "2"])
 
         if clm_type_cd in (10, 20):
@@ -667,12 +666,9 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd in (20, 30, 60, 61, 62, 63, 64):
             clm_instnl[f.CLM_HIPPS_READMSN_RDCTN_AMT] = round(random.uniform(0, 5000), 2)
             clm_instnl[f.CLM_HIPPS_VBP_AMT] = round(random.uniform(0, 5000), 2)
-            clm_instnl[f.CLM_INSTNL_LOW_VOL_PMT_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_MDCR_IP_1ST_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_MDCR_IP_SCND_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_PPS_MD_WVR_STDZD_VAL_AMT] = round(random.uniform(0, 10000), 2)
-        if clm_type_cd in (40, 61, 64, 62, 20, 63, 30, 60):
-            clm_instnl[f.CLM_INSTNL_PRFNL_AMT] = round(random.uniform(0, 10000), 2)
 
         add_meta_timestamps(clm_instnl, clm)
 

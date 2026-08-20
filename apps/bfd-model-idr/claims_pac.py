@@ -41,7 +41,7 @@ class PacGeneratorUtil:
         init_clm_type_cd = int(init_clm[f.CLM_TYPE_CD])
         # Always exclude these fields from init_clm. We do this because RowAdapter ignores changes
         # to existing fields, so we could never unset these fields.
-        exclude_fields_always = {f.CLM_BLOOD_PT_FRNSH_QTY, f.CLM_NCH_PRMRY_PYR_CD}
+        exclude_fields_always = {f.CLM_NCH_PRMRY_PYR_CD}
         # todo remove
         
         # Exclude these fields if init_clm is adjudicated and we're generating a pac clm from it. We
@@ -306,7 +306,6 @@ class PacGeneratorUtil:
             init_row=init_clm_instnl,
             is_pac_predicate=lambda: init_clm_instnl[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
             exclude_fields_always={
-                f.CLM_MDCR_IP_BENE_DDCTBL_AMT,
                 f.CLM_MDCR_INSTNL_PRMRY_PYR_AMT,
                 f.CLM_PPS_IND_CD,
                 f.CLM_MDCR_HOSPC_PRD_CNT,
