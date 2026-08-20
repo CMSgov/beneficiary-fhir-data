@@ -177,6 +177,8 @@ def _compare_table(
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
+    additional_where_clauses: list[str],
+    additional_clm_where_clauses: list[str],
 ) -> bool:
     idr_extractor = SnowflakeExtractor(model, partition)
     # We must use pydantic-partial to create a partial model for some model types because not all
@@ -223,7 +225,7 @@ def _compare_table(
                     *[_escape_sql_val(param) for param in additional_where_params]
                 )
             )
-        where_clause = " AND ".join(where_clauses)
+        where_clause = " AND ".join([*where_clauses, *additional_where_clauses])
 
         base_claims_where_filters = ""
         if progress:
@@ -240,7 +242,9 @@ def _compare_table(
                         *[_escape_sql_val(param) for param in addl_base_where_params]
                     )
                 )
-            joined_base_claim_wheres = " AND ".join(base_claim_where_clauses)
+            joined_base_claim_wheres = " AND ".join(
+                [*base_claim_where_clauses, *additional_clm_where_clauses]
+            )
             base_claims_where_filters = f"""
             AND (
                 {joined_base_claim_wheres}
@@ -519,10 +523,19 @@ def _wrap_compare(
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
+    where_clauses: list[str],
+    clm_where_clauses: list[str],
 ) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
     return (
         _compare_table(
-            model, partition, row_limit, enable_reports, reports_dir, allow_sensitive_logs
+            model,
+            partition,
+            row_limit,
+            enable_reports,
+            reports_dir,
+            allow_sensitive_logs,
+            where_clauses,
+            clm_where_clauses,
         ),
         model,
         partition,
@@ -537,6 +550,8 @@ def _compare_all(
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
+    where_clauses: list[str],
+    clm_where_clauses: list[str],
 ) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
     now = datetime.now(UTC)
 
@@ -576,6 +591,8 @@ def _compare_all(
             enable_reports,
             reports_dir,
             allow_sensitive_logs,
+            where_clauses,
+            clm_where_clauses,
         )
 
 
@@ -599,6 +616,8 @@ async def async_main(
     enable_reports: bool,
     reports_dir: Path | None,
     allow_sensitive_logs: bool,
+    where_clauses: list[str],
+    clm_where_clauses: list[str],
 ) -> bool:
     executor = ParallelStagesExecutor(max_workers=max_parallel)
     reports_dir = reports_dir or _create_dir_in_tmp("reports_")
@@ -617,6 +636,8 @@ async def async_main(
                         enable_reports,
                         reports_dir,
                         allow_sensitive_logs,
+                        where_clauses,
+                        clm_where_clauses,
                     )
                 ]
             )
@@ -725,6 +746,27 @@ async def async_main(
     show_default=True,
     help="Allow logging of sensitive data to stdout.",
 )
+@click.option(
+    "-w",
+    "--where-clauses",
+    multiple=True,
+    envvar="ADDITIONAL_WHERE_CLAUSES",
+    type=list[str],
+    default=[],
+    show_default=False,
+    help="List of additional where clauses to append with AND to the default WHERE",
+)
+@click.option(
+    "-W",
+    "--clm-where-clauses",
+    multiple=True,
+    envvar="ADDITIONAL_CLAIM_WHERE_CLAUSES",
+    type=list[str],
+    default=[],
+    show_default=False,
+    help="List of additional where clauses to append with AND to the default WHERE for claims"
+    "tables",
+)
 def main(
     tables: list[str],
     exclude_tables: list[str],
@@ -734,6 +776,8 @@ def main(
     enable_reports: bool,
     reports_dir: Path | None,
     allow_sensitive_logs: bool,
+    where_clauses: list[str],
+    clm_where_clauses: list[str],
 ) -> None:
     configure_logger()
     logger.remove()
@@ -757,6 +801,8 @@ def main(
         enable_reports,
         reports_dir,
         allow_sensitive_logs,
+        where_clauses,
+        clm_where_clauses,
     ):
         sys.exit(1)
 
