@@ -194,6 +194,32 @@
         "CLM_MDCR_NPMT_RSN_CD": "P",
         "CLM_FI_ACTN_CD": "1"
     },
+    "claimValues": [
+        {
+            "CLM_VAL_CD": "05",
+            "CLM_VAL_AMT": "93.22"
+        },
+        {
+            "CLM_VAL_CD": "18",
+            "CLM_VAL_AMT": "14.14"
+        },
+        {
+            "CLM_VAL_CD": "19",
+            "CLM_VAL_AMT": "12342.14"
+        },
+        {
+            "CLM_VAL_CD": "37",
+            "CLM_VAL_AMT": "15"
+        },
+        {
+            "CLM_VAL_CD": "74",
+            "CLM_VAL_AMT": "10.05"
+        },
+        {
+            "CLM_VAL_CD": "A1",
+            "CLM_VAL_AMT": "19.11"
+        }
+    ],
     "PRVDR_ATNDG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_OPRTG_PRVDR_NPI_NUM": "1942945159",
     "CLM_OTHR_PRVDR_NPI_NUM": "1942945159",

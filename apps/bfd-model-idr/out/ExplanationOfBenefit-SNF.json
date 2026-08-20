@@ -272,25 +272,7 @@
     }
   },
   {
-    "sequence" : 7,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-        "display" : "Blood Pints Furnished Quantity"
-      }]
-    },
-    "valueQuantity" : {
-      "value" : 15,
-      "unit" : "pint",
-      "system" : "http://unitsofmeasure.org",
-      "code" : "[pt_us]"
-    }
+    "sequence" : 7
   },
   {
     "sequence" : 8,
@@ -755,6 +737,26 @@
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD",
         "code" : "123"
       }]
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
+        "display" : "Blood Pints Furnished Quantity"
+      }]
+    },
+    "valueQuantity" : {
+      "value" : 15,
+      "unit" : "pint",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "[pt_us]"
     }
   }],
   "diagnosis" : [{
@@ -1569,19 +1571,6 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_INSTNL_PRFNL_AMT",
-        "display" : "Professional Component Charge Amount"
-      }]
-    },
-    "amount" : {
-      "value" : 93.22,
-      "currency" : "USD"
-    }
-  },
-  {
-    "category" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_INSTNL_DRG_OUTLIER_AMT",
         "display" : "DRG Outlier Approved Payment Amount"
       }]
@@ -1608,12 +1597,11 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount"
+        "code" : "CLM_INSTNL_PRFNL_AMT"
       }]
     },
     "amount" : {
-      "value" : 19.11,
+      "value" : 93.22,
       "currency" : "USD"
     }
   },
@@ -1621,8 +1609,7 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount"
+        "code" : "CLM_OPRTNL_DSPRTNT_AMT"
       }]
     },
     "amount" : {
@@ -1634,12 +1621,35 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount"
+        "code" : "CLM_OPRTNL_IME_AMT"
       }]
     },
     "amount" : {
       "value" : 12342.14,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 10.05,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 19.11,
       "currency" : "USD"
     }
   },
