@@ -488,7 +488,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD').code.coding.code
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
+- inputPath: BFDClaimValues.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
     - HHA
@@ -506,7 +506,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_DSPRTNT_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
+- inputPath: BFDClaimValues.CLM_OPRTNL_IME_AMT
   appliesTo:
     - Inpatient
     - HHA
@@ -1922,7 +1922,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_PT_FRNSH_QTY
+- inputPath: BFDClaimValues.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
     - SNF
@@ -2567,7 +2567,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
+- inputPath: BFDClaimValues.CLM_INSTNL_PRFNL_AMT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -4401,7 +4401,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_PBP_INCLSN_AMT
+- inputPath: BFDClaimValues.CLM_PBP_INCLSN_AMT
   appliesTo:
     - HHA
     - Hospice
@@ -4416,7 +4416,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_INCLSN_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_PBP_RDCTN_AMT
+- inputPath: BFDClaimValues.CLM_PBP_RDCTN_AMT
   appliesTo:
     - HHA
     - Hospice
@@ -4431,7 +4431,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_RDCTN_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_OUTLR_AMT
+- inputPath: BFDClaimValues.CLM_OPRTNL_OUTLR_AMT
   appliesTo:
     - HHA
     - Hospice
@@ -4446,7 +4446,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_OUTLR_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_NEW_TECH_AMT
+- inputPath: BFDClaimValues.CLM_MDCR_NEW_TECH_AMT
   appliesTo:
     - HHA
     - Hospice
@@ -4461,7 +4461,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_NEW_TECH_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_SQSTRTN_RDCTN_AMT
+- inputPath: BFDClaimValues.CLM_SQSTRTN_RDCTN_AMT
   appliesTo:
     - HHA
     - Hospice
@@ -4476,7 +4476,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_SQSTRTN_RDCTN_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_MIPS_PMT_AMT
+- inputPath: BFDClaimValues.CLM_MIPS_PMT_AMT
   appliesTo:
     - Hospice
     - Outpatient

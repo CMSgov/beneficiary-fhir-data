@@ -202,7 +202,7 @@ conceptmap "CLM_VAL_CD" {
   s:"74" == t:"CLM_INSTNL_LOW_VOL_PMT_AMT"
   s:"77" == t:"CLM_MDCR_NEW_TECH_AMT"
   s:"A1" == t:"CLM_MDCR_IP_BENE_DDCTBL_AMT"
-  s:"Q0" == t:"CLM_PBP_INCLSN_AMT) **"
+  s:"Q0" == t:"CLM_PBP_INCLSN_AMT"
   s:"Q1" == t:"CLM_PBP_RDCTN_AMT"
   s:"QM" == t:"CLM_MIPS_PMT_AMT"
 }

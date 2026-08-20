@@ -13,7 +13,6 @@ Id: SupportingInfoComponent
 * DGNS_DRG_CD 0..1 string "Related Diagnosis Group Code" ""
 * BENE_PTNT_STUS_CD 0..1 string "Patient Discharge Status Code" ""
 * CLM_ADMSN_TYPE_CD 0..1 string "Claim Admission Type Code" ""
-* CLM_BLOOD_PT_FRNSH_QTY 0..1 string "Blood Pints Furnished Quantity" ""
 * CLM_MDCR_INSTNL_MCO_PD_SW 0..1 string "MCO Paid Switch" ""
 * CLM_MDCR_NCH_PTNT_STUS_IND_CD 0..1 string "Patient Status Code" ""
 * TYPE_OF_BILL_CD 0..1 string "Type of Bill Code" "The Type of Bill Code. Composed of a 0, followed by the Claim Facility Type Code, then the Claim Service Classification Type Code, and finally the Claim Frequency Code."
