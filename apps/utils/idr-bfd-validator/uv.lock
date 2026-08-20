@@ -302,6 +302,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "anyio" },
     { name = "boto3" },
+    { name = "click" },
     { name = "idr-pipeline" },
     { name = "loguru" },
     { name = "pydantic-partial" },
@@ -318,6 +319,7 @@ dev = [
 requires-dist = [
     { name = "anyio" },
     { name = "boto3" },
+    { name = "click", specifier = ">=8.4.2" },
     { name = "idr-pipeline", editable = "packages/idr-pipeline" },
     { name = "loguru", git = "https://github.com/Delgan/loguru?rev=2a17be730e111cf874d0bf967c4c5da15b7e4670" },
     { name = "pydantic-partial" },

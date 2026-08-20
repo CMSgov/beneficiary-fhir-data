@@ -2,7 +2,10 @@ import functools
 import itertools
 import json
 import os
+import random
+import string
 import sys
+import tempfile
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
@@ -12,6 +15,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import anyio
 import boto3
+import click
 from botocore.config import Config
 from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
@@ -41,7 +45,6 @@ from idr_pipeline.model.idr_claim_item_professional_nch import IdrClaimItemProfe
 from idr_pipeline.model.idr_claim_item_professional_ss import IdrClaimItemProfessionalSs
 from idr_pipeline.model.idr_claim_professional_nch import IdrClaimProfessionalNch
 from idr_pipeline.model.idr_claim_professional_ss import IdrClaimProfessionalSs
-from idr_pipeline.model.idr_claim_rx import IdrClaimRx
 from idr_pipeline.model.load_progress import LoadProgress
 from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
 from idr_pipeline.pipeline_stages import (
@@ -59,15 +62,6 @@ if TYPE_CHECKING:
 else:
     Record = object
 
-_ALLOW_SENSITIVE_LOGS = os.environ.get("ALLOW_SENSITIVE_LOGS", "false").lower() in ["1", "true"]
-_TABLES_TO_LOAD = [
-    y for x in os.environ.get("IDR_TABLES", "").split(",") if (y := x.lower().strip())
-]
-_TABLES_TO_EXCLUDE = [
-    y for x in os.environ.get("IDR_EXCLUDE_TABLES", "").split(",") if (y := x.lower().strip())
-]
-_ROW_LIMIT = int(os.environ.get("ROW_LIMIT", "1000"))
-_MAX_PARALLELISM = int(os.environ.get("MAX_PARALLELISM", "12"))
 
 _ALL_MODELS = [*CLAIM_AUX_TABLES, *CLAIM_TABLES, *BENE_TABLES, *BENE_AUX_TABLES, *PRIOR_AUTH_TABLES]
 _IGNORED_COLS_PER_MODEL = {
@@ -180,6 +174,9 @@ def _compare_table(
     model: type[T],
     partition: LoadPartition,
     num_rows: int,
+    enable_reports: bool,
+    reports_dir: Path,
+    allow_sensitive_logs: bool,
 ) -> bool:
     idr_extractor = SnowflakeExtractor(model, partition)
     # We must use pydantic-partial to create a partial model for some model types because not all
@@ -271,7 +268,7 @@ def _compare_table(
         ]
 
         log_redact_pkeys: set[str] = (
-            _REDACTED_PKEYS_PER_MODEL.get(model, set()) if not _ALLOW_SENSITIVE_LOGS else set()
+            _REDACTED_PKEYS_PER_MODEL.get(model, set()) if not allow_sensitive_logs else set()
         )
         logger.opt(lazy=True).debug(
             "idr rows: \n{}",
@@ -297,7 +294,7 @@ def _compare_table(
             """
         logger.debug(
             bfd_query
-            if _ALLOW_SENSITIVE_LOGS or not log_redact_pkeys.intersection(set(model_pkeys))
+            if allow_sensitive_logs or not log_redact_pkeys.intersection(set(model_pkeys))
             else "BFD query redacted due to sensitive column(s): {}",
             ", ".join(log_redact_pkeys),
         )
@@ -359,7 +356,7 @@ def _compare_table(
 
                 if idr_val != bfd_val:
                     mismatched_cols.append(col)
-                    if _ALLOW_SENSITIVE_LOGS:
+                    if allow_sensitive_logs:
                         logger.debug(
                             "({}) {}: (IDR) {} != (BFD) {}",
                             json.dumps(
@@ -377,7 +374,7 @@ def _compare_table(
                     json.dumps(_get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys), default=str),
                     ", ".join(x for x in mismatched_cols),
                 )
-                if _ALLOW_SENSITIVE_LOGS:
+                if allow_sensitive_logs:
                     logger.debug(
                         "(IDR) {} != (BFD) {}",
                         json.dumps(idr_row, default=str),
@@ -404,26 +401,44 @@ def _compare_table(
                 len(idr_rows),
             )
 
-        Path(f"./generated/{model.table().split('.')[-1]}.{partition.name}.json").write_text(
-            json.dumps(
-                asdict(
-                    OverallResult(
-                        model=model.table(),
-                        partition=partition.name,
-                        num_idr_rows=len(idr_rows),
-                        num_bfd_rows=len(bfd_rows),
-                        num_success=sum(x.result == RowValidationResult.SUCCESS for x in results),
-                        num_failed=sum(x.result != RowValidationResult.SUCCESS for x in results),
-                        per_row_results=results,
-                    )
-                ),
-                default=str,
-                skipkeys=True,
-                indent=2,
+        if enable_reports:
+            report_path = reports_dir.joinpath(
+                f"{model.table().split('.')[-1]}.{partition.name}.json"
             )
-        )
+            logger.info("Writing JSON validation report to {}", str(report_path))
+            report_path.write_text(
+                json.dumps(
+                    asdict(
+                        OverallResult(
+                            model=model.table(),
+                            partition=partition.name,
+                            num_idr_rows=len(idr_rows),
+                            num_bfd_rows=len(bfd_rows),
+                            num_success=sum(
+                                x.result == RowValidationResult.SUCCESS for x in results
+                            ),
+                            num_failed=sum(
+                                x.result != RowValidationResult.SUCCESS for x in results
+                            ),
+                            per_row_results=results,
+                        )
+                    ),
+                    default=str,
+                    skipkeys=True,
+                    indent=2,
+                )
+            )
 
         return all(x.result == RowValidationResult.SUCCESS for x in results) and row_lengths_match
+
+
+def _create_dir_in_tmp(prefix: str) -> Path:
+    tmpdir = tempfile.gettempdir()
+    dir_path = Path(tmpdir).joinpath(
+        f"{prefix}{''.join(random.choices(string.ascii_letters, k=5))}"
+    )
+    dir_path.mkdir(exist_ok=True)
+    return dir_path
 
 
 def _fix_idr_val(val: DbType) -> DbType:
@@ -498,24 +513,39 @@ def bucket_rows(
 
 
 def _wrap_compare(
-    model: type[IdrBaseModel], partition: LoadPartition, row_limit: int
+    model: type[IdrBaseModel],
+    partition: LoadPartition,
+    row_limit: int,
+    enable_reports: bool,
+    reports_dir: Path,
+    allow_sensitive_logs: bool,
 ) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
-    return (_compare_table(model, partition, row_limit), model, partition)
+    return (
+        _compare_table(
+            model, partition, row_limit, enable_reports, reports_dir, allow_sensitive_logs
+        ),
+        model,
+        partition,
+    )
 
 
-def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
+def _compare_all(
+    tables: list[str],
+    exclude_tables: list[str],
+    limit: int,
+    max_parallel: int,
+    enable_reports: bool,
+    reports_dir: Path,
+    allow_sensitive_logs: bool,
+) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
     now = datetime.now(UTC)
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
     all_models_set = set(_ALL_MODELS)
     filtered_models = {
         y
-        for y in (
-            {x for x in all_models_set if x.table() in _TABLES_TO_LOAD}
-            if _TABLES_TO_LOAD
-            else all_models_set
-        )
-        if y.table() not in _TABLES_TO_EXCLUDE
+        for y in ({x for x in all_models_set if x.table() in tables} if tables else all_models_set)
+        if y.table() not in exclude_tables
     }
     models_to_compare = filtered_models - immutable_models
 
@@ -529,8 +559,8 @@ def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
     logger.info(
         "Running IDR -> BFD validation ({} row(s) per-model, {} max parallelism) for {} models and "
         "partitions: {}",
-        _ROW_LIMIT,
-        _MAX_PARALLELISM,
+        limit,
+        max_parallel,
         len(models_and_partitions),
         ", ".join(
             f"{model.table()}-{partition.name}" for model, partition in models_and_partitions
@@ -542,14 +572,56 @@ def _compare_all() -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
             _wrap_compare,
             model,
             partition,
-            _ROW_LIMIT,
+            limit,
+            enable_reports,
+            reports_dir,
+            allow_sensitive_logs,
         )
 
 
-async def main() -> bool:
-    executor = ParallelStagesExecutor(max_workers=_MAX_PARALLELISM)
+def _log_formatter(record: Record) -> str:
+    return "".join(
+        [
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS Z}</green> | ",
+            "<level>{level: <8}</level> | ",
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> ",
+            "<m>{extra[table]}-{extra[part]}</m> " if record["extra"] else "",
+            "- <level>{message}</level>\n{exception}",
+        ]
+    )
+
+
+async def async_main(
+    tables: list[str],
+    exclude_tables: list[str],
+    limit: int,
+    max_parallel: int,
+    enable_reports: bool,
+    reports_dir: Path | None,
+    allow_sensitive_logs: bool,
+) -> bool:
+    executor = ParallelStagesExecutor(max_workers=max_parallel)
+    reports_dir = reports_dir or _create_dir_in_tmp("reports_")
+    if enable_reports:
+        logger.info("Writing JSON validation reports to {}", str(reports_dir))
     results = [
-        x for x in itertools.chain.from_iterable(await executor.execute([_compare_all()])) if x
+        x
+        for x in itertools.chain.from_iterable(
+            await executor.execute(
+                [
+                    _compare_all(
+                        tables,
+                        exclude_tables,
+                        limit,
+                        max_parallel,
+                        enable_reports,
+                        reports_dir,
+                        allow_sensitive_logs,
+                    )
+                ]
+            )
+        )
+        if x
     ]
     mismatches = [x for x in results if not x[0]]
 
@@ -579,24 +651,95 @@ async def main() -> bool:
     return True
 
 
-def _log_formatter(record: Record) -> str:
-    return "".join(
-        [
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS Z}</green> | ",
-            "<level>{level: <8}</level> | ",
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> ",
-            "<m>{extra[table]}-{extra[part]}</m> " if record["extra"] else "",
-            "- <level>{message}</level>\n{exception}",
-        ]
-    )
-
-
-if __name__ == "__main__":
+@click.command
+@click.option(
+    "-t",
+    "--tables",
+    multiple=True,
+    envvar="IDR_TABLES",
+    type=list[str],
+    default=[],
+    show_default=False,
+    help="List of tables to validate. Defaults to all tables if unspecified or empty",
+)
+@click.option(
+    "-T",
+    "--exclude-tables",
+    multiple=True,
+    envvar="IDR_EXCLUDE_TABLES",
+    type=list[str],
+    default=[],
+    show_default=False,
+    help="List of tables to exclude from validation. Defaults to no tables if unspecified or empty",
+)
+@click.option(
+    "-l",
+    "--limit",
+    envvar="ROW_LIMIT",
+    type=int,
+    default=1000,
+    show_default=True,
+    help="Number of rows to load from each table when validating.",
+)
+@click.option(
+    "-p",
+    "--max-parallel",
+    envvar="MAX_PARALLELISM",
+    type=int,
+    default=12,
+    show_default=True,
+    help="Maximum number of table+partitions to validate at once.",
+)
+@click.option(
+    "-L",
+    "--log-level",
+    envvar="IDR_LOG_LEVEL",
+    type=click.Choice(["debug", "info", "warning", "error"], case_sensitive=False),
+    default="info",
+    show_default=True,
+    help="Log level.",
+)
+@click.option(
+    "-r",
+    "--enable-reports/--disable-reports",
+    envvar="ENABLE_REPORTS",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Enable JSON report generation for validation results.",
+)
+@click.option(
+    "-R",
+    "--reports-dir",
+    envvar="REPORTS_DIR",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
+    required=False,
+    help="Directory to store validation reports in. If unspecified, defaults to a temporary dir.",
+)
+@click.option(
+    "--allow-sensitive-logs/--disallow-sensitive-logs",
+    envvar="ALLOW_SENSITIVE_LOGS",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Allow logging of sensitive data to stdout.",
+)
+def main(
+    tables: list[str],
+    exclude_tables: list[str],
+    limit: int,
+    max_parallel: int,
+    log_level: str,
+    enable_reports: bool,
+    reports_dir: Path | None,
+    allow_sensitive_logs: bool,
+) -> None:
     configure_logger()
     logger.remove()
     logger.add(
         sink=sys.stderr,
-        level=os.getenv("IDR_LOG_LEVEL", "INFO").upper(),
+        level=log_level.upper(),
         format=_log_formatter,
         enqueue=True,  # Ensures non-blocking and async+multiprocessing-safe
         diagnose=False,  # Ensures local variables are not logged for exceptions
@@ -605,5 +748,18 @@ if __name__ == "__main__":
     os.environ.setdefault("IDR_ALLOW_EXTRACTOR_QUERY_LOGGING", "false")
     os.environ.setdefault("IDR_LATEST_CLAIMS", "true")
 
-    if not anyio.run(main):
+    if not anyio.run(
+        async_main,
+        tables,
+        exclude_tables,
+        limit,
+        max_parallel,
+        enable_reports,
+        reports_dir,
+        allow_sensitive_logs,
+    ):
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
