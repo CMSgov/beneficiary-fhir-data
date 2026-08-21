@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.FIRST;
+import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
@@ -8,10 +8,8 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
@@ -46,18 +44,15 @@ import org.hl7.fhir.r4.model.Reference;
 @SuppressWarnings("java:S6539")
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
+  // TODO - move down to CMS
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode; // TODO - move down to CMS
   @Embedded private TypeOfBillCode typeOfBillCode;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
   @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
@@ -65,8 +60,14 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
-  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
+
+  @Embedded
+  private AdjudicationChargeInstitutional
+      adjudicationChargeInstitutional; // TODO - move down to CMS
+
+  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes; // TODO - move down to CMS
+
+  // region Hook Methods
 
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
@@ -74,9 +75,20 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+  abstract List<ClaimValue> getClaimValues();
 
-  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
+  /**
+   * Hook method to get a ClaimContractorNumber from some data sources.
+   *
+   * @return the ClaimContractorNumber
+   */
+  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
+
+  // endregion
+
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
 
   /**
    * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
@@ -86,13 +98,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    */
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo();
-
-  /**
-   * Returns the claim values from all items, used to populate institutional adjudication.
-   *
-   * @return list of ClaimValues from each item
-   */
-  public abstract List<ClaimValue> getClaimValues();
 
   /**
    * Adds care-team members that are unique to the subclass.
@@ -126,7 +131,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
       buildSubclassInitialSupportingInfo() {
     return Stream.of(
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
+            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)),
             nchPrimaryPayorCode.toFhir(supportingInfoFactory),
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
@@ -134,7 +139,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-
     getItems()
         .forEach(
             item -> {
@@ -242,7 +246,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
-    eob.setPayment(getClaimPaymentAmount().toFhir());
+    getPaymentComponent().toFhir().ifPresent(eob::setPayment);
   }
 
   /**

@@ -41,7 +41,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr")
 @SuppressWarnings({"java:S2293"})
-public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
+public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
   @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
@@ -88,7 +88,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 

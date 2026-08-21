@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -46,7 +46,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -93,14 +93,14 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return Stream.concat(
-            Stream.of(
-                nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-                buildAuditStatusSupportingInfo()),
-            buildRxSupportingInfo())
-        .flatMap(Optional::stream)
+    return Stream.of(
+            super.buildSubclassSupportingInfo().stream(),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory).stream(),
+            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)).stream(),
+            Stream.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+            buildAuditStatusSupportingInfo().stream(),
+            buildRxSupportingInfo().flatMap(Optional::stream))
+        .flatMap(Function.identity())
         .toList();
   }
 
@@ -127,10 +127,6 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
         // Line-level: Rx number from each claim item.
         getClaimItems().stream()
             .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory)));
-  }
-
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
   }
 
   /** SS adjudication: provider account-receivable offset amount. */

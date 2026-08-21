@@ -343,26 +343,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
-        "display" : "Pharmacy Service Type Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "04",
-        "display" : "Institutional pharmacy",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
-      } ]
-    },
-    "sequence" : 8
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "rxorigincode",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -376,7 +356,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -395,7 +375,84 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
+    "sequence" : 9
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "compoundcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "display" : "Compound",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
+      }, {
+        "code" : "2",
+        "display" : "Compound",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
+      } ]
+    },
     "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "dawcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
+      } ]
+    },
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "dayssupply",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 12,
+    "valueQuantity" : {
+      "unit" : "days",
+      "value" : 7
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "refillnum",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 13,
+    "valueQuantity" : {
+      "unit" : "fill",
+      "value" : 4
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
+        "display" : "Pharmacy Service Type Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "04",
+        "display" : "Institutional pharmacy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
+      } ]
+    },
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -415,7 +472,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -433,63 +490,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "code" : "22",
         "display" : "LTC dispensing, 7-day supply",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
-      } ]
-    },
-    "sequence" : 12
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "compoundcode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "2",
-        "display" : "Compound",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
-      }, {
-        "code" : "2",
-        "display" : "Compound",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
-      } ]
-    },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dayssupply",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 14,
-    "valueQuantity" : {
-      "unit" : "days",
-      "value" : 7
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "refillnum",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 15,
-    "valueQuantity" : {
-      "unit" : "fill",
-      "value" : 4
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dawcode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
     "sequence" : 16
@@ -959,26 +959,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
-        "display" : "Pharmacy Service Type Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "08",
-        "display" : "Specialty care pharmacy",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
-      } ]
-    },
-    "sequence" : 8
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "rxorigincode",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -992,7 +972,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -1011,7 +991,84 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
+    "sequence" : 9
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "compoundcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "Not specified (missing values are also possible)",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
+      }, {
+        "code" : "0",
+        "display" : "Not specified (missing values are also possible)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
+      } ]
+    },
     "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "dawcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
+      } ]
+    },
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "dayssupply",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 12,
+    "valueQuantity" : {
+      "unit" : "days",
+      "value" : 2
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "refillnum",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 13,
+    "valueQuantity" : {
+      "unit" : "fill",
+      "value" : 1
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
+        "display" : "Pharmacy Service Type Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "08",
+        "display" : "Specialty care pharmacy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
+      } ]
+    },
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -1031,7 +1088,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -1049,63 +1106,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "code" : "35",
         "display" : "LTC dispensing, other 8-14 day dispensing not listed above",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
-      } ]
-    },
-    "sequence" : 12
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "compoundcode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "0",
-        "display" : "Not specified (missing values are also possible)",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
-      }, {
-        "code" : "0",
-        "display" : "Not specified (missing values are also possible)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
-      } ]
-    },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dayssupply",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 14,
-    "valueQuantity" : {
-      "unit" : "days",
-      "value" : 2
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "refillnum",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 15,
-    "valueQuantity" : {
-      "unit" : "fill",
-      "value" : 1
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dawcode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "2",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
     "sequence" : 16

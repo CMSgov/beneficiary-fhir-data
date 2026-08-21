@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
@@ -10,6 +11,7 @@ import org.hl7.fhir.r4.model.Extension;
  * Represents the "Revenue Center Status Code" for a claim. This code identifies the status of a
  * revenue center line item within the claim.
  */
+@Embeddable
 public class ClaimRevenueCenterStatusCode {
   @Column(name = "clm_rev_cntr_stus_cd")
   private Optional<String> revenueCenterStatusCode;

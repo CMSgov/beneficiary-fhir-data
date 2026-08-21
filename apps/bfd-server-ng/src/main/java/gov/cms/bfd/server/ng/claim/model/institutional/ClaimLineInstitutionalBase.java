@@ -26,7 +26,6 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -85,11 +84,6 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   @Override
-  public Optional<Observation> toFhirObservation(int bfdRowId) {
-    return Optional.empty();
-  }
-
-  @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       ClaimFilterOptions options) {
     if (claimLineNumber.isEmpty()) {
@@ -133,9 +127,4 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   abstract void addAdjudication(ExplanationOfBenefit.ItemComponent line);
-
-  @Override
-  public Optional<String> getClaimLineDiagnosisCode() {
-    return Optional.empty();
-  }
 }
