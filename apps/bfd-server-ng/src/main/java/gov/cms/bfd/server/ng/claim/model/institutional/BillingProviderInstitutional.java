@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_blg_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_blg_last_or_lgl_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_blg_prvdr_npi_type"))
 public class BillingProviderInstitutional extends ProviderHistoryBase {
 
   @Column(name = "clm_blg_prvdr_zip5_cd")
@@ -27,20 +28,12 @@ public class BillingProviderInstitutional extends ProviderHistoryBase {
   @Column(name = "prvdr_blg_1st_name")
   private Optional<String> providerFirstName;
 
-  @Column(name = "bfd_blg_prvdr_npi_type")
-  private Optional<Integer> npiType;
-
   @Column(name = "clm_blg_prvdr_oscar_num")
   private Optional<String> providerOscarNumber;
 
   @Override
   public CareTeamType getCareTeamType() {
     return CareTeamType.BILLING;
-  }
-
-  @Override
-  public ProviderHistoryBase.NpiType getNpiType() {
-    return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   /**

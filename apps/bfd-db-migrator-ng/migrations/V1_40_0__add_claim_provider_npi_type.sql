@@ -39,5 +39,4 @@ ADD COLUMN bfd_prvdr_rndrng_npi_type integer;
 
 ALTER TABLE idr.claim_rx
 ADD COLUMN bfd_prvdr_prscrbng_npi_type integer,
-ADD COLUMN bfd_srvc_prvdr_gnrc_id_npi_type integer,
-ADD COLUMN bfd_srvc_prvdr_npi_type integer;
+ADD COLUMN bfd_srvc_prvdr_gnrc_id_npi_type integer;

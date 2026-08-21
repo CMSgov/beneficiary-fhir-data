@@ -18,6 +18,8 @@ public abstract class ProviderHistoryBase {
   private Optional<String> providerNpiNumber;
   private Optional<String> providerName;
 
+  private Optional<Integer> npiType;
+
   /** Represents the enum NPI Type. */
   @Getter
   @AllArgsConstructor
@@ -32,7 +34,10 @@ public abstract class ProviderHistoryBase {
     private final String type;
 
     public static NpiType fromNpiTypeCode(Optional<Integer> npiTypeCode) {
-      if (npiTypeCode.isPresent() && npiTypeCode.get().equals(2)) {
+      if (npiTypeCode.isEmpty()) {
+        return UNKNOWN;
+      }
+      if (npiTypeCode.get().equals(2)) {
         return ORGANIZATION;
       }
       return INDIVIDUAL;
@@ -41,7 +46,9 @@ public abstract class ProviderHistoryBase {
 
   public abstract CareTeamType getCareTeamType();
 
-  protected abstract NpiType getNpiType();
+  public NpiType getNpiType() {
+    return NpiType.fromNpiTypeCode(npiType);
+  }
 
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
       Integer sequence, Optional<ClaimContext> claimContext) {

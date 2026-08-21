@@ -4424,8 +4424,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "2616337335"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4451,8 +4450,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "1228058750"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4478,8 +4476,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "1726578739"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4742,8 +4739,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "1315044119"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4769,8 +4765,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "1315044119"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4796,8 +4791,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
               } ]
             },
             "value" : "1784175089"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -5020,8 +5014,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
               } ]
             },
             "value" : "2616337335"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -5047,8 +5040,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
               } ]
             },
             "value" : "1228058750"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -5074,8 +5066,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
               } ]
             },
             "value" : "1726578739"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -13757,8 +13748,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
               } ]
             },
             "value" : "1570418214"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -13784,8 +13774,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
               } ]
             },
             "value" : "2206785075"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -13811,8 +13800,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
               } ]
             },
             "value" : "1238340180"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14080,8 +14068,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "2616337335"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14107,8 +14094,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "1228058750"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14134,8 +14120,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "1726578739"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14398,8 +14383,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "1315044119"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14425,8 +14409,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "1315044119"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14452,8 +14435,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               } ]
             },
             "value" : "1784175089"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14676,8 +14658,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
               } ]
             },
             "value" : "2616337335"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14703,8 +14684,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
               } ]
             },
             "value" : "1228058750"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -14730,8 +14710,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
               } ]
             },
             "value" : "1726578739"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -23413,8 +23392,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
               } ]
             },
             "value" : "1570418214"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -23440,8 +23418,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
               } ]
             },
             "value" : "2206785075"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -23467,8 +23444,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
               } ]
             },
             "value" : "1238340180"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {

@@ -21,13 +21,11 @@ import org.hl7.fhir.r4.model.Practitioner;
     name = "providerNpiNumber",
     column = @Column(name = "clm_srvc_prvdr_gnrc_id_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "prvdr_srvc_last_or_lgl_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type"))
 public class ServiceProviderPharmacy extends ProviderHistoryBase {
 
   @Column(name = "prvdr_srvc_1st_name")
   private Optional<String> providerFirstName;
-
-  @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type")
-  private Optional<Integer> genericIdNpiType;
 
   @Column(name = "prvdr_srvc_id_qlfyr_cd")
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
@@ -45,7 +43,7 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
       return NpiType.ORGANIZATION;
     }
 
-    return NpiType.fromNpiTypeCode(genericIdNpiType);
+    return super.getNpiType();
   }
 
   /**

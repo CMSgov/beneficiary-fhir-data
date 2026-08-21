@@ -10,12 +10,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @MappedSuperclass
 public abstract class CareTeamBase extends ProviderHistoryBase {
   private Optional<ProviderSpecialtyCode> specialtyCode;
-  private Optional<Integer> npiType;
-
-  @Override
-  protected NpiType getNpiType() {
-    return NpiType.fromNpiTypeCode(npiType);
-  }
 
   @Override
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
