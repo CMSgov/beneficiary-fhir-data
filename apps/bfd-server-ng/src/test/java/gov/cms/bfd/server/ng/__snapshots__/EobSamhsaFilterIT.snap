@@ -4228,6 +4228,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "unknown",
+            "display" : "Not a PPS bill",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -4238,7 +4258,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
