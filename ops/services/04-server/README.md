@@ -67,6 +67,13 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ------ | ------- |
 | <a name="module_bucket_certstores"></a> [bucket\_certstores](#module\_bucket\_certstores) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
+| <a name="module_log_group_adot_messages"></a> [log\_group\_adot\_messages](#module\_log\_group\_adot\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_adot_metrics"></a> [log\_group\_adot\_metrics](#module\_log\_group\_adot\_metrics) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_certstores_messages"></a> [log\_group\_certstores\_messages](#module\_log\_group\_certstores\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_log_router_messages"></a> [log\_group\_log\_router\_messages](#module\_log\_group\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_regression_wrapper"></a> [log\_group\_regression\_wrapper](#module\_log\_group\_regression\_wrapper) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_server_access"></a> [log\_group\_server\_access](#module\_log\_group\_server\_access) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_server_messages"></a> [log\_group\_server\_messages](#module\_log\_group\_server\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -80,13 +87,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ---- |
 | [aws_appautoscaling_policy.server_track_cpu](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_policy) | resource |
 | [aws_appautoscaling_target.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/appautoscaling_target) | resource |
-| [aws_cloudwatch_log_group.adot_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.adot_metrics](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.certstores_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.log_router_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.regression_wrapper](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.server_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_codedeploy_app.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codedeploy_app) | resource |
 | [aws_codedeploy_deployment_group.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codedeploy_deployment_group) | resource |
 | [aws_ecs_service.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_service) | resource |

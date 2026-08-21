@@ -88,6 +88,7 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 | ---- | ------ | ------- |
 | <a name="module_bucket_athena"></a> [bucket\_athena](#module\_bucket\_athena) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_locust_stats_trigger"></a> [locust\_stats\_trigger](#module\_locust\_stats\_trigger) | ../../terraform-modules/general/trigger-glue-crawler | n/a |
+| <a name="module_log_group_run_locust"></a> [log\_group\_run\_locust](#module\_log\_group\_run\_locust) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -100,7 +101,6 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 | Name | Type |
 | ---- | ---- |
 | [aws_athena_workgroup.locust_stats](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/athena_workgroup) | resource |
-| [aws_cloudwatch_log_group.run_locust](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_glue_crawler.locust_stats](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/glue_crawler) | resource |
 | [aws_iam_policy.crawler_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.crawler_s3](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |

@@ -35,7 +35,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ccw_runner_rds_cluster" {
   description                  = "Grants ${local.ccw_runner_lambda_full_name} Lambda access to the ${local.env} database"
 }
 
-resource "aws_cloudwatch_log_group" "ccw_runner" {
+module "log_group_ccw_runner" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/lambda/${local.ccw_runner_lambda_full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -63,7 +64,7 @@ resource "aws_lambda_function" "ccw_runner" {
 
   logging_config {
     log_format = "Text"
-    log_group  = aws_cloudwatch_log_group.ccw_runner.name
+    log_group  = module.log_group_ccw_runner.name
   }
 
   environment {
