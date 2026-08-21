@@ -27,3 +27,4 @@ def run_export() -> None:
             f"SELECT * FROM {table.schema_name}.{table.table_name}"
         )
     print("Export Complete!")
+    
