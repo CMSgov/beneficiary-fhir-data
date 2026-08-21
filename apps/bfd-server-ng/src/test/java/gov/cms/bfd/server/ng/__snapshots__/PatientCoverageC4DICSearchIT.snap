@@ -343,6 +343,9 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND",
+        "valueString" : "Y"
       } ],
       "identifier" : [ {
         "type" : {
