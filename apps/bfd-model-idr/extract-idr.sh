@@ -2,8 +2,6 @@
 
 set -e
 
-BFD_ENV=test
-
 IDR_USERNAME="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_username --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_USERNAME
 export IDR_USERNAME
