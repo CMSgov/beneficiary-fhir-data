@@ -4,8 +4,10 @@ set -Eeou pipefail
 
 export TZ=UTC
 
-bfd_env="${BFD_ENV:-"${1}"}"
+bfd_env="test"
 readonly bfd_env
+BFD_ENV="${bfd_env}"
+readonly BFD_ENV
 
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR

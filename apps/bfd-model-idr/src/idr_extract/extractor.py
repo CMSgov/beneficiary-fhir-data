@@ -74,7 +74,16 @@ class SnowflakeExecutor:
             MAX_FILE_SIZE = 1073741824;
         """
         .replace("{FILE_NAME}",file_name)
-        .replace("{QUERY}",sql))
+        .replace("{QUERY}",sql.replace(
+                            "{WHERE_CLAUSE}",
+                            "",
+                        )
+                        .replace("{FILTER_OP}", "")
+                        .replace("{LAST_TS}", "")
+                        .replace("{ORDER_BY}", "")
+                        .replace("{TABLESAMPLE}", "")
+                        .replace("{LIMIT}", "")
+                        .replace("{BASE_CLAIMS_WHERE_FILTERS}", "")))
 
         try:
             get_command = f"GET @tmp_export_stage/{file_name} file://{output_dir()}"

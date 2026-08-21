@@ -1,30 +1,12 @@
 import click
-
 from idr_pipeline.load_synthetic import tables
 
 from .extractor import SnowflakeExecutor
-from .flyway_migration import run_flyway
-from pathlib import Path
 
 
 @click.command()
-@click.option(
-    "--run-migration",
-    is_flag=True,
-    help="Run Flyway Migrations on snowflake database",
-)
-@click.option(
-    "--skip-export",
-    is_flag=True,
-    help="Skip Export. Meant for only running migrations.",
-)
-def main(run_migration: bool, skip_export: bool) -> None:
-    if run_migration:
-        print("Starting Flyway Migration.")
-        run_flyway()
-        print("Complete Flyway Migration.")
-    if not skip_export:
-        run_export()
+def main() -> None:
+    run_export()
 
 
 def run_export() -> None:
