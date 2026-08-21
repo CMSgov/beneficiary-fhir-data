@@ -40,7 +40,7 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "idr_model"
-packages = ["src/idr_extract"]
+packages = ["src/idr_model", "src/idr_extract"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

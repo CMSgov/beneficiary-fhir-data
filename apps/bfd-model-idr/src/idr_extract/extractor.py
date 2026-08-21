@@ -108,4 +108,5 @@ class SnowflakeTable:
     def __init__(self, schema_name: str, table_name: str) -> None:
         self.schema_name = schema_name
         self.table_name = table_name
-        
+
+
