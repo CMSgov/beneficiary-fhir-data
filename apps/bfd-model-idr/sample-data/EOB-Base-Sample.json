@@ -229,6 +229,10 @@
             "CLM_VAL_AMT": "93.22"
         },
         {
+            "CLM_VAL_CD": "17",
+            "CLM_VAL_AMT": "05.32"
+        },
+        {
             "CLM_VAL_CD": "18",
             "CLM_VAL_AMT": "14.14"
         },
@@ -241,12 +245,32 @@
             "CLM_VAL_AMT": "15"
         },
         {
+            "CLM_VAL_CD": "73",
+            "CLM_VAL_AMT": "10.04"
+        },
+        {
             "CLM_VAL_CD": "74",
             "CLM_VAL_AMT": "10.05"
         },
         {
+            "CLM_VAL_CD": "77",
+            "CLM_VAL_AMT": "99.98"
+        },
+        {
             "CLM_VAL_CD": "A1",
             "CLM_VAL_AMT": "19.11"
+        },
+        {
+            "CLM_VAL_CD": "Q0",
+            "CLM_VAL_AMT": "11.38"
+        },
+        {
+            "CLM_VAL_CD": "Q1",
+            "CLM_VAL_AMT": "86.19"
+        },
+        {
+            "CLM_VAL_CD": "QM",
+            "CLM_VAL_AMT": "67.76"
         }
     ],
     "PRVDR_ATNDG_PRVDR_NPI_NUM": "1942945159",

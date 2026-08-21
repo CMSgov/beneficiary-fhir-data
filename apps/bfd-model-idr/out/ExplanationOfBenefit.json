@@ -2070,6 +2070,18 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_OPRTNL_OUTLR_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 5.32,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_OPRTNL_DSPRTNT_AMT"
       }]
     },
@@ -2094,6 +2106,18 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 10.04,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT"
       }]
     },
@@ -2106,11 +2130,59 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MDCR_NEW_TECH_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 99.98,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT"
       }]
     },
     "amount" : {
       "value" : 19.11,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 11.38,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 86.19,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MIPS_PMT_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 67.76,
       "currency" : "USD"
     }
   },

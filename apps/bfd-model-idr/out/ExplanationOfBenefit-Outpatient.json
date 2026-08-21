@@ -340,10 +340,7 @@
     }
   },
   {
-    "sequence" : 7
-  },
-  {
-    "sequence" : 8,
+    "sequence" : 7,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -359,7 +356,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 9,
+    "sequence" : 8,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -381,7 +378,7 @@
     }
   },
   {
-    "sequence" : 10,
+    "sequence" : 9,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -403,7 +400,7 @@
     }
   },
   {
-    "sequence" : 11,
+    "sequence" : 10,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -425,7 +422,7 @@
     }
   },
   {
-    "sequence" : 12,
+    "sequence" : 11,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -441,7 +438,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 13,
+    "sequence" : 12,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -457,7 +454,7 @@
     "timingDate" : "2025-01-11"
   },
   {
-    "sequence" : 14,
+    "sequence" : 13,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -479,7 +476,7 @@
     }
   },
   {
-    "sequence" : 15,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -501,7 +498,7 @@
     }
   },
   {
-    "sequence" : 16,
+    "sequence" : 15,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -523,7 +520,7 @@
     }
   },
   {
-    "sequence" : 17,
+    "sequence" : 16,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -539,7 +536,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 18,
+    "sequence" : 17,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -555,7 +552,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 19,
+    "sequence" : 18,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -571,7 +568,7 @@
     "timingDate" : "2025-01-02"
   },
   {
-    "sequence" : 20,
+    "sequence" : 19,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -593,7 +590,7 @@
     }
   },
   {
-    "sequence" : 21,
+    "sequence" : 20,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -615,7 +612,7 @@
     }
   },
   {
-    "sequence" : 22,
+    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -637,7 +634,7 @@
     }
   },
   {
-    "sequence" : 23,
+    "sequence" : 22,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -659,7 +656,7 @@
     }
   },
   {
-    "sequence" : 24,
+    "sequence" : 23,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -669,7 +666,7 @@
     "timingDate" : "2020-01-13"
   },
   {
-    "sequence" : 25,
+    "sequence" : 24,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -684,7 +681,7 @@
     }
   },
   {
-    "sequence" : 26,
+    "sequence" : 25,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -705,7 +702,7 @@
     }
   },
   {
-    "sequence" : 27,
+    "sequence" : 26,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -1630,6 +1627,18 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_OPRTNL_OUTLR_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 5.32,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_OPRTNL_DSPRTNT_AMT"
       }]
     },
@@ -1654,6 +1663,18 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 10.04,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT"
       }]
     },
@@ -1666,11 +1687,59 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MDCR_NEW_TECH_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 99.98,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT"
       }]
     },
     "amount" : {
       "value" : 19.11,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 11.38,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 86.19,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MIPS_PMT_AMT"
+      }]
+    },
+    "amount" : {
+      "value" : 67.76,
       "currency" : "USD"
     }
   },

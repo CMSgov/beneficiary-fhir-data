@@ -1924,11 +1924,11 @@
     - CMS
 - inputPath: BFDClaimValues.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
-    - Inpatient
-    - SNF
-    - Outpatient
     - HHA
     - Hospice
+    - Inpatient
+    - Outpatient
+    - SNF
   sources: 
     - NCH
     - FISS
