@@ -57,9 +57,9 @@ public abstract class ProviderHistoryBase {
     }
     var providerReference =
         ProviderFhirHelper.createProviderReference(providerNpiNumber.get(), providerName);
-    var npiType = getNpiType();
-    if (npiType != NpiType.UNKNOWN) {
-      providerReference.setType(npiType.getType());
+    var providerNpiType = getNpiType();
+    if (providerNpiType != NpiType.UNKNOWN) {
+      providerReference.setType(providerNpiType.getType());
     }
 
     return getCareTeamComponent(sequence, providerReference);
