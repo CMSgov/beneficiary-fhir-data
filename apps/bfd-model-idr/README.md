@@ -345,3 +345,13 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 ```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
+
+## Export from Test IDR
+
+We have a test snowflake environment. This process will take all of the tables that we use for Synthetic Data and will pull them to .csv of the approprate name
+that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
+
+```bash
+export BFD_ENV="1234_TEST"
+./export-idr.sh
+```
