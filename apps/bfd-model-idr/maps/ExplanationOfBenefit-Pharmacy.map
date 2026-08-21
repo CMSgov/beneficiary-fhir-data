@@ -138,6 +138,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       } "Add reference for coverage";
     } "Add insurance coverage";
 
+    //note, this is always the same as CLM_LINE.CLM_LINE_BENE_PMT_AMT. 
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
@@ -418,14 +419,6 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
      } "Add codeable concept";
      src -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(coveredAmt, tgtMoney) "Add Money";
     } "Add total covered amount";
-
-    src.CLM_LINE_BENE_PMT_AMT as benePmtAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {  
-      src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BENE_PMT_AMT") "Add second coding";
-     } "Add codeable concept";
-      benePmtAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(benePmtAmt, tgtMoney) "Add beneficiary payment amount";
-    } "Add beneficiary payment amount";
 
     src.CLM_LINE_GRS_ABOVE_THRSHLD_AMT as aboveThreshAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_GRS_ABOVE_THRSHLD_AMT") "Set category";
