@@ -12,7 +12,6 @@ uses "http://hl7.org/fhir/StructureDefinition/LineItemComponent" alias LineItemC
 uses "http://hl7.org/fhir/StructureDefinition/Provider" alias ProviderComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/BFDClaimValues" alias BFDClaimValues as source
 
-
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
 
@@ -120,7 +119,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.diagnoses as diagnoses -> tgt.diagnosis = create('BackboneElement') as tgtDiagnosis then addDiagnosesProfessional(diagnoses, tgtDiagnosis) "Add diagnoses";
     } "Add diagnoses for professional claims.";
     
-
     //Supportinginfo!
     src.supportingInfoComponents as infoComponent -> tgt.supportingInfo = create('BackboneElement') as tgtSupportingInfo then addSupportingInfo(infoComponent,tgtSupportingInfo) "add supportingInfo";
 
@@ -187,10 +185,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalAdjudicationElements(src, instlTgt) "add institutional components to adjudication";
 
-
     src.profComponents as profComponents -> tgt as profTgt then addProfessionalItems(src, profTgt) "Add professional components";
 
-    src.claimValues as claimValues -> tgt.supportingInfo as siTgt then addSupportingClmVal(claimValues, siTgt) "Add claim values for Supporting Info";
     src.claimValues as claimValues -> tgt.adjudication as adjTgt then addAdjudicationClmVal(claimValues, adjTgt) "Add claim values for Adjudication ";
 
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
@@ -552,13 +548,8 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 
 }
 
-group addSupportingClmVal(source src: BFDClaimValues, target tgt: BackboneElement){
-  src.CLM_VAL_CD as valCode where (valCode in ('37')) -> tgt then addBloodPintsFurnished(src, tgt) "Add supportingInfo CLM_VAL";
-}
-
 group addAdjudicationClmVal(source src: BFDClaimValues, target tgt: BackboneElement){
   src.CLM_VAL_CD as valCode where (valCode in ('05' | '17' | '18' | '19' | '73' | '74' | '77' | 'A1' | 'Q0' | 'Q1' | 'QM')) -> tgt then {
-    src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
     src -> tgt.category = create('CodeableConcept') as tgtCategory then {
       src -> tgtCategory.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication" "Set system";
@@ -567,20 +558,6 @@ group addAdjudicationClmVal(source src: BFDClaimValues, target tgt: BackboneElem
     } "Set category";
     src.CLM_VAL_AMT as amt -> tgt.amount = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add amount";
   } "Add adjudication CLM_VAL";
-}
-
-group addBloodPintsFurnished(source src: BFDClaimValues, target tgt: BackboneElement){
-  src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
-  src -> tgt.category = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add coding";
-    src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BLOOD_PT_FRNSH_QTY") "Add coding";
-  } "Set category";
-  src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
-    src.CLM_VAL_AMT as pintsFurnished -> tgtQuantity.value = cast(pintsFurnished,"integer") "Set value";
-    src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-    src -> tgtQuantity.unit = "pint" "Set unit";
-    src -> tgtQuantity.code = "[pt_us]" "Set code";
-  } "Set blood pints furnished";
 }
 
 group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg: Organization){

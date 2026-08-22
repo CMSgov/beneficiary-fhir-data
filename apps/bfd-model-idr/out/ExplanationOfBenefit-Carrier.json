@@ -562,6 +562,27 @@
     }
   },
   {
+    "sequence" : 20,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
+        "display" : "Blood Pints Furnished Quantity"
+      }]
+    },
+    "valueQuantity" : {
+      "value" : 15,
+      "unit" : "pint",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "[pt_us]"
+    }
+  },
+  {
     "sequence" : 8,
     "category" : {
       "coding" : [{
@@ -592,26 +613,6 @@
       }]
     },
     "valueString" : "0LA00000109286"
-  },
-  {
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-        "display" : "Blood Pints Furnished Quantity"
-      }]
-    },
-    "valueQuantity" : {
-      "value" : 15,
-      "unit" : "pint",
-      "system" : "http://unitsofmeasure.org",
-      "code" : "[pt_us]"
-    }
   }],
   "diagnosis" : [{
     "sequence" : 1,
