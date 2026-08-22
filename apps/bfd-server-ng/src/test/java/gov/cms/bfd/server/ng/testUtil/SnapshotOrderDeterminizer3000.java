@@ -109,11 +109,25 @@ public class SnapshotOrderDeterminizer3000 {
     var itemNode = eob.path("item");
     if (itemNode.isArray()) {
       var itemArray = (ArrayNode) itemNode;
-      itemArray.forEach(
-          item ->
-              LINE_ITEM_MAP.forEach(
-                  (field, sourceArray) ->
-                      rewriteReference((ObjectNode) item, field, sequenceMap.get(sourceArray))));
+
+      for (var item : itemArray) {
+        var itemObj = (ObjectNode) item;
+
+        for (var entry : LINE_ITEM_MAP.entrySet()) {
+          var itemSequenceName = entry.getKey();
+          var componentArrayName = entry.getValue();
+
+          var remap = sequenceMap.get(componentArrayName);
+          if (remap == null || !itemObj.has(itemSequenceName)) {
+            continue;
+          }
+
+          var newSequence = remap.get(itemObj.get(itemSequenceName).asInt());
+          if (newSequence != null) {
+            itemObj.set(itemSequenceName, IntNode.valueOf(newSequence));
+          }
+        }
+      }
 
       sortAndRenumber(itemArray);
     }
@@ -156,16 +170,5 @@ public class SnapshotOrderDeterminizer3000 {
           elements.add(new SequencedComponent(obj, oldSequence));
         });
     return elements;
-  }
-
-  private static void rewriteReference(ObjectNode item, String field, Map<Integer, Integer> remap) {
-    // Item doesn't always have a sequence array for components (never for CareTeam or Procedure)
-    if (!item.has(field) || remap == null) {
-      return;
-    }
-    var newSequence = remap.get(item.get(field).asInt());
-    if (newSequence != null) {
-      item.set(field, IntNode.valueOf(newSequence));
-    }
   }
 }
