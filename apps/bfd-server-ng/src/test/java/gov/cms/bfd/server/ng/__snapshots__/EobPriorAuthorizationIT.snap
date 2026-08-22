@@ -14,8 +14,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
               } ]
             },
             "value" : "1570418214"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -41,8 +40,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
               } ]
             },
             "value" : "2206785075"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {
@@ -68,8 +66,7 @@ gov.cms.bfd.server.ng.EobPriorAuthorizationIT.eobSearchPriorAuthorizationByPatie
               } ]
             },
             "value" : "1238340180"
-          },
-          "type" : "Practitioner"
+          }
         },
         "role" : {
           "coding" : [ {

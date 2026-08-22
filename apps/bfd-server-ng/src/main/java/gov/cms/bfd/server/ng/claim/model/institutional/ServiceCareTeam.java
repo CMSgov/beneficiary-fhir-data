@@ -10,6 +10,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_srvc_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_srvc_careteam_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_prvdr_srvc_npi_type"))
 public class ServiceCareTeam extends ProviderHistoryBase {
 
   @Override
