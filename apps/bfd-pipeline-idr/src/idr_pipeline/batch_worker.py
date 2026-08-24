@@ -39,7 +39,7 @@ from .load_partition import LoadPartition
 from .model.base_model import DbType, IdrBaseModel
 from .model.load_progress import LoadProgress
 from .parallel_executor import ExternallyCanceled
-from .settings import PER_BATCH_MAX_CONNECTIONS, PER_BATCH_MIN_CONNECTIONS
+from .settings import SETTINGS
 from .timer import Timer
 
 _MAX_LAST_UPDATED_CHUNKS_PER_BATCH = 100
@@ -238,16 +238,16 @@ class _LoadingBatchWorker(Process):
 
     async def _worker_main(self) -> None:
         task_send, task_receive = anyio.create_memory_object_stream[_TaskSequence](
-            PER_BATCH_MAX_CONNECTIONS
+            SETTINGS.per_batch_max_connections
         )
-        limiter = anyio.CapacityLimiter(PER_BATCH_MAX_CONNECTIONS)
+        limiter = anyio.CapacityLimiter(SETTINGS.per_batch_max_connections)
 
         async with (
             anyio.create_task_group() as tg,
             psycopg_pool.AsyncConnectionPool(
                 conninfo=self._conn_str,
-                min_size=PER_BATCH_MIN_CONNECTIONS,
-                max_size=PER_BATCH_MAX_CONNECTIONS,
+                min_size=SETTINGS.per_batch_min_connections,
+                max_size=SETTINGS.per_batch_max_connections,
                 timeout=600,  # See loader.py for explanation on timeout length
             ) as pool,
         ):
@@ -259,7 +259,8 @@ class _LoadingBatchWorker(Process):
             # Signal back to the manager that we're alive and ready
             self.started_signal.set()
             logger.info(
-                "LoadingBatchWorker setup with max concurrency of {}", PER_BATCH_MAX_CONNECTIONS
+                "LoadingBatchWorker setup with max concurrency of {}",
+                SETTINGS.per_batch_max_connections,
             )
 
             async with task_receive:

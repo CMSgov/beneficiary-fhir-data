@@ -18,11 +18,10 @@ from .constants import (
     CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    DEFAULT_PARTITION,
     PHASE_1_CUTOFF,
 )
 from .extractor import PostgresExtractor, SnowflakeExtractor, Source
-from .load_partition import LoadPartition
+from .load_partition import DEFAULT_PARTITION, LoadPartition
 from .loader import LoadType, PostgresLoader, get_connection_string, should_track_load_progress
 from .model.base_model import (
     LoadMode,
@@ -34,7 +33,7 @@ from .model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowInc
 from .model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from .model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
 from .model.load_progress import LoadProgress
-from .settings import PRUNE_BATCH_LIMIT
+from .settings import SETTINGS
 
 _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
@@ -247,10 +246,10 @@ def prune_bene_lis_cmbnd(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
@@ -275,10 +274,10 @@ def prune_bene_ma_part_d(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
@@ -312,10 +311,10 @@ def prune_bene_ma_part_d_rx(
                     LIMIT %s
                 )
                 """,  # type: ignore
-                (DEFAULT_MAX_DATE, PRUNE_BATCH_LIMIT),
+                (DEFAULT_MAX_DATE, SETTINGS.prune_batch_limit),
             )
             logger.info("pruned {} rows from {}", res.rowcount, bene_table)
-            if res.rowcount < PRUNE_BATCH_LIMIT:
+            if res.rowcount < SETTINGS.prune_batch_limit:
                 break
 
     return True
