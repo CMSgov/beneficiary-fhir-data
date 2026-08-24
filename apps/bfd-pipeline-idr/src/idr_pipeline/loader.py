@@ -524,5 +524,5 @@ def _remove_null_bytes(val: DbType) -> DbType:
 
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
-    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    # Whether to read/write load progress, which is disabled for synthetic and testing loads.
     return load_mode == LoadMode.PROD or SETTINGS.test_mode
