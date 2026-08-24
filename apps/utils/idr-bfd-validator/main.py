@@ -10,13 +10,19 @@ from typing import TYPE_CHECKING, Any
 import anyio
 import boto3
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_JOB_ID, DEFAULT_PARTITION
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
-from idr_pipeline.load_partition import LoadPartition, LoadType
+from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
-from idr_pipeline.model.base_model import ALIAS_CLM, DbType, IdrBaseModel, LoadMode, Source, T
+from idr_pipeline.model.base_model import (
+    ALIAS_CLM,
+    DbType,
+    IdrBaseModel,
+    LoadMode,
+    Source,
+    T,
+)
 from idr_pipeline.model.load_progress import LoadProgress
-from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
+from idr_pipeline.parallel_executor import MultiprocessingExecutor, Stage
 from idr_pipeline.pipeline_stages import (
     BENE_AUX_TABLES,
     BENE_TABLES,
@@ -32,7 +38,10 @@ if TYPE_CHECKING:
 else:
     Record = object
 
-_ALLOW_SENSITIVE_LOGS = os.environ.get("ALLOW_SENSITIVE_LOGS", "false").lower() in ["1", "true"]
+_ALLOW_SENSITIVE_LOGS = os.environ.get("ALLOW_SENSITIVE_LOGS", "false").lower() in [
+    "1",
+    "true",
+]
 _TABLES_TO_LOAD = [
     y for x in os.environ.get("IDR_TABLES", "").split(",") if (y := x.lower().strip())
 ]
@@ -42,7 +51,13 @@ _TABLES_TO_EXCLUDE = [
 _ROW_LIMIT = int(os.environ.get("ROW_LIMIT", "1000"))
 _MAX_PARALLELISM = int(os.environ.get("MAX_PARALLELISM", "12"))
 
-_ALL_MODELS = [*CLAIM_AUX_TABLES, *CLAIM_TABLES, *BENE_TABLES, *BENE_AUX_TABLES, *PRIOR_AUTH_TABLES]
+_ALL_MODELS = [
+    *CLAIM_AUX_TABLES,
+    *CLAIM_TABLES,
+    *BENE_TABLES,
+    *BENE_AUX_TABLES,
+    *PRIOR_AUTH_TABLES,
+]
 _IGNORED_COLS_PER_MODEL = {
     k: v
     for keys, v in {
@@ -107,7 +122,10 @@ def _compare_table(
         )
 
         if progress:
-            logger.info("Last load progress time: {}", progress.last_ts.astimezone(UTC).isoformat())
+            logger.info(
+                "Last load progress time: {}",
+                progress.last_ts.astimezone(UTC).isoformat(),
+            )
 
         batch_timestamp_clause = idr_extractor.build_filter_columns(progress)
         model_pkeys = model.ordered_pkeys()
@@ -197,7 +215,9 @@ def _compare_table(
         )
 
         logger.info(
-            "received {} rows from BFD DB and {} rows from IDR", len(bfd_rows), len(idr_rows)
+            "received {} rows from BFD DB and {} rows from IDR",
+            len(bfd_rows),
+            len(idr_rows),
         )
 
         if len(bfd_rows) != len(idr_rows):
@@ -237,7 +257,8 @@ def _compare_table(
                 logger.error(
                     "mismatched columns for row ({}): {}",
                     json.dumps(
-                        _prep_row_for_log(bfd_row, model_pkeys, log_redact_pkeys), default=str
+                        _prep_row_for_log(bfd_row, model_pkeys, log_redact_pkeys),
+                        default=str,
                     ),
                     ", ".join(x for x in mismatched_cols),
                 )
@@ -281,11 +302,16 @@ def _comma_list(vals: Iterable[str]) -> str:
 
 def _wrap_compare(
     model: type[IdrBaseModel], partition: LoadPartition, row_limit: int, job_id: int
-) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
-    return (_compare_table(model, partition, row_limit,job_id), model, partition, job_id)
+) -> tuple[bool, type[IdrBaseModel], LoadPartition, int]:
+    return (
+        _compare_table(model, partition, row_limit, job_id),
+        model,
+        partition,
+        job_id,
+    )
 
 
-def _compare_all(job_id: int) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
+def _compare_all(job_id: int) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition, int]]:
     now = datetime.now(UTC)
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
@@ -331,10 +357,12 @@ def _compare_all(job_id: int) -> Stage[tuple[bool, type[IdrBaseModel], LoadParti
 
 async def main() -> bool:
 
-    job_id = os.environ.get("IDR_JOB_ID",default=DEFAULT_JOB_ID)
-    executor = ParallelStagesExecutor(max_workers=_MAX_PARALLELISM)
+    job_id = int(os.getenv("IDR_JOB_ID", "1"))
+    executor = MultiprocessingExecutor(max_workers=_MAX_PARALLELISM)
     results = [
-        x for x in itertools.chain.from_iterable(await executor.execute([_compare_all(job_id)])) if x
+        x
+        for x in itertools.chain.from_iterable(await executor.execute([_compare_all(job_id)]))
+        if x
     ]
     mismatches = [x for x in results if not x[0]]
 
