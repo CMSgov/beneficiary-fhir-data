@@ -20,12 +20,7 @@ from .db_utils import get_connection_string
 from .load_partition import LoadPartition, LoadType
 from .model.base_model import DbType, IdrBaseModel, LoadMode, T
 from .model.load_progress import LoadProgress
-from .settings import (
-    PER_BATCH_CONCURRENT_ROWS,
-    PER_BATCH_MAX_CONNECTIONS,
-    PER_BATCH_MIN_CONNECTIONS,
-    test_mode,
-)
+from .settings import SETTINGS
 from .timer import Timer
 
 
@@ -66,8 +61,8 @@ class PostgresLoader:
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=PER_BATCH_MIN_CONNECTIONS,
-            max_size=PER_BATCH_MAX_CONNECTIONS,
+            min_size=SETTINGS.per_batch_min_connections,
+            max_size=SETTINGS.per_batch_max_connections,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
             # acquires a connection from either library's implementation of a pool showed that
             # the majority of the time spent was actually in acquiring a connection, _not_ the
@@ -188,7 +183,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
                 self.partition.name,
                 batch_num,
                 len(results),
-                PER_BATCH_CONCURRENT_ROWS,
+                SETTINGS.per_batch_concurrent_rows,
             )
             self.sort_batch_timer.start()
             results.sort(key=operator.attrgetter(*self.ordered_pkeys))
@@ -205,7 +200,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
 
             async with anyio.create_task_group() as tg:
                 for idx, chunk in enumerate(
-                    itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                    itertools.batched(results, SETTINGS.per_batch_concurrent_rows, strict=False)
                 ):
 
                     async def _wrap_batch_chunk(
@@ -492,11 +487,15 @@ class FullSyncBatchLoader(BatchLoader[T]):
         return data_loaded
 
     async def _delete_missing(self, cur: psycopg.AsyncCursor[Any], temp_tablename: str) -> int:
+        if self.load_mode != LoadMode.PROD and not SETTINGS.test_mode:
+            return 0
         # We have to exclude our synthetic data that also exists in prod from deletion. We also want
-        # to do this for synthetic loads, expect for our pipeline tests
+        # to do this for synthetic loads, except for our pipeline tests
         synthetic_data_filter = self.model.synthetic_data_filter()
         synthetic_where_clause = (
-            f"WHERE {synthetic_data_filter}" if synthetic_data_filter and not test_mode() else ""
+            f"WHERE {synthetic_data_filter}"
+            if synthetic_data_filter and self.load_mode != LoadMode.SYNTHETIC
+            else ""
         )
         result = await cur.execute(  # type: ignore
             f'''
@@ -525,5 +524,5 @@ def _remove_null_bytes(val: DbType) -> DbType:
 
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
-    # Whether to read/write load progress, which is disabled for synthetic and testing loads.
-    return load_mode == LoadMode.PROD or test_mode()
+    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    return load_mode == LoadMode.PROD or SETTINGS.test_mode
