@@ -162,7 +162,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
 
       - name: Pull base images
         env:
@@ -314,7 +314,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
 
       - name: Push jib images
         env:
