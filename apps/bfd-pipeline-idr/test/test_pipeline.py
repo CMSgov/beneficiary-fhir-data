@@ -794,7 +794,6 @@ def _setup_pipeline_environment() -> None:
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
-    os.environ["IDR_MAX_TASKS"] = "4"
     os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
     os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
 
