@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This used to be fully recursive and could work for any resource, and the bones of that code are still in here.
- * Right now, this only works for an ExplanationOfBenefit represented by a Jackson JsonNode.
+ * This used to be fully recursive and could work for any resource, and the bones of that code are
+ * still in here. Right now, this only works for an ExplanationOfBenefit represented by a Jackson
+ * JsonNode.
  */
 public class SnapshotDeterministicOrderer {
 
@@ -32,7 +33,9 @@ public class SnapshotDeterministicOrderer {
   private record SequencedComponent(ObjectNode component, Integer oldSequence) {}
 
   /**
-   * State exists over the course of ordering and then is thrown away, wrapped in static function call for convenience.
+   * State exists over the course of ordering and then is thrown away, wrapped in static function
+   * call for convenience.
+   *
    * @param eob the root JsonNode of a serialized ExplanationOfBenefit
    */
   public static void order(JsonNode eob) {
@@ -43,13 +46,16 @@ public class SnapshotDeterministicOrderer {
 
   private void orderInternal(ObjectNode eob) {
 
-    // Extensions can appear anywhere on the object, so we need to recursively scan the object for extension arrays.
+    // Extensions can appear anywhere on the object, so we need to recursively scan the object for
+    // extension arrays.
     orderExtensionsRecursively(eob);
 
-    // EoB.Item contains important sequence references to 4 other component arrays, those are handled together.
+    // EoB.Item contains important sequence references to 4 other component arrays, those are
+    // handled together.
     orderItemArray(eob);
 
-    // Insurance is a top level array, but it doesn't have a sequence mapping back to .Line. This can be generalized
+    // Insurance is a top level array, but it doesn't have a sequence mapping back to .Line. This
+    // can be generalized
     // in the future if there are additional unsequenced component arrays that we need to order.
     var insuranceArrayNode = eob.path("insurance");
     if (insuranceArrayNode.isArray()) {
@@ -89,7 +95,8 @@ public class SnapshotDeterministicOrderer {
 
   /**
    * Orders each SEQUENCED_COMPONENTS array first, remember their old sequence, map to new sequence,
-   * then populate item array with the new sequence numbers so that the numbers are all correct still.
+   * then populate item array with the new sequence numbers so that the numbers are all correct
+   * still.
    */
   private void orderItemArray(ObjectNode eob) {
     var sequenceMap = new HashMap<String, Map<Integer, Integer>>();
@@ -131,7 +138,8 @@ public class SnapshotDeterministicOrderer {
   }
 
   /**
-   * Sorts elements by toString after removing sequence, then renumbers them and re-adds the sequence element.
+   * Sorts elements by toString after removing sequence, then renumbers them and re-adds the
+   * sequence element.
    */
   private static Map<Integer, Integer> sortAndRenumber(ArrayNode node) {
     var elements = removeAndRecordSequence(node);
