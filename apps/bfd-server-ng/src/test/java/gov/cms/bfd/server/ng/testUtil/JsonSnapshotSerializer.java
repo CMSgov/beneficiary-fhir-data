@@ -90,9 +90,12 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
             .reader()
             .with(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
             .readTree(json);
+
+    // Right now, we're reordering EoB snapshots so that the order of known arrays is deterministic.
     if (object instanceof ExplanationOfBenefit) {
-      SnapshotOrderDeterminizer3000.order(orderedJsonNode);
+      SnapshotDeterministicOrderer.order(orderedJsonNode);
     }
+
     var orderedJsonString =
         keyOrderingObjectMapper
             .writerWithDefaultPrettyPrinter()

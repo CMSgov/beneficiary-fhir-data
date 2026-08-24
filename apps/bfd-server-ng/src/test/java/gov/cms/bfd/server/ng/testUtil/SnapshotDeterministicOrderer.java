@@ -12,12 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This used to be fully recursive and could work for any resource, and then I realized that that
- * was really complicated and painful to edge case test. Right now only works for an
- * ExplanationOfBenefit represented by a Jackson JsonNode (which is conveniently what we get in
- * JsonSnapshotSerializer).
+ * This used to be fully recursive and could work for any resource, and the bones of that code are still in here.
+ * Right now, this only works for an ExplanationOfBenefit represented by a Jackson JsonNode.
  */
-public class SnapshotOrderDeterminizer3000 {
+public class SnapshotDeterministicOrderer {
 
   // Component arrays that can be referenced by ExplanationOfBenefit.Item
   private static final Set<String> SEQUENCED_COMPONENTS =
@@ -31,30 +29,28 @@ public class SnapshotOrderDeterminizer3000 {
           "careTeamSequence", "careTeam",
           "informationSequence", "supportingInfo");
 
-  // Records are tuples, TIL
   private record SequencedComponent(ObjectNode component, Integer oldSequence) {}
 
   /**
-   * Wanted static calling with state, apparently this is a thing in Java.
-   *
-   * @param eob The JsonNode root of a
+   * State exists over the course of ordering and then is thrown away, wrapped in static function call for convenience.
+   * @param eob the root JsonNode of a serialized ExplanationOfBenefit
    */
   public static void order(JsonNode eob) {
     if (eob.isObject()) {
-      new SnapshotOrderDeterminizer3000().orderInternal((ObjectNode) eob);
+      new SnapshotDeterministicOrderer().orderInternal((ObjectNode) eob);
     }
   }
 
   private void orderInternal(ObjectNode eob) {
 
-    // Okay so SOME recursion is still here, because extension arrays can be in many many different
-    // places, so I didn't have to throw away all of my old code.
+    // Extensions can appear anywhere on the object, so we need to recursively scan the object for extension arrays.
     orderExtensionsRecursively(eob);
 
+    // EoB.Item contains important sequence references to 4 other component arrays, those are handled together.
     orderItemArray(eob);
 
-    // Insurance is a top level array, but it doesn't have a sequence mapping back to .Line, so it's
-    // chill
+    // Insurance is a top level array, but it doesn't have a sequence mapping back to .Line. This can be generalized
+    // in the future if there are additional unsequenced component arrays that we need to order.
     var insuranceArrayNode = eob.path("insurance");
     if (insuranceArrayNode.isArray()) {
       orderUnsequencedArray((ArrayNode) insuranceArrayNode);
@@ -62,15 +58,15 @@ public class SnapshotOrderDeterminizer3000 {
   }
 
   /**
-   * Recursive extension order and checker
+   * Recursive extension array finder and reorderer
    *
    * @param node the component, wherever in the chain
    */
   private static void orderExtensionsRecursively(JsonNode node) {
     if (node.isArray()) {
-      node.forEach(SnapshotOrderDeterminizer3000::orderExtensionsRecursively);
+      node.forEach(SnapshotDeterministicOrderer::orderExtensionsRecursively);
     } else if (node.isObject()) {
-      node.forEach(SnapshotOrderDeterminizer3000::orderExtensionsRecursively);
+      node.forEach(SnapshotDeterministicOrderer::orderExtensionsRecursively);
       var extensionNode = node.path("extension");
       if (extensionNode.isArray()) {
         orderUnsequencedArray((ArrayNode) extensionNode);
@@ -93,16 +89,15 @@ public class SnapshotOrderDeterminizer3000 {
 
   /**
    * Orders each SEQUENCED_COMPONENTS array first, remember their old sequence, map to new sequence,
-   * then populate item array with the new sequence numbers so that the numbers are all correct
-   * still. This is the most important method to get right.
+   * then populate item array with the new sequence numbers so that the numbers are all correct still.
    */
   private void orderItemArray(ObjectNode eob) {
     var sequenceMap = new HashMap<String, Map<Integer, Integer>>();
 
     for (var field : SEQUENCED_COMPONENTS) {
-      var componentArray = eob.path(field);
-      if (componentArray.isArray()) {
-        sequenceMap.put(field, sortAndRenumber((ArrayNode) componentArray));
+      var componentArrayNode = eob.path(field);
+      if (componentArrayNode.isArray()) {
+        sequenceMap.put(field, sortAndRenumber((ArrayNode) componentArrayNode));
       }
     }
 
@@ -111,20 +106,22 @@ public class SnapshotOrderDeterminizer3000 {
       var itemArray = (ArrayNode) itemNode;
 
       for (var item : itemArray) {
-        var itemObj = (ObjectNode) item;
+        var itemComponent = (ObjectNode) item;
 
         for (var entry : LINE_ITEM_MAP.entrySet()) {
           var itemSequenceName = entry.getKey();
           var componentArrayName = entry.getValue();
 
           var remap = sequenceMap.get(componentArrayName);
-          if (remap == null || !itemObj.has(itemSequenceName)) {
+
+          // This is always true for CareTeam and Procedure, and sometimes true for the other two.
+          if (remap == null || !itemComponent.has(itemSequenceName)) {
             continue;
           }
 
-          var newSequence = remap.get(itemObj.get(itemSequenceName).asInt());
+          var newSequence = remap.get(itemComponent.get(itemSequenceName).asInt());
           if (newSequence != null) {
-            itemObj.set(itemSequenceName, IntNode.valueOf(newSequence));
+            itemComponent.set(itemSequenceName, IntNode.valueOf(newSequence));
           }
         }
       }
@@ -134,8 +131,7 @@ public class SnapshotOrderDeterminizer3000 {
   }
 
   /**
-   * Sorts elements by toString after removing sequence, then renumbers them and maps the old
-   * sequence to the new
+   * Sorts elements by toString after removing sequence, then renumbers them and re-adds the sequence element.
    */
   private static Map<Integer, Integer> sortAndRenumber(ArrayNode node) {
     var elements = removeAndRecordSequence(node);
@@ -154,8 +150,7 @@ public class SnapshotOrderDeterminizer3000 {
   }
 
   /**
-   * Strips the sequence element, creates a tuple of the element and the old sequence so the main
-   * method can map them.
+   * Strips the sequence element, creates a tuple of the element and the old sequence
    *
    * @param node the array we're stripping and recording
    * @return a list of Tuple(component, sequence)
@@ -164,10 +159,10 @@ public class SnapshotOrderDeterminizer3000 {
     var elements = new ArrayList<SequencedComponent>();
     node.forEach(
         e -> {
-          var obj = (ObjectNode) e;
-          Integer oldSequence = obj.get("sequence").asInt();
-          obj.remove("sequence");
-          elements.add(new SequencedComponent(obj, oldSequence));
+          var component = (ObjectNode) e;
+          var oldSequence = component.get("sequence").asInt();
+          component.remove("sequence");
+          elements.add(new SequencedComponent(component, oldSequence));
         });
     return elements;
   }
