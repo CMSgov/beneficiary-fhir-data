@@ -56,6 +56,17 @@
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-IND",
       "code" : "Y"
     }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-COPMT-LVL-ID",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-COPMT-LVL-ID",
+      "code" : "1"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-PRM-PCT",
+    "valueDecimal" : 100.0
   }],
   "identifier" : [{
     "type" : {

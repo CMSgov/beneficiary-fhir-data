@@ -779,7 +779,7 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         lis_end_date = "9999-12-31"
-        copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
+        copmt_lvl_cd = random.choice(self.code_systems["BENE_CMBND_DEEMD_COPMT_LVL_ID"])
         ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
         lis_row["IDR_LTST_TRANS_FLG"] = "Y"

@@ -54,7 +54,7 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
 
     var premiumPercentage = partDPremiumPercentage;
     var extPartDPremiumPercentage =
-        new Extension(SystemUrls.EXT_BENE_LIS_PTD_PRM_PCT_URL)
+        new Extension(SystemUrls.EXT_BENE_CMBND_DEEMD_PRM_PCT_URL)
             .setValue(new DecimalType(premiumPercentage));
 
     var stream =

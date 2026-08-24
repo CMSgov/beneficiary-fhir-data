@@ -51,8 +51,8 @@ public sealed interface BeneficiaryLISCopaymentLevelCode
    * @return FHIR Extension
    */
   default Extension toFhir() {
-    return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
-        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD, getCode(), null));
+    return new Extension(SystemUrls.EXT_BENE_CMBND_DEEMD_COPMT_LVL_ID_URL)
+        .setValue(new Coding(SystemUrls.SYS_BENE_CMBND_DEEMD_COPMT_LVL_ID, getCode(), null));
   }
 
   /** Enum for all known, valid codes. */

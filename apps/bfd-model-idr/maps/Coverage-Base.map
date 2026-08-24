@@ -249,16 +249,16 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     //LIS Copayment Level Code Extension 
     src.BENE_CMBND_DEEMD_COPMT_LVL_ID -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-COPMT-LVL-ID" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-COPMT-LVL-ID" "add system";
             src.BENE_CMBND_DEEMD_COPMT_LVL_ID as lisCopmtLvlCd -> tgtCoding.code = lisCopmtLvlCd "Add code";
         } "Add coding";
     } "Add LIS copayment level code when LIS is effective";
 
     //LIS Part D Premium Percentage Extension 
     src.BENE_CMBND_DEEMD_PRM_PCT -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-PRM-PCT" "Add url";
         src.BENE_CMBND_DEEMD_PRM_PCT as lisPtdPrmPct -> tgtExtension.value = cast(lisPtdPrmPct,'decimal')  "Add value";
     } "Add LIS Part D premium percentage when LIS is effective";
 
