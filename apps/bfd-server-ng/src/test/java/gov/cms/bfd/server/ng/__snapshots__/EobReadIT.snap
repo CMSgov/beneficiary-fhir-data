@@ -505,6 +505,62 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   },
   "careTeam" : [ {
     "provider" : {
+      "display" : "Garcia, Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
+      "display" : "Rogers, Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "provider" : {
       "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -539,63 +595,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "provider" : {
-      "display" : "Garcia, Indiana",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1942945159"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "provider" : {
-      "display" : "Rogers, Gromit",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1558719914"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 4
+    "sequence" : 3
   } ],
   "contained" : [ {
     "active" : true,
@@ -979,6 +979,80 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 1,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CNTRCTR_NUM",
+        "display" : "Claim Contractor Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "01211",
+        "display" : "HAWAII - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 8/26/2013)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_DISP_CD",
+        "display" : "Claim Disposition Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "55",
+        "display" : "NAME/SEX MIS-MATCH",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_FI_ACTN_CD",
+        "display" : "Claim Fiscal Intermediary Action Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "display" : "Force action code 3 (secondary debit adjustment)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+      } ]
+    },
+    "sequence" : 4
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_IDR_LD_DT",
         "display" : "Claim IDR Load Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -988,8 +1062,155 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 1,
+    "sequence" : 5,
     "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
+        "display" : "MCO Paid Switch",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
+      } ]
+    },
+    "sequence" : 6
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PD_STUS_CD",
+        "display" : "Claim Paid Status Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "I",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+      } ]
+    },
+    "sequence" : 7
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "display" : "FINAL BILL",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+      } ]
+    },
+    "sequence" : 8
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admissionperiod",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 9,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-27"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admtype",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "9",
+        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
+      }, {
+        "code" : "9",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
+      } ]
+    },
+    "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 11,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "discharge-status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "03",
+        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
+      }, {
+        "code" : "03",
+        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
+      } ]
+    },
+    "sequence" : 12
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "drg",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "8",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+      } ]
+    },
+    "sequence" : 13
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "pointoforigin",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "6",
+        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
+      }, {
+        "code" : "6",
+        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+      } ]
+    },
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -1010,227 +1231,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       }, {
         "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QUERY_CD",
-        "display" : "Claim Query Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "display" : "FINAL BILL",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CNTRCTR_NUM",
-        "display" : "Claim Contractor Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "01211",
-        "display" : "HAWAII - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 8/26/2013)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_DISP_CD",
-        "display" : "Claim Disposition Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "55",
-        "display" : "NAME/SEX MIS-MATCH",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-      } ]
-    },
-    "sequence" : 5
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admissionperiod",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 6,
-    "timingPeriod" : {
-      "end" : "2021-10-03",
-      "start" : "2021-09-27"
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 7,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CMS_PROC_DT",
-        "display" : "FI Claim Process Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 8,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_PD_STUS_CD",
-        "display" : "Claim Paid Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "I",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
-      } ]
-    },
-    "sequence" : 9
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "pointoforigin",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "6",
-        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
-      }, {
-        "code" : "6",
-        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
-      } ]
-    },
-    "sequence" : 10
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "discharge-status",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "03",
-        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
-      }, {
-        "code" : "03",
-        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
-      } ]
-    },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admtype",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "9",
-        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-      }, {
-        "code" : "9",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
-      } ]
-    },
-    "sequence" : 12
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
-        "display" : "MCO Paid Switch",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "0",
-        "display" : "No managed care organization (MCO) payment",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
-      } ]
-    },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_FI_ACTN_CD",
-        "display" : "Claim Fiscal Intermediary Action Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "5",
-        "display" : "Force action code 3 (secondary debit adjustment)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-      } ]
-    },
-    "sequence" : 14
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "drg",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "8",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
     "sequence" : 15
@@ -1906,6 +1906,62 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   },
   "careTeam" : [ {
     "provider" : {
+      "display" : "Garcia, Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
+      "display" : "Rogers, Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "provider" : {
       "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -1940,63 +1996,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "provider" : {
-      "display" : "Garcia, Indiana",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1942945159"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "provider" : {
-      "display" : "Rogers, Gromit",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1558719914"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 4
+    "sequence" : 3
   } ],
   "contained" : [ {
     "active" : true,
@@ -2392,6 +2392,138 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_AUDT_TRL_STUS_CD",
+        "display" : "Claim Status Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "FA",
+        "display" : "Accept",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "4",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 4,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CNTRCTR_NUM",
+        "display" : "Claim Contractor Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "01211",
+        "display" : "HAWAII - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 8/26/2013)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+      } ]
+    },
+    "sequence" : 5
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_DISP_CD",
+        "display" : "Claim Disposition Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "55",
+        "display" : "NAME/SEX MIS-MATCH",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+      } ]
+    },
+    "sequence" : 6
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_FI_ACTN_CD",
+        "display" : "Claim Fiscal Intermediary Action Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "display" : "Force action code 3 (secondary debit adjustment)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+      } ]
+    },
+    "sequence" : 7
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_IDR_LD_DT",
         "display" : "Claim IDR Load Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -2401,8 +2533,155 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 1,
+    "sequence" : 8,
     "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
+        "display" : "MCO Paid Switch",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
+      } ]
+    },
+    "sequence" : 9
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PD_STUS_CD",
+        "display" : "Claim Paid Status Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "I",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
+      } ]
+    },
+    "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "display" : "FINAL BILL",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+      } ]
+    },
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admissionperiod",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 12,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-27"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admtype",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "9",
+        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
+      }, {
+        "code" : "9",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
+      } ]
+    },
+    "sequence" : 13
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 14,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "discharge-status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "03",
+        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
+      }, {
+        "code" : "03",
+        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
+      } ]
+    },
+    "sequence" : 15
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "drg",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+      } ]
+    },
+    "sequence" : 16
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "pointoforigin",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "6",
+        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
+      }, {
+        "code" : "6",
+        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+      } ]
+    },
+    "sequence" : 17
   }, {
     "category" : {
       "coding" : [ {
@@ -2423,285 +2702,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       }, {
         "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BNFT_ENHNCMT_CD",
-        "display" : "Claim Benefit Enhancement Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BNFT_ENHNCMT_CD",
-        "display" : "Claim Benefit Enhancement Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "4",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QUERY_CD",
-        "display" : "Claim Query Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "display" : "FINAL BILL",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      } ]
-    },
-    "sequence" : 5
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CNTRCTR_NUM",
-        "display" : "Claim Contractor Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "01211",
-        "display" : "HAWAII - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 8/26/2013)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-      } ]
-    },
-    "sequence" : 6
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_DISP_CD",
-        "display" : "Claim Disposition Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "55",
-        "display" : "NAME/SEX MIS-MATCH",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-      } ]
-    },
-    "sequence" : 7
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admissionperiod",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 8,
-    "timingPeriod" : {
-      "end" : "2021-10-03",
-      "start" : "2021-09-27"
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 9,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CMS_PROC_DT",
-        "display" : "FI Claim Process Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 10,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_PD_STUS_CD",
-        "display" : "Claim Paid Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "I",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
-      } ]
-    },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_AUDT_TRL_STUS_CD",
-        "display" : "Claim Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "FA",
-        "display" : "Accept",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
-      } ]
-    },
-    "sequence" : 12
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "pointoforigin",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "6",
-        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
-      }, {
-        "code" : "6",
-        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
-      } ]
-    },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "discharge-status",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "03",
-        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
-      }, {
-        "code" : "03",
-        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
-      } ]
-    },
-    "sequence" : 14
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admtype",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "9",
-        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-      }, {
-        "code" : "9",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
-      } ]
-    },
-    "sequence" : 15
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
-        "display" : "MCO Paid Switch",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "0",
-        "display" : "No managed care organization (MCO) payment",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
-      } ]
-    },
-    "sequence" : 16
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_FI_ACTN_CD",
-        "display" : "Claim Fiscal Intermediary Action Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "5",
-        "display" : "Force action code 3 (secondary debit adjustment)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-      } ]
-    },
-    "sequence" : 17
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "drg",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
     "sequence" : 18
@@ -3356,8 +3356,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
+        "code" : "CLM_AUDT_TRL_STUS_CD",
+        "display" : "Claim Status Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -3365,8 +3365,14 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 1,
-    "timingDate" : "9999-12-31"
+    "code" : {
+      "coding" : [ {
+        "code" : "V0008",
+        "display" : "Void/Entry Code 3 Claim",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
+      } ]
+    },
+    "sequence" : 1
   }, {
     "category" : {
       "coding" : [ {
@@ -3389,12 +3395,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_CLNCL_TRIL_NUM",
+        "display" : "Clinical Trial Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
     "sequence" : 3,
-    "timingDate" : "2021-10-03"
+    "valueString" : "5201"
   }, {
     "category" : {
       "coding" : [ {
@@ -3418,8 +3429,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_CLNCL_TRIL_NUM",
-        "display" : "Clinical Trial Number",
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -3428,7 +3439,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       } ]
     },
     "sequence" : 5,
-    "valueString" : "5201"
+    "timingDate" : "9999-12-31"
   }, {
     "category" : {
       "coding" : [ {
@@ -3471,23 +3482,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_AUDT_TRL_STUS_CD",
-        "display" : "Claim Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "V0008",
-        "display" : "Void/Entry Code 3 Claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
-      } ]
-    },
-    "sequence" : 8
+    "sequence" : 8,
+    "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
     "amount" : {
@@ -4083,26 +4083,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     } ],
     "diagnosisSequence" : [ 1 ],
     "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD",
-      "valueCoding" : {
-        "code" : "0",
-        "display" : "80%",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
-      }
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT",
+      "valueDecimal" : 4.0
     }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD",
-      "valueCoding" : {
-        "code" : "01",
-        "display" : "GENERAL PRACTICE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
-      "valueCoding" : {
-        "code" : "0",
-        "display" : "Service Subject to Deductible",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
-      }
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
+      "valueDecimal" : 2.0
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD",
       "valueCoding" : {
@@ -4118,11 +4103,25 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD"
       }
     }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "80%",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
+      }
+    }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD",
       "valueCoding" : {
         "code" : "Z",
         "display" : "Bundled test, no payment",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD",
+      "valueCoding" : {
+        "code" : "01",
+        "display" : "GENERAL PRACTICE",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD",
@@ -4132,11 +4131,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"
       }
     }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT",
-      "valueDecimal" : 4.0
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
-      "valueDecimal" : 2.0
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "Service Subject to Deductible",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
+      }
     } ],
     "informationSequence" : [ 2, 3, 4, 5, 6 ],
     "locationCodeableConcept" : {
@@ -4200,8 +4200,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -4209,8 +4209,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 1,
-    "timingDate" : "9999-12-31"
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 1
   }, {
     "category" : {
       "coding" : [ {
@@ -4233,8 +4238,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_BNFT_ENHNCMT_CD",
-        "display" : "Claim Benefit Enhancement Code",
+        "code" : "CLM_CARR_PMT_DNL_CD",
+        "display" : "Claim Payment Denial Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -4244,16 +4249,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "code" : {
       "coding" : [ {
-        "code" : "3",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+        "code" : "00",
+        "display" : "MEDICARE SECONDARY PAYER (MSP) COST AVOIDED - COORDINATOR OF BENEFITS (COB) CONTRACTOR 11100",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD"
       } ]
     },
     "sequence" : 3
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
-        "display" : "Rendering Provider FIPS State Code",
+        "code" : "CLM_CLNCL_TRIL_NUM",
+        "display" : "Clinical Trial Number",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -4261,60 +4267,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "04",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
-        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 5
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_CPTATN_SW",
-        "display" : "AIPBP Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 6
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 7,
-    "timingDate" : "2021-10-03"
+    "sequence" : 4,
+    "valueString" : "5201"
   }, {
     "category" : {
       "coding" : [ {
@@ -4334,12 +4288,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_CLNCL_TRIL_NUM",
-        "display" : "Clinical Trial Number",
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -4347,8 +4301,60 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
-    "valueString" : "5201"
+    "sequence" : 6,
+    "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NCH_WKLY_PROC_DT",
+        "display" : "Weekly Process Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 7,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NGACO_CPTATN_SW",
+        "display" : "AIPBP Benefit Enhancement Indicator",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 8
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
+        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
@@ -4372,22 +4378,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_NCH_WKLY_PROC_DT",
-        "display" : "Weekly Process Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 11,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CARR_PMT_DNL_CD",
-        "display" : "Claim Payment Denial Code",
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -4397,12 +4389,20 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "code" : {
       "coding" : [ {
-        "code" : "00",
-        "display" : "MEDICARE SECONDARY PAYER (MSP) COST AVOIDED - COORDINATOR OF BENEFITS (COB) CONTRACTOR 11100",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD"
+        "code" : "04",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 12,
+    "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
     "amount" : {
@@ -4951,6 +4951,62 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   },
   "careTeam" : [ {
     "provider" : {
+      "display" : "Garcia, Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
+      "display" : "Rogers, Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "provider" : {
       "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -4985,63 +5041,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "provider" : {
-      "display" : "Garcia, Indiana",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1942945159"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "provider" : {
-      "display" : "Rogers, Gromit",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1558719914"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 4
+    "sequence" : 3
   } ],
   "contained" : [ {
     "active" : true,
@@ -5084,31 +5084,31 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
       } ]
     },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "N",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
     "sequence" : 1,
     "type" : [ {
       "coding" : [ {
-        "code" : "admitting",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "W55.41XA",
+        "code" : "V97.2",
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "U",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
     "sequence" : 2,
     "type" : [ {
       "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+        "code" : "admitting",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
       } ]
     } ]
   }, {
@@ -5152,7 +5152,75 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
       } ]
     },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "U",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
     "sequence" : 5,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W55.41XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "sequence" : 6,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W55.41XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "sequence" : 7,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "principal",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W5813XD",
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm"
+      } ]
+    },
+    "sequence" : 8,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "externalcauseofinjury",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W59.22XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "X",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
+    "sequence" : 9,
     "type" : [ {
       "coding" : [ {
         "code" : "other",
@@ -5172,79 +5240,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
-    "sequence" : 6,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "V97.2",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "N",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-      } ]
-    },
-    "sequence" : 7,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W59.22XA",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "X",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-      } ]
-    },
-    "sequence" : 8,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W5813XD",
-        "system" : "http://hl7.org/fhir/sid/icd-9-cm"
-      } ]
-    },
-    "sequence" : 9,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "externalcauseofinjury",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W55.41XA",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
     "sequence" : 10,
     "type" : [ {
       "coding" : [ {
-        "code" : "principal",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   } ],
@@ -5594,6 +5594,39 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_ACO_CARE_MGMT_HCBS_SW",
+        "display" : "Care Management Home Visits Enhancement",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_ACTV_CARE_THRU_DT",
+        "display" : "Covered Care Through Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 2,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_ADJSTMT_TYPE_CD",
         "display" : "Claim Adjustment Type Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -5610,120 +5643,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 2,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "typeofbill",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "033X",
-        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
-      }, {
-        "code" : "3",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
-      }, {
-        "code" : "33",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
-      }, {
-        "code" : "33X",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
-      } ]
-    },
     "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
-        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_SNF_WVR_SW",
-        "display" : "SNF 3-Day Waiver Enhancement",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 5
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_TLHLTH_SW",
-        "display" : "Telehealth Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 6
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_ACO_CARE_MGMT_HCBS_SW",
-        "display" : "Care Management Home Visits Enhancement",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -5742,7 +5662,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -5761,12 +5681,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_QUERY_CD",
-        "display" : "Claim Query Code",
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -5774,14 +5694,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "display" : "FINAL BILL",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      } ]
-    },
-    "sequence" : 10
+    "sequence" : 6,
+    "timingDate" : "2021-10-03"
   }, {
     "category" : {
       "coding" : [ {
@@ -5801,26 +5715,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
       } ]
     },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NCH_PRMRY_PYR_CD",
-        "display" : "NCH Primary Payer Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "L",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
-      } ]
-    },
-    "sequence" : 12
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -5840,28 +5735,134 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "admissionperiod",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_FI_ACTN_CD",
+        "display" : "Claim Fiscal Intermediary Action Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 14,
-    "timingPeriod" : {
-      "end" : "2021-10-03",
-      "start" : "2021-09-26"
-    }
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "display" : "Force action code 3 (secondary debit adjustment)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+      } ]
+    },
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_HHA_LUP_IND_CD",
+        "display" : "Claim Lupa Indicator Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 15,
+    "code" : {
+      "coding" : [ {
+        "code" : "L",
+        "display" : "Low utilization payment adjustment (LUPA) claim",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
+      } ]
+    },
+    "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_HHA_RFRL_CD",
+        "display" : "Claim Referral Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "1",
+        "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
+      } ]
+    },
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 12,
+    "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_EXHSTD_DT",
+        "display" : "Medicare Benefits Exhausted Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 13,
     "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
+        "display" : "MCO Paid Switch",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
+      } ]
+    },
+    "sequence" : 14
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NCH_PRMRY_PYR_CD",
+        "display" : "NCH Primary Payer Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "L",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+      } ]
+    },
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -5879,20 +5880,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_ACTV_CARE_THRU_DT",
-        "display" : "Covered Care Through Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 17,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "CLM_NCVRD_FROM_DT",
         "display" : "Noncovered Stay From Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -5902,7 +5889,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 18,
+    "sequence" : 17,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -5916,13 +5903,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 19,
+    "sequence" : 18,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_MDCR_EXHSTD_DT",
-        "display" : "Medicare Benefits Exhausted Date",
+        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
+        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -5930,13 +5917,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 20,
-    "timingDate" : "2021-10-03"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 19
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_CMS_PROC_DT",
-        "display" : "FI Claim Process Date",
+        "code" : "CLM_NGACO_SNF_WVR_SW",
+        "display" : "SNF 3-Day Waiver Enhancement",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -5944,8 +5936,32 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 21,
-    "timingDate" : "2021-10-03"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 20
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NGACO_TLHLTH_SW",
+        "display" : "Telehealth Benefit Enhancement Indicator",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 21
   }, {
     "category" : {
       "coding" : [ {
@@ -5969,136 +5985,23 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "pointoforigin",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "6",
-        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
-      }, {
-        "code" : "6",
-        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+        "code" : "3",
+        "display" : "FINAL BILL",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       } ]
     },
     "sequence" : 23
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "discharge-status",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "03",
-        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
-      }, {
-        "code" : "03",
-        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
-      } ]
-    },
-    "sequence" : 24
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admtype",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "9",
-        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-      }, {
-        "code" : "9",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
-      } ]
-    },
-    "sequence" : 25
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
-        "display" : "MCO Paid Switch",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "0",
-        "display" : "No managed care organization (MCO) payment",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
-      } ]
-    },
-    "sequence" : 26
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_FI_ACTN_CD",
-        "display" : "Claim Fiscal Intermediary Action Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "5",
-        "display" : "Force action code 3 (secondary debit adjustment)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-      } ]
-    },
-    "sequence" : 27
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_HHA_LUP_IND_CD",
-        "display" : "Claim Lupa Indicator Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "L",
-        "display" : "Low utilization payment adjustment (LUPA) claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
-      } ]
-    },
-    "sequence" : 28
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_HHA_RFRL_CD",
-        "display" : "Claim Referral Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "1",
-        "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
-      } ]
-    },
-    "sequence" : 29
   }, {
     "category" : {
       "coding" : [ {
@@ -6117,7 +6020,63 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 30
+    "sequence" : 24
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admissionperiod",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 25,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-26"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admtype",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "9",
+        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
+      }, {
+        "code" : "9",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
+      } ]
+    },
+    "sequence" : 26
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 27,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "discharge-status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "03",
+        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
+      }, {
+        "code" : "03",
+        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
+      } ]
+    },
+    "sequence" : 28
   }, {
     "category" : {
       "coding" : [ {
@@ -6129,6 +6088,47 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "8",
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+      } ]
+    },
+    "sequence" : 29
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "pointoforigin",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "6",
+        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
+      }, {
+        "code" : "6",
+        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+      } ]
+    },
+    "sequence" : 30
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "typeofbill",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "033X",
+        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
+      }, {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
+      }, {
+        "code" : "33",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
+      }, {
+        "code" : "33X",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
     "sequence" : 31
@@ -6712,6 +6712,62 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   },
   "careTeam" : [ {
     "provider" : {
+      "display" : "Garcia, Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
+      "display" : "Rogers, Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      },
+      "type" : "Practitioner"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "provider" : {
       "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -6746,63 +6802,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "provider" : {
-      "display" : "Garcia, Indiana",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1942945159"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "operating",
-        "display" : "Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 2
-  }, {
-    "provider" : {
-      "display" : "Rogers, Gromit",
-      "identifier" : {
-        "system" : "http://hl7.org/fhir/sid/us-npi",
-        "type" : {
-          "coding" : [ {
-            "code" : "NPI",
-            "display" : "National provider identifier",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "1558719914"
-      },
-      "type" : "Practitioner"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-      }, {
-        "code" : "rendering",
-        "display" : "Rendering provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 4
+    "sequence" : 3
   } ],
   "contained" : [ {
     "active" : true,
@@ -6845,31 +6845,31 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
       } ]
     },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "N",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
     "sequence" : 1,
     "type" : [ {
       "coding" : [ {
-        "code" : "admitting",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "W55.41XA",
+        "code" : "V97.2",
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "U",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
     "sequence" : 2,
     "type" : [ {
       "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+        "code" : "admitting",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
       } ]
     } ]
   }, {
@@ -6913,7 +6913,75 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/sid/icd-10-cm"
       } ]
     },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "U",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
     "sequence" : 5,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W55.41XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "sequence" : 6,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W55.41XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "sequence" : 7,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "principal",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W5813XD",
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm"
+      } ]
+    },
+    "sequence" : 8,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "externalcauseofinjury",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  }, {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W59.22XA",
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+      } ]
+    },
+    "onAdmission" : {
+      "coding" : [ {
+        "code" : "X",
+        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+      } ]
+    },
+    "sequence" : 9,
     "type" : [ {
       "coding" : [ {
         "code" : "other",
@@ -6933,79 +7001,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
-    "sequence" : 6,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "V97.2",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "N",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-      } ]
-    },
-    "sequence" : 7,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W59.22XA",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "X",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-      } ]
-    },
-    "sequence" : 8,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "other",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W5813XD",
-        "system" : "http://hl7.org/fhir/sid/icd-9-cm"
-      } ]
-    },
-    "sequence" : 9,
-    "type" : [ {
-      "coding" : [ {
-        "code" : "externalcauseofinjury",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-      } ]
-    } ]
-  }, {
-    "diagnosisCodeableConcept" : {
-      "coding" : [ {
-        "code" : "W55.41XA",
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-      } ]
-    },
     "sequence" : 10,
     "type" : [ {
       "coding" : [ {
-        "code" : "principal",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   } ],
@@ -7355,6 +7355,39 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_ACO_CARE_MGMT_HCBS_SW",
+        "display" : "Care Management Home Visits Enhancement",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_ACTV_CARE_THRU_DT",
+        "display" : "Covered Care Through Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 2,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_ADJSTMT_TYPE_CD",
         "display" : "Claim Adjustment Type Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7371,120 +7404,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
       } ]
     },
-    "sequence" : 1
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 2,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "typeofbill",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "033X",
-        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
-      }, {
-        "code" : "3",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
-      }, {
-        "code" : "33",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
-      }, {
-        "code" : "33X",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
-      } ]
-    },
     "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
-        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_SNF_WVR_SW",
-        "display" : "SNF 3-Day Waiver Enhancement",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 5
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NGACO_TLHLTH_SW",
-        "display" : "Telehealth Benefit Enhancement Indicator",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 6
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_ACO_CARE_MGMT_HCBS_SW",
-        "display" : "Care Management Home Visits Enhancement",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "Y",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
-      } ]
-    },
-    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -7503,7 +7423,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -7522,12 +7442,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_QUERY_CD",
-        "display" : "Claim Query Code",
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -7535,14 +7455,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "3",
-        "display" : "FINAL BILL",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      } ]
-    },
-    "sequence" : 10
+    "sequence" : 6,
+    "timingDate" : "2021-10-03"
   }, {
     "category" : {
       "coding" : [ {
@@ -7562,26 +7476,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
       } ]
     },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NCH_PRMRY_PYR_CD",
-        "display" : "NCH Primary Payer Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "L",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
-      } ]
-    },
-    "sequence" : 12
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -7601,28 +7496,134 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "admissionperiod",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_FI_ACTN_CD",
+        "display" : "Claim Fiscal Intermediary Action Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 14,
-    "timingPeriod" : {
-      "end" : "2021-10-03",
-      "start" : "2021-09-26"
-    }
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "display" : "Force action code 3 (secondary debit adjustment)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+      } ]
+    },
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_HHA_LUP_IND_CD",
+        "display" : "Claim Lupa Indicator Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 15,
+    "code" : {
+      "coding" : [ {
+        "code" : "L",
+        "display" : "Low utilization payment adjustment (LUPA) claim",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
+      } ]
+    },
+    "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_HHA_RFRL_CD",
+        "display" : "Claim Referral Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "1",
+        "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
+      } ]
+    },
+    "sequence" : 11
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 12,
+    "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_EXHSTD_DT",
+        "display" : "Medicare Benefits Exhausted Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 13,
     "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
+        "display" : "MCO Paid Switch",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
+      } ]
+    },
+    "sequence" : 14
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NCH_PRMRY_PYR_CD",
+        "display" : "NCH Primary Payer Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "L",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+      } ]
+    },
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -7640,20 +7641,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_ACTV_CARE_THRU_DT",
-        "display" : "Covered Care Through Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 17,
-    "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "CLM_NCVRD_FROM_DT",
         "display" : "Noncovered Stay From Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7663,7 +7650,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 18,
+    "sequence" : 17,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -7677,13 +7664,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 19,
+    "sequence" : 18,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_MDCR_EXHSTD_DT",
-        "display" : "Medicare Benefits Exhausted Date",
+        "code" : "CLM_NGACO_PDSCHRG_HCBS_SW",
+        "display" : "Post Discharge Home Visit Benefit Enhancement Indicator",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -7691,13 +7678,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 20,
-    "timingDate" : "2021-10-03"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 19
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_CMS_PROC_DT",
-        "display" : "FI Claim Process Date",
+        "code" : "CLM_NGACO_SNF_WVR_SW",
+        "display" : "SNF 3-Day Waiver Enhancement",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -7705,8 +7697,32 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 21,
-    "timingDate" : "2021-10-03"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 20
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_NGACO_TLHLTH_SW",
+        "display" : "Telehealth Benefit Enhancement Indicator",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 21
   }, {
     "category" : {
       "coding" : [ {
@@ -7730,136 +7746,23 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "pointoforigin",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "6",
-        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
-      }, {
-        "code" : "6",
-        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+        "code" : "3",
+        "display" : "FINAL BILL",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       } ]
     },
     "sequence" : 23
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "discharge-status",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "03",
-        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
-      }, {
-        "code" : "03",
-        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
-      } ]
-    },
-    "sequence" : 24
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "admtype",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "9",
-        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-      }, {
-        "code" : "9",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
-      } ]
-    },
-    "sequence" : 25
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_INSTNL_MCO_PD_SW",
-        "display" : "MCO Paid Switch",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "0",
-        "display" : "No managed care organization (MCO) payment",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
-      } ]
-    },
-    "sequence" : 26
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_FI_ACTN_CD",
-        "display" : "Claim Fiscal Intermediary Action Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "5",
-        "display" : "Force action code 3 (secondary debit adjustment)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-      } ]
-    },
-    "sequence" : 27
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_HHA_LUP_IND_CD",
-        "display" : "Claim Lupa Indicator Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "L",
-        "display" : "Low utilization payment adjustment (LUPA) claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
-      } ]
-    },
-    "sequence" : 28
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_HHA_RFRL_CD",
-        "display" : "Claim Referral Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "1",
-        "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
-      } ]
-    },
-    "sequence" : 29
   }, {
     "category" : {
       "coding" : [ {
@@ -7878,7 +7781,63 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 30
+    "sequence" : 24
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admissionperiod",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 25,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-26"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "admtype",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "9",
+        "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
+      }, {
+        "code" : "9",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
+      } ]
+    },
+    "sequence" : 26
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 27,
+    "timingDate" : "2021-10-03"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "discharge-status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "03",
+        "system" : "https://www.nubc.org/CodeSystem/PatDischargeStatus"
+      }, {
+        "code" : "03",
+        "display" : "DISCHARGED/TRANSFERRED TO SKILLED NURSING FACILITY (SNF) WITH MEDICARE CERTIFICATION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
+      } ]
+    },
+    "sequence" : 28
   }, {
     "category" : {
       "coding" : [ {
@@ -7890,6 +7849,47 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "8",
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+      } ]
+    },
+    "sequence" : 29
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "pointoforigin",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "6",
+        "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
+      }, {
+        "code" : "6",
+        "display" : "TRANSFER FROM ANOTHER HEALTH CARE FACILITY (NON-NEWBORN)/NEWBORN - BORN OUTSIDE OF THIS HOSPITAL (NEWBORN)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+      } ]
+    },
+    "sequence" : 30
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "typeofbill",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "033X",
+        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill"
+      }, {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
+      }, {
+        "code" : "33",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
+      }, {
+        "code" : "33X",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
     "sequence" : 31
