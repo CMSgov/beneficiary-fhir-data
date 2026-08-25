@@ -27,6 +27,7 @@ from generator_util import (
     output_table_contains_by_bene_sk,
     probability,
 )
+from load_synthetic_output import CsvWriter, SnowflakeWriter
 
 fake = Faker()
 
@@ -76,7 +77,27 @@ parser.add_argument(
     ),
     dest="force_ztm",
 )
+parser.add_argument(
+    "--destination",
+    choices=["csv", "snowflake"],
+    default="csv",
+    help="Destination to write generated synthetic data where snowflake is our synthetic snowflake "
+    "environment and csv is the default out directory. Requires load-credentials.sh sourced first.",
+)
+parser.add_argument(
+    "--truncate",
+    action="store_true",
+    default=False,
+    help="Truncate tables before reloading. Default is false",
+)
 args = parser.parse_args()
+
+if args.claims and args.destination == "snowflake":
+    print(
+        "claims needs out/BENE_HSTRY.csv and out/CNTRCT_PBP_NUM.csv as input to "
+        "claims_generator.py so it isn't compatible with destination flag set to snowflake."
+    )
+    sys.exit(1)
 
 
 available_given_names = [
@@ -297,9 +318,9 @@ def load_inputs():
             # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
             # any of those are true
             if probability(0.5) and not output_table_contains_by_bene_sk(
-                    table=generator.bene_lis_cmbnd,
-                    for_file=BENE_LIS_CMBND,
-                    bene_sk=patient["BENE_SK"],
+                table=generator.bene_lis_cmbnd,
+                for_file=BENE_LIS_CMBND,
+                bene_sk=patient["BENE_SK"],
             ):
                 generator.generate_bene_lis_cmbnd(RowAdapter(initial_kv_template.copy()))
 
@@ -349,8 +370,11 @@ def load_inputs():
         generator.bene_hstry_table.append(patient.kv)
 
     print(f"Done generating {len(patients)} patients")
-    print("Writing finished tables to out directory...")
-    generator.save_output_files()
+    print("Writing finished tables...")
+    generator.save_output_files(
+        SnowflakeWriter() if args.destination == "snowflake" else CsvWriter(),
+        truncate=args.truncate,
+    )
     print("Patient data generation complete!")
 
 

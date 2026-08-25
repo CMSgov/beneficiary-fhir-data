@@ -18,6 +18,8 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 
+from load_synthetic_output import CsvWriter, OutputDestinationWriter
+
 BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
 BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
 BENE_STUS = "SYNTHETIC_BENE_MDCR_STUS"
@@ -772,7 +774,6 @@ class GeneratorUtil:
         stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.mdcr_stus.append(stus_row.kv)
 
-
     def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
         lis_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
@@ -960,43 +961,48 @@ class GeneratorUtil:
 
         return contract_pbp_nums, contract_pbp_contacts
 
-    def save_output_files(self):
-        Path("out").mkdir(exist_ok=True)
-
+    def save_output_files(
+        self,
+        destination: OutputDestinationWriter = CsvWriter,
+        truncate: bool = False,
+    ):
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
-            (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", GeneratorUtil.ALL_KEYS),
-            (mbi_arr, f"out/{BENE_MBI_ID}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_rsn, f"out/{BENE_ENTLMT_RSN}.csv", GeneratorUtil.ALL_KEYS),
-            (self.bene_xref_table, f"out/{BENE_XREF}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_hstry_table, BENE_HSTRY, GeneratorUtil.ALL_KEYS),
+            (mbi_arr, BENE_MBI_ID, GeneratorUtil.ALL_KEYS),
+            (self.mdcr_stus, BENE_STUS, GeneratorUtil.ALL_KEYS),
+            (self.mdcr_entlmt, BENE_ENTLMT, GeneratorUtil.ALL_KEYS),
+            (self.mdcr_tp, BENE_TP, GeneratorUtil.ALL_KEYS),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN, GeneratorUtil.ALL_KEYS),
+            (self.bene_xref_table, BENE_XREF, GeneratorUtil.ALL_KEYS),
             (
                 self.bene_cmbnd_dual_mdcr,
-                f"out/{BENE_DUAL}.csv",
+                BENE_DUAL,
                 GeneratorUtil.ALL_KEYS,
             ),
-            (self.bene_lis_cmbnd, f"out/{BENE_LIS_CMBND}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND, GeneratorUtil.ALL_KEYS),
             (
                 self.bene_mapd_enrlmt_rx,
-                f"out/{BENE_MAPD_ENRLMT_RX}.csv",
+                BENE_MAPD_ENRLMT_RX,
                 GeneratorUtil.ALL_KEYS,
             ),
-            (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_num, f"out/{CNTRCT_PBP_NUM}.csv", GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_cntct, f"out/{CNTRCT_PBP_CNTCT}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, GeneratorUtil.ALL_KEYS),
+            (self.cntrct_pbp_num, CNTRCT_PBP_NUM, GeneratorUtil.ALL_KEYS),
+            (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, GeneratorUtil.ALL_KEYS),
         ]
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
-            for data, path, cols in t:
-                t.set_postfix(file=path)  # type: ignore
-                self.export_df(data, path, cols)
+            for data, table_name, cols in t:
+                t.set_postfix(file=table_name)  # type: ignore
+                self.export_table(data, table_name, cols, destination, truncate)
 
-    @staticmethod
-    def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = ALL_KEYS):
-        df = pd.json_normalize(data)  # type: ignore
-        if cols != GeneratorUtil.ALL_KEYS:
-            df = df[cols]
-        df.to_csv(out_path, index=False)
+    def export_table(
+        self,
+        data: list[dict[str, Any]],
+        table_name: str,
+        cols: list[str] | str = ALL_KEYS,
+        destination: OutputDestinationWriter = CsvWriter,
+        truncate: bool = False,
+    ):
+        destination.write_table(data, table_name, cols, truncate)
