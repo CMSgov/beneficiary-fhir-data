@@ -24,6 +24,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -91,7 +92,9 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return List.of();
+    return Stream.of(SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory))
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   /**

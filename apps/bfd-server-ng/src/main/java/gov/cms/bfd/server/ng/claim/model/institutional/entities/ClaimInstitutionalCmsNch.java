@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -52,7 +51,6 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
 
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
-  @Embedded private BloodPints bloodPints;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;
 
@@ -71,7 +69,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
-            bloodPints.toFhir(supportingInfoFactory).stream().toList(),
+            SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory),
             nchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .toList();

@@ -63,17 +63,11 @@ public class AdjudicationChargeInstitutional {
   @Column(name = "clm_mdcr_instnl_prmry_pyr_amt")
   private BigDecimal primaryPayerAmount;
 
-  @Column(name = "clm_instnl_prfnl_amt")
-  private BigDecimal professionalAmount;
-
   @Column(name = "clm_instnl_drg_outlier_amt")
   private BigDecimal drgOutlierAmount;
 
   @Column(name = "clm_hipps_uncompd_care_amt")
   private BigDecimal hippsUncompensatedCareAmount;
-
-  @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
-  private BigDecimal beneDeductibleAmount;
 
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
   private BigDecimal benePaidAmount;
@@ -92,9 +86,6 @@ public class AdjudicationChargeInstitutional {
 
   @Column(name = "clm_hipps_vbp_amt")
   private BigDecimal hippsPurchasingAmount;
-
-  @Column(name = "clm_instnl_low_vol_pmt_amt")
-  private BigDecimal lowVolumePaymentAmount;
 
   @Column(name = "clm_mdcr_ip_1st_yr_rate_amt")
   private BigDecimal firstYearRateAmount;
@@ -116,7 +107,6 @@ public class AdjudicationChargeInstitutional {
 
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     return Stream.of(
-            AdjudicationChargeClaimValue.toFhir(claimValues),
             List.of(
                 AdjudicationChargeType.BENE_MEDICARE_LRD_USED_COUNT.toFhirAdjudicationUnsignedType(
                     lifetimeReserveDaysUsed),
@@ -150,14 +140,10 @@ public class AdjudicationChargeInstitutional {
                     ppsCapitalTotalAmount),
                 AdjudicationChargeType.PRIMARY_PAYER_NON_MEDICARE_PAID_AMOUNT.toFhirAdjudication(
                     primaryPayerAmount),
-                AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT.toFhirAdjudication(
-                    professionalAmount),
                 AdjudicationChargeType.DRUG_OUTLIER_APPROVED_PAYMENT_AMOUNT.toFhirAdjudication(
                     drgOutlierAmount),
                 AdjudicationChargeType.UNCOMPENSATED_CARE_PAYMENT_AMOUNT.toFhirAdjudication(
                     hippsUncompensatedCareAmount),
-                AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-                    beneDeductibleAmount),
                 AdjudicationChargeType.STANDARDIZED_PAYMENT_AMOUNT.toFhirAdjudication(
                     standardizedPaymentAmount),
                 AdjudicationChargeType.HOSPITAL_ACQUIRED_CONDITION_REDUCTION_AMOUNT
@@ -168,8 +154,6 @@ public class AdjudicationChargeInstitutional {
                     readmissionReductionAmount),
                 AdjudicationChargeType.HIPPS_VALUE_BASED_PURCHASING_AMOUNT.toFhirAdjudication(
                     hippsPurchasingAmount),
-                AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudication(
-                    lowVolumePaymentAmount),
                 AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudication(
                     firstYearRateAmount),
                 AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudication(

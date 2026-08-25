@@ -236,7 +236,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutional().toFhir(getClaimValues()).forEach(eob::addAdjudication);
+    getAdjudicationChargeInstitutional().toFhir().forEach(eob::addAdjudication);
+    AdjudicationChargeClaimValue.toFhir(getClaimValues()).forEach(eob::addAdjudication);
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)

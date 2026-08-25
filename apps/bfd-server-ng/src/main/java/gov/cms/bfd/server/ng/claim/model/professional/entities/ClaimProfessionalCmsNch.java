@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDenialCode;
@@ -57,7 +56,6 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
 
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
-  @Embedded private BloodPints bloodPints;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
@@ -74,7 +72,6 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
             nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            bloodPints.toFhir(supportingInfoFactory),
             claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();

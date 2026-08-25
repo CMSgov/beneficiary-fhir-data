@@ -20,27 +20,24 @@ public class ClaimValue {
   private Optional<String> claimValueCode;
 
   @Column(name = "clm_val_amt")
-  private BigDecimal claimValueAmount;
+  private Optional<BigDecimal> claimValueAmount;
 
-  private static final String VALUE_CODE_DISPROPORTIONATE = "18";
-  private static final String VALUE_CODE_IME = "19";
-
-  Optional<BigDecimal> getDisproportionateAmount() {
-    return getAmountForCode(VALUE_CODE_DISPROPORTIONATE);
+  Optional<BigDecimal> getClaimValueAmount(String code) {
+    return getAmountForCode(code);
   }
 
-  Optional<BigDecimal> getImeAmount() {
-    return getAmountForCode(VALUE_CODE_IME);
+  Optional<Integer> getClaimValueQuantity(String code) {
+    return getQuantityForCode(code);
   }
 
   private Optional<BigDecimal> getAmountForCode(String code) {
-    return claimValueCode.flatMap(
-        c -> {
-          if (c.equals(code)) {
-            return Optional.of(claimValueAmount);
-          } else {
-            return Optional.empty();
-          }
-        });
+    return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount);
+  }
+
+  private Optional<Integer> getQuantityForCode(String code) {
+    return claimValueCode
+        .filter(c -> c.equals(code))
+        .flatMap(c -> claimValueAmount)
+        .map(BigDecimal::intValue);
   }
 }
