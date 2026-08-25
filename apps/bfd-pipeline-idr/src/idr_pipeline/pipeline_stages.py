@@ -3,6 +3,8 @@ import itertools
 import random
 from datetime import datetime
 
+from idr_pipeline import Executor
+
 from .batch_worker import LoadingBatchWorkerClient
 from .load_partition import LoadPartition, LoadType
 from .model.base_model import (
@@ -14,7 +16,6 @@ from .model.idr_beneficiary import IdrBeneficiary
 from .model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
 from .model.idr_beneficiary_entitlement import IdrBeneficiaryEntitlement
 from .model.idr_beneficiary_entitlement_reason import IdrBeneficiaryEntitlementReason
-from .model.idr_beneficiary_low_income_subsidy import IdrBeneficiaryLowIncomeSubsidy
 from .model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
 from .model.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
 from .model.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
@@ -35,7 +36,7 @@ from .model.idr_contract_pbp_contact import IdrContractPbpContact
 from .model.idr_contract_pbp_number import IdrContractPbpNumber
 from .model.idr_prior_auth import IdrPriorAuth
 from .model.idr_prior_auth_item import IdrPriorAuthItem
-from .parallel_executor import ParallelStagesExecutor, Stage
+from .parallel_executor import Stage
 from .pipeline_utils import (
     extract_and_load,
     prune_bene_lis_cmbnd,
@@ -44,7 +45,7 @@ from .pipeline_utils import (
     prune_phase_1_ss_claims,
     prune_stale_non_part_d_claims,
 )
-from .settings import enable_prior_auth_ingestion
+from .settings import SETTINGS
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
@@ -83,7 +84,6 @@ BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrContractPbpNumber,
     IdrBeneficiaryMaPartDEnrollment,
     IdrBeneficiaryMaPartDEnrollmentRx,
-    IdrBeneficiaryLowIncomeSubsidy,
     IdrBeneficiaryLowIncomeSubsidyCmbnd,
 ]
 BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
@@ -94,7 +94,7 @@ _LOAD_ALL_TABLES = {"all"}
 class StagedIdrPipeline:
     def __init__(
         self,
-        max_workers: int,
+        executor: Executor,
         load_mode: LoadMode,
         start_time: datetime,
         load_type: LoadType,
@@ -108,7 +108,7 @@ class StagedIdrPipeline:
         self.source = source
         self.worker_client = worker_client
         self.tables_to_load = tables_to_load
-        self._executor = ParallelStagesExecutor(max_workers)
+        self._executor = executor
 
     async def start(self) -> bool:
         return all(
@@ -132,7 +132,7 @@ class StagedIdrPipeline:
         tables = [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES]
         if self.load_type == LoadType.INITIAL:
             tables.extend([*CLAIM_TABLES, *BENE_TABLES])
-        if enable_prior_auth_ingestion():
+        if SETTINGS.enable_prior_auth_ingestion:
             tables.extend(PRIOR_AUTH_TABLES)
 
         filtered_tables = self._filter_tables(tables)

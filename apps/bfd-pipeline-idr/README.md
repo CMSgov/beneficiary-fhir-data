@@ -43,13 +43,27 @@ This is useful for loading our synthetic data stored in our repository, or the t
 uv run pytest
 ```
 
+### Debugging tests
+
+The tests work with the VS Code testing integration (the beaker icon). By default, the pipeline spawns multiple processes
+in order to load data concurrently, but this does not play nicely with the debugger. We detect when a debugger is attached
+and run using threads instead of processes. This incurs a performance hit due to blocking IO, but is necessary for breakpoints
+to work seamlessly.
+
+To run a specific test: 
+
+```sh
+ uv run test/test_pipeline.py::{your_test_name}
+```
+
 ### Debugging generated queries
 
 The queries used here are heavily dynamic and sometimes it's useful to inspect the generated result.
 
-To inspect a single query, run `IDR_LOG_LEVEL=debug IDR_TABLES="idr.<your_table_name>" ./run-db.sh ./test_samples1`
+To inspect a single query, run `IDR_SQL_LOG=1 IDR_LOG_LEVEL=warning IDR_TABLES="idr.<your_table_name>" ./run-db.sh ./test_samples1`
 
 This will enable debug logging and only run against a single table to prevent dozens of queries from spamming the logs.
+Setting `IDR_LOG_LEVEL=warning` will prevent additional logs from making it hard to find the query.
 
 ## Settings
 
@@ -78,6 +92,10 @@ This will first _replace_ the contents in Snowflake with the given CSV data and 
 ```sh
 BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
 ```
+
+## Loading synthetic data into your local database
+
+The steps above also apply, but run `./load-synthetic-local.sh` instead.
 
 ## Running against production data
 

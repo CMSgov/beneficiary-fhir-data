@@ -5,7 +5,18 @@ from enum import IntFlag, StrEnum, auto
 
 from dateutil.relativedelta import relativedelta
 
-from .settings import ENABLE_DATE_PARTITIONS
+from idr_pipeline.constants import (
+    ALL_CLAIM_TYPE_CODES,
+    INSTITUTIONAL_NCH_CLAIM_TYPE_CODES,
+    INSTITUTIONAL_OUTPATIENT_CLAIM_TYPE_CODE,
+    INSTITUTIONAL_SS_CLAIM_TYPE_CODES,
+    PART_D_CLAIM_TYPE_CODES,
+    PART_D_ORIGINAL_CLAIM_TYPE_CODE,
+    PROFESSIONAL_NCH_CLAIM_TYPE_CODES,
+    PROFESSIONAL_SS_CLAIM_TYPE_CODES,
+)
+
+from .settings import SETTINGS
 
 
 class LoadType(StrEnum):
@@ -42,7 +53,7 @@ class LoadPartitionGroup:
     def generate_ranges(self, load_type: LoadType, start_date: date) -> Generator[LoadPartition]:
         if (
             self.date_interval is None
-            or not ENABLE_DATE_PARTITIONS
+            or not SETTINGS.enable_date_partitions
             or load_type == LoadType.INCREMENTAL
         ):
             yield LoadPartition(
@@ -65,3 +76,103 @@ class LoadPartitionGroup:
                 self.priority,
             )
             start += self.date_interval
+
+
+match SETTINGS.partition_type:
+    case "year" | "years":
+        partition_range = relativedelta(years=1)
+    case "month" | "months":
+        partition_range = relativedelta(months=1)
+    case "day" | "days":
+        partition_range = relativedelta(days=1)
+    case _:
+        raise ValueError("invalid partition type " + SETTINGS.partition_type)
+
+
+PART_D_PARTITIONS = [
+    LoadPartitionGroup(
+        "part_d_original", [PART_D_ORIGINAL_CLAIM_TYPE_CODE], PartitionType.PART_D, partition_range
+    ),
+    LoadPartitionGroup(
+        "part_d_adjustment",
+        [c for c in PART_D_CLAIM_TYPE_CODES if c != PART_D_ORIGINAL_CLAIM_TYPE_CODE],
+        PartitionType.PART_D,
+        partition_range,
+    ),
+]
+
+INSTITUTIONAL_NCH_PARTITIONS = [
+    # Outpatient
+    LoadPartitionGroup(
+        "outpatient",
+        [INSTITUTIONAL_OUTPATIENT_CLAIM_TYPE_CODE],
+        PartitionType.INSTITUTIONAL,
+        partition_range,
+    ),
+    # HHA, SNF, Hospice, Inpatient, MA
+    LoadPartitionGroup(
+        "institutional",
+        [
+            c
+            for c in INSTITUTIONAL_NCH_CLAIM_TYPE_CODES
+            if c != INSTITUTIONAL_OUTPATIENT_CLAIM_TYPE_CODE
+        ],
+        PartitionType.INSTITUTIONAL,
+        partition_range,
+    ),
+]
+
+INSTITUTIONAL_SS_PARTITIONS = [
+    LoadPartitionGroup(
+        "institututional_pac",
+        INSTITUTIONAL_SS_CLAIM_TYPE_CODES,
+        PartitionType.INSTITUTIONAL | PartitionType.PAC,
+        partition_range,
+    )
+]
+
+PROFESSIONAL_NCH_PARTITIONS = [
+    LoadPartitionGroup(
+        "professional",
+        PROFESSIONAL_NCH_CLAIM_TYPE_CODES,
+        PartitionType.PROFESSIONAL,
+        partition_range,
+    ),
+]
+
+PROFESSIONAL_SS_PARTITIONS = [
+    LoadPartitionGroup(
+        "professional_pac",
+        PROFESSIONAL_SS_CLAIM_TYPE_CODES,
+        PartitionType.PROFESSIONAL | PartitionType.PAC,
+        partition_range,
+    )
+]
+
+
+ALL_CLAIM_PARTITIONS = [
+    *PART_D_PARTITIONS,
+    *INSTITUTIONAL_NCH_PARTITIONS,
+    *INSTITUTIONAL_SS_PARTITIONS,
+    *PROFESSIONAL_NCH_PARTITIONS,
+    *PROFESSIONAL_SS_PARTITIONS,
+]
+
+
+COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
+    "all_claims",
+    ALL_CLAIM_TYPE_CODES,
+    PartitionType.INSTITUTIONAL
+    | PartitionType.PROFESSIONAL
+    | PartitionType.PART_D
+    | PartitionType.PAC,
+    None,
+)
+
+DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.ALL, None, None, 0)
+
+NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.ALL, None, 1)
+
+# Need to declare this separately because python struggles
+# with type-hinting empty arrays :(
+EMPTY_PARTITION: list[LoadPartitionGroup] = []

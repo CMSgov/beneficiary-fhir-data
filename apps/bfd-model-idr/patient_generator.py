@@ -12,7 +12,6 @@ from generator_util import (
     BENE_ENTLMT,
     BENE_ENTLMT_RSN,
     BENE_HSTRY,
-    BENE_LIS,
     BENE_LIS_CMBND,
     BENE_MAPD_ENRLMT,
     BENE_MAPD_ENRLMT_RX,
@@ -166,9 +165,6 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             pbp_num=bene_mapd_enrlmt_rx_row["BENE_PBP_NUM"],
         )
 
-    for bene_lis_row in files[BENE_LIS]:
-        generator.generate_bene_lis(lis_row=bene_lis_row)
-
     for bene_lis_row in files[BENE_LIS_CMBND]:
         generator.generate_bene_lis_cmbnd(lis_row=bene_lis_row)
 
@@ -196,7 +192,6 @@ def load_inputs():
         BENE_DUAL: [],
         BENE_MAPD_ENRLMT: [],
         BENE_MAPD_ENRLMT_RX: [],
-        BENE_LIS: [],
         BENE_LIS_CMBND: [],
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
@@ -298,15 +293,6 @@ def load_inputs():
                     contract_num=contract_num,
                     pbp_num=pbp_num,
                 )
-
-            # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
-            # any of those are true
-            if probability(0.5) and not output_table_contains_by_bene_sk(
-                table=generator.bene_lis,
-                for_file=BENE_LIS,
-                bene_sk=patient["BENE_SK"],
-            ):
-                generator.generate_bene_lis(RowAdapter(initial_kv_template.copy()))
 
             # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
             # any of those are true

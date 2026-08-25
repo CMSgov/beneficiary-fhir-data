@@ -51,21 +51,21 @@
     }
   },
   {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD",
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-IND",
     "valueCoding" : {
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-EFCTV-CD",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-IND",
       "code" : "Y"
     }
   },
   {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-COPMT-LVL-ID",
     "valueCoding" : {
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-COPMT-LVL-ID",
       "code" : "1"
     }
   },
   {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-PRM-PCT",
     "valueDecimal" : 100.0
   }],
   "identifier" : [{
