@@ -608,6 +608,10 @@ def _log_formatter(record: Record) -> str:
     )
 
 
+def _filter_sql_logs(record: Record) -> bool:
+    return record["level"].name != "SQL"
+
+
 async def async_main(
     tables: list[str],
     exclude_tables: list[str],
@@ -785,6 +789,7 @@ def main(
         sink=sys.stderr,
         level=log_level.upper(),
         format=_log_formatter,
+        filter=_filter_sql_logs,  # filter out SQL level messages
         enqueue=True,  # Ensures non-blocking and async+multiprocessing-safe
         diagnose=False,  # Ensures local variables are not logged for exceptions
     )
