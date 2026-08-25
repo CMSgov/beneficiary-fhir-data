@@ -682,8 +682,7 @@ async def async_main(
     "--tables",
     multiple=True,
     envvar="IDR_TABLES",
-    type=list[str],
-    default=[],
+    type=str,
     show_default=False,
     help="List of tables to validate. Defaults to all tables if unspecified or empty",
 )
@@ -692,8 +691,7 @@ async def async_main(
     "--exclude-tables",
     multiple=True,
     envvar="IDR_EXCLUDE_TABLES",
-    type=list[str],
-    default=[],
+    type=str,
     show_default=False,
     help="List of tables to exclude from validation. Defaults to no tables if unspecified or empty",
 )
@@ -755,8 +753,7 @@ async def async_main(
     "--where-clauses",
     multiple=True,
     envvar="ADDITIONAL_WHERE_CLAUSES",
-    type=list[str],
-    default=[],
+    type=str,
     show_default=False,
     help="List of additional where clauses to append with AND to the default WHERE",
 )
@@ -765,23 +762,22 @@ async def async_main(
     "--clm-where-clauses",
     multiple=True,
     envvar="ADDITIONAL_CLAIM_WHERE_CLAUSES",
-    type=list[str],
-    default=[],
+    type=str,
     show_default=False,
     help="List of additional where clauses to append with AND to the default WHERE for claims"
     "tables",
 )
 def main(
-    tables: list[str],
-    exclude_tables: list[str],
+    tables: tuple[str],
+    exclude_tables: tuple[str],
     limit: int,
     max_parallel: int,
     log_level: str,
     enable_reports: bool,
     reports_dir: Path | None,
     allow_sensitive_logs: bool,
-    where_clauses: list[str],
-    clm_where_clauses: list[str],
+    where_clauses: tuple[str],
+    clm_where_clauses: tuple[str],
 ) -> None:
     configure_logger()
     logger.remove()
@@ -799,15 +795,15 @@ def main(
 
     if not anyio.run(
         async_main,
-        tables,
-        exclude_tables,
+        list(tables),
+        list(exclude_tables),
         limit,
         max_parallel,
         enable_reports,
         reports_dir,
         allow_sensitive_logs,
-        where_clauses,
-        clm_where_clauses,
+        list(where_clauses),
+        list(clm_where_clauses),
     ):
         sys.exit(1)
 
