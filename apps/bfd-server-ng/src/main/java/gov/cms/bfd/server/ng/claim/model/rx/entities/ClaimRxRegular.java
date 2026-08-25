@@ -11,7 +11,6 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.Optional;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -19,7 +18,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimRxRegular extends ClaimRxBase {
 
   /**
@@ -39,11 +37,6 @@ public class ClaimRxRegular extends ClaimRxBase {
     return Optional.of(adjudicationCharge);
   }
 
-  @Override
-  protected ClaimItemBase getClaimItem() {
-    return null;
-  }
-
   // endregion
 
   // region Claim Submission Format Code
@@ -57,6 +50,11 @@ public class ClaimRxRegular extends ClaimRxBase {
         .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
         .map(c -> c.toFhir(supportingInfoFactory));
   }
+
   // endregion
 
+  @Override
+  protected ClaimItemBase getClaimItem() {
+    return null;
+  }
 }
