@@ -21,6 +21,13 @@ public sealed interface ClaimPaidStatusCode
   String getCode();
 
   /**
+   * Gets the display.
+   *
+   * @return the display
+   */
+  String getDisplay();
+
+  /**
    * Gets the outcome value.
    *
    * @return the outcome
@@ -56,7 +63,8 @@ public sealed interface ClaimPaidStatusCode
             new CodeableConcept(
                 new Coding()
                     .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_PAID_STATUS_CODE)
-                    .setCode(getCode())));
+                    .setCode(getCode())
+                    .setDisplay(getDisplay())));
   }
 
   /**
@@ -91,37 +99,38 @@ public sealed interface ClaimPaidStatusCode
   @Getter
   enum Valid implements ClaimPaidStatusCode {
     /** P. */
-    P("P", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    P("P", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "PAID"),
 
     /** 1. */
-    NUM_1("1", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    NUM_1("1", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "INACTIVE/DELETED"),
 
     /** R. */
-    R("R", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    R("R", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "REJECTED"),
 
     /** 2. */
-    NUM_2("2", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    NUM_2("2", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "REPLACED"),
 
     /** D. */
-    D("D", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    D("D", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "DENIED"),
 
     /** Y. */
-    Y("Y", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+    Y("Y", ExplanationOfBenefit.RemittanceOutcome.COMPLETE, "DENIED - MCS ONLY"),
 
     /** Empty value (normalized from "~"). */
-    EMPTY("", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
+    EMPTY("", ExplanationOfBenefit.RemittanceOutcome.PARTIAL, "NO DESCRIPTION AVAILABLE"),
 
     /** I. */
-    I("I", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
+    I("I", ExplanationOfBenefit.RemittanceOutcome.PARTIAL, "INACTIVE/DELETED"),
 
     /** S. */
-    S("S", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
+    S("S", ExplanationOfBenefit.RemittanceOutcome.PARTIAL, "SUSPENDED"),
 
     /** T. */
-    T("T", ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+    T("T", ExplanationOfBenefit.RemittanceOutcome.PARTIAL, "RETURN TO PROVIDER");
 
     private final String code;
     private final ExplanationOfBenefit.RemittanceOutcome outcome;
+    private final String display;
   }
 
   /** Captures unknown/invalid codes. */
@@ -129,6 +138,11 @@ public sealed interface ClaimPaidStatusCode
     @Override
     public ExplanationOfBenefit.RemittanceOutcome getOutcome() {
       return ExplanationOfBenefit.RemittanceOutcome.NULL;
+    }
+
+    @Override
+    public String getDisplay() {
+      return "";
     }
 
     @Override

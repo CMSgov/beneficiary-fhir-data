@@ -2538,6 +2538,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -3950,6 +3951,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -5362,6 +5364,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -6774,6 +6777,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -8186,6 +8190,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -9598,6 +9603,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -23938,6 +23944,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -25386,6 +25393,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -26843,6 +26851,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -31684,6 +31693,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -33132,6 +33142,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -34589,6 +34600,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -39430,6 +39442,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -40878,6 +40891,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -42335,6 +42349,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -48456,6 +48471,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -49904,6 +49920,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -56132,6 +56149,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -57580,6 +57598,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -63808,6 +63827,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -65256,6 +65276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -74398,6 +74419,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -75855,6 +75877,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -80762,6 +80785,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -82219,6 +82243,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -83598,6 +83623,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -84441,6 +84467,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -86402,6 +86429,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -87850,6 +87878,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -88693,6 +88722,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -97728,6 +97758,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -99185,6 +99216,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -104092,6 +104124,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -105549,6 +105582,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -106928,6 +106962,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -107771,6 +107806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -109732,6 +109768,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -111180,6 +111217,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -112023,6 +112061,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -121058,6 +121097,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -122515,6 +122555,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -127422,6 +127463,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -128879,6 +128921,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -130258,6 +130301,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -131101,6 +131145,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -133062,6 +133107,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -134510,6 +134556,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -135353,6 +135400,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -138436,6 +138484,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -139884,6 +139933,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -144832,6 +144882,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -146280,6 +146331,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -151228,6 +151280,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -152676,6 +152729,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -154133,6 +154187,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -157216,6 +157271,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -158664,6 +158720,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -163612,6 +163669,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -165060,6 +165118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -170008,6 +170067,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -171456,6 +171516,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -172913,6 +172974,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -175996,6 +176058,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -177444,6 +177507,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -182392,6 +182456,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -183840,6 +183905,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -188788,6 +188854,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -190236,6 +190303,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -191693,6 +191761,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
