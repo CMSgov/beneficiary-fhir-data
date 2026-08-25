@@ -17,7 +17,7 @@ import anyio
 import boto3
 import click
 from botocore.config import Config
-from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION, PHASE_1_CUTOFF
+from idr_pipeline.constants import DEFAULT_MAX_DATE, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
