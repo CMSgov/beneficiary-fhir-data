@@ -28,7 +28,6 @@ BENE_XREF = "SYNTHETIC_BENE_XREF"
 BENE_DUAL = "SYNTHETIC_BENE_CMBND_DUAL_MDCR"
 BENE_MAPD_ENRLMT = "SYNTHETIC_BENE_MAPD_ENRLMT"
 BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
-BENE_LIS = "SYNTHETIC_BENE_LIS"
 BENE_LIS_CMBND = "SYNTHETIC_BENE_LIS_CMBND"
 CLM = "SYNTHETIC_CLM"
 CLM_LINE = "SYNTHETIC_CLM_LINE"
@@ -773,28 +772,6 @@ class GeneratorUtil:
         stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.mdcr_stus.append(stus_row.kv)
 
-    def generate_bene_lis(self, lis_row: RowAdapter):
-        lis_start_date = self.fake.date_between_dates(
-            datetime.date(year=2017, month=5, day=20),
-            datetime.date(year=2021, month=1, day=1),
-        )
-        lis_end_date = "9999-12-31"
-        lis_efctv_cd = random.choice(self.code_systems["BENE_LIS_EFCTV_CD"])
-        copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
-        ptd_prm_pct = random.choice(["025", "050", "075", "100"])
-
-        lis_row["IDR_LTST_TRANS_FLG"] = "Y"
-        lis_row["BENE_LIS_EFCTV_CD"] = lis_efctv_cd
-        lis_row["BENE_LIS_COPMT_LVL_CD"] = copmt_lvl_cd
-        lis_row["BENE_LIS_PTD_PRM_PCT"] = str(ptd_prm_pct)
-        lis_row["BENE_RNG_BGN_DT"] = str(lis_start_date)
-        lis_row["BENE_RNG_END_DT"] = lis_end_date
-        lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000"
-        lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000"
-        lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000"
-        lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
-
-        self.bene_lis.append(lis_row.kv)
 
     def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
         lis_start_date = self.fake.date_between_dates(
@@ -802,7 +779,7 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         lis_end_date = "9999-12-31"
-        copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
+        copmt_lvl_cd = random.choice(self.code_systems["BENE_CMBND_DEEMD_COPMT_LVL_ID"])
         ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
         lis_row["IDR_LTST_TRANS_FLG"] = "Y"
@@ -1001,7 +978,6 @@ class GeneratorUtil:
                 f"out/{BENE_DUAL}.csv",
                 GeneratorUtil.ALL_KEYS,
             ),
-            (self.bene_lis, f"out/{BENE_LIS}.csv", GeneratorUtil.ALL_KEYS),
             (self.bene_lis_cmbnd, f"out/{BENE_LIS_CMBND}.csv", GeneratorUtil.ALL_KEYS),
             (
                 self.bene_mapd_enrlmt_rx,

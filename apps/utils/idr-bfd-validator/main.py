@@ -19,7 +19,7 @@ import click
 from botocore.config import Config
 from idr_pipeline.constants import DEFAULT_MAX_DATE, DEFAULT_PARTITION, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
-from idr_pipeline.load_partition import LoadPartition, LoadType
+from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import (
     ALIAS_CLM,
@@ -46,7 +46,7 @@ from idr_pipeline.model.idr_claim_item_professional_ss import IdrClaimItemProfes
 from idr_pipeline.model.idr_claim_professional_nch import IdrClaimProfessionalNch
 from idr_pipeline.model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from idr_pipeline.model.load_progress import LoadProgress
-from idr_pipeline.parallel_executor import ParallelStagesExecutor, Stage
+from idr_pipeline.parallel_executor import MultiprocessingExecutor, Stage
 from idr_pipeline.pipeline_stages import (
     BENE_AUX_TABLES,
     BENE_TABLES,
@@ -619,7 +619,7 @@ async def async_main(
     where_clauses: list[str],
     clm_where_clauses: list[str],
 ) -> bool:
-    executor = ParallelStagesExecutor(max_workers=max_parallel)
+    executor = MultiprocessingExecutor(max_workers=max_parallel)
     reports_dir = reports_dir or _create_dir_in_tmp("reports_")
     if enable_reports:
         logger.info("Writing JSON validation reports to {}", str(reports_dir))
