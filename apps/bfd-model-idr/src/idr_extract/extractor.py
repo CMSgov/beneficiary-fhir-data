@@ -3,18 +3,19 @@ from pathlib import Path
 import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from idr_pipeline.settings import SETTINGS
 from snowflake.connector import SnowflakeConnection
 
 from .settings import (
-    idr_account,
-    idr_database,
-    idr_private_key,
-    idr_schema,
-    idr_username,
-    idr_warehouse,
     output_dir,
     table_exception_list,
 )
+
+
+class SnowflakeTable:
+    def __init__(self, schema_name: str, table_name: str) -> None:
+        self.schema_name = schema_name
+        self.table_name = table_name
 
 
 class SnowflakeExecutor:
@@ -25,7 +26,7 @@ class SnowflakeExecutor:
     @staticmethod
     def connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
-            idr_private_key().encode(),
+            SETTINGS.idr_private_key.encode(),
             password=None,
             backend=default_backend(),
         )
@@ -35,12 +36,12 @@ class SnowflakeExecutor:
             encryption_algorithm=serialization.NoEncryption(),
         )
         return snowflake.connector.connect(  # type: ignore
-            user=idr_username(),
+            user=SETTINGS.idr_username,
             private_key=private_key_bytes,
-            account=idr_account(),
-            warehouse=idr_warehouse(),
-            database=idr_database(),
-            schema=idr_schema(),
+            account=SETTINGS.idr_account,
+            warehouse=SETTINGS.idr_warehouse,
+            database=SETTINGS.idr_database,
+            schema=SETTINGS.idr_schema,
         )
 
     def prep(self) -> None:
@@ -74,16 +75,7 @@ class SnowflakeExecutor:
             MAX_FILE_SIZE = 1073741824;
         """
         .replace("{FILE_NAME}",file_name)
-        .replace("{QUERY}",sql.replace(
-                            "{WHERE_CLAUSE}",
-                            "",
-                        )
-                        .replace("{FILTER_OP}", "")
-                        .replace("{LAST_TS}", "")
-                        .replace("{ORDER_BY}", "")
-                        .replace("{TABLESAMPLE}", "")
-                        .replace("{LIMIT}", "")
-                        .replace("{BASE_CLAIMS_WHERE_FILTERS}", "")))
+        .replace("{QUERY}",sql))
 
         try:
             get_command = f"GET @tmp_export_stage/{file_name} file://{output_dir()}"
@@ -104,9 +96,5 @@ class SnowflakeExecutor:
         """,expection_list)
         return [SnowflakeTable(row[0],row[1]) for row in cur.fetchall()]
 
-class SnowflakeTable:
-    def __init__(self, schema_name: str, table_name: str) -> None:
-        self.schema_name = schema_name
-        self.table_name = table_name
 
 
