@@ -5,12 +5,13 @@
 # ]
 # ///
 
-import difflib
 import re
 import sys
 from pathlib import Path
 
 import yaml
+
+# DISCLAIMER : This was generated with the assistance of Claude AI
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,20 +53,6 @@ JAVA_ENTITY_RE = re.compile(
     re.IGNORECASE,
 )
 
-# House-style doc block sitting directly above a class's own
-# @Entity/@MappedSuperclass/@Embeddable annotation, e.g.:
-#   /**
-#    * Claim header-level benefit enhancement codes.
-#    * Resource - ExplanationOfBenefit.SupportingInformationComponent
-#    * Domain   - [ Professional, Institutional ]
-#    * Profiles - [ CMS ]
-#    * Source   - [ SS, NCH ]
-#    */
-DOC_BLOCK_RE = re.compile(
-    r"/\*\*(?P<body>.*?)\*/\s*(?=@Entity\b|@MappedSuperclass\b|@Embeddable\b)", re.S
-)
-DOC_FIELD_RE = re.compile(r"^\s*\*\s*(Resource|Domain|Profiles|Source)\s*-\s*(.+?)\s*$", re.MULTILINE)
-
 DEFAULT_PROFILES = ["Basis", "Regular", "CMS (Default)"]
 ALL_PROFILES_ORDERED = ["BASIS", "REGULAR", "CMS"]
 ALL_PROFILES_SET = set(ALL_PROFILES_ORDERED)
@@ -83,6 +70,7 @@ UNMATCHED_COLUMNS: set[str] = set()
 DUPLICATE_COLUMN_BINDINGS: dict[tuple[str, str], set[str]] = {}
 
 FORMAT_SPACING = "    │"
+
 
 def parse_yaml_map(yaml_dir: Path) -> dict:
     mappings = {}
@@ -144,26 +132,6 @@ def _record_duplicate_bindings(class_name: str, columns: list) -> None:
             DUPLICATE_COLUMN_BINDINGS[(class_name, db_col)] = java_vars
 
 
-def _parse_doc_metadata(content: str) -> dict[str, list[str]]:
-    """Pulls Resource/Domain/Profiles/Source out of the doc block sitting
-    directly above a class's own annotation, if present. A bracketed
-    value ('[ CMS, REGULAR ]') becomes a list; a bare value becomes a
-    single-item list. Missing entirely just means no metadata -- callers
-    fall back to name-based profile detection."""
-    block = DOC_BLOCK_RE.search(content)
-    if not block:
-        return {}
-    metadata: dict[str, list[str]] = {}
-    for key, raw_value in DOC_FIELD_RE.findall(block.group("body")):
-        value = raw_value.strip()
-        if value.startswith("[") and value.endswith("]"):
-            values = [v.strip() for v in value[1:-1].split(",") if v.strip()]
-        else:
-            values = [value] if value else []
-        metadata[key.lower()] = values
-    return metadata
-
-
 def parse_java_graph(src_dir: Path) -> dict:
     graph = {}
     if not src_dir.exists():
@@ -186,7 +154,6 @@ def parse_java_graph(src_dir: Path) -> dict:
             "table": table_match.group(1) if table_match else None,
             "columns": columns,
             "embeddeds": _extract_embeddeds(clean_content),
-            "doc_metadata": _parse_doc_metadata(content),
         }
     return graph
 
@@ -199,36 +166,15 @@ def get_class_profile(class_name: str) -> str | None:
     return None
 
 
-def entity_profile(class_name: str, graph: dict = None) -> tuple[str, bool]:
-    """(profile, was_inferred). Checks for a single explicit doc-comment
-    Profiles value first, then the name heuristic. Most entities outside
-    the claim family aren't profile-scoped at all, so when neither says
-    anything, default to CMS -- it's the superset profile, and flagging
-    the default keeps this honest rather than silently guessing."""
-    if graph is not None:
-        doc_profiles = graph.get(class_name, {}).get("doc_metadata", {}).get("profiles")
-        if doc_profiles and len(doc_profiles) == 1:
-            return doc_profiles[0].strip().upper(), False
+def entity_profile(class_name: str) -> tuple[str, bool]:
+    """(profile, was_inferred). Most entities outside the claim family
+    aren't profile-scoped at all, so when the name doesn't tell us,
+    default to CMS -- it's the superset profile, and flagging the
+    default keeps this honest rather than silently guessing."""
     detected = get_class_profile(class_name)
     if detected:
         return detected, False
     return "CMS", True
-
-
-def resolved_class_profiles(graph: dict, class_name: str) -> frozenset | None:
-    """The set of profiles a MappedSuperclass/Embeddable is scoped to.
-    Prefers an explicit doc-comment Profiles annotation -- ground truth
-    the developer wrote down, and the only way to detect a class scoped
-    to more than one profile at once (BenefitEnhancementCodes-style) --
-    over the name heuristic, which can only ever find a single profile
-    and misses classes that don't encode one in their name at all."""
-    doc_profiles = graph.get(class_name, {}).get("doc_metadata", {}).get("profiles")
-    if doc_profiles:
-        normalized = frozenset(p.strip().upper() for p in doc_profiles)
-        if normalized and normalized <= ALL_PROFILES_SET:
-            return normalized
-    detected = get_class_profile(class_name)
-    return frozenset({detected}) if detected else None
 
 
 def entity_exposed_columns(graph: dict, class_name: str, visited: set = None) -> set[str]:
@@ -312,7 +258,7 @@ def print_entity_tree(
 
 def print_entity(graph: dict, profile_map: dict, entity_name: str, debug_col: str | None = None) -> tuple[str, list]:
     node = graph[entity_name]
-    profile, inferred = entity_profile(entity_name, graph)
+    profile, inferred = entity_profile(entity_name)
 
     table_info = f" ──► Table: {node['table']}" if node["table"] else ""
     profile_label = f"{profile} (default, no profile in name)" if inferred else profile
@@ -350,28 +296,21 @@ def _collect_reachable_profiles(graph: dict) -> dict[str, set]:
     for name, node in graph.items():
         if node["type"] != "Entity":
             continue
-        profile, _ = entity_profile(name, graph)
+        profile, _ = entity_profile(name)
         walk(name, profile, set())
 
     return reachable
 
 
-def _shared_class_flag(class_profiles: frozenset | None, allowed_profiles: list, ambiguous: bool = False) -> str:
+def _shared_class_flag(class_profile: str | None, allowed_profiles: list, ambiguous: bool = False) -> str:
     if ambiguous:
         return ""
-    if class_profiles is None:
-        if set(allowed_profiles) < ALL_PROFILES_SET:
-            return f"  ▼ PUSH DOWN candidate: only valid for {allowed_profiles}, move to profile-specific subclass(es)"
-        return ""
-    allowed = set(allowed_profiles)
-    if not class_profiles <= allowed:
-        missing = sorted(class_profiles - allowed)
-        return (
-            f"  ⚠️  WARNING: declared for profile(s) {sorted(class_profiles)} but column only "
-            f"valid for {allowed_profiles} (missing: {missing})"
-        )
-    if class_profiles < ALL_PROFILES_SET and allowed >= ALL_PROFILES_SET:
+    if class_profile and class_profile not in allowed_profiles:
+        return f"  ⚠️  WARNING: not valid for this class's own profile '{class_profile}'!"
+    if class_profile and set(allowed_profiles) >= ALL_PROFILES_SET:
         return "  ▲ PULL UP candidate: valid for all profiles, could move to a shared base"
+    if not class_profile and set(allowed_profiles) < ALL_PROFILES_SET:
+        return f"  ▼ PUSH DOWN candidate: only valid for {allowed_profiles}, move to profile-specific subclass(es)"
     return ""
 
 
@@ -379,7 +318,7 @@ def _print_shared_fields(
         graph: dict,
         profile_map: dict,
         class_name: str,
-        governing_profiles: frozenset | None,
+        governing_profile: str | None,
         indent: str,
         expand_embeds: bool,
         reachable: dict,
@@ -398,7 +337,7 @@ def _print_shared_fields(
         if db_col not in profile_map:
             UNMATCHED_COLUMNS.add(db_col)
         allowed_profiles = profile_map.get(db_col, ALL_PROFILES_ORDERED)
-        flag = _shared_class_flag(governing_profiles, allowed_profiles, ambiguous)
+        flag = _shared_class_flag(governing_profile, allowed_profiles, ambiguous)
         print(
             f"{indent}├── [Column] {col['db_col']} ({col['java_var']}) "
             f"[profiles: {', '.join(allowed_profiles)}]{flag}"
@@ -408,9 +347,9 @@ def _print_shared_fields(
         print(f"{indent}└── [Embedded] {embed['java_var']} ──► Type: {embed['type']}")
         if expand_embeds:
             _print_shared_fields(
-                graph, profile_map, embed["type"], governing_profiles, indent + FORMAT_SPACING,
+                graph, profile_map, embed["type"], governing_profile, indent + FORMAT_SPACING,
                 expand_embeds, reachable, visited.copy(),
-                                                                       )
+                                                                      )
 
 
 def print_shared_class(
@@ -424,36 +363,33 @@ def print_shared_class(
     (they get their own section further down); pass expand_embeds to
     recurse into them inline instead -- every nested column is still
     checked against THIS class's own profile, not whatever the embedded
-    type's own name (or lack of one) implies in isolation. Flags are
-    suppressed for any class demonstrably reused across more than one
-    governing profile elsewhere in the codebase (see reachable)."""
+    type's own name (or lack of one) implies in isolation. Any class with
+    "base" in its name always expands inline regardless of the flag,
+    since that's where push-down/pull-up review actually concentrates.
+    Flags are suppressed for any class demonstrably reused across more
+    than one governing profile elsewhere in the codebase (see reachable)."""
     reachable = reachable or {}
     node = graph[class_name]
-    class_profiles = resolved_class_profiles(graph, class_name)
+    class_profile = get_class_profile(class_name)
     ambiguous = len(reachable.get(class_name, set())) > 1
 
     if ambiguous:
         contexts = ", ".join(sorted((p or "no profile") for p in reachable[class_name]))
         profile_label = f"reused across multiple contexts ({contexts}) -- flags suppressed"
-    elif class_profiles:
-        profile_label = ", ".join(sorted(class_profiles))
     else:
-        profile_label = "shared, no profile in name"
-
-    doc = node.get("doc_metadata", {})
-    doc_bits = [f"{key}={', '.join(doc[key])}" for key in ("resource", "domain", "source") if doc.get(key)]
-    doc_note = f"  ({'; '.join(doc_bits)})" if doc_bits else ""
-
+        profile_label = class_profile or "shared, no profile in name"
     inheritance = f" extends {node['parent']}" if node["parent"] else ""
 
-    print(f"[{node['type']}] {class_name}{inheritance}  [profile: {profile_label}]{doc_note}")
+    should_expand = expand_embeds or "base" in class_name.lower()
+
+    print(f"[{node['type']}] {class_name}{inheritance}  [profile: {profile_label}]")
     _print_shared_fields(
-        graph, profile_map, class_name, class_profiles, indent="    ", expand_embeds=expand_embeds, reachable=reachable
+        graph, profile_map, class_name, class_profile, indent="    ", expand_embeds=should_expand, reachable=reachable
     )
     print()
 
 
-def print_shared_classes(graph: dict, profile_map: dict, expand_embeds: bool = False, group_embeds: bool = False) -> dict:
+def print_shared_classes(graph: dict, profile_map: dict, expand_embeds: bool = False, group_embeds: bool = False) -> None:
     reachable = _collect_reachable_profiles(graph)
     shared = sorted(
         (n for n, d in graph.items() if d["type"] in ("MappedSuperclass", "Embeddable")),
@@ -463,7 +399,7 @@ def print_shared_classes(graph: dict, profile_map: dict, expand_embeds: bool = F
     if not group_embeds:
         for name in shared:
             print_shared_class(graph, profile_map, name, expand_embeds, reachable)
-        return reachable
+        return
 
     # Print each embed type right after the class that references it,
     # instead of strict alphabetical order -- makes it easier to trace an
@@ -481,35 +417,6 @@ def print_shared_classes(graph: dict, profile_map: dict, expand_embeds: bool = F
 
     for name in shared:
         visit(name)
-
-    return reachable
-
-
-def find_doc_profile_mismatches(graph: dict, reachable: dict) -> list[tuple[str, list, list]]:
-    """Classes whose doc-comment Profiles annotation disagrees with where
-    they're actually reachable from in the codebase. Either the comment
-    is stale, or the class is being used somewhere it shouldn't be."""
-    mismatches = []
-    for class_name, node in graph.items():
-        doc_profiles = node.get("doc_metadata", {}).get("profiles")
-        if not doc_profiles:
-            continue
-        declared = frozenset(p.strip().upper() for p in doc_profiles)
-        actual = {p for p in reachable.get(class_name, set()) if p is not None}
-        if actual and actual != declared:
-            mismatches.append((class_name, sorted(declared), sorted(actual)))
-    return mismatches
-
-
-def _print_doc_profile_mismatches(mismatches: list) -> None:
-    if not mismatches:
-        return
-    print(
-        "\n[WARN] Doc-comment 'Profiles' annotation doesn't match actual usage -- "
-        "the comment is stale, or the class is used somewhere it shouldn't be:"
-    )
-    for class_name, declared, actual in sorted(mismatches):
-        print(f"    - {class_name}: documented={declared}, actually reachable from={actual}")
 
 
 def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
@@ -532,17 +439,13 @@ def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
 def _print_unmatched_columns(profile_map: dict) -> None:
     if not UNMATCHED_COLUMNS:
         return
-    known_columns = list(profile_map.keys())
     print(
         f"[WARN] {len(UNMATCHED_COLUMNS)} column(s) had no YAML dictionary entry "
         "and defaulted to 'all profiles valid' -- check for typos or missing "
-        "dictionary files. A suggested match means it's likely a naming "
-        "mismatch rather than a real gap:"
+        "dictionary files:"
     )
     for col in sorted(UNMATCHED_COLUMNS):
-        close = difflib.get_close_matches(col, known_columns, n=3, cutoff=0.6)
-        suggestion = f" (possible match: {', '.join(close)})" if close else ""
-        print(f"    - {col}{suggestion}")
+        print(f"    - {col}")
 
 
 def _print_duplicate_bindings() -> None:
@@ -625,13 +528,12 @@ def main():
     print("MappedSuperclass / Embeddable review (push-down / pull-up candidates)")
     print("-" * 80)
     print()
-    reachable = print_shared_classes(graph, profile_map, expand_embeds=expand_embeds, group_embeds=group_embeds)
+    print_shared_classes(graph, profile_map, expand_embeds=expand_embeds, group_embeds=group_embeds)
 
     _print_unmatched_columns(profile_map)
     _print_duplicate_bindings()
     _print_completeness_gaps(check_profile_completeness(profile_map, entity_index))
     _print_unresolved_embeds(find_unresolved_embeds(graph))
-    _print_doc_profile_mismatches(find_doc_profile_mismatches(graph, reachable))
 
 
 if __name__ == "__main__":

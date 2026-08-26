@@ -4,17 +4,12 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
-import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
@@ -29,7 +24,6 @@ import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -44,14 +38,9 @@ import org.hl7.fhir.r4.model.Reference;
 @SuppressWarnings("java:S6539")
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
-  // TODO - move down to CMS
-  @Column(name = "clm_disp_cd")
-  private Optional<ClaimDispositionCode> claimDispositionCode;
-
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode; // TODO - move down to CMS
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
@@ -60,12 +49,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
-
-  @Embedded
-  private AdjudicationChargeInstitutional
-      adjudicationChargeInstitutional; // TODO - move down to CMS
-
-  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes; // TODO - move down to CMS
 
   // region Hook Methods
 
@@ -77,18 +60,18 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   abstract List<ClaimValue> getClaimValues();
 
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+
   /**
-   * Hook method to get a ClaimContractorNumber from some data sources.
+   * Contractor number hook method.
    *
-   * @return the ClaimContractorNumber
+   * @return an optional ClaimContractorNumber structure
    */
   public Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();
   }
 
-  // endregion
-
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
 
   /**
    * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
@@ -106,6 +89,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    * @param sequenceGenerator shared sequence generator for care-team entries
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+
+  // endregion
 
   @Override
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
@@ -127,13 +112,16 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
-  private List<ExplanationOfBenefit.SupportingInformationComponent>
+  /**
+   * Overridable by subclasses to allow injecting profile specific supporting info.
+   *
+   * @return a list of
+   */
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassInitialSupportingInfo() {
     return Stream.of(
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
+            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }
@@ -201,8 +189,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     var sharedInitialSupportingInfo =
         Stream.of(
                 getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
-                buildSubclassSupportingInfo(),
-                benefitEnhancementCodes.toFhir(supportingInfoFactory))
+                buildSubclassSupportingInfo())
             .flatMap(Collection::stream)
             .toList();
 
@@ -240,22 +227,11 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutional().toFhir(getClaimValues()).forEach(eob::addAdjudication);
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
-    getBenePaidAmount()
-        .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
-        .ifPresent(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     getPaymentComponent().toFhir().ifPresent(eob::setPayment);
-  }
 
-  /**
-   * Returns the beneficiary-paid amount from the institutional adjudication charge.
-   *
-   * @return the bene paid amount
-   */
-  public Optional<BigDecimal> getBenePaidAmount() {
-    return Optional.of(getAdjudicationChargeInstitutional().getBenePaidAmount());
+    addSubclassAdjudication(eob);
   }
 
   @Override
