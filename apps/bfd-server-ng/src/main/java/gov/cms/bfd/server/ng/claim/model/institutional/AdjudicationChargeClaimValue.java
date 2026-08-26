@@ -8,7 +8,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** TODO something smart goes here AdjudicationChargeClaimValue. */
+/** Claim Value codes for Adjudication elements. */
 public class AdjudicationChargeClaimValue {
   private AdjudicationChargeClaimValue() {}
 
@@ -31,10 +31,11 @@ public class AdjudicationChargeClaimValue {
   }
 
   /**
-   * TODO something smart goes here AdjudicationChargeClaimValue.
+   * Finds all the values for each code present in the claim values, sums these values per code, and
+   * then processes these into {@link AdjudicationComponent} elements.
    *
-   * @param claimValues all the values
-   * @return a list
+   * @param claimValues all the {@link ClaimValues} db records.
+   * @return a list of the resulting {@link AdjudicationComponent} elements.
    */
   public static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(
       List<ClaimValue> claimValues) {

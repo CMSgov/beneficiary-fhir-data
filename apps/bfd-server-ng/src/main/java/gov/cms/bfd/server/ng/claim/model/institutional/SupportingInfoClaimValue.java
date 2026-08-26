@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
-/** TODO something smart goes here SupportingInfoClaimValue. */
+/** Claim Value codes for SupportingInfo elements. */
 public class SupportingInfoClaimValue {
   private SupportingInfoClaimValue() {}
 
@@ -23,11 +23,12 @@ public class SupportingInfoClaimValue {
   }
 
   /**
-   * TODO something smart goes here SupportingInfoClaimValue.
+   * Finds all the values for each code present in the claim values, sums these values per code, and
+   * then processes these into {@link SupportingInformationComponent} elements.
    *
-   * @param claimValues all the values
-   * @param supportingInfoFactory a machine shop
-   * @return a list
+   * @param claimValues all the {@link ClaimValues} db records.
+   * @param supportingInfoFactory helper class for building {@link SupportingInformationComponent}.
+   * @return a list of the resulting {@link SupportingInformationComponent} elements.
    */
   public static List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       List<ClaimValue> claimValues, SupportingInfoFactory supportingInfoFactory) {

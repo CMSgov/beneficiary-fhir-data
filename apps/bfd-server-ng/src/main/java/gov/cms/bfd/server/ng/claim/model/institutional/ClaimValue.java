@@ -8,7 +8,16 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 
-@SuppressWarnings("checkstyle:MissingJavadocType")
+/**
+ * Represents various amounts associated with a claim, either as an Adjudication or SupportingInfo
+ * on the EOB.
+ *
+ * <ul>
+ *   <li>{@code sequenceNumber}: The sequence number for the claim value.
+ *   <li>{@code claimValueCode}: The code representing kind of value amount.
+ *   <li>{@code claimValueAmount}: The amount relating to the claim.
+ * </ul>
+ */
 @Getter
 @Embeddable
 public class ClaimValue {
