@@ -203,8 +203,7 @@ jobs:
                           *Build:* ${{ needs.build-release.result }}\n
                           *Platform:* ${{ needs.deploy-platform.result }}\n
                           *Test:* ${{ needs.deploy-to-test.result }}\n
-                          *Sandbox:* ${{ needs.deploy-to-prodlike.result }}\n
-                          *Prod:* ${{ needs.deploy-to-prodlike.result }}\n\n
+                          *Sandbox/Prod:* ${{ needs.deploy-to-prodlike.result }}\n
                           <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Full Report>"
                 }
               ]
