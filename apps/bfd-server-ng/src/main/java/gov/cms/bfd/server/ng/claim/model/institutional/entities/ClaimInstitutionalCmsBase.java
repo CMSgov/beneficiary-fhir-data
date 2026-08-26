@@ -63,7 +63,6 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   // endregion
 
   // region Overrides
-
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassInitialSupportingInfo() {
@@ -89,7 +88,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   // endregion
 
   /**
-   * Returns the beneficiary-paid amount from the institutional adjudication charge.
+   * Helper method to get the paid amount from the institutional adjudication charge.
    *
    * @return the bene paid amount
    */

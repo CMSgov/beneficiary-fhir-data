@@ -43,13 +43,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"java:S2293"})
 public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
-  @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
 
+  @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
