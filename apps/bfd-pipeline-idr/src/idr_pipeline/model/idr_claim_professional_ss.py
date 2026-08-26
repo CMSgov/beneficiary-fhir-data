@@ -114,12 +114,12 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_prvdr_rmng_due_amt: float | None
     clm_blood_ncvrd_chrg_amt: float | None
     clm_prvdr_intrst_pd_amt: float | None
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm: Annotated[
         datetime,
         {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
