@@ -49,7 +49,7 @@ jobs:
       - name: Get role ARN
         id: get-role-arn
         # It doesn't matter whether we use prod or non-prod account here as either works.
-        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts.
         run: |
           role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
           echo "::add-mask::$role_arn"
@@ -115,19 +115,17 @@ jobs:
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
     secrets: inherit
 
-  deploy-to-sandbox:
+  deploy-to-prodlike:
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-to-test]
+    strategy:
+      matrix:
+        bfd-env:
+          - sandbox
+          - prod
+      fail-fast: false
     with:
-      bfd-env: sandbox
-      git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
-    secrets: inherit
-
-  deploy-to-prod:
-    uses: ./.github/workflows/deploy-env-services.yml
-    needs: [build-release, deploy-to-sandbox]
-    with:
-      bfd-env: prod
+      bfd-env: ${{ matrix.bfd-env }}
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
     secrets: inherit
 
@@ -138,14 +136,13 @@ jobs:
       - build-release
       - deploy-platform
       - deploy-to-test
-      - deploy-to-sandbox
-      - deploy-to-prod
+      - deploy-to-prodlike
     if: ${{ !cancelled() }}
     steps:
       - name: Get role ARN
         id: get-role-arn
         # It doesn't matter whether we use prod or non-prod account here as either works.
-        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts.
         run: |
           role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
           echo "::add-mask::$role_arn"
@@ -167,13 +164,13 @@ jobs:
       - name: Compute status
         id: status
         run: |
-          STAGES=("build-release" "deploy-platform" "deploy-to-test" "deploy-to-sandbox" "deploy-to-prod")
+          STAGES=("build-release" "deploy-platform" "deploy-to-test" "deploy-to-prodlike")
           RESULTS='${{ toJSON(needs) }}'
-          
+
           FINAL_STATUS="SUCCESS"
           FAILED_STAGE="none"
           COLOR="good"
-          
+
           for STAGE in "${STAGES[@]}"; do
             RESULT=$(echo $RESULTS | jq -r ".[\"$STAGE\"].result")
             if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
@@ -206,8 +203,8 @@ jobs:
                           *Build:* ${{ needs.build-release.result }}\n
                           *Platform:* ${{ needs.deploy-platform.result }}\n
                           *Test:* ${{ needs.deploy-to-test.result }}\n
-                          *Sandbox:* ${{ needs.deploy-to-sandbox.result }}\n
-                          *Prod:* ${{ needs.deploy-to-prod.result }}\n\n
+                          *Sandbox:* ${{ needs.deploy-to-prodlike.result }}\n
+                          *Prod:* ${{ needs.deploy-to-prodlike.result }}\n\n
                           <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Full Report>"
                 }
               ]
