@@ -321,7 +321,7 @@ class BatchLoader:
             %(job_id)s,
         """
 
-        if self.job_id == 1:
+        if self.job_id == DEFAULT_JOB_ID:
             sql += """
                 null
             """
