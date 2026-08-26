@@ -16,30 +16,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_LRD_USE_CNT",
@@ -213,18 +189,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_PRFNL_AMT",
-        "display" : "Professional Component Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 212.86
     },
     "category" : {
@@ -243,18 +207,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "coding" : [ {
         "code" : "CLM_HIPPS_UNCOMPD_CARE_AMT",
         "display" : "Claim Uncompensated Care Payment Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 14.34
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -315,18 +267,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "coding" : [ {
         "code" : "CLM_HIPPS_VBP_AMT",
         "display" : "HIPPS Value Based Purchasing Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -399,6 +339,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "coding" : [ {
         "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
         "display" : "Short Stay Outlier Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 14.33
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1417,30 +1369,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_LRD_USE_CNT",
@@ -1614,18 +1542,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 85.65
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_PRFNL_AMT",
-        "display" : "Professional Component Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 212.87
     },
     "category" : {
@@ -1644,18 +1560,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "CLM_HIPPS_UNCOMPD_CARE_AMT",
         "display" : "Claim Uncompensated Care Payment Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 14.34
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1716,18 +1620,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "CLM_HIPPS_VBP_AMT",
         "display" : "HIPPS Value Based Purchasing Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1800,6 +1692,30 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
         "display" : "Short Stay Outlier Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 85.64
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_INSTNL_PRFNL_AMT",
+        "display" : "Professional Component Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 14.34
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4522,30 +4438,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_LRD_USE_CNT",
@@ -4719,18 +4611,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_PRFNL_AMT",
-        "display" : "Professional Component Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 212.86
     },
     "category" : {
@@ -4749,18 +4629,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "CLM_HIPPS_UNCOMPD_CARE_AMT",
         "display" : "Claim Uncompensated Care Payment Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 14.34
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4821,18 +4689,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "CLM_HIPPS_VBP_AMT",
         "display" : "HIPPS Value Based Purchasing Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4905,6 +4761,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
         "display" : "Short Stay Outlier Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 14.33
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6283,30 +6151,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0.0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_LRD_USE_CNT",
@@ -6480,18 +6324,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_PRFNL_AMT",
-        "display" : "Professional Component Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 212.86
     },
     "category" : {
@@ -6510,18 +6342,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "CLM_HIPPS_UNCOMPD_CARE_AMT",
         "display" : "Claim Uncompensated Care Payment Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 14.34
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6582,18 +6402,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "CLM_HIPPS_VBP_AMT",
         "display" : "HIPPS Value Based Purchasing Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6666,6 +6474,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
         "display" : "Short Stay Outlier Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 14.33
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+        "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
