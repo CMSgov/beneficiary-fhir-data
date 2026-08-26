@@ -1123,6 +1123,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "code" : {
       "coding" : [ {
         "code" : "I",
+        "display" : "INACTIVE/DELETED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
@@ -2574,6 +2575,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "code" : {
       "coding" : [ {
         "code" : "I",
+        "display" : "INACTIVE/DELETED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
@@ -3464,6 +3466,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "code" : {
       "coding" : [ {
         "code" : "T",
+        "display" : "RETURN TO PROVIDER",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
