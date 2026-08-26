@@ -46,6 +46,7 @@ from generator_util import (
     probability,
     run_command,
 )
+from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 
 _INT_TO_STRING_COLS = [
     f.BENE_SK,
@@ -674,14 +675,24 @@ class _ClaimsFile(StrEnum):
         return obj
 
 
-def _save_claims_data(files: dict[_ClaimsFile, list[RowAdapter]]):
-    Path("out").mkdir(exist_ok=True)
-
-    print("Exporting finished synthetic claims to ./out...")
+def _save_claims_data(
+    files: dict[_ClaimsFile, list[RowAdapter]],
+    destination: OutputDestinationWriter = CsvWriter,
+    truncate: bool = True,
+):
+    print("Exporting finished synthetic claims...")
     with tqdm.tqdm(files.items()) as t:
         for claims_file, data in t:
             t.set_postfix(file=str(claims_file.out_path))  # type: ignore
-            _write_claims_file(claims_file=claims_file, data=data)
+            if isinstance(destination, CsvWriter):
+                Path("out").mkdir(exist_ok=True)
+                _write_claims_file(claims_file=claims_file, data=data)
+            if isinstance(destination, SnowflakeWriter):
+                destination.write_table(
+                    data=adapters_to_dicts(data),
+                    table_name=claims_file.value,
+                    truncate=truncate,
+                )
     print("Finished exporting generated claims")
 
 
@@ -766,6 +777,24 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
         f"only from {CLM}. 'both' indicates loading from both"
     ),
 )
+@click.option(
+    "--destination",
+    type=click.Choice(["csv", "snowflake"]),
+    default="csv",
+    show_default=True,
+    help=(
+        "Destination to write generated synthetic data where snowflake is our synthetic snowflake "
+        "environment and csv is the default out directory. "
+        "Requires load-credentials.sh sourced first."
+    ),
+)
+@click.option(
+    "--truncate",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Truncate tables before reloading. Default is false",
+)
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def generate(
     sushi: bool,
@@ -775,6 +804,8 @@ def generate(
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
+    destination: OutputDestinationWriter = CsvWriter,
+    truncate: bool = False,
 ):
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
@@ -1270,9 +1301,14 @@ def generate(
         generated_type_2_npis=generated_type_2_npis,
     )
     out_tables[PRAUC].extend(prauc_rows)
-    print(f"Done generating synthetic prior authorization data.")
+    print("Done generating synthetic prior authorization data.")
 
-    _save_claims_data({_ClaimsFile(k): v for k, v in out_tables.items() if k in _ClaimsFile})
+    files = {_ClaimsFile(k): v for k, v in out_tables.items() if k in _ClaimsFile}
+    _save_claims_data(
+        files,
+        SnowflakeWriter() if destination == "snowflake" else CsvWriter(),
+        truncate,
+    )
 
 
 if __name__ == "__main__":
