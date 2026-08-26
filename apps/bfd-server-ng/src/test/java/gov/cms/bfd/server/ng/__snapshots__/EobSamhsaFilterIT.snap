@@ -4109,6 +4109,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },

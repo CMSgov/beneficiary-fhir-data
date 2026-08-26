@@ -1117,9 +1117,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "code" : {
       "coding" : [ {
-        "code" : "3",
-        "display" : "FINAL BILL",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+        "code" : "I",
+        "display" : "INACTIVE/DELETED",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
     "sequence" : 8
@@ -2549,9 +2549,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "code" : {
       "coding" : [ {
-        "code" : "0",
-        "display" : "No managed care organization (MCO) payment",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
+        "code" : "I",
+        "display" : "INACTIVE/DELETED",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
     "sequence" : 9
@@ -3475,6 +3475,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "code" : {
       "coding" : [ {
         "code" : "T",
+        "display" : "RETURN TO PROVIDER",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
