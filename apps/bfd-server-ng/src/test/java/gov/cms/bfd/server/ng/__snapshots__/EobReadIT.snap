@@ -469,7 +469,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         },
         "value" : "1437702123"
       },
-      "type" : "Organization"
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {
@@ -1075,6 +1075,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "code" : {
       "coding" : [ {
         "code" : "I",
+        "display" : "INACTIVE/DELETED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
@@ -1834,7 +1835,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         },
         "value" : "1437702123"
       },
-      "type" : "Organization"
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {
@@ -2490,6 +2491,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "code" : {
       "coding" : [ {
         "code" : "I",
+        "display" : "INACTIVE/DELETED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
@@ -2917,7 +2919,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -2944,7 +2947,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1720749690"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -3380,6 +3384,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "code" : {
       "coding" : [ {
         "code" : "T",
+        "display" : "RETURN TO PROVIDER",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
       } ]
     },
@@ -3617,7 +3622,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         },
         "value" : "1558719914"
       },
-      "type" : "Organization"
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {
@@ -3653,7 +3658,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           } ]
         },
         "value" : "1720749690"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -3700,6 +3706,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "value" : 2.3
     }
   }, {
+    "active" : true,
     "id" : "1003488552",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -3713,13 +3720,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "value" : "1003488552"
     } ],
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
     },
-    "name" : [ {
-      "family" : "CBS Health Corporation",
-      "given" : [ "Wednesday" ]
-    } ],
-    "resourceType" : "Practitioner"
+    "name" : "CBS Health Corporation",
+    "resourceType" : "Organization"
   } ],
   "created" : "2025-08-15T00:00:00+00:00",
   "diagnosis" : [ {
@@ -4831,7 +4835,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         },
         "value" : "1437702123"
       },
-      "type" : "Organization"
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {
@@ -6544,7 +6548,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         },
         "value" : "1437702123"
       },
-      "type" : "Organization"
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {

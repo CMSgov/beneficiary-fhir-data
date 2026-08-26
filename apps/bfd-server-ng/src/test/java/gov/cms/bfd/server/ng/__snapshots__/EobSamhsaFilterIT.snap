@@ -475,7 +475,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "Addams, Wednesday",
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -485,7 +485,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1003488552"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4049,6 +4049,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -4354,6 +4355,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4363,7 +4365,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2616337335"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4381,6 +4383,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4390,7 +4393,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1228058750"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4408,6 +4411,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4417,7 +4421,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1726578739"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4672,6 +4676,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4681,7 +4686,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1315044119"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4699,6 +4704,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4708,7 +4714,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1315044119"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4726,6 +4732,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4735,7 +4742,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1784175089"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4950,6 +4957,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4959,7 +4967,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2616337335"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -4977,6 +4985,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4986,7 +4995,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1228058750"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -5004,6 +5013,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -5013,7 +5023,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1726578739"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -8111,7 +8121,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "Addams, Wednesday",
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -8121,7 +8131,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1003488552"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13615,6 +13625,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -13624,7 +13635,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1570418214"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13642,6 +13653,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -13651,7 +13663,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2206785075"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13669,6 +13681,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -13678,7 +13691,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1238340180"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13938,6 +13951,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -13947,7 +13961,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2616337335"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13965,6 +13979,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -13974,7 +13989,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1228058750"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -13992,6 +14007,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14001,7 +14017,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1726578739"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14256,6 +14272,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14265,7 +14282,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1315044119"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14283,6 +14300,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14292,7 +14310,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1315044119"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14310,6 +14328,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14319,7 +14338,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1784175089"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14534,6 +14553,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14543,7 +14563,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2616337335"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14561,6 +14581,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14570,7 +14591,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1228058750"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -14588,6 +14609,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14597,7 +14619,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1726578739"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -17695,7 +17717,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "Addams, Wednesday",
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -17705,7 +17727,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1003488552"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -23199,6 +23221,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
     "resource" : {
       "careTeam" : [ {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -23208,7 +23231,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1570418214"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -23226,6 +23249,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
         "sequence" : 1
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -23235,7 +23259,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "2206785075"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },
@@ -23253,6 +23277,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
         "sequence" : 2
       }, {
         "provider" : {
+          "display" : "Garcia, Indiana",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -23262,7 +23287,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
                 "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
               } ]
             },
-            "value" : "1238340180"
+            "value" : "1104867175"
           },
           "type" : "Practitioner"
         },

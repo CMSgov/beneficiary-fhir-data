@@ -2075,7 +2075,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -2102,7 +2103,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -2538,6 +2540,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -3487,7 +3490,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -3514,7 +3518,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -3950,6 +3955,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -4899,7 +4905,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4926,7 +4933,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -5362,6 +5370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -6311,7 +6320,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6338,7 +6348,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6774,6 +6785,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -7723,7 +7735,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -7750,7 +7763,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -8186,6 +8200,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -9135,7 +9150,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -9162,7 +9178,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -9598,6 +9615,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "T",
+            "display" : "RETURN TO PROVIDER",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -10827,7 +10845,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -12555,7 +12573,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -14283,7 +14301,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -16011,7 +16029,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -17778,7 +17796,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -19508,7 +19526,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -21254,7 +21272,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -23020,7 +23038,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -23626,6 +23644,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -24382,7 +24401,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -25038,6 +25057,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -26076,7 +26096,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -26103,7 +26124,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -26127,6 +26149,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -26140,13 +26163,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -26495,6 +26515,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -27110,7 +27131,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -28856,7 +28877,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -30622,7 +30643,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -31228,6 +31249,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -31984,7 +32006,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -32640,6 +32662,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -33678,7 +33701,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -33705,7 +33729,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -33729,6 +33754,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -33742,13 +33768,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -34097,6 +34120,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -34712,7 +34736,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -36458,7 +36482,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -38224,7 +38248,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -38830,6 +38854,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -39586,7 +39611,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -40242,6 +40267,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -41280,7 +41306,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -41307,7 +41334,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -41331,6 +41359,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -41344,13 +41373,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -41699,6 +41725,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -42330,7 +42357,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -44076,7 +44103,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -47106,7 +47133,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -47712,6 +47739,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -48468,7 +48496,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -49124,6 +49152,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -49862,7 +49891,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -51608,7 +51637,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -54638,7 +54667,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -55244,6 +55273,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -56000,7 +56030,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -56656,6 +56686,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -57394,7 +57425,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -59140,7 +59171,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -62170,7 +62201,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -62776,6 +62807,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -63532,7 +63564,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -64188,6 +64220,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -64910,7 +64943,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -66656,7 +66689,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -68994,7 +69027,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -70740,7 +70773,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -72518,7 +72551,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -73174,6 +73207,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -74212,7 +74246,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -74239,7 +74274,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -74263,6 +74299,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -74276,13 +74313,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -74631,6 +74665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -75262,7 +75297,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -77008,7 +77043,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -78786,7 +78821,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -79442,6 +79477,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -80480,7 +80516,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -80507,7 +80544,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -80531,6 +80569,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -80544,13 +80583,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -80899,6 +80935,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -81586,7 +81623,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -82242,6 +82279,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -82666,7 +82704,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -82693,7 +82732,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -82717,6 +82757,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -82730,13 +82771,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -83085,6 +83123,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -84392,7 +84431,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -84998,6 +85037,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -85754,7 +85794,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -86410,6 +86450,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -86834,7 +86875,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -86861,7 +86903,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -86885,6 +86928,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -86898,13 +86942,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -87253,6 +87294,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -87868,7 +87910,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -89614,7 +89656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -91952,7 +91994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -93698,7 +93740,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -95476,7 +95518,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -96132,6 +96174,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -97170,7 +97213,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -97197,7 +97241,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -97221,6 +97266,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -97234,13 +97280,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -97589,6 +97632,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -98220,7 +98264,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -99966,7 +100010,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -101744,7 +101788,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -102400,6 +102444,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -103438,7 +103483,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -103465,7 +103511,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -103489,6 +103536,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -103502,13 +103550,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -103857,6 +103902,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -104544,7 +104590,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -105200,6 +105246,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -105624,7 +105671,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -105651,7 +105699,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -105675,6 +105724,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -105688,13 +105738,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -106043,6 +106090,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -107350,7 +107398,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -107956,6 +108004,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -108712,7 +108761,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -109368,6 +109417,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -109792,7 +109842,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -109819,7 +109870,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -109843,6 +109895,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -109856,13 +109909,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -110211,6 +110261,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -110826,7 +110877,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -112572,7 +112623,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -114910,7 +114961,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -116656,7 +116707,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -118434,7 +118485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -119090,6 +119141,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -120128,7 +120180,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -120155,7 +120208,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -120179,6 +120233,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -120192,13 +120247,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -120547,6 +120599,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -121178,7 +121231,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -122924,7 +122977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -124702,7 +124755,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -125358,6 +125411,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -126396,7 +126450,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -126423,7 +126478,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -126447,6 +126503,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -126460,13 +126517,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -126815,6 +126869,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -127502,7 +127557,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -128158,6 +128213,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -128582,7 +128638,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -128609,7 +128666,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -128633,6 +128691,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -128646,13 +128705,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -129001,6 +129057,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -130308,7 +130365,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -130914,6 +130971,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -131670,7 +131728,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -132326,6 +132384,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -132750,7 +132809,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -132777,7 +132837,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -132801,6 +132862,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -132814,13 +132876,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -133169,6 +133228,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -133820,7 +133880,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -135586,7 +135646,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -136192,6 +136252,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -136948,7 +137009,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -137604,6 +137665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -138326,7 +138388,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -140072,7 +140134,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -141838,7 +141900,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -142444,6 +142506,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -143200,7 +143263,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -143856,6 +143919,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -144578,7 +144642,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -146324,7 +146388,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -148090,7 +148154,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -148696,6 +148760,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -149452,7 +149517,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -150108,6 +150173,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -151146,7 +151212,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -151173,7 +151240,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -151197,6 +151265,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -151210,13 +151279,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -151565,6 +151631,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -152216,7 +152283,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -153982,7 +154049,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -154588,6 +154655,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -155344,7 +155412,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -156000,6 +156068,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -156722,7 +156791,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -158468,7 +158537,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -160234,7 +160303,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -160840,6 +160909,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -161596,7 +161666,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -162252,6 +162322,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -162974,7 +163045,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -164720,7 +164791,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -166486,7 +166557,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -167092,6 +167163,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -167848,7 +167920,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -168504,6 +168576,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -169542,7 +169615,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -169569,7 +169643,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -169593,6 +169668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -169606,13 +169682,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -169961,6 +170034,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -170612,7 +170686,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -172378,7 +172452,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -172984,6 +173058,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -173740,7 +173815,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -174396,6 +174471,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -175118,7 +175194,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -176864,7 +176940,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -178630,7 +178706,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -179236,6 +179312,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -179992,7 +180069,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -180648,6 +180725,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -181370,7 +181448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -183116,7 +183194,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -184882,7 +184960,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -185488,6 +185566,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -186244,7 +186323,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             },
             "value" : "1437702123"
           },
-          "type" : "Organization"
+          "type" : "Practitioner"
         },
         "qualification" : {
           "coding" : [ {
@@ -186900,6 +186979,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "I",
+            "display" : "INACTIVE/DELETED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
@@ -187938,7 +188018,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -187965,7 +188046,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -187989,6 +188071,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
+        "active" : true,
         "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -188002,13 +188085,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "value" : "1003488552"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" ]
         },
-        "name" : [ {
-          "family" : "CBS Health Corporation",
-          "given" : [ "Wednesday" ]
-        } ],
-        "resourceType" : "Practitioner"
+        "name" : "CBS Health Corporation",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -188357,6 +188437,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "S",
+            "display" : "SUSPENDED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD"
           } ]
         },
