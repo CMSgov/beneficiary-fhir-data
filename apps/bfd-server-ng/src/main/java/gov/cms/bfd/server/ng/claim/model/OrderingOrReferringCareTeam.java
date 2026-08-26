@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -15,20 +14,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "order_refer_npi"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_order_refer_careteam_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_order_refer_npi_type"))
 class OrderingOrReferringCareTeam extends ProviderHistoryBase {
-
-  @Column(name = "bfd_order_refer_npi_type")
-  private Optional<Integer> npiType;
 
   @Override
   public CareTeamType getCareTeamType() {
     return CareTeamType.REFERRING;
-  }
-
-  @Override
-  @Transient
-  public ProviderHistoryBase.NpiType getNpiType() {
-    return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   @Override
