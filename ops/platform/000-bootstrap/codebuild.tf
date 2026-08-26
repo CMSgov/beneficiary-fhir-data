@@ -161,8 +161,9 @@ module "log_group_runner" {
   source   = "../../terraform-modules/general/high-retention-log-group"
   for_each = local.codebuild_runner_config
 
-  name       = "/aws/codebuild/${each.value.name}"
-  kms_key_id = aws_kms_key.primary["platform"].arn
+  name         = "/aws/codebuild/${each.value.name}"
+  kms_key_id   = aws_kms_key.primary["platform"].arn
+  skip_destroy = false
 }
 
 resource "aws_codebuild_project" "runner" {

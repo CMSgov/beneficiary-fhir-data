@@ -1,6 +1,6 @@
 moved {
-  from = aws_cloudwatch_log_group.regression_wrapper
-  to   = module.log_group_regression_wrapper.aws_cloudwatch_log_group.this
+  from = aws_cloudwatch_log_group.regression_wrapper[0]
+  to   = module.log_group_regression_wrapper[0].aws_cloudwatch_log_group.this
 }
 
 moved {

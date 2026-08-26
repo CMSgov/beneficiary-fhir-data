@@ -4,7 +4,7 @@ moved {
 }
 
 moved {
-  from = aws_cloudwatch_log_group.ecs_events
-  to   = module.log_group_ecs_events.aws_cloudwatch_log_group.this
+  from = aws_cloudwatch_log_group.ecs_events[0]
+  to   = module.log_group_ecs_events[0].aws_cloudwatch_log_group.this
 }
 
