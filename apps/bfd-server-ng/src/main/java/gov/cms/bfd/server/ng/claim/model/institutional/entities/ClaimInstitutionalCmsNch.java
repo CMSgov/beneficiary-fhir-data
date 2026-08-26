@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalNchSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoClaimValue;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;

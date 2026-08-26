@@ -1,5 +1,7 @@
-package gov.cms.bfd.server.ng.claim.model;
+package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,7 +10,8 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
-class SupportingInfoClaimValue {
+/** TODO something smart goes here SupportingInfoClaimValue. */
+public class SupportingInfoClaimValue {
   private SupportingInfoClaimValue() {}
 
   @AllArgsConstructor
@@ -19,7 +22,14 @@ class SupportingInfoClaimValue {
     final BlueButtonSupportingInfoCategory category;
   }
 
-  static List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  /**
+   * TODO something smart goes here SupportingInfoClaimValue.
+   *
+   * @param claimValues all the values
+   * @param supportingInfoFactory a machine shop
+   * @return a list
+   */
+  public static List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       List<ClaimValue> claimValues, SupportingInfoFactory supportingInfoFactory) {
     var sumsByCode = new HashMap<String, Integer>();
 

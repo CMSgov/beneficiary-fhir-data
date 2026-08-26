@@ -105,7 +105,7 @@ public class AdjudicationChargeInstitutional {
   @Column(name = "clm_ss_outlier_std_pymt_amt")
   private BigDecimal shortStayOutlierPaymentAmount;
 
-  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return Stream.of(
             List.of(
                 AdjudicationChargeType.BENE_MEDICARE_LRD_USED_COUNT.toFhirAdjudicationUnsignedType(

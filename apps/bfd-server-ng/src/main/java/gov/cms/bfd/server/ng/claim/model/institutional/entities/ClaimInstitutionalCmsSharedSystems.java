@@ -13,6 +13,7 @@ import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitu
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSupportingInfoBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoClaimValue;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;

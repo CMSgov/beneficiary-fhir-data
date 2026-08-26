@@ -16,6 +16,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;

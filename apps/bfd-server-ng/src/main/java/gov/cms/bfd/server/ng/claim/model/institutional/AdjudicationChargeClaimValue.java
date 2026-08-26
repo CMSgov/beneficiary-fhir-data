@@ -8,7 +8,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-class AdjudicationChargeClaimValue {
+/** TODO something smart goes here AdjudicationChargeClaimValue. */
+public class AdjudicationChargeClaimValue {
   private AdjudicationChargeClaimValue() {}
 
   @AllArgsConstructor
@@ -29,7 +30,14 @@ class AdjudicationChargeClaimValue {
     final AdjudicationChargeType category;
   }
 
-  static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+  /**
+   * TODO something smart goes here AdjudicationChargeClaimValue.
+   *
+   * @param claimValues all the values
+   * @return a list
+   */
+  public static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(
+      List<ClaimValue> claimValues) {
     var sumsByCode = new HashMap<String, BigDecimal>();
 
     for (ClaimValue claimValue : claimValues) {
