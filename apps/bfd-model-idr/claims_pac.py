@@ -362,6 +362,38 @@ class PacGeneratorUtil:
 
         return clm_prfnl
 
+    def gen_pac_clm_line_mcs(
+            self, clm: RowAdapter, 
+            clm_line_num: int,
+
+        ) -> RowAdapter:
+            clm_mcs = RowAdapter({})    
+    
+            clm_mcs[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+            clm_mcs[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+            clm_mcs[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+            clm_mcs[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+            clm_mcs[f.CLM_LINE_NUM] = clm_line_num
+            clm_mcs[f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD] = random.choice(
+                [
+                    "A4",
+                    "AE",
+                    "95",
+                    "45",
+                ]
+            )
+            clm_mcs[f.CLM_LINE_RBNDLG_CRTFCTN_NUM] = random.choice(
+                [
+                    "11D1111111",
+                    "22D2222222",
+                ]
+            )
+            clm_mcs[f.CLM_LINE_HCT_LVL_NUM] = round(random.uniform(30, 45), 1)
+            clm_mcs[f.CLM_LINE_HGB_LVL_NUM] = round(random.uniform(12, 20), 1)
+    
+            add_meta_timestamps(clm_mcs, clm)
+            return clm_mcs
+
     def gen_pac_clm_dcmtn(self, clm: RowAdapter, init_clm_dcmtn: RowAdapter | None = None):
         if not init_clm_dcmtn:
             init_clm_dcmtn = RowAdapter({})
