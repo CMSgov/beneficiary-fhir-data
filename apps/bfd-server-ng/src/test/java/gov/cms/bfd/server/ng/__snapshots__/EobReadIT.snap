@@ -6142,6 +6142,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_PPS_IND_CD",
+        "display" : "Claim PPS Indicator Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "unknown",
+        "display" : "Not a PPS bill",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+      } ]
+    },
+    "sequence" : 30
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "PRVDR_FAC_FIPS_ST_CD",
         "display" : "Federal Information Processing Standards (FIPS) State Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -6157,7 +6177,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 30
+    "sequence" : 31
   }, {
     "category" : {
       "coding" : [ {
@@ -6171,7 +6191,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 31
+    "sequence" : 32
   } ],
   "total" : [ {
     "amount" : {
@@ -7903,6 +7923,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_PPS_IND_CD",
+        "display" : "Claim PPS Indicator Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "unknown",
+        "display" : "Not a PPS bill",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+      } ]
+    },
+    "sequence" : 30
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "PRVDR_FAC_FIPS_ST_CD",
         "display" : "Federal Information Processing Standards (FIPS) State Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7918,7 +7958,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 30
+    "sequence" : 31
   }, {
     "category" : {
       "coding" : [ {
@@ -7932,7 +7972,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 31
+    "sequence" : 32
   } ],
   "total" : [ {
     "amount" : {

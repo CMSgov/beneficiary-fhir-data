@@ -33,12 +33,12 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
    * @return claim PPS indicator code or empty Optional if code is null or blank
    */
   static Optional<PpsIndicatorCode> fromCode(String code) {
-    if (code == null || code.isBlank()) {
+    if (code == null) {
       return Optional.empty();
     }
     return Optional.of(
         Arrays.stream(Valid.values())
-            .filter(v -> v.code.equals(code))
+            .filter(v -> v.instNchDbMatchCode.equals(code))
             .map(v -> (PpsIndicatorCode) v)
             .findFirst()
             .orElseGet(() -> new Invalid(code)));
@@ -56,7 +56,7 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
     }
     return Optional.of(
         Arrays.stream(Valid.values())
-            .filter(v -> v.fissCode.equals(code))
+            .filter(v -> v.fissDbMatchCode.equals(code))
             .map(v -> (PpsIndicatorCode) v)
             .findFirst()
             .orElseGet(() -> new Invalid(code)));
@@ -86,15 +86,18 @@ public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndi
   @Getter
   enum Valid implements PpsIndicatorCode {
     /** 2 - PPS bill; claim contains PPS indicator. */
-    PPS("2", "PPS bill; claim contains PPS indicator", "Y"),
+    PPS("2", "PPS bill; claim contains PPS indicator", "Y", "2"),
     /** unknown - Not a PPS bill. */
-    NOT_PPS("unknown", "Not a PPS bill", "N");
+    NOT_PPS("unknown", "Not a PPS bill", "N", "");
 
     private final String code;
     private final String display;
 
     /** (claim_institutional_ss) clm_fiss.clm_pps_ind maps as a PPSIndicatorCode. */
-    private final String fissCode;
+    private final String fissDbMatchCode;
+
+    /** (claim_institutional_nch) clm_pps_ind_cd maps as a PPSIndicatorCode. */
+    private final String instNchDbMatchCode;
   }
 
   /** Captures unknown/invalid codes. */

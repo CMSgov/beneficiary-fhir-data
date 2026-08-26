@@ -22,7 +22,7 @@ Id: SupportingInfoComponent
 * CLM_ACTV_CARE_THRU_DT 0..1 date "Covered Care Through Date" ""
 * CLM_NCVRD_FROM_DT 0..1 date "Noncovered Stay From Date" ""
 * CLM_NCVRD_THRU_DT 0..1 date "Noncovered Stay Through Date" ""
-* CLM_PPS_IND_CD 0..1 string "Claim PPS Indicator Code Institutional" ""
+* CLM_PPS_IND_CD 0..1 string "Claim PPS Indicator Code NCH" ""
 * CLM_PPS_IND 0..1 string "Claim PPS Indicator Code FISS" ""
 * CLM_NCH_PRMRY_PYR_CD 0..1 string "The code outlining the primary payer." ""
 * CLM_QLFY_STAY_FROM_DT 0..1 date "Qualified Stay From Date" ""
