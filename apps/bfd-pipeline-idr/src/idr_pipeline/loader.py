@@ -19,13 +19,7 @@ from .db_utils import get_connection_string
 from .load_partition import LoadPartition, LoadType
 from .model.base_model import DbType, IdrBaseModel, LoadMode, T
 from .model.load_progress import LoadProgress
-from .settings import (
-    PER_BATCH_CONCURRENT_ROWS,
-    PER_BATCH_MAX_CONNECTIONS,
-    PER_BATCH_MIN_CONNECTIONS,
-    bfd_test_date,
-    force_load_progress,
-)
+from .settings import SETTINGS
 from .timer import Timer
 
 
@@ -66,8 +60,8 @@ class PostgresLoader:
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=PER_BATCH_MIN_CONNECTIONS,
-            max_size=PER_BATCH_MAX_CONNECTIONS,
+            min_size=SETTINGS.per_batch_min_connections,
+            max_size=SETTINGS.per_batch_max_connections,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
             # acquires a connection from either library's implementation of a pool showed that
             # the majority of the time spent was actually in acquiring a connection, _not_ the
@@ -259,7 +253,7 @@ class BatchLoader:
                 self.partition.name,
                 batch_num,
                 len(results),
-                PER_BATCH_CONCURRENT_ROWS,
+                SETTINGS.per_batch_concurrent_rows,
             )
             num_rows += len(results)
 
@@ -278,7 +272,7 @@ class BatchLoader:
 
             async with anyio.create_task_group() as tg:
                 for idx, chunk in enumerate(
-                    itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                    itertools.batched(results, SETTINGS.per_batch_concurrent_rows, strict=False)
                 ):
 
                     async def _wrap_batch_chunk(
@@ -497,12 +491,12 @@ def _remove_null_bytes(val: DbType) -> DbType:
 
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
-    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
-    return load_mode == LoadMode.PROD or force_load_progress()
+    # Whether to read/write load progress, which is disabled for synthetic and testing loads.
+    return load_mode == LoadMode.PROD or SETTINGS.force_load_progress
 
 
 def resolve_test_date(load_mode: LoadMode) -> datetime:
-    test_date = bfd_test_date()
+    test_date = SETTINGS.bfd_test_date()
 
     if test_date and load_mode != LoadMode.PROD:
         return test_date

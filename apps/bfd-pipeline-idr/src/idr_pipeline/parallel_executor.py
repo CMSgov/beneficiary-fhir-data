@@ -3,8 +3,9 @@ import os
 import signal
 import sys
 import threading
+from abc import ABC, abstractmethod
 from collections.abc import Callable, Generator
-from concurrent.futures import Future, ProcessPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import Manager
 from pathlib import Path
 from queue import Empty, Queue
@@ -29,7 +30,51 @@ class ExternallyCanceled(Exception):
     pass
 
 
-class ParallelStagesExecutor:
+class Executor(ABC):
+    @abstractmethod
+    async def execute[T](self, stages: list[Stage[T]]) -> list[list[T | None]]: ...
+
+    @staticmethod
+    async def _wait_for_future_result[T](future: Future[T]) -> T:
+        while not future.done():
+            await anyio.sleep(0.01)
+
+        return future.result()
+
+
+class MultithreadingExecutor(Executor):
+    """
+    Executor that uses multithreading instead of multiprocessing.
+
+    This is much slower than the multiprocessing executor due to blocking IO
+    so it should only be used for tests.
+    """
+
+    def __init__(self, max_workers: int | None = None) -> None:
+        self.max_workers: int | None = max_workers
+
+    async def execute[T](self, stages: list[Stage[T]]) -> list[list[T | None]]:
+        all_results: list[list[T | None]] = []
+        pool = ThreadPoolExecutor(self.max_workers)
+        for stage in stages:
+            results: dict[int, T | None] = {}
+            for i, task in enumerate(stage):
+
+                async def _task(
+                    task: StageTask[T] = task, idx: int = i, results: dict[int, T | None] = results
+                ) -> None:
+                    val = await self._wait_for_future_result(pool.submit(task))
+                    results[idx] = val
+
+                async with anyio.create_task_group() as tg:
+                    tg.start_soon(_task)
+
+            all_results.append([results[i] for i in range(len(results))])
+
+        return all_results
+
+
+class MultiprocessingExecutor(Executor):
     def __init__(self, max_workers: int | None = None) -> None:
         self.max_workers: int | None = max_workers
         self._manager = Manager()
@@ -122,10 +167,3 @@ class ParallelStagesExecutor:
                 raise rebuild_exception_chain(errors_queue.get_nowait())
 
             await anyio.sleep(0.01)
-
-    @staticmethod
-    async def _wait_for_future_result[T](future: Future[T]) -> T:
-        while not future.done():
-            await anyio.sleep(0.01)
-
-        return future.result()

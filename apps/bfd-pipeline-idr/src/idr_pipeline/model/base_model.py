@@ -18,7 +18,6 @@ from ..constants import (
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
-    EMPTY_PARTITION,
     FISS_CLM_SOURCE,
     IDR_BENE_HISTORY_TABLE,
     IDR_CLAIM_ANSI_SIGNATURE_TABLE,
@@ -28,27 +27,28 @@ from ..constants import (
     IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE,
     IDR_CLAIM_TABLE,
     IDR_PRIOR_AUTH_TABLE,
-    INSTITUTIONAL_NCH_PARTITIONS,
-    INSTITUTIONAL_SS_PARTITIONS,
     MCS_CLM_SOURCE,
-    NON_CLAIM_PARTITION,
+    MIN_CLAIM_LOAD_DATE,
     PART_D_CLAIM_TYPE_CODES,
-    PART_D_PARTITIONS,
     PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
-    PROFESSIONAL_NCH_PARTITIONS,
-    PROFESSIONAL_SS_PARTITIONS,
     VMS_CLM_SOURCE,
 )
-from ..load_partition import LoadPartition, LoadPartitionGroup, PartitionType
+from ..load_partition import (
+    EMPTY_PARTITION,
+    INSTITUTIONAL_NCH_PARTITIONS,
+    INSTITUTIONAL_SS_PARTITIONS,
+    NON_CLAIM_PARTITION,
+    PART_D_PARTITIONS,
+    PROFESSIONAL_NCH_PARTITIONS,
+    PROFESSIONAL_SS_PARTITIONS,
+    LoadPartition,
+    LoadPartitionGroup,
+    PartitionType,
+)
 from ..settings import (
-    LATEST_CLAIMS,
-    MIN_CLAIM_LOAD_DATE,
-    MIN_CLAIM_NCH_TRANSACTION_DATE,
-    MIN_CLAIM_SS_TRANSACTION_DATE,
-    MIN_PRIOR_AUTH_TRANSACTION_DATE,
-    PRUNE_BATCH_LIMIT,
+    SETTINGS,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -388,6 +388,7 @@ ALIAS_VAL = "val"
 ALIAS_HSTRY = "hstry"
 ALIAS_PRVDR_PRSCRBNG = "prvdr_prscrbng"
 ALIAS_PRVDR_SRVC = "prvdr_srvc"
+ALIAS_PRVDR_SRVC_GNRC_ID = "prvdr_srvc_gnrc_id"
 ALIAS_PRVDR_BLG = "prvdr_blg"
 ALIAS_PRVDR_RFRG = "prvdr_rfrg"
 ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
@@ -427,29 +428,33 @@ class Source(StrEnum):
 
 class ModelType(Enum):
     CLAIM_INSTITUTIONAL_NCH = (
-        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        SETTINGS.min_claim_nch_transaction_date,
         CLAIM_INSTITUTIONAL_NCH_TABLE,
         INSTITUTIONAL_NCH_PARTITIONS,
     )
     CLAIM_INSTITUTIONAL_SS = (
-        MIN_CLAIM_SS_TRANSACTION_DATE,
+        SETTINGS.min_claim_ss_transaction_date,
         CLAIM_INSTITUTIONAL_SS_TABLE,
         INSTITUTIONAL_SS_PARTITIONS,
     )
     CLAIM_PROFESSIONAL_NCH = (
-        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        SETTINGS.min_claim_nch_transaction_date,
         CLAIM_PROFESSIONAL_NCH_TABLE,
         PROFESSIONAL_NCH_PARTITIONS,
     )
     CLAIM_PROFESSIONAL_SS = (
-        MIN_CLAIM_SS_TRANSACTION_DATE,
+        SETTINGS.min_claim_ss_transaction_date,
         CLAIM_PROFESSIONAL_SS_TABLE,
         PROFESSIONAL_SS_PARTITIONS,
     )
-    CLAIM_RX = (MIN_CLAIM_NCH_TRANSACTION_DATE, CLAIM_RX_TABLE, PART_D_PARTITIONS)
+    CLAIM_RX = (SETTINGS.min_claim_nch_transaction_date, CLAIM_RX_TABLE, PART_D_PARTITIONS)
     BENEFICIARY = (DEFAULT_MIN_DATE, BENEFICIARY_TABLE, [NON_CLAIM_PARTITION])
     LOAD_PROGRESS = (DEFAULT_MIN_DATE, "", EMPTY_PARTITION)
-    PRIOR_AUTH = (MIN_PRIOR_AUTH_TRANSACTION_DATE, IDR_PRIOR_AUTH_TABLE, [NON_CLAIM_PARTITION])
+    PRIOR_AUTH = (
+        SETTINGS.min_prior_auth_transaction_date,
+        IDR_PRIOR_AUTH_TABLE,
+        [NON_CLAIM_PARTITION],
+    )
 
     def __init__(
         self,
@@ -713,12 +718,12 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     # For part D, we want ALL the claims
     # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
-    if LATEST_CLAIMS and (
+    if SETTINGS.latest_claims and (
         (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
     ):
         codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
-    elif LATEST_CLAIMS:
+    elif SETTINGS.latest_claims:
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
     else:
         latest_claim_ind = ""
@@ -881,7 +886,7 @@ def stale_phase_1_claims_query(
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
-            LIMIT {PRUNE_BATCH_LIMIT}
+            LIMIT {SETTINGS.prune_batch_limit}
         """,
         (cutoff_date, cutoff_date),
     )
@@ -927,5 +932,5 @@ def stale_non_part_d_claims_query(claim_table: str) -> str:
         WHERE clm.clm_ltst_clm_ind = 'N'
         AND clm.clm_uniq_id > 0
         ORDER BY clm.clm_uniq_id
-        LIMIT {PRUNE_BATCH_LIMIT}
+        LIMIT {SETTINGS.prune_batch_limit}
     """

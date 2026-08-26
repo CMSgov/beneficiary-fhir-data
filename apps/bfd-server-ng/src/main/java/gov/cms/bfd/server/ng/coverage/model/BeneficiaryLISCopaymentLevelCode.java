@@ -51,18 +51,25 @@ public sealed interface BeneficiaryLISCopaymentLevelCode
    * @return FHIR Extension
    */
   default Extension toFhir() {
-    return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
-        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD, getCode(), null));
+    return new Extension(SystemUrls.EXT_BENE_CMBND_DEEMD_COPMT_LVL_ID_URL)
+        .setValue(new Coding(SystemUrls.SYS_BENE_CMBND_DEEMD_COPMT_LVL_ID, getCode(), null));
   }
 
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
+  @SuppressWarnings("java:S115")
   enum Valid implements BeneficiaryLISCopaymentLevelCode {
     /** 1 - High. */
     _1("1", "High"),
+    /** 2 - Low. */
+    _2("2", "Low"),
+    /** 3 - 0 (no copay). */
+    _3("3", "0 (no copay)"),
     /** 4 - 15% Copayment. */
-    _4("4", "15% Copayment");
+    _4("4", "15% Copayment"),
+    /** 5 - Unknown. */
+    _5("5", "Unknown");
 
     private final String code;
     private final String display;

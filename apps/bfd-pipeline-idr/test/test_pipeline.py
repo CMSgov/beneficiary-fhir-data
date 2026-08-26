@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import sys
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -18,7 +19,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
-from idr_pipeline import run
+from idr_pipeline import Executor, run
 from idr_pipeline.constants import IDR_BENE_HISTORY_TABLE
 from idr_pipeline.extractor import PostgresExecutor
 from idr_pipeline.load_events import IdrJobLoadEvent, IdrJobType
@@ -26,8 +27,9 @@ from idr_pipeline.load_partition import LoadType
 from idr_pipeline.load_synthetic import load_from_csv
 from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import LoadMode, Source
+from idr_pipeline.parallel_executor import MultiprocessingExecutor, MultithreadingExecutor
 from idr_pipeline.pydantic_utils import fields
-from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, enable_prior_auth_ingestion
+from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, SETTINGS
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -59,8 +61,17 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
+def _get_executor() -> Executor:
+    # Only enable the multithreading executor if a debugger is attached
+    # This makes debugging much simpler, but it is also a lot slower
+    # So we only want to enable it when necessary
+    if "pydevd" in sys.modules:
+        return MultithreadingExecutor(SETTINGS.max_tasks)
+    return MultiprocessingExecutor(SETTINGS.max_tasks)
+
+
 def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 29
@@ -86,7 +97,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_xref_efctv_sk"] == 353816021
 
-    if enable_prior_auth_ingestion():
+    if SETTINGS.enable_prior_auth_ingestion:
         cur = conn.execute("select * from idr.prior_auth order by mbi_num")
         assert cur.rowcount == 21
         rows = cur.fetchmany(1)
@@ -235,7 +246,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -314,11 +325,6 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert cur.rowcount == 2
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 353816020
-
-    cur = conn.execute("select * from idr.beneficiary_low_income_subsidy order by bene_sk")
-    assert cur.rowcount == 2
-    rows = cur.fetchmany(1)
-    assert rows[0]["bene_sk"] == 353816020
 
     lis_cmbnd_query = "select * from idr.beneficiary_low_income_subsidy_cmbnd order by bene_sk"
     if load_type == LoadType.INITIAL:
@@ -445,7 +451,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     else:
         make_it_stale_ts = datetime.now(UTC) + timedelta(days=60)
         _advance_time(make_it_stale_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL, _get_executor())
         cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
         assert cur.rowcount == 9
         rows = cur.fetchmany(1)
@@ -601,7 +607,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
         _advance_time(ss_clm_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
         # in source_load_events nor has it been 24 hours since the last load of NCH data
@@ -639,7 +645,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
         _advance_time(nch_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
 
         # Check for the NCH claim in the v3 idr schema
         cur = conn.execute(
@@ -700,7 +706,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
         _advance_time(ss_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
 
         # Check for the SS claim in the v3 idr schema
         cur = conn.execute(
@@ -733,7 +739,7 @@ def _advance_time(timestamp: datetime) -> None:
 
 
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -744,7 +750,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     conn.execute("truncate table idr.load_progress")
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 
@@ -861,17 +867,13 @@ def _reset_db(
     load_from_csv(PostgresExecutor(conn), sample_path)  # type: ignore
 
 
-def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
+def _setup_pipeline_environment() -> None:
     # Info level logs obscure the error output when running tests
     # so we want to override this unless the calling process has set this explicitly
     os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-    os.environ["BFD_DB_ENDPOINT"] = info.host
-    os.environ["BFD_DB_PORT"] = str(info.port)
-    os.environ["BFD_DB_NAME"] = info.dbname
-    os.environ["BFD_DB_USERNAME"] = info.user
-    os.environ["BFD_DB_PASSWORD"] = info.password
     # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
+    os.environ["IDR_MAX_TASKS"] = "4"
     os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
@@ -882,6 +884,14 @@ def _setup_pipeline_environment(info: psycopg.ConnectionInfo) -> None:
     os.environ["IDR_MAX_TASKS"] = "1"
 
 
+def _setup_db_config(info: psycopg.ConnectionInfo) -> None:
+    os.environ["BFD_DB_ENDPOINT"] = info.host
+    os.environ["BFD_DB_PORT"] = str(info.port)
+    os.environ["BFD_DB_NAME"] = info.dbname
+    os.environ["BFD_DB_USERNAME"] = info.user
+    os.environ["BFD_DB_PASSWORD"] = info.password
+
+
 @pytest.fixture(scope="module")
 def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
     with PostgresContainer("postgres:16", driver="") as postgres:
@@ -890,12 +900,13 @@ def postgres_db() -> Generator[tuple[PostgresContainer, str]]:
 
 
 def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: LoadType) -> None:
+    _setup_pipeline_environment()
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
-        _setup_pipeline_environment(conn.info)
+        _setup_db_config(conn.info)
         _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
     logger.remove()
 
@@ -909,11 +920,12 @@ def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -
 
 
 def test_legacy_npi_type_pipeline_update(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _setup_pipeline_environment()
     configure_logger()
     postgres, conninfo = postgres_db
     with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
-        _setup_pipeline_environment(conn.info)
+        _setup_db_config(conn.info)
         _do_legacy_npi_type_update(cast(Connection[DictRow], conn))
     logger.remove()

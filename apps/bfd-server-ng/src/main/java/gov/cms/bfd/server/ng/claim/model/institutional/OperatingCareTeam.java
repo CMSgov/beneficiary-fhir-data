@@ -13,6 +13,7 @@ import java.util.Optional;
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_oprtg_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_oprtg_careteam_name"))
 @AttributeOverride(name = "specialtyCode", column = @Column(name = "clm_oprtg_fed_prvdr_spclty_cd"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_prvdr_oprtg_npi_type"))
 public class OperatingCareTeam extends CareTeamBase {
 
   @Override

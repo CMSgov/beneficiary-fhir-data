@@ -21,6 +21,7 @@ from ..model.base_model import (
     ALIAS_PBP_NUM,
     ALIAS_PRVDR_PRSCRBNG,
     ALIAS_PRVDR_SRVC,
+    ALIAS_PRVDR_SRVC_GNRC_ID,
     ALIAS_RX_LINE,
     ALIAS_SGNTR,
     BATCH_ID,
@@ -109,6 +110,10 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_srvc_prvdr_gnrc_id_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
     ]
     prvdr_prsbng_id_qlfyr_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -223,10 +228,6 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    bfd_srvc_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
-    ]
     prvdr_srvc_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_SRVC},
@@ -281,6 +282,7 @@ class IdrClaimRx(IdrBaseModel):
         rx_line = ALIAS_RX_LINE
         sgntr = ALIAS_SGNTR
         prvdr_srvc = ALIAS_PRVDR_SRVC
+        prvdr_srvc_gnrc_id = ALIAS_PRVDR_SRVC_GNRC_ID
         prvdr_prscrbng = ALIAS_PRVDR_PRSCRBNG
         pbp_num = ALIAS_PBP_NUM
         return f"""
@@ -326,6 +328,9 @@ class IdrClaimRx(IdrBaseModel):
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc_gnrc_id}
+                ON {prvdr_srvc_gnrc_id}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
+                AND {prvdr_srvc_gnrc_id}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
                 AND {prvdr_prscrbng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
