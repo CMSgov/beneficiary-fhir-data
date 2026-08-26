@@ -24,11 +24,13 @@ public class SupportingInfoClaimValue {
 
   /**
    * Finds all the values for each code present in the claim values, sums these values per code, and
-   * then processes these into {@link SupportingInformationComponent} elements.
+   * then processes these into {@link ExplanationOfBenefit.SupportingInformationComponent} elements.
    *
-   * @param claimValues all the {@link ClaimValues} db records.
-   * @param supportingInfoFactory helper class for building {@link SupportingInformationComponent}.
-   * @return a list of the resulting {@link SupportingInformationComponent} elements.
+   * @param claimValues all the {@link ClaimValue} db records.
+   * @param supportingInfoFactory helper class for building {@link
+   *     ExplanationOfBenefit.SupportingInformationComponent}.
+   * @return a list of the resulting {@link ExplanationOfBenefit.SupportingInformationComponent}
+   *     elements.
    */
   public static List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       List<ClaimValue> claimValues, SupportingInfoFactory supportingInfoFactory) {

@@ -32,10 +32,10 @@ public class AdjudicationChargeClaimValue {
 
   /**
    * Finds all the values for each code present in the claim values, sums these values per code, and
-   * then processes these into {@link AdjudicationComponent} elements.
+   * then processes these into {@link ExplanationOfBenefit.AdjudicationComponent} elements.
    *
-   * @param claimValues all the {@link ClaimValues} db records.
-   * @return a list of the resulting {@link AdjudicationComponent} elements.
+   * @param claimValues all the {@link ClaimValue} db records.
+   * @return a list of the resulting {@link ExplanationOfBenefit.AdjudicationComponent} elements.
    */
   public static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(
       List<ClaimValue> claimValues) {
