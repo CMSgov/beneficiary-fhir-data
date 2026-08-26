@@ -6,6 +6,7 @@ import random
 import string
 import subprocess
 import sys
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable, Iterable
 from datetime import date, timedelta
@@ -112,6 +113,105 @@ class RowAdapter:
 
         for k, v in other_dict.items():
             cur[k] = v
+
+
+class IdGenerator(ABC):
+    def gen_basic_id(self, field: str, length: int, allowed_chars: str = string.digits) -> str:
+        return self.multipart_id(field=field, parts=[(allowed_chars, length)])
+
+    @abstractmethod
+    def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str: ...
+
+    @abstractmethod
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str: ...
+
+    @abstractmethod
+    def npi_id(self, field: str) -> str: ...
+
+    @abstractmethod
+    def bene_sk(self) -> int: ...
+
+    @abstractmethod
+    def mbi(self) -> str: ...
+
+
+class RandomIdGenerator(IdGenerator):
+    def __init__(self) -> None:
+        self._used_by_field: dict[str, set[str]] = {}
+        self._used_bene_sk: set[int] = set()
+        self._used_mbi: set[str] = set()
+
+    def _gen_id(self, field: str, gen_func: Callable[[], str]) -> str:
+        id_set = self._used_by_field.setdefault(field, set())
+        while True:
+            id = gen_func()
+            if id not in id_set:
+                id_set.add(id)
+                return id
+
+    def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str:
+        return self._gen_id(
+            field=field,
+            gen_func=lambda: (
+                f"-{
+                    ''.join(
+                        [
+                            ''.join(random.choices(population=allowed_chars, k=length))
+                            for (allowed_chars, length) in parts
+                        ]
+                    )
+                }"
+            ),
+        )
+
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+        if start > 0 or end > 0 or end > start:
+            raise ValueError(
+                "'end' and 'start' must be negative and 'end' must be less than 'start'"
+            )
+
+        return self._gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
+
+    def npi_id(self, field: str) -> str:
+        def make_npi():
+            first_digit = random.choice(["1", "2"])
+            rest = "".join(random.choices(population=string.digits, k=8))
+            npi_9 = first_digit + rest
+            check_digit = calculate_npi_checksum(npi_9)
+            return npi_9 + check_digit
+
+        return self._gen_id(field=field, gen_func=make_npi)
+
+    def bene_sk(self) -> int:
+        while True:
+            bene_sk = random.randint(-1000000000, -1000)
+            if bene_sk not in self.used_bene_sk:
+                self._used_bene_sk.add(bene_sk)
+                return bene_sk
+
+    def mbi(self) -> str:
+        mbi: list[str] = []
+        set_1 = set(string.ascii_uppercase) - set(["S", "L", "O", "I", "B", "Z"])
+        set_2 = set(list(set_1) + list(string.digits))
+        mbi.append(random.choice(["1", "2", "3", "4", "5", "6", "7", "8", "9"]))
+        mbi.append(random.choice(["L", "O", "I", "B", "Z"]))
+        mbi.append(random.choice(list(set_2)))
+        mbi.append(random.choice(string.digits))
+        mbi.append(random.choice(list(set_1)))
+        mbi.append(random.choice(list(set_2)))
+        mbi.append(random.choice(string.digits))
+        mbi.append(random.choice(list(set_1)))
+        mbi.append(random.choice(list(set_1)))
+        mbi.append(random.choice(string.digits))
+        mbi.append(random.choice(string.digits))
+
+        full_mbi = "".join(mbi)
+        if full_mbi in self.mbi_table:
+            return self.gen_mbi()
+        return full_mbi
+
+
+# class SequenatialIdGenerator(IdGenerator):
 
 
 def as_list[T](obj: T | None) -> list[T]:
