@@ -506,7 +506,7 @@ conceptmap "CLM_PPS_IND" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
 
-  s:"N" == t:" "
+  s:"N" == t:""
   s:"Y" == t:"2"
 }
 
