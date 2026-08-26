@@ -5,4 +5,4 @@ def output_dir() -> str:
     return getenv("EXPORT_FILE_DIR","")
 
 def table_exception_list() -> str:
-    return getenv("TABLE_EXCEPTION_LIST","flyway_schema_history,V2_CLM_RLT_OCRNC_SGNTR_MBR")
+    return getenv("TABLE_EXCEPTION_LIST","flyway_schema_history")

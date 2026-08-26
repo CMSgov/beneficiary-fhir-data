@@ -81,7 +81,7 @@ class SnowflakeExecutor:
             get_command = f"GET @tmp_export_stage/{file_name} file://{output_dir()}"
             cursor.execute(get_command)
         except snowflake.connector.errors.OperationalError:
-            print(f"File is not found in Snowflake for {file_name}.")
+            print(f"No records found for file {file_name} in Snowflake.")
 
     def get_tables(self) -> list[SnowflakeTable]:
         expection_list = table_exception_list().split(",")
