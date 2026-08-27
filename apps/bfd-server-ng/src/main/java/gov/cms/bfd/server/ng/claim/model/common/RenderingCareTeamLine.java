@@ -11,6 +11,7 @@ import jakarta.persistence.Embeddable;
     column = @Column(name = "prvdr_rndrng_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_rndrng_careteam_name"))
 @AttributeOverride(name = "specialtyCode", column = @Column(name = "clm_rndrg_fed_prvdr_spclty_cd"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_prvdr_rndrng_npi_type"))
 public class RenderingCareTeamLine extends CareTeamBase {
 
   @Override

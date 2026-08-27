@@ -12,6 +12,7 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_BLOOD_PT_FRNSH_QTY as pintsFurnished -> tgt then addBloodPintsFurnished(src, tgt) "Add blood pints furnished";
     src.CLM_MDCR_INSTNL_MCO_PD_SW as mcoPdSw -> tgt then addMCOPdSw(src, tgt) "Add primary payer switch";
     src.CLM_PPS_IND_CD as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
+    src.CLM_PPS_IND as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
     src.TYPE_OF_BILL_CD as tobCode -> tgt then addTypeOfBill(src, tgt) "Add type of bill code";
     src.CLM_NCH_WKLY_PROC_DT as procDt -> tgt then addProcessingDate(src, tgt) "Add processing date";
     src.CLM_ACTV_CARE_THRU_DT as activeThruDt -> tgt then addNCHThroughDate(src, tgt) "Add processing date";
@@ -297,6 +298,7 @@ group addPPSInd(source src: SupportingInfoComponent, target tgt: BackboneElement
     } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.CLM_PPS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",val) "Add coding";
+        src.CLM_PPS_IND as val -> tgtCC.coding = translate(val,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PPS_IND','coding') "Add coding";
     } "Add CC";
 }
 //code. Not necessary, duplicative with BENE_PTNT_STUS_CD. 
