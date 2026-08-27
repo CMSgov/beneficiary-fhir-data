@@ -521,6 +521,29 @@ for item in line_items:
         item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
         supporting_info_seq += 1
 
+    # MCS stores hemoglobin and hematocrit as separate line-level values.
+    hct_hgb_rslt_mcs = item.get("CLM_LINE_HGB_LVL_NUM")
+    hct_hct_rslt_mcs = item.get("CLM_LINE_HCT_LVL_NUM")
+    clncl_lab_num_mcs = item.get("CLM_LINE_RBNDLG_CRTFCTN_NUM")
+
+    if hct_hgb_rslt_mcs:
+        temp_var = {"ROW_NUM": supporting_info_seq}
+        if clncl_lab_num_mcs:
+            temp_var["CLM_LINE_RBNDLG_CRTFCTN_NUM"] = clncl_lab_num_mcs
+        temp_var["CLM_LINE_HGB_LVL_NUM"] = hct_hgb_rslt_mcs
+        supporting_info_components.append(temp_var)
+        item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+        supporting_info_seq += 1
+
+    if hct_hct_rslt_mcs:
+        temp_var = {"ROW_NUM": supporting_info_seq}
+        if clncl_lab_num_mcs:
+            temp_var["CLM_LINE_RBNDLG_CRTFCTN_NUM"] = clncl_lab_num_mcs
+        temp_var["CLM_LINE_HCT_LVL_NUM"] = hct_hct_rslt_mcs
+        supporting_info_components.append(temp_var)
+        item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+        supporting_info_seq += 1
+
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
     # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT
     tot_rx_amt = sum(

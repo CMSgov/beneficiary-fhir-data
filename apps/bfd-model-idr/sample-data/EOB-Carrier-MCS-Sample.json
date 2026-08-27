@@ -89,9 +89,9 @@
             "GEO_FAC_SSA_STATE_CD": "01",
             "CLM_LINE_PRVDR_PMT_AMT": "11.15",
             "CLM_LINE_SBMT_CHRG_AMT": "50.11",
-            "CLM_LINE_HCT_HGB_RSLT_NUM": "1.11",
-            "CLM_LINE_HCT_HGB_TYPE_CD": "R1",
-            "CLM_LINE_CARR_CLNCL_LAB_NUM": "11D1343434"
+            "CLM_LINE_HCT_LVL_NUM": "30.5",
+            "CLM_LINE_HGB_LVL_NUM": "15.8",
+            "CLM_LINE_RBNDLG_CRTFCTN_NUM": "11D1343434"
         },
         {
             "CLM_SRVC_DDCTBL_SW": "0",
