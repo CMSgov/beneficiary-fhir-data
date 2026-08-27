@@ -14,7 +14,12 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
-from claims_static import AVAILABLE_CLM_VAL_CDS, INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROFESSIONAL_CLAIM_TYPES
+from claims_static import (
+    AVAILABLE_CLM_VAL_CDS,
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+    PROFESSIONAL_CLAIM_TYPES,
+)
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     BENE_HSTRY,
@@ -980,9 +985,11 @@ def generate(
             ]
             adj_clms_tbls[CLM_DCMTN].extend(clm_dcmtns)
 
-            # todo verify clm val fields are appropriate for these clm type cds
             if clm_type_cd in (20, 40, 60, 61, 62, 63, 64):
                 for sqnc_num, value_code in enumerate(AVAILABLE_CLM_VAL_CDS, start=1):
+                    # 'QM' is the only clm_val_cd with limited a clm_type_cd range
+                    if (value_code == 'QM' & clm_type_cd != 40):
+                        continue
                     clm_val_row = adj_util.gen_clm_val(
                         clm=clm,
                         value_code=value_code,

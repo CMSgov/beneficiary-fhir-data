@@ -81,7 +81,6 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_RLT_COND_SGNTR_SK] = "-1"
             clm[f.META_SRC_SK] = 1
 
-
         clm[f.CLM_NUM_SK] = gen_numeric_id(field=f.CLM_NUM_SK)
         clm[f.CLM_EFCTV_DT] = str(date.today())
         clm[f.CLM_IDR_LD_DT] = random_date(clm[f.CLM_FROM_DT], max_date)
@@ -408,16 +407,26 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-
-    def gen_clm_val(self, clm: RowAdapter, value_code: string, clm_val_sqnc_num: int, init_clm_val: RowAdapter | None = None):
+    def gen_clm_val(
+            self, 
+            clm: RowAdapter, 
+            value_code: str, 
+            clm_val_sqnc_num: int, 
+            init_clm_val: RowAdapter | None = None
+    ):
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
         clm_val[f.CLM_VAL_CD] = value_code
-        clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = clm_val_sqnc_num
+
+        # '37' represents a whole number and not a monetary ammount
+        if (value_code != '37'):
+            clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
+        else:
+            clm_val[f.CLM_VAL_AMT] = random.randint(0, 20)
 
         add_meta_timestamps(clm_val, clm)
 
