@@ -110,7 +110,10 @@ _ADDITIONAL_BASE_CLAIM_WHERE_CLAUSES_PER_MODEL = {
                 IdrClaimInstitutionalSs,
                 IdrClaimItemInstitutionalSs,
             ): (
-                f"{ALIAS_CLM}.idr_updt_ts > {{}}",
+                f"""
+                {ALIAS_CLM}.idr_updt_ts > {{}}
+                AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
+                """,
                 [(datetime.now(UTC) - timedelta(days=PHASE_1_CUTOFF)).date().isoformat()],
             ),
             (
@@ -119,10 +122,7 @@ _ADDITIONAL_BASE_CLAIM_WHERE_CLAUSES_PER_MODEL = {
                 IdrClaimInstitutionalNch,
                 IdrClaimItemInstitutionalNch,
             ): (
-                f"""
-                {ALIAS_CLM}.clm_ltst_clm_ind = 'N'
-                AND {ALIAS_CLM}.clm_uniq_id > 0
-                """,
+                f"{ALIAS_CLM}.clm_ltst_clm_ind = 'Y'",
                 [],
             ),
         },
