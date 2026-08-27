@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Adjudication charge for institutional claims in the CMS profile, not system specific */
+/** Adjudication charge for institutional claims in the CMS profile, not system specific. */
 @Embeddable
 @Getter
 public class AdjudicationChargeCms {
@@ -114,6 +114,11 @@ public class AdjudicationChargeCms {
   @Column(name = "clm_ss_outlier_std_pymt_amt")
   private BigDecimal shortStayOutlierPaymentAmount;
 
+  /**
+   * Converts all the fields into a list of adjudication components
+   * @param claimValues claim values to also convert into adjudication components
+   * @return a list of adjudication components
+   */
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     return Stream.of(
             AdjudicationChargeClaimValue.toFhir(claimValues),

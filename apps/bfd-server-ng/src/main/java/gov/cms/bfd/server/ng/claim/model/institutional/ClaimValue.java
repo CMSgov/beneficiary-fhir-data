@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 
-@SuppressWarnings("checkstyle:MissingJavadocType")
+@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:MissingJavadocMethod:"})
 @Getter
 @Embeddable
 public class ClaimValue {
