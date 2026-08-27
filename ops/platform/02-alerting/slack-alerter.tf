@@ -101,7 +101,8 @@ data "archive_file" "slack_alerter_src" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "slack_alerter" {
+module "log_group_slack_alerter" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/lambda/${local.slack_lambda_full_name}"
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
@@ -127,7 +128,7 @@ resource "aws_lambda_function" "slack_alerter" {
   timeout          = 30
 
   logging_config {
-    log_group  = aws_cloudwatch_log_group.slack_alerter.name
+    log_group  = module.log_group_slack_alerter.name
     log_format = "Text"
   }
 

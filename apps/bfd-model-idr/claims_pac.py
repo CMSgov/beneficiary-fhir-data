@@ -160,6 +160,7 @@ class PacGeneratorUtil:
         clm_fiss[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_fiss[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_fiss[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_fiss[f.CLM_PPS_IND] = random.choice(["N", "Y"])
 
         add_meta_timestamps(clm_fiss, clm)
 

@@ -39,11 +39,11 @@ resource "aws_vpc_security_group_ingress_rule" "allow_events_rds_cluster" {
   description                  = "Grants ${local.events_lambda_full_name} Lambda access to the ${local.env} database"
 }
 
-resource "aws_cloudwatch_log_group" "events" {
-  name              = "/aws/lambda/${local.events_lambda_full_name}"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = 30
-  skip_destroy      = true
+module "log_group_events" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/lambda/${local.events_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_lambda_function" "events" {
@@ -71,7 +71,7 @@ resource "aws_lambda_function" "events" {
 
   logging_config {
     log_format = "Text"
-    log_group  = aws_cloudwatch_log_group.events.name
+    log_group  = module.log_group_events.name
   }
 
   environment {

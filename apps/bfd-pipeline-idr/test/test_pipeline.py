@@ -29,7 +29,7 @@ from idr_pipeline.logger_config import configure_logger
 from idr_pipeline.model.base_model import LoadMode, Source
 from idr_pipeline.parallel_executor import MultiprocessingExecutor, MultithreadingExecutor
 from idr_pipeline.pydantic_utils import fields
-from idr_pipeline.settings import MIN_CLAIM_LOAD_DATE, SETTINGS
+from idr_pipeline.settings import SETTINGS
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -97,16 +97,15 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_xref_efctv_sk"] == 353816021
 
-    if SETTINGS.enable_prior_auth_ingestion:
-        cur = conn.execute("select * from idr.prior_auth order by mbi_num")
-        assert cur.rowcount == 21
-        rows = cur.fetchmany(1)
-        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+    cur = conn.execute("select * from idr.prior_auth order by mbi_num")
+    assert cur.rowcount == 21
+    rows = cur.fetchmany(1)
+    assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
-        cur = conn.execute("select * from idr.prior_auth_item order by mbi_num")
-        assert cur.rowcount == 64
-        rows = cur.fetchmany(1)
-        assert rows[0]["mbi_num"] == "1OX4Y88RV68"
+    cur = conn.execute("select * from idr.prior_auth_item order by mbi_num")
+    assert cur.rowcount == 64
+    rows = cur.fetchmany(1)
+    assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
     # Seed stale non-Part-D parent claims so the prune job has rows to delete.
     # CSVs cover item pruning because stale non-Part-D parents do not load.
@@ -241,7 +240,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         UPDATE {IDR_BENE_HISTORY_TABLE}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
-        """,
+        """,  # type: ignore
         {"timestamp": datetime_now},
     )
     conn.commit()
@@ -734,6 +733,74 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         assert updated_ss_job.completion_time >= ss_clm_ts
 
 
+def _do_test_prior_auth_update_and_delete(conn: Connection[DictRow], load_type: LoadType) -> None:
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-OTENCJLOQRAKA'"
+    )
+    assert cur.rowcount == 1
+    rows = cur.fetchmany(6)
+    assert rows[0]["mbi_num"] == "7ZM6HW2AT68"
+    original_updated_ts = rows[0]["bfd_updated_ts"]
+    original_name = rows[0]["name"]
+
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 1
+    row = cur.fetchone()
+    assert row is not None
+
+    prauc_table = sql.Identifier("cms_edp_view_cvm_prau_prd", "prauc")
+    conn.execute(
+        t"""
+        UPDATE {prauc_table:i}
+        SET name = 'BITE AID PHARMACY'
+        WHERE mbi_num = '7ZM6HW2AT68'
+        AND utn = '-OTENCJLOQRAKA'
+        """
+    )
+
+    conn.execute(
+        t"""
+        DELETE FROM {prauc_table:i}
+        WHERE mbi_num = '5OH0K85GU23'
+        AND utn = '-SC21YQR4UY4LI'
+        """
+    )
+    conn.commit()
+
+    _advance_time(datetime.now() + timedelta(days=1))
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+
+    # verify that updated rows by upstream were updated
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-OTENCJLOQRAKA'"
+    )
+    assert cur.rowcount == 1
+    updated_row = cur.fetchone()
+    assert updated_row is not None
+    assert updated_row["name"] != original_name
+    assert updated_row["bfd_updated_ts"] > original_updated_ts
+
+    # verify that deleted rows by upstream were deleted in header and item level for prior auth
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 0
+
+    cur = conn.execute(
+        "select * from idr.prior_auth_item where mbi_num = '5OH0K85GU23' and utn = '-SC21YQR4UY4LI'"
+    )
+    assert cur.rowcount == 0
+
+    # verify that untouched rows by upstream were not updated
+    cur = conn.execute(
+        "select * from idr.prior_auth where mbi_num = '7ZM6HW2AT68' and utn = '-RVUOWAUT5V5QZ'"
+    )
+    rows = cur.fetchmany(2)
+    assert rows[0]["bfd_updated_ts"] < updated_row["bfd_updated_ts"]
+
+
 def _advance_time(timestamp: datetime) -> None:
     os.environ["BFD_TEST_DATE"] = timestamp.isoformat()
 
@@ -873,15 +940,14 @@ def _setup_pipeline_environment() -> None:
     os.environ.setdefault("IDR_LOG_LEVEL", "warning")
     # Prevent user-defined environment variables from overriding the defaults
     os.environ["IDR_BATCH_SIZE"] = "100000"
+    os.environ["IDR_TEST_MODE"] = "1"
     os.environ["IDR_MAX_TASKS"] = "4"
-    os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
     os.environ["BFD_TEST_DATE"] = "2023-04-02"
     os.environ["IDR_PER_BATCH_MIN_CONNECTIONS"] = "1"
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
-    os.environ["IDR_ENABLE_PRIOR_AUTH"] = "1"
-    os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
-    os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = MIN_CLAIM_LOAD_DATE
-    os.environ["IDR_MAX_TASKS"] = "1"
+    os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = SETTINGS.min_claim_nch_transaction_date
+    os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = SETTINGS.min_claim_ss_transaction_date
+    # os.environ["IDR_MAX_TASKS"] = "1"
 
 
 def _setup_db_config(info: psycopg.ConnectionInfo) -> None:
@@ -908,6 +974,7 @@ def _test_pipeline_load(postgres_db: tuple[PostgresContainer, str], load_type: L
         _reset_db(conn, sample_dir, postgres)
         _setup_db_config(conn.info)
         _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+        _do_test_prior_auth_update_and_delete(cast(Connection[DictRow], conn), load_type)
     logger.remove()
 
 

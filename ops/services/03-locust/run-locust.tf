@@ -49,7 +49,8 @@ resource "aws_vpc_security_group_ingress_rule" "allow_run_locust" {
   description                  = "Grants ${local.run_locust_lambda_full_name} Lambda access to the ${local.env} database"
 }
 
-resource "aws_cloudwatch_log_group" "run_locust" {
+module "log_group_run_locust" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/lambda/${local.run_locust_lambda_full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true

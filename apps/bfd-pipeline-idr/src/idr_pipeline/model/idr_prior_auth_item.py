@@ -7,10 +7,7 @@ from ..constants import IDR_PRIOR_AUTH_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS_PRIOR_AUTH,
-    BATCH_TIMESTAMP,
-    INSERT_EXCLUDE,
     PRIMARY_KEY_ORDER,
-    UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
     Source,
@@ -18,7 +15,6 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
-from ..settings import MIN_PRIOR_AUTH_LOAD_DATE
 
 
 class IdrPriorAuthItem(IdrBaseModel):
@@ -43,12 +39,6 @@ class IdrPriorAuthItem(IdrBaseModel):
     mr_count_st_dt: Annotated[date, BeforeValidator(transform_null_date_to_min)]
     mr_count_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     rrb_excl_ind: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True}]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True},
-        BeforeValidator(transform_null_date_to_min),
-    ]
 
     @override
     @staticmethod
@@ -66,6 +56,21 @@ class IdrPriorAuthItem(IdrBaseModel):
         return ModelType.PRIOR_AUTH
 
     @override
+    @staticmethod
+    def should_delete_missing() -> bool:
+        return True
+
+    @override
+    @classmethod
+    def is_immutable(cls) -> bool:
+        return False
+
+    @override
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        return "utn NOT LIKE '-%'"
+
+    @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # Prior auth data older than the lookback period should be filtered
@@ -75,8 +80,8 @@ class IdrPriorAuthItem(IdrBaseModel):
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > '{MIN_PRIOR_AUTH_LOAD_DATE}'
+                WHERE pa_req_rec_dt > {{MIN_TS}}
             )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
-            {{WHERE_CLAUSE}} AND row_order = 1;
+            WHERE row_order = 1;
             """

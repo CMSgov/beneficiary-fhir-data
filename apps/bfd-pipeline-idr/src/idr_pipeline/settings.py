@@ -15,10 +15,10 @@ class _Settings:
     # Tracking load progress is disabled for synthetic data loads.
     # Use this to force enabling load progress for testing.
     @cached_property
-    def force_load_progress(self) -> bool:
-        # We don't normally want to store the load progress info for synthetic data since the dates
-        # won't be in order like in prod. However, we need a way to override this for the tests.
-        return self._parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+    def test_mode(self) -> bool:
+        # We don't normally want to perform some operations outside of production mode.
+        # However, we need a way to override this for the tests.
+        return self._parse_bool_default_false("IDR_TEST_MODE")
 
     def bfd_test_date(self) -> datetime | None:
         test_date = getenv("BFD_TEST_DATE", "")
@@ -26,7 +26,7 @@ class _Settings:
 
     @cached_property
     def enable_prior_auth_ingestion(self) -> bool:
-        return self._parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+        return self._parse_bool_default_true("IDR_ENABLE_PRIOR_AUTH")
 
     @cached_property
     def enable_date_partitions(self) -> bool:
@@ -202,6 +202,10 @@ class _Settings:
     @cached_property
     def idr_database(self) -> str:
         return getenv("IDR_DATABASE", "")
+
+    @cached_property
+    def idr_prior_auth_database(self) -> str:
+        return getenv("IDR_EDP_DATABASE", "")
 
     @cached_property
     def idr_schema(self) -> str:

@@ -501,6 +501,20 @@ class IdrBaseModel(BaseModel, ABC):
         """Whether to merge or replace data when loading this table."""
         return False
 
+    @staticmethod
+    def should_delete_missing() -> bool:
+        """Whether upstream data deletion requires manual cleanup on our end.
+
+        Upstream data can be deleted with no indicator like an obsolete timestamp, requiring
+        us to delete it on our end.
+        """
+        return False
+
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        """Expression used to exclude synthetic data from being deleted in FullSyncBatchLoader."""
+        return ""
+
     @classmethod
     @abstractmethod
     def fetch_query(
@@ -538,6 +552,10 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def update_timestamp_col(cls) -> list[str]:
         return cls._extract_meta_keys(UPDATE_TIMESTAMP)
+
+    @classmethod
+    def is_immutable(cls) -> bool:
+        return not cls.update_timestamp_col()
 
     @classmethod
     def batch_id_col_alias(cls) -> str | None:
