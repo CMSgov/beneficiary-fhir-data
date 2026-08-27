@@ -8,11 +8,11 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsNch;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -43,12 +43,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"java:S2293"})
 public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
-  @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
-
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
 
+  @Embedded private AdjudicationChargeCmsNch adjudicationCharge;
   @Embedded private DateSupportingInfoCmsNch dateSupportingInfo;
   @Embedded private InstitutionalSupportingInfoCmsNch supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;

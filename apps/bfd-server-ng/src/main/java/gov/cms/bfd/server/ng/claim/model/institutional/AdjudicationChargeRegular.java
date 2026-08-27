@@ -8,9 +8,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The adjudication charge for an institutional claim from nch. */
+/**
+ * Adjudication fields for institutional claims, regular profile, both systems (but full set for
+ * nch) because cartesian products are fun.
+ */
 @Embeddable
-public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBase {
+public class AdjudicationChargeRegular implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -24,20 +27,11 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
   @Column(name = "clm_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
-  @Column(name = "clm_blood_ncvrd_chrg_amt")
-  private BigDecimal bloodNoncoveredChargeAmount;
-
   @Column(name = "clm_ncvrd_chrg_amt")
   private BigDecimal noncoveredChargeAmount;
 
   @Column(name = "clm_mdcr_coinsrnc_amt")
   private BigDecimal coinsuranceAmount;
-
-  @Column(name = "clm_blood_chrg_amt")
-  private BigDecimal bloodChargeAmount;
-
-  @Column(name = "clm_blood_lblty_amt")
-  private BigDecimal bloodLiabilityAmount;
 
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
@@ -54,11 +48,6 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of(
-        AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
-        AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
-            bloodLiabilityAmount),
-        AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            bloodNoncoveredChargeAmount));
+    return List.of(); // no-op, regular doesn't have the fields to create an adjudication component
   }
 }

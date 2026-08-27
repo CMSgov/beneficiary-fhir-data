@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** CMS profile specific information for claim date supporting info. */
+@Embeddable
 public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
 
   @Embedded private DateSupportingInfo dateSupportingInfo;

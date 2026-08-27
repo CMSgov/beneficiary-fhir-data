@@ -25,11 +25,11 @@ public class ClaimValue {
   private static final String VALUE_CODE_DISPROPORTIONATE = "18";
   private static final String VALUE_CODE_IME = "19";
 
-  Optional<BigDecimal> getDisproportionateAmount() {
+  public Optional<BigDecimal> getDisproportionateAmount() {
     return getAmountForCode(VALUE_CODE_DISPROPORTIONATE);
   }
 
-  Optional<BigDecimal> getImeAmount() {
+  public Optional<BigDecimal> getImeAmount() {
     return getAmountForCode(VALUE_CODE_IME);
   }
 

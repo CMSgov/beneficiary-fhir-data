@@ -9,10 +9,10 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -45,7 +45,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase {
 
   @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationChargeCmsSharedSystems adjudicationCharge;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 

@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCms;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -28,7 +28,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
+  @Embedded private AdjudicationChargeCms adjudicationChargeInstitutionalCms;
   @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
 
   // region Claim IDR Load Date
@@ -79,7 +79,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutional().toFhir(getClaimValues()).forEach(eob::addAdjudication);
+    getAdjudicationChargeInstitutionalCms().toFhir(getClaimValues()).forEach(eob::addAdjudication);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
@@ -93,6 +93,6 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
    * @return the bene paid amount
    */
   public Optional<BigDecimal> getBenePaidAmount() {
-    return Optional.of(getAdjudicationChargeInstitutional().getBenePaidAmount());
+    return Optional.of(getAdjudicationChargeInstitutionalCms().getBenePaidAmount());
   }
 }

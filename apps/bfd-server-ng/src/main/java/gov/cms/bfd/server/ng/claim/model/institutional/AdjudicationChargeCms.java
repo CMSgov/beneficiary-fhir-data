@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** Adjudication charge for institutional claims in the CMS profile, not system specific */
 @Embeddable
 @Getter
-public class AdjudicationChargeInstitutional {
+public class AdjudicationChargeCms {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;

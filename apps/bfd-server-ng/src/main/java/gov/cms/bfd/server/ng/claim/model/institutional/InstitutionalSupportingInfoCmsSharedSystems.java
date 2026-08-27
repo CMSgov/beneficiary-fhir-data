@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Supporting info for CMS profile shared systems source. */
+@Embeddable
 public class InstitutionalSupportingInfoCmsSharedSystems implements SupportingInfoComponentBase {
 
   @Embedded private InstitutionalSupportingInfo claimInstitutionalSupportingInfo;

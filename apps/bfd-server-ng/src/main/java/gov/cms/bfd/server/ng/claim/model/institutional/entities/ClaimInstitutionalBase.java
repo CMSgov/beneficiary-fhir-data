@@ -104,7 +104,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   /**
    * Overridable by subclasses to allow injecting profile specific supporting info.
    *
-   * @return a list of
+   * @return a list of supporting information components
    */
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassInitialSupportingInfo() {
