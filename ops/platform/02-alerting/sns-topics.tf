@@ -48,13 +48,15 @@ data "aws_iam_policy_document" "topic_template" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "splunk_incident_success" {
+module "log_group_splunk_incident_success" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "sns/${local.region}/${local.account_id}/${local.splunk_incident_topic}"
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
 }
 
-resource "aws_cloudwatch_log_group" "splunk_incident_failure" {
+module "log_group_splunk_incident_failure" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "sns/${local.region}/${local.account_id}/${local.splunk_incident_topic}/Failure"
   kms_key_id   = local.kms_key_arn
   skip_destroy = true
@@ -62,8 +64,8 @@ resource "aws_cloudwatch_log_group" "splunk_incident_failure" {
 
 resource "aws_sns_topic" "splunk_incident" {
   depends_on = [
-    aws_cloudwatch_log_group.splunk_incident_success,
-    aws_cloudwatch_log_group.splunk_incident_failure
+    module.log_group_splunk_incident_success,
+    module.log_group_splunk_incident_failure
   ]
 
   name              = local.splunk_incident_topic
@@ -91,7 +93,8 @@ resource "aws_sns_topic_subscription" "splunk_incident" {
   endpoint_auto_confirms = true
 }
 
-resource "aws_cloudwatch_log_group" "slack_success" {
+module "log_group_slack_success" {
+  source   = "../../terraform-modules/general/high-retention-log-group"
   for_each = local.slack_channel_to_topic
 
   name         = "sns/${local.region}/${local.account_id}/${each.value}"
@@ -99,7 +102,8 @@ resource "aws_cloudwatch_log_group" "slack_success" {
   skip_destroy = true
 }
 
-resource "aws_cloudwatch_log_group" "slack_failure" {
+module "log_group_slack_failure" {
+  source   = "../../terraform-modules/general/high-retention-log-group"
   for_each = local.slack_channel_to_topic
 
   name         = "sns/${local.region}/${local.account_id}/${each.value}/Failure"
@@ -110,8 +114,8 @@ resource "aws_cloudwatch_log_group" "slack_failure" {
 resource "aws_sns_topic" "slack" {
   for_each = local.slack_channel_to_topic
   depends_on = [
-    aws_cloudwatch_log_group.slack_success,
-    aws_cloudwatch_log_group.slack_failure
+    module.log_group_slack_success,
+    module.log_group_slack_failure
   ]
 
   name              = each.value

@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "verifier_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.verifier.arn}:*"]
+    resources = ["${module.log_group_verifier.arn}:*"]
   }
 }
 
