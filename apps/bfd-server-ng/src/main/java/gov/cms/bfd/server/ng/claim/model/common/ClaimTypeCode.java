@@ -458,7 +458,6 @@ public enum ClaimTypeCode {
     return codesForThisType;
   }
 
-  // todo would be nice to go over the type codes again for DD
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
     return List.of(_71, _72, _1700, _2700);
   }

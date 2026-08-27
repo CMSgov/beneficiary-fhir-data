@@ -20,6 +20,6 @@ public class OptionalBigDecimalToAmountConverter
 
   @Override
   public Optional<BigDecimal> convertToEntityAttribute(BigDecimal value) {
-    return Optional.ofNullable(value).map(v -> v.setScale(ROUNDING_SCALE, RoundingMode.DOWN));
+    return Optional.ofNullable(value).map(v -> v.setScale(ROUNDING_SCALE, RoundingMode.HALF_UP));
   }
 }
