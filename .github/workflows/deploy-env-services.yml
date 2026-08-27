@@ -14,16 +14,24 @@ on:
           database,
           locust,
           migrator,
+          migrator-ng,
           ccw-pipeline,
           npi-pipeline,
           rda-pipeline,
+          idr-pipeline,
+          idr-bfd-validator,
           server,
+          server-ng,
           ccw-pipeline-metrics,
           rda-pipeline-metrics,
+          idr-pipeline-metrics,
           server-metrics,
+          server-ng-metrics,
           ccw-pipeline-alarms,
           rda-pipeline-alarms,
-          server-alarms
+          idr-pipeline-alarms,
+          server-alarms,
+          server-ng-alarms
         required: true
       per-service-vars-json:
         description: >-
@@ -66,16 +74,24 @@ on:
           database,
           locust,
           migrator,
+          migrator-ng,
           ccw-pipeline,
           npi-pipeline,
           rda-pipeline,
+          idr-pipeline,
+          idr-bfd-validator,
           server,
+          server-ng,
           ccw-pipeline-metrics,
           rda-pipeline-metrics,
+          idr-pipeline-metrics,
           server-metrics,
+          server-ng-metrics,
           ccw-pipeline-alarms,
           rda-pipeline-alarms,
-          server-alarms
+          idr-pipeline-alarms,
+          server-alarms,
+          server-ng-alarms
         required: false
       per-service-vars-json:
         type: string
