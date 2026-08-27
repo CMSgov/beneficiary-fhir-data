@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from typing import override
 
+from ..constants import DEFAULT_JOB_ID
 from ..load_partition import LoadPartition
 from ..model.base_model import IdrBaseModel, ModelType, Source
 
@@ -12,6 +13,8 @@ class LoadProgress(IdrBaseModel):
     batch_partition: str
     job_start_ts: datetime
     batch_complete_ts: datetime
+    job_id: int
+    max_run_ts: datetime | None = None
 
     @staticmethod
     def query_placeholder() -> str:
@@ -35,11 +38,17 @@ class LoadProgress(IdrBaseModel):
     @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
+        return cls.fetch_query_by_job(partition, DEFAULT_JOB_ID)
+
+    @classmethod
+    def fetch_query_by_job(cls, partition: LoadPartition, job_id: int) -> str:
         return f"""
-        SELECT table_name, last_ts, last_id, batch_partition, job_start_ts, batch_complete_ts
+        SELECT table_name, last_ts, last_id, batch_partition, job_start_ts,
+            batch_complete_ts, job_id, max_run_ts
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s 
         AND batch_partition = '{partition.name}'
+        AND job_id = {job_id}
         """
 
     def is_historical(self) -> bool:
