@@ -35,7 +35,6 @@ data "aws_cloudwatch_log_group" "messages" {
 resource "aws_cloudwatch_log_metric_filter" "error_count" {
   name = "${local.metrics_namespace}/messages/count/error"
 
-  # IDR uses Loguru, which pads the log level to eight characters.
   pattern        = "$.record.level.name = \"ERROR\""
   log_group_name = data.aws_cloudwatch_log_group.messages.name
 
