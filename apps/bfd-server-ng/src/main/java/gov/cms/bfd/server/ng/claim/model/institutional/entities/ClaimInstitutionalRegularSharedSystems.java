@@ -14,5 +14,5 @@ import lombok.Getter;
 @Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRegularBase {
 
-    @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
 }

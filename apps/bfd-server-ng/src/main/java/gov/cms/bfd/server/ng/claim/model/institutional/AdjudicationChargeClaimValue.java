@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
