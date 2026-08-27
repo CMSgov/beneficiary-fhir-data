@@ -23,10 +23,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_institutional_ss", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasisBase {
-  @Override
-  SupportingInfoComponentBase getClaimDateSupportingInfo() {
-    return null;
-  }
 
   @Override
   SupportingInfoComponentBase getSupportingInfo() {

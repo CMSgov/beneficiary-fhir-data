@@ -10,9 +10,9 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSupportingInfoBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -44,15 +44,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"java:S6539", "java:S2293"})
 public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase {
 
-  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
+  @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
-
-  @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;

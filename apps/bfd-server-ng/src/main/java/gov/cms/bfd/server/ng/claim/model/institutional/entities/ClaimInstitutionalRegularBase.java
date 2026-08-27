@@ -9,22 +9,35 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import javax.annotation.processing.Generated;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The institutional claim, regular profile base class. */
+@Getter
+@MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
+
+  @Embedded private DateSupportingInfo dateSupportingInfo;
+
+  // region PaymentComponent
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
+
   @Override
-  SupportingInfoComponentBase getClaimDateSupportingInfo() {
-    return null;
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
   }
+
+  // endregion
 
   @Override
   SupportingInfoComponentBase getSupportingInfo() {
@@ -74,14 +87,4 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
   }
-
-  // region PaymentComponent
-  @Embedded private ClaimPaymentComponentAmount paymentComponent;
-
-  @Override
-  public ClaimPaymentComponentBase getPaymentComponent() {
-    return paymentComponent;
-  }
-
-  // endregion
 }

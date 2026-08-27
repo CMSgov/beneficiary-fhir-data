@@ -1,22 +1,20 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The claim date for a supporting info component. */
-@Embeddable
-public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
-  @Embedded private AdmissionPeriod admissionPeriod;
-  @Embedded private ClaimSubmissionDate claimSubmissionDate;
+/** CMS profile specific information for claim date supporting info. */
+public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
+
+  @Embedded private DateSupportingInfo dateSupportingInfo;
+
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
@@ -29,18 +27,18 @@ public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.of(
-            admissionPeriod.toFhir(supportingInfoFactory),
-            claimSubmissionDate.toFhir(supportingInfoFactory),
-            nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            activeCareThroughDate.toFhir(supportingInfoFactory),
-            noncoveredFromDate.toFhir(supportingInfoFactory),
-            noncoveredThroughDate.toFhir(supportingInfoFactory),
-            benefitsExhaustedDate.toFhir(supportingInfoFactory),
-            qualifyStayFromDate.toFhir(supportingInfoFactory),
-            qualifyStayThruDate.toFhir(supportingInfoFactory),
-            claimProcessDate.toFhir(supportingInfoFactory))
-        .flatMap(Optional::stream)
+    return Stream.concat(
+            Stream.of(
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    activeCareThroughDate.toFhir(supportingInfoFactory),
+                    noncoveredFromDate.toFhir(supportingInfoFactory),
+                    noncoveredThroughDate.toFhir(supportingInfoFactory),
+                    benefitsExhaustedDate.toFhir(supportingInfoFactory),
+                    qualifyStayFromDate.toFhir(supportingInfoFactory),
+                    qualifyStayThruDate.toFhir(supportingInfoFactory),
+                    claimProcessDate.toFhir(supportingInfoFactory))
+                .flatMap(Optional::stream),
+            dateSupportingInfo.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }

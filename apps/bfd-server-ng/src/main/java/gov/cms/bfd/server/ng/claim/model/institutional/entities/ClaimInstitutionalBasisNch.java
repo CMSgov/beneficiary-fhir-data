@@ -25,11 +25,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
 
   @Override
-  SupportingInfoComponentBase getClaimDateSupportingInfo() {
-    return null;
-  }
-
-  @Override
   SupportingInfoComponentBase getSupportingInfo() {
     return null;
   }

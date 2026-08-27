@@ -56,7 +56,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   private Optional<ClaimContractorNumber> claimContractorNumber;
 
   @Override
-  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return claimContractorNumber;
   }
 

@@ -52,42 +52,31 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   // region Hook Methods
 
-  abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
+  abstract SupportingInfoComponentBase getDateSupportingInfo();
 
   abstract SupportingInfoComponentBase getSupportingInfo();
 
-  abstract AdjudicationChargeBase getAdjudicationCharge();
-
-  abstract List<ClaimValue> getClaimValues();
-
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
-
-  /**
-   * Contractor number hook method.
-   *
-   * @return an optional ClaimContractorNumber structure
-   */
-  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
-    return Optional.empty();
-  }
-
-  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
-
-  /**
-   * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
-   * produces this from its own concrete record-type field.
-   *
-   * @return list containing at most one record-type supporting-info component
-   */
+  // Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
+  // produces this
+  // from its own concrete record-type field.
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo();
 
-  /**
-   * Adds care-team members that are unique to the subclass.
-   *
-   * @param eob the EOB being built
-   * @param sequenceGenerator shared sequence generator for care-team entries
-   */
+  // Various supporting info components not covered by previous hooks
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+
+  abstract List<ClaimValue> getClaimValues();
+
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
+
+  abstract AdjudicationChargeBase getAdjudicationCharge();
+
+  // Hook to add an adjudication and a total, just for CMS
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
+
+  // Adds care-team members that are unique to the subclass.
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
 
   // endregion
@@ -202,7 +191,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     Stream.of(
             buildSubclassInitialSupportingInfo(),
             sharedInitialSupportingInfo,
-            getClaimDateSupportingInfo().toFhir(supportingInfoFactory),
+            getDateSupportingInfo().toFhir(supportingInfoFactory),
             buildRecordTypeSupportingInfo(),
             getSupportingInfo().toFhir(supportingInfoFactory),
             getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),
