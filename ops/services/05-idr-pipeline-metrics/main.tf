@@ -35,7 +35,7 @@ data "aws_cloudwatch_log_group" "messages" {
 resource "aws_cloudwatch_log_metric_filter" "error_count" {
   name = "${local.metrics_namespace}/messages/count/error"
 
-  pattern        = "$.record.level.name = \"ERROR\""
+  pattern        = "{ $.record.level.name = \"ERROR\" }"
   log_group_name = data.aws_cloudwatch_log_group.messages.name
 
   metric_transformation {
