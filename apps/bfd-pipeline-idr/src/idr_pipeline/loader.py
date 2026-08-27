@@ -133,7 +133,9 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in update_set)})"
         )
         self.npi_type_backfill_map = model.npi_type_backfill_compare_cols()
-        self.npi_type_backfill_enabled = bool(self.npi_type_backfill_map)
+        self.npi_type_backfill_enabled = SETTINGS.enable_npi_type_backfill_compare and bool(
+            self.npi_type_backfill_map
+        )
         self.temp_only_cols = (
             list(self.npi_type_backfill_map) if self.npi_type_backfill_enabled else []
         )

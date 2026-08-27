@@ -947,7 +947,7 @@ def _setup_pipeline_environment() -> None:
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = SETTINGS.min_claim_nch_transaction_date
     os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = SETTINGS.min_claim_ss_transaction_date
-    # os.environ["IDR_MAX_TASKS"] = "1"
+    os.environ["IDR_ENABLE_NPI_TYPE_BACKFILL"] = "1"
 
 
 def _setup_db_config(info: psycopg.ConnectionInfo) -> None:
