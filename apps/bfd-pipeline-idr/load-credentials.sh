@@ -12,6 +12,8 @@ IDR_WAREHOUSE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensi
 export IDR_WAREHOUSE
 IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/idr_database --with-decryption --query "Parameter.Value" --output text)"
 export IDR_DATABASE
+IDR_EDP_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/idr_edp_database --with-decryption --query "Parameter.Value" --output text)"
+export IDR_EDP_DATABASE
 IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/idr_schema --with-decryption --query "Parameter.Value" --output text)"
 export IDR_SCHEMA
 

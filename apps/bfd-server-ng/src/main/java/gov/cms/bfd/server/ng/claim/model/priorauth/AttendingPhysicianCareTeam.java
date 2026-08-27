@@ -15,20 +15,12 @@ import org.hl7.fhir.r4.model.*;
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "att_phy_npi"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_att_phy_careteam_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_att_phy_npi_type"))
 public class AttendingPhysicianCareTeam extends ProviderHistoryBase {
-
-  @Column(name = "bfd_att_phy_npi_type")
-  private Optional<Integer> npiType;
 
   @Override
   public CareTeamType getCareTeamType() {
     return CareTeamType.ATTENDING;
-  }
-
-  @Override
-  @Transient
-  public ProviderHistoryBase.NpiType getNpiType() {
-    return ProviderHistoryBase.NpiType.fromNpiTypeCode(npiType);
   }
 
   @Override

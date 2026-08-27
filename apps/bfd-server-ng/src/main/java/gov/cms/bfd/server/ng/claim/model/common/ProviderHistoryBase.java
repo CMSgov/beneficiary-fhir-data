@@ -18,6 +18,8 @@ public abstract class ProviderHistoryBase {
   private Optional<String> providerNpiNumber;
   private Optional<String> providerName;
 
+  private Optional<Integer> npiType;
+
   /** Represents the enum NPI Type. */
   @Getter
   @AllArgsConstructor
@@ -32,7 +34,10 @@ public abstract class ProviderHistoryBase {
     private final String type;
 
     public static NpiType fromNpiTypeCode(Optional<Integer> npiTypeCode) {
-      if (npiTypeCode.isPresent() && npiTypeCode.get().equals(2)) {
+      if (npiTypeCode.isEmpty()) {
+        return UNKNOWN;
+      }
+      if (npiTypeCode.get().equals(2)) {
         return ORGANIZATION;
       }
       return INDIVIDUAL;
@@ -41,12 +46,8 @@ public abstract class ProviderHistoryBase {
 
   public abstract CareTeamType getCareTeamType();
 
-  public ProviderHistoryBase.NpiType getNpiType() {
-    if (getProviderName().isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
+  public NpiType getNpiType() {
+    return NpiType.fromNpiTypeCode(npiType);
   }
 
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
@@ -56,12 +57,10 @@ public abstract class ProviderHistoryBase {
     }
     var providerReference =
         ProviderFhirHelper.createProviderReference(providerNpiNumber.get(), providerName);
-    claimContext.ifPresent(
-        claimType -> {
-          if (claimType == ClaimContext.INSTITUTIONAL) {
-            providerReference.setType(NpiType.INDIVIDUAL.getType());
-          }
-        });
+    var providerNpiType = getNpiType();
+    if (providerNpiType != NpiType.UNKNOWN) {
+      providerReference.setType(providerNpiType.getType());
+    }
 
     return getCareTeamComponent(sequence, providerReference);
   }

@@ -35,9 +35,6 @@ export IDR_WAREHOUSE
 IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_database --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_DATABASE
 export IDR_DATABASE
-IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_schema --with-decryption --query "Parameter.Value" --output text)"
-readonly IDR_SCHEMA
-export IDR_SCHEMA
 
 args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
 if [[ -n "$1" ]]; then
