@@ -42,8 +42,6 @@ class PacGeneratorUtil:
         # Always exclude these fields from init_clm. We do this because RowAdapter ignores changes
         # to existing fields, so we could never unset these fields.
         exclude_fields_always = {f.CLM_NCH_PRMRY_PYR_CD}
-        # todo remove
-        
         # Exclude these fields if init_clm is adjudicated and we're generating a pac clm from it. We
         # do this so that these fields for an existing adjudicated CLM can be set, or these fields
         # don't exist for pac claims. The combined set of always excluded fields + adjudicated below

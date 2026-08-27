@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
+import gov.cms.bfd.server.ng.converter.OptionalBigDecimalToAmountConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
@@ -28,6 +29,7 @@ public class ClaimValue {
   @Column(name = "clm_val_cd")
   private Optional<String> claimValueCode;
 
+  @Convert(converter = OptionalBigDecimalToAmountConverter.class)
   @Column(name = "clm_val_amt")
   private Optional<BigDecimal> claimValueAmount;
 
