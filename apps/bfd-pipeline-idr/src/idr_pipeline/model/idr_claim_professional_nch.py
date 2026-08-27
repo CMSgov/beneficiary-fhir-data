@@ -98,12 +98,12 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     clm_blg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),

@@ -191,6 +191,14 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             else {"timestamp": compare_timestamp},
         )
 
+    def extract_full_idr_data(self, source: Source) -> Iterator[list[T]]:
+        start_time = self.cls.model_type().min_transaction_date
+        fetch_query = self.get_query(start_time, source)
+        logger.info("extracting full {}", self.cls.table())
+        return self.extract_many(
+            fetch_query.replace("{MIN_TS}", "%(timestamp)s"), {"timestamp": start_time}
+        )
+
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
         self.transform_timer.start()
         res = self.type_adapter.validate_python(
@@ -316,8 +324,6 @@ class SnowflakeExtractor(Extractor[T]):
             private_key=private_key_bytes,
             account=SETTINGS.idr_account,
             warehouse=SETTINGS.idr_warehouse,
-            database=SETTINGS.idr_database,
-            schema=SETTINGS.idr_schema,
         )
 
     @override
@@ -376,8 +382,6 @@ class SnowflakeExecutor(DbExecutor):
                 "user": SETTINGS.idr_username,
                 "private_key": private_key_bytes,  # type: ignore
                 "warehouse": SETTINGS.idr_warehouse,
-                "database": SETTINGS.idr_database,
-                "schema": SETTINGS.idr_schema,
             }
         ).create()
         self.conn = SnowflakeExtractor.connect()

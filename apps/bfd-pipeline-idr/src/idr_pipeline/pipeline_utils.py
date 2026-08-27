@@ -112,7 +112,11 @@ def extract_and_load(
             else:
                 logger.info("no previous progress for {} - {}", cls.table(), partition.name)
 
-            data_iter = data_extractor.extract_idr_data(progress, job_start, source)
+            data_iter = (
+                data_extractor.extract_full_idr_data(source)
+                if cls.should_delete_missing()
+                else data_extractor.extract_idr_data(progress, job_start, source)
+            )
             res = loader.load(
                 data_iter,
                 cls,

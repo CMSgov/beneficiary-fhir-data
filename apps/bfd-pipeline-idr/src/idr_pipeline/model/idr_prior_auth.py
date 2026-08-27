@@ -10,11 +10,8 @@ from ..model.base_model import (
     ALIAS_PRVDR_ATT_PHY,
     ALIAS_PRVDR_ORDER_REFER,
     ALIAS_PRVDR_RENDER,
-    BATCH_TIMESTAMP,
     EXPR,
-    INSERT_EXCLUDE,
     PRIMARY_KEY_ORDER,
-    UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
     Source,
@@ -24,7 +21,6 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
-from ..settings import MIN_PRIOR_AUTH_LOAD_DATE
 
 
 class IdrPriorAuth(IdrBaseModel):
@@ -62,13 +58,6 @@ class IdrPriorAuth(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
     bfd_att_phy_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_ATT_PHY)}]
-    # TBD: might have to change the insert & update ts once IDR adds those
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True}]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True},
-        BeforeValidator(transform_null_date_to_min),
-    ]
 
     @override
     @staticmethod
@@ -86,6 +75,21 @@ class IdrPriorAuth(IdrBaseModel):
         return ModelType.PRIOR_AUTH
 
     @override
+    @staticmethod
+    def should_delete_missing() -> bool:
+        return True
+
+    @override
+    @classmethod
+    def is_immutable(cls) -> bool:
+        return False
+
+    @override
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        return "utn NOT LIKE '-%'"
+
+    @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # Prior auth data older than the lookback period should be filtered
@@ -98,8 +102,8 @@ class IdrPriorAuth(IdrBaseModel):
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn ORDER BY current_segment) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > '{MIN_PRIOR_AUTH_LOAD_DATE}'
-            )
+                WHERE pa_req_rec_dt > {{MIN_TS}}
+            ) 
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_att_phy}
                 ON {prvdr_att_phy}.prvdr_npi_num = {prior_auth}.att_phy_npi
@@ -110,5 +114,5 @@ class IdrPriorAuth(IdrBaseModel):
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_render}
                 ON {prvdr_render}.prvdr_npi_num = {prior_auth}.render_npi
                 AND {prvdr_render}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            {{WHERE_CLAUSE}} AND row_order = 1;
+            WHERE row_order = 1;
             """
