@@ -181,6 +181,10 @@ class _Settings:
         return getenv("IDR_LOG_LEVEL", "INFO").upper()
 
     @cached_property
+    def structured_logs(self) -> bool:
+        return self._parse_bool_default_false("IDR_STRUCTURED_LOGS")
+
+    @cached_property
     def sql_log(self) -> bool:
         return self._parse_bool_default_false("IDR_SQL_LOG")
 

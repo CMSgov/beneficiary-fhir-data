@@ -150,6 +150,10 @@ resource "aws_ecs_task_definition" "this" {
             name  = "BFD_DB_ENDPOINT"
             value = data.aws_rds_cluster.main.reader_endpoint
           },
+          {
+            name  = "IDR_STRUCTURED_LOGS",
+            value = "1"
+          },
           # TODO: Unexclude these tables when they work correctly
           {
             name = "IDR_EXCLUDE_TABLES"

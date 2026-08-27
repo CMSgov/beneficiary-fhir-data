@@ -187,6 +187,10 @@ resource "aws_ecs_task_definition" "idr" {
             value = "0"
           },
           {
+            name  = "IDR_STRUCTURED_LOGS",
+            value = "1"
+          },
+          {
             name = "CONFIG_SETTINGS_JSON"
             value = jsonencode(
               {
