@@ -11,7 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalSupportingInfoBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalCmsSharedSystemsSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoClaimValue;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
@@ -54,7 +54,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
   @Embedded
   private ClaimRecordType claimRecordType;
 
-  @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
+  @Embedded private ClaimInstitutionalCmsSharedSystemsSupportingInfo supportingInfo;
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;

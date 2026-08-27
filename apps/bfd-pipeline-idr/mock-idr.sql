@@ -853,7 +853,5 @@ CREATE TABLE cms_edp_view_cvm_prau_prd.prauc (
     mr_count_end_dt DATE,
     att_phy_npi VARCHAR(10) NOT NULL,
     rrb_excl_ind VARCHAR(1),
-    idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(mbi_num, utn, current_segment)
 );

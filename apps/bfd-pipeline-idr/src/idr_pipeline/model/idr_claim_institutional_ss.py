@@ -293,12 +293,12 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     # Columns from v2_mdcr_clm_fiss
     clm_crnt_stus_cd: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_default_string)]
     clm_pps_ind: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_fiss: Annotated[
         datetime,
         {ALIAS: ALIAS_FISS, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_fiss: Annotated[
         datetime,
         {ALIAS: ALIAS_FISS, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
