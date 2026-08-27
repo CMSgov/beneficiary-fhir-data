@@ -1,11 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.converter.FissPpsIndicatorCodeConverter;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFiscalIntermediaryActionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimNonpaymentReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.McoPaidSwitch;
+import gov.cms.bfd.server.ng.claim.model.common.PpsIndicatorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,10 @@ public class InstitutionalSupportingInfoCmsSharedSystems implements SupportingIn
   @Column(name = "clm_fi_actn_cd")
   private Optional<ClaimFiscalIntermediaryActionCode> claimFiscalIntermediaryActionCode;
 
+  @Column(name = "clm_pps_ind")
+  @Convert(converter = FissPpsIndicatorCodeConverter.class)
+  private Optional<PpsIndicatorCode> ppsIndicatorCode;
+
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
@@ -35,7 +42,8 @@ public class InstitutionalSupportingInfoCmsSharedSystems implements SupportingIn
             Stream.of(
                     mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
                     nonpaymentReasonCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    claimFiscalIntermediaryActionCode.map(c -> c.toFhir(supportingInfoFactory)))
+                    claimFiscalIntermediaryActionCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)))
                 .flatMap(Optional::stream))
         .toList();
   }

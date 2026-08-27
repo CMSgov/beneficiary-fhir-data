@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.*;
 

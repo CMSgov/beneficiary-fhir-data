@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The claim date for institutional claims in the shared system. */
+/** The claim date for institutional claims, cms profile, shared system. */
 @Embeddable
 public class DateSupportingInfoCmsSharedSystems implements SupportingInfoComponentBase {
 
