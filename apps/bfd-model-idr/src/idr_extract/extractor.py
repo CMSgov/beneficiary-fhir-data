@@ -84,7 +84,7 @@ class SnowflakeExecutor:
             print(f"No records found for file {file_name} in Snowflake.")
 
     def get_tables(self) -> list[SnowflakeTable]:
-        expection_list = table_exception_list().split(",")
+        exception_list = table_exception_list().split(",")
         el_placeholder = ", ".join(["%s"] * len(expection_list))
         cur = self.conn.cursor()
         cur.execute(f"""
