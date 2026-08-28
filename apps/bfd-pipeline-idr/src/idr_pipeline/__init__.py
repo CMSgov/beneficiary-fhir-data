@@ -1,7 +1,6 @@
 import atexit
 import multiprocessing
 import sys
-from datetime import UTC, datetime
 
 import anyio
 import click
@@ -25,6 +24,7 @@ from .load_events import (
 )
 from .load_partition import LoadType
 from .load_synthetic import load_from_csv
+from .loader import resolve_test_date
 from .logger_config import configure_logger
 from .model.base_model import LoadMode, Source
 from .pipeline_stages import StagedIdrPipeline
@@ -172,11 +172,3 @@ def run(
             )
 
         logger.complete()
-
-
-def resolve_test_date(load_mode: LoadMode) -> datetime:
-    test_date = SETTINGS.bfd_test_date()
-
-    if test_date and load_mode != LoadMode.PROD:
-        return test_date
-    return datetime.now(UTC)

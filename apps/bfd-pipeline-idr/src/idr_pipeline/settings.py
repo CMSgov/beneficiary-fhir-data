@@ -32,6 +32,10 @@ class _Settings:
         return self._parse_bool_default_true("IDR_ENABLE_PRIOR_AUTH")
 
     @cached_property
+    def enable_npi_type_backfill_compare(self) -> bool:
+        return self._parse_bool_default_false("IDR_ENABLE_NPI_TYPE_BACKFILL")
+
+    @cached_property
     def enable_date_partitions(self) -> bool:
         """
         Enables partitioning claims data based on dates.

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimContext;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderIdQualifierCode;
@@ -26,13 +26,13 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.PRESCRIBING;
   }
 
   @Override
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
-      Integer sequence, Optional<ClaimContext> claimContext) {
+      Integer sequence, Optional<ClaimTypeCode> claimTypeCode) {
 
     return getProviderNpiNumber()
         .flatMap(
@@ -48,7 +48,7 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
                         providerReference.setType(providerNpiType.getType());
                       }
 
-                      return getCareTeamComponent(sequence, providerReference);
+                      return getCareTeamComponent(sequence, providerReference, claimTypeCode);
                     }));
   }
 }

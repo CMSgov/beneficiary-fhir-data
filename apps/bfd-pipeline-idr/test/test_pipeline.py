@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -33,6 +34,9 @@ from idr_pipeline.settings import SETTINGS
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
+
+# Forces runners to use spawn instead of the default fork when running tests
+multiprocessing.set_start_method("spawn", force=True)
 
 
 def _run_migrator(postgres: PostgresContainer) -> None:
@@ -337,9 +341,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_institutional_nch order by clm_uniq_id")
-    assert cur.rowcount == 51
+    assert cur.rowcount == 63
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
+    assert rows[0]["clm_uniq_id"] == -9879437343384
 
     # Stale non-Part-D parent claims do not remain in the final claim tables
     cur = conn.execute("select * from idr.claim_institutional_nch where clm_uniq_id = 999999434801")
@@ -355,9 +359,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 51
+    assert cur.rowcount == 56
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 119855147698
+    assert rows[0]["clm_uniq_id"] == -8309297293881
 
     cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1
@@ -365,17 +369,17 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert rows[0]["clm_uniq_id"] == 4991490559710
 
     cur = conn.execute("select * from idr.claim_rx order by clm_uniq_id")
-    assert cur.rowcount == 19
+    assert cur.rowcount == 27
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 166776396279
+    assert rows[0]["clm_uniq_id"] == -8797257401798
 
     cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
     if load_type == LoadType.INITIAL:
-        assert cur.rowcount == 796
+        assert cur.rowcount == 996
     elif load_type == LoadType.INCREMENTAL:
-        assert cur.rowcount == 795
+        assert cur.rowcount == 995
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
+    assert rows[0]["clm_uniq_id"] == -9879437343384
 
     # Items for stale non-Part-D claims are pruned on incremental loads
     cur = conn.execute(
@@ -412,11 +416,11 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     if load_type == LoadType.INITIAL:
-        assert cur.rowcount == 443
+        assert cur.rowcount == 504
     elif load_type == LoadType.INCREMENTAL:
-        assert cur.rowcount == 442
+        assert cur.rowcount == 503
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 119855147698
+    assert rows[0]["clm_uniq_id"] == -8309297293881
 
     cur = conn.execute("select * from idr.claim_item_professional_ss order by clm_uniq_id")
     if load_type == LoadType.INITIAL:
@@ -798,8 +802,95 @@ def _do_test_prior_auth_update_and_delete(conn: Connection[DictRow], load_type: 
 
 
 def _advance_time(timestamp: datetime) -> None:
-    new_time = timestamp + timedelta(minutes=1)
-    os.environ["BFD_TEST_DATE"] = new_time.isoformat()
+    os.environ["BFD_TEST_DATE"] = timestamp.isoformat()
+
+
+def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
+
+    cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+    row = cur.fetchone()
+    assert row is not None
+    latest_time = cast(datetime, row["max_ts"]) + timedelta(days=1)
+    _advance_time(latest_time)
+
+    conn.execute("truncate table idr.load_progress")
+    conn.commit()
+
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
+
+    old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -1784862973911")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_prscrbng_prvdr_npi_num"] == "1789655200"
+    assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
+    assert row["bfd_prvdr_prscrbng_npi_type"] == 1
+    assert row["bfd_updated_ts"] == old_update_ts
+    assert row["bfd_claim_updated_ts"] == old_update_ts
+
+    cur = conn.execute("select max(bfd_claim_updated_ts) as max_claim_updated_ts from idr.claim_rx")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["max_claim_updated_ts"] >= latest_time
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -6260496095505")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
+    assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
+    assert row["bfd_prvdr_prscrbng_npi_type"] is None
+    assert row["bfd_updated_ts"] == latest_time
+    assert row["bfd_claim_updated_ts"] == latest_time
+
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 580550863030")
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_othr_prvdr_npi_num"] == "1320757457"
+    assert row["clm_othr_fed_prvdr_spclty_cd"] == "93"
+    assert row["bfd_prvdr_othr_npi_type"] == 1
+    assert row["bfd_updated_ts"] == old_update_ts
+    assert row["bfd_claim_updated_ts"] == old_update_ts
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
+        "and prvdr_rndrng_prvdr_npi_num = '2658486156'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
+    assert row["bfd_prvdr_rndrng_npi_type"] == 1
+    assert row["bfd_updated_ts"] == latest_time
+    # verify that bfd_claim_updated_ts on claim header table was updated as a result
+    cur = conn.execute(
+        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881 "
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["bfd_claim_updated_ts"] == latest_time
+
+    cur = conn.execute(
+        "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
+        "and prvdr_rndrng_prvdr_npi_num = '1820038259'"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
+    assert row["bfd_prvdr_rndrng_npi_type"] is None
+    assert row["bfd_updated_ts"] == old_update_ts
+    # bfd_claim_updated_ts updated in claim -8309297293881 header still since a different
+    # npi_type (prvdr_rndrg_prvdr_npi_num) was actually updated. See above.
+
+    cur = conn.execute(
+        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"
+    )
+    row = cur.fetchone()
+    assert row is not None
+    assert row["prvdr_srvc_prvdr_npi_num"] == "1819676937"
+    assert row["bfd_prvdr_srvc_npi_type"] == 2
+    assert row["bfd_updated_ts"] == latest_time
+    assert row["bfd_claim_updated_ts"] == latest_time
 
 
 def _reset_db(
@@ -856,6 +947,7 @@ def _setup_pipeline_environment() -> None:
     os.environ["IDR_PER_BATCH_MAX_CONNECTIONS"] = "1"
     os.environ["IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"] = SETTINGS.min_claim_nch_transaction_date
     os.environ["IDR_MIN_CLAIM_SS_TRANSACTION_DATE"] = SETTINGS.min_claim_ss_transaction_date
+    os.environ["IDR_ENABLE_NPI_TYPE_BACKFILL"] = "1"
 
 
 def _setup_db_config(info: psycopg.ConnectionInfo) -> None:
@@ -929,6 +1021,18 @@ def test_initial_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> No
 
 def test_incremental_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
     _test_pipeline_load(postgres_db, LoadType.INCREMENTAL)
+
+
+def test_legacy_npi_type_pipeline_update(postgres_db: tuple[PostgresContainer, str]) -> None:
+    _setup_pipeline_environment()
+    configure_logger()
+    postgres, conninfo = postgres_db
+    with psycopg.connect(conninfo=conninfo, row_factory=dict_row) as conn:  # pyright: ignore[reportArgumentType]
+        sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
+        _reset_db(conn, sample_dir, postgres)
+        _setup_db_config(conn.info)
+        _do_legacy_npi_type_update(cast(Connection[DictRow], conn))
+    logger.remove()
 
 
 def run_1() -> None:

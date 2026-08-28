@@ -22,8 +22,10 @@ from ..model.base_model import (
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -35,6 +37,7 @@ from ..model.base_model import (
     clm_dt_sgntr_query,
     clm_orig_cntl_num_expr,
     clm_query,
+    legacy_rx_prescribing_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     provider_npi_type_expr,
@@ -102,6 +105,10 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_srvc_prvdr_gnrc_id_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
     ]
     prvdr_prsbng_id_qlfyr_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -227,25 +234,24 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
-    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
-    ]
-
     prvdr_prscrbng_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_prscrbng_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)}
+    ]
+    legacy_prvdr_prscrbng_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_rx_prescribing_npi_type_expr("prvdr_prsbng_id_qlfyr_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_prscrbng_npi_type"},
+    ]
     bfd_prvdr_prscrbng_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_PRSCRBNG, None)},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_prscrbng_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)},
     ]
 
     @override
