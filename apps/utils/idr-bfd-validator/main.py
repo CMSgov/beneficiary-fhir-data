@@ -81,6 +81,9 @@ _IGNORED_COLS_PER_MODEL = {
             "bfd_prvdr_blg_last_or_lgl_name",
             "bfd_prvdr_rfrg_careteam_name",
             "bfd_prvdr_srvc_careteam_name",
+            "bfd_prvdr_prscrbng_npi_type",
+            "clm_srvc_prvdr_gnrc_id_num",
+            "bfd_srvc_prvdr_gnrc_id_npi_type",
             "prvdr_srvc_last_or_lgl_name",
         }
     }.items()
