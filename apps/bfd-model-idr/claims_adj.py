@@ -408,11 +408,11 @@ class AdjudicatedGeneratorUtil:
         return clm_dcmtn
 
     def gen_clm_val(
-            self, 
-            clm: RowAdapter, 
-            value_code: str, 
-            clm_val_sqnc_num: int, 
-            init_clm_val: RowAdapter | None = None
+        self,
+        clm: RowAdapter,
+        value_code: str,
+        clm_val_sqnc_num: int,
+        init_clm_val: RowAdapter | None = None,
     ):
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -422,8 +422,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = value_code
         clm_val[f.CLM_VAL_SQNC_NUM] = clm_val_sqnc_num
 
-        # '37' represents a whole number and not a monetary ammount
-        if (value_code != '37'):
+        # '37' represents a whole number and not a monetary amount
+        if value_code != "37":
             clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         else:
             clm_val[f.CLM_VAL_AMT] = random.randint(0, 20)
@@ -941,7 +941,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_PHYSN_ASTNT_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PHYSN_ASTNT_CD]
         )
-        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(  
+        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(
               gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
         )
 

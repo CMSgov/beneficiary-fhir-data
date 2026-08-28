@@ -987,8 +987,8 @@ def generate(
 
             if clm_type_cd in (20, 40, 60, 61, 62, 63, 64):
                 for sqnc_num, value_code in enumerate(AVAILABLE_CLM_VAL_CDS, start=1):
-                    # 'QM' is the only clm_val_cd with limited a clm_type_cd range
-                    if (value_code == 'QM' & clm_type_cd != 40):
+                    # 'QM' is the only clm_val_cd with a limited clm_type_cd range
+                    if value_code == "QM" and clm_type_cd != 40:
                         continue
                     clm_val_row = adj_util.gen_clm_val(
                         clm=clm,
@@ -997,7 +997,6 @@ def generate(
                         init_clm_val=value_code_per_fpk[value_code].get(four_part_key(clm)),
                     )
                     adj_clms_tbls[CLM_VAL].append(clm_val_row)
-
 
             if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
                 init_procs = proc_clm_prod_per_fpk.get(four_part_key(clm)) or [
