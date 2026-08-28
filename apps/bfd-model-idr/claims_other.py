@@ -15,12 +15,7 @@ from claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
-from generator_util import (
-    CLM_ANSI_SGNTR,
-    RowAdapter,
-    gen_basic_id,
-    gen_npi_id,
-)
+from generator_util import CLM_ANSI_SGNTR, GeneratorUtil, RandomIdGenerator, RowAdapter
 
 _faker = Faker()
 
@@ -71,7 +66,10 @@ class OtherGeneratorUtil:
         ]
 
     def gen_provider_history(
-        self, amount: int, init_provider_historys: list[RowAdapter] | None = None
+        self,
+        amount: int,
+        init_provider_historys: list[RowAdapter] | None = None,
+        gen_utils: GeneratorUtil = RandomIdGenerator,
     ):
         init_provider_historys = init_provider_historys or []
         additional_provider_historys = [
@@ -83,7 +81,7 @@ class OtherGeneratorUtil:
         generated_type_1_npis = set()
         generated_type_2_npis = set()
         for idx, provider_history in enumerate(all_provider_historys):
-            prvdr_sk = gen_npi_id(field="PRVDR_SK")
+            prvdr_sk = gen_utils.id_gen.npi_id(field="PRVDR_SK")
             # make half of providers type 1 npi and half type 2
             # type 1 npis never have a legal name
             # need to return both the subsets of type 1/2 npis that were used so that
@@ -105,8 +103,12 @@ class OtherGeneratorUtil:
                     f.PRVDR_NAME: random.choice(AVAILABLE_PROVIDER_NAMES),
                     f.PRVDR_LGL_NAME: prvdr_lgl_name,
                     f.PRVDR_NPI_NUM: prvdr_sk,
-                    f.PRVDR_EMPLR_ID_NUM: gen_basic_id(field=f.PRVDR_EMPLR_ID_NUM, length=9),
-                    f.PRVDR_OSCAR_NUM: gen_basic_id(field=f.PRVDR_OSCAR_NUM, length=6),
+                    f.PRVDR_EMPLR_ID_NUM: gen_utils.id_gen.gen_basic_id(
+                        field=f.PRVDR_EMPLR_ID_NUM, length=9
+                    ),
+                    f.PRVDR_OSCAR_NUM: gen_utils.id_gen.gen_basic_id(
+                        field=f.PRVDR_OSCAR_NUM, length=6
+                    ),
                     f.PRVDR_TXNMY_CMPST_CD: random.choice(AVAILABLE_PROVIDER_TX_CODES),
                     f.PRVDR_TYPE_CD: random.choice(AVAILABLE_PROVIDER_TYPE_CODES),
                 }

@@ -22,12 +22,15 @@ from generator_util import (
     CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
     GeneratorUtil,
+    IdGenerator,
+    RandomIdGenerator,
     RowAdapter,
+    SequentialIdGenerator,
     load_file_dict,
     output_table_contains_by_bene_sk,
     probability,
 )
-from load_synthetic_output import CsvWriter, SnowflakeWriter
+from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 
 fake = Faker()
 
@@ -91,13 +94,6 @@ parser.add_argument(
     help="Truncate tables before reloading. Default is false",
 )
 args = parser.parse_args()
-
-if args.claims and args.destination == "snowflake":
-    print(
-        "claims needs out/BENE_HSTRY.csv and out/CNTRCT_PBP_NUM.csv as input to "
-        "claims_generator.py so it isn't compatible with destination flag set to snowflake."
-    )
-    sys.exit(1)
 
 
 available_given_names = [
@@ -200,7 +196,17 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
 
 
 def load_inputs():
-    generator = GeneratorUtil()
+    writer: OutputDestinationWriter = (
+        SnowflakeWriter() if args.destination == "snowflake" else CsvWriter()
+    )
+
+    id_gen: IdGenerator = (
+        SequentialIdGenerator(writer)
+        if isinstance(writer, SnowflakeWriter)
+        else RandomIdGenerator()
+    )
+
+    generator = GeneratorUtil(id_gen=id_gen)
 
     files: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
@@ -277,7 +283,6 @@ def load_inputs():
         patient["BENE_SK"] = str(pt_bene_sk)
         patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
         patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
-        generator.used_bene_sk.append(pt_bene_sk)
 
         patient_static_mbi_row = patient_mbi_id_rows.get(patient.get("BENE_MBI_ID"))
         if not patient_static_mbi_row:
@@ -349,7 +354,6 @@ def load_inputs():
             # current patient as this is by far the most common case in prod data
             if probability(0.9):
                 generator.gen_mbis_for_patient(patient=prior_patient, num_mbis=1)
-            generator.used_bene_sk.append(pt_bene_sk)
 
             bene_xref = RowAdapter({})
             generator.generate_bene_xref(
@@ -372,9 +376,10 @@ def load_inputs():
     print(f"Done generating {len(patients)} patients")
     print("Writing finished tables...")
     generator.save_output_files(
-        SnowflakeWriter() if args.destination == "snowflake" else CsvWriter(),
+        writer,
         truncate=args.truncate,
     )
+    writer.close()
     print("Patient data generation complete!")
 
 
@@ -386,13 +391,23 @@ if __name__ == "__main__":
         print("Generating claims for generated benes")
         try:
             # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
+            claims_args = [
+                sys.executable,
+                "claims_generator.py",
+            ]
+
+            if args.destination == "snowflake":
+                claims_args.extend(["--destination", "snowflake"])
+            else:
+                claims_args.extend(
+                    [
+                        f"out/{BENE_HSTRY}.csv",
+                        f"out/{CNTRCT_PBP_NUM}.csv",
+                    ]
+                )
+
             result = subprocess.run(
-                args=[
-                    sys.executable,
-                    "claims_generator.py",
-                    f"out/{BENE_HSTRY}.csv",
-                    f"out/{CNTRCT_PBP_NUM}.csv",
-                ],
+                args=claims_args,
                 check=True,
                 stdout=sys.stdout,
                 stderr=sys.stderr,

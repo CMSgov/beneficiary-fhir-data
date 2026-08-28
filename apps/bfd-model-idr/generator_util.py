@@ -13,13 +13,14 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Self
 
+import numpy as np
 import pandas as pd
 import tqdm
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 
-from load_synthetic_output import CsvWriter, OutputDestinationWriter
+from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 
 BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
 BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
@@ -82,11 +83,24 @@ NOW = date.today()
 # keyed by the patient's bene_sk, and innermost dict is the full row itself
 _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
-# Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
-# Used with the gen_*_id functions below.
-__used_ids_by_field: dict[str, set[str]] = {}
-
 _faker = Faker()
+
+_UNIQUE_FIELDS_AND_SOURCES: dict[str, str] = {
+    "BENE_SK": BENE_HSTRY,
+    "CNTRCT_PBP_SK": CNTRCT_PBP_NUM,
+    "CLM_UNIQ_ID": CLM,
+    "CLM_DT_SGNTR_SK": CLM_DT_SGNTR,
+    "CLM_NUM_SK": CLM,
+    "GEO_BENE_SK": CLM,
+    "CLM_RLT_COND_SGNTR_SK": CLM_RLT_COND_SGNTR_MBR,
+    "BENE_PDP_ENRLMT_MMBR_ID_NUM": BENE_MAPD_ENRLMT_RX,
+    "BENE_MBI_ID": BENE_MBI_ID,
+    "CLM_CNTL_NUM": CLM,
+    "CLM_ORIG_CNTL_NUM": CLM,
+    "CLM_LINE_PMD_UNIQ_TRKNG_NUM": CLM_LINE,
+    "PRVDR_EMPLR_ID_NUM": PRVDR_HSTRY,
+    "PRVDR_OSCAR_NUM": PRVDR_HSTRY,
+}
 
 
 class RowAdapter:
@@ -133,6 +147,25 @@ class IdGenerator(ABC):
 
     @abstractmethod
     def mbi(self) -> str: ...
+
+
+def _sorted_chars(chars: str) -> str:
+    return "".join(sorted(set(chars)))
+
+
+_MBI_ALPHABETS = [
+    _sorted_chars("123456789"),
+    _sorted_chars("LOIBZ"),
+    _sorted_chars((set(string.ascii_uppercase) - set("SLOIBZ")) | set(string.digits)),
+    _sorted_chars(string.digits),
+    _sorted_chars(set(string.ascii_uppercase) - set("SLOIBZ")),
+    _sorted_chars((set(string.ascii_uppercase) - set("SLOIBZ")) | set(string.digits)),
+    _sorted_chars(string.digits),
+    _sorted_chars(set(string.ascii_uppercase) - set("SLOIBZ")),
+    _sorted_chars(set(string.ascii_uppercase) - set("SLOIBZ")),
+    _sorted_chars(string.digits),
+    _sorted_chars(string.digits),
+]
 
 
 class RandomIdGenerator(IdGenerator):
@@ -185,33 +218,139 @@ class RandomIdGenerator(IdGenerator):
     def bene_sk(self) -> int:
         while True:
             bene_sk = random.randint(-1000000000, -1000)
-            if bene_sk not in self.used_bene_sk:
+            if bene_sk not in self._used_bene_sk:
                 self._used_bene_sk.add(bene_sk)
                 return bene_sk
 
     def mbi(self) -> str:
-        mbi: list[str] = []
-        set_1 = set(string.ascii_uppercase) - set(["S", "L", "O", "I", "B", "Z"])
-        set_2 = set(list(set_1) + list(string.digits))
-        mbi.append(random.choice(["1", "2", "3", "4", "5", "6", "7", "8", "9"]))
-        mbi.append(random.choice(["L", "O", "I", "B", "Z"]))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(string.digits))
-
-        full_mbi = "".join(mbi)
-        if full_mbi in self.mbi_table:
-            return self.gen_mbi()
+        full_mbi = "".join(random.choice(a) for a in _MBI_ALPHABETS)
+        if full_mbi in self._used_mbi:
+            return self.mbi()
+        self._used_mbi.add(full_mbi)
         return full_mbi
 
 
-# class SequenatialIdGenerator(IdGenerator):
+def _expand_parts(parts: list[tuple[str, int]]) -> list[str]:
+    position_alphabets: list[str] = []
+    for chars, length in parts:
+        position_alphabets.extend([_sorted_chars(chars)] * length)
+    return position_alphabets
+
+
+""" _decode_mixed_identifier converts a string identifier into its numeric position so we can treat 
+these identifiers as sequential counters. This uses a mixed radix counter approach here. Each 
+position can have a different number of possible values so its radix. position_alphabets contains 
+the ordered alphabet for each position. We increment its numeric position and encode that back into 
+the next valid identifier _encode_mixed_identifier """
+
+
+def _decode_mixed_identifier(value: str, position_alphabets: list[str]) -> int:
+    character_positions = [
+        alphabet.index(char) for char, alphabet in zip(value, position_alphabets, strict=False)
+    ]
+    radices = tuple(len(alphabet) for alphabet in position_alphabets)
+    return int(np.ravel_multi_index(character_positions, radices))
+
+
+def _encode_mixed_identifier(position: int, position_alphabets: list[str]) -> str:
+    radices = tuple(len(alphabet) for alphabet in position_alphabets)
+    character_positions = np.unravel_index(position, radices)
+    return "".join(
+        alphabet[character_position]
+        for alphabet, character_position in zip(
+            position_alphabets, character_positions, strict=False
+        )
+    )
+
+
+class SequentialIdGenerator(IdGenerator):
+    def __init__(self, writer: SnowflakeWriter) -> None:
+        self.writer = writer
+        self._positions: dict[tuple[str, str], int] = {}
+        self._multipart_alphabets: dict[str, list[str]] = {}
+        self._next_npi_position: int | None = None
+
+    def _query(self, sql: str) -> Any:
+        cur = self.writer.conn.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        return row[0] if row else None
+
+    def _qualified_table(self, table_name: str) -> str:
+        resolved_table_name, database, schema = self.writer.resolve_target_table(table_name)
+        return f'"{database}"."{schema}"."{resolved_table_name}"'
+
+    def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str:
+        key = (field, "multipart")
+        position_alphabets = self._multipart_alphabets.setdefault(field, _expand_parts(parts))
+        if key not in self._positions:
+            table = _UNIQUE_FIELDS_AND_SOURCES[field]
+            existing_max = self._query(f"SELECT MAX({field}) FROM {self._qualified_table(table)}")
+            if existing_max is None:
+                self._positions[key] = 0
+            else:
+                value = existing_max.removeprefix("_")
+                self._positions[key] = _decode_mixed_identifier(value, position_alphabets) + 1
+        n = self._positions[key]
+        self._positions[key] = n + 1
+        return "-" + _encode_mixed_identifier(n, position_alphabets)
+
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+        if start > 0 or end > 0 or end > start:
+            raise ValueError(
+                "'end' and 'start' must be negative and 'end' must be less than 'start'"
+            )
+        key = (field, "numeric")
+        if key not in self._positions:
+            table = _UNIQUE_FIELDS_AND_SOURCES[field]
+            existing_min = self._query(f"SELECT MIN({field}) FROM {self._qualified_table(table)}")
+            self._positions[key] = start if existing_min is None else int(existing_min) - 1
+        value = self._positions[key]
+        self._positions[key] -= 1
+        return str(value)
+
+    def bene_sk(self) -> int:
+        key = ("BENE_SK", "bene_sk")
+        if key not in self._positions:
+            table = _UNIQUE_FIELDS_AND_SOURCES["BENE_SK"]
+            existing_min = self._query(f"SELECT MIN(BENE_SK) FROM {self._qualified_table(table)}")
+            self._positions[key] = -1000 if existing_min is None else int(existing_min) - 1
+        value = self._positions[key]
+        self._positions[key] -= 1
+        return value
+
+    def mbi(self) -> str:
+        key = ("BENE_MBI_ID", "mbi")
+        if key not in self._positions:
+            table = _UNIQUE_FIELDS_AND_SOURCES["BENE_MBI_ID"]
+            existing_max = self._query(
+                f"SELECT MAX(BENE_MBI_ID) FROM {self._qualified_table(table)}"
+            )
+            self._positions[key] = (
+                0
+                if existing_max is None
+                else _decode_mixed_identifier(existing_max, _MBI_ALPHABETS) + 1
+            )
+        n = self._positions[key]
+        self._positions[key] = n + 1
+        return _encode_mixed_identifier(n, _MBI_ALPHABETS)
+
+    def npi_id(self, field: str) -> str:  # noqa: ARG002
+        if self._next_npi_position is None:
+            existing_max_npi = self._query(
+                f"SELECT MAX(PRVDR_NPI_NUM) FROM {self._qualified_table(PRVDR_HSTRY)}"
+            )
+            if existing_max_npi is None:
+                self._next_npi_position = 100_000_000
+            else:
+                self._next_npi_position = int(existing_max_npi[:9])
+
+        position = self._next_npi_position
+        if position >= 299_999_999:
+            raise OverflowError("npi_id exhausted the 9-digits NPI body space")
+        self._next_npi_position += 1
+        npi_9 = str(position)
+        return npi_9 + calculate_npi_checksum(npi_9)
 
 
 def as_list[T](obj: T | None) -> list[T]:
@@ -267,39 +406,6 @@ def gen_thru_dt(frm_dt: str, max_days: int = 30):
     return (from_date + timedelta(days=days_to_add)).isoformat()
 
 
-def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
-    while True:
-        id = gen_func()
-        id_set = __used_ids_by_field.get(field, set())
-        if id not in id_set:
-            if id_set:
-                __used_ids_by_field[field].add(id)
-            else:
-                __used_ids_by_field[field] = {id}
-
-            return id
-
-
-def gen_multipart_id(field: str, parts: list[tuple[str, int]]) -> str:
-    return __gen_id(
-        field=field,
-        gen_func=lambda: (
-            f"-{
-                ''.join(
-                    [
-                        ''.join(random.choices(population=allowed_chars, k=length))
-                        for (allowed_chars, length) in parts
-                    ]
-                )
-            }"
-        ),
-    )
-
-
-def gen_basic_id(field: str, length: int, allowed_chars: str = string.digits) -> str:
-    return gen_multipart_id(field=field, parts=[(allowed_chars, length)])
-
-
 def calculate_npi_checksum(npi_9: str) -> str:
     full_str = "80840" + npi_9
     digits = [int(char) for char in full_str]
@@ -312,24 +418,6 @@ def calculate_npi_checksum(npi_9: str) -> str:
     total = sum(digits)
     check_digit = (10 - (total % 10)) % 10
     return str(check_digit)
-
-
-def gen_npi_id(field: str) -> str:
-    def make_npi():
-        first_digit = random.choice(["1", "2"])
-        rest = "".join(random.choices(population=string.digits, k=8))
-        npi_9 = first_digit + rest
-        check_digit = calculate_npi_checksum(npi_9)
-        return npi_9 + check_digit
-
-    return __gen_id(field=field, gen_func=make_npi)
-
-
-def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
-    if start > 0 or end > 0 or end > start:
-        raise ValueError("'end' and 'start' must be negative and 'end' must be less than 'start'")
-
-    return __gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
 
 
 def load_file_dict(
@@ -408,13 +496,12 @@ class GeneratorUtil:
     USE_COLS = "use_cols"
     ALL_KEYS = "all_keys"
 
-    def __init__(self):
+    def __init__(self, id_gen: IdGenerator | None = None):
+        self.id_gen = id_gen or RandomIdGenerator()
         self.fake = Faker()
-        self.used_bene_sk: list[int] = []
-        self.used_mbi: list[str] = []
         self.bene_hstry_table: list[dict[str, Any]] = []
         self.bene_xref_table: list[dict[str, Any]] = []
-        self.mbi_table: dict[str, dict[str, Any]] = {}
+        self.mbi_table: dict[str, dict[str, Any]] = {}  # TODO: do i still need this?
         self.address_options: list[dict[str, Any]] = []
         self.mdcr_stus: list[dict[str, Any]] = []
         self.mdcr_entlmt: list[dict[str, Any]] = []
@@ -474,31 +561,10 @@ class GeneratorUtil:
                 self.address_options.append(cur_row)
 
     def gen_mbi(self) -> str:
-        mbi: list[str] = []
-        set_1 = set(string.ascii_uppercase) - set(["S", "L", "O", "I", "B", "Z"])
-        set_2 = set(list(set_1) + list(string.digits))
-        mbi.append(random.choice(["1", "2", "3", "4", "5", "6", "7", "8", "9"]))
-        mbi.append(random.choice(["L", "O", "I", "B", "Z"]))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(string.digits))
-
-        full_mbi = "".join(mbi)
-        if full_mbi in self.mbi_table:
-            return self.gen_mbi()
-        return full_mbi
+        return self.id_gen.mbi()
 
     def gen_bene_sk(self) -> int:
-        bene_sk = random.randint(-1000000000, -1000)
-        if bene_sk in self.used_bene_sk:
-            return self.gen_bene_sk()
-        return bene_sk
+        return self.id_gen.bene_sk()
 
     def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int):
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
@@ -907,7 +973,7 @@ class GeneratorUtil:
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
         )
-        member_id_num = gen_numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        member_id_num = self.id_gen.numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
         group_num = str(random.randint(-999, -100))
         prcsr_num = str(random.randint(-999999, -100000))
         bank_id_num = str(random.randint(-99999, -10000))
@@ -939,7 +1005,7 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
         contract = random.choice(self.cntrct_pbp_num)
-        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or gen_basic_id(
+        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.gen_basic_id(
             field="CNTRCT_PBP_SK", length=12
         )
         contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
@@ -1007,7 +1073,9 @@ class GeneratorUtil:
             if not contract_num or not pbp_val:
                 contract_num, pbp_val = available_contract_num_pairs[pair_index]
                 pair_index += 1
-            sk = pbp_num.get("CNTRCT_PBP_SK") or gen_basic_id(field="CNTRCT_PBP_SK", length=12)
+            sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.gen_basic_id(
+                field="CNTRCT_PBP_SK", length=12
+            )
             effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
             end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
             obsolete_date = random.choice(

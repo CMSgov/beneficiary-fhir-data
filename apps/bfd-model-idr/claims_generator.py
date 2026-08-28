@@ -38,7 +38,10 @@ from generator_util import (
     PRAUC,
     PRVDR_HSTRY,
     GeneratorUtil,
+    IdGenerator,
+    RandomIdGenerator,
     RowAdapter,
+    SequentialIdGenerator,
     adapters_to_dicts,
     as_list,
     load_file_dict,
@@ -804,18 +807,30 @@ def generate(
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
-    destination: OutputDestinationWriter = CsvWriter,
+    destination: str = "csv",
     truncate: bool = False,
 ):
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
-        print(
-            f"error: min claims value of {min_claims} is greater than "
-            f"max claims value of {max_claims}"
+        raise click.UsageError(
+            "error: min claims value of {min_claims} is greater than max claims value of "
+            "{max_claims}"
         )
-        sys.exit(1)
 
-    gen_utils = GeneratorUtil()
+    if destination == "snowflake" and paths:
+        raise click.UsageError("Input paths should not be provided when destination is snowflake.")
+
+    writer: OutputDestinationWriter = (
+        SnowflakeWriter() if destination == "snowflake" else CsvWriter()
+    )
+
+    id_gen: IdGenerator = (
+        SequentialIdGenerator(writer)
+        if isinstance(writer, SnowflakeWriter)
+        else RandomIdGenerator()
+    )
+
+    gen_utils = GeneratorUtil(id_gen=id_gen)
 
     if sushi:
         print("Running sushi build")
@@ -860,7 +875,9 @@ def generate(
     other_util = OtherGeneratorUtil()
 
     generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
-        other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
+        other_util.gen_provider_history(
+            amount=14, init_provider_historys=files[PRVDR_HSTRY], gen_utils=gen_utils
+        )
     )
 
     out_tables[PRVDR_HSTRY].extend(generated_provider_histories)
@@ -991,6 +1008,7 @@ def generate(
             clm_rlt_cond_sgntr_mbr = adj_util.gen_clm_rlt_cond_sgntr_mbr(
                 clm=clm,
                 init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+                gen_utils=gen_utils,
             )
             adj_clms_tbls[CLM_RLT_COND_SGNTR_MBR].append(clm_rlt_cond_sgntr_mbr)
 
@@ -1165,7 +1183,7 @@ def generate(
             else []
         )
         for claims_tbls in init_pac_clms_tbls:
-            pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[CLM][0])
+            pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[CLM][0], gen_utils=gen_utils)
             out_tables[CLM].append(pac_clm)
 
             pac_clm_fiss = pac_util.gen_clm_fiss(
@@ -1266,6 +1284,7 @@ def generate(
                     init_clm_rlt_cond_sgntr_mbr=next(
                         iter(claims_tbls[CLM_RLT_COND_SGNTR_MBR]), RowAdapter({})
                     ),
+                    gen_utils=gen_utils,
                 )
             )
 
@@ -1306,7 +1325,7 @@ def generate(
     files = {_ClaimsFile(k): v for k, v in out_tables.items() if k in _ClaimsFile}
     _save_claims_data(
         files,
-        SnowflakeWriter() if destination == "snowflake" else CsvWriter(),
+        writer,
         truncate,
     )
 

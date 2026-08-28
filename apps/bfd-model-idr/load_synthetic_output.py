@@ -41,6 +41,7 @@ class OutputDestinationWriter(ABC):
         truncate: bool = False,
     ) -> None: ...
 
+    @abstractmethod
     def close(self) -> None: ...
 
 
@@ -60,6 +61,9 @@ class CsvWriter(OutputDestinationWriter):
         if cols != ALL_KEYS:
             df = df[cols]
         df.to_csv(self.out_dir / f"{table_name}.csv", index=False)
+
+    def close(self) -> None:
+        pass
 
 
 class SnowflakeWriter(OutputDestinationWriter):
@@ -103,7 +107,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             schema=self.schema,
         )
 
-    def _resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
+    def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
         override = _TABLE_OVERRIDES.get(table_name)
         if override is not None:
             return (
@@ -127,10 +131,8 @@ class SnowflakeWriter(OutputDestinationWriter):
         if not data:
             return
 
-        resolved_table_name, database, schema = self._resolve_target_table(table_name)
+        resolved_table_name, database, schema = self.resolve_target_table(table_name)
         df = pd.DataFrame(data)
-
-        table_name.replace("SYNTHETIC", "V2_MDCR")
 
         success, _, num_rows, _ = write_pandas(
             conn=self.conn,

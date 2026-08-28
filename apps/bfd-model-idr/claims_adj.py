@@ -9,6 +9,7 @@ from claims_static import (
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
     AVAILABLE_NDC,
+    AVAILABLE_SSA_STATE_CDS,
     CLM_POA_IND_CHOICES,
     FISS_CLM_TYPE_CDS,
     HCPCS_MODS,
@@ -17,7 +18,6 @@ from claims_static import (
     PHARMACY_CLM_TYPE_CDS,
     TARGET_RLT_COND_CODES,
     TARGET_SEQUENCE_NUMBERS,
-    AVAILABLE_SSA_STATE_CDS,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
@@ -28,10 +28,8 @@ from generator_util import (
     AVAIL_CONTRACT_NUMS,
     AVAIL_PBP_NUMS,
     GeneratorUtil,
+    RandomIdGenerator,
     RowAdapter,
-    gen_basic_id,
-    gen_multipart_id,
-    gen_numeric_id,
     gen_thru_dt,
     probability,
     random_date,
@@ -53,9 +51,11 @@ class AdjudicatedGeneratorUtil:
         type_2_npis: list = [0],
     ):
         clm = init_clm or RowAdapter({})
-        clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
-        clm[f.CLM_UNIQ_ID] = gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
-        clm[f.CLM_RLT_COND_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
+        clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
+        clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
+        clm[f.CLM_RLT_COND_SGNTR_SK] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_RLT_COND_SGNTR_SK, start=-2
+        )
 
         clm_type_cd = (
             int(clm[f.CLM_TYPE_CD])
@@ -70,12 +70,12 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_THRU_DT] = gen_thru_dt(clm[f.CLM_FROM_DT])
 
         # NON-PDE
-        clm[f.CLM_CNTL_NUM] = gen_multipart_id(
+        clm[f.CLM_CNTL_NUM] = gen_utils.id_gen.multipart_id(
             field=f.CLM_CNTL_NUM, parts=[(string.digits, 14), (string.ascii_uppercase, 3)]
         )
         # PDE -> diff Claim control number process.
         if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
-            clm[f.CLM_ORIG_CNTL_NUM] = gen_multipart_id(
+            clm[f.CLM_ORIG_CNTL_NUM] = gen_utils.id_gen.multipart_id(
                 field=f.CLM_ORIG_CNTL_NUM, parts=[(string.digits, 14), (string.ascii_uppercase, 3)]
             )
             clm[f.CLM_RLT_COND_SGNTR_SK] = "-1"
@@ -84,11 +84,13 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
             clm[f.CLM_BLOOD_PT_FRNSH_QTY] = random.randint(0, 20)
 
-        clm[f.CLM_NUM_SK] = gen_numeric_id(field=f.CLM_NUM_SK)
+        clm[f.CLM_NUM_SK] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_NUM_SK
+        )  # TODO: rework CLM_NUM_SK generation
         clm[f.CLM_EFCTV_DT] = str(date.today())
         clm[f.CLM_IDR_LD_DT] = random_date(clm[f.CLM_FROM_DT], max_date)
         clm[f.CLM_OBSLT_DT] = "9999-12-31"
-        clm[f.GEO_BENE_SK] = gen_numeric_id(field=f.GEO_BENE_SK)
+        clm[f.GEO_BENE_SK] = gen_utils.id_gen.numeric_id(field=f.GEO_BENE_SK)
         clm[f.BENE_SK] = bene_sk
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
         clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD])
@@ -243,13 +245,16 @@ class AdjudicatedGeneratorUtil:
         return clm
 
     def gen_clm_rlt_cond_sgntr_mbr(
-        self, clm: RowAdapter, init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None
+        self,
+        clm: RowAdapter,
+        init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None,
+        gen_utils: GeneratorUtil = RandomIdGenerator,
     ):
         clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
             if str(clm.get(f.CLM_RLT_COND_SGNTR_SK, "")).startswith("-")
-            else gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
+            else gen_utils.id_gen.numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(
             TARGET_SEQUENCE_NUMBERS
@@ -754,7 +759,7 @@ class AdjudicatedGeneratorUtil:
         clm_line[f.CLM_LINE_FROM_DT] = clm[f.CLM_FROM_DT]
         clm_line[f.CLM_LINE_THRU_DT] = clm[f.CLM_THRU_DT]
         if probability(0.10):
-            clm_line[f.CLM_LINE_PMD_UNIQ_TRKNG_NUM] = gen_basic_id(
+            clm_line[f.CLM_LINE_PMD_UNIQ_TRKNG_NUM] = gen_utils.id_gen.gen_basic_id(
                 field=f.CLM_LINE_PMD_UNIQ_TRKNG_NUM,
                 length=13,  # varchar(14) so 13 + 1 for '-' prefix
                 allowed_chars=string.ascii_uppercase + string.digits,
@@ -954,10 +959,9 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_PHYSN_ASTNT_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PHYSN_ASTNT_CD]
         )
-        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(  
-              gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
         )
-
 
         clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_CHRG_AMT] = round(random.uniform(0, 10000), 2)
         clm_line_prfnl[f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT] = round(random.uniform(0, 10000), 2)
