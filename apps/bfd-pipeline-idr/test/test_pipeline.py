@@ -20,7 +20,6 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from idr_pipeline import Executor, run
-from idr_pipeline.constants import IDR_BENE_HISTORY_TABLE
 from idr_pipeline.extractor import PostgresExecutor
 from idr_pipeline.load_events import IdrJobLoadEvent, IdrJobType
 from idr_pipeline.load_partition import LoadType
@@ -234,7 +233,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     conn.execute(
         f"""
-        UPDATE {IDR_BENE_HISTORY_TABLE}
+        UPDATE {SETTINGS.idr_bene_history_table}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,  # type: ignore

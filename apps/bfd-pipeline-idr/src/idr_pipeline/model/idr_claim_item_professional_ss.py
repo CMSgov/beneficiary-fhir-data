@@ -5,12 +5,6 @@ from pydantic import BeforeValidator
 
 from ..constants import (
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_LINE_DOCUMENTATION_TABLE,
-    IDR_CLAIM_LINE_MCS_TABLE,
-    IDR_CLAIM_LINE_PROFESSIONAL_TABLE,
-    IDR_CLAIM_LINE_TABLE,
-    IDR_CLAIM_PROD_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -44,6 +38,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimItemProfessionalSs(IdrBaseModel):
@@ -286,15 +281,15 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                 claims as (
                     {clm_query()}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_PROD_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_prod_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_PROFESSIONAL_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_professional_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_DOCUMENTATION_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_documentation_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_MCS_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_mcs_table)}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -303,7 +298,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                             PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {line}.clm_line_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_LINE_TABLE} {line}
+                    FROM {SETTINGS.idr_claim_line_table} {line}
                     JOIN claims {clm}
                         ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
@@ -319,7 +314,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                             ORDER BY {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_PROD_TABLE} {prod}
+                    FROM {SETTINGS.idr_claim_prod_table} {prod}
                     JOIN claims {clm}
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
@@ -349,25 +344,25 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
-                LEFT JOIN {IDR_CLAIM_LINE_PROFESSIONAL_TABLE} {line_prfnl}
+                LEFT JOIN {SETTINGS.idr_claim_line_professional_table} {line_prfnl}
                     ON {line_prfnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_prfnl}.clm_type_cd = {line}.clm_type_cd
                     AND {line_prfnl}.clm_num_sk = {line}.clm_num_sk
                     AND {line_prfnl}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_prfnl}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_CLAIM_LINE_MCS_TABLE} {line_mcs}
+                LEFT JOIN {SETTINGS.idr_claim_line_mcs_table} {line_mcs}
                     ON {line_mcs}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_mcs}.clm_type_cd = {line}.clm_type_cd
                     AND {line_mcs}.clm_num_sk = {line}.clm_num_sk
                     AND {line_mcs}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_mcs}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_CLAIM_LINE_DOCUMENTATION_TABLE} {line_dcmtn}
+                LEFT JOIN {SETTINGS.idr_claim_line_documentation_table} {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
                     AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rndrng}
+                LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rndrng}
                     ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}

@@ -6,11 +6,6 @@ from pydantic import BeforeValidator
 from ..constants import (
     CLAIM_PROFESSIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_DOCUMENTATION_TABLE,
-    IDR_CLAIM_PROFESSIONAL_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -52,6 +47,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimProfessionalNch(IdrBaseModel):
@@ -287,9 +283,9 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query(IDR_CLAIM_PROFESSIONAL_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_professional_table)}
                 UNION
-                {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_documentation_table)}
                 UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
@@ -301,30 +297,30 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN {IDR_CLAIM_TABLE} {clm} ON
+            JOIN {SETTINGS.idr_claim_table} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
+            JOIN {SETTINGS.idr_claim_date_signature_table} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            LEFT JOIN {IDR_CLAIM_PROFESSIONAL_TABLE} {prfnl} ON
+            LEFT JOIN {SETTINGS.idr_claim_professional_table} {prfnl} ON
                 {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            LEFT JOIN {IDR_CLAIM_DOCUMENTATION_TABLE} {dcmtn} ON
+            LEFT JOIN {SETTINGS.idr_claim_documentation_table} {dcmtn} ON
                 {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_blg}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_blg}
                 ON {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num
                 AND {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rfrg}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rfrg}
                 ON {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num
                 AND {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd}
