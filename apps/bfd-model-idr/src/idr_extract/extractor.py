@@ -93,7 +93,7 @@ class SnowflakeExecutor:
             WHERE table_type = 'BASE TABLE'
               AND table_name NOT IN ({el_placeholder})
             ORDER BY table_name
-        """,expection_list)
+        """,exception_list)
         return [SnowflakeTable(row[0],row[1]) for row in cur.fetchall()]
 
 
