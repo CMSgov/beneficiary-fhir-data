@@ -492,16 +492,7 @@ def _fix_bfd_val(model: type[IdrBaseModel], col: str, val: DbType) -> DbType | N
             case _:
                 pass
 
-    match val:
-        case datetime() as d:
-            # Some primery key columns (specifically bene_cmbnd_deemd_efctv_dt for
-            # idr.beneficiary_low_income_subsidy_cmbnd) are stored in the BFD DB as dates but are
-            # represented in the model as datetimes. These columns have no tzinfo, and so when
-            # we try to compare IDR to BFD rows after fixing IDR datetimes the BFD rows are not
-            # found as they _technically_ are not the same due to missing the tzinfo.
-            return d.replace(tzinfo=UTC) if not d.tzinfo else d
-        case _:
-            return val
+    return val
 
 
 def _get_row_pkey(

@@ -22,7 +22,7 @@ from ..settings import SETTINGS
 
 class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    bene_cmbnd_deemd_efctv_dt: Annotated[datetime, {PRIMARY_KEY_ORDER: 1}]
+    bene_cmbnd_deemd_efctv_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
     bene_cmbnd_deemd_trmntn_dt: date
     bene_cmbnd_deemd_copmt_lvl_id: str
     bene_cmbnd_deemd_prm_pct: str
