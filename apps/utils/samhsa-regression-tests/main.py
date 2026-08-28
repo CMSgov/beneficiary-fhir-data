@@ -91,6 +91,13 @@ class BeneWithSamshaClaims:
     samhsa_claim_ids: list[str]
 
 
+@dataclass(frozen=True, eq=True)
+class BeneWithSamshaClaimsAndPriorAuths:
+    bene_sk: str
+    samhsa_claim_ids: list[str]
+    samhsa_prior_auth_utns: list[str]
+
+
 class ABCEnumMeta(EnumMeta, ABCMeta):
     pass
 
@@ -194,6 +201,10 @@ CLAIMS_TABLES = [
     CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
 ]
+
+PRIOR_AUTH_TABLE = "prior_auth"
+PRIOR_AUTH_ITEM_TABLE = "prior_auth_item"
+
 TABLES_META: dict[str, tuple[type[ClaimTableColumnBase], str]] = {
     CLAIM_INSTITUTIONAL_NCH_TABLE: (
         ClaimInstitutionalNchColumn,
@@ -369,6 +380,134 @@ async def query_samhsa_benes_with_claims(
         ]
 
 
+async def query_samhsa_benes_with_prior_auths(
+    tablesample: float,
+    limit: int,
+    security_labels: list[SecurityLabelModel],
+    db_details: DatabaseDetailsModel,
+) -> list[tuple[str, str]]:
+    query_params = list(
+        itertools.chain.from_iterable(
+            [label.code, normalize_code(label.code)]
+            for label in security_labels
+            if label.system in CLM_LINE_HCPCS_CD_LABELS
+        )
+    )
+
+    async with (
+        await psycopg.AsyncConnection.connect(
+            host=db_details.host,
+            user=db_details.user,
+            password=db_details.password,
+            port=db_details.port,
+            dbname=db_details.dbname,
+        ) as conn,
+        conn.cursor(row_factory=dict_row) as curs,
+    ):
+        logger.info(
+            "Connected to %s; querying for prior auth bene_sks...",
+            db_details.dbname,
+        )
+
+        result = await (
+            await curs.execute(
+                t"""
+                SELECT valid_beneficiary.bene_xref_efctv_sk AS bene_sk,
+                    {PRIOR_AUTH_TABLE:i}.utn,
+                    {PRIOR_AUTH_TABLE:i}.clm_type,
+                    {PRIOR_AUTH_TABLE:i}.utn_valid_st_dt,
+                    {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps
+                FROM idr.{PRIOR_AUTH_ITEM_TABLE:i}
+                TABLESAMPLE SYSTEM({tablesample:l})
+                INNER JOIN idr.{PRIOR_AUTH_TABLE:i}
+                    ON {PRIOR_AUTH_ITEM_TABLE:i}.mbi_num = {PRIOR_AUTH_TABLE:i}.mbi_num
+                    AND {PRIOR_AUTH_ITEM_TABLE:i}.utn = {PRIOR_AUTH_TABLE:i}.utn
+                INNER JOIN idr.valid_beneficiary
+                    ON {PRIOR_AUTH_TABLE:i}.mbi_num = valid_beneficiary.bene_mbi_id
+                WHERE valid_beneficiary.idr_ltst_trans_flg = 'Y'
+                    AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY({(list(query_params))})
+                LIMIT {limit:l};
+                """
+            )
+        ).fetchall()
+
+        bene_sks_and_prior_auths: set[tuple[str, str]] = set()
+        for row in result:
+            prior_auth_code = str(row["hcpcs_or_cpt_or_hipps"])
+            if row["clm_type"] == "I":
+                continue
+
+            matching_label = next(
+                (
+                    label
+                    for label in security_labels
+                    if label.system
+                    == (
+                        SECURITY_LABEL_CPT_SYSTEM
+                        if prior_auth_code[0].isdigit()
+                        else SECURITY_LABEL_HCPCS_SYSTEM
+                    )
+                    and normalize_code(label.code) == normalize_code(prior_auth_code)
+                ),
+                None,
+            )
+
+            if (
+                matching_label
+                and row["utn_valid_st_dt"] >= matching_label.start_date
+                and row["utn_valid_st_dt"] <= matching_label.end_date
+            ):
+                bene_sks_and_prior_auths.add((str(row["bene_sk"]), str(row["utn"])))
+
+        uniq_bene_sks = set(x[0] for x in bene_sks_and_prior_auths)
+
+        logger.info(
+            "%d potential SAMHSA prior auth bene_sks returned",
+            len(uniq_bene_sks),
+        )
+
+        return list(bene_sks_and_prior_auths)
+
+
+async def query_samhsa_benes(
+    tablesample: float,
+    limit: int,
+    security_labels: list[SecurityLabelModel],
+    db_details: DatabaseDetailsModel,
+) -> list[BeneWithSamshaClaimsAndPriorAuths]:
+    claim_benes = await query_samhsa_benes_with_claims(
+        tablesample=tablesample,
+        limit=limit,
+        security_labels=security_labels,
+        db_details=db_details,
+    )
+    prior_auth_benes = await query_samhsa_benes_with_prior_auths(
+        tablesample=tablesample,
+        limit=limit,
+        security_labels=security_labels,
+        db_details=db_details,
+    )
+
+    # Combine claims and prior auths so both EOB types are checked for each beneficiary.
+    uniq_bene_sks = {x.bene_sk for x in claim_benes} | {x[0] for x in prior_auth_benes}
+
+    return [
+        BeneWithSamshaClaimsAndPriorAuths(
+            bene_sk=bene_sk,
+            samhsa_claim_ids=[
+                claim_id
+                for claim_bene in claim_benes
+                if claim_bene.bene_sk == bene_sk
+                for claim_id in claim_bene.samhsa_claim_ids
+            ],
+            samhsa_prior_auth_utns=[
+                utn for prior_auth_bene_sk, utn in prior_auth_benes if prior_auth_bene_sk == bene_sk
+            ],
+        )
+        for bene_sk in uniq_bene_sks
+    ]
+
+
 def get_uniq_clm_id_for_bundle_resource(bundle_resource: dict[str, Any]) -> str:
     # If we can't find the uniq_clm_id, something's wrong and a StopIteration _should_ be raised.
     return next(
@@ -388,7 +527,7 @@ async def verify_samhsa_filtering(
     url: str,
     samhsa_session: ClientSession,
     no_samhsa_session: ClientSession,
-    samhsa_bene: BeneWithSamshaClaims,
+    samhsa_bene: BeneWithSamshaClaimsAndPriorAuths,
 ) -> VerifyFilteringResult:
     patient_query = {"patient": samhsa_bene.bene_sk}
     try:
@@ -417,10 +556,12 @@ async def verify_samhsa_filtering(
             all_samhsa_allowed_clm_ids = [
                 get_uniq_clm_id_for_bundle_resource(entry["resource"])
                 for entry in samhsa_bundle_entries
+                if entry["resource"].get("use") != "preauthorization"
             ]
             all_samhsa_filtered_clm_ids = [
                 get_uniq_clm_id_for_bundle_resource(entry["resource"])
                 for entry in no_samhsa_bundle_entries
+                if entry["resource"].get("use") != "preauthorization"
             ]
             bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
             samhsa_unauthed_unfiltered_clms = set(all_samhsa_filtered_clm_ids).intersection(
@@ -438,21 +579,55 @@ async def verify_samhsa_filtering(
             samhsa_claims_unfiltered_when_authorized = (
                 samhsa_authed_clms_intersection == bene_samhsa_claims_set
             )
+
+            all_samhsa_allowed_prior_auth_utns = [
+                identifier["value"]
+                for entry in samhsa_bundle_entries
+                if entry["resource"].get("use") == "preauthorization"
+                for identifier in entry["resource"].get("identifier", [])
+            ]
+            all_samhsa_filtered_prior_auth_utns = [
+                identifier["value"]
+                for entry in no_samhsa_bundle_entries
+                if entry["resource"].get("use") == "preauthorization"
+                for identifier in entry["resource"].get("identifier", [])
+            ]
+            bene_samhsa_prior_auths_set = set(samhsa_bene.samhsa_prior_auth_utns)
+            samhsa_unauthed_unfiltered_prior_auths = set(
+                all_samhsa_filtered_prior_auth_utns
+            ).intersection(bene_samhsa_prior_auths_set)
+            # A non-SAMHSA cert should not return any of the SAMHSA prior auths we found.
+            samhsa_prior_auths_filtered_when_not_authorized = (
+                len(samhsa_unauthed_unfiltered_prior_auths) == 0
+            )
+            samhsa_authed_prior_auths_intersection = set(
+                all_samhsa_allowed_prior_auth_utns
+            ).intersection(bene_samhsa_prior_auths_set)
+            # A SAMHSA cert should return all of the SAMHSA prior auths we found.
+            samhsa_prior_auths_unfiltered_when_authorized = (
+                samhsa_authed_prior_auths_intersection == bene_samhsa_prior_auths_set
+            )
+
             final_result = (
                 VerifyFilteringResult.PASS
                 if samhsa_claims_filtered_when_not_authorized
                 and samhsa_claims_unfiltered_when_authorized
+                and samhsa_prior_auths_filtered_when_not_authorized
+                and samhsa_prior_auths_unfiltered_when_authorized
                 else VerifyFilteringResult.FAIL
             )
             logger.log(
                 logging.INFO if final_result == VerifyFilteringResult.PASS else logging.ERROR,
                 (
                     "Bene SK: %s, SAMHSA claims excluded for non-SAMHSA cert: %s, SAMHSA claims "
-                    "included for SAMHSA cert: %s, final result: %s"
+                    "included for SAMHSA cert: %s, SAMHSA prior auths excluded for non-SAMHSA "
+                    "cert: %s, SAMHSA prior auths included for SAMHSA cert: %s, final result: %s"
                 ),
                 samhsa_bene.bene_sk,
                 samhsa_claims_filtered_when_not_authorized,
                 samhsa_claims_unfiltered_when_authorized,
+                samhsa_prior_auths_filtered_when_not_authorized,
+                samhsa_prior_auths_unfiltered_when_authorized,
                 final_result,
             )
 
@@ -636,7 +811,7 @@ async def main(
         else DatabaseDetailsModel.from_env()
     )
 
-    samhsa_benes = await query_samhsa_benes_with_claims(
+    samhsa_benes = await query_samhsa_benes(
         security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
     )
 
