@@ -1719,7 +1719,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 85.64
+      "value" : 85.65
     },
     "category" : {
       "coding" : [ {
