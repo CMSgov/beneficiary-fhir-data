@@ -412,7 +412,7 @@ async def query_samhsa_benes_with_prior_auths(
         result = await (
             await curs.execute(
                 t"""
-                SELECT valid_beneficiary.bene_xref_efctv_sk AS bene_sk,
+                SELECT beneficiary.bene_sk,
                     {PRIOR_AUTH_TABLE:i}.utn,
                     {PRIOR_AUTH_TABLE:i}.clm_type,
                     {PRIOR_AUTH_TABLE:i}.utn_valid_st_dt,
@@ -422,9 +422,9 @@ async def query_samhsa_benes_with_prior_auths(
                 INNER JOIN idr.{PRIOR_AUTH_TABLE:i}
                     ON {PRIOR_AUTH_ITEM_TABLE:i}.mbi_num = {PRIOR_AUTH_TABLE:i}.mbi_num
                     AND {PRIOR_AUTH_ITEM_TABLE:i}.utn = {PRIOR_AUTH_TABLE:i}.utn
-                INNER JOIN idr.valid_beneficiary
-                    ON {PRIOR_AUTH_TABLE:i}.mbi_num = valid_beneficiary.bene_mbi_id
-                WHERE valid_beneficiary.idr_ltst_trans_flg = 'Y'
+                INNER JOIN idr.beneficiary
+                    ON {PRIOR_AUTH_TABLE:i}.mbi_num = beneficiary.bene_mbi_id
+                WHERE beneficiary.idr_ltst_trans_flg = 'Y'
                     AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY({(list(query_params))})
                 LIMIT {limit:l};
                 """
