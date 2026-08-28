@@ -54,20 +54,20 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
         } "Add category";
      } "set category";
 
-    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal != '~' -> tgt.value = create('Reference') as tgtReference then{
+    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal.exists() -> tgt.value = create('Reference') as tgtReference then{
         src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-hgb-",rowNum) "Add observation num";
     } "Add hemoglobin observation reference";
-    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal != '~' -> tgt.category = create('CodeableConcept') as tgtCC then {
+    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal.exists() -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgt.category = create('CodeableConcept') as tgtCC then {
             src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
             src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HGB_LVL_NUM") "Add Coding";
         } "Add category";
     } "Set hemoglobin category";
 
-    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal != '~' -> tgt.value = create('Reference') as tgtReference then{
+    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal.exists() -> tgt.value = create('Reference') as tgtReference then{
         src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-hct-",rowNum) "Add observation num";
     } "Add hematocrit observation reference";
-    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal != '~' -> tgt.category = create('CodeableConcept') as tgtCC then {
+    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal.exists() -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgt.category = create('CodeableConcept') as tgtCC then {
             src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
             src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HCT_LVL_NUM") "Add Coding";

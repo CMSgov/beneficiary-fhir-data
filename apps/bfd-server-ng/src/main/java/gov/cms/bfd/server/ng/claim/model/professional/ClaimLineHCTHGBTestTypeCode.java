@@ -12,14 +12,20 @@ import org.hl7.fhir.r4.model.Coding;
 @AllArgsConstructor
 public enum ClaimLineHCTHGBTestTypeCode {
   /** Principal diagnosis. */
-  R1("R1", "718-7", "Hemoglobin [Mass/volume] in Blood", SystemUrls.LOINC),
+  R1("R1", "718-7", "Hemoglobin [Mass/volume] in Blood", SystemUrls.LOINC, "g/dL"),
   /** Admitting diagnosis. */
-  R2("R2", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count", SystemUrls.LOINC);
+  R2(
+      "R2",
+      "4544-3",
+      "Hematocrit [Volume Fraction] of Blood by Automated count",
+      SystemUrls.LOINC,
+      "%");
 
   private final String code;
   private final String loincCode;
   private final String loincDisplay;
   private final String system;
+  private final String unit;
 
   /**
    * Converts from a database code.
@@ -31,7 +37,7 @@ public enum ClaimLineHCTHGBTestTypeCode {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
-  Coding toFhirCoding() {
+  public Coding toFhirCoding() {
     return new Coding(system, loincCode, loincDisplay);
   }
 }

@@ -24,7 +24,8 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
   }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
+  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
+      ExplanationOfBenefit eob) {
     return List.of();
   }
 

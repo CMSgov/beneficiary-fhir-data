@@ -67,7 +67,12 @@
         "value" : "11D1343434"
       }
     }],
-    "valueString" : "15.8"
+    "valueQuantity" : {
+      "value" : 15.8,
+      "unit" : "g/dL",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "g/dL"
+    }
   },
   {
     "resourceType" : "Observation",
@@ -85,7 +90,12 @@
         "value" : "11D1343434"
       }
     }],
-    "valueString" : "30.5"
+    "valueQuantity" : {
+      "value" : 30.5,
+      "unit" : "%",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "%"
+    }
   }],
   "identifier" : [{
     "type" : {

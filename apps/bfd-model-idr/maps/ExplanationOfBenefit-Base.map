@@ -129,7 +129,14 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       suppComponent.ROW_NUM as rowNum -> tgtObs.id = append("line-observation-",rowNum) "Add id";
       suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R1' -> tgtObs.code = cc("http://loinc.org","718-7") "Add code for Hemoglobin";
       suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R2' -> tgtObs.code = cc("http://loinc.org","4544-3") "Add code for Hematocrit";
-      suppComponent.CLM_LINE_HCT_HGB_RSLT_NUM as rslt -> tgtObs.value = rslt "Add result value";
+      suppComponent.CLM_LINE_HCT_HGB_RSLT_NUM as rslt -> tgtObs.value = create('Quantity') as tgtQuantity then {
+        rslt -> tgtQuantity.value = cast(rslt, 'decimal') "Add result value";
+        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set UCUM system";
+        suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R1' -> tgtQuantity.unit = "g/dL" "Set hemoglobin unit";
+        suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R1' -> tgtQuantity.code = "g/dL" "Set hemoglobin code";
+        suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R2' -> tgtQuantity.unit = "%" "Set hematocrit unit";
+        suppComponent.CLM_LINE_HCT_HGB_TYPE_CD as hctType where hctType = 'R2' -> tgtQuantity.code = "%" "Set hematocrit code";
+      } "Add HCT/HGB quantity";
       src -> tgtObs.status = "final" "Add final status";
       suppComponent.CLM_LINE_CARR_CLNCL_LAB_NUM as cliaNum -> tgtObs.performer = create('Reference') as tgtRef then{
         cliaNum -> tgtRef.identifier = create('Identifier') as tgtIdentifier, tgtIdentifier.system="http://terminology.hl7.org/NamingSystem/CLIA",tgtIdentifier.value=cliaNum "Add CLIA Num";
@@ -140,7 +147,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.supportingInfoComponents as suppComponent where suppComponent.CLM_LINE_HGB_LVL_NUM.exists() -> tgt.contained = create('Observation') as tgtObs then{
       suppComponent.ROW_NUM as rowNum -> tgtObs.id = append("line-observation-hgb-",rowNum) "Add id";
       src -> tgtObs.code = cc("http://loinc.org","718-7") "Add code for Hemoglobin";
-      suppComponent.CLM_LINE_HGB_LVL_NUM as rslt -> tgtObs.value = rslt "Add result value";
+      suppComponent.CLM_LINE_HGB_LVL_NUM as rslt -> tgtObs.value = create('Quantity') as tgtQuantity then {
+        rslt -> tgtQuantity.value = cast(rslt, 'decimal') "Add result value";
+        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set UCUM system";
+        src -> tgtQuantity.unit = "g/dL" "Set unit";
+        src -> tgtQuantity.code = "g/dL" "Set code";
+      } "Add hemoglobin percentage";
       src -> tgtObs.status = "final" "Add final status";
       suppComponent.CLM_LINE_RBNDLG_CRTFCTN_NUM as cliaNum -> tgtObs.performer = create('Reference') as tgtRef then{
         cliaNum -> tgtRef.identifier = create('Identifier') as tgtIdentifier, tgtIdentifier.system="http://terminology.hl7.org/NamingSystem/CLIA",tgtIdentifier.value=cliaNum "Add CLIA Num";
@@ -151,7 +163,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.supportingInfoComponents as suppComponent where suppComponent.CLM_LINE_HCT_LVL_NUM.exists() -> tgt.contained = create('Observation') as tgtObs then{
       suppComponent.ROW_NUM as rowNum -> tgtObs.id = append("line-observation-hct-",rowNum) "Add id";
       src -> tgtObs.code = cc("http://loinc.org","4544-3") "Add code for Hematocrit";
-      suppComponent.CLM_LINE_HCT_LVL_NUM as rslt -> tgtObs.value = rslt "Add result value";
+      suppComponent.CLM_LINE_HCT_LVL_NUM as rslt -> tgtObs.value = create('Quantity') as tgtQuantity then {
+        rslt -> tgtQuantity.value = cast(rslt, 'decimal') "Add result value";
+        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set UCUM system";
+        src -> tgtQuantity.unit = "%" "Set unit";
+        src -> tgtQuantity.code = "%" "Set code";
+      } "Add hematocrit percentage";
       src -> tgtObs.status = "final" "Add final status";
       suppComponent.CLM_LINE_RBNDLG_CRTFCTN_NUM as cliaNum -> tgtObs.performer = create('Reference') as tgtRef then{
         cliaNum -> tgtRef.identifier = create('Identifier') as tgtIdentifier, tgtIdentifier.system="http://terminology.hl7.org/NamingSystem/CLIA",tgtIdentifier.value=cliaNum "Add CLIA Num";

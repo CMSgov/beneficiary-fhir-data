@@ -107,19 +107,22 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
 
     var observation = new Observation();
     observation.setId(String.valueOf(bfdRowId));
+    Quantity quantity = new Quantity();
     claimLineHCTHGBTestTypeCode.ifPresent(
-        testTypeCode ->
-            observation.setCode(new CodeableConcept().addCoding(testTypeCode.toFhirCoding())));
+        testTypeCode -> {
+          observation.setCode(new CodeableConcept().addCoding(testTypeCode.toFhirCoding()));
+          quantity
+              .setUnit(testTypeCode.getUnit()) // or the proper UCUM unit
+              .setSystem(SystemUrls.UNITS_OF_MEASURE)
+              .setCode(testTypeCode.getUnit());
+        });
 
     observation.setStatus(Observation.ObservationStatus.FINAL);
     claimLineHCTHGBTestResult.ifPresent(
-        result ->
-            observation.setValue(
-                new Quantity()
-                    .setValue(BigDecimal.valueOf(result))
-                    .setUnit("g/dL") // or the proper UCUM unit
-                    .setSystem(SystemUrls.UNITS_OF_MEASURE)
-                    .setCode("g/dL")));
+        result -> {
+          quantity.setValue(BigDecimal.valueOf(result));
+          observation.setValue(quantity);
+        });
 
     claimLineCarrierClinicalLabNumber.ifPresent(
         labNumber -> {
