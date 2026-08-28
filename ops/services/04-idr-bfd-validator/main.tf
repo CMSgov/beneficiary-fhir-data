@@ -49,14 +49,14 @@ locals {
   disk_size = 21
   task_ssm = {
     for k, v in {
-      IDR_USERNAME    = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_username"
-      IDR_PRIVATE_KEY = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_private_key"
-      IDR_ACCOUNT     = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_account"
-      IDR_WAREHOUSE   = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_warehouse"
-      IDR_DATABASE    = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_database"
-      IDR_SCHEMA      = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_schema"
-      BFD_DB_USERNAME = "/bfd/${local.env}/${local.pipeline_service}/sensitive/db/username"
-      BFD_DB_PASSWORD = "/bfd/${local.env}/${local.pipeline_service}/sensitive/db/password"
+      IDR_USERNAME     = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_username"
+      IDR_PRIVATE_KEY  = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_private_key"
+      IDR_ACCOUNT      = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_account"
+      IDR_WAREHOUSE    = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_warehouse"
+      IDR_DATABASE     = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_database"
+      IDR_EDP_DATABASE = "/bfd/${local.env}/${local.pipeline_service}/sensitive/idr_edp_database"
+      BFD_DB_USERNAME  = "/bfd/${local.env}/${local.pipeline_service}/sensitive/db/username"
+      BFD_DB_PASSWORD  = "/bfd/${local.env}/${local.pipeline_service}/sensitive/db/password"
     } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
   }
   task_tmp_dir = "/app/.tmp"
@@ -149,6 +149,10 @@ resource "aws_ecs_task_definition" "this" {
           {
             name  = "BFD_DB_ENDPOINT"
             value = data.aws_rds_cluster.main.reader_endpoint
+          },
+          {
+            name  = "IDR_STRUCTURED_LOGS",
+            value = "1"
           },
           # TODO: Unexclude these tables when they work correctly
           {

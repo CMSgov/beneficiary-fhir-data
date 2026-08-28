@@ -63,7 +63,13 @@ else:
     Record = object
 
 
-_ALL_MODELS = [*CLAIM_AUX_TABLES, *CLAIM_TABLES, *BENE_TABLES, *BENE_AUX_TABLES, *PRIOR_AUTH_TABLES]
+_ALL_MODELS = [
+    *CLAIM_AUX_TABLES,
+    *CLAIM_TABLES,
+    *BENE_TABLES,
+    *BENE_AUX_TABLES,
+    *PRIOR_AUTH_TABLES,
+]
 _IGNORED_COLS_PER_MODEL = {
     k: v
     for keys, v in {
@@ -174,6 +180,7 @@ def _compare_table(
     model: type[T],
     partition: LoadPartition,
     num_rows: int,
+    job_id: int,
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
@@ -196,13 +203,17 @@ def _compare_table(
             FROM {LoadProgress.table()}
             WHERE batch_partition = {_escape_sql_val(partition.name)}
             AND table_name = %(table)s
+            AND job_id = %(job_id)s
             ORDER BY last_ts
             """,
-            {"table": model.table()},
+            {"table": model.table(), "job_id": job_id},
         )
 
         if progress:
-            logger.info("Last load progress time: {}", progress.last_ts.astimezone(UTC).isoformat())
+            logger.info(
+                "Last load progress time: {}",
+                progress.last_ts.astimezone(UTC).isoformat(),
+            )
 
         batch_timestamp_clause = idr_extractor.build_filter_columns(progress)
         model_pkeys = model.ordered_pkeys()
@@ -242,6 +253,12 @@ def _compare_table(
                         *[_escape_sql_val(param) for param in addl_base_where_params]
                     )
                 )
+
+            if progress.max_run_ts is not None:
+                base_claim_where_clauses.append(
+                    f"{batch_timestamp_clause} <= '{progress.max_run_ts}'"
+                )
+
             joined_base_claim_wheres = " AND ".join(
                 [*base_claim_where_clauses, *additional_clm_where_clauses]
             )
@@ -250,6 +267,7 @@ def _compare_table(
                 {joined_base_claim_wheres}
             )
             """
+
         idr_query = (
             model.fetch_query(partition, datetime.now(UTC), Source.SNOWFLAKE)
             .replace("{COLUMNS}", columns)
@@ -318,7 +336,9 @@ def _compare_table(
         )
 
         logger.info(
-            "received {} rows from BFD DB and {} rows from IDR", len(bfd_rows), len(idr_rows)
+            "received {} rows from BFD DB and {} rows from IDR",
+            len(bfd_rows),
+            len(idr_rows),
         )
 
         row_lengths_match = len(bfd_rows) == len(idr_rows)
@@ -375,7 +395,10 @@ def _compare_table(
             if mismatched_cols:
                 logger.error(
                     "mismatched columns for row ({}): {}",
-                    json.dumps(_get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys), default=str),
+                    json.dumps(
+                        _get_row_pkey(bfd_row, model_pkeys, log_redact_pkeys),
+                        default=str,
+                    ),
                     ", ".join(x for x in mismatched_cols),
                 )
                 if allow_sensitive_logs:
@@ -520,17 +543,19 @@ def _wrap_compare(
     model: type[IdrBaseModel],
     partition: LoadPartition,
     row_limit: int,
+    job_id: int,
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
     where_clauses: list[str],
     clm_where_clauses: list[str],
-) -> tuple[bool, type[IdrBaseModel], LoadPartition]:
+) -> tuple[bool, type[IdrBaseModel], LoadPartition, int]:
     return (
         _compare_table(
             model,
             partition,
             row_limit,
+            job_id,
             enable_reports,
             reports_dir,
             allow_sensitive_logs,
@@ -539,6 +564,7 @@ def _wrap_compare(
         ),
         model,
         partition,
+        job_id,
     )
 
 
@@ -546,13 +572,14 @@ def _compare_all(
     tables: list[str],
     exclude_tables: list[str],
     limit: int,
+    job_id: int,
     max_parallel: int,
     enable_reports: bool,
     reports_dir: Path,
     allow_sensitive_logs: bool,
     where_clauses: list[str],
     clm_where_clauses: list[str],
-) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition]]:
+) -> Stage[tuple[bool, type[IdrBaseModel], LoadPartition, int]]:
     now = datetime.now(UTC)
 
     immutable_models = {model for model in _ALL_MODELS if not model.update_timestamp_col()}
@@ -588,6 +615,7 @@ def _compare_all(
             model,
             partition,
             limit,
+            job_id,
             enable_reports,
             reports_dir,
             allow_sensitive_logs,
@@ -616,6 +644,7 @@ async def async_main(
     tables: list[str],
     exclude_tables: list[str],
     limit: int,
+    job_id: int,
     max_parallel: int,
     enable_reports: bool,
     reports_dir: Path | None,
@@ -636,6 +665,7 @@ async def async_main(
                         tables,
                         exclude_tables,
                         limit,
+                        job_id,
                         max_parallel,
                         enable_reports,
                         reports_dir,
@@ -705,6 +735,14 @@ async def async_main(
     help="Number of rows to load from each table when validating.",
 )
 @click.option(
+    "-j",
+    "--job-id",
+    envvar="IDR_JOB_ID",
+    type=int,
+    default=1,
+    help="IDR Pipeline Job ID to validate against.",
+)
+@click.option(
     "-p",
     "--max-parallel",
     envvar="MAX_PARALLELISM",
@@ -771,6 +809,7 @@ def main(
     tables: tuple[str],
     exclude_tables: tuple[str],
     limit: int,
+    job_id: int,
     max_parallel: int,
     log_level: str,
     enable_reports: bool,
@@ -798,6 +837,7 @@ def main(
         list(tables),
         list(exclude_tables),
         limit,
+        job_id,
         max_parallel,
         enable_reports,
         reports_dir,

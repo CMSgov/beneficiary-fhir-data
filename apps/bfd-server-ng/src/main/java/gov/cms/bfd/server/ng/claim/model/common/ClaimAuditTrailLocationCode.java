@@ -42,9 +42,6 @@ public enum ClaimAuditTrailLocationCode {
    * @return claim audit trail location code
    */
   public static Optional<ClaimAuditTrailLocationCode> tryFromCode(String code) {
-    if (code == null || code.isBlank()) {
-      return Optional.empty();
-    }
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 }

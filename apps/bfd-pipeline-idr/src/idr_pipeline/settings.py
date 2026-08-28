@@ -6,6 +6,9 @@ from .constants import MIN_CLAIM_LOAD_DATE, MIN_PRIOR_AUTH_LOAD_DATE
 
 
 class _Settings:
+    _IDR_DATABASE = "IDR_DATABASE"
+    _IDR_EDP_DATABASE = "IDR_EDP_DATABASE"
+
     def _parse_bool_default_false(self, var_name: str) -> bool:
         return getenv(var_name, "").lower() in ("1", "true")
 
@@ -15,10 +18,10 @@ class _Settings:
     # Tracking load progress is disabled for synthetic data loads.
     # Use this to force enabling load progress for testing.
     @cached_property
-    def force_load_progress(self) -> bool:
-        # We don't normally want to store the load progress info for synthetic data since the dates
-        # won't be in order like in prod. However, we need a way to override this for the tests.
-        return self._parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+    def test_mode(self) -> bool:
+        # We don't normally want to perform some operations outside of production mode.
+        # However, we need a way to override this for the tests.
+        return self._parse_bool_default_false("IDR_TEST_MODE")
 
     def bfd_test_date(self) -> datetime | None:
         test_date = getenv("BFD_TEST_DATE", "")
@@ -26,7 +29,7 @@ class _Settings:
 
     @cached_property
     def enable_prior_auth_ingestion(self) -> bool:
-        return self._parse_bool_default_false("IDR_ENABLE_PRIOR_AUTH")
+        return self._parse_bool_default_true("IDR_ENABLE_PRIOR_AUTH")
 
     @cached_property
     def enable_date_partitions(self) -> bool:
@@ -177,6 +180,10 @@ class _Settings:
         return getenv("IDR_LOG_LEVEL", "INFO").upper()
 
     @cached_property
+    def structured_logs(self) -> bool:
+        return self._parse_bool_default_false("IDR_STRUCTURED_LOGS")
+
+    @cached_property
     def sql_log(self) -> bool:
         return self._parse_bool_default_false("IDR_SQL_LOG")
 
@@ -201,11 +208,199 @@ class _Settings:
 
     @cached_property
     def idr_database(self) -> str:
-        return getenv("IDR_DATABASE", "")
+        return getenv(self._IDR_DATABASE, "")
+
+    @cached_property
+    def idr_prior_auth_database(self) -> str:
+        return getenv(self._IDR_EDP_DATABASE, "")
 
     @cached_property
     def idr_schema(self) -> str:
         return getenv("IDR_SCHEMA", "")
+
+    def _qualified_path(self, database: str, schema: str, table: str) -> str:
+        database = getenv(database, "")
+        segments = (database, schema, table)
+        return ".".join(s for s in segments if s)
+
+    # Source Schemas
+    _IDR_SCHEMA = "cms_vdm_view_mdcr_prd"
+    _IDR_PRIOR_AUTH_SCHEMA = "cms_edp_view_cvm_prau_prd"
+
+    # Beneficiary History Tables
+    @property
+    def idr_bene_history_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_hstry")
+
+    @property
+    def idr_bene_mbi_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mbi_id")
+
+    @property
+    def idr_bene_xref_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_xref")
+
+    @property
+    def idr_bene_entitlement_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mdcr_entlmt"
+        )
+
+    @property
+    def idr_bene_entitlement_reason_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mdcr_entlmt_rsn"
+        )
+
+    @property
+    def idr_bene_status_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mdcr_stus")
+
+    @property
+    def idr_bene_third_party_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_tp")
+
+    @property
+    def idr_bene_combined_dual_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_cmbnd_dual_mdcr"
+        )
+
+    @property
+    def idr_bene_low_income_subsidy_cmbnd_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_cmbnd_lis")
+
+    @property
+    def idr_bene_ma_part_d_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mapd_enrlmt"
+        )
+
+    @property
+    def idr_bene_ma_part_d_rx_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_bene_mapd_enrlmt_rx"
+        )
+
+    # Claim Tables
+    @property
+    def idr_claim_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm")
+
+    @property
+    def idr_claim_ansi_signature_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_ansi_sgntr")
+
+    @property
+    def idr_claim_date_signature_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_dt_sgntr")
+
+    @property
+    def idr_claim_institutional_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_instnl")
+
+    @property
+    def idr_claim_professional_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_prfnl")
+
+    @property
+    def idr_claim_documentation_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_dcmtn")
+
+    @property
+    def idr_claim_line_documentation_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_dcmtn")
+
+    @property
+    def idr_claim_val_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_val")
+
+    @property
+    def idr_claim_line_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line")
+
+    @property
+    def idr_claim_line_institutional_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_instnl")
+
+    @property
+    def idr_claim_line_professional_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_prfnl")
+
+    @property
+    def idr_claim_prod_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_prod")
+
+    @property
+    def idr_claim_fiss_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_fiss")
+
+    @property
+    def idr_claim_line_rx_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_rx")
+
+    @property
+    def idr_claim_line_fiss_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_fiss")
+
+    @property
+    def idr_claim_line_mcs_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_mcs")
+
+    @property
+    def idr_claim_line_fiss_benefit_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_line_fiss_bnft_svg"
+        )
+
+    @property
+    def idr_claim_location_history_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_lctn_hstry")
+
+    @property
+    def idr_claim_related_condition_signature_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_rlt_cond_sgntr_mbr"
+        )
+
+    @property
+    def idr_claim_occurrence_signature_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_clm_ocrnc_sgntr_mbr"
+        )
+
+    @property
+    def idr_claim_related_occurrence_signature_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_clm_rlt_ocrnc_sgntr_mbr"
+        )
+
+    @property
+    def idr_provider_history_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_prvdr_hstry")
+
+    @property
+    def idr_contract_pbp_num_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_cntrct_pbp_num")
+
+    @property
+    def idr_contract_pbp_contact_table(self) -> str:
+        return self._qualified_path(
+            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_cntrct_pbp_cntct"
+        )
+
+    @property
+    def idr_contract_pbp_segment_table(self) -> str:
+        return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_cntrct_pbp_sgmt")
+
+    @property
+    def idr_prior_auth_table(self) -> str:
+        # fall back to IDR_DATABASE if IDR_EDP_DATABASE is absent which is the case for synthetic
+        # loads
+        database_env_var = (
+            self._IDR_EDP_DATABASE if getenv(self._IDR_EDP_DATABASE) else self._IDR_DATABASE
+        )
+        return self._qualified_path(database_env_var, self._IDR_PRIOR_AUTH_SCHEMA, "prauc")
 
     # Database credentials/settings
 

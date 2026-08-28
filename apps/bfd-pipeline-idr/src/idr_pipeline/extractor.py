@@ -132,6 +132,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 {"timestamp": min_transaction_date},
             )
 
+        max_runs_ts_clause = ""
         previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
         min_batch_completion_date = format_date_opt(SETTINGS.min_batch_completion_date)
         if (
@@ -161,6 +162,12 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
+        if progress.max_run_ts is not None:
+            max_runs_ts_clause = f"""
+            AND (
+                {batch_timestamp_clause} <= %(max_runs_ts)s
+            )"""
+
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             fetch_query.replace(
@@ -169,6 +176,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     WHERE (
                         {batch_timestamp_clause} {filter_op} %(timestamp)s
                         {batch_id_clause}
+                        {max_runs_ts_clause}
                     )
                     """,
             )
@@ -178,7 +186,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             .replace("{TABLESAMPLE}", "")
             .replace("{LIMIT}", "")
             .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
-            {"timestamp": compare_timestamp},
+            {"timestamp": compare_timestamp, "max_runs_ts": progress.max_run_ts}
+            if progress.max_run_ts is not None
+            else {"timestamp": compare_timestamp},
+        )
+
+    def extract_full_idr_data(self, source: Source) -> Iterator[list[T]]:
+        start_time = self.cls.model_type().min_transaction_date
+        fetch_query = self.get_query(start_time, source)
+        logger.info("extracting full {}", self.cls.table())
+        return self.extract_many(
+            fetch_query.replace("{MIN_TS}", "%(timestamp)s"), {"timestamp": start_time}
         )
 
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
@@ -306,8 +324,6 @@ class SnowflakeExtractor(Extractor[T]):
             private_key=private_key_bytes,
             account=SETTINGS.idr_account,
             warehouse=SETTINGS.idr_warehouse,
-            database=SETTINGS.idr_database,
-            schema=SETTINGS.idr_schema,
         )
 
     @override
@@ -366,8 +382,6 @@ class SnowflakeExecutor(DbExecutor):
                 "user": SETTINGS.idr_username,
                 "private_key": private_key_bytes,  # type: ignore
                 "warehouse": SETTINGS.idr_warehouse,
-                "database": SETTINGS.idr_database,
-                "schema": SETTINGS.idr_schema,
             }
         ).create()
         self.conn = SnowflakeExtractor.connect()

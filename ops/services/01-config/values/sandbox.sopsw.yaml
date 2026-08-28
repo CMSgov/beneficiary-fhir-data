@@ -38,7 +38,6 @@
 /bfd/${env}/idr-pipeline/sensitive/synthetic_env_account: ENC[AES256_GCM,data:pzUAvD89DQ==,iv:TfaEPTKk8leprcEXIbyVse/6j/JOi/MAtS4MI3bG9Ag=,tag:WAOeHgImuLoaoIufeePteA==,type:str]
 /bfd/${env}/idr-pipeline/sensitive/synthetic_env_database: ENC[AES256_GCM,data:O1XCauuSqUOdy2M=,iv:UKkTybopum/fRDmwNMrqL7Y09tM6O4GclpfHFGUzJFU=,tag:qG2FHUMlf7SM8h5UnF+EvA==,type:str]
 /bfd/${env}/idr-pipeline/sensitive/synthetic_env_warehouse: ENC[AES256_GCM,data:Q3NZ,iv:EhFDOBM1d5xTPsrcHvwPul4I5fc/09RC6vo9iqP+nw8=,tag:KXGYd0GUTtUDOVYpqNQmVA==,type:str]
-/bfd/${env}/idr-pipeline/sensitive/synthetic_env_schema: ENC[AES256_GCM,data:ZGI3f4Z0EuH+nsCfPmf+sBST+mE8,iv:djGgV5qQZLQmslgakkLdxn/l1m1Dz1KYewmyokOito0=,tag:vhUfro1yNDHNKHcMRseb5w==,type:str]
 /bfd/${env}/idr-pipeline/sensitive/synthetic_env_private_key: ENC[AES256_GCM,data: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,iv:mto+UK1H6tKWKajPJRSaOFZ477WlNXTHJRzjI8xh2tI=,tag:aRJnXhOFDX4/uUSP2bm8xg==,type:str]
 /bfd/${env}/idr-pipeline/nonsensitive/synthetic_env_public_key: |
   -----BEGIN PUBLIC KEY-----
@@ -1575,20 +1574,20 @@
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-sbx-config-cmk
+      aws_profile: ""
       created_at: "2025-05-29T19:05:53Z"
       enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgFLoS1HtIVJis6KCi6IGgYtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMYXpFYeIHnLME7ja5AgEQgDsaaGnkO4KCbl3PxuQ/6xlsl42bBPosBcbDSZCjuEw5FiozdEJPIQKi2GnHBR3a4PJAgTMxZddz57uOWw==
-      aws_profile: ""
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-sbx-cmk
+      aws_profile: ""
       created_at: "2025-05-29T19:05:53Z"
       enc: AQICAHhHJZYi+MFRKFTHfYVWYS6PhbzwLNq4isexRIBWUW6UVAHYOoM3Wmc9vHbogkQNmI5rAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMvR9IxBZxsccEiPA2AgEQgDtS2TovK1kZfuk9NlVbJrTZqESM7m1Is19bKNTK5gfUMCyor8I3+MlnS5wsNnLBVvyA0j1n7nzQU6N3KA==
-      aws_profile: ""
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-sandbox-cmk
+      aws_profile: ""
       created_at: "2025-06-16T19:15:24Z"
       enc: AQICAHgeb6WVlAiQlv36YrB0vjY473KhX7b/JfaXaUcCtUQFkQEoS26161rCnQXywCnVnsASAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJg1DN2R+a6HG5UeZAgEQgDtHqLiAgHHpn07reZ3rEcUBwW6lMquhLGljV7LqOTlSWNakoMsmeFPOpxBtwTal8ceyfl7ufkWp8IUjng==
-      aws_profile: ""
     - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-sandbox-cmk
+      aws_profile: ""
       created_at: "2025-06-16T19:15:34Z"
       enc: AQICAHhJyyTYz7F9ZtNNOqGQey2/S5rpRtPB96w5RrdTRf7ycQFKTOb7uLgtYqFd+lCmkLF3AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM2hGiKtGbX/DxiwP0AgEQgDvBGTkDcOudxsok1MRLWKiTtoPF+gvgaeTcTHaVK4hX2w0zxRbM3/llsarbb7f1u+7fAEPFZftQd+EUhA==
-      aws_profile: ""
   unencrypted_regex: /nonsensitive/
-  version: 3.12.2
+  version: 3.13.3
