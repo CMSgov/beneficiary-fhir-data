@@ -49,6 +49,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   /**
    * Returns supporting-info components that are specific to the subclass.
    *
+   * @param eob ExplanationOfBenefit
    * @return list of subclass-specific supporting-info components
    */
   abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(

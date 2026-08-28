@@ -26495,6 +26495,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -26867,6 +26913,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -34241,6 +34319,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -34613,6 +34737,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -41987,6 +42143,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -42359,6 +42561,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -75507,6 +75741,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -75879,6 +76159,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -81871,6 +82183,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -82243,6 +82601,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -84093,6 +84483,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -84465,6 +84901,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -88345,6 +88813,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -88717,6 +89231,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -98837,6 +99383,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -99209,6 +99801,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -105201,6 +105825,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -105573,6 +106243,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -107423,6 +108125,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -107795,6 +108543,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -111675,6 +112455,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -112047,6 +112873,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -122167,6 +123025,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -122539,6 +123443,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -128531,6 +129467,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -128903,6 +129885,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -130753,6 +131767,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -131125,6 +132185,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -135005,6 +136097,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -135377,6 +136515,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -153785,6 +154955,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -154157,6 +155373,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -172565,6 +173813,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -172937,6 +174231,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -191345,6 +192671,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "given" : [ "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -191717,6 +193089,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {

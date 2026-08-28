@@ -37,6 +37,11 @@ public enum ClaimLineHCTHGBTestTypeCode {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
+  /**
+   * Creates FHIR Coding Object for the given type.
+   *
+   * @return Coding
+   */
   public Coding toFhirCoding() {
     return new Coding(system, loincCode, loincDisplay);
   }

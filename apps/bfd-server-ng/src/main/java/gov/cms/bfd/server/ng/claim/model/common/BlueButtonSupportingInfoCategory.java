@@ -48,7 +48,9 @@ public enum BlueButtonSupportingInfoCategory {
   CLM_CTSTRPHC_CVRG_IND_CD("CLM_CTSTRPHC_CVRG_IND_CD", "Catastrophic Coverage Code"),
   /** CLM_LINE_HCT_HGB_RSLT_NUM - HCT/HGB Test Result. */
   CLM_LINE_HCT_HGB_RSLT_NUM("CLM_LINE_HCT_HGB_RSLT_NUM", "HCT/HGB Test Result"),
+  /** CLM_LINE_HCT_LVL_NUM - HCT Test Result. */
   CLM_LINE_HCT_LVL_NUM("CLM_LINE_HCT_LVL_NUM", "HCT Test Result"),
+  /** CLM_LINE_HGB_LVL_NUM - HGB Test Result. */
   CLM_LINE_HGB_LVL_NUM("CLM_LINE_HGB_LVL_NUM", "HGB Test Result"),
   /** CLM_DSPNSNG_STUS_CD - Claim Dispensing Status Code. */
   CLM_DSPNSNG_STUS_CD("CLM_DSPNSNG_STUS_CD", "Claim Dispensing Status Code"),
