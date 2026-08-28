@@ -42,7 +42,6 @@ data "aws_iam_policy_document" "lambda_ssm" {
       for param in [
         "sensitive/idr_account",
         "sensitive/idr_database",
-        "sensitive/idr_schema",
         "sensitive/idr_username",
         "sensitive/idr_private_key",
         "sensitive/idr_warehouse",
