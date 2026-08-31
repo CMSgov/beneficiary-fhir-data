@@ -1,7 +1,7 @@
 CodeSystem: CLM_OP_SRVC_TYPE_CD
 Title: "Claim Outpatient Service Type Code"
 Id: CLM-OP-SRVC-TYPE-CD
-Description: "A code reported by the provider that indicates the specific type of claim"
+Description: "A code reported by the provider that indicates the specific type of claim."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
 * ^status = #active
 * ^content = #complete

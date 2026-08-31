@@ -62,7 +62,8 @@ public sealed interface ClaimAdmissionTypeCode
                 .addCoding(
                     new Coding()
                         .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_TYPE_CODE)
-                        .setCode(getCode())));
+                        .setCode(getCode())
+                        .setDisplay(getDisplay())));
   }
 
   /** Enum for all known, valid claim admission type codes. */

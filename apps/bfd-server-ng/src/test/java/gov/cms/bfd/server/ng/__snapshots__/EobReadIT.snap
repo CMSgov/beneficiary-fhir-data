@@ -1169,6 +1169,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
       }, {
         "code" : "9",
+        "display" : "Unknown - Information not available.",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
@@ -2661,6 +2662,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
       }, {
         "code" : "9",
+        "display" : "Unknown - Information not available.",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
@@ -6110,6 +6112,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
       }, {
         "code" : "9",
+        "display" : "Unknown - Information not available.",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
@@ -7891,6 +7894,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
       }, {
         "code" : "9",
+        "display" : "Unknown - Information not available.",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
