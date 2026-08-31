@@ -379,44 +379,6 @@
                 <artifactId>owasp-java-html-sanitizer</artifactId>
                 <version>20260313.1</version>
             </dependency>
-            <!-- Fix for CVE-2026-10050 (Jetty Digest auth bypass): pin transitive jetty
-                 artifacts pulled in by hapi-fhir-test-utilities (12.0.34) to the same
-                 patched line used elsewhere in the reactor (${jetty.version}). -->
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-security</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-http</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-io</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-util</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty.ee10</groupId>
-                <artifactId>jetty-ee10-servlet</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty.ee10</groupId>
-                <artifactId>jetty-ee10-servlets</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
             <!-- Fix for CVE-2025-67030 (Plexus-Utils directory traversal), transitive via maven-plugin-api -->
             <dependency>
                 <groupId>org.codehaus.plexus</groupId>
