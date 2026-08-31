@@ -47,6 +47,7 @@ from ..model.base_model import (
     clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -97,12 +98,12 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     clm_blg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
@@ -168,6 +169,11 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    bfd_blg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)},
+    ]
+
     prvdr_rfrg_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
@@ -179,6 +185,11 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    bfd_prvdr_rfrg_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)},
+    ]
+
     prvdr_srvc_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
@@ -188,6 +199,11 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
         BeforeValidator(transform_default_string),
+    ]
+
+    bfd_prvdr_srvc_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
     ]
 
     # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
