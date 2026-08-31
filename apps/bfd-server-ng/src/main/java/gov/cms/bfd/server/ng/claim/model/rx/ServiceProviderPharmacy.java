@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderIdQualifierCode;
@@ -31,7 +32,7 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.SERVICE;
   }
 

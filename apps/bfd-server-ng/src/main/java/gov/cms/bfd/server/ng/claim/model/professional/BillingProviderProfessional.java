@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -30,7 +31,7 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
   private Optional<String> providerTaxNumber;
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.BILLING;
   }
 

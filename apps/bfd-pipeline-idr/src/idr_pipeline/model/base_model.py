@@ -19,14 +19,6 @@ from ..constants import (
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
     FISS_CLM_SOURCE,
-    IDR_BENE_HISTORY_TABLE,
-    IDR_CLAIM_ANSI_SIGNATURE_TABLE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE,
-    IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE,
-    IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_PRIOR_AUTH_TABLE,
     MCS_CLM_SOURCE,
     MIN_CLAIM_LOAD_DATE,
     PART_D_CLAIM_TYPE_CODES,
@@ -171,6 +163,11 @@ def provider_npi_type_expr(alias: str) -> str:
     """
 
 
+PROVIDER_ORG_SPECIALTY_CODES = (
+    "('45', '47', '49', '51', '52', '53', '54', '58', '59', '60', '61', '63', '69', '70', '73', "
+    "'74', '75', '87', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B1', 'B3', "
+    "'B4', 'C1', 'C2', 'C4', 'D1', 'D5', 'D6', 'Z1', 'Z2', 'Z3', 'Z4', 'Z5')"
+)
 MEDICARE_EXHAUSTED_CD = "A3"
 ACTIVE_CARE_CD = "22"
 QUALIFYING_STAY_CD = "70"
@@ -192,7 +189,7 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
             clm_idr_ld_dt,
             idr_insrt_ts,
             idr_updt_ts
-        FROM {IDR_CLAIM_TABLE} {clm} {{TABLESAMPLE}}
+        FROM {SETTINGS.idr_claim_table} {clm} {{TABLESAMPLE}}
         WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
@@ -251,7 +248,7 @@ def clm_ansi_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_ANSI_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_ansi_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -269,7 +266,7 @@ def clm_dt_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_DATE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_date_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -287,7 +284,7 @@ def clm_ocrnc_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_occurrence_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
         WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
@@ -308,7 +305,7 @@ def clm_rlt_ocrnc_clause() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_related_occurrence_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
         WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
@@ -328,7 +325,7 @@ def clm_rlt_cond_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} sgntr
+            FROM {SETTINGS.idr_claim_related_condition_signature_table} sgntr
             JOIN claim_base {clm} ON
                 {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
@@ -360,6 +357,7 @@ LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 EXPR = "expr"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
+NPI_TYPE_BACKFILL_COMPARE = "npi_type_backfill_compare"
 
 
 ALIAS_CLM = "clm"
@@ -446,7 +444,7 @@ class ModelType(Enum):
     LOAD_PROGRESS = (DEFAULT_MIN_DATE, "", EMPTY_PARTITION)
     PRIOR_AUTH = (
         SETTINGS.min_prior_auth_transaction_date,
-        IDR_PRIOR_AUTH_TABLE,
+        SETTINGS.idr_prior_auth_table,
         [NON_CLAIM_PARTITION],
     )
 
@@ -646,6 +644,14 @@ class IdrBaseModel(BaseModel, ABC):
             key for key in cls.model_fields if not cls._extract_meta(key, INSERT_EXCLUDE)
         ] + list(cls.model_computed_fields)
 
+    @classmethod
+    def npi_type_backfill_compare_cols(cls) -> dict[str, str]:
+        return {
+            key: cast(str, meta)
+            for key in cls.model_fields
+            if (meta := cls._extract_meta(key, NPI_TYPE_BACKFILL_COMPARE)) is not None
+        }
+
 
 T = TypeVar("T", bound=IdrBaseModel)
 
@@ -653,7 +659,7 @@ T = TypeVar("T", bound=IdrBaseModel)
 def deceased_bene_filter(alias: str, start_time: datetime) -> str:
     return f"""
             SELECT bene_sk
-            FROM {IDR_BENE_HISTORY_TABLE} {alias}
+            FROM {SETTINGS.idr_bene_history_table} {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
             AND {alias}.bene_death_dt < DATE '{start_time.strftime("%Y-%m-%d")}'
             - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
@@ -809,7 +815,7 @@ def claim_occurrence_cte() -> str:
                 MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
                     THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} {ocrnc_sgntr}
+            FROM {SETTINGS.idr_claim_occurrence_signature_table} {ocrnc_sgntr}
             WHERE clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
             GROUP BY clm_ocrnc_sgntr_sk"""
 
@@ -826,7 +832,7 @@ def claim_related_occurrences_cte() -> str:
                 MAX(CASE WHEN clm_rlt_ocrnc_cd = '{ACTIVE_CARE_CD}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} {rlt_ocrnc_sgntr}
+            FROM {SETTINGS.idr_claim_related_occurrence_signature_table} {rlt_ocrnc_sgntr}
             WHERE clm_rlt_ocrnc_cd in ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
     """
@@ -860,7 +866,7 @@ def claim_related_conditions_cte(source: Source) -> str:
                 clm_rlt_cond_sgntr_sk,
                 ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} {rlt_cond}
+            FROM {SETTINGS.idr_claim_related_condition_signature_table} {rlt_cond}
             WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
             AND clm_rlt_cond_cd != '~'
             GROUP BY clm_rlt_cond_sgntr_sk
@@ -894,6 +900,39 @@ def stale_phase_1_claims_query(
         """,
         (cutoff_date, cutoff_date),
     )
+
+
+def legacy_institutional_specialty_npi_type_expr(specialty_col: str) -> str:
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            ELSE 1
+        END
+    """
+
+
+def legacy_professional_specialty_npi_type_expr(specialty_col: str) -> str:
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            WHEN {specialty_col} IS NULL OR TRIM({specialty_col}) = '' OR {specialty_col} IN ('31',
+              '95', '96', '99', 'D2') THEN NULL
+            ELSE 1
+        END
+    """
+
+
+def legacy_service_npi_type_expr_for_context(is_institutional: bool) -> str:
+    return "1" if is_institutional else "NULL"
+
+
+def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
+    return f"""
+        CASE
+            WHEN {provider_qualifier_code} != '' THEN 1
+            ELSE NULL
+        END
+    """
 
 
 def stale_non_part_d_claims_query(claim_table: str) -> str:

@@ -1,10 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Optional;
 
 /** Attending Provider History. * */
 @Embeddable
@@ -14,7 +16,7 @@ import jakarta.persistence.Embeddable;
 public class ReferringProfessionalCareTeam extends ProviderHistoryBase {
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.REFERRING;
   }
 }
