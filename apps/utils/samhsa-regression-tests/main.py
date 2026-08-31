@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 LOCALHOST_CERTIFICATE_HEADER = "X-Amzn-Mtls-Clientcert"
 CLM_UNIQ_ID_IDENTIFIER_SYSTEM = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
 CLM_UNIQ_ID_IDENTIFIER_CODE = "uc"
+PREAUTHORIZATION_USE = "preauthorization"
 SECURITY_LABEL_CPT_SYSTEM = "http://www.ama-assn.org/go/cpt"
 SECURITY_LABEL_HCPCS_SYSTEM = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
 SECURITY_LABEL_DRG_SYSTEM = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
@@ -556,12 +557,12 @@ async def verify_samhsa_filtering(
             all_samhsa_allowed_clm_ids = [
                 get_uniq_clm_id_for_bundle_resource(entry["resource"])
                 for entry in samhsa_bundle_entries
-                if entry["resource"].get("use") != "preauthorization"
+                if entry["resource"].get("use") != PREAUTHORIZATION_USE
             ]
             all_samhsa_filtered_clm_ids = [
                 get_uniq_clm_id_for_bundle_resource(entry["resource"])
                 for entry in no_samhsa_bundle_entries
-                if entry["resource"].get("use") != "preauthorization"
+                if entry["resource"].get("use") != PREAUTHORIZATION_USE
             ]
             bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
             samhsa_unauthed_unfiltered_clms = set(all_samhsa_filtered_clm_ids).intersection(
@@ -583,13 +584,13 @@ async def verify_samhsa_filtering(
             all_samhsa_allowed_prior_auth_utns = [
                 identifier["value"]
                 for entry in samhsa_bundle_entries
-                if entry["resource"].get("use") == "preauthorization"
+                if entry["resource"].get("use") == PREAUTHORIZATION_USE
                 for identifier in entry["resource"].get("identifier", [])
             ]
             all_samhsa_filtered_prior_auth_utns = [
                 identifier["value"]
                 for entry in no_samhsa_bundle_entries
-                if entry["resource"].get("use") == "preauthorization"
+                if entry["resource"].get("use") == PREAUTHORIZATION_USE
                 for identifier in entry["resource"].get("identifier", [])
             ]
             bene_samhsa_prior_auths_set = set(samhsa_bene.samhsa_prior_auth_utns)
