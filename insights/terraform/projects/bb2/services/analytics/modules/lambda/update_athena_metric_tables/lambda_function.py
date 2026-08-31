@@ -1,11 +1,13 @@
-import boto3
 import datetime
 
+import boto3
 from utils.utils import (
+    download_content_from_s3,
     get_report_dates_from_target_date,
+    run_athena_query_result_to_s3,
+    send_metrics_data_csvs_to_bcda_bucket,
     update_or_create_metrics_table,
 )
-
 
 """
 Summary:
@@ -80,7 +82,7 @@ def lambda_handler(event, context):
         "basename_main": event["BASENAME_MAIN"],
         "basename_per_app": event["BASENAME_PER_APP"],
         "report_dates": report_dates,
-        "retry_sleep_seconds": event.get("RETRY_SLEEP_SECONDS", "300")
+        "retry_sleep_seconds": event.get("RETRY_SLEEP_SECONDS", "300"),
     }
 
     lambda_start_time = datetime.datetime.now()
@@ -132,6 +134,8 @@ def lambda_handler(event, context):
             "STATUS": "FAIL",
             "DETAIL": "MAIN table create/update was un-successful after retries!",
         }
+
+    send_metrics_data_csvs_to_bcda_bucket(session, params)
 
     return {
         "STATUS": "SUCCESS",
