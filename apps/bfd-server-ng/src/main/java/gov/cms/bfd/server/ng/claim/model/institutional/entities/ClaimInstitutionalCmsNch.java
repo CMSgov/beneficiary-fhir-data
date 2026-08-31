@@ -57,7 +57,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemInstitutionalNch> claimItems;
+  private SortedSet<ClaimItemCmsNch> claimItems;
 
   /** NCH record-type supporting info limited to one entry. */
   @Override
@@ -93,7 +93,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
   @Override
   public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
+    return getClaimItems().stream().map(ClaimItemCmsNch::getClaimValue).toList();
   }
 
   /**

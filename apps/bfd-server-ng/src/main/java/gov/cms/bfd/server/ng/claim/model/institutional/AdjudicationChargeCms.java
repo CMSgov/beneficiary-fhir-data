@@ -115,11 +115,11 @@ public class AdjudicationChargeCms {
   private BigDecimal shortStayOutlierPaymentAmount;
 
   /**
-   * Converts all the fields into a list of adjudication components
+   * Converts all the fields into a list of adjudication components.
    *
    * @param claimValues claim values to also convert into adjudication components
    * @return a list of adjudication components
-   */ 
+   */
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     return Stream.of(
             AdjudicationChargeClaimValue.toFhir(claimValues),

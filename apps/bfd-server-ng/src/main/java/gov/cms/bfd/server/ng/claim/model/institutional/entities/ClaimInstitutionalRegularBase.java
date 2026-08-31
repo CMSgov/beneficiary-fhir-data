@@ -7,9 +7,9 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
 
   @Embedded private DateSupportingInfo dateSupportingInfo;
+  @Embedded private InstitutionalSupportingInfo supportingInfo;
 
   // region PaymentComponent
   @Embedded private ClaimPaymentComponentAmount paymentComponent;
@@ -38,11 +39,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   }
 
   // endregion
-
-  @Override
-  SupportingInfoComponentBase getSupportingInfo() {
-    return null;
-  }
 
   @Override
   AdjudicationChargeBase getAdjudicationCharge() {

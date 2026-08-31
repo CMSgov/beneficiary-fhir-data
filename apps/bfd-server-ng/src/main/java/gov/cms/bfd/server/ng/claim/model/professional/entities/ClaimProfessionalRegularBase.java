@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
+@MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
   @Override

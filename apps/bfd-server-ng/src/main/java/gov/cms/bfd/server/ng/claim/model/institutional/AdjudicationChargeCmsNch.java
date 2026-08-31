@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
  * Adjudication fields for institutional claim, cms profile, nch system. Note: this leverages the
- * fact that CMS is a subset of REGULAR.
+ * fact that CMS is a superset of REGULAR.
  */
 @Embeddable
 public class AdjudicationChargeCmsNch implements AdjudicationChargeBase {

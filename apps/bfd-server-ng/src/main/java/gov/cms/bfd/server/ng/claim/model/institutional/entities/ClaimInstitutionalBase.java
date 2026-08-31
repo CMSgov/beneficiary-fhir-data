@@ -57,8 +57,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   abstract SupportingInfoComponentBase getSupportingInfo();
 
   // Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
-  // produces this
-  // from its own concrete record-type field.
+  // produces this from its own concrete record-type field.
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo();
 

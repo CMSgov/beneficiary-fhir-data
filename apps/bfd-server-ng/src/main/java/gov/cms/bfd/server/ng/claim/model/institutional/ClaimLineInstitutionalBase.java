@@ -47,7 +47,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   private Optional<LocalDate> fromDate;
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
-  private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;
+  private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode; // TODO - CMS
 
   @Column(name = "clm_line_instnl_rev_ctr_dt")
   private Optional<LocalDate> revenueCenterDate;
@@ -56,7 +56,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   private Optional<LocalDate> thruDate;
 
   @Embedded private ClaimLineHippsCode hippsCode;
-  @Embedded private ClaimLineInstitutionalExtensions extensions;
+  @Embedded private ClaimLineInstitutionalExtensions extensions; // TODO - CMS
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;

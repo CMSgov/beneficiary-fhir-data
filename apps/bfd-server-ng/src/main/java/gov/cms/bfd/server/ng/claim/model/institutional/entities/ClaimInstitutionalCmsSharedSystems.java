@@ -64,7 +64,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
+  private SortedSet<ClaimItemCmsSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
@@ -82,9 +82,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
 
   @Override
   public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream()
-        .map(ClaimItemInstitutionalSharedSystems::getClaimValue)
-        .toList();
+    return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
   }
 
   @Override

@@ -22,7 +22,7 @@ import lombok.Getter;
 @Entity
 @EqualsAndHashCode
 @Table(name = "claim_item_institutional_ss", schema = "idr")
-public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
+public class ClaimItemSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineInstitutionalSharedSystems claimLine;
   @Embedded private ClaimProcedureInstitutional claimProcedure;
