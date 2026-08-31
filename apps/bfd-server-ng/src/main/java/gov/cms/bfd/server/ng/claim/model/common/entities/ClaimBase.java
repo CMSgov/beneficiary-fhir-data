@@ -133,8 +133,6 @@ public abstract class ClaimBase {
         .sort(
             Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
     eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
-    // Sorting the extensions isn't strictly necessary, but it can interfere with the snapshot tests
-    // if the order changes.
     return eob;
   }
 
