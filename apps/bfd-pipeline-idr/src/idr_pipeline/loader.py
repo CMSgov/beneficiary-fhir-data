@@ -115,12 +115,18 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         # (temp tables can't be created with an explicit schema set)
         self.temp_table = model.table().split(".")[1] + "_temp"
         self.job_start = job_start
-        self.batch_start = datetime.now(UTC)
+        self.batch_start = resolve_test_date(load_mode)
         self.insert_cols = list(model.insert_keys())
         self.insert_cols.sort()
         self.meta_keys = (
             ["bfd_created_ts"] if model.is_immutable() else ["bfd_created_ts", "bfd_updated_ts"]
         )
+        last_updated_col = self.model.last_updated_date_column()
+        if last_updated_col:
+            target_updated_date_table = self.model.last_updated_date_table()
+            current_table = self.model.table()
+            if current_table == target_updated_date_table:
+                self.meta_keys.append(last_updated_col[0])
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
         self.ordered_pkeys = model.ordered_pkeys()
@@ -131,6 +137,60 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             f"WHERE ({', '.join(f't.{v}' for v in update_set)}) IS "
             f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in update_set)})"
         )
+        self.npi_type_backfill_map = model.npi_type_backfill_compare_cols()
+        self.npi_type_backfill_enabled = SETTINGS.enable_npi_type_backfill_compare and bool(
+            self.npi_type_backfill_map
+        )
+        self.temp_only_cols = (
+            list(self.npi_type_backfill_map) if self.npi_type_backfill_enabled else []
+        )
+        self.insert_and_temp_cols = self.insert_cols + self.temp_only_cols
+        self.insert_and_temp_cols_str = ", ".join(self.insert_and_temp_cols)
+
+        if self.npi_type_backfill_enabled:
+            npi_type_real_cols = set(self.npi_type_backfill_map.values())
+            non_npi_cols = [c for c in update_set if c not in npi_type_real_cols]
+            other_changed_clause = (
+                " OR ".join(f"t.{c} IS DISTINCT FROM EXCLUDED.{c}" for c in non_npi_cols)
+                if non_npi_cols
+                else "FALSE"
+            )
+            pkey_join = " AND ".join(f"tmp.{k} = EXCLUDED.{k}" for k in self.ordered_pkeys)
+            legacy_versus_real_npi_types_check = " OR ".join(
+                f"COALESCE(tmp.{legacy_col}, 0) IS DISTINCT FROM COALESCE(EXCLUDED.{real_col}, 0)"
+                for legacy_col, real_col in self.npi_type_backfill_map.items()
+            )
+            npi_type_changed_clause = f"""
+                EXISTS (
+                        SELECT 1 
+                        FROM "{{temp_tablename}}" tmp
+                        WHERE {pkey_join} 
+                        AND ({legacy_versus_real_npi_types_check})
+                    )
+            """
+            updated_ts_expr = f"""
+                CASE
+                    WHEN {npi_type_changed_clause} THEN %(timestamp)s
+                    WHEN ({other_changed_clause}) THEN %(timestamp)s
+                    ELSE t.bfd_updated_ts
+                END
+            """
+
+            on_conflict_where_clause = f"""
+                WHERE (
+                    ({", ".join(f"t.{v}" for v in update_set)}) 
+                    IS DISTINCT FROM 
+                    ({", ".join(f"EXCLUDED.{v}" for v in update_set)})
+                )
+                OR {npi_type_changed_clause}
+            """
+
+        else:
+            updated_ts_expr = "%(timestamp)s"
+            on_conflict_where_clause = (
+                f"WHERE ({', '.join(f't.{v}' for v in update_set)}) IS "
+                f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in update_set)})"
+            )
         # For immutable tables, we may still be attempting to re-load some data
         # due to a batch cancellation.
         # In these cases, we can assume any conflicting rows have already been loaded so
@@ -140,7 +200,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             "DO NOTHING"
             if model.is_immutable() or not update_set
             else (
-                f"DO UPDATE SET {update_set_str}, bfd_updated_ts=%(timestamp)s "
+                f"DO UPDATE SET {update_set_str}, bfd_updated_ts={updated_ts_expr} "
                 f"{on_conflict_where_clause}"
             )
         )
@@ -173,7 +233,8 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         self.job_id = job_id
 
     async def load(self) -> bool:
-        timestamp = datetime.now(UTC)
+        timestamp = resolve_test_date(self.load_mode)
+
         self.full_load_timer.start()
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             await self._record_batch_start(conn, cur, commit=True)
@@ -238,7 +299,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
                 updated_keys,
                 timestamp,
             )
-            if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+            if self.model.last_updated_date_table():
                 self.worker_client.do_last_updated(cur_batch, self.enable_load_progress)
             elif self.enable_load_progress:
                 self.worker_client.do_load_progress(cur_batch)
@@ -395,6 +456,9 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         for col in self.meta_keys:
             await cur.execute(f'ALTER TABLE "{full_tablename}" DROP COLUMN {col}')  # type: ignore
 
+        for col in self.temp_only_cols:
+            await cur.execute(f'ALTER TABLE "{full_tablename}" ADD COLUMN {col} integer')  # type: ignore
+
         return full_tablename
 
     async def _update_load_progress(
@@ -419,14 +483,17 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             await cur.execute(f"DELETE FROM {self.table}")  # type: ignore
         await cur.execute("SET LOCAL synchronous_commit TO OFF")
 
+        params: dict[str, DbType] = {"timestamp": timestamp}
+        on_conflict_clause = self.on_conflict_clause.format(temp_tablename=temp_tablename)
+
         await cur.execute(
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
-            ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
+            ON CONFLICT ({self.primary_keys_str}) {on_conflict_clause}
             RETURNING {self.updated_keys_returning_str}
             ''',  # type: ignore
-            {"timestamp": timestamp},
+            params,
         )
 
         return await cur.fetchall()
@@ -443,11 +510,11 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
         async with cur.copy(
-            f'COPY "{temp_tablename}" ({self.cols_str}) FROM STDIN'  # type: ignore
+            f'COPY "{temp_tablename}" ({self.insert_and_temp_cols_str}) FROM STDIN'  # type: ignore
         ) as copy:
             for row in data:
                 await copy.write_row(
-                    [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
+                    [_remove_null_bytes(getattr(row, k)) for k in self.insert_and_temp_cols]
                 )
 
     async def _record_batch_start(
@@ -568,3 +635,11 @@ def _remove_null_bytes(val: DbType) -> DbType:
 def should_track_load_progress(load_mode: LoadMode) -> bool:
     # Whether to read/write load progress, which is disabled for synthetic and testing loads.
     return load_mode == LoadMode.PROD or SETTINGS.test_mode
+
+
+def resolve_test_date(load_mode: LoadMode) -> datetime:
+    test_date = SETTINGS.bfd_test_date()
+
+    if test_date and load_mode != LoadMode.PROD:
+        return test_date
+    return datetime.now(UTC)

@@ -3,7 +3,6 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import IDR_PRIOR_AUTH_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS_PRIOR_AUTH,
@@ -15,6 +14,7 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrPriorAuthItem(IdrBaseModel):
@@ -79,7 +79,7 @@ class IdrPriorAuthItem(IdrBaseModel):
             WITH distinct_prior_auths AS (
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
-                FROM {IDR_PRIOR_AUTH_TABLE}
+                FROM {SETTINGS.idr_prior_auth_table}
                 WHERE pa_req_rec_dt > {{MIN_TS}}
             )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}

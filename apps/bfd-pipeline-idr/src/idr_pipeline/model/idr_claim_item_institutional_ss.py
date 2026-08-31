@@ -5,14 +5,6 @@ from pydantic import BeforeValidator
 
 from ..constants import (
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_LINE_DOCUMENTATION_TABLE,
-    IDR_CLAIM_LINE_FISS_BENEFIT_TABLE,
-    IDR_CLAIM_LINE_FISS_TABLE,
-    IDR_CLAIM_LINE_INSTITUTIONAL_TABLE,
-    IDR_CLAIM_LINE_TABLE,
-    IDR_CLAIM_PROD_TABLE,
-    IDR_CLAIM_VAL_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -35,6 +27,7 @@ from ..model.base_model import (
     INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -43,6 +36,7 @@ from ..model.base_model import (
     clm_base_query,
     clm_child_query,
     clm_query,
+    legacy_institutional_specialty_npi_type_expr,
     provider_careteam_name_expr,
     provider_npi_type_expr,
     transform_default_date_to_null,
@@ -50,6 +44,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimItemInstitutionalSs(IdrBaseModel):
@@ -231,15 +226,19 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_rndrng_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)}
+    ]
+    legacy_prvdr_rndrng_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_rndrg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_rndrng_npi_type"},
+    ]
     bfd_prvdr_rndrng_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, None)},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_rndrng_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)},
     ]
 
     # columns derived from v2_mdcr_clm_line_fiss_bnft_svg
@@ -344,19 +343,19 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                 claims as (
                     {clm_query()}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_PROD_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_prod_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_VAL_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_val_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_DOCUMENTATION_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_documentation_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_INSTITUTIONAL_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_institutional_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_FISS_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_fiss_table)}
                     UNION
-                    {clm_child_query(IDR_CLAIM_LINE_FISS_BENEFIT_TABLE)}
+                    {clm_child_query(SETTINGS.idr_claim_line_fiss_benefit_table)}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -365,7 +364,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                             PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {line}.clm_line_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_LINE_TABLE} {line}
+                    FROM {SETTINGS.idr_claim_line_table} {line}
                     JOIN claims {clm}
                         ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
@@ -381,7 +380,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                             ORDER BY {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_PROD_TABLE} {prod}
+                    FROM {SETTINGS.idr_claim_prod_table} {prod}
                     JOIN claims {clm}
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
@@ -396,7 +395,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                             PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
-                    FROM {IDR_CLAIM_VAL_TABLE} {val}
+                    FROM {SETTINGS.idr_claim_val_table} {val}
                     JOIN claims {clm}
                         ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {val}.clm_type_cd = {clm}.clm_type_cd
@@ -428,7 +427,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                             THEN clm_bnft_svg_ansi_rsn_cd END) AS bfd_clm_bnft_svg_ansi_rsn_4_cd,
                         MAX(idr_insrt_ts) AS idr_insrt_ts,
                         MAX(idr_updt_ts) AS idr_updt_ts
-                    FROM {IDR_CLAIM_LINE_FISS_BENEFIT_TABLE} {line_fiss_bnft}
+                    FROM {SETTINGS.idr_claim_line_fiss_benefit_table} {line_fiss_bnft}
                     JOIN claims {clm}
                         ON {line_fiss_bnft}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {line_fiss_bnft}.clm_type_cd = {clm}.clm_type_cd
@@ -473,25 +472,25 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {val}.clm_num_sk = {clm}.clm_num_sk
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
-                LEFT JOIN {IDR_CLAIM_LINE_INSTITUTIONAL_TABLE} {line_instnl}
+                LEFT JOIN {SETTINGS.idr_claim_line_institutional_table} {line_instnl}
                     ON {line_instnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_instnl}.clm_type_cd = {line}.clm_type_cd
                     AND {line_instnl}.clm_num_sk = {line}.clm_num_sk
                     AND {line_instnl}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_instnl}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_CLAIM_LINE_DOCUMENTATION_TABLE} {line_dcmtn}
+                LEFT JOIN {SETTINGS.idr_claim_line_documentation_table} {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
                     AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_CLAIM_LINE_FISS_TABLE} {line_fiss}
+                LEFT JOIN {SETTINGS.idr_claim_line_fiss_table} {line_fiss}
                     ON {line_fiss}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_fiss}.clm_type_cd = {line}.clm_type_cd
                     AND {line_fiss}.clm_num_sk = {line}.clm_num_sk
                     AND {line_fiss}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_fiss}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rndrng}
+                LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rndrng}
                     ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 LEFT JOIN claim_line_fiss_bnft_svg {line_fiss_bnft_flattened}

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Optional;
 
 /** Rendering Provider History. * */
 @Embeddable
@@ -15,7 +16,7 @@ import jakarta.persistence.Embeddable;
 public class RenderingCareTeamLine extends CareTeamBase {
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.RENDERING;
   }
 }
