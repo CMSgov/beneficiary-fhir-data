@@ -9,28 +9,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @MappedSuperclass
 public abstract class CareTeamBase extends ProviderHistoryBase {
+
   private Optional<ProviderSpecialtyCode> specialtyCode;
 
   @Override
   public Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
-      Integer sequence, Optional<ClaimContext> claimContext) {
-    var careTeamComponent = super.toFhirCareTeamComponent(sequence, claimContext);
+      Integer sequence, Optional<ClaimTypeCode> claimTypeCode) {
+    var careTeamComponent = super.toFhirCareTeamComponent(sequence, claimTypeCode);
 
     careTeamComponent.ifPresent(
-        ctc ->
-            specialtyCode.ifPresent(
-                sc -> {
-                  ctc.setQualification(sc.toFhir());
-
-                  // Determine NPI Type based on provider specialty code
-                  var npiType = sc.getNpiType();
-                  if (npiType != NpiType.UNKNOWN) {
-                    var reference = ctc.getProvider();
-                    reference.setType(npiType.getType());
-                    ctc.setProvider(reference);
-                  }
-                }));
-
+        ctc -> specialtyCode.ifPresent(sc -> ctc.setQualification(sc.toFhir())));
     return careTeamComponent;
   }
 }

@@ -239,6 +239,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_NUM_SK,
             f.CLM_TYPE_CD,
             f.CLM_CRNT_STUS_CD,
+            f.CLM_PPS_IND,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],

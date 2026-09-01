@@ -56,20 +56,21 @@ locals {
   idr_capacity_provider_strategies = module.data_strategies.strategies
   idr_task_ssm = {
     for k, v in {
-      IDR_USERNAME    = "/bfd/${local.env}/${local.service}/sensitive/idr_username"
-      IDR_PRIVATE_KEY = "/bfd/${local.env}/${local.service}/sensitive/idr_private_key"
-      IDR_ACCOUNT     = "/bfd/${local.env}/${local.service}/sensitive/idr_account"
-      IDR_WAREHOUSE   = "/bfd/${local.env}/${local.service}/sensitive/idr_warehouse"
-      IDR_DATABASE    = "/bfd/${local.env}/${local.service}/sensitive/idr_database"
-      IDR_SCHEMA      = "/bfd/${local.env}/${local.service}/sensitive/idr_schema"
-      BFD_DB_USERNAME = "/bfd/${local.env}/${local.service}/sensitive/db/username"
-      BFD_DB_PASSWORD = "/bfd/${local.env}/${local.service}/sensitive/db/password"
+      IDR_USERNAME     = "/bfd/${local.env}/${local.service}/sensitive/idr_username"
+      IDR_PRIVATE_KEY  = "/bfd/${local.env}/${local.service}/sensitive/idr_private_key"
+      IDR_ACCOUNT      = "/bfd/${local.env}/${local.service}/sensitive/idr_account"
+      IDR_WAREHOUSE    = "/bfd/${local.env}/${local.service}/sensitive/idr_warehouse"
+      IDR_DATABASE     = "/bfd/${local.env}/${local.service}/sensitive/idr_database"
+      IDR_EDP_DATABASE = "/bfd/${local.env}/${local.service}/sensitive/idr_edp_database"
+      BFD_DB_USERNAME  = "/bfd/${local.env}/${local.service}/sensitive/db/username"
+      BFD_DB_PASSWORD  = "/bfd/${local.env}/${local.service}/sensitive/db/password"
     } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
   }
   idr_task_tmp_dir = "/app/.tmp"
 }
 
-resource "aws_cloudwatch_log_group" "idr_messages" {
+module "log_group_idr_messages" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -186,6 +187,10 @@ resource "aws_ecs_task_definition" "idr" {
             value = "0"
           },
           {
+            name  = "IDR_STRUCTURED_LOGS",
+            value = "1"
+          },
+          {
             name = "CONFIG_SETTINGS_JSON"
             value = jsonencode(
               {
@@ -197,7 +202,7 @@ resource "aws_ecs_task_definition" "idr" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = aws_cloudwatch_log_group.idr_messages.name
+            awslogs-group         = module.log_group_idr_messages.name
             awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
