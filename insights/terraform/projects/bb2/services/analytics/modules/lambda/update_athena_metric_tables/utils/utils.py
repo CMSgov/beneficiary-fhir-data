@@ -1,12 +1,12 @@
-import boto3
 import csv
 import re
 import time
-
 from datetime import datetime, timezone
-from dateutil.relativedelta import relativedelta, MO
 from io import StringIO
 from string import Template
+
+import boto3
+from dateutil.relativedelta import MO, relativedelta
 
 """
 Summary:
