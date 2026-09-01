@@ -20,6 +20,7 @@ import java.util.SortedSet;
 import java.util.UUID;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -27,7 +28,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
@@ -159,7 +159,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
       // Logo Extension
       var logoExtension = new Extension(SystemUrls.C4DIC_LOGO_EXT_URL);
-      logoExtension.setValue(new StringType(SystemUrls.C4DIC_LOGO_URL));
+      var imageExtension = new Extension("image");
+      var attachment = new Attachment();
+
+      attachment.setUrl(SystemUrls.C4DIC_LOGO_URL);
+      imageExtension.setValue(attachment);
+      logoExtension.addExtension(imageExtension);
+
       coverage.addExtension(logoExtension);
 
     } else {
