@@ -128,7 +128,7 @@
         <spring-data-jpa.version>3.5.12</spring-data-jpa.version>
         <spring-framework.version>6.2.19</spring-framework.version>
         <spring-retry.version>2.0.13</spring-retry.version>
-        <spring-boot.version>3.5.15</spring-boot.version>
+        <spring-boot.version>3.5.16</spring-boot.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
         <spring-cloud-aws.version>3.4.2</spring-cloud-aws.version>
 
@@ -182,8 +182,8 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <netty.version>4.1.136.Final</netty.version>
-        <jetty.version>12.1.7</jetty.version>
+        <netty.version>4.1.137.Final</netty.version>
+        <jetty.version>12.1.10</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -378,6 +378,24 @@
                 <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
                 <artifactId>owasp-java-html-sanitizer</artifactId>
                 <version>20260313.1</version>
+            </dependency>
+            <!-- Fix for CVE-2025-67030 (Plexus-Utils directory traversal), transitive via maven-plugin-api -->
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.6.1</version>
+            </dependency>
+            <!-- Fix for CVE-2024-57699 (json-smart uncontrolled recursion / DoS), transitive via json-path -->
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>2.5.2</version>
+            </dependency>
+            <!-- Fix for CVE-2026-71290 (httpclient5 improper certificate validation), transitive via AWS SDK apache5-client -->
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.4</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
             <dependency>
