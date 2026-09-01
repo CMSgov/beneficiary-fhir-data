@@ -68,8 +68,8 @@ class OtherGeneratorUtil:
     def gen_provider_history(
         self,
         amount: int,
+        gen_utils: GeneratorUtil,
         init_provider_historys: list[RowAdapter] | None = None,
-        gen_utils: GeneratorUtil = RandomIdGenerator,
     ):
         init_provider_historys = init_provider_historys or []
         additional_provider_historys = [

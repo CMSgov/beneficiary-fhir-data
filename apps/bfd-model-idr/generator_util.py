@@ -9,6 +9,7 @@ import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Self
@@ -20,7 +21,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 
-from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import OutputDestinationWriter, SnowflakeWriter
 
 BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
 BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
@@ -85,23 +86,6 @@ _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 _faker = Faker()
 
-_UNIQUE_FIELDS_AND_SOURCES: dict[str, str] = {
-    "BENE_SK": BENE_HSTRY,
-    "CNTRCT_PBP_SK": CNTRCT_PBP_NUM,
-    "CLM_UNIQ_ID": CLM,
-    "CLM_DT_SGNTR_SK": CLM_DT_SGNTR,
-    "CLM_NUM_SK": CLM,
-    "GEO_BENE_SK": CLM,
-    "CLM_RLT_COND_SGNTR_SK": CLM_RLT_COND_SGNTR_MBR,
-    "BENE_PDP_ENRLMT_MMBR_ID_NUM": BENE_MAPD_ENRLMT_RX,
-    "BENE_MBI_ID": BENE_MBI_ID,
-    "CLM_CNTL_NUM": CLM,
-    "CLM_ORIG_CNTL_NUM": CLM,
-    "CLM_LINE_PMD_UNIQ_TRKNG_NUM": CLM_LINE,
-    "PRVDR_EMPLR_ID_NUM": PRVDR_HSTRY,
-    "PRVDR_OSCAR_NUM": PRVDR_HSTRY,
-}
-
 
 class RowAdapter:
     def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
@@ -130,8 +114,8 @@ class RowAdapter:
 
 
 class IdGenerator(ABC):
-    def gen_basic_id(self, field: str, length: int, allowed_chars: str = string.digits) -> str:
-        return self.multipart_id(field=field, parts=[(allowed_chars, length)])
+    def gen_basic_id(self, field: str, length: int, alphabet: str = string.digits) -> str:
+        return self.multipart_id(field=field, parts=[(alphabet, length)])
 
     @abstractmethod
     def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str: ...
@@ -148,8 +132,11 @@ class IdGenerator(ABC):
     @abstractmethod
     def mbi(self) -> str: ...
 
+    @abstractmethod
+    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str: ...
 
-def _sorted_chars(chars: str) -> str:
+
+def _sorted_chars(chars: Iterable[str]) -> str:
     return "".join(sorted(set(chars)))
 
 
@@ -229,6 +216,125 @@ class RandomIdGenerator(IdGenerator):
         self._used_mbi.add(full_mbi)
         return full_mbi
 
+    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:  # noqa: ARG002
+        return self.numeric_id(field="CLM_NUM_SK")
+
+
+DEFAULT_INITIAL_BENE_SK = -1000
+DEFAULT_INITIAL_CLM_NUM_SK = 0
+DEFAULT_INITIAL_NPI = 100_000_000
+
+
+@dataclass
+class SnowflakeIdState:
+    bene_sk_next: int = DEFAULT_INITIAL_BENE_SK
+    numeric_id_next: dict[str, int] = field(default_factory=dict)
+    multipart_id_next: dict[str, int] = field(default_factory=dict)
+    mbi_next: int = 0
+    npi_next: int = DEFAULT_INITIAL_NPI
+    claim_num_sk_next: dict[tuple[str, str, str], int] = field(default_factory=dict)
+
+
+def _qualified_table(writer: SnowflakeWriter, table_name: str) -> str:
+    resolved_table_name, database, schema = writer.resolve_target_table(table_name)
+    return f'"{database}"."{schema}"."{resolved_table_name}"'
+
+
+def _query(writer: SnowflakeWriter, sql: str) -> Any:
+    with writer.conn.cursor() as cur:
+        cur.execute(sql)
+        row = cur.fetchone()
+    return row[0] if row else None
+
+
+def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[tuple[Any, ...]]:
+    with writer.conn.cursor() as cur:
+        cur.execute(sql)
+        return cur.fetchall()
+
+
+def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
+    state = SnowflakeIdState()
+
+    # Get or set the min ben_sk
+    existing_min_bene_sk = _query(
+        writer, f"SELECT MIN(BENE_SK) FROM {_qualified_table(writer, BENE_HSTRY)}"
+    )
+    if existing_min_bene_sk is not None:
+        state.bene_sk_next = int(existing_min_bene_sk) - 1
+
+    # Get or set the max mbi
+    existing_max_mbi = _query(
+        writer, f"SELECT MAX(BENE_MBI_ID) FROM {_qualified_table(writer, BENE_MBI_ID)}"
+    )
+    if existing_max_mbi is not None:
+        state.mbi_next = _decode_identifier(existing_max_mbi, _MBI_ALPHABETS) + 1
+
+    # Get or set the max npi
+    existing_max_npi = _query(
+        writer, f"SELECT MAX(PRVDR_NPI_NUM) FROM {_qualified_table(writer, PRVDR_HSTRY)}"
+    )
+    if existing_max_npi is not None:
+        state.npi_next = int(existing_max_npi[:9]) + 1
+
+    _NUMERIC_MULTIPART_FIELDS: dict[str, str] = {
+        "CNTRCT_PBP_SK": CNTRCT_PBP_NUM,
+        "CLM_UNIQ_ID": CLM,
+        "CLM_DT_SGNTR_SK": CLM_DT_SGNTR,
+        "GEO_BENE_SK": CLM,
+        "CLM_RLT_COND_SGNTR_SK": CLM_RLT_COND_SGNTR_MBR,
+        "BENE_PDP_ENRLMT_MMBR_ID_NUM": BENE_MAPD_ENRLMT_RX,
+    }
+
+    _TEXT_MULTIPART_FIELDS: dict[str, tuple[str, list[tuple[str, int]]]] = {
+        "CLM_LINE_PMD_UNIQ_TRKNG_NUM": (CLM_LINE, [(string.ascii_letters + string.digits, 13)]),
+        "CLM_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_letters, 3)]),
+        "CLM_ORIG_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_letters, 3)]),
+        "PRVDR_EMPLR_ID_NUM": (PRVDR_HSTRY, [(string.digits, 9)]),
+        "PRVDR_OSCAR_NUM": (PRVDR_HSTRY, [(string.digits, 6)]),
+    }
+
+    # Get or set the min numeric ids
+    for field_name, table_name in _NUMERIC_MULTIPART_FIELDS.items():
+        existing_min = _query(
+            writer, f"SELECT MIN({field_name}) FROM {_qualified_table(writer, table_name)}"
+        )
+        if existing_min is not None:
+            state.numeric_id_next[field_name] = int(existing_min) - 1
+
+    # Get or set the max multipart ids
+    for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
+        existing_max = _query(
+            writer, f"SELECT MAX({field_name}) FROM {_qualified_table(writer, table_name)}"
+        )
+        if existing_max is not None:
+            value = existing_max.removeprefix("-")
+            alphabets = _expand_parts(parts)
+            state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
+
+    # Get or set the min clm_num_sk per (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
+    claims_rows = _query_multiple(
+        writer,
+        f"""
+        SELECT
+            CLM_TYPE_CD,
+            CLM_DT_SGNTR_SK,
+            GEO_BENE_SK,
+            MIN(CLM_NUM_SK) AS MIN_CLM_NUM_SK
+        FROM {_qualified_table(writer, CLM)}
+        GROUP BY
+            CLM_TYPE_CD,
+            CLM_DT_SGNTR_SK,
+            GEO_BENE_SK
+        """,
+    )
+
+    for clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk, min_clm_num_sk in claims_rows:
+        key_columns = (str(clm_type_cd), str(clm_dt_sgntr_sk), str(geo_bene_sk))
+        state.claim_num_sk_next[key_columns] = int(min_clm_num_sk) - 1
+
+    return state
+
 
 def _expand_parts(parts: list[tuple[str, int]]) -> list[str]:
     position_alphabets: list[str] = []
@@ -237,14 +343,14 @@ def _expand_parts(parts: list[tuple[str, int]]) -> list[str]:
     return position_alphabets
 
 
-""" _decode_mixed_identifier converts a string identifier into its numeric position so we can treat 
+""" _decode_identifier converts a string identifier into its numeric position so we can treat 
 these identifiers as sequential counters. This uses a mixed radix counter approach here. Each 
 position can have a different number of possible values so its radix. position_alphabets contains 
 the ordered alphabet for each position. We increment its numeric position and encode that back into 
-the next valid identifier _encode_mixed_identifier """
+the next valid identifier _encode_identifier """
 
 
-def _decode_mixed_identifier(value: str, position_alphabets: list[str]) -> int:
+def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
     character_positions = [
         alphabet.index(char) for char, alphabet in zip(value, position_alphabets, strict=False)
     ]
@@ -252,7 +358,7 @@ def _decode_mixed_identifier(value: str, position_alphabets: list[str]) -> int:
     return int(np.ravel_multi_index(character_positions, radices))
 
 
-def _encode_mixed_identifier(position: int, position_alphabets: list[str]) -> str:
+def _encode_identifier(position: int, position_alphabets: list[str]) -> str:
     radices = tuple(len(alphabet) for alphabet in position_alphabets)
     character_positions = np.unravel_index(position, radices)
     return "".join(
@@ -264,93 +370,52 @@ def _encode_mixed_identifier(position: int, position_alphabets: list[str]) -> st
 
 
 class SequentialIdGenerator(IdGenerator):
-    def __init__(self, writer: SnowflakeWriter) -> None:
-        self.writer = writer
-        self._positions: dict[tuple[str, str], int] = {}
-        self._multipart_alphabets: dict[str, list[str]] = {}
-        self._next_npi_position: int | None = None
-
-    def _query(self, sql: str) -> Any:
-        cur = self.writer.conn.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-        return row[0] if row else None
-
-    def _qualified_table(self, table_name: str) -> str:
-        resolved_table_name, database, schema = self.writer.resolve_target_table(table_name)
-        return f'"{database}"."{schema}"."{resolved_table_name}"'
+    def __init__(self, state: SnowflakeIdState) -> None:
+        self.state = state
 
     def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str:
-        key = (field, "multipart")
-        position_alphabets = self._multipart_alphabets.setdefault(field, _expand_parts(parts))
-        if key not in self._positions:
-            table = _UNIQUE_FIELDS_AND_SOURCES[field]
-            existing_max = self._query(f"SELECT MAX({field}) FROM {self._qualified_table(table)}")
-            if existing_max is None:
-                self._positions[key] = 0
-            else:
-                value = existing_max.removeprefix("_")
-                self._positions[key] = _decode_mixed_identifier(value, position_alphabets) + 1
-        n = self._positions[key]
-        self._positions[key] = n + 1
-        return "-" + _encode_mixed_identifier(n, position_alphabets)
+        position_alphabets = _expand_parts(parts)
+        if field not in self.state.multipart_id_next:
+            self.state.multipart_id_next[field] = 0
+
+        position = self.state.multipart_id_next[field]
+        self.state.multipart_id_next[field] += 1
+
+        return "-" + _encode_identifier(position, position_alphabets)
 
     def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
         if start > 0 or end > 0 or end > start:
             raise ValueError(
                 "'end' and 'start' must be negative and 'end' must be less than 'start'"
             )
-        key = (field, "numeric")
-        if key not in self._positions:
-            table = _UNIQUE_FIELDS_AND_SOURCES[field]
-            existing_min = self._query(f"SELECT MIN({field}) FROM {self._qualified_table(table)}")
-            self._positions[key] = start if existing_min is None else int(existing_min) - 1
-        value = self._positions[key]
-        self._positions[key] -= 1
+        value = self.state.numeric_id_next.setdefault(field, start)
+        self.state.numeric_id_next[field] = value - 1
         return str(value)
 
     def bene_sk(self) -> int:
-        key = ("BENE_SK", "bene_sk")
-        if key not in self._positions:
-            table = _UNIQUE_FIELDS_AND_SOURCES["BENE_SK"]
-            existing_min = self._query(f"SELECT MIN(BENE_SK) FROM {self._qualified_table(table)}")
-            self._positions[key] = -1000 if existing_min is None else int(existing_min) - 1
-        value = self._positions[key]
-        self._positions[key] -= 1
+        value = self.state.bene_sk_next
+        self.state.bene_sk_next -= 1
         return value
 
     def mbi(self) -> str:
-        key = ("BENE_MBI_ID", "mbi")
-        if key not in self._positions:
-            table = _UNIQUE_FIELDS_AND_SOURCES["BENE_MBI_ID"]
-            existing_max = self._query(
-                f"SELECT MAX(BENE_MBI_ID) FROM {self._qualified_table(table)}"
-            )
-            self._positions[key] = (
-                0
-                if existing_max is None
-                else _decode_mixed_identifier(existing_max, _MBI_ALPHABETS) + 1
-            )
-        n = self._positions[key]
-        self._positions[key] = n + 1
-        return _encode_mixed_identifier(n, _MBI_ALPHABETS)
+        position = self.state.mbi_next
+        self.state.mbi_next += 1
+        return _encode_identifier(position, _MBI_ALPHABETS)
 
     def npi_id(self, field: str) -> str:  # noqa: ARG002
-        if self._next_npi_position is None:
-            existing_max_npi = self._query(
-                f"SELECT MAX(PRVDR_NPI_NUM) FROM {self._qualified_table(PRVDR_HSTRY)}"
-            )
-            if existing_max_npi is None:
-                self._next_npi_position = 100_000_000
-            else:
-                self._next_npi_position = int(existing_max_npi[:9])
+        position = self.state.npi_next
 
-        position = self._next_npi_position
         if position >= 299_999_999:
             raise OverflowError("npi_id exhausted the 9-digits NPI body space")
-        self._next_npi_position += 1
+        self.state.npi_next += 1
         npi_9 = str(position)
         return npi_9 + calculate_npi_checksum(npi_9)
+
+    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:
+        key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
+        value = self.state.claim_num_sk_next.setdefault(key_columns, DEFAULT_INITIAL_CLM_NUM_SK)
+        self.state.claim_num_sk_next[key_columns] = value + 1
+        return str(value)
 
 
 def as_list[T](obj: T | None) -> list[T]:
@@ -501,7 +566,7 @@ class GeneratorUtil:
         self.fake = Faker()
         self.bene_hstry_table: list[dict[str, Any]] = []
         self.bene_xref_table: list[dict[str, Any]] = []
-        self.mbi_table: dict[str, dict[str, Any]] = {}  # TODO: do i still need this?
+        self.mbi_table: dict[str, dict[str, Any]] = {}
         self.address_options: list[dict[str, Any]] = []
         self.mdcr_stus: list[dict[str, Any]] = []
         self.mdcr_entlmt: list[dict[str, Any]] = []
@@ -1005,8 +1070,8 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
         contract = random.choice(self.cntrct_pbp_num)
-        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.gen_basic_id(
-            field="CNTRCT_PBP_SK", length=12
+        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.numeric_id(
+            field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
         )
         contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
         pbp_num = contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS)
@@ -1073,8 +1138,8 @@ class GeneratorUtil:
             if not contract_num or not pbp_val:
                 contract_num, pbp_val = available_contract_num_pairs[pair_index]
                 pair_index += 1
-            sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.gen_basic_id(
-                field="CNTRCT_PBP_SK", length=12
+            sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.numeric_id(
+                field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
             )
             effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
             end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
@@ -1131,7 +1196,7 @@ class GeneratorUtil:
 
     def save_output_files(
         self,
-        destination: OutputDestinationWriter = CsvWriter,
+        destination: OutputDestinationWriter,
         truncate: bool = False,
     ):
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
@@ -1163,14 +1228,14 @@ class GeneratorUtil:
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
             for data, table_name, cols in t:
                 t.set_postfix(file=table_name)  # type: ignore
-                self.export_table(data, table_name, cols, destination, truncate)
+                self.export_table(data, table_name, destination, cols, truncate)
 
     def export_table(
         self,
         data: list[dict[str, Any]],
         table_name: str,
+        destination: OutputDestinationWriter,
         cols: list[str] | str = ALL_KEYS,
-        destination: OutputDestinationWriter = CsvWriter,
         truncate: bool = False,
     ):
         destination.write_table(data, table_name, cols, truncate)

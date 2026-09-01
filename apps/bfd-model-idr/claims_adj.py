@@ -51,8 +51,12 @@ class AdjudicatedGeneratorUtil:
         type_2_npis: list = [0],
     ):
         clm = init_clm or RowAdapter({})
-        clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
-        clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
+        clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**13 - 1)
+        )
+        clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_UNIQ_ID, start=-1, end=-(10**12 - 1)
+        )
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_RLT_COND_SGNTR_SK, start=-2
         )
@@ -84,13 +88,13 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
             clm[f.CLM_BLOOD_PT_FRNSH_QTY] = random.randint(0, 20)
 
-        clm[f.CLM_NUM_SK] = gen_utils.id_gen.numeric_id(
-            field=f.CLM_NUM_SK
-        )  # TODO: rework CLM_NUM_SK generation
         clm[f.CLM_EFCTV_DT] = str(date.today())
         clm[f.CLM_IDR_LD_DT] = random_date(clm[f.CLM_FROM_DT], max_date)
         clm[f.CLM_OBSLT_DT] = "9999-12-31"
         clm[f.GEO_BENE_SK] = gen_utils.id_gen.numeric_id(field=f.GEO_BENE_SK)
+        clm[f.CLM_NUM_SK] = gen_utils.id_gen.claim_num_sk(
+            str(clm_type_cd), clm[f.CLM_DT_SGNTR_SK], clm[f.GEO_BENE_SK]
+        )
         clm[f.BENE_SK] = bene_sk
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
         clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD])
@@ -247,8 +251,8 @@ class AdjudicatedGeneratorUtil:
     def gen_clm_rlt_cond_sgntr_mbr(
         self,
         clm: RowAdapter,
+        gen_utils: GeneratorUtil,
         init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None,
-        gen_utils: GeneratorUtil = RandomIdGenerator,
     ):
         clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (

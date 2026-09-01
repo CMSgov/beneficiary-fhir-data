@@ -27,6 +27,7 @@ from generator_util import (
     RowAdapter,
     SequentialIdGenerator,
     load_file_dict,
+    load_id_state,
     output_table_contains_by_bene_sk,
     probability,
 )
@@ -200,11 +201,11 @@ def load_inputs():
         SnowflakeWriter() if args.destination == "snowflake" else CsvWriter()
     )
 
-    id_gen: IdGenerator = (
-        SequentialIdGenerator(writer)
-        if isinstance(writer, SnowflakeWriter)
-        else RandomIdGenerator()
-    )
+    if isinstance(writer, SnowflakeWriter):
+        id_state = load_id_state(writer)
+        id_gen: IdGenerator = SequentialIdGenerator(id_state)
+    else:
+        id_gen = RandomIdGenerator()
 
     generator = GeneratorUtil(id_gen=id_gen)
 

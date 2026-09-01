@@ -70,7 +70,9 @@ class PacGeneratorUtil:
             exclude_fields_adj=exclude_fields_adj,
         )
 
-        clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
+        clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_UNIQ_ID, start=-1, end=-(10**13 - 1)
+        )
 
         if init_clm_type_cd in (60, 61, 62, 63, 64):
             clm[f.CLM_TYPE_CD] = random.choices(
@@ -110,7 +112,9 @@ class PacGeneratorUtil:
         else:
             clm[f.CLM_FINL_ACTN_IND] = "Y"
 
-        clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
+        clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
+            field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**12 - 1)
+        )
         clm[f.GEO_BENE_SK] = gen_utils.id_gen.gen_basic_id(field=f.GEO_BENE_SK, length=5)
 
         clm[f.CLM_PD_STUS_CD] = random.choice(["S", "T", "R", "D", "1", "P", "2", "I"])

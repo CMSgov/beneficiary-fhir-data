@@ -45,6 +45,7 @@ from generator_util import (
     adapters_to_dicts,
     as_list,
     load_file_dict,
+    load_id_state,
     partition_rows,
     probability,
     run_command,
@@ -680,7 +681,7 @@ class _ClaimsFile(StrEnum):
 
 def _save_claims_data(
     files: dict[_ClaimsFile, list[RowAdapter]],
-    destination: OutputDestinationWriter = CsvWriter,
+    destination: OutputDestinationWriter,
     truncate: bool = True,
 ):
     print("Exporting finished synthetic claims...")
@@ -824,11 +825,11 @@ def generate(
         SnowflakeWriter() if destination == "snowflake" else CsvWriter()
     )
 
-    id_gen: IdGenerator = (
-        SequentialIdGenerator(writer)
-        if isinstance(writer, SnowflakeWriter)
-        else RandomIdGenerator()
-    )
+    if isinstance(writer, SnowflakeWriter):
+        id_state = load_id_state(writer)
+        id_gen: IdGenerator = SequentialIdGenerator(id_state)
+    else:
+        id_gen = RandomIdGenerator()
 
     gen_utils = GeneratorUtil(id_gen=id_gen)
 
@@ -876,7 +877,9 @@ def generate(
 
     generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
         other_util.gen_provider_history(
-            amount=14, init_provider_historys=files[PRVDR_HSTRY], gen_utils=gen_utils
+            amount=14,
+            gen_utils=gen_utils,
+            init_provider_historys=files[PRVDR_HSTRY],
         )
     )
 
@@ -1007,8 +1010,8 @@ def generate(
 
             clm_rlt_cond_sgntr_mbr = adj_util.gen_clm_rlt_cond_sgntr_mbr(
                 clm=clm,
-                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
                 gen_utils=gen_utils,
+                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
             )
             adj_clms_tbls[CLM_RLT_COND_SGNTR_MBR].append(clm_rlt_cond_sgntr_mbr)
 
