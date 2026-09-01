@@ -182,7 +182,7 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <netty.version>4.1.136.Final</netty.version>
+        <netty.version>4.1.137.Final</netty.version>
         <jetty.version>12.1.10</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
@@ -390,6 +390,12 @@
                 <groupId>net.minidev</groupId>
                 <artifactId>json-smart</artifactId>
                 <version>2.5.2</version>
+            </dependency>
+            <!-- Fix for CVE-2026-71290 (httpclient5 improper certificate validation), transitive via AWS SDK apache5-client -->
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.4</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
             <dependency>
