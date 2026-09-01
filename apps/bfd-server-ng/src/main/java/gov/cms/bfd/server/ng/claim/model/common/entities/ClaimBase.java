@@ -8,6 +8,8 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;

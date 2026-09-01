@@ -1,22 +1,18 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
