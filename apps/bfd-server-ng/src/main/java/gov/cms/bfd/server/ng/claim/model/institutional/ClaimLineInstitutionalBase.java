@@ -63,6 +63,14 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
+  //region Hook methods
+
+  protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
+    // no-op, because Basis profiles do not have adjudications
+  }
+
+  //endregion
+
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
@@ -125,6 +133,4 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
 
     return Optional.of(line);
   }
-
-  abstract void addAdjudication(ExplanationOfBenefit.ItemComponent line);
 }

@@ -16,7 +16,7 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
   @Embedded private ClaimLineAdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
 
   @Override
-  void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
+  protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
   }
 }

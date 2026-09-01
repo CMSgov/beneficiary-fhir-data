@@ -64,7 +64,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   // Various supporting info components not covered by previous hooks
   abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
 
-  abstract List<ClaimValue> getClaimValues();
+  protected Optional<List<ClaimValue>> getClaimValues() { return Optional.empty(); }
 
   protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();

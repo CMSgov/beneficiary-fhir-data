@@ -13,6 +13,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -79,7 +80,9 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutionalCms().toFhir(getClaimValues()).forEach(eob::addAdjudication);
+    getClaimValues()
+        .map(getAdjudicationChargeInstitutionalCms()::toFhir)
+        .ifPresent(list -> list.forEach(eob::addAdjudication));
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
