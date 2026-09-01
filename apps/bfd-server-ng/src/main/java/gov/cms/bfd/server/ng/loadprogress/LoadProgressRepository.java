@@ -16,10 +16,10 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class LoadProgressRepository {
   @PersistenceContext private EntityManager entityManager;
-  private DateUtil dateUtil;
+  private final DateUtil dateUtil;
 
   /**
-   * Returns the global max batch completion timestamp or {@link DateUtil#MIN_DATETIME} if none.
+   * Returns the global max batch completion timestamp or UTC now if none.
    *
    * @return latest timestamp
    */

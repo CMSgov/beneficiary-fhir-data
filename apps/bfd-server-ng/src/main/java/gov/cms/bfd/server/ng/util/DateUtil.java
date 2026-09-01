@@ -21,10 +21,6 @@ public class DateUtil {
    */
   public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-  /** Minimum possible {@link ZonedDateTime}. */
-  public static final ZonedDateTime MIN_DATETIME =
-      ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);
-
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
    *
