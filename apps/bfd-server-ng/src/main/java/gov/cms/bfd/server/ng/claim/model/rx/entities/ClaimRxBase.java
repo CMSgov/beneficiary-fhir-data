@@ -105,7 +105,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   protected void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     prescribingProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
         .ifPresent(eob::addCareTeam);
   }
 
