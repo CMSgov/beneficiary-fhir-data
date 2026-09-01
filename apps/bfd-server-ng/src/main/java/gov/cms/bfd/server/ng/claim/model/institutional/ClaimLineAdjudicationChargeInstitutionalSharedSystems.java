@@ -9,58 +9,58 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ClaimLineAdjudicationChargeInstitutionalSharedSystems {
-  @Column(name = "clm_line_ncvrd_chrg_amt")
+  @Column(name = "clm_line_ncvrd_chrg_amt") // REGULAR CMS
   private BigDecimal noncoveredChargeAmount;
 
   @Column(name = "clm_line_ncvrd_pd_amt")
   private BigDecimal noncoveredProductPaidAmount;
 
-  @Column(name = "clm_line_alowd_chrg_amt")
+  @Column(name = "clm_line_alowd_chrg_amt") // REGULAR CMS
   private BigDecimal allowedChargeAmount;
 
-  @Column(name = "clm_line_sbmt_chrg_amt")
+  @Column(name = "clm_line_sbmt_chrg_amt") // REGULAR CMS
   private BigDecimal submittedChargeAmount;
 
-  @Column(name = "clm_line_prvdr_pmt_amt")
+  @Column(name = "clm_line_prvdr_pmt_amt") // CMS
   private BigDecimal providerPaymentAmount;
 
-  @Column(name = "clm_line_bene_pmt_amt")
+  @Column(name = "clm_line_bene_pmt_amt") // REGULAR CMS
   private BigDecimal benePaymentAmount;
 
-  @Column(name = "clm_line_bene_pd_amt")
+  @Column(name = "clm_line_bene_pd_amt") // REGULAR CMS
   private BigDecimal benePaidAmount;
 
-  @Column(name = "clm_line_cvrd_pd_amt")
+  @Column(name = "clm_line_cvrd_pd_amt") // REGULAR CMS
   private BigDecimal coveredPaidAmount;
 
-  @Column(name = "clm_line_mdcr_ddctbl_amt")
+  @Column(name = "clm_line_mdcr_ddctbl_amt") // REGULAR CMS
   private BigDecimal deductibleAmount;
 
-  @Column(name = "clm_line_otaf_amt")
+  @Column(name = "clm_line_otaf_amt") // CMS
   private BigDecimal providerObligationToAcceptFullAmount;
 
-  @Column(name = "clm_line_othr_tp_pd_amt")
+  @Column(name = "clm_line_othr_tp_pd_amt") // CMS
   private BigDecimal otherThirdPartyPaidAmount;
 
-  @Column(name = "clm_line_instnl_adjstd_amt")
+  @Column(name = "clm_line_instnl_adjstd_amt") // CMS
   private BigDecimal adjustedAmount;
 
-  @Column(name = "clm_line_instnl_rdcd_amt")
+  @Column(name = "clm_line_instnl_rdcd_amt") // CMS
   private BigDecimal reducedAmount;
 
-  @Column(name = "clm_line_instnl_msp1_pd_amt")
+  @Column(name = "clm_line_instnl_msp1_pd_amt") // CMS
   private BigDecimal msp1PaidAmount;
 
-  @Column(name = "clm_line_instnl_msp2_pd_amt")
+  @Column(name = "clm_line_instnl_msp2_pd_amt") // CMS
   private BigDecimal msp2PaidAmount;
 
-  @Column(name = "clm_line_instnl_rate_amt")
+  @Column(name = "clm_line_instnl_rate_amt") // CMS
   private BigDecimal rateAmount;
 
-  @Column(name = "clm_line_add_on_pymt_amt")
+  @Column(name = "clm_line_add_on_pymt_amt") // CMS
   private BigDecimal addOnPaymentAmount;
 
-  @Column(name = "clm_line_non_ehr_rdctn_amt")
+  @Column(name = "clm_line_non_ehr_rdctn_amt") // CMS
   private BigDecimal nonEHRReductionAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {

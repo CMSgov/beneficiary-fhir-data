@@ -9,10 +9,14 @@ import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -24,6 +28,20 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasisBase {
 
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "clm_uniq_id")
+  private SortedSet<ClaimItemBasisSharedSystems> claimItems;
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public List<ClaimValue> getClaimValues() {
+    return getClaimItems().stream().map(ClaimItemBasisSharedSystems::getClaimValue).toList();
+  }
+
   @Override
   SupportingInfoComponentBase getSupportingInfo() {
     return null;
@@ -32,11 +50,6 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
   @Override
   AdjudicationChargeBase getAdjudicationCharge() {
     return null;
-  }
-
-  @Override
-  List<ClaimValue> getClaimValues() {
-    return List.of();
   }
 
   @Override
@@ -60,11 +73,6 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
 
   @Override
   public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
     return null;
   }
 

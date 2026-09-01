@@ -22,7 +22,7 @@ import lombok.Getter;
 @Entity
 @EqualsAndHashCode
 @Table(name = "claim_item_institutional_ss", schema = "idr")
-public class ClaimItemSharedSystems implements ClaimItemBase {
+public class ClaimItemBasisSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineInstitutionalSharedSystems claimLine;
   @Embedded private ClaimProcedureInstitutional claimProcedure;
@@ -30,7 +30,7 @@ public class ClaimItemSharedSystems implements ClaimItemBase {
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimInstitutionalCmsSharedSystems claim;
+  private ClaimInstitutionalBasisSharedSystems claim;
 
   @Override
   public Optional<ClaimProcedureBase> getProcedure() {

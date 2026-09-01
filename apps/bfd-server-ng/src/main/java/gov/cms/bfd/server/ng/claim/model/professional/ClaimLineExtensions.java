@@ -9,11 +9,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
-/**
- * Embedded container for professional claim line extensions. Resource -
- * ExplanationOfBenefit.ItemComponent.Extension Domain - [ Professional ] Profile - [ CMS, Basis,
- * Regular ] Source - [ SS, NCH ]
- */
+/** Embedded container for professional claim line extensions. */
 @Embeddable
 public class ClaimLineExtensions {
 
