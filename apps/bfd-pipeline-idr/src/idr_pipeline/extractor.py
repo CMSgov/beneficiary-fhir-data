@@ -132,6 +132,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 {"timestamp": min_transaction_date},
             )
 
+        max_runs_ts_clause = ""
         previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
         min_batch_completion_date = format_date_opt(SETTINGS.min_batch_completion_date)
         if (
@@ -161,6 +162,12 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
+        if progress.max_run_ts is not None:
+            max_runs_ts_clause = f"""
+            AND (
+                {batch_timestamp_clause} <= %(max_runs_ts)s
+            )"""
+
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             fetch_query.replace(
@@ -169,6 +176,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     WHERE (
                         {batch_timestamp_clause} {filter_op} %(timestamp)s
                         {batch_id_clause}
+                        {max_runs_ts_clause}
                     )
                     """,
             )
@@ -178,7 +186,9 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             .replace("{TABLESAMPLE}", "")
             .replace("{LIMIT}", "")
             .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
-            {"timestamp": compare_timestamp},
+            {"timestamp": compare_timestamp, "max_runs_ts": progress.max_run_ts}
+            if progress.max_run_ts is not None
+            else {"timestamp": compare_timestamp},
         )
 
     def extract_full_idr_data(self, source: Source) -> Iterator[list[T]]:

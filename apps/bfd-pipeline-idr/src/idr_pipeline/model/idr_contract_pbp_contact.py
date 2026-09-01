@@ -5,7 +5,6 @@ from pydantic import BeforeValidator
 
 from ..constants import (
     DEFAULT_MAX_DATE,
-    IDR_CONTRACT_PBP_CONTACT_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -16,6 +15,7 @@ from ..model.base_model import (
     Source,
     transform_default_string,
 )
+from ..settings import SETTINGS
 
 
 class IdrContractPbpContact(IdrBaseModel):
@@ -62,7 +62,7 @@ class IdrContractPbpContact(IdrBaseModel):
                     WHEN cntrct_plan_cntct_type_cd = '30' THEN 2
                     ELSE 3
                 END) as row_order
-                FROM {IDR_CONTRACT_PBP_CONTACT_TABLE} cntct {{TABLESAMPLE}}
+                FROM {SETTINGS.idr_contract_pbp_contact_table} cntct {{TABLESAMPLE}}
                 WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH',
                                                     DATE '{start_time.strftime("%Y-%m-%d")}')

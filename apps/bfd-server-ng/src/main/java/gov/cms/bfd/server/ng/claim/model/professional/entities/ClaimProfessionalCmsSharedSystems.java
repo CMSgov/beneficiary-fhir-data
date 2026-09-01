@@ -153,7 +153,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase 
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     otherProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
         .ifPresent(eob::addCareTeam);
   }
 

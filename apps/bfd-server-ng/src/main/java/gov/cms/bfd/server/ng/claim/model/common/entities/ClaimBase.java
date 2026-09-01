@@ -8,8 +8,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -134,8 +132,6 @@ public abstract class ClaimBase {
         .sort(
             Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
     eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
-    // Sorting the extensions isn't strictly necessary, but it can interfere with the snapshot tests
-    // if the order changes.
     return eob;
   }
 

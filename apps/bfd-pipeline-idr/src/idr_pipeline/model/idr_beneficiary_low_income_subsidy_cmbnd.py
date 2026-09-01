@@ -3,9 +3,6 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import (
-    IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE,
-)
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS_HSTRY,
@@ -20,6 +17,7 @@ from ..model.base_model import (
     deceased_bene_filter,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
@@ -58,7 +56,7 @@ class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM {IDR_BENE_LOW_INCOME_SUBSIDY_CMBND_TABLE} bene_lis
+                FROM {SETTINGS.idr_bene_low_income_subsidy_cmbnd_table} bene_lis
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry, start_time)}

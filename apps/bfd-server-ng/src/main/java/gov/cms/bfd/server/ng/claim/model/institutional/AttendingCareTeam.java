@@ -2,9 +2,11 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamBase;
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Optional;
 
 /** CareTeamComponent for an attending provider. * */
 @Embeddable
@@ -15,7 +17,7 @@ import jakarta.persistence.Embeddable;
 public class AttendingCareTeam extends CareTeamBase {
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.ATTENDING;
   }
 }

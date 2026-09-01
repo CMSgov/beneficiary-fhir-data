@@ -428,7 +428,7 @@ class PacGeneratorUtil:
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
-            if int(clm[f.CLM_RLT_COND_SGNTR_SK]) < -1
+            if clm[f.CLM_RLT_COND_SGNTR_SK].strip() and int(clm[f.CLM_RLT_COND_SGNTR_SK]) < -1
             else gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(

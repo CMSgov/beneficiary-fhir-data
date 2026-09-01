@@ -6,12 +6,6 @@ from pydantic import BeforeValidator
 from ..constants import (
     CLAIM_RX_TABLE,
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_LINE_RX_TABLE,
-    IDR_CLAIM_LINE_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_CONTRACT_PBP_NUM_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -28,8 +22,10 @@ from ..model.base_model import (
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -41,6 +37,7 @@ from ..model.base_model import (
     clm_dt_sgntr_query,
     clm_orig_cntl_num_expr,
     clm_query,
+    legacy_rx_prescribing_npi_type_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     provider_npi_type_expr,
@@ -48,6 +45,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimRx(IdrBaseModel):
@@ -107,6 +105,10 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_srvc_prvdr_gnrc_id_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
+        int | None,
+        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
     ]
     prvdr_prsbng_id_qlfyr_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -232,25 +234,24 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
-    bfd_srvc_prvdr_gnrc_id_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
-    ]
-
     prvdr_prscrbng_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_prscrbng_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)}
+    ]
+    legacy_prvdr_prscrbng_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_rx_prescribing_npi_type_expr("prvdr_prsbng_id_qlfyr_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_prscrbng_npi_type"},
+    ]
     bfd_prvdr_prscrbng_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_PRSCRBNG, None)},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_prscrbng_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)},
     ]
 
     @override
@@ -288,9 +289,9 @@ class IdrClaimRx(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query(IDR_CLAIM_LINE_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_line_table)}
                 UNION
-                {clm_child_query(IDR_CLAIM_LINE_RX_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_line_rx_table)}
             ),
             contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
@@ -298,34 +299,34 @@ class IdrClaimRx(IdrBaseModel):
                     PARTITION BY cntrct_num, cntrct_pbp_num
                     ORDER BY cntrct_pbp_sk_obslt_dt DESC
                 ) AS contract_version_rank
-                FROM {IDR_CONTRACT_PBP_NUM_TABLE}
+                FROM {SETTINGS.idr_contract_pbp_num_table}
             )
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN {IDR_CLAIM_TABLE} {clm} ON
+            JOIN {SETTINGS.idr_claim_table} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
+            JOIN {SETTINGS.idr_claim_date_signature_table} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            JOIN {IDR_CLAIM_LINE_TABLE} {line} ON
+            JOIN {SETTINGS.idr_claim_line_table} {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            LEFT JOIN {IDR_CLAIM_LINE_RX_TABLE} {rx_line} ON
+            LEFT JOIN {SETTINGS.idr_claim_line_rx_table} {rx_line} ON
                 {clm}.geo_bene_sk = {rx_line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND
                 {clm}.clm_num_sk = {rx_line}.clm_num_sk
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc_gnrc_id}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc_gnrc_id}
                 ON {prvdr_srvc_gnrc_id}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
                 AND {prvdr_srvc_gnrc_id}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_prscrbng}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
                 AND {prvdr_prscrbng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN contracts {pbp_num}

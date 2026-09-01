@@ -3,7 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import DEFAULT_MAX_DATE, IDR_PRIOR_AUTH_TABLE, IDR_PROVIDER_HISTORY_TABLE
+from ..constants import DEFAULT_MAX_DATE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS_PRIOR_AUTH,
@@ -21,6 +21,7 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrPriorAuth(IdrBaseModel):
@@ -101,17 +102,17 @@ class IdrPriorAuth(IdrBaseModel):
             WITH distinct_prior_auths AS (
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn ORDER BY current_segment) as row_order
-                FROM {IDR_PRIOR_AUTH_TABLE}
+                FROM {SETTINGS.idr_prior_auth_table}
                 WHERE pa_req_rec_dt > {{MIN_TS}}
             ) 
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_att_phy}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_att_phy}
                 ON {prvdr_att_phy}.prvdr_npi_num = {prior_auth}.att_phy_npi
                 AND {prvdr_att_phy}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_order_refer}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_order_refer}
                 ON {prvdr_order_refer}.prvdr_npi_num = {prior_auth}.order_refer_npi
                 AND {prvdr_order_refer}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_render}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_render}
                 ON {prvdr_render}.prvdr_npi_num = {prior_auth}.render_npi
                 AND {prvdr_render}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             WHERE row_order = 1;

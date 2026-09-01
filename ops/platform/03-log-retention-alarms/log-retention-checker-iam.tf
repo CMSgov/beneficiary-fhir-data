@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "checker_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.checker.arn}:*"]
+    resources = ["${module.log_group_checker.arn}:*"]
   }
 
   statement {
