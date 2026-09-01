@@ -672,9 +672,9 @@
       "valueDecimal" : 3.1
     },
     {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD",
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD",
       "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD",
         "code" : "42"
       }
     },
@@ -953,7 +953,7 @@
         },
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-          "code" : "CLM_LINE_BENE_PMT_AMT",
+          "code" : "CLM_LINE_MSP_COINSRNC_AMT",
           "display" : "Line Paid By Beneficiary Amount"
         }]
       },

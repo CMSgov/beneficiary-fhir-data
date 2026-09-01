@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class EobValidityIT extends IntegrationTestBase {
 
-  private void validateEob(ExplanationOfBenefit eob) {
+  private void validateEob(String claimId, ExplanationOfBenefit eob) {
     assertFalse(eob.isEmpty(), "EOB should not be empty.");
     assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
     assertTrue(eob.hasMeta(), "EOB should have meta.");
@@ -33,7 +33,11 @@ class EobValidityIT extends IntegrationTestBase {
         "EOB should have provider, or data-absent-reason when provider/org npi is not provided");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
-    assertFalse(eob.hasExtension());
+    if (CLAIM_ID_PROFESSIONAL_MCS.equals(claimId)) {
+      assertTrue(eob.hasExtension());
+    } else {
+      assertFalse(eob.hasExtension());
+    }
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()
@@ -82,7 +86,7 @@ class EobValidityIT extends IntegrationTestBase {
       })
   void testEobReadValidity(String claimId) {
     var eob = getFhirClient().read().resource(ExplanationOfBenefit.class).withId(claimId).execute();
-    validateEob(eob);
+    validateEob(claimId, eob);
   }
 
   @Test
@@ -101,7 +105,8 @@ class EobValidityIT extends IntegrationTestBase {
     assertFalse(bundle.getEntry().isEmpty(), "Search should return results for validation");
 
     for (var entry : bundle.getEntry()) {
-      validateEob((ExplanationOfBenefit) entry.getResource());
+      var eob = (ExplanationOfBenefit) entry.getResource();
+      validateEob(eob.getIdPart(), eob);
     }
   }
 }

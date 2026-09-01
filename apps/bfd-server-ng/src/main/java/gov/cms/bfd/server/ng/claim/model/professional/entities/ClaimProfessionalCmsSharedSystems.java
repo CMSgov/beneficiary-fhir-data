@@ -102,7 +102,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
                 providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
                 Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
                 buildAuditStatusSupportingInfo()),
-            buildRxSupportingInfo(eob))
+            buildItemSupportingInfo(eob))
         .flatMap(Optional::stream)
         .toList();
   }
@@ -120,7 +120,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   }
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>
-      buildRxSupportingInfo(ExplanationOfBenefit eob) {
+      buildItemSupportingInfo(ExplanationOfBenefit eob) {
     return Stream.concat(
         // Header-level: format code, only when this is a PDE subtype claim.
         claimFormatCode
@@ -205,5 +205,10 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   @Override
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
+  }
+
+  @Override
+  protected void addExtensions(ExplanationOfBenefit eob) {
+    getClaimItems().forEach(item -> item.toFhirExtension().forEach(eob::addExtension));
   }
 }

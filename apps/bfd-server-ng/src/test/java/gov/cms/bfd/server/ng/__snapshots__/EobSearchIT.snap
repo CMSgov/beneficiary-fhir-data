@@ -23313,6 +23313,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -24708,6 +24724,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -26543,6 +26575,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -31137,6 +31177,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -32532,6 +32588,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -34367,6 +34439,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -38961,6 +39041,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -40356,6 +40452,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -42191,6 +42303,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -48065,6 +48185,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -49460,6 +49596,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -55741,6 +55893,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -57136,6 +57304,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -63417,6 +63601,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -64812,6 +65012,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -73957,6 +74173,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -75789,6 +76021,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -80399,6 +80639,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -82231,6 +82487,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -83310,6 +83574,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -84531,6 +84811,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -86245,6 +86533,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -87643,6 +87947,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -88861,6 +89181,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -97599,6 +97927,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -99431,6 +99775,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -104041,6 +104393,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -105873,6 +106241,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -106952,6 +107328,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -108173,6 +108565,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -109887,6 +110287,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -111285,6 +111701,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -112503,6 +112935,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -121241,6 +121681,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -123073,6 +123529,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -127683,6 +128147,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -129515,6 +129995,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -130594,6 +131082,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -131815,6 +132319,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -133529,6 +134041,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -134927,6 +135455,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -136145,6 +136689,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -138981,6 +139533,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -140376,6 +140944,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -145377,6 +145961,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -146772,6 +147372,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -151773,6 +152389,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -153168,6 +153800,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -155003,6 +155651,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -157839,6 +158495,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -159234,6 +159906,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -164235,6 +164923,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -165630,6 +166334,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -170631,6 +171351,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -172026,6 +172762,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -173861,6 +174613,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -176697,6 +177457,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -178092,6 +178868,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -183093,6 +183885,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -184488,6 +185296,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -189489,6 +190313,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 12.25
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -190884,6 +191724,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 98.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -192719,6 +193575,14 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
+        "valueCoding" : {
+          "code" : "73",
+          "display" : "AUSTIN, TX",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
+        }
+      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {

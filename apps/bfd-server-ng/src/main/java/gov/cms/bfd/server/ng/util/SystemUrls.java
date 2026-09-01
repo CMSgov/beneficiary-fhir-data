@@ -309,12 +309,29 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD";
 
   /**
+   * Extension URL for Claim Pricing Locality Code. Source:
+   * V2_MDCR_CLM_LINE_MCS.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD">CLM-PRFRMG-PRVDR-LCLTY-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRFRMG_PRVDR_LCLTY_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD";
+
+  /**
    * System URL for the BFD/BlueButton Claim Pricing Locality Code System. Used for the coding in
    * the CLM-PRCNG-LCLTY-CD extension. <a
    * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD">CodeSystem</a>
    */
   public static final String SYS_CLM_PRCNG_LCLTY_CD =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Pricing Locality Code System. Used for the coding in
+   * the CLM-PRFRMG-PRVDR-LCLTY-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_PRFRMG_PRVDR_LCLTY_CD_URL =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD";
 
   /**
    * Extension URL for Claim Primary Payer Code. Source: V2_MDCR_CLM_LINE_PRFNL.CLM_PRMRY_PYR_CD

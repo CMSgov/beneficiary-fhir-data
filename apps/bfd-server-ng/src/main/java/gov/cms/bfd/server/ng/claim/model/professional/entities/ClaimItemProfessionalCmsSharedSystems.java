@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRxNumber;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingLocalityCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineHCTHGBTestTypeCode;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalSharedSystems;
@@ -19,10 +20,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
@@ -49,6 +53,9 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
 
   @Column(name = "clm_line_rbndlg_crtfctn_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
+
+  @Column(name = "clm_line_prfrmg_prvdr_lclty_cd")
+  private Optional<ClaimPricingLocalityCode> pricingLocalityCode;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
@@ -126,5 +133,16 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
           observation.addPerformer(new Reference().setIdentifier(identifier));
         });
     return Optional.of(observation);
+  }
+
+  /**
+   * Returns a list of Extension for FHIR.
+   *
+   * @return List
+   */
+  public List<Extension> toFhirExtension() {
+    return Stream.of(pricingLocalityCode.map(ClaimPricingLocalityCode::toFhirMcs))
+        .flatMap(Optional::stream)
+        .toList();
   }
 }

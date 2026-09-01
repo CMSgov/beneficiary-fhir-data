@@ -89,6 +89,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
+    addExtensions(eob);
 
     return sortedEob(eob);
   }
@@ -229,4 +230,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                     .computeIfAbsent(key, _ -> new ArrayList<>())
                     .add(diagnosisComponent.getSequence()));
   }
+
+  protected void addExtensions(ExplanationOfBenefit eob) {}
 }

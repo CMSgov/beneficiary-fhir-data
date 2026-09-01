@@ -498,6 +498,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 12.25
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
   } ],
   "billablePeriod" : {
     "end" : "2021-10-03",
@@ -1896,6 +1912,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "CLM_TOT_CNTRCTL_AMT",
         "display" : "Total Contractual Amount Discrepancy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 98.22
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+        "display" : "Secondary Payment Coinsurance Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }

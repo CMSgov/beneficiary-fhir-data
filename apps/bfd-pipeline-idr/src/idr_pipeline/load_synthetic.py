@@ -24,6 +24,7 @@ from .constants import (
     IDR_CLAIM_FISS_TABLE,
     IDR_CLAIM_INSTITUTIONAL_TABLE,
     IDR_CLAIM_LINE_DOCUMENTATION_TABLE,
+    IDR_CLAIM_LINE_FISS_TABLE,
     IDR_CLAIM_LINE_INSTITUTIONAL_TABLE,
     IDR_CLAIM_LINE_MCS_TABLE,
     IDR_CLAIM_LINE_PROFESSIONAL_TABLE,
@@ -115,6 +116,10 @@ tables = [
     {
         "csv_name": "SYNTHETIC_CLM_LINE_MCS.csv",
         "table": IDR_CLAIM_LINE_MCS_TABLE,
+    },
+    {
+        "csv_name": "SYNTHETIC_CLM_FISS.csv",
+        "table": IDR_CLAIM_LINE_FISS_TABLE,
     },
 ]
 
