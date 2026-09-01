@@ -102,4 +102,13 @@ public class DateUtil {
   public LocalDate nowAoe() {
     return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
+
+  /**
+   * Returns UTC now.
+   *
+   * @return local date
+   */
+  public LocalDate nowUtc() {
+    return LocalDate.now(clock.withZone(ZONE_ID_UTC));
+  }
 }

@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.loadprogress;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class LoadProgressRepository {
   @PersistenceContext private EntityManager entityManager;
+  private DateUtil dateUtil;
 
   /**
    * Returns the global max batch completion timestamp or {@link DateUtil#MIN_DATETIME} if none.
@@ -24,15 +24,22 @@ public class LoadProgressRepository {
    * @return latest timestamp
    */
   public ZonedDateTime lastUpdated() {
+    // We should only take into account data from the main pipeline
+    // since other pipelines are likely being used for backfills
+    final var defaultJobId = 1;
     // COALESCE is needed here in case no batches have been loaded.
     return entityManager
         .createQuery(
             """
             SELECT COALESCE(MAX(p.batchCompletionTimestamp), :defaultDate)
             FROM LoadProgress p
+            WHERE p.jobId = :defaultJobId
             """,
             ZonedDateTime.class)
-        .setParameter("defaultDate", LocalDate.EPOCH)
+        // Per user request, it's desirable to default to the current timestamp here to show that no
+        // data has changed
+        .setParameter("defaultDate", dateUtil.nowUtc())
+        .setParameter("defaultJobId", defaultJobId)
         .getSingleResult();
   }
 }
