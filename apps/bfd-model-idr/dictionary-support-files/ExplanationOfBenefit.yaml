@@ -513,10 +513,7 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
-    - HHA
-    - Hospice
     - Outpatient
-    - SNF
   sources:
     - NCH
     - FISS
@@ -531,10 +528,7 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
   appliesTo:
     - Inpatient
-    - HHA
-    - Hospice
     - Outpatient
-    - SNF
   sources:
     - NCH
     - FISS
@@ -1946,8 +1940,6 @@
     - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
-    - HHA
-    - Hospice
     - Inpatient
     - Outpatient
     - SNF
@@ -2610,7 +2602,6 @@
     - Outpatient
     - SNF
     - HHA
-    - Hospice
   sources:
     - NCH
     - FISS
@@ -3806,8 +3797,6 @@
     - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
   appliesTo:
-    - HHA
-    - Hospice
     - Inpatient
     - Outpatient
     - SNF
@@ -4471,10 +4460,8 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_OUTLR_AMT
   appliesTo:
     - HHA
-    - Hospice
     - Inpatient
     - Outpatient
-    - SNF
   sources:
     - NCH
     - FISS
@@ -4485,11 +4472,7 @@
     - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_MDCR_NEW_TECH_AMT
   appliesTo:
-    - HHA
-    - Hospice
     - Inpatient
-    - Outpatient
-    - SNF
   sources:
     - NCH
     - FISS
@@ -4515,7 +4498,6 @@
     - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_MIPS_PMT_AMT
   appliesTo:
-    - Hospice
     - Outpatient
   sources:
     - NCH
