@@ -110,8 +110,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -206,8 +211,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -302,8 +312,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -423,8 +438,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -520,8 +540,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -694,8 +719,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -868,8 +898,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
@@ -1049,8 +1084,13 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
         } ],
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
       }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
-        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+        "extension" : [ {
+          "url" : "image",
+          "valueAttachment" : {
+            "url" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension"
       }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
