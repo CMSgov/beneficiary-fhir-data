@@ -89,6 +89,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "Part A"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -161,6 +185,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "Part B"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -233,6 +281,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "Part C"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -330,6 +402,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "289653"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -403,6 +499,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "Dual Medicare/Medicaid"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -553,6 +673,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
         "value" : "Dual Medicare/Medicaid"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -703,6 +847,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
         "value" : "Part A"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
@@ -860,6 +1028,30 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
         "value" : "Part B"
       } ],
       "extension" : [ {
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension",
+          "valueCoding" : {
+            "code" : "#F4FEFF",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension",
+          "valueCoding" : {
+            "code" : "#092E86",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        }, {
+          "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension",
+          "valueCoding" : {
+            "code" : "#335097",
+            "system" : "http://terminology.hl7.org/CodeSystem/IECColourManagement"
+          }
+        } ],
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension"
+      }, {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension",
+        "valueString" : "https://www.hhs.gov/sites/default/files/logo-white-lg.png"
+      }, {
         "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
         "valueAnnotation" : {
           "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."

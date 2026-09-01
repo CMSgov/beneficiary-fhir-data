@@ -169,6 +169,8 @@ group createC4DICCoveragePartA(source src: CoverageBase, target tgt: C4DICCovera
         } "Add end date as variable";
     } "Add status";
 
+    src -> tgt then addC4DICColorPaletteAndLogoExtension(src, tgt) "Add color palette and logo";
+
     //Current Entitlement Reason Code Extension
     src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
@@ -185,7 +187,6 @@ group createC4DICCoveragePartA(source src: CoverageBase, target tgt: C4DICCovera
             src -> tgtAnnotation.text = "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley." "Add placeholder text";
         } "Add annotation value";
     } "Add C4DIC Additional Card Information extension";
-
 }
 
 //Create C4DIC Coverage for Part B
@@ -244,7 +245,9 @@ group createC4DICCoveragePartB(source src: CoverageBase, target tgt: C4DICCovera
             src.BENE_RNG_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
         } "Add end date as variable";
     } "Add status";
-    
+
+    src -> tgt then addC4DICColorPaletteAndLogoExtension(src, tgt) "Add color palette and logo";
+
     //Current Entitlement Reason Code Extension
     src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
@@ -261,7 +264,6 @@ group createC4DICCoveragePartB(source src: CoverageBase, target tgt: C4DICCovera
             src -> tgtAnnotation.text = "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley." "Add placeholder text";
         } "Add annotation value";
     } "Add C4DIC Additional Card Information extension";
-
 }
 
 //Create C4DIC Coverage for Part C
@@ -320,6 +322,8 @@ group createC4DICCoveragePartC(source src: CoverageBase, target tgt: C4DICCovera
             src.BENE_ENRLMT_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
         } "Add end date as variable";
     } "Add status";
+
+    src -> tgt then addC4DICColorPaletteAndLogoExtension(src, tgt) "Add color palette and logo";
 }
 
 //Create C4DIC Coverage for Part D with RX elements
@@ -400,6 +404,8 @@ group createC4DICCoveragePartD(source src: CoverageBase, target tgt: C4DICCovera
             src.BENE_ENRLMT_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
         } "Add end date as variable";
     } "Add status";
+
+    src -> tgt then addC4DICColorPaletteAndLogoExtension(src, tgt) "Add color palette and logo";
 }
 
 //Create C4DIC Coverage for DUAL

@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
@@ -135,6 +136,32 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
+
+      // Color Extension
+      var colorExtension = new Extension(SystemUrls.C4DIC_COLOR_PALETTE_EXT_URL);
+
+      var foregroundColorExtension = new Extension(SystemUrls.C4DIC_FOREGROUNDCOLOR_EXT_URL);
+      foregroundColorExtension.setValue(
+          new Coding(SystemUrls.C4DIC_COLORS_CODE_SYSTEM, SystemUrls.C4DIC_FOREGROUNDCOLOR, null));
+      colorExtension.addExtension(foregroundColorExtension);
+
+      var backgroundColorExtension = new Extension(SystemUrls.C4DIC_BACKGROUNDCOLOR_EXT_URL);
+      backgroundColorExtension.setValue(
+          new Coding(SystemUrls.C4DIC_COLORS_CODE_SYSTEM, SystemUrls.C4DIC_BACKGROUNDCOLOR, null));
+      colorExtension.addExtension(backgroundColorExtension);
+
+      var highlightColorExtension = new Extension(SystemUrls.C4DIC_HIGHLIGHTCOLOR_EXT_URL);
+      highlightColorExtension.setValue(
+          new Coding(SystemUrls.C4DIC_COLORS_CODE_SYSTEM, SystemUrls.C4DIC_HIGHLIGHTCOLOR, null));
+      colorExtension.addExtension(highlightColorExtension);
+
+      coverage.addExtension(colorExtension);
+
+      // Logo Extension
+      var logoExtension = new Extension(SystemUrls.C4DIC_LOGO_EXT_URL);
+      logoExtension.setValue(new StringType(SystemUrls.C4DIC_LOGO_URL));
+      coverage.addExtension(logoExtension);
+
     } else {
       coverage.setId(coverageCompositeId.fullId());
       coverage.setMeta(meta.toFhir(profileType, coveragePart));
