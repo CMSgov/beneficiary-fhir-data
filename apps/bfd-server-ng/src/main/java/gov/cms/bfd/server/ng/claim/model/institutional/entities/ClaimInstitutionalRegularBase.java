@@ -57,11 +57,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   }
 
   @Override
-  public List<ClaimValue> getClaimValues() {
-    return List.of();
-  }
-
-  @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   @Override
@@ -72,11 +67,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return Collections.emptySortedSet();
   }
 
   @Override
