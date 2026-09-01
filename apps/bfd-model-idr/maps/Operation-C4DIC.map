@@ -465,6 +465,8 @@ group createC4DICCoverageDual(source src: CoverageBase, target tgt: C4DICCoverag
         } "Add end date as variable";
     } "Add status";
 
+    src -> tgt then addC4DICColorPaletteAndLogoExtension(src, tgt) "Add color palette and logo";
+
     //C4DIC Additional Card Information Extension
     src -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension" "Add url";
@@ -527,5 +529,50 @@ group createC4DICOrganizationInsurer(source src: CoverageBase, target tgt: C4DIC
             
     } "set organization contact info";
     */
+}
+
+// Color Palette + Logo Extension
+group addC4DICColorPaletteAndLogoExtension(source src : CoverageBase, target tgt : C4DICCoverage){
+
+    src -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension" "Add url";
+        src -> tgtExtension.extension = create('Extension') as fgExt then{
+            src -> fgExt.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension" "Add url";
+            src -> fgExt.value = create('CodeableConcept') as fgCC then{
+                src -> fgCC.coding = create('Coding') as fgCoding then{
+                    src -> fgCoding.system = "http://terminology.hl7.org/CodeSystem/IECColourManagement" "add system";
+                    src -> fgCoding.code = "#F4FEFF" "add code";
+                } "Add foreground coding";
+            } "Add foreground value";
+        } "Add foreground color extension";
+        src -> tgtExtension.extension = create('Extension') as bgExt then{
+            src -> bgExt.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension" "Add url";
+            src -> bgExt.value = create('CodeableConcept') as bgCC then{
+                src -> bgCC.coding = create('Coding') as bgCoding then{
+                    src -> bgCoding.system = "http://terminology.hl7.org/CodeSystem/IECColourManagement" "add system";
+                    src -> bgCoding.code = "#092E86" "add code";
+                } "Add background coding";
+            } "Add background value";
+        } "Add background color extension";
+        src -> tgtExtension.extension = create('Extension') as hlExt then{
+            src -> hlExt.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension" "Add url";
+            src -> hlExt.value = create('CodeableConcept') as hlCC then{
+                src -> hlCC.coding = create('Coding') as hlCoding then{
+                    src -> hlCoding.system = "http://terminology.hl7.org/CodeSystem/IECColourManagement" "add system";
+                    src -> hlCoding.code = "#335097" "add code";
+                } "Add highlight coding";
+            } "Add highlight value";
+        } "Add highlight color extension";
+    } "Add C4DIC Color Palette extension";
+
+    src -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension" "Add url";
+        src -> tgtExtension.extension = create('Extension') as imgExt then{
+            src -> imgExt.url = "image" "Add url";
+            src -> imgExt.value = create('Attachment') as att then{
+                src -> att.url = "https://www.hhs.gov/sites/default/files/logo-white-lg.png" "Add attachment url";
+            } "Add image attachment";
+        } "Add image sub-extension";
+    } "Add C4DIC Logo extension";
 }
 
