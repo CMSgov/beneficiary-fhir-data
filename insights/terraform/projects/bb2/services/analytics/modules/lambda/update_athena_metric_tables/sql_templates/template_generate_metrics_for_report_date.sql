@@ -202,7 +202,7 @@ applications_state_metrics AS (
       )
     AND
       name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
-                   'MyMedicare PROD', 'new-relic')
+                   'MyMedicare PROD', 'new-relic', 'datadog')
 ),
 /* Select all top level global state metrics from 
    nightly global state event
@@ -539,6 +539,12 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
         app_fhir_v3_generate_insurance_card_call_synthetic_count
       ) app_all_fhir_v3_generate_insurance_card_call_synthetic_count,
       "sum"(
+        app_fhir_v3_eob_shared_systems_call_real_count
+      ) app_all_fhir_v3_eob_shared_systems_call_real_count,
+      "sum"(
+        app_fhir_v3_eob_shared_systems_call_synthetic_count
+      ) app_all_fhir_v3_eob_shared_systems_call_synthetic_count,
+      "sum"(
         app_auth_ok_real_bene_count
       ) app_all_auth_ok_real_bene_count,
       "sum"(
@@ -746,7 +752,7 @@ v1_fhir_events AS (
       and response_code = 200
       AND
         app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
-                     'MyMedicare PROD', 'new-relic')
+                     'MyMedicare PROD', 'new-relic', 'datadog')
     )
 ),
 
@@ -768,7 +774,7 @@ v2_fhir_events AS (
       and response_code = 200
       AND
         app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
-                     'MyMedicare PROD', 'new-relic')
+                     'MyMedicare PROD', 'new-relic', 'datadog')
     )
 ),
 
@@ -790,7 +796,7 @@ v3_fhir_events AS (
       and response_code = 200
       AND
         app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
-                     'MyMedicare PROD', 'new-relic')
+                     'MyMedicare PROD', 'new-relic', 'datadog')
     )
 ),
 
@@ -813,7 +819,7 @@ auth_events AS (
       and vpc = '${ENV}'
       AND
         auth_app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
-                     'MyMedicare PROD', 'new-relic')
+                     'MyMedicare PROD', 'new-relic', 'datadog')
     )
 )
 
