@@ -57,7 +57,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=50.0.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
-    { name = "snowflake-connector-python", specifier = ">=4.7.1" },
+    { name = "snowflake-connector-python", specifier = ">=4.7.2" },
 ]
 
 [package.metadata.requires-dev]
