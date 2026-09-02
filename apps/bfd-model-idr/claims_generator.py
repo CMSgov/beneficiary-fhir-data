@@ -789,7 +789,7 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
     help=(
         "Destination to write generated synthetic data where snowflake is our synthetic snowflake "
         "environment and csv is the default out directory. "
-        "Requires load-credentials.sh sourced first."
+        "Requires load-synthetic-credentials.sh sourced first."
     ),
 )
 @click.option(
@@ -862,16 +862,25 @@ def generate(
         PRAUC: [],
     }
     load_file_dict(files=files, paths=list(paths))
-    gen_utils.cntrct_pbp_num = [row.kv for row in files[CNTRCT_PBP_NUM]]
 
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in files}
 
-    if not files[BENE_HSTRY] and not files[CLM] and not files[CNTRCT_PBP_NUM]:
+    if (
+        destination == "csv"
+        and not files[BENE_HSTRY]
+        and not files[CLM]
+        and not files[CNTRCT_PBP_NUM]
+    ):
         print(
             f"{BENE_HSTRY} and {CNTRCT_PBP_NUM} and/or {CLM} must be provided for "
             f"claims data generation to proceed"
         )
         sys.exit(1)
+
+    gen_utils.cntrct_pbp_num = get_cntrct_pbp_nums(
+        files=files,
+        writer=writer,
+    )
 
     other_util = OtherGeneratorUtil()
 
@@ -894,18 +903,7 @@ def generate(
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
-    clm_bene_sks = (
-        [int(row[f.BENE_SK]) for row in files[CLM]]
-        if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
-        else []
-    )
-    bene_hstry_bene_sks = (
-        [int(row[f.BENE_SK]) for row in files[BENE_HSTRY]]
-        if bene_sk_mode == BeneSkMode.BENE_HSTRY or bene_sk_mode == BeneSkMode.BOTH
-        else []
-    )
-    all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
-    ordered_bene_sks = list(OrderedDict.fromkeys(x for x in all_bene_sks))
+    ordered_bene_sks = get_bene_sks(files=files, writer=writer, bene_sk_mode=bene_sk_mode)
 
     # Regenerating existing data implies that we need a way to uniquely address a single row/set of
     # rows for each claims table per-CLM. We could do this via list comprehensions/scanning each
@@ -1331,6 +1329,38 @@ def generate(
         writer,
         truncate,
     )
+
+
+def get_bene_sks(
+    files: dict[str, list[RowAdapter]],
+    writer: OutputDestinationWriter,
+    bene_sk_mode: BeneSkMode,
+) -> list[int]:
+    if isinstance(writer, SnowflakeWriter):
+        return writer.get_bene_sks()
+
+    clm_bene_sks = (
+        [int(row[f.BENE_SK]) for row in files[CLM]]
+        if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
+        else []
+    )
+    bene_hstry_bene_sks = (
+        [int(row[f.BENE_SK]) for row in files[BENE_HSTRY]]
+        if bene_sk_mode == BeneSkMode.BENE_HSTRY or bene_sk_mode == BeneSkMode.BOTH
+        else []
+    )
+    all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
+    return list(OrderedDict.fromkeys(x for x in all_bene_sks))
+
+
+def get_cntrct_pbp_nums(
+    files: dict[str, list[RowAdapter]],
+    writer: OutputDestinationWriter,
+) -> list[dict[str, Any]]:
+    if isinstance(writer, SnowflakeWriter):
+        return writer.get_cntrct_pbp_nums()
+
+    return [row.kv for row in files[CNTRCT_PBP_NUM]]
 
 
 if __name__ == "__main__":

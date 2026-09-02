@@ -14,7 +14,6 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Self
 
-import numpy as np
 import pandas as pd
 import tqdm
 from dateutil.parser import parse
@@ -33,7 +32,7 @@ BENE_XREF = "SYNTHETIC_BENE_XREF"
 BENE_DUAL = "SYNTHETIC_BENE_CMBND_DUAL_MDCR"
 BENE_MAPD_ENRLMT = "SYNTHETIC_BENE_MAPD_ENRLMT"
 BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
-BENE_LIS_CMBND = "SYNTHETIC_BENE_LIS_CMBND"
+BENE_LIS_CMBND = "SYNTHETIC_BENE_CMBND_LIS"
 CLM = "SYNTHETIC_CLM"
 CLM_LINE = "SYNTHETIC_CLM_LINE"
 CLM_LINE_DCMTN = "SYNTHETIC_CLM_LINE_DCMTN"
@@ -351,22 +350,22 @@ the next valid identifier _encode_identifier """
 
 
 def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
-    character_positions = [
-        alphabet.index(char) for char, alphabet in zip(value, position_alphabets, strict=False)
-    ]
-    radices = tuple(len(alphabet) for alphabet in position_alphabets)
-    return int(np.ravel_multi_index(character_positions, radices))
+    position = 0
+    for char, alphabet in zip(value, position_alphabets, strict=False):
+        position = position * len(alphabet) + alphabet.index(char)
+    return position
 
 
 def _encode_identifier(position: int, position_alphabets: list[str]) -> str:
-    radices = tuple(len(alphabet) for alphabet in position_alphabets)
-    character_positions = np.unravel_index(position, radices)
-    return "".join(
-        alphabet[character_position]
-        for alphabet, character_position in zip(
-            position_alphabets, character_positions, strict=False
-        )
-    )
+    characters = []
+    for alphabet in reversed(position_alphabets):
+        position, character_position = divmod(position, len(alphabet))
+        characters.append(alphabet[character_position])
+
+    if position != 0:
+        raise ValueError("position exceeds capacity for these alphabets")
+
+    return "".join(reversed(characters))
 
 
 class SequentialIdGenerator(IdGenerator):

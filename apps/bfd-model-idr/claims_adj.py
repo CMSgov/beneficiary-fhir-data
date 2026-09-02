@@ -766,7 +766,7 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_LINE_PMD_UNIQ_TRKNG_NUM] = gen_utils.id_gen.gen_basic_id(
                 field=f.CLM_LINE_PMD_UNIQ_TRKNG_NUM,
                 length=13,  # varchar(14) so 13 + 1 for '-' prefix
-                allowed_chars=string.ascii_uppercase + string.digits,
+                alphabet=string.ascii_uppercase + string.digits,
             )
 
         if clm_type_cd >= 71 and clm_type_cd <= 82:

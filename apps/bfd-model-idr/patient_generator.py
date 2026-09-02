@@ -86,7 +86,8 @@ parser.add_argument(
     choices=["csv", "snowflake"],
     default="csv",
     help="Destination to write generated synthetic data where snowflake is our synthetic snowflake "
-    "environment and csv is the default out directory. Requires load-credentials.sh sourced first.",
+    "environment and csv is the default out directory. Requires load-synthetic-credentials.sh "
+    "sourced first.",
 )
 parser.add_argument(
     "--truncate",
