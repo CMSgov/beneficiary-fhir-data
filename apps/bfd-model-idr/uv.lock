@@ -320,7 +320,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "cryptography", specifier = ">=49.0.0" },
+    { name = "cryptography", specifier = ">=50.0.0" },
     { name = "faker", specifier = ">=37.1.0" },
     { name = "idr-pipeline", editable = "../bfd-pipeline-idr" },
     { name = "pandas", specifier = ">=3.0.2" },
@@ -376,7 +376,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.3.3" },
     { name = "pydantic", specifier = ">=2.13.3" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
-    { name = "snowflake-connector-python", specifier = ">=4.7.1" },
+    { name = "snowflake-connector-python", specifier = ">=4.7.2" },
     { name = "snowflake-snowpark-python", specifier = ">=1.54.0" },
     { name = "tblib", specifier = ">=3.2.2" },
     { name = "unidecode", specifier = ">=1.4.0" },
