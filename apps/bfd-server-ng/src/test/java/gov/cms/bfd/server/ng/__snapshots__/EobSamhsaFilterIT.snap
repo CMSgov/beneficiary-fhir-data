@@ -4122,6 +4122,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "8",
+            "display" : "Reserved",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -7424,6 +7425,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -11421,6 +11423,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "8",
+            "display" : "Reserved",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -13342,6 +13345,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -17020,6 +17024,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -21017,6 +21022,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "8",
+            "display" : "Reserved",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -22938,6 +22944,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },

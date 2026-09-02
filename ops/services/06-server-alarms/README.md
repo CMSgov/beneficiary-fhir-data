@@ -73,6 +73,7 @@ Along with the summary, the alert includes various links to Log Insights queries
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_log_group_alerter"></a> [log\_group\_alerter](#module\_log\_group\_alerter) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -84,7 +85,6 @@ Along with the summary, the alert includes various links to Log Insights queries
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_group.alerter](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.elb_healthy_hosts](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.samhsa_mismatch_error](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.server_log_availability_1hr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |

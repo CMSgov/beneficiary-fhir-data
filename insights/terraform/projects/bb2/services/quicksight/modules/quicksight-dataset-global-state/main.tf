@@ -785,6 +785,10 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state" {
         name = "app_all_unsuccessful_patient_match_call"
         type = "INTEGER"
       }
+      input_columns {
+        name = "app_all_fhir_v3_eob_shared_systems_call_real_count"
+        type = "INTEGER"
+      }
     }
   }
 

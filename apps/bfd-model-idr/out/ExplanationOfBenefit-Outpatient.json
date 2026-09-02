@@ -611,7 +611,7 @@
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD",
         "code" : "3",
-        "display" : "Elective"
+        "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations."
       }]
     }
   },

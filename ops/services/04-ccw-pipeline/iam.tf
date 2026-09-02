@@ -166,7 +166,7 @@ data "aws_iam_policy_document" "ccw_execution_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.ccw_messages.arn}:*"]
+    resources = ["${module.log_group_ccw_messages.arn}:*"]
   }
 }
 

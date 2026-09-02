@@ -150,13 +150,16 @@ resource "aws_ecs_task_definition" "this" {
             name  = "BFD_DB_ENDPOINT"
             value = data.aws_rds_cluster.main.reader_endpoint
           },
+          {
+            name  = "IDR_STRUCTURED_LOGS",
+            value = "1"
+          },
           # TODO: Unexclude these tables when they work correctly
           {
             name = "IDR_EXCLUDE_TABLES"
-            value = join(",", [
+            value = join(" ", [
               "idr.prior_auth",
               "idr.prior_auth_item",
-              "idr.beneficiary_low_income_subsidy_cmbnd"
             ])
           },
           # TODO: Uncommment this after BFD-4796 resolves known inconsistencies

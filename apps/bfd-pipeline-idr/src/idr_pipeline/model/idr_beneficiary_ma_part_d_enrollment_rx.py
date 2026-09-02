@@ -3,7 +3,6 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import IDR_BENE_MA_PART_D_RX_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS_HSTRY,
@@ -19,6 +18,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
@@ -61,7 +61,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM {IDR_BENE_MA_PART_D_RX_TABLE} enrlmt_rx {{TABLESAMPLE}}
+                FROM {SETTINGS.idr_bene_ma_part_d_rx_table} enrlmt_rx {{TABLESAMPLE}}
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry, start_time)}

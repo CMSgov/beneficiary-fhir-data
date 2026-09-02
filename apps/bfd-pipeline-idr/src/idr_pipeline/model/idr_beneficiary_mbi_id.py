@@ -3,7 +3,6 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import IDR_BENE_MBI_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     BATCH_TIMESTAMP,
@@ -17,6 +16,7 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
@@ -51,7 +51,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
                SELECT {{COLUMNS}}
-               FROM {IDR_BENE_MBI_TABLE} {{TABLESAMPLE}}
+               FROM {SETTINGS.idr_bene_mbi_table} {{TABLESAMPLE}}
                    {{WHERE_CLAUSE}}
                    {{ORDER_BY}}
                    {{LIMIT}}

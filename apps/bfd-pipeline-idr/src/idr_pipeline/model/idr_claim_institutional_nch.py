@@ -6,11 +6,6 @@ from pydantic import BeforeValidator
 from ..constants import (
     CLAIM_INSTITUTIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_DOCUMENTATION_TABLE,
-    IDR_CLAIM_INSTITUTIONAL_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
@@ -33,8 +28,10 @@ from ..model.base_model import (
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
+    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
+    NPI_TYPE_BACKFILL_COMPARE,
     PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
@@ -52,6 +49,8 @@ from ..model.base_model import (
     clm_query,
     clm_rlt_cond_sgntr_query,
     clm_rlt_ocrnc_clause,
+    legacy_institutional_specialty_npi_type_expr,
+    legacy_service_npi_type_expr_for_context,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     provider_npi_type_expr,
@@ -59,6 +58,7 @@ from ..model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimInstitutionalNch(IdrBaseModel):
@@ -313,15 +313,19 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_ATNDG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_atndg_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_ATNDG)}
+    ]
+    legacy_prvdr_atndg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_atndg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_atndg_npi_type"},
+    ]
     bfd_prvdr_atndg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_ATNDG, "ATNDG")},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_atndg_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_ATNDG)},
     ]
 
     prvdr_rfrg_prvdr_npi_num: Annotated[
@@ -329,15 +333,17 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_rfrg_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}]
+    legacy_prvdr_rfrg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_rfrg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_rfrg_npi_type"},
+    ]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, "RFRG")},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_rfrg_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)},
     ]
 
     prvdr_othr_prvdr_npi_num: Annotated[
@@ -345,15 +351,17 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OTHR},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_othr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)}]
+    legacy_prvdr_othr_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_othr_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_othr_npi_type"},
+    ]
     bfd_prvdr_othr_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OTHR, "OTHR")},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_othr_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)},
     ]
 
     prvdr_oprtg_prvdr_npi_num: Annotated[
@@ -361,15 +369,19 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OPRTG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_oprtg_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OPRTG)}
+    ]
+    legacy_prvdr_oprtg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_oprtg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_oprtg_npi_type"},
+    ]
     bfd_prvdr_oprtg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OPRTG, "OPRTG")},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_oprtg_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OPRTG)},
     ]
 
     prvdr_rndrg_prvdr_npi_num: Annotated[
@@ -377,15 +389,19 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_rndrg_npi_type: Annotated[
+        int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)}
+    ]
+    legacy_prvdr_rndrg_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_institutional_specialty_npi_type_expr("clm_rndrg_fed_prvdr_spclty_cd")},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_rndrg_npi_type"},
+    ]
     bfd_prvdr_rndrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, "RNDRG")},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_rndrg_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RNDRNG)},
     ]
 
     prvdr_srvc_prvdr_npi_num: Annotated[
@@ -393,15 +409,17 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_srvc_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)}]
+    legacy_prvdr_srvc_prvdr_npi_type: Annotated[
+        int | None,
+        {EXPR: legacy_service_npi_type_expr_for_context(True)},
+        {INSERT_EXCLUDE: True},
+        {NPI_TYPE_BACKFILL_COMPARE: "bfd_prvdr_srvc_npi_type"},
+    ]
     bfd_prvdr_srvc_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_prvdr_srvc_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_SRVC)},
     ]
 
     prvdr_blg_prvdr_npi_num: Annotated[
@@ -409,6 +427,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -418,11 +437,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         str,
         {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_BLG)},
         BeforeValidator(transform_default_string),
-    ]
-
-    bfd_blg_prvdr_npi_type: Annotated[
-        int | None,
-        {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)},
     ]
 
     # Columns from V2_MDCR_CLM_RLT_COND_SGNTR_MBR
@@ -521,9 +535,9 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query(IDR_CLAIM_INSTITUTIONAL_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_institutional_table)}
                 UNION
-                {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_documentation_table)}
                 UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
@@ -539,42 +553,42 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 ({claim_related_conditions_cte(source)})
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN {IDR_CLAIM_TABLE} {clm} ON
+            JOIN {SETTINGS.idr_claim_table} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
+            JOIN {SETTINGS.idr_claim_date_signature_table} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            LEFT JOIN {IDR_CLAIM_INSTITUTIONAL_TABLE} {instnl} ON
+            LEFT JOIN {SETTINGS.idr_claim_institutional_table} {instnl} ON
                 {clm}.geo_bene_sk = {instnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            LEFT JOIN {IDR_CLAIM_DOCUMENTATION_TABLE} {dcmtn} ON
+            LEFT JOIN {SETTINGS.idr_claim_documentation_table} {dcmtn} ON
                 {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_atng} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_atng} ON
                 {prvdr_atng}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_atng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rfrg} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rfrg} ON
                 {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num AND
                 {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_blg} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_blg} ON
                 {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num AND
                 {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_oprtg} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_oprtg} ON
                 {prvdr_oprtg}.prvdr_npi_num = {clm}.prvdr_oprtg_prvdr_npi_num AND
                 {prvdr_oprtg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rndrg} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rndrg} ON
                 {prvdr_rndrg}.prvdr_npi_num = {clm}.prvdr_rndrng_prvdr_npi_num AND
                 {prvdr_rndrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_othr} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_othr} ON
                 {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num AND
                 {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc} ON
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc} ON
                 {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num AND
                 {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN claim_related_conditions {rlt_cond}

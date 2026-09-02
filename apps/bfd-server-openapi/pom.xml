@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-parent</artifactId>
-        <version>2.265.0-SNAPSHOT</version>
+        <version>2.267.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-openapi</artifactId>
@@ -13,6 +13,45 @@
     <properties>
         <sonar.sources>src/main/java,src/main/resources/gov/cms/bfd/server/openapi</sonar.sources>
     </properties>
+
+    <!-- Fix for CVE-2026-10050 (Jetty Digest auth bypass): pin the test-scope jetty-security
+         pulled in transitively by hapi-fhir-test-utilities (12.0.34) to the patched 12.0.36
+         release. Scoped to this module only so it doesn't disturb the jetty version that
+         spring-boot-starter-jetty manages consistently for bfd-server-ng. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-servlets</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.websocket</groupId>
+                <artifactId>jetty-websocket-jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10.websocket</groupId>
+                <artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10.websocket</groupId>
+                <artifactId>jetty-ee10-websocket-jakarta-client</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- HAPI FHIR -->

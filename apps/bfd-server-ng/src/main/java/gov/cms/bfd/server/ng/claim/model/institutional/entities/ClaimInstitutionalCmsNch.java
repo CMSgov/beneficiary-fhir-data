@@ -109,7 +109,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     serviceProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
         .ifPresent(eob::addCareTeam);
   }
 
