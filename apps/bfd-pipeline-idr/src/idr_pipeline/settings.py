@@ -394,12 +394,6 @@ class _Settings:
         )
 
     @property
-    def idr_contract_pbp_contact_table(self) -> str:
-        return self._qualified_path(
-            self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_cntrct_pbp_cntct"
-        )
-
-    @property
     def idr_contract_pbp_segment_table(self) -> str:
         return self._qualified_path(self._IDR_DATABASE, self._IDR_SCHEMA, "v2_mdcr_cntrct_pbp_sgmt")
 
