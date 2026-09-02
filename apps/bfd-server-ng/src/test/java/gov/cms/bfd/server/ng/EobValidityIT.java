@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class EobValidityIT extends IntegrationTestBase {
 
-  private void validateEob(String claimId, ExplanationOfBenefit eob) {
+  private void validateEob(ExplanationOfBenefit eob) {
     assertFalse(eob.isEmpty(), "EOB should not be empty.");
     assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
     assertTrue(eob.hasMeta(), "EOB should have meta.");
@@ -81,7 +81,7 @@ class EobValidityIT extends IntegrationTestBase {
       })
   void testEobReadValidity(String claimId) {
     var eob = getFhirClient().read().resource(ExplanationOfBenefit.class).withId(claimId).execute();
-    validateEob(claimId, eob);
+    validateEob(eob);
   }
 
   @Test
@@ -101,7 +101,7 @@ class EobValidityIT extends IntegrationTestBase {
 
     for (var entry : bundle.getEntry()) {
       var eob = (ExplanationOfBenefit) entry.getResource();
-      validateEob(eob.getIdPart(), eob);
+      validateEob(eob);
     }
   }
 }
