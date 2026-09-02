@@ -161,7 +161,6 @@ class PacGeneratorUtil:
         clm_fiss[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_fiss[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
         clm_fiss[f.CLM_PPS_IND] = random.choice(["N", "Y"])
-        clm_fiss[f.CLM_LINE_MSP_COINSRNC_AMT] = round(random.uniform(5, 100), 2)
 
         add_meta_timestamps(clm_fiss, clm)
 
@@ -395,6 +394,23 @@ class PacGeneratorUtil:
 
             add_meta_timestamps(clm_mcs, clm)
             return clm_mcs
+
+    def gen_pac_clm_line_fiss(
+            self, clm: RowAdapter,
+            clm_line_num: int,
+
+        ) -> RowAdapter:
+            clm_line_fiss = RowAdapter({})
+
+            clm_line_fiss[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+            clm_line_fiss[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+            clm_line_fiss[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+            clm_line_fiss[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+            clm_line_fiss[f.CLM_LINE_NUM] = clm_line_num
+            clm_line_fiss[f.CLM_LINE_MSP_COINSRNC_AMT] = round(random.uniform(5, 100), 2)
+
+            add_meta_timestamps(clm_line_fiss, clm)
+            return clm_line_fiss
 
     def gen_pac_clm_dcmtn(self, clm: RowAdapter, init_clm_dcmtn: RowAdapter | None = None):
         if not init_clm_dcmtn:

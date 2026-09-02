@@ -83,11 +83,11 @@ tables = [
     },
     {
         "csv_name": "SYNTHETIC_CLM_LINE_MCS.csv",
-        "table": IDR_CLAIM_LINE_MCS_TABLE,
+        "table": SETTINGS.idr_claim_line_mcs_table,
     },
     {
-        "csv_name": "SYNTHETIC_CLM_FISS.csv",
-        "table": IDR_CLAIM_LINE_FISS_TABLE,
+        "csv_name": "SYNTHETIC_CLM_LINE_FISS.csv",
+        "table": SETTINGS.idr_claim_line_fiss_table,
     },
 ]
 

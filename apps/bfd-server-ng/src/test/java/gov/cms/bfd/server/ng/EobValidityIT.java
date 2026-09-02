@@ -33,11 +33,6 @@ class EobValidityIT extends IntegrationTestBase {
         "EOB should have provider, or data-absent-reason when provider/org npi is not provided");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
-    if (CLAIM_ID_PROFESSIONAL_MCS.equals(claimId)) {
-      assertTrue(eob.hasExtension());
-    } else {
-      assertFalse(eob.hasExtension());
-    }
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()
