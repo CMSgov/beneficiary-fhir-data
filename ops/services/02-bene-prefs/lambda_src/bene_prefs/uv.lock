@@ -54,10 +54,10 @@ dev = [
 requires-dist = [
     { name = "aws-lambda-powertools", specifier = ">=3.25.0" },
     { name = "boto3", specifier = ">=1.42.56" },
-    { name = "cryptography", specifier = ">=45.0.6" },
+    { name = "cryptography", specifier = ">=50.0.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
-    { name = "snowflake-connector-python", specifier = ">=4.3.0" },
+    { name = "snowflake-connector-python", specifier = ">=4.7.1" },
 ]
 
 [package.metadata.requires-dev]

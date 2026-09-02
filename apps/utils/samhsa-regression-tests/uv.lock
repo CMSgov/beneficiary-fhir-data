@@ -406,7 +406,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiohttp", specifier = ">=3.14.0" },
+    { name = "aiohttp", specifier = ">=3.14.3" },
     { name = "anyio", specifier = ">=4.11.0" },
     { name = "asyncclick", specifier = ">=8.3.0.5" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.10" },
