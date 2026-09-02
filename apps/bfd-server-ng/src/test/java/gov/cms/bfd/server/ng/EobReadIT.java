@@ -43,9 +43,9 @@ class EobReadIT extends IntegrationTestBase {
 
   @Test
   void eobReadValidString() {
-    var patient = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
-    assertFalse(patient.isEmpty());
-    expectFhir().toMatchSnapshot(patient);
+    var eob = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
+    assertFalse(eob.isEmpty());
+    expectFhir().toMatchSnapshot(eob);
   }
 
   @Test
