@@ -387,12 +387,9 @@ async def query_samhsa_benes_with_prior_auths(
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
 ) -> list[tuple[str, str]]:
-    query_params = list(
-        itertools.chain.from_iterable(
-            [label.code, normalize_code(label.code)]
-            for label in security_labels
-            if label.system in CLM_LINE_HCPCS_CD_LABELS
-        )
+    query_params = default_code_generator(
+        ClaimItemProfessionalNchColumn.CLM_LINE_HCPCS_CD,
+        security_labels,
     )
 
     async with (
@@ -524,6 +521,33 @@ def get_uniq_clm_id_for_bundle_resource(bundle_resource: dict[str, Any]) -> str:
     )
 
 
+def verify_expected_samhsa_ids(
+    allowed_response_ids: list[str],
+    filtered_response_ids: list[str],
+    expected_samhsa_ids: list[str],
+) -> tuple[bool, bool, set[str], set[str]]:
+    expected_samhsa_ids_set = set(expected_samhsa_ids)
+    unauthed_unfiltered_ids = set(filtered_response_ids).intersection(
+        expected_samhsa_ids_set
+    )
+    authed_ids_intersection = set(allowed_response_ids).intersection(
+        expected_samhsa_ids_set
+    )
+
+    # A non-SAMHSA-authorized response should not return any expected SAMHSA IDs.
+    filtered_when_not_authorized = len(unauthed_unfiltered_ids) == 0
+
+    # A SAMHSA-authorized response should return all expected SAMHSA IDs.
+    unfiltered_when_authorized = authed_ids_intersection == expected_samhsa_ids_set
+
+    return (
+        filtered_when_not_authorized,
+        unfiltered_when_authorized,
+        unauthed_unfiltered_ids,
+        authed_ids_intersection,
+    )
+
+
 async def verify_samhsa_filtering(
     url: str,
     samhsa_session: ClientSession,
@@ -564,21 +588,15 @@ async def verify_samhsa_filtering(
                 for entry in no_samhsa_bundle_entries
                 if entry["resource"].get("use") != PREAUTHORIZATION_USE
             ]
-            bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
-            samhsa_unauthed_unfiltered_clms = set(all_samhsa_filtered_clm_ids).intersection(
-                bene_samhsa_claims_set
-            )
-            # We should expect the intersection of the set of all claims on the SAMHSA unauthorized
-            # response to have _zero_ SAMHSA claim IDs on it.
-            samhsa_claims_filtered_when_not_authorized = len(samhsa_unauthed_unfiltered_clms) == 0
-            samhsa_authed_clms_intersection = set(all_samhsa_allowed_clm_ids).intersection(
-                bene_samhsa_claims_set
-            )
-            # We should expect the intersection of the set of all claims on the SAMHSA _authorized_
-            # response to be exactly the set of SAMHSA claims retrieved from the database, as we
-            # expect that no SAMHSA claims are filtered
-            samhsa_claims_unfiltered_when_authorized = (
-                samhsa_authed_clms_intersection == bene_samhsa_claims_set
+            (
+                samhsa_claims_filtered_when_not_authorized,
+                samhsa_claims_unfiltered_when_authorized,
+                samhsa_unauthed_unfiltered_clms,
+                samhsa_authed_clms_intersection,
+            ) = verify_expected_samhsa_ids(
+                allowed_response_ids=all_samhsa_allowed_clm_ids,
+                filtered_response_ids=all_samhsa_filtered_clm_ids,
+                expected_samhsa_ids=samhsa_bene.samhsa_claim_ids,
             )
 
             all_samhsa_allowed_prior_auth_utns = [
@@ -593,20 +611,15 @@ async def verify_samhsa_filtering(
                 if entry["resource"].get("use") == PREAUTHORIZATION_USE
                 for identifier in entry["resource"].get("identifier", [])
             ]
-            bene_samhsa_prior_auths_set = set(samhsa_bene.samhsa_prior_auth_utns)
-            samhsa_unauthed_unfiltered_prior_auths = set(
-                all_samhsa_filtered_prior_auth_utns
-            ).intersection(bene_samhsa_prior_auths_set)
-            # A non-SAMHSA cert should not return any of the SAMHSA prior auths we found.
-            samhsa_prior_auths_filtered_when_not_authorized = (
-                len(samhsa_unauthed_unfiltered_prior_auths) == 0
-            )
-            samhsa_authed_prior_auths_intersection = set(
-                all_samhsa_allowed_prior_auth_utns
-            ).intersection(bene_samhsa_prior_auths_set)
-            # A SAMHSA cert should return all of the SAMHSA prior auths we found.
-            samhsa_prior_auths_unfiltered_when_authorized = (
-                samhsa_authed_prior_auths_intersection == bene_samhsa_prior_auths_set
+            (
+                samhsa_prior_auths_filtered_when_not_authorized,
+                samhsa_prior_auths_unfiltered_when_authorized,
+                samhsa_unauthed_unfiltered_prior_auths,
+                samhsa_authed_prior_auths_intersection,
+            ) = verify_expected_samhsa_ids(
+                allowed_response_ids=all_samhsa_allowed_prior_auth_utns,
+                filtered_response_ids=all_samhsa_filtered_prior_auth_utns,
+                expected_samhsa_ids=samhsa_bene.samhsa_prior_auth_utns,
             )
 
             final_result = (
@@ -819,7 +832,10 @@ async def main(
     if LOGGING_LEVEL == "DEBUG":
         for samhsa_bene in samhsa_benes:
             logger.debug(
-                "Bene SK: %s, clms: %s", samhsa_bene.bene_sk, ",".join(samhsa_bene.samhsa_claim_ids)
+                "Bene SK: %s, clms: %s, prior auth UTNs: %s",
+                samhsa_bene.bene_sk,
+                ",".join(samhsa_bene.samhsa_claim_ids),
+                ",".join(samhsa_bene.samhsa_prior_auth_utns),
             )
 
     # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
