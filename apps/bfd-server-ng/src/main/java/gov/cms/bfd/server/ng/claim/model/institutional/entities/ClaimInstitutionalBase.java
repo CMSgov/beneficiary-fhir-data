@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
@@ -12,7 +11,6 @@ import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DiagnosisDrgCode;
 import gov.cms.bfd.server.ng.claim.model.institutional.OperatingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.OtherInstitutionalCareTeam;
@@ -64,13 +62,9 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   // Various supporting info components not covered by previous hooks
   abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
 
-  protected Optional<List<ClaimValue>> getClaimValues() { return Optional.empty(); }
-
   protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();
   }
-
-  abstract AdjudicationChargeBase getAdjudicationCharge();
 
   // Hook to add an adjudication and a total, just for CMS
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
@@ -219,10 +213,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
-    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     getPaymentComponent().toFhir().ifPresent(eob::setPayment);
-
     addSubclassAdjudication(eob);
   }
 

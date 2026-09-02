@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimLineDeductibleCoinsuranceCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsModifierCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
@@ -46,9 +45,6 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
-  @Column(name = "clm_ddctbl_coinsrnc_cd")
-  private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode; // TODO - CMS
-
   @Column(name = "clm_line_instnl_rev_ctr_dt")
   private Optional<LocalDate> revenueCenterDate;
 
@@ -56,20 +52,27 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   private Optional<LocalDate> thruDate;
 
   @Embedded private ClaimLineHippsCode hippsCode;
-  @Embedded private ClaimLineInstitutionalExtensions extensions; // TODO - CMS
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
-  //region Hook methods
+  // region Hook methods
 
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
     // no-op, because Basis profiles do not have adjudications
   }
 
-  //endregion
+  protected void addRevenue(ExplanationOfBenefit.ItemComponent line) {
+    // no-op, only CMS adds revenue
+  }
+
+  protected void addExtensions(ExplanationOfBenefit.ItemComponent line) {
+    // no-op, only CMS adds extensions
+  }
+
+  // endregion
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
@@ -108,11 +111,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
     ndc.toFhirDetail().ifPresent(line::addDetail);
     line.setQuantity(serviceUnitQuantity.toFhir());
 
-    revenueCenterCode.ifPresent(
-        c -> {
-          var revenueCoding = c.toFhir(getDeductibleCoinsuranceCode());
-          line.setRevenue(revenueCoding);
-        });
+    addRevenue(line);
 
     line.addModifier(hcpcsModifierCode.toFhir());
     thruDate.ifPresentOrElse(
@@ -129,7 +128,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
         });
 
     addAdjudication(line);
-    getExtensions().toFhir().forEach(line::addExtension);
+    addExtensions(line);
 
     return Optional.of(line);
   }

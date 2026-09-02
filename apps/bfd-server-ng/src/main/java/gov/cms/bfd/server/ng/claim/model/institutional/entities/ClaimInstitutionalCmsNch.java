@@ -114,6 +114,14 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
   }
 
   @Override
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    super.addSubclassAdjudication(eob);
+
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+  }
+
+  @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }

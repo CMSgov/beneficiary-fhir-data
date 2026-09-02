@@ -8,12 +8,12 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCms;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalCms;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -29,7 +29,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationChargeCms adjudicationChargeInstitutionalCms;
+  @Embedded private AdjudicationChargeInstitutionalCms adjudicationChargeInstitutionalCms;
   @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
 
   // region Claim IDR Load Date
@@ -63,6 +63,12 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   // endregion
 
+  // region Hook Methods
+
+  abstract List<ClaimValue> getClaimValues();
+
+  // endregion
+
   // region Overrides
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
@@ -80,9 +86,7 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    getClaimValues()
-        .map(getAdjudicationChargeInstitutionalCms()::toFhir)
-        .ifPresent(list -> list.forEach(eob::addAdjudication));
+    getAdjudicationChargeInstitutionalCms().toFhir(getClaimValues()).forEach(eob::addAdjudication);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);

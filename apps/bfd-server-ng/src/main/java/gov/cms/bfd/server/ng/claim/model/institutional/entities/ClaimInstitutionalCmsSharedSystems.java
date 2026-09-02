@@ -81,23 +81,14 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   }
 
   @Override
-  public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
-  }
-
-  @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return List.of();
   }
 
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.SS;
+  @Override
+  public List<ClaimValue> getClaimValues() {
+    return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
   }
 
   /** SS record-type supporting info from limited to one entry. */
@@ -112,6 +103,40 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
         .toList();
   }
 
+  /** NCH has no additional care-team members beyond the referring provider added by the base. */
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    // no-op for SS
+  }
+
+  @Override
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    super.addSubclassAdjudication(eob);
+
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+  }
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.of(claimRelatedCondition);
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.SS;
+  }
+
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
       buildAuditStatusSupportingInfo() {
     // since audit trail status codes can overlap between the different shared systems, we must
@@ -123,22 +148,5 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
                 ClaimAuditTrailStatusCode.tryFromCode(
                     getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA))
         .map(code -> code.toFhir(supportingInfoFactory));
-  }
-
-  /** NCH has no additional care-team members beyond the referring provider added by the base. */
-  @Override
-  protected void addSubclassCareTeam(
-      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    // no-op for SS
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
   }
 }

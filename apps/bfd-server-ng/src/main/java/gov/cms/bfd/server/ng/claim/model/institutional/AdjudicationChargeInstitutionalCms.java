@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Adjudication charge for institutional claims in the CMS profile, not system specific. */
 @Embeddable
 @Getter
-public class AdjudicationChargeCms {
+public class AdjudicationChargeInstitutionalCms {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;

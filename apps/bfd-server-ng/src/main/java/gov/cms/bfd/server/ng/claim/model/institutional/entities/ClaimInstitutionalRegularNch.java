@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegular;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -42,11 +41,6 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemRegularNch> claimItems;
-
-  @Override
-  public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemRegularNch::getClaimValue).toList();
-  }
 
   @Override
   public SortedSet<ClaimItemBase> getItems() {

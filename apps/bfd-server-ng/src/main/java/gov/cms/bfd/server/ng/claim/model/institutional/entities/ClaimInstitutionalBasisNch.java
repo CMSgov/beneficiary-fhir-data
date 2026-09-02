@@ -1,12 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -38,17 +36,7 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
   }
 
   @Override
-  public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemBasisNch::getClaimValue).toList();
-  }
-
-  @Override
   SupportingInfoComponentBase getSupportingInfo() {
-    return null;
-  }
-
-  @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
     return null;
   }
 

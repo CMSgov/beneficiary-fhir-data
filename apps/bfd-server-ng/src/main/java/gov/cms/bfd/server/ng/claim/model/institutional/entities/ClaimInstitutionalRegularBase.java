@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -35,11 +34,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   }
 
   // endregion
-
-  @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
-  }
 
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
