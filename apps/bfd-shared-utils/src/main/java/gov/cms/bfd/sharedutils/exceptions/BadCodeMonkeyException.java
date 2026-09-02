@@ -5,9 +5,7 @@ package gov.cms.bfd.sharedutils.exceptions;
  * edge cases that will only occur if the code itself is somehow incorrect.
  *
  * <blockquote>
- *
  * Bad Code Monkey! No more cheesy snacks for you!
- *
  * </blockquote>
  */
 public final class BadCodeMonkeyException extends RuntimeException {

@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.CareTeamType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderFhirHelper;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderHistoryBase;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderIdQualifierCode;
@@ -8,7 +9,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.HumanName;
@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Practitioner;
     name = "providerNpiNumber",
     column = @Column(name = "clm_srvc_prvdr_gnrc_id_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "prvdr_srvc_last_or_lgl_name"))
+@AttributeOverride(name = "npiType", column = @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type"))
 public class ServiceProviderPharmacy extends ProviderHistoryBase {
 
   @Column(name = "prvdr_srvc_1st_name")
@@ -31,18 +32,19 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
   @Override
-  public CareTeamType getCareTeamType() {
+  public CareTeamType getCareTeamType(Optional<ClaimTypeCode> claimTypeCode) {
     return CareTeamType.SERVICE;
   }
 
   @Override
-  @Transient
-  public ProviderHistoryBase.NpiType getNpiType() {
-    if (providerFirstName.isEmpty() || getProviderNpiNumber().isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
+  public NpiType getNpiType() {
+    // If it's not an NPI -> Organization
+    if (providerQualifierCode.isEmpty()
+        || providerQualifierCode.get() != ProviderIdQualifierCode._01) {
+      return NpiType.ORGANIZATION;
     }
+
+    return super.getNpiType();
   }
 
   /**

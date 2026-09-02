@@ -59,7 +59,6 @@ def execute_query(query: str) -> list[dict[str, Any]]:
         private_key_raw = str(
             SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key", decrypt=True)
         )
-        schema = str(SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema", decrypt=True))
         user = str(SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username", decrypt=True))
         warehouse = str(
             SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse", decrypt=True)
@@ -87,7 +86,7 @@ def execute_query(query: str) -> list[dict[str, Any]]:
             private_key=private_key_bytes,
             warehouse=warehouse,
             database=database,
-            schema=schema,
+            schema="CMS_VDM_VIEW_MDCR_PRD",  # This should never change
         ) as conn:
             cursor = conn.cursor(DictCursor)
             cursor.execute(query)

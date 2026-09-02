@@ -34,6 +34,8 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_log_group_ecs_events"></a> [log\_group\_ecs\_events](#module\_log\_group\_ecs\_events) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_this"></a> [log\_group\_this](#module\_log\_group\_this) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -47,8 +49,6 @@
 | ---- | ---- |
 | [aws_cloudwatch_event_rule.ecs_events](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.ecs_events_to_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_target) | resource |
-| [aws_cloudwatch_log_group.ecs_events](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_resource_policy.eventbridge_to_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_resource_policy) | resource |
 | [aws_ecs_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_cluster_capacity_providers) | resource |

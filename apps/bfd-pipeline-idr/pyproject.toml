@@ -4,15 +4,15 @@ version = "0.1.0"
 description = "ETL Pipeline to load data from the IDR into BFD's database"
 requires-python = ">=3.14.3"
 dependencies = [
-    "cryptography>=46.0.5",
+    "cryptography>=50.0.0",
     "psycopg[binary,pool]>=3.3.3",
-    "snowflake-connector-python>=4.4.0",
-    "snowflake-snowpark-python>=1.50.0",
+    "snowflake-connector-python>=4.7.1",
+    "snowflake-snowpark-python>=1.54.0",
     "python-dateutil>=2.9.0",
     "pydantic>=2.13.3",
     "usaddress>=0.5.16",
     "unidecode>=1.4.0",
-    "click>=8.3.3",
+    "click>=8.4.2",
     "anyio",
     "loguru",
     "tblib>=3.2.2",

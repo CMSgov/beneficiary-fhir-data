@@ -431,7 +431,7 @@ public final class RifLoader {
 
   /**
    * Applies various "tweaks" to the {@link Beneficiary} (if any) in the specified {@link
-   * RifRecordEvent}:
+   * RifRecordEvent}.
    *
    * <ul>
    *   <li>Hashes any MBIs or HICNs in it.

@@ -3,7 +3,7 @@ package gov.cms.bfd.server.war.commons;
 /** An interface for building page links in a Bundle. */
 public interface LinkBuilder {
   /**
-   * Is paging requested?
+   * Returns if paging is requested.
    *
    * @return true iff paging is requested
    */

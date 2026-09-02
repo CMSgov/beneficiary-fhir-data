@@ -37,7 +37,7 @@ class ApiMessage<TMessage> {
   private final TMessage message;
 
   /**
-   * Is this a special message to detect when a Flux is idle?
+   * Returns whether this is a special message to detect when a Flux is idle.
    *
    * @return true if it is
    */
@@ -46,7 +46,7 @@ class ApiMessage<TMessage> {
   }
 
   /**
-   * Is this a special message to signal immediate buffer flush is needed?
+   * Returns whether this a special message to signal immediate buffer flush is needed.
    *
    * @return true if it is
    */

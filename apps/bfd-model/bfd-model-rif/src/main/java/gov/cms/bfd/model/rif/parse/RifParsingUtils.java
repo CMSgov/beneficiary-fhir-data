@@ -54,7 +54,6 @@ public final class RifParsingUtils {
    * @return a {@link CSVParser} for the specified {@link RifFile}
    */
   public static CSVParser createCsvParser(CSVFormat csvFormat, RifFile file) {
-    String displayName = file.getDisplayName();
     return createCsvParser(csvFormat, file.open(), file.getCharset());
   }
 
@@ -68,7 +67,13 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
-    BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
+    BOMInputStream fileStreamWithoutBom;
+    try {
+      fileStreamWithoutBom =
+          BOMInputStream.builder().setInclude(false).setInputStream(fileStream).get();
+    } catch (IOException e) {
+      throw new RuntimeException("Error creating BOM input stream", e);
+    }
     InputStream fileStreamStrippedOfBackslashes =
         new ReplacingInputStream(fileStreamWithoutBom, "\\|", "|");
     InputStreamReader reader = new InputStreamReader(fileStreamStrippedOfBackslashes, charset);

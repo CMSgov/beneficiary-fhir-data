@@ -13,7 +13,7 @@ import java.util.Map;
 /** Represents missing CCW Codebook variables. */
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   /**
-   * The {@code MBI_EFFCTV_DT}
+   * The {@code MBI_EFFCTV_DT}.
    *
    * <ul>
    *   <li><strong>Label:</strong> MBI Effective Date
@@ -32,7 +32,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   MBI_EFFCTV_DT,
   /**
-   * The {@code MBI_END_DT}
+   * The {@code MBI_END_DT}.
    *
    * <ul>
    *   <li><strong>Label:</strong> MBI End Date
@@ -52,7 +52,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   MBI_END_DT,
   /**
-   * The {@code BENE_LINK_KEY_NUM}
+   * The {@code BENE_LINK_KEY_NUM}.
    *
    * <ul>
    *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part
@@ -75,7 +75,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   BENE_LINK_KEY_NUM,
   /**
-   * The {@code CARR_CLM_CNTL_NUM}
+   * The {@code CARR_CLM_CNTL_NUM}.
    *
    * <ul>
    *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part
@@ -96,7 +96,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   CARR_CLM_CNTL_NUM,
   /**
-   * The {@code FI_DOC_CLM_CNTL_NUM}
+   * The {@code FI_DOC_CLM_CNTL_NUM}.
    *
    * <ul>
    *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part
@@ -117,7 +117,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    */
   FI_DOC_CLM_CNTL_NUM,
   /**
-   * The {@code FI_ORIG_CLM_CNTL_NUM}
+   * The {@code FI_ORIG_CLM_CNTL_NUM}.
    *
    * <ul>
    *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part
@@ -140,7 +140,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
   FI_ORIG_CLM_CNTL_NUM,
 
   /**
-   * The {@code REV_CNTR_UNIT_CNT}
+   * The {@code REV_CNTR_UNIT_CNT}.
    *
    * <ul>
    *   <li><strong>Codebook:</strong> Master Beneficiary Summary File - Base With Medicare Part

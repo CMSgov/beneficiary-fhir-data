@@ -22,7 +22,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
 
   /**
    * absolute lower-bound value for a clm_grp_id, as determined from initial Synthea setup; will not
-   * change!
+   * change.
    */
   private static final long CLM_GRP_ID_END = -99999831003L;
 

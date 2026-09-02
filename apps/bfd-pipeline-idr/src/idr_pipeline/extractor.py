@@ -17,7 +17,7 @@ from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
 from snowflake.snowpark import Session
 
-from .constants import DEFAULT_MIN_DATE
+from .constants import DEFAULT_MIN_DATE, SQL_LOG_TYPE
 from .db_utils import get_connection_string
 from .load_partition import LoadPartition
 from .model.base_model import (
@@ -28,18 +28,7 @@ from .model.base_model import (
     format_date_opt,
 )
 from .model.load_progress import LoadProgress
-from .settings import (
-    ALLOW_EXTRACTOR_QUERY_LOGGING,
-    BATCH_MULTIPLIER,
-    ENABLE_DATE_PARTITIONS,
-    IDR_ACCOUNT,
-    IDR_DATABASE,
-    IDR_PRIVATE_KEY,
-    IDR_SCHEMA,
-    IDR_USERNAME,
-    IDR_WAREHOUSE,
-    MIN_BATCH_COMPLETION_DATE,
-)
+from .settings import SETTINGS
 from .timer import Timer
 
 
@@ -82,10 +71,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         return f"GREATEST({','.join(cols)})"
 
     def _get_batch_size(self) -> int:
-        if ENABLE_DATE_PARTITIONS:
+        if SETTINGS.enable_date_partitions:
             # Larger tables take up more memory, so we'll try to normalize
             # the total memory used here based on the number of columns
-            return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
+            return round(SETTINGS.batch_multiplier / len(self.cls.columns_raw()))
         # If date partitioning is not enabled, the number of concurrent jobs will be small
         return 100_000
 
@@ -143,8 +132,9 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 {"timestamp": min_transaction_date},
             )
 
+        max_runs_ts_clause = ""
         previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
-        min_batch_completion_date = format_date_opt(MIN_BATCH_COMPLETION_DATE)
+        min_batch_completion_date = format_date_opt(SETTINGS.min_batch_completion_date)
         if (
             previous_batch_complete
             and min_batch_completion_date
@@ -172,6 +162,12 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
+        if progress.max_run_ts is not None:
+            max_runs_ts_clause = f"""
+            AND (
+                {batch_timestamp_clause} <= %(max_runs_ts)s
+            )"""
+
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             fetch_query.replace(
@@ -180,6 +176,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                     WHERE (
                         {batch_timestamp_clause} {filter_op} %(timestamp)s
                         {batch_id_clause}
+                        {max_runs_ts_clause}
                     )
                     """,
             )
@@ -189,7 +186,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             .replace("{TABLESAMPLE}", "")
             .replace("{LIMIT}", "")
             .replace("{BASE_CLAIMS_WHERE_FILTERS}", ""),
-            {"timestamp": compare_timestamp},
+            {"timestamp": compare_timestamp, "max_runs_ts": progress.max_run_ts}
+            if progress.max_run_ts is not None
+            else {"timestamp": compare_timestamp},
+        )
+
+    def extract_full_idr_data(self, source: Source) -> Iterator[list[T]]:
+        start_time = self.cls.model_type().min_transaction_date
+        fetch_query = self.get_query(start_time, source)
+        logger.info("extracting full {}", self.cls.table())
+        return self.extract_many(
+            fetch_query.replace("{MIN_TS}", "%(timestamp)s"), {"timestamp": start_time}
         )
 
     def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
@@ -235,8 +242,7 @@ class PostgresExtractor(Extractor[T]):
         sql: str,
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
-        if ALLOW_EXTRACTOR_QUERY_LOGGING:
-            logger.debug(sql)
+        logger.log(SQL_LOG_TYPE, sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -304,7 +310,7 @@ class SnowflakeExtractor(Extractor[T]):
     @staticmethod
     def connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
-            IDR_PRIVATE_KEY.encode(),
+            SETTINGS.idr_private_key.encode(),
             password=None,
             backend=default_backend(),
         )
@@ -314,12 +320,10 @@ class SnowflakeExtractor(Extractor[T]):
             encryption_algorithm=serialization.NoEncryption(),
         )
         return snowflake.connector.connect(  # type: ignore
-            user=IDR_USERNAME,
+            user=SETTINGS.idr_username,
             private_key=private_key_bytes,
-            account=IDR_ACCOUNT,
-            warehouse=IDR_WAREHOUSE,
-            database=IDR_DATABASE,
-            schema=IDR_SCHEMA,
+            account=SETTINGS.idr_account,
+            warehouse=SETTINGS.idr_warehouse,
         )
 
     @override
@@ -329,8 +333,7 @@ class SnowflakeExtractor(Extractor[T]):
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
         cur = None
-        if ALLOW_EXTRACTOR_QUERY_LOGGING:
-            logger.debug(sql)
+        logger.log(SQL_LOG_TYPE, sql)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
@@ -364,7 +367,7 @@ class SnowflakeExtractor(Extractor[T]):
 class SnowflakeExecutor(DbExecutor):
     def __init__(self) -> None:
         private_key = serialization.load_pem_private_key(
-            IDR_PRIVATE_KEY.encode(),
+            SETTINGS.idr_private_key.encode(),
             password=None,
             backend=default_backend(),
         )
@@ -375,12 +378,10 @@ class SnowflakeExecutor(DbExecutor):
         )
         self.session = Session.builder.configs(
             {
-                "account": IDR_ACCOUNT,
-                "user": IDR_USERNAME,
+                "account": SETTINGS.idr_account,
+                "user": SETTINGS.idr_username,
                 "private_key": private_key_bytes,  # type: ignore
-                "warehouse": IDR_WAREHOUSE,
-                "database": IDR_DATABASE,
-                "schema": IDR_SCHEMA,
+                "warehouse": SETTINGS.idr_warehouse,
             }
         ).create()
         self.conn = SnowflakeExtractor.connect()

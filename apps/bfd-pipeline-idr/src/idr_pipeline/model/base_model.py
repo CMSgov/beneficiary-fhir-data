@@ -18,37 +18,29 @@ from ..constants import (
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
-    EMPTY_PARTITION,
     FISS_CLM_SOURCE,
-    IDR_BENE_HISTORY_TABLE,
-    IDR_CLAIM_ANSI_SIGNATURE_TABLE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE,
-    IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE,
-    IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_PRIOR_AUTH_TABLE,
-    INSTITUTIONAL_NCH_PARTITIONS,
-    INSTITUTIONAL_SS_PARTITIONS,
     MCS_CLM_SOURCE,
-    NON_CLAIM_PARTITION,
+    MIN_CLAIM_LOAD_DATE,
     PART_D_CLAIM_TYPE_CODES,
-    PART_D_PARTITIONS,
     PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
-    PROFESSIONAL_NCH_PARTITIONS,
-    PROFESSIONAL_SS_PARTITIONS,
     VMS_CLM_SOURCE,
 )
-from ..load_partition import LoadPartition, LoadPartitionGroup, PartitionType
+from ..load_partition import (
+    EMPTY_PARTITION,
+    INSTITUTIONAL_NCH_PARTITIONS,
+    INSTITUTIONAL_SS_PARTITIONS,
+    NON_CLAIM_PARTITION,
+    PART_D_PARTITIONS,
+    PROFESSIONAL_NCH_PARTITIONS,
+    PROFESSIONAL_SS_PARTITIONS,
+    LoadPartition,
+    LoadPartitionGroup,
+    PartitionType,
+)
 from ..settings import (
-    LATEST_CLAIMS,
-    MIN_CLAIM_LOAD_DATE,
-    MIN_CLAIM_NCH_TRANSACTION_DATE,
-    MIN_CLAIM_SS_TRANSACTION_DATE,
-    MIN_PRIOR_AUTH_TRANSACTION_DATE,
-    PRUNE_BATCH_LIMIT,
+    SETTINGS,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -171,6 +163,11 @@ def provider_npi_type_expr(alias: str) -> str:
     """
 
 
+PROVIDER_ORG_SPECIALTY_CODES = (
+    "('45', '47', '49', '51', '52', '53', '54', '58', '59', '60', '61', '63', '69', '70', '73', "
+    "'74', '75', '87', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B1', 'B3', "
+    "'B4', 'C1', 'C2', 'C4', 'D1', 'D5', 'D6', 'Z1', 'Z2', 'Z3', 'Z4', 'Z5')"
+)
 MEDICARE_EXHAUSTED_CD = "A3"
 ACTIVE_CARE_CD = "22"
 QUALIFYING_STAY_CD = "70"
@@ -192,7 +189,7 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
             clm_idr_ld_dt,
             idr_insrt_ts,
             idr_updt_ts
-        FROM {IDR_CLAIM_TABLE} {clm} {{TABLESAMPLE}}
+        FROM {SETTINGS.idr_claim_table} {clm} {{TABLESAMPLE}}
         WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
@@ -251,7 +248,7 @@ def clm_ansi_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_ANSI_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_ansi_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -269,7 +266,7 @@ def clm_dt_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_DATE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_date_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
         WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
@@ -287,7 +284,7 @@ def clm_ocrnc_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_occurrence_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
         WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
@@ -308,7 +305,7 @@ def clm_rlt_ocrnc_clause() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} sgntr
+        FROM {SETTINGS.idr_claim_related_occurrence_signature_table} sgntr
         JOIN claim_base clm ON
             {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
         WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
@@ -328,7 +325,7 @@ def clm_rlt_cond_sgntr_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} sgntr
+            FROM {SETTINGS.idr_claim_related_condition_signature_table} sgntr
             JOIN claim_base {clm} ON
                 {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
@@ -360,6 +357,7 @@ LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 EXPR = "expr"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
+NPI_TYPE_BACKFILL_COMPARE = "npi_type_backfill_compare"
 
 
 ALIAS_CLM = "clm"
@@ -382,6 +380,7 @@ ALIAS_VAL = "val"
 ALIAS_HSTRY = "hstry"
 ALIAS_PRVDR_PRSCRBNG = "prvdr_prscrbng"
 ALIAS_PRVDR_SRVC = "prvdr_srvc"
+ALIAS_PRVDR_SRVC_GNRC_ID = "prvdr_srvc_gnrc_id"
 ALIAS_PRVDR_BLG = "prvdr_blg"
 ALIAS_PRVDR_RFRG = "prvdr_rfrg"
 ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
@@ -421,29 +420,33 @@ class Source(StrEnum):
 
 class ModelType(Enum):
     CLAIM_INSTITUTIONAL_NCH = (
-        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        SETTINGS.min_claim_nch_transaction_date,
         CLAIM_INSTITUTIONAL_NCH_TABLE,
         INSTITUTIONAL_NCH_PARTITIONS,
     )
     CLAIM_INSTITUTIONAL_SS = (
-        MIN_CLAIM_SS_TRANSACTION_DATE,
+        SETTINGS.min_claim_ss_transaction_date,
         CLAIM_INSTITUTIONAL_SS_TABLE,
         INSTITUTIONAL_SS_PARTITIONS,
     )
     CLAIM_PROFESSIONAL_NCH = (
-        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        SETTINGS.min_claim_nch_transaction_date,
         CLAIM_PROFESSIONAL_NCH_TABLE,
         PROFESSIONAL_NCH_PARTITIONS,
     )
     CLAIM_PROFESSIONAL_SS = (
-        MIN_CLAIM_SS_TRANSACTION_DATE,
+        SETTINGS.min_claim_ss_transaction_date,
         CLAIM_PROFESSIONAL_SS_TABLE,
         PROFESSIONAL_SS_PARTITIONS,
     )
-    CLAIM_RX = (MIN_CLAIM_NCH_TRANSACTION_DATE, CLAIM_RX_TABLE, PART_D_PARTITIONS)
+    CLAIM_RX = (SETTINGS.min_claim_nch_transaction_date, CLAIM_RX_TABLE, PART_D_PARTITIONS)
     BENEFICIARY = (DEFAULT_MIN_DATE, BENEFICIARY_TABLE, [NON_CLAIM_PARTITION])
     LOAD_PROGRESS = (DEFAULT_MIN_DATE, "", EMPTY_PARTITION)
-    PRIOR_AUTH = (MIN_PRIOR_AUTH_TRANSACTION_DATE, IDR_PRIOR_AUTH_TABLE, [NON_CLAIM_PARTITION])
+    PRIOR_AUTH = (
+        SETTINGS.min_prior_auth_transaction_date,
+        SETTINGS.idr_prior_auth_table,
+        [NON_CLAIM_PARTITION],
+    )
 
     def __init__(
         self,
@@ -490,6 +493,20 @@ class IdrBaseModel(BaseModel, ABC):
         """Whether to merge or replace data when loading this table."""
         return False
 
+    @staticmethod
+    def should_delete_missing() -> bool:
+        """Whether upstream data deletion requires manual cleanup on our end.
+
+        Upstream data can be deleted with no indicator like an obsolete timestamp, requiring
+        us to delete it on our end.
+        """
+        return False
+
+    @staticmethod
+    def synthetic_data_filter() -> str:
+        """Expression used to exclude synthetic data from being deleted in FullSyncBatchLoader."""
+        return ""
+
     @classmethod
     @abstractmethod
     def fetch_query(
@@ -527,6 +544,10 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def update_timestamp_col(cls) -> list[str]:
         return cls._extract_meta_keys(UPDATE_TIMESTAMP)
+
+    @classmethod
+    def is_immutable(cls) -> bool:
+        return not cls.update_timestamp_col()
 
     @classmethod
     def batch_id_col_alias(cls) -> str | None:
@@ -623,6 +644,14 @@ class IdrBaseModel(BaseModel, ABC):
             key for key in cls.model_fields if not cls._extract_meta(key, INSERT_EXCLUDE)
         ] + list(cls.model_computed_fields)
 
+    @classmethod
+    def npi_type_backfill_compare_cols(cls) -> dict[str, str]:
+        return {
+            key: cast(str, meta)
+            for key in cls.model_fields
+            if (meta := cls._extract_meta(key, NPI_TYPE_BACKFILL_COMPARE)) is not None
+        }
+
 
 T = TypeVar("T", bound=IdrBaseModel)
 
@@ -630,7 +659,7 @@ T = TypeVar("T", bound=IdrBaseModel)
 def deceased_bene_filter(alias: str, start_time: datetime) -> str:
     return f"""
             SELECT bene_sk
-            FROM {IDR_BENE_HISTORY_TABLE} {alias}
+            FROM {SETTINGS.idr_bene_history_table} {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
             AND {alias}.bene_death_dt < DATE '{start_time.strftime("%Y-%m-%d")}'
             - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
@@ -699,12 +728,12 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     # For part D, we want ALL the claims
     # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
-    if LATEST_CLAIMS and (
+    if SETTINGS.latest_claims and (
         (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
     ):
         codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
-    elif LATEST_CLAIMS:
+    elif SETTINGS.latest_claims:
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
     else:
         latest_claim_ind = ""
@@ -786,7 +815,7 @@ def claim_occurrence_cte() -> str:
                 MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
                     THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} {ocrnc_sgntr}
+            FROM {SETTINGS.idr_claim_occurrence_signature_table} {ocrnc_sgntr}
             WHERE clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
             GROUP BY clm_ocrnc_sgntr_sk"""
 
@@ -803,7 +832,7 @@ def claim_related_occurrences_cte() -> str:
                 MAX(CASE WHEN clm_rlt_ocrnc_cd = '{ACTIVE_CARE_CD}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_OCCURRENCE_SIGNATURE_TABLE} {rlt_ocrnc_sgntr}
+            FROM {SETTINGS.idr_claim_related_occurrence_signature_table} {rlt_ocrnc_sgntr}
             WHERE clm_rlt_ocrnc_cd in ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
     """
@@ -837,7 +866,7 @@ def claim_related_conditions_cte(source: Source) -> str:
                 clm_rlt_cond_sgntr_sk,
                 ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {IDR_CLAIM_RELATED_CONDITION_SIGNATURE_TABLE} {rlt_cond}
+            FROM {SETTINGS.idr_claim_related_condition_signature_table} {rlt_cond}
             WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
             AND clm_rlt_cond_cd != '~'
             GROUP BY clm_rlt_cond_sgntr_sk
@@ -867,10 +896,43 @@ def stale_phase_1_claims_query(
                 WHERE clm.clm_uniq_id = item.clm_uniq_id
                 AND item.bfd_updated_ts >= %s
             )
-            LIMIT {PRUNE_BATCH_LIMIT}
+            LIMIT {SETTINGS.prune_batch_limit}
         """,
         (cutoff_date, cutoff_date),
     )
+
+
+def legacy_institutional_specialty_npi_type_expr(specialty_col: str) -> str:
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            ELSE 1
+        END
+    """
+
+
+def legacy_professional_specialty_npi_type_expr(specialty_col: str) -> str:
+    return f"""
+        CASE
+            WHEN {specialty_col} IN {PROVIDER_ORG_SPECIALTY_CODES} THEN 2
+            WHEN {specialty_col} IS NULL OR TRIM({specialty_col}) = '' OR {specialty_col} IN ('31',
+              '95', '96', '99', 'D2') THEN NULL
+            ELSE 1
+        END
+    """
+
+
+def legacy_service_npi_type_expr_for_context(is_institutional: bool) -> str:
+    return "1" if is_institutional else "NULL"
+
+
+def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
+    return f"""
+        CASE
+            WHEN {provider_qualifier_code} != '' THEN 1
+            ELSE NULL
+        END
+    """
 
 
 def stale_non_part_d_claims_query(claim_table: str) -> str:
@@ -880,5 +942,5 @@ def stale_non_part_d_claims_query(claim_table: str) -> str:
         WHERE clm.clm_ltst_clm_ind = 'N'
         AND clm.clm_uniq_id > 0
         ORDER BY clm.clm_uniq_id
-        LIMIT {PRUNE_BATCH_LIMIT}
+        LIMIT {SETTINGS.prune_batch_limit}
     """

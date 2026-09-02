@@ -35,13 +35,10 @@ export IDR_WAREHOUSE
 IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_database --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_DATABASE
 export IDR_DATABASE
-IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_schema --with-decryption --query "Parameter.Value" --output text)"
-readonly IDR_SCHEMA
-export IDR_SCHEMA
 
 args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
 if [[ -n "$1" ]]; then
   args+=('--seed-from' "$1")
 fi
 
-IDR_ENABLE_DATE_PARTITIONS=0 IDR_ENABLE_PRIOR_AUTH=1 uv run idr-pipeline "${args[@]}"
+IDR_ENABLE_DATE_PARTITIONS=0 uv run idr-pipeline "${args[@]}"
