@@ -16,6 +16,8 @@ from claims_static import (
     NOW,
     PHARMACY_CLM_TYPE_CDS,
     TARGET_RLT_COND_CODES,
+    TARGET_RLT_OCRNC_CODES,
+    TARGET_OCRNC_SPAN_CODES,
     TARGET_SEQUENCE_NUMBERS,
     AVAILABLE_SSA_STATE_CDS,
     get_drg_dgns_codes,
@@ -268,6 +270,74 @@ class AdjudicatedGeneratorUtil:
         add_meta_timestamps(clm_rlt_cond_sgntr_mbr, clm)
 
         return clm_rlt_cond_sgntr_mbr
+
+    def gen_clm_ocrnc_sgntr_mbr(
+        self, clm: RowAdapter, init_clm_ocrnc_sgntr_mbr: RowAdapter | None = None
+    ):
+        clm_ocrnc_sgntr_mbr = init_clm_ocrnc_sgntr_mbr or RowAdapter({})
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SK] = (
+            clm[f.CLM_OCRNC_SGNTR_SK]
+            if str(clm.get(f.CLM_OCRNC_SGNTR_SK, "")).startswith("-")
+            else gen_numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
+        )
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(
+            TARGET_SEQUENCE_NUMBERS
+        )
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_CD] = random.choice(TARGET_OCRNC_SPAN_CODES)
+
+        # add from and thru dates
+        if random.choice([0, 1]):
+            if clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_CD] == "70":
+                clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = clm[f.CLM_FROM_DT]
+            else:
+                clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = clm[f.CLM_THRU_DT]
+            clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = clm[f.CLM_THRU_DT]
+        else:
+            clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = "1000-01-01"
+            clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = "1000-01-01"
+
+        # HACK: Of all claims tables that are derived from CLM, this particular table is the only
+        # one where rows can be orphaned from their root CLM row as some CLM rows may set their
+        # CLM_OCRNC_SGNTR_SK to an invalid value. There are no other fields from which a
+        # foreign-key relationship can be derived, so we must store the CLM_UNIQ_ID of the parent
+        # CLM for each row of this table, otherwise we would have to special-case the logic for
+        # generating this table. CLM_UNIQ_ID will be ignored by the pipeline when loading, so this
+        # is OK
+        clm_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
+
+        add_meta_timestamps(clm_ocrnc_sgntr_mbr, clm)
+
+        return clm_ocrnc_sgntr_mbr
+
+    def gen_clm_rlt_ocrnc_sgntr_mbr(
+        self, clm: RowAdapter, init_clm_rlt_ocrnc_sgntr_mbr: RowAdapter | None = None
+    ):
+        clm_rlt_ocrnc_sgntr_mbr = init_clm_rlt_ocrnc_sgntr_mbr or RowAdapter({})
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SK] = (
+            clm[f.CLM_RLT_OCRNC_SGNTR_SK]
+            if str(clm.get(f.CLM_RLT_OCRNC_SGNTR_SK, "")).startswith("-")
+            else gen_numeric_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, start=-2)
+        )
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM] = random.choice(
+            TARGET_SEQUENCE_NUMBERS
+        )
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_CD] = random.choice(TARGET_RLT_OCRNC_CODES)
+
+        # add field for date
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = clm[f.CLM_THRU_DT]
+
+        # HACK: Of all claims tables that are derived from CLM, this particular table is the only
+        # one where rows can be orphaned from their root CLM row as some CLM rows may set their
+        # CLM_RLT_OCRNC_SGNTR_SK to an invalid value. There are no other fields from which a
+        # foreign-key relationship can be derived, so we must store the CLM_UNIQ_ID of the parent
+        # CLM for each row of this table, otherwise we would have to special-case the logic for
+        # generating this table. CLM_UNIQ_ID will be ignored by the pipeline when loading, so this
+        # is OK
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
+
+        add_meta_timestamps(clm_rlt_ocrnc_sgntr_mbr, clm)
+
+        return clm_rlt_ocrnc_sgntr_mbr
 
     def gen_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
         clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})

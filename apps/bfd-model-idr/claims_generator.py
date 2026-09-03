@@ -33,6 +33,8 @@ from generator_util import (
     CLM_PRFNL,
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
+    CLM_OCRNC_SGNTR_MBR,
+    CLM_RLT_OCRNC_SGNTR_MBR,
     CLM_VAL,
     CNTRCT_PBP_NUM,
     PRAUC,
@@ -520,6 +522,35 @@ class _ClaimsFile(StrEnum):
             f.CLM_POA_IND,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+        ],
+    )
+    CLM_OCRNC_SGNTR_MBR = (
+        CLM_OCRNC_SGNTR_MBR,
+        [
+            f.CLM_OCRNC_SGNTR_SK,
+            f.CLM_OCRNC_SGNTR_SQNC_NUM,
+            f.CLM_OCRNC_SPAN_CD,
+            f.CLM_OCRNC_SPAN_FROM_DT,
+            f.CLM_OCRNC_SPAN_THRU_DT,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+            # HACK: See generation function for justification. This is not a real field of this
+            # table
+            f.CLM_UNIQ_ID,
+        ],
+    )
+    CLM_RLT_OCRNC_SGNTR_MBR = (
+        CLM_RLT_OCRNC_SGNTR_MBR,
+        [
+            f.CLM_RLT_OCRNC_SGNTR_SK,
+            f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM,
+            f.CLM_RLT_OCRNC_CD,
+            f.CLM_RLT_OCRNC_DT,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+            # HACK: See generation function for justification. This is not a real field of this
+            # table
+            f.CLM_UNIQ_ID,
         ],
     )
     CLM_RLT_COND_SGNTR_MBR = (
