@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalBasisSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimProcedureInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import jakarta.persistence.Embedded;
@@ -24,7 +24,7 @@ import lombok.Getter;
 @Table(name = "claim_item_institutional_ss", schema = "idr")
 public class ClaimItemRegularSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
-  @Embedded private ClaimLineInstitutionalSharedSystems claimLine;
+  @Embedded private ClaimLineInstitutionalBasisSharedSystems claimLine;
   @Embedded private ClaimProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
 

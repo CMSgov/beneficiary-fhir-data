@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @Getter
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pa_uniq_trkng_num"))
-public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalBase {
+public class ClaimLineInstitutionalBasisSharedSystems extends ClaimLineInstitutionalBase {
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;

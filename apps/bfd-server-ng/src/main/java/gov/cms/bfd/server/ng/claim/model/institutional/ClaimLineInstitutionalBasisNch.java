@@ -12,16 +12,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @SuppressWarnings("java:S2201")
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
-public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
+public class ClaimLineInstitutionalBasisNch extends ClaimLineInstitutionalBase {
 
-  @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignature ansiSignature;
-  @Embedded private ClaimLineInstitutionalNchExtensions claimLineInstitutionalNchExtensions;
 
   @Override
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
-    adjudicationCharge.toFhir().forEach(line::addAdjudication);
     ansiSignature.toFhir().ifPresent(line::addAdjudication);
-    claimLineInstitutionalNchExtensions.toFhir().forEach(line::addExtension);
   }
 }
