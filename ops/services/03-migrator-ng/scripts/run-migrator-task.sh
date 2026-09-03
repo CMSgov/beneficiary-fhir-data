@@ -61,6 +61,7 @@ while ((task_start_retries > 0)); do
       --task-definition "$TASK_DEFINITION_ARN" \
       --enable-ecs-managed-tags \
       --propagate-tags TASK_DEFINITION \
+      --enable-execute-command \
       --count 1 \
       --platform-version "LATEST" \
       --capacity-provider-strategy "$CAPACITY_PROVIDER_STRATEGIES" \

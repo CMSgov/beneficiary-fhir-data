@@ -101,7 +101,8 @@ resource "aws_ecs_task_definition" "this" {
             name      = k
             valueFrom = v
           }
-        ]
+        ],
+        entrypoint = ["sleep", "infinity"]
         environment = [
           {
             name  = "TZ"
@@ -129,7 +130,7 @@ resource "aws_ecs_task_definition" "this" {
             sourceVolume  = "tmp"
           }
         ]
-        readonlyRootFilesystem = true
+        readonlyRootFilesystem = false
         # Empty declarations reduce Terraform diff noise
         portMappings   = []
         systemControls = []
@@ -179,7 +180,7 @@ resource "null_resource" "start_migrator" {
   provisioner "local-exec" {
     environment = {
       ROLE_NAME              = aws_iam_role.task.name
-      TASK_NAME              = local.service
+      TASK_NAME              = "manual-db-ops"
       CONTAINER_NAME         = local.service
       CLUSTER_NAME           = data.aws_ecs_cluster.main.cluster_name
       TASK_DEFINITION_ARN    = aws_ecs_task_definition.this.arn

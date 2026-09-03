@@ -8,6 +8,26 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role" {
   }
 }
 
+data "aws_iam_policy_document" "idr_ecs_exec" {
+  statement {
+    sid = "AllowECSExec"
+    actions = [
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:CreateControlChannel"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "idr_ecs_exec" {
+  name        = "${local.name_prefix}-ecs-exec-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to use ECS Exec"
+  policy      = data.aws_iam_policy_document.idr_ecs_exec.json
+}
+
 resource "aws_iam_role" "task" {
   name                  = "${local.name_prefix}-task-role"
   path                  = local.iam_path
@@ -15,6 +35,15 @@ resource "aws_iam_role" "task" {
   assume_role_policy    = data.aws_iam_policy_document.ecs_tasks_assume_role.json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "task" {
+  for_each = {
+    ecs-exec        = aws_iam_policy.idr_ecs_exec.arn
+  }
+
+  role       = aws_iam_role.task.name
+  policy_arn = each.value
 }
 
 data "aws_iam_policy_document" "execution_ecr" {
