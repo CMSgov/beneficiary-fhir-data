@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,11 +32,6 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  SupportingInfoComponentBase getSupportingInfo() {
-    return null;
   }
 
   @Override

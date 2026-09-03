@@ -2,7 +2,9 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import javax.annotation.processing.Generated;
@@ -23,6 +25,13 @@ public abstract class ClaimInstitutionalBasisBase extends ClaimInstitutionalBase
   }
 
   // endregion
+
+  @Embedded private InstitutionalSupportingInfo supportingInfo;
+
+  @Override
+  SupportingInfoComponentBase getSupportingInfo() {
+    return supportingInfo;
+  }
 
   @Embedded private DateSupportingInfo dateSupportingInfo;
 }
