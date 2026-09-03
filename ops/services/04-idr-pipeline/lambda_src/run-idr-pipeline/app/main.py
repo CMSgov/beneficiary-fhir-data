@@ -146,11 +146,29 @@ def filter_falsey(unfiltered_dict: dict[str, Any | None]) -> dict[str, Any]:
     return {k: v for k, v in unfiltered_dict.items() if v}
 
 
+def get_task_job_id(task: dict[str, Any]) -> str:
+    # Retrieve the IDR_JOB_ID from the task's container overrides
+    # environment variables if set in the call
+    # Supporting documentation:
+    # https://docs.aws.amazon.com/boto3/latest/reference/services/ecs/client/describe_tasks.html
+    # https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerOverride.html
+    default_job_id = "1"
+    container_overrides = task.get("overrides", {}).get("containerOverrides", [])
+
+    for container_override in container_overrides:
+        for env_var in container_override.get("environment", []):
+            if env_var.get("name") == "IDR_JOB_ID" and "value" in env_var:
+                return env_var["value"]
+
+    return default_job_id
+
+
 def result_handler(event: dict[str, Any], context: LambdaContext) -> LambdaResult:
     # Pylance does not understand that Pydantic BaseSettings classes validate themselves, so it
     # errors thinking that every model field needs to be provided. Hence, type: ignore
     settings = Settings()  # type: ignore
     invoke_model = parse(event=event, model=InvokeModel)
+    requested_job_id = invoke_model.env.get("IDR_JOB_ID", "1") if invoke_model.env else "1"
 
     ecs_client = boto3.client("ecs", config=BOTO_CONFIG)
     tasks = ecs_client.list_tasks(cluster=settings.ecs_cluster_arn)["taskArns"]
@@ -165,6 +183,7 @@ def result_handler(event: dict[str, Any], context: LambdaContext) -> LambdaResul
             and "desiredStatus" in task
             and task["desiredStatus"].lower()
             not in ["deactivating", "stopping", "deprovisioning", "stopped", "deleted"]
+            and get_task_job_id(task) == requested_job_id
         ]
         if tasks
         else []

@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["boto3-stubs[ecs,scheduler]", "ruff", "uv>=0.11.15", "pyright"]
+dev = ["boto3-stubs[ecs,scheduler]", "pytest", "ruff", "uv>=0.11.15", "pyright"]
 
 [tool.uv]
 exclude-newer = "7 days"
