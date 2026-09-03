@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
@@ -48,9 +49,11 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   /**
    * Returns supporting-info components that are specific to the subclass.
    *
+   * @param eob ExplanationOfBenefit
    * @return list of subclass-specific supporting-info components
    */
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
+      ExplanationOfBenefit eob);
 
   /**
    * Adds any adjudication entries that are unique to the subclass.
@@ -86,6 +89,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
+    addExtensions(eob);
 
     return sortedEob(eob);
   }
@@ -137,7 +141,17 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     // Line-level observation (NCH only; SS items return empty).
     item.getClaimLine()
         .toFhirObservation(item.getClaimItemId().getBfdRowId())
-        .ifPresent(eob::addContained);
+        .ifPresent(
+            observation -> {
+              var supportingInfo =
+                  supportingInfoFactory
+                      .createSupportingInfo()
+                      .setCategory(
+                          BlueButtonSupportingInfoCategory.CLM_LINE_HCT_HGB_RSLT_NUM.toFhir());
+              eob.addContained(observation);
+              supportingInfo.setValue(new Reference(observation));
+              eob.addSupportingInfo(supportingInfo);
+            });
   }
 
   private void addProviders(ExplanationOfBenefit eob) {
@@ -162,7 +176,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
             .flatMap(Optional::stream)
             .toList();
 
-    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo())
+    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo(eob))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
@@ -218,4 +232,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                     .computeIfAbsent(key, _ -> new ArrayList<>())
                     .add(diagnosisComponent.getSequence()));
   }
+
+  protected void addExtensions(ExplanationOfBenefit eob) {}
 }

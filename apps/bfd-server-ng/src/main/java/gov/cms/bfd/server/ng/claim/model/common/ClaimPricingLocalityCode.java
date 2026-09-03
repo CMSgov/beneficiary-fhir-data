@@ -54,6 +54,17 @@ public sealed interface ClaimPricingLocalityCode
         .setValue(new Coding(SystemUrls.SYS_CLM_PRCNG_LCLTY_CD, getCode(), getDisplay()));
   }
 
+  /**
+   * Maps enum/record to FHIR spec.
+   *
+   * @return extension
+   */
+  default Extension toFhirMcs() {
+    return new Extension(SystemUrls.EXT_CLM_PRFRMG_PRVDR_LCLTY_CD_URL)
+        .setValue(
+            new Coding(SystemUrls.SYS_CLM_PRFRMG_PRVDR_LCLTY_CD_URL, getCode(), getDisplay()));
+  }
+
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter

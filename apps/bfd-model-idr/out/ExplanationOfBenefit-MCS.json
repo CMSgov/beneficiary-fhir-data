@@ -53,7 +53,7 @@
   },
   {
     "resourceType" : "Observation",
-    "id" : "line-observation-11",
+    "id" : "line-observation-hgb-12",
     "status" : "final",
     "code" : {
       "coding" : [{
@@ -67,7 +67,35 @@
         "value" : "11D1343434"
       }
     }],
-    "valueString" : "1.11"
+    "valueQuantity" : {
+      "value" : 15.8,
+      "unit" : "g/dL",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "g/dL"
+    }
+  },
+  {
+    "resourceType" : "Observation",
+    "id" : "line-observation-hct-11",
+    "status" : "final",
+    "code" : {
+      "coding" : [{
+        "system" : "http://loinc.org",
+        "code" : "4544-3"
+      }]
+    },
+    "performer" : [{
+      "identifier" : {
+        "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+        "value" : "11D1343434"
+      }
+    }],
+    "valueQuantity" : {
+      "value" : 30.5,
+      "unit" : "%",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "%"
+    }
   }],
   "identifier" : [{
     "type" : {
@@ -316,16 +344,32 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_LINE_HCT_HGB_RSLT_NUM",
-        "display" : "HCT/HGB Test Result"
+        "code" : "CLM_LINE_HCT_LVL_NUM"
       }]
     },
     "valueReference" : {
-      "reference" : "#line-observation-11"
+      "reference" : "#line-observation-hct-11"
     }
   },
   {
     "sequence" : 12,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_LINE_HGB_LVL_NUM"
+      }]
+    },
+    "valueReference" : {
+      "reference" : "#line-observation-hgb-12"
+    }
+  },
+  {
+    "sequence" : 13,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -341,7 +385,7 @@
     "timingDate" : "2025-01-11"
   },
   {
-    "sequence" : 13,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -363,7 +407,7 @@
     }
   },
   {
-    "sequence" : 14,
+    "sequence" : 15,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -385,7 +429,7 @@
     }
   },
   {
-    "sequence" : 15,
+    "sequence" : 16,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -401,7 +445,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 16,
+    "sequence" : 17,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -422,7 +466,7 @@
     }
   },
   {
-    "sequence" : 17,
+    "sequence" : 18,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -444,7 +488,7 @@
     }
   },
   {
-    "sequence" : 18,
+    "sequence" : 19,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -466,7 +510,7 @@
     }
   },
   {
-    "sequence" : 19,
+    "sequence" : 20,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -476,7 +520,7 @@
     "timingDate" : "2020-01-13"
   },
   {
-    "sequence" : 20,
+    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -628,9 +672,9 @@
       "valueDecimal" : 3.1
     },
     {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD",
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD",
       "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD",
         "code" : "42"
       }
     },
@@ -663,7 +707,8 @@
       }
     }],
     "sequence" : 1,
-    "informationSequence" : [11],
+    "informationSequence" : [12,
+    11],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -908,7 +953,7 @@
         },
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-          "code" : "CLM_LINE_BENE_PMT_AMT",
+          "code" : "CLM_LINE_MSP_COINSRNC_AMT",
           "display" : "Line Paid By Beneficiary Amount"
         }]
       },

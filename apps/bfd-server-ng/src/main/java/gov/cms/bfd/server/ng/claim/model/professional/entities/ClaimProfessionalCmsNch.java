@@ -70,8 +70,8 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   private SortedSet<ClaimItemProfessionalCmsNch> claimItems;
 
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo() {
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
+      ExplanationOfBenefit eob) {
     return Stream.of(
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),

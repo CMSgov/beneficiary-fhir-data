@@ -11,6 +11,7 @@ Description: "This code system includes a selection of Adjudication Value Codes 
 * #CLM_LINE_SBMT_CHRG_AMT "Line Submitted Charge Amount" "The amount of submitted charges for the line-item service on the claim."
 * #CLM_LINE_PRVDR_PMT_AMT "Line Provider Payment Amount" "The amount Medicare paid for the services reported on the revenue center record."
 * #CLM_LINE_BENE_PMT_AMT "Line Paid By Beneficiary Amount" "The amount paid by the beneficiary to the provider for the line-item service."
+* #CLM_LINE_MSP_COINSRNC_AMT "Patient Responsibility Payment Amount" "An amount identifying the payment made by a beneficiary for a detail line of service on a claim."
 * #CLM_LINE_BENE_PD_AMT "Payment Amount to Beneficiary" "The amount paid to the beneficiary for the services reported on the line item."
 * #CLM_LINE_CVRD_PD_AMT	"Payment Amount" "Amount of payment made from the Medicare trust fund (after deductible and coinsurance amounts have been paid) for the line-item service on the claim."
 * #CLM_LINE_BLOOD_DDCTBL_AMT "Blood Deductible Amount" "This variable is the dollar amount the beneficiary is responsible for related to the deductible for blood products that appear on the revenue center record."

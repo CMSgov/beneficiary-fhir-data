@@ -498,6 +498,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 20.63
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
   } ],
   "billablePeriod" : {
     "end" : "2021-10-03",
@@ -1918,6 +1934,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "CLM_TOT_CNTRCTL_AMT",
         "display" : "Total Contractual Amount Discrepancy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 69.16
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Secondary Payment Coinsurance Amount",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+        "display" : "Secondary Payment Coinsurance Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4352,6 +4384,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_LINE_HCT_HGB_RSLT_NUM",
+        "display" : "HCT/HGB Test Result",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 7,
+    "valueReference" : {
+      "reference" : "#1"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_NCH_WKLY_PROC_DT",
         "display" : "Weekly Process Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -4361,7 +4409,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -4381,7 +4429,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
@@ -4400,7 +4448,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 10
   }, {
     "category" : {
       "coding" : [ {
@@ -4420,7 +4468,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 11
   }, {
     "category" : {
       "coding" : [ {
@@ -4439,7 +4487,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -4447,7 +4495,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 12,
+    "sequence" : 13,
     "timingDate" : "2021-10-03"
   } ],
   "total" : [ {

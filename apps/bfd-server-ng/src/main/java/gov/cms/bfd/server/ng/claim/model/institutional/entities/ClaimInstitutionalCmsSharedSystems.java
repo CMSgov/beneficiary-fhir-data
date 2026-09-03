@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -7,6 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
@@ -143,5 +145,22 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
   @Override
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.of(claimRelatedCondition);
+  }
+
+  /**
+   * Creates ExplanationOfBenefit components.
+   *
+   * @param options claim filter options
+   * @param claimState computed claim state
+   * @return ExplanationOfBenefit
+   */
+  @Override
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
+    getClaimItems().stream()
+        .map(ClaimItemInstitutionalSharedSystems::toFhir)
+        .filter(Optional::isPresent)
+        .forEach(adjudications -> adjudications.get().forEach(eob::addAdjudication));
+    return eob;
   }
 }
