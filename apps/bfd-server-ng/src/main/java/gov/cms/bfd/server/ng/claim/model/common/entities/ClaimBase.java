@@ -5,9 +5,11 @@ import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimIDRLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -44,8 +46,8 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @Getter
 @MappedSuperclass
-@SuppressWarnings({"JpaAttributeTypeInspection"})
 public abstract class ClaimBase {
+
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
@@ -69,7 +71,6 @@ public abstract class ClaimBase {
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
-  @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -113,7 +114,7 @@ public abstract class ClaimBase {
     var initialSupportingInfo =
         Stream.of(
                 claimAdjustmentTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)))
+                getClaimIdrLoadDate().map(date -> date.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
@@ -135,6 +136,13 @@ public abstract class ClaimBase {
     eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
     return eob;
   }
+
+  /**
+   * Hook method for payment component information, shared across all claims.
+   *
+   * @return The class data for a PaymentComponent
+   */
+  public abstract ClaimPaymentComponentBase getPaymentComponent();
 
   /**
    * Return the claim source id.
@@ -172,8 +180,26 @@ public abstract class ClaimBase {
   public abstract Optional<ClaimRelatedCondition> getClaimRelatedCondition();
 
   /**
-   * Returns the claim paid status code if applicable to this claim source type. Defaults to empty
-   * for base claims (like NCH/DDPS) that do not track this field.
+   * Returns the ClaimRecordType, if relevant to the claim source type. Defaults to empty.
+   *
+   * @return the ClaimRecordType
+   */
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.empty();
+  }
+
+  /**
+   * Hook method for ClaimIdrLoadDate (CMS profile only).
+   *
+   * @return the ClaimIdrLoadDate, or nothing
+   */
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
+    return Optional.empty();
+  }
+
+  /**
+   * Hook method to return the claim paid status code if applicable to this claim source type.
+   * Defaults to empty for base claims (like NCH/DDPS) that do not track this field.
    *
    * @return an optional containing the claim paid status code
    */
@@ -183,7 +209,8 @@ public abstract class ClaimBase {
 
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail
-   * logic. Standard base claims with no status code will ignore this.
+   * logic. Standard base claims with no status code will ignore this, default implementation is to
+   * return empty, and only Shared Systems wil override getClaimPaidStatusCode().
    *
    * @param eob the EOB being built
    */
@@ -192,7 +219,6 @@ public abstract class ClaimBase {
     // status codes are resolved as PARTIAL to match the outcome search filter behavior.
     if (this instanceof ClaimInstitutionalCmsSharedSystems
         || this instanceof ClaimProfessionalCmsSharedSystems) {
-
       ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
     }
   }

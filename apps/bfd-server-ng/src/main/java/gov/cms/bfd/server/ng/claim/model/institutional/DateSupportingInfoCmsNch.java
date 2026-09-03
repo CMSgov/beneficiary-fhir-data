@@ -1,0 +1,46 @@
+package gov.cms.bfd.server.ng.claim.model.institutional;
+
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
+import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+
+/** CMS profile specific information for claim date supporting info. */
+@Embeddable
+public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
+
+  @Embedded private DateSupportingInfo dateSupportingInfo;
+
+  @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  @Embedded private ActiveCareThroughDate activeCareThroughDate;
+  @Embedded private NoncoveredFromDate noncoveredFromDate;
+  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
+  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
+  @Embedded private QualifyStayFromDate qualifyStayFromDate;
+  @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  @Embedded private ClaimProcessDate claimProcessDate;
+
+  @Override
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return Stream.concat(
+            Stream.of(
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    activeCareThroughDate.toFhir(supportingInfoFactory),
+                    noncoveredFromDate.toFhir(supportingInfoFactory),
+                    noncoveredThroughDate.toFhir(supportingInfoFactory),
+                    benefitsExhaustedDate.toFhir(supportingInfoFactory),
+                    qualifyStayFromDate.toFhir(supportingInfoFactory),
+                    qualifyStayThruDate.toFhir(supportingInfoFactory),
+                    claimProcessDate.toFhir(supportingInfoFactory))
+                .flatMap(Optional::stream),
+            dateSupportingInfo.toFhir(supportingInfoFactory).stream())
+        .toList();
+  }
+}

@@ -42,7 +42,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase {
 
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
@@ -72,18 +72,20 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return Stream.of(
-            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            bloodPints.toFhir(supportingInfoFactory),
-            claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
+    return Stream.concat(
+            super.buildSubclassSupportingInfo().stream(),
+            Stream.of(
+                    claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    bloodPints.toFhir(supportingInfoFactory),
+                    claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
+                .flatMap(Optional::stream))
         .toList();
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 

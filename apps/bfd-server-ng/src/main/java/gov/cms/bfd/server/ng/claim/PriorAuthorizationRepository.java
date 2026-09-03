@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.claim.model.PriorAuthorization;
+import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;

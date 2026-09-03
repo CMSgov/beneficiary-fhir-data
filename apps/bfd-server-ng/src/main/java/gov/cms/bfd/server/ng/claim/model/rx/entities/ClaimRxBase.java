@@ -1,31 +1,203 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import java.util.Collections;
+import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
+import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
+import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
+import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
+import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractPBPNumber;
+import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.processing.Generated;
+import java.util.TreeSet;
+import java.util.stream.Stream;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Reference;
 
-/** Shared base for professional claim types (NCH and Shared Systems). */
-@Generated("TODO - Remove after query optimization implementation")
-public class ClaimRxBase extends ClaimBase {
+/**
+ * Base claim table for pharmacy ExplanationOfBenefits. Resource - ExplanationOfBenefit Domain - [
+ * Rx ] Profile - [ CMS ] Source - [ Rx ]
+ */
+@MappedSuperclass
+@Getter
+public abstract class ClaimRxBase extends ClaimBase {
+
+  @Column(name = "cntrct_pbp_name")
+  private Optional<String> contractName;
+
+  @Column(name = "clm_prcng_excptn_cd")
+  private Optional<ClaimPricingReasonCode> pricingCode;
+
+  @Embedded private ServiceProviderPharmacy serviceProviderHistory;
+  @Embedded private PrescribingCareTeam prescribingProviderHistory;
+  @Embedded private ClaimPaymentComponent paymentComponent;
+  @Embedded private SubmitterContractNumber submitterContractNumber;
+  @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
+  @Embedded private ClaimSubmissionDate claimSubmissionDate;
+
+  /** {@inheritDoc} */
+  @Override
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
+
+    addPartDInsurer(eob);
+    addClaimLineItem(eob, options);
+    addServiceProvider(eob);
+    addSupportingInfo(eob);
+    addPrescribingProviderCareTeam(eob);
+    addAdjudicationAndPayment(eob);
+    addInsurance(eob);
+
+    return sortedEob(eob);
+  }
+
+  protected void addPartDInsurer(ExplanationOfBenefit eob) {
+    contractName
+        .flatMap(name -> getClaimTypeCode().toFhirInsurerPartD(name))
+        .ifPresent(
+            i -> {
+              eob.addContained(i);
+              eob.setInsurer(new Reference(i));
+            });
+  }
+
+  protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+    getClaimItem().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
+  }
+
+  protected void addServiceProvider(ExplanationOfBenefit eob) {
+    serviceProviderHistory
+        .toFhirNpiType()
+        .ifPresentOrElse(
+            p -> {
+              eob.setProvider(new Reference("#" + p.getId()));
+              eob.addContained(p);
+            },
+            () -> eob.setProvider(FhirUtil.setDataAbsentReasonUnknown(new Reference())));
+  }
+
+  protected void addSupportingInfo(ExplanationOfBenefit eob) {
+    buildHeaderSupportingInfo().forEach(eob::addSupportingInfo);
+    buildLineSupportingInfo().forEach(eob::addSupportingInfo);
+  }
+
+  protected void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
+    var sequenceGenerator = new SequenceGenerator();
+    prescribingProviderHistory
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
+        .ifPresent(eob::addCareTeam);
+  }
+
+  protected void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
+    getAdjudicationChargeRx()
+        .ifPresent(
+            charge -> {
+              charge.toFhirTotal().forEach(eob::addTotal);
+              charge.toFhirAdjudication().forEach(eob::addAdjudication);
+            });
+
+    getTotalDrugCostAmount()
+        .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
+        .ifPresent(eob::addTotal);
+
+    headerAdjudicationComponent().ifPresent(eob::addAdjudication);
+
+    paymentComponent.toFhir().ifPresent(eob::setPayment);
+  }
+
+  private Optional<ExplanationOfBenefit.AdjudicationComponent> headerAdjudicationComponent() {
+    if (pricingCode.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var reasonCode = pricingCode.get().toFhir();
+    var reasonCodeableConcept = new CodeableConcept();
+    reasonCodeableConcept.addCoding(reasonCode);
+
+    return Optional.of(
+        new ExplanationOfBenefit.AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept(
+                    new Coding()
+                        .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                        .setCode("benefitpaymentstatus")
+                        .setDisplay("Benefit Payment Status")))
+            .setReason(reasonCodeableConcept));
+  }
+
+  protected void addInsurance(ExplanationOfBenefit eob) {
+    eob.addInsurance(getClaimTypeCode().toFhirPartDInsurance());
+  }
+
+  /**
+   * Build the SupportingInformationComponent from a ClaimSubmissionFormatCode.
+   *
+   * @return the eob.SupportingInformationComponent
+   */
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
+    return Stream.of(
+            submissionFormatSupportingInfo(),
+            getSubmitterContractNumber().toFhir(supportingInfoFactory).stream().findFirst(),
+            getSubmitterContractPBPNumber().toFhir(supportingInfoFactory).stream().findFirst(),
+            getClaimSubmissionDate().toFhir(supportingInfoFactory),
+            getClaimProcessDate().flatMap(cpd -> cpd.toFhir(supportingInfoFactory)))
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
+  // region Hook Methods
+  protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
+      submissionFormatSupportingInfo() {
+    return Optional.empty();
+  }
+
+  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
+    return Optional.empty();
+  }
+
+  protected Optional<ClaimProcessDate> getClaimProcessDate() {
+    return Optional.empty();
+  }
+
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
+    return List.of();
+  }
+
+  protected Optional<BigDecimal> getTotalDrugCostAmount() {
+    return Optional.empty();
+  }
+
+  // endregion
+
   @Override
   public ClaimSourceId getClaimSourceId() {
-    return null;
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 
   @Override
   public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return Collections.emptySortedSet();
+    return MetaSourceSk.DDPS;
   }
 
   @Override
@@ -37,4 +209,14 @@ public class ClaimRxBase extends ClaimBase {
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
   }
+
+  /** Rx claims have a single embedded rather than a collection. */
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    var items = new TreeSet<ClaimItemBase>();
+    items.add(getClaimItem());
+    return items;
+  }
+
+  protected abstract ClaimItemBase getClaimItem();
 }

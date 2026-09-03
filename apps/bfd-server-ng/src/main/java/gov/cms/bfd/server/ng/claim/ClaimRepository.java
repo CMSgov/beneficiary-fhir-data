@@ -2,14 +2,14 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
-import gov.cms.bfd.server.ng.claim.model.PriorAuthorization;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimCmsRx;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxCms;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
@@ -61,11 +61,25 @@ public class ClaimRepository {
         JOIN FETCH c.claimItems cl
       """;
 
-  private static final String CLAIM_RX =
+  private static final String CLAIM_RX_CMS =
       """
         SELECT c
-        FROM ClaimCmsRx c
+        FROM ClaimRxCms c
         JOIN FETCH c.beneficiary b
+      """;
+
+  private static final String CLAIM_RX_REGULAR =
+      """
+          SELECT c
+          FROM ClaimRxRegular c
+          JOIN FETCH c.beneficiary b
+      """;
+
+  private static final String CLAIM_RX_BASIS =
+      """
+          SELECT c
+          FROM ClaimRxBasis c
+          JOIN FETCH c.beneficiary b
       """;
 
   private static final List<ClaimTypeDefinition> ALL_CLAIM_TYPES =
@@ -82,7 +96,7 @@ public class ClaimRepository {
               SystemType.SS),
           new ClaimTypeDefinition(
               CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalCmsNch.class, SystemType.NCH),
-          new ClaimTypeDefinition(CLAIM_RX, ClaimCmsRx.class, SystemType.DDPS));
+          new ClaimTypeDefinition(CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS));
 
   /**
    * Search for a claim by its ID.
@@ -141,9 +155,9 @@ public class ClaimRepository {
 
     var rxClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_RX,
-            ClaimCmsRx.class,
-            ClaimCmsRx.getSystemType(),
+            CLAIM_RX_CMS,
+            ClaimRxCms.class,
+            ClaimRxCms.getSystemType(),
             criteria.claimUniqueIds(),
             paramBuilders);
 

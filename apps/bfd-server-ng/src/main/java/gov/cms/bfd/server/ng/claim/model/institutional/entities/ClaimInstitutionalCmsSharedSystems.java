@@ -9,10 +9,10 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalCmsSharedSystemsSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -42,17 +42,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr")
 @SuppressWarnings({"java:S6539", "java:S2293"})
-public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
+public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase {
 
-  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
+  @Embedded private AdjudicationChargeCmsSharedSystems adjudicationCharge;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
-
-  @Embedded private ClaimInstitutionalCmsSharedSystemsSupportingInfo supportingInfo;
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
@@ -65,7 +64,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
+  private SortedSet<ClaimItemCmsSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
@@ -77,15 +76,8 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
-  }
-
-  @Override
-  public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream()
-        .map(ClaimItemInstitutionalSharedSystems::getClaimValue)
-        .toList();
   }
 
   @Override
@@ -94,13 +86,9 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
     return List.of();
   }
 
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.SS;
+  @Override
+  public List<ClaimValue> getClaimValues() {
+    return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
   }
 
   /** SS record-type supporting info from limited to one entry. */
@@ -115,6 +103,40 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
         .toList();
   }
 
+  /** NCH has no additional care-team members beyond the referring provider added by the base. */
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    // no-op for SS
+  }
+
+  @Override
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    super.addSubclassAdjudication(eob);
+
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+  }
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.of(claimRelatedCondition);
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.SS;
+  }
+
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
       buildAuditStatusSupportingInfo() {
     // since audit trail status codes can overlap between the different shared systems, we must
@@ -126,22 +148,5 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
                 ClaimAuditTrailStatusCode.tryFromCode(
                     getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA))
         .map(code -> code.toFhir(supportingInfoFactory));
-  }
-
-  /** NCH has no additional care-team members beyond the referring provider added by the base. */
-  @Override
-  protected void addSubclassCareTeam(
-      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    // no-op for SS
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
   }
 }

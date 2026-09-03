@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 
-@SuppressWarnings("checkstyle:MissingJavadocType")
+@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:MissingJavadocMethod:"})
 @Getter
 @Embeddable
 public class ClaimValue {
@@ -25,11 +25,21 @@ public class ClaimValue {
   private static final String VALUE_CODE_DISPROPORTIONATE = "18";
   private static final String VALUE_CODE_IME = "19";
 
-  Optional<BigDecimal> getDisproportionateAmount() {
+  /**
+   * Wrapping for amount from VALUE_CODE_DISPROPORTIONATE.
+   *
+   * @return the amount
+   */
+  public Optional<BigDecimal> getDisproportionateAmount() {
     return getAmountForCode(VALUE_CODE_DISPROPORTIONATE);
   }
 
-  Optional<BigDecimal> getImeAmount() {
+  /**
+   * Wrapping for amount from VALUE_CODE_IME.
+   *
+   * @return the amount
+   */
+  public Optional<BigDecimal> getImeAmount() {
     return getAmountForCode(VALUE_CODE_IME);
   }
 

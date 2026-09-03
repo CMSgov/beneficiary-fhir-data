@@ -5,7 +5,7 @@ import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Provider History. */
+/** ExplanationOfBenefit.CareTeamComponent base class. */
 @Getter
 @MappedSuperclass
 public abstract class CareTeamBase extends ProviderHistoryBase {
