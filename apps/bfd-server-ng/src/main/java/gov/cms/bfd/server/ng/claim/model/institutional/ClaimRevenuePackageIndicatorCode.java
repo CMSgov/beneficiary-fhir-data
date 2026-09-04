@@ -20,6 +20,41 @@ public class ClaimRevenuePackageIndicatorCode {
                     new Coding()
                         .setSystem(
                             SystemUrls.BLUE_BUTTON_CODE_SYSTEM_REVENUE_PACKAGE_INDICATOR_CODE)
-                        .setCode(s)));
+                        .setCode(s)
+                        .setDisplay(ValidCodes.getByCode(s).getDisplay())));
+  }
+
+  private enum ValidCodes {
+    NOT_PACKAGE("NOT PACKAGED", "0"),
+    PACKAGED("PACKAGED SERVICE (SERVICE INDICATOR N)", "1"),
+    ARTIFICIAL("ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)", "2"),
+    PARTIAL(
+        "PACKAGED AS PART OF PARTIAL HOSPITALIZATION PER DIEM OR DAILY MENTAL HEALTH SERVICE PER DIEM",
+        "3"),
+    DRUG_ADMIN("Drug Admin", "4"),
+    FQHC("Federally Qualified Health Centers (FQHC) DIEM", "5"),
+    NOCOIN("FQHC NOCOIN", "6"),
+    UNKNOWN("", "");
+
+    private final String display;
+    private final String code;
+
+    ValidCodes(String display, String code) {
+      this.display = display;
+      this.code = code;
+    }
+
+    String getDisplay() {
+      return display;
+    }
+
+    static ValidCodes getByCode(String code) {
+      for (ValidCodes validCode : ValidCodes.values()) {
+        if (validCode.code.equals(code)) {
+          return validCode;
+        }
+      }
+      return UNKNOWN;
+    }
   }
 }
