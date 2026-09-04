@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.List;
@@ -45,9 +44,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
       buildRecordTypeSupportingInfo() {
     return List.of();
   }
-
-  @Override
-  void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   @Override
   public ClaimSourceId getClaimSourceId() {

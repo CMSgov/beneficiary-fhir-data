@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegular;
+import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -12,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.annotation.processing.Generated;
@@ -45,5 +48,15 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase 
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Embedded private ServiceCareTeam serviceProviderHistory;
+
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    serviceProviderHistory
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
+        .ifPresent(eob::addCareTeam);
   }
 }

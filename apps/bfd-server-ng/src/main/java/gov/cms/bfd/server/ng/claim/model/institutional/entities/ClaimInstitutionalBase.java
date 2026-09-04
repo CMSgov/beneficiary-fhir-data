@@ -69,8 +69,9 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   // Hook to add an adjudication and a total, just for CMS
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
 
-  // Adds care-team members that are unique to the subclass.
-  abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+  // Adds care-team members that are unique to the subclass, irrelevant to SharedSystems
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   // endregion
 

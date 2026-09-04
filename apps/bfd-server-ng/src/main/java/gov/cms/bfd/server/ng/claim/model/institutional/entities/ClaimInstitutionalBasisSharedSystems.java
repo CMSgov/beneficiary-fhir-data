@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -44,9 +43,6 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
       buildRecordTypeSupportingInfo() {
     return List.of();
   }
-
-  @Override
-  void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   @Override
   public ClaimSourceId getClaimSourceId() {

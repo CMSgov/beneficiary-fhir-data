@@ -4,7 +4,9 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -34,6 +36,16 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }
 
+  @Embedded private ServiceCareTeam serviceProviderHistory;
+
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    serviceProviderHistory
+        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
+        .ifPresent(eob::addCareTeam);
+  }
+
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
     return List.of();
@@ -44,9 +56,6 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
       buildRecordTypeSupportingInfo() {
     return List.of();
   }
-
-  @Override
-  void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   @Override
   public ClaimSourceId getClaimSourceId() {
