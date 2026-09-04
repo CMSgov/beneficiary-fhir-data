@@ -1,5 +1,6 @@
 map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" = "BFD-ExplanationOfBenefit-SupportingInfo-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+uses "http://hl7.org/fhir/StructureDefinition/BFDClaimValues" alias BFDClaimValues as source
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper"
 
 group addSupportingInfo(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
@@ -86,9 +87,9 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
 
 }
 
-//Note: the input in the base is header-level (institutional) and line-item level for professional claims. 
+//Note: the input in the base is header-level (institutional) and line-item level for professional claims.
 //We consolidate them in augment_sample_resources and use a pointer to them from line-items, where appropriate. Otherwise it's
-//implied that they are header-level. 
+//implied that they are header-level.
 group addPBPMTSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
@@ -152,7 +153,6 @@ group addBenefitEnhancementCode(source src: string, target tgt: BackboneElement)
     } "Add category";
     src as code -> tgt.code = cc("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",code) "add benefit enhancement code";
 }
-
 
 //To get the individual codes, join V2_MDCR_CLM.CLM_RLT_COND_SGNTR_SK to V2_MDCR_CLM_RLT_COND_SGNTR_MBR, and for each CLM_RLT_COND_SGNTR_SQNC_NUM, there should be a CLM_RLT_COND_CD populated. EG clm_rlt_cond_sgntr_sk 89543 would have 5 CLM_RLT_COND_CD
 //If the SK value is 0 or 1, don't populate these supportingInfo elements (eg Part D / Professional claims don't have them. This is institutional only.)
@@ -247,16 +247,6 @@ group addNearLineRecordIdentificationCode(source src: SupportingInfoComponent, t
         src.CLM_NRLN_RIC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",val) "Add coding";
     } "Add CC";
 }
-//code
-group addRecordIdentificationCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NRLN_RIC_CD") "Add Coding";
-    } "Add category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src.CLM_RIC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",val) "Add coding";
-    } "Add CC";
-}
 //value
 group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -269,6 +259,16 @@ group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: Ba
         src -> tgtQuantity.unit = "pint" "Set unit";
         src -> tgtQuantity.code = "[pt_us]" "Set code";
     } "Add blood Furnished";
+}
+//code
+group addRecordIdentificationCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NRLN_RIC_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_RIC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",val) "Add coding";
+    } "Add CC";
 }
 //code
 group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -321,8 +321,8 @@ group addPPSInd(source src: SupportingInfoComponent, target tgt: BackboneElement
         src.CLM_PPS_IND as val -> tgtCC.coding = translate(val,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PPS_IND','coding') "Add coding";
     } "Add CC";
 }
-//code. Not necessary, duplicative with BENE_PTNT_STUS_CD. 
-/* 
+//code. Not necessary, duplicative with BENE_PTNT_STUS_CD.
+/*
 group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
@@ -401,23 +401,23 @@ group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneEle
     //cc macro won't work with %evaluate
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,1)), 
+            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,1)),
             //CLM_BILL_FAC_TYPE_CD
             tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD" "Set coding";
         } "Add coding #2";
     } "Add CC";
-    
+
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
             //This must be a concatenation to work. The meaning of the classification type code is dependent upon the facility type code. So we concatenate them.
-            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,2)), 
+            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,2)),
             tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD" "Set coding";
         } "Add coding #3";
     } "Add CC";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            //Same deal as above, but it's a concatenation of all three fields. 
-            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,3)), 
+            //Same deal as above, but it's a concatenation of all three fields.
+            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,3)),
             tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD" "Set coding";
         } "Add coding #4";
     } "Add CC";
@@ -565,31 +565,31 @@ group addClmPdStusCd(source src: SupportingInfoComponent, target tgt: BackboneEl
     } "Add CC";
 }
 
-group addBlgStCd(source src: SupportingInfoComponent, target tgt: BackboneElement){         
+group addBlgStCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";             
-      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","PRVDR_FAC_FIPS_ST_CD") "Add Coding";                   
-    } "Add category";   
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","PRVDR_FAC_FIPS_ST_CD") "Add Coding";
+    } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES" "Set coding";
             src.GEO_BLG_SSA_STATE_CD as val -> tgtCoding.code = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Add code";
         } "Add coding";
-    } "Add CC"; 
-}                                                                                                    
-                            
+    } "Add CC";
+}
+
 group addRndrgStCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
       src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","RNDRG_PRVDR_FIPS_ST_CD") "Add Coding";
-    } "Add category";      
+    } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES" "Set coding";
             src.GEO_RNDRG_SSA_STATE_CD as val -> tgtCoding.code = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Add code";
         } "Add coding";
-    } "Add CC";                                                                          
-}     
+    } "Add CC";
+}
 
 group addPMDUTNSupportingInfo(source item : LineItemComponent,target tgtSI : SupportingInfoComponent) {
   item.SEQUENCE_INFO as seqInfo -> tgtSI.sequence = seqInfo;
