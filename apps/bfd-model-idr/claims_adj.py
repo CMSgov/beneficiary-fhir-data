@@ -406,6 +406,11 @@ class AdjudicatedGeneratorUtil:
         if ric_cd:
             clm_dcmtn[f.CLM_NRLN_RIC_CD] = ric_cd
 
+        clm_dcmtn[f.CLM_PTNT_CNTL_NUM] = gen_multipart_id(
+            field=f.CLM_PTNT_CNTL_NUM,
+            parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
+        )
+
         add_meta_timestamps(clm_dcmtn, clm)
 
         return clm_dcmtn

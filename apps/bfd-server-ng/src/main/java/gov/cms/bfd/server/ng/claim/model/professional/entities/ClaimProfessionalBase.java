@@ -15,6 +15,7 @@ import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for professional claim types (NCH and Shared Systems). */
@@ -36,6 +38,9 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Column(name = "clm_ptnt_cntl_num")
+  private Optional<String> patientControlNumber;
 
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
@@ -83,6 +88,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(getClaimPaymentAmount().toFhir());
+    addPatientControlNumberIdentifier(eob);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
@@ -177,6 +183,15 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   private void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
+  }
+
+  private void addPatientControlNumberIdentifier(ExplanationOfBenefit eob) {
+    patientControlNumber.ifPresent(
+        s ->
+            eob.addIdentifier(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_PATIENT_CONTROL_NUMBER)
+                    .setValue(s)));
   }
 
   @Override

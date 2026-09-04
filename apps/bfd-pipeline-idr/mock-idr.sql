@@ -306,6 +306,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_nrln_ric_cd VARCHAR(1),
+    clm_ptnt_cntl_num VARCHAR(38),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     clm_bnft_enhncmt_1_cd VARCHAR(2),

@@ -89,6 +89,27 @@
     - Basis
     - Regular
     - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_PTNT_CNTL_NUM
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+    - Carrier
+  sources:
+    - FISS
+    - NCH
+    - VMS
+    - MCS
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_PTNT_CNTL_NUM
+  fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM').value
+  profiles:
+    - Basis
+    - Regular
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Inpatient
