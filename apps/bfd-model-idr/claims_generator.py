@@ -14,7 +14,12 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
-from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROFESSIONAL_CLAIM_TYPES
+from claims_static import (
+    AVAILABLE_CLM_VAL_CDS,
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+    PROFESSIONAL_CLAIM_TYPES,
+)
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     BENE_HSTRY,
@@ -135,7 +140,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_PRVDR_OTAF_AMT,
             f.CLM_PRVDR_RMNG_DUE_AMT,
             f.CLM_TOT_CNTRCTL_AMT,
-            f.CLM_BLOOD_PT_FRNSH_QTY,
             f.PRVDR_RFRG_PRVDR_NPI_NUM,
             f.CLM_PRVDR_PMT_AMT,
             f.CLM_RIC_CD,
@@ -268,19 +272,16 @@ class _ClaimsFile(StrEnum):
             f.CLM_MDCR_IP_PPS_OUTLIER_AMT,
             f.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT,
             f.CLM_MDCR_IP_PPS_CPTL_TOT_AMT,
-            f.CLM_MDCR_IP_BENE_DDCTBL_AMT,
             f.CLM_PPS_IND_CD,
             f.CLM_MDCR_HOSPC_PRD_CNT,
             f.CLM_MDCR_NPMT_RSN_CD,
             f.CLM_OP_SRVC_TYPE_CD,
-            f.CLM_INSTNL_PRFNL_AMT,
             f.CLM_MDCR_INSTNL_BENE_PD_AMT,
             f.CLM_FINL_STDZD_PYMT_AMT,
             f.CLM_HHA_RFRL_CD,
             f.CLM_MDCR_HHA_TOT_VISIT_CNT,
             f.CLM_HIPPS_READMSN_RDCTN_AMT,
             f.CLM_HIPPS_VBP_AMT,
-            f.CLM_INSTNL_LOW_VOL_PMT_AMT,
             f.CLM_MDCR_IP_1ST_YR_RATE_AMT,
             f.CLM_MDCR_IP_SCND_YR_RATE_AMT,
             f.CLM_PPS_MD_WVR_STDZD_VAL_AMT,
@@ -882,12 +883,12 @@ def generate(
         llist=files[CLM_DCMTN],
         part_by=lambda x: four_part_key(x),
     )
-    dsprtnt_clm_val_per_fpk = {
-        four_part_key(x): x for x in files[CLM_VAL] if int(x[f.CLM_VAL_CD]) == 18
-    }
-    ime_clm_val_per_fpk = {
-        four_part_key(x): x for x in files[CLM_VAL] if int(x[f.CLM_VAL_CD]) == 19
-    }
+    value_code_per_fpk = {}
+    for value_code in AVAILABLE_CLM_VAL_CDS:
+        value_code_per_fpk[value_code] = {
+            four_part_key(x): x for x in files[CLM_VAL] if x.get(f.CLM_VAL_CD) == value_code
+        }
+
     proc_clm_prod_per_fpk = partition_rows(
         llist=files[CLM_PROD],
         part_by=lambda x: four_part_key(x),
@@ -985,17 +986,17 @@ def generate(
             adj_clms_tbls[CLM_DCMTN].extend(clm_dcmtns)
 
             if clm_type_cd in (20, 40, 60, 61, 62, 63, 64):
-                dsprtnt_clm_val = adj_util.gen_dsprtnt_clm_val(
-                    clm=clm,
-                    init_clm_val=dsprtnt_clm_val_per_fpk.get(four_part_key(clm)),
-                )
-                adj_clms_tbls[CLM_VAL].append(dsprtnt_clm_val)
-
-                ime_clm_val = adj_util.gen_ime_clm_val(
-                    clm=clm,
-                    init_clm_val=ime_clm_val_per_fpk.get(four_part_key(clm)),
-                )
-                adj_clms_tbls[CLM_VAL].append(ime_clm_val)
+                for sqnc_num, value_code in enumerate(AVAILABLE_CLM_VAL_CDS, start=1):
+                    # 'QM' is the only clm_val_cd with a limited clm_type_cd range
+                    if value_code == "QM" and clm_type_cd != 40:
+                        continue
+                    clm_val_row = adj_util.gen_clm_val(
+                        clm=clm,
+                        value_code=value_code,
+                        clm_val_sqnc_num=sqnc_num,
+                        init_clm_val=value_code_per_fpk[value_code].get(four_part_key(clm)),
+                    )
+                    adj_clms_tbls[CLM_VAL].append(clm_val_row)
 
             if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
                 init_procs = proc_clm_prod_per_fpk.get(four_part_key(clm)) or [
@@ -1106,8 +1107,9 @@ def generate(
                 CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_PRFNL: clm_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_VAL: [
-                    *as_list(dsprtnt_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
-                    *as_list(ime_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
+                    row
+                    for per_fpk in value_code_per_fpk.values()
+                    for row in as_list(per_fpk.get(four_part_key(file_pac_clm)))
                 ],
                 CLM_LINE_DCMTN: clm_line_dcmtns_per_clk.get(four_part_key(file_pac_clm), []),
                 CLM_LINE_INSTNL: clm_line_instnls_per_fpk.get(four_part_key(file_pac_clm), []),

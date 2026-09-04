@@ -81,9 +81,6 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_RLT_COND_SGNTR_SK] = "-1"
             clm[f.META_SRC_SK] = 1
 
-        if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
-            clm[f.CLM_BLOOD_PT_FRNSH_QTY] = random.randint(0, 20)
-
         clm[f.CLM_NUM_SK] = gen_numeric_id(field=f.CLM_NUM_SK)
         clm[f.CLM_EFCTV_DT] = str(date.today())
         clm[f.CLM_IDR_LD_DT] = random_date(clm[f.CLM_FROM_DT], max_date)
@@ -410,32 +407,26 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_dsprtnt_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
-        # CLM_OPRTNL_DSPRTNT_AMT
-        # Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique
-        # identifier with CLM_UNIQ_ID.
+    def gen_clm_val(
+        self,
+        clm: RowAdapter,
+        value_code: str,
+        clm_val_sqnc_num: int,
+        init_clm_val: RowAdapter | None = None,
+    ):
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = 18
-        clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
-        clm_val[f.CLM_VAL_SQNC_NUM] = 14
+        clm_val[f.CLM_VAL_CD] = value_code
+        clm_val[f.CLM_VAL_SQNC_NUM] = clm_val_sqnc_num
 
-        add_meta_timestamps(clm_val, clm)
-
-        return clm_val
-
-    def gen_ime_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
-        clm_val = init_clm_val or RowAdapter({})
-        clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
-        clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
-        clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = 19
-        clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
-        clm_val[f.CLM_VAL_SQNC_NUM] = 3
+        # '37' represents a whole number and not a monetary amount
+        if value_code != "37":
+            clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
+        else:
+            clm_val[f.CLM_VAL_AMT] = random.randint(0, 20)
 
         add_meta_timestamps(clm_val, clm)
 
@@ -669,7 +660,6 @@ class AdjudicatedGeneratorUtil:
         clm_instnl[f.CLM_MDCR_IP_PPS_OUTLIER_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_MDCR_IP_PPS_CPTL_TOT_AMT] = round(random.uniform(0, 25), 2)
-        clm_instnl[f.CLM_MDCR_IP_BENE_DDCTBL_AMT] = round(random.uniform(0, 25), 2)
         clm_instnl[f.CLM_PPS_IND_CD] = random.choice(["", "2"])
 
         if clm_type_cd in (10, 20):
@@ -683,12 +673,9 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd in (20, 30, 60, 61, 62, 63, 64):
             clm_instnl[f.CLM_HIPPS_READMSN_RDCTN_AMT] = round(random.uniform(0, 5000), 2)
             clm_instnl[f.CLM_HIPPS_VBP_AMT] = round(random.uniform(0, 5000), 2)
-            clm_instnl[f.CLM_INSTNL_LOW_VOL_PMT_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_MDCR_IP_1ST_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_MDCR_IP_SCND_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
             clm_instnl[f.CLM_PPS_MD_WVR_STDZD_VAL_AMT] = round(random.uniform(0, 10000), 2)
-        if clm_type_cd in (40, 61, 64, 62, 20, 63, 30, 60):
-            clm_instnl[f.CLM_INSTNL_PRFNL_AMT] = round(random.uniform(0, 10000), 2)
 
         add_meta_timestamps(clm_instnl, clm)
 
@@ -954,7 +941,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_PHYSN_ASTNT_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PHYSN_ASTNT_CD]
         )
-        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(  
+        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(
               gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
         )
 

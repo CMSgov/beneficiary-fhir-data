@@ -221,6 +221,7 @@ AVAILABLE_PROVIDER_TX_CODES = [
 ]
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
 AVAILABLE_SSA_STATE_CDS = ["01", "03", "06", "12", "48"]
+AVAILABLE_CLM_VAL_CDS = ["05", "17", "18", "19", "37", "73", "74", "77", "A1", "Q0", "Q1", "QM"]
 
 
 def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:

@@ -41,7 +41,7 @@ class PacGeneratorUtil:
         init_clm_type_cd = int(init_clm[f.CLM_TYPE_CD])
         # Always exclude these fields from init_clm. We do this because RowAdapter ignores changes
         # to existing fields, so we could never unset these fields.
-        exclude_fields_always = {f.CLM_BLOOD_PT_FRNSH_QTY, f.CLM_NCH_PRMRY_PYR_CD}
+        exclude_fields_always = {f.CLM_NCH_PRMRY_PYR_CD}
         # Exclude these fields if init_clm is adjudicated and we're generating a pac clm from it. We
         # do this so that these fields for an existing adjudicated CLM can be set, or these fields
         # don't exist for pac claims. The combined set of always excluded fields + adjudicated below
@@ -137,8 +137,9 @@ class PacGeneratorUtil:
             init_row=init_clm_dt_sgntr,
             # If these match, the initial clm_dt_sgntr is already "pac" in that it's associated with
             # the pac CLM (because this function will be called after the pac CLM is created)
-            is_pac_predicate=lambda: clm[f.CLM_DT_SGNTR_SK]
-            == init_clm_dt_sgntr.get(f.CLM_DT_SGNTR_SK),
+            is_pac_predicate=lambda: (
+                clm[f.CLM_DT_SGNTR_SK] == init_clm_dt_sgntr.get(f.CLM_DT_SGNTR_SK)
+            ),
             exclude_fields_always={
                 f.CLM_MDCR_EXHSTD_DT,
                 f.CLM_NCVRD_FROM_DT,
@@ -305,7 +306,6 @@ class PacGeneratorUtil:
             init_row=init_clm_instnl,
             is_pac_predicate=lambda: init_clm_instnl[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
             exclude_fields_always={
-                f.CLM_MDCR_IP_BENE_DDCTBL_AMT,
                 f.CLM_MDCR_INSTNL_PRMRY_PYR_AMT,
                 f.CLM_PPS_IND_CD,
                 f.CLM_MDCR_HOSPC_PRD_CNT,
@@ -413,8 +413,10 @@ class PacGeneratorUtil:
     ):
         clm_rlt_cond_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_rlt_cond_sgntr_mbr,
-            is_pac_predicate=lambda: f.CLM_UNIQ_ID in init_clm_rlt_cond_sgntr_mbr
-            and init_clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID],
+            is_pac_predicate=lambda: (
+                f.CLM_UNIQ_ID in init_clm_rlt_cond_sgntr_mbr
+                and init_clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID]
+            ),
             exclude_fields_always=set(),
             exclude_fields_adj={
                 f.CLM_RLT_COND_SGNTR_SK,

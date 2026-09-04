@@ -150,7 +150,6 @@ cur_sample_data["profileType"] = profile_type #in case it's not specified, we re
 
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 
-
 line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
@@ -195,7 +194,6 @@ header_to_supp_info_cols = {
     "CLM_QLFY_STAY_THRU_DT": "CLM_QLFY_STAY_THRU_DT",
     "CLM_SUBMSN_DT": "CLM_SUBMSN_DT",
     "CLM_ADJSTMT_TYPE_CD": "CLM_ADJSTMT_TYPE_CD",
-    "CLM_BLOOD_PT_FRNSH_QTY": "CLM_BLOOD_PT_FRNSH_QTY",
     "CLM_CNTRCTR_NUM": "CLM_CNTRCTR_NUM",
     "CLM_DISP_CD": "CLM_DISP_CD",
     "CLM_IDR_LD_DT": "CLM_IDR_LD_DT",
@@ -482,6 +480,16 @@ if actv_from or dschrg_dt:
     supporting_info_components.append(temp_var)
     supporting_info_seq += 1
 
+# We only want records from CLM_VAL if the CLM_VAL_CD corresponds to a supp info value
+SUPPORTING_INFO_CLM_VAL_CDS = {"37"}
+
+for cv in cur_sample_data.get("claimValues", []):
+    if cv.get("CLM_VAL_CD") in SUPPORTING_INFO_CLM_VAL_CDS:
+        supporting_info_components.append({
+            "ROW_NUM": supporting_info_seq,
+            "claimValues": [cv]
+        })
+        supporting_info_seq += 1
 
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
