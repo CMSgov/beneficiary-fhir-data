@@ -1,4 +1,5 @@
 import random
+import string
 from collections.abc import Callable
 
 import field_constants as f
@@ -10,7 +11,13 @@ from claims_static import (
     VMS_CDS,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
-from generator_util import GeneratorUtil, RowAdapter, gen_basic_id, gen_numeric_id
+from generator_util import (
+    GeneratorUtil,
+    RowAdapter,
+    gen_basic_id,
+    gen_multipart_id,
+    gen_numeric_id,
+)
 
 
 class PacGeneratorUtil:
@@ -373,6 +380,7 @@ class PacGeneratorUtil:
             exclude_fields_always=set(),
             exclude_fields_adj={
                 f.CLM_NRLN_RIC_CD,
+                f.CLM_PTNT_CNTL_NUM,
                 f.GEO_BENE_SK,
                 f.CLM_DT_SGNTR_SK,
                 f.CLM_TYPE_CD,
@@ -390,6 +398,11 @@ class PacGeneratorUtil:
         ric_cd = get_ric_cd_for_clm_type_cd(clm[f.CLM_TYPE_CD])
         if ric_cd:
             clm_dcmtn[f.CLM_NRLN_RIC_CD] = ric_cd
+
+        clm_dcmtn[f.CLM_PTNT_CNTL_NUM] = gen_multipart_id(
+            field=f.CLM_PTNT_CNTL_NUM,
+            parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
+        )
 
         add_meta_timestamps(clm_dcmtn, clm)
 

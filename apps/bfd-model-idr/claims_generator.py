@@ -202,6 +202,7 @@ class _ClaimsFile(StrEnum):
             f.GEO_BENE_SK,
             f.CLM_TYPE_CD,
             f.CLM_NRLN_RIC_CD,
+            f.CLM_PTNT_CNTL_NUM,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],

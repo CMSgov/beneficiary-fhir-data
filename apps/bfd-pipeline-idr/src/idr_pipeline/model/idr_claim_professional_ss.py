@@ -11,6 +11,7 @@ from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS,
     ALIAS_CLM,
+    ALIAS_DCMTN,
     ALIAS_LCTN_HSTRY,
     ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PRFNL,
@@ -169,6 +170,29 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         },
         BeforeValidator(transform_null_date_to_min),
     ]
+    clm_ptnt_cntl_num: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    idr_insrt_ts_dcmtn: Annotated[
+        datetime,
+        {
+            BATCH_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_DCMTN,
+            COLUMN_MAP: "idr_insrt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_dcmtn: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_DCMTN,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
     # columns from v2_mdcr_clm_lctn_hstry
     clm_audt_trl_stus_cd: Annotated[
         str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_default_string)
@@ -304,6 +328,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
+        dcmtn = ALIAS_DCMTN
         lctn_hstry = ALIAS_LCTN_HSTRY
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
@@ -367,6 +392,11 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
+            LEFT JOIN {SETTINGS.idr_claim_documentation_table} {dcmtn} ON
+                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
+                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
             LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
                 {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
                 {clm}.clm_type_cd = latest_lctn.clm_type_cd AND

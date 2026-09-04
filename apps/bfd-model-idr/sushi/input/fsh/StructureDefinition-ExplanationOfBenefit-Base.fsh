@@ -10,6 +10,7 @@ Id: ExplanationOfBenefit-Base
 * CLM_TYPE_CD 1..1 integer "Claim Type Code" "A code identifying the source and type of claim submitted through the Medicare or Medicaid program. For example: 60 = Medicare National Claims History (NCH) inpatient claim. 8900 = Medicaid fee for service dental. Reference table: CLM_TYPE_CD"
 * CLM_UNIQ_ID 1..1 string "The claim unique ID is a unique ID for the claim within the source system." "An Integrated Data Repository (IDR) assigned surrogate key used to identify a claim."
 * CLM_CNTL_NUM 1..1 string "Claim Control Number" "An identifier assigned by the claim processor (i.e., Medicare Administrative Contractor, Part D plan, or Encounter Data Processing Contractor) to a claim."
+* CLM_PTNT_CNTL_NUM 0..1 string "Patient Control Number" "A number used to identify the patient account or encounter associated with a claim."
 * CLM_MDCR_COINSRNC_AMT 0..1 string "Part A/B Coinsurance Liability Amount" "An amount identifying the portion applied toward the coinsurance a beneficiary is responsible for."
 * CLM_ORIG_CNTL_NUM 1..1 string "This field is the original identification value assigned." "A number identifying the original Claim Control Number (CCN) on an adjusted claim."
 * CLM_FROM_DT 1..1 string "Claim From Date" "A date identifying the first day services are provided to a beneficiary."
