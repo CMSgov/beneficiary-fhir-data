@@ -513,6 +513,7 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
+    - Outpatient
   sources:
     - NCH
     - FISS
@@ -527,6 +528,7 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
   appliesTo:
     - Inpatient
+    - Outpatient
   sources:
     - NCH
     - FISS
@@ -1940,11 +1942,11 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
-    - SNF
     - Outpatient
-    - Carrier
+    - SNF
   sources: 
     - NCH
+    - FISS
   ccwMapping:
     - NCH_BLOOD_PNTS_FRNSHD_QTY
   sourceView: V2_MDCR_CLM
@@ -2595,13 +2597,15 @@
     - Basis
     - Regular
     - CMS
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_INSTNL_PRFNL_AMT
   appliesTo:
     - Inpatient
     - Outpatient
     - SNF
+    - HHA
   sources:
     - NCH
+    - FISS
   ccwMapping:
     - NCH_PROFNL_CMPNT_CHRG_AMT
   cclfMapping:
@@ -2628,12 +2632,16 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_BLOOD_LBLTY_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT
   appliesTo:
+    - HHA
+    - Hospice
     - Inpatient
+    - Outpatient
     - SNF
   sources:
     - NCH
+    - FISS
   ccwMapping:
     - NCH_BENE_IP_DDCTBL_AMT
   cclfMapping:
@@ -3788,12 +3796,14 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_VBP_AMT')).amount.value
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
   appliesTo:
     - Inpatient
+    - Outpatient
     - SNF
   sources:
     - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_LOW_VOL_PMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_INSTNL_LOW_VOL_PMT_AMT')).amount.value
@@ -4416,5 +4426,85 @@
   sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
   notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_PBP_INCLSN_AMT
+  appliesTo:
+    - HHA
+    - Hospice
+    - Inpatient
+    - Outpatient
+    - SNF
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_PBP_INCLSN_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_INCLSN_AMT').exists()).amount.value
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_PBP_RDCTN_AMT
+  appliesTo:
+    - HHA
+    - Hospice
+    - Inpatient
+    - Outpatient
+    - SNF
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_PBP_RDCTN_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_RDCTN_AMT').exists()).amount.value
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_OUTLR_AMT
+  appliesTo:
+    - HHA
+    - Inpatient
+    - Outpatient
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_OPRTNL_OUTLR_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_OUTLR_AMT').exists()).amount.value
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_NEW_TECH_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_MDCR_NEW_TECH_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_NEW_TECH_AMT').exists()).amount.value
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_SQSTRTN_RDCTN_AMT
+  appliesTo:
+    - HHA
+    - Hospice
+    - Inpatient
+    - Outpatient
+    - SNF
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_SQSTRTN_RDCTN_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_SQSTRTN_RDCTN_AMT').exists()).amount.value
+  profiles:
+    - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_MIPS_PMT_AMT
+  appliesTo:
+    - Outpatient
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCFLA.CLM_MIPS_PMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MIPS_PMT_AMT').exists()).amount.value
   profiles:
     - CMS

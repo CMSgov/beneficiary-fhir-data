@@ -530,24 +530,6 @@
     {
       "category" : {
         "coding" : [{
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
-          "code" : "paidbypatient",
-          "display" : "Paid by patient"
-        },
-        {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-          "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Line Paid By Beneficiary Amount"
-        }]
-      },
-      "amount" : {
-        "value" : 10.00,
-        "currency" : "USD"
-      }
-    },
-    {
-      "category" : {
-        "coding" : [{
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
           "display" : "Gross Drug Cost Above Out Of Pocket Threshold"
