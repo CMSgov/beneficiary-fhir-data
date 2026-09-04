@@ -386,7 +386,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         "select * from idr.claim_item_institutional_nch where clm_uniq_id = 999999434801"
     )
     if load_type == LoadType.INITIAL:
-        assert cur.rowcount == 1
+        assert cur.rowcount == 2
     elif load_type == LoadType.INCREMENTAL:
         assert cur.rowcount == 0
 

@@ -115,7 +115,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     geo_blg_ssa_state_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -281,14 +280,11 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_ip_pps_cptl_tot_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_instnl_cvrd_day_cnt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_instnl_prmry_pyr_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_instnl_prfnl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_mdcr_ip_bene_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_instnl_drg_outlier_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     dgns_drg_outlier_cd: Annotated[
         str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
     clm_mdcr_ip_scnd_yr_rate_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
-    clm_instnl_low_vol_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_readmsn_rdctn_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_model_bndld_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_hipps_vbp_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
