@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
@@ -46,7 +45,6 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
 
   @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
   @Embedded private AdjudicationChargeCmsSharedSystems adjudicationCharge;
-  @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
@@ -121,11 +119,6 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
   }
 
   /**

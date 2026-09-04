@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
@@ -47,11 +48,14 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
+  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   // region Hook Methods
 
+  // Tied to Lombok @Getters
   abstract SupportingInfoComponentBase getDateSupportingInfo();
 
+  // Tied to Lombok @Getters
   abstract SupportingInfoComponentBase getSupportingInfo();
 
   // Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
@@ -178,9 +182,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
     // Handle claim related condition codes after BFD-4523
     var claimRelatedConditionCodes =
-        getClaimRelatedCondition().stream()
-            .flatMap(c -> c.toFhir(supportingInfoFactory).stream())
-            .toList();
+        getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList();
 
     Stream.of(
             buildSubclassInitialSupportingInfo(),

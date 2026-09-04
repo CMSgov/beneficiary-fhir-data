@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
@@ -65,10 +64,5 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return null;
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

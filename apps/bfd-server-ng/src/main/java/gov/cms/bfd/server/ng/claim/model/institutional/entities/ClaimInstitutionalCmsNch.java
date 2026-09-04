@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
@@ -52,7 +51,6 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
   @Embedded private InstitutionalSupportingInfoCmsNch supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
-  @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;
 
   @OneToMany(fetch = FetchType.EAGER)
@@ -124,10 +122,5 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
   }
 }

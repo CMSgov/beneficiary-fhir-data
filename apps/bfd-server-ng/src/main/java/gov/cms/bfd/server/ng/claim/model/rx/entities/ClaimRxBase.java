@@ -6,7 +6,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
@@ -202,11 +201,6 @@ public abstract class ClaimRxBase extends ClaimBase {
 
   @Override
   public Optional<Integer> getDrgCode() {
-    return Optional.empty();
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
   }
 

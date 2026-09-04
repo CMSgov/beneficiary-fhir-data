@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -160,10 +159,5 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase 
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

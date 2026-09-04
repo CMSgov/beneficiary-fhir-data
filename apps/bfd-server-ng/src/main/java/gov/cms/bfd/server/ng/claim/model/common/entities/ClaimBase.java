@@ -10,7 +10,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
@@ -171,13 +170,6 @@ public abstract class ClaimBase {
    * @return the DRG code
    */
   public abstract Optional<Integer> getDrgCode();
-
-  /**
-   * Returns the ClaimRelatedCondition for this claim, if present.
-   *
-   * @return the ClaimRelatedCondition
-   */
-  public abstract Optional<ClaimRelatedCondition> getClaimRelatedCondition();
 
   /**
    * Returns the ClaimRecordType, if relevant to the claim source type. Defaults to empty.

@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import jakarta.persistence.Entity;
@@ -10,7 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
-import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.annotation.processing.Generated;
@@ -52,10 +50,5 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return null;
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

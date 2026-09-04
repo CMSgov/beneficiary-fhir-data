@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
@@ -10,7 +9,6 @@ import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingIn
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -53,10 +51,5 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return null;
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }
