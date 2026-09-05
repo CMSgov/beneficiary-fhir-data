@@ -2597,15 +2597,13 @@
     - Basis
     - Regular
     - CMS
-- inputPath: ExplanationOfBenefit-Base.CLM_INSTNL_PRFNL_AMT
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
   appliesTo:
     - Inpatient
     - Outpatient
     - SNF
-    - HHA
   sources:
     - NCH
-    - FISS
   ccwMapping:
     - NCH_PROFNL_CMPNT_CHRG_AMT
   cclfMapping:

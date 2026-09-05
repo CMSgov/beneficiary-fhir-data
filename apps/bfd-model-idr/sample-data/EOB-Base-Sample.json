@@ -200,6 +200,7 @@
         "CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT": "13.31",
         "CLM_MDCR_IP_PPS_CPTL_TOT_AMT": "11.11",
         "CLM_INSTNL_DRG_OUTLIER_AMT": "15.89",
+        "CLM_INSTNL_PRFNL_AMT": "93.22",
         "CLM_FINL_STDZD_PYMT_AMT": "10.00",
         "CLM_HAC_RDCTN_PYMT_AMT": "10.01",
         "CLM_HIPPS_MODEL_BNDLD_PMT_AMT": "10.02",
@@ -224,10 +225,6 @@
         "CLM_FI_ACTN_CD": "1"
     },
     "claimValues": [
-        {
-            "CLM_VAL_CD": "05",
-            "CLM_VAL_AMT": "93.22"
-        },
         {
             "CLM_VAL_CD": "17",
             "CLM_VAL_AMT": "05.32"

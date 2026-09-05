@@ -445,6 +445,10 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_INSTNL_PRMRY_PYR_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_INSTNL_PRMRY_PYR_AMT";
+  institutionalComponents.CLM_INSTNL_PRFNL_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_PRFNL_AMT") "Add codeable concept";
+    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_INSTNL_PRFNL_AMT";  
   institutionalComponents.CLM_INSTNL_DRG_OUTLIER_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_INSTNL_DRG_OUTLIER_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
@@ -550,7 +554,7 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 }
 
 group addAdjudicationClmVal(source src: BFDClaimValues, target tgt: BackboneElement){
-  src.CLM_VAL_CD as valCode where (valCode in ('05' | '17' | '18' | '19' | '73' | '74' | '77' | 'A1' | 'Q0' | 'Q1' | 'QM')) -> tgt then {
+  src.CLM_VAL_CD as valCode where (valCode in ('17' | '18' | '19' | '73' | '74' | '77' | 'A1' | 'Q0' | 'Q1' | 'QM')) -> tgt then {
     src -> tgt.category = create('CodeableConcept') as tgtCategory then {
       src -> tgtCategory.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication" "Set system";

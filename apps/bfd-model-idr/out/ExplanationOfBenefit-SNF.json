@@ -1552,6 +1552,19 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_INSTNL_PRFNL_AMT",
+        "display" : "Professional Component Charge Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 93.22,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_INSTNL_DRG_OUTLIER_AMT",
         "display" : "DRG Outlier Approved Payment Amount"
       }]
@@ -1571,18 +1584,6 @@
     },
     "amount" : {
       "value" : 15.00,
-      "currency" : "USD"
-    }
-  },
-  {
-    "category" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_INSTNL_PRFNL_AMT"
-      }]
-    },
-    "amount" : {
-      "value" : 93.22,
       "currency" : "USD"
     }
   },

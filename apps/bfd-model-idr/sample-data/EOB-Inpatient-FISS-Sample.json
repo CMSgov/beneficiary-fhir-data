@@ -173,10 +173,6 @@
     },
     "claimValues": [
         {
-            "CLM_VAL_CD": "05",
-            "CLM_VAL_AMT": "93.22"
-        },
-        {
             "CLM_VAL_CD": "17",
             "CLM_VAL_AMT": "05.32"
         },

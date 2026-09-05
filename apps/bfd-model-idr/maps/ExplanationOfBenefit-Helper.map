@@ -193,7 +193,6 @@ conceptmap "CLM_VAL_CD" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"
 
-  s:"05" == t:"CLM_INSTNL_PRFNL_AMT"
   s:"17" == t:"CLM_OPRTNL_OUTLR_AMT"
   s:"18" == t:"CLM_OPRTNL_DSPRTNT_AMT"
   s:"19" == t:"CLM_OPRTNL_IME_AMT"
