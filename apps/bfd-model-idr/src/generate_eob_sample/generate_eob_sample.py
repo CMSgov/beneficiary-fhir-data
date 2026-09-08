@@ -3,18 +3,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import click
 import pandas as pd
 
 
-@click.command
-@click.option(
-    '--clm-uniq-id',
-    type=str, 
-    required=True, 
-    help='Pass the claim unique ID.'
-)
-def main(clm_uniq_id:str):
+def run(clm_uniq_id:str):
     """Generate EOB sample JSON from SYNTHETIC_EOB.csv based on claim unique ID."""
     claim_row = read_clm(clm_uniq_id)
     claim_type = int(claim_row.get("CLM_TYPE_CD"))
@@ -101,7 +93,8 @@ def create_pharmacy(clm_uniq_id: Any,claim_row: Any) -> Result:
                 "CLM_LINE_INGRDNT_CST_AMT": extract_col_str(rx_line,"CLM_LINE_INGRDNT_CST_AMT"),
                 "CLM_LINE_SRVC_CST_AMT": extract_col_str(rx_line,"CLM_LINE_SRVC_CST_AMT"),
                 "CLM_LINE_SLS_TAX_AMT": extract_col_str(rx_line,"CLM_LINE_SLS_TAX_AMT"),
-                "CLM_LINE_VCCN_ADMIN_FEE_AMT": extract_col_str(rx_line,"CLM_LINE_VCCN_ADMIN_FEE_AMT"),
+                "CLM_LINE_VCCN_ADMIN_FEE_AMT": extract_col_str(rx_line,
+                    "CLM_LINE_VCCN_ADMIN_FEE_AMT"),
                 "CLM_PRCNG_EXCPTN_CD": extract_col_str(rx_line,"CLM_PRCNG_EXCPTN_CD"),
                 "CLM_LINE_BENE_PMT_AMT": extract_col_str(clm_line,"CLM_LINE_BENE_PMT_AMT"),
                 "CLM_CMS_CALCD_MFTR_DSCNT_AMT": extract_col_str(rx_line,
@@ -252,6 +245,3 @@ def read_rx_line(clm_line:Any) -> Any:
 def extract_col_str(row: Any,name: str) -> str:
     return str(row.get(name, "")).strip()
 
-    
-if __name__ == "__main__":
-    main()
