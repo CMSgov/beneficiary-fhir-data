@@ -1,7 +1,7 @@
 CodeSystem: CLM_ADMSN_TYPE_CD
 Title: "Claim Admission Type Code"
 Id: CLM-ADMSN-TYPE-CD
-Description: "Indicates the type and priority of inpatient services."
+Description: "Indicates the type and priority of inpatient and outpatient services."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
 * ^status = #active
 * ^content = #complete

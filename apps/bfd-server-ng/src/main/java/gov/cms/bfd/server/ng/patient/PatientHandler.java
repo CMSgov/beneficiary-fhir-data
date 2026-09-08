@@ -121,7 +121,8 @@ public class PatientHandler {
   }
 
   /**
-   * Searches for all Coverage resources associated with a given beneficiary SK.
+   * Searches for all Coverage resources associated with a given beneficiary SK for C4DIC (insurance
+   * card).
    *
    * @param beneSk The beneficiary surrogate key.
    * @param benefitDate date used to determine Coverage status.
@@ -129,6 +130,7 @@ public class PatientHandler {
    */
   @Timed("application.patient.handler.search_by_beneficiary_C4DIC")
   public Bundle searchByBeneficiaryC4DIC(Long beneSk, LocalDate benefitDate) {
+
     var beneficiaryOpt =
         coverageRepository
             .searchBeneficiaryWithCoverage(
@@ -137,9 +139,10 @@ public class PatientHandler {
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);
     }
-    var beneficiary = beneficiaryOpt.get();
 
+    var beneficiary = beneficiaryOpt.get();
     var patient = beneficiary.toFhirPatient(ProfileType.C4DIC);
+
     // Two more organization may be needed, once mappings for Part C and D are added.
     var cmsOrg =
         OrganizationFactory.createCmsOrganization(

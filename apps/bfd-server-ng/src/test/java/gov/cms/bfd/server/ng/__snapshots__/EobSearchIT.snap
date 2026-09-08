@@ -11945,6 +11945,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -13741,6 +13742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -15537,6 +15539,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -17333,6 +17336,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -19108,6 +19112,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -19207,7 +19212,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -20910,6 +20915,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -22664,6 +22670,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -22763,7 +22770,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -24110,6 +24117,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -25599,6 +25607,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -28719,6 +28728,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -30473,6 +30483,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -30572,7 +30583,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -31919,6 +31930,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -33408,6 +33420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -36528,6 +36541,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -38282,6 +38296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -38381,7 +38396,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -39728,6 +39743,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -41217,6 +41233,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -44353,6 +44370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -46107,6 +46125,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -46206,7 +46225,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -48817,6 +48836,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -50306,6 +50326,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -52091,6 +52112,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -53845,6 +53867,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -53944,7 +53967,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -56555,6 +56578,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -58044,6 +58068,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -59829,6 +59854,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -61583,6 +61609,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -61682,7 +61709,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -64293,6 +64320,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -65782,6 +65810,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -67551,6 +67580,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -69305,6 +69335,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -69404,7 +69435,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -71715,6 +71746,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -73469,6 +73501,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -73568,7 +73601,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -74985,6 +75018,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -78121,6 +78155,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -79875,6 +79910,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -79974,7 +80010,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -81391,6 +81427,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -84249,6 +84286,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -87055,6 +87093,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -88544,6 +88583,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -91050,6 +91090,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -92804,6 +92845,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -92903,7 +92945,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -95214,6 +95256,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -96968,6 +97011,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -97067,7 +97111,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -98484,6 +98528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -101620,6 +101665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -103374,6 +103420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -103473,7 +103520,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -104890,6 +104937,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -107748,6 +107796,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -110554,6 +110603,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -112043,6 +112093,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -114549,6 +114600,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -116303,6 +116355,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -116402,7 +116455,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -118713,6 +118766,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -120467,6 +120521,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -120566,7 +120621,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -121983,6 +122038,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -125119,6 +125175,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -126873,6 +126930,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -126972,7 +127030,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -128389,6 +128447,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -131247,6 +131306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -134053,6 +134113,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -135542,6 +135603,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -138024,6 +138086,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -138123,7 +138186,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -139470,6 +139533,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -140959,6 +141023,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -142728,6 +142793,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -144482,6 +144548,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -144581,7 +144648,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -145928,6 +145995,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -147417,6 +147485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -149186,6 +149255,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -150940,6 +151010,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -151039,7 +151110,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -152386,6 +152457,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -153875,6 +153947,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -156971,6 +157044,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -157070,7 +157144,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -158417,6 +158491,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -159906,6 +159981,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -161675,6 +161751,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -163429,6 +163506,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -163528,7 +163606,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -164875,6 +164953,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -166364,6 +166443,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -168133,6 +168213,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -169887,6 +169968,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -169986,7 +170068,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -171333,6 +171415,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -172822,6 +172905,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -175918,6 +176002,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -176017,7 +176102,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -177364,6 +177449,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -178853,6 +178939,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -180622,6 +180709,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -182376,6 +182464,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -182475,7 +182564,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -183822,6 +183911,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -185311,6 +185401,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -187080,6 +187171,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -188834,6 +188926,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "3",
+            "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -188933,7 +189026,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "0",
-            "display" : "Blank",
+            "display" : "Unknown Value (but present in data)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD"
           } ]
         },
@@ -190280,6 +190373,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
@@ -191769,6 +191863,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
           }, {
             "code" : "9",
+            "display" : "Unknown - Information not available.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
