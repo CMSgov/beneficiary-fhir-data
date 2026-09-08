@@ -46,7 +46,7 @@ jobs:
               pythonVersion: "3.14",
             },
             {
-              projectName: "idr-pipeline",
+              projectName: "run-idr-pipeline",
               projectRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
               testsRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
               uvCommand: "uv sync",
