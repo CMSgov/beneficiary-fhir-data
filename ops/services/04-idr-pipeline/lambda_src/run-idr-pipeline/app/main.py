@@ -19,9 +19,10 @@ from pydantic.main import BaseModel
 from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
-    from mypy_boto3_ecs.type_defs import CapacityProviderStrategyItemTypeDef
+    from mypy_boto3_ecs.type_defs import CapacityProviderStrategyItemTypeDef, TaskTypeDef
 else:
     CapacityProviderStrategyItemTypeDef = object
+    TaskTypeDef = object
 
 REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
 
@@ -146,7 +147,7 @@ def filter_falsey(unfiltered_dict: dict[str, Any | None]) -> dict[str, Any]:
     return {k: v for k, v in unfiltered_dict.items() if v}
 
 
-def get_task_job_id(task: dict[str, Any]) -> str:
+def get_task_job_id(task: TaskTypeDef) -> str:
     # Retrieve the IDR_JOB_ID from the task's container overrides
     # environment variables if set in the call
     # Supporting documentation:
