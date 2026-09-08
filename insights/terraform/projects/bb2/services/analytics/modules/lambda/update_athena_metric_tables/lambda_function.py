@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import boto3
 from utils.utils import (
@@ -135,7 +136,10 @@ def lambda_handler(event, context):
             "DETAIL": "MAIN table create/update was un-successful after retries!",
         }
 
-    send_metrics_data_csvs_to_bcda_bucket(session, params)
+    bcda_bucket_name = os.environ.get("BCDA_BUCKET_NAME", default="")
+    kms_key = os.environ.get("KMS_KEY", default="")
+
+    send_metrics_data_csvs_to_bcda_bucket(session, params, bcda_bucket_name, kms_key)
 
     return {
         "STATUS": "SUCCESS",

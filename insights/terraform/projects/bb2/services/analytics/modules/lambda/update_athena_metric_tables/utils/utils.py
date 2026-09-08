@@ -418,10 +418,12 @@ def output_results_list_to_csv_file(result_list, output_file, include_header=Tru
         dw.writerows(result_list)
 
 
-def send_metrics_data_csvs_to_bcda_bucket(session, params):
+def send_metrics_data_csvs_to_bcda_bucket(session, params, bcda_bucket_name, kms_key):
     """
     Retrieves and transfers metrics CSV files from BFD to BCDA AWS Account
     """
+
+    s3_client = boto3.client("s3")
 
     # The impl_global_state_per_app table is not included
     # as it is not used by any active Dashboards. Further, that table contains over 600K rows,
@@ -436,13 +438,22 @@ def send_metrics_data_csvs_to_bcda_bucket(session, params):
         params["query"] = query
         output_s3_path = run_athena_query_result_to_s3(session, params, 1000)
 
+        bucket = output_s3_path.split("//")[1]
+        source_bucket_name = bucket.split("/")[0]
+        source_bucket_key = bucket.split("/", 1)[-1]
+
+        s3_response = s3_client.get_object(
+            Bucket=source_bucket_name, Key=source_bucket_key
+        )
+        csv_data = s3_response["Body"].read()
+
         # Transfer to BCDA s3 bucket.
         bcda_file_name = "latest_" + table + ".csv"
-
-        # s3_client.put_object(
-        #     Bucket=bucket,
-        #     Key=bcda_file_name,
-        #     Body=view_report,
-        #     ServerSideEncryption='aws:kms',
-        #     SSEKMSKeyId='your-kms-cmk-id-or-arn' # e.g., 'alias/my-key' or the full ARN
-        # )
+        s3_client.put_object(
+            Bucket=bcda_bucket_name,
+            Key=bcda_file_name,
+            Body=csv_data,
+            ContentType="text/csv",
+            ServerSideEncryption="aws:kms",
+            SSEKMSKeyId=kms_key,
+        )
