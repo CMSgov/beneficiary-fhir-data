@@ -439,6 +439,10 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state_per_app" {
           type = "INTEGER"
       }
       input_columns {
+          name = "app_fhir_v3_eob_shared_systems_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
           name = "app_fhir_v3_eob_call_synthetic_count"
           type = "INTEGER"
       }

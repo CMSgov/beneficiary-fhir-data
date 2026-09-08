@@ -9,7 +9,6 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.PriorAuthorizationRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
@@ -48,7 +47,6 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
-  private final PriorAuthorizationRepository priorAuthorizationRepository;
   private final MetricRecorder metricRecorder;
 
   // Cache the security labels map to avoid repeated I/O and parsing
