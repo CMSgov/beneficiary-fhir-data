@@ -65,8 +65,7 @@ def download_content_from_s3(s3_path, csv_format=True):
     s3 = boto3.resource("s3")
     bucket_name = re.findall(r"^s3://([^/]+)", s3_path)[0]
     key = re.findall(r"^s3://[^/]+[/](.+)", s3_path)[0]
-    print("bucket_name: ", bucket_name)
-    print("key: ", key)
+
     try:
         response = s3.Object(bucket_name, key).get()
     except s3.meta.client.exceptions.NoSuchKey:
