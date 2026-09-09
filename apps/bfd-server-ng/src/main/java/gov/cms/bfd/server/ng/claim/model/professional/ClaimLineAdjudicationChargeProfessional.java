@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @MappedSuperclass
-public abstract class ClaimLineAdjudicationChargeProfessionalBase {
+public abstract class ClaimLineAdjudicationChargeProfessional {
 
   @Column(name = "clm_line_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;

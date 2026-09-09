@@ -49,12 +49,12 @@ public class SnapshotDeterministicOrderer {
 
   private void orderInternal(ObjectNode eob) {
 
+    // Order unsequenced components
+    orderArraysRecursively(eob);
+
     // EoB.Item contains important sequence references to 4 other component arrays, those are
     // handled together.
     orderItemArray(eob);
-
-    // Order unsequenced components
-    orderArraysRecursively(eob);
   }
 
   /**

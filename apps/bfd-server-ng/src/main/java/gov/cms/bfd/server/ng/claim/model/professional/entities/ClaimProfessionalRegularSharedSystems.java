@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import jakarta.persistence.Column;
@@ -31,4 +32,7 @@ public class ClaimProfessionalRegularSharedSystems extends ClaimProfessionalRegu
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
+
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
 }

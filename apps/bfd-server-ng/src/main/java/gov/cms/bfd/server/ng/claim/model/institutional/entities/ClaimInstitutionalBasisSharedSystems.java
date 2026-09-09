@@ -43,6 +43,9 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemBasisSharedSystems> claimItems;
 
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;

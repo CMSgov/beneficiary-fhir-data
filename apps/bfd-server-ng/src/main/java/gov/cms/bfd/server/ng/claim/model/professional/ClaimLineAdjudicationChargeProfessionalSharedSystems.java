@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ClaimLineAdjudicationChargeProfessionalSharedSystems
-    extends ClaimLineAdjudicationChargeProfessionalBase {
+    extends ClaimLineAdjudicationChargeProfessional {
 
   @Column(name = "clm_line_otaf_amt")
   private BigDecimal providerObligationToAcceptFullAmount;

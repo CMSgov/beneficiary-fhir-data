@@ -11,10 +11,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("java:S2201")
 public class ClaimLineInstitutionalRegularNch extends ClaimLineInstitutionalBase {
 
+  @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignature ansiSignature;
 
   @Override
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
+    adjudicationCharge.toFhir().forEach(line::addAdjudication);
     ansiSignature.toFhir().ifPresent(line::addAdjudication);
   }
 }

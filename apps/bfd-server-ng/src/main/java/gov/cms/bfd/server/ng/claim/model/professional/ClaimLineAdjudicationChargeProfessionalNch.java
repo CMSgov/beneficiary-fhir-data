@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-class ClaimLineAdjudicationChargeProfessionalNch
-    extends ClaimLineAdjudicationChargeProfessionalBase {
+class ClaimLineAdjudicationChargeProfessionalNch extends ClaimLineAdjudicationChargeProfessional {
 
   @Column(name = "clm_line_prfnl_intrst_amt")
   private BigDecimal professionalInterestAmount;

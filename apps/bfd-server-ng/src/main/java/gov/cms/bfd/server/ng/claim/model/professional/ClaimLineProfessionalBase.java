@@ -96,7 +96,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     return trackingSupportingInfo.stream().toList();
   }
 
-  abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();
+  abstract ClaimLineAdjudicationChargeProfessional getAdjudicationCharge();
 
   abstract List<Extension> getExtensions(ClaimFilterOptions options);
 
