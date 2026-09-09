@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegular;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -26,7 +27,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
-public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase {
+public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
+    implements NchClaim {
 
   @Embedded private AdjudicationChargeRegular adjudicationCharge;
 

@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
@@ -41,7 +42,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase {
+public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements NchClaim {
 
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;

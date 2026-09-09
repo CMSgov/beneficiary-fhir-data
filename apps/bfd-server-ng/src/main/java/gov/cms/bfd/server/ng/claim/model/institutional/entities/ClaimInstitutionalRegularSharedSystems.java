@@ -2,9 +2,12 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegularSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
@@ -31,11 +34,23 @@ public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRe
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
   private ClaimPaidStatusCode claimPaidStatusCode;
 
-  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
-
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemRegularSharedSystems> claimItems;
+
+  @Column(name = "clm_src_id")
+  private ClaimSourceId claimSourceId;
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
+
+  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
+
+  @Override
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.of(claimRecordType);
+  }
 
   @Override
   public SortedSet<ClaimItemBase> getItems() {

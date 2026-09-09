@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Marked interface to remove instanceof chain in ClaimBase. */
+/** Marker interface across SharedSystems claims, since profile comes before data source. */
 public interface SharedSystemsClaim {
 
   /**

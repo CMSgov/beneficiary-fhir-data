@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import javax.annotation.processing.Generated;
@@ -8,4 +10,10 @@ import javax.annotation.processing.Generated;
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
-public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase {}
+public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase implements NchClaim {
+
+  @Override
+  public ClaimSourceId getClaimSourceId() {
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+}

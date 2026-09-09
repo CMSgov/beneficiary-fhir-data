@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -27,7 +28,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
-public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
+public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase implements NchClaim {
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
@@ -65,7 +66,7 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
 
   @Override
   public ClaimSourceId getClaimSourceId() {
-    return null;
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 
   @Override
