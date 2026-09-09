@@ -183,6 +183,10 @@ resource "aws_ecs_task_definition" "idr" {
             value = "snowflake"
           },
           {
+            name  = "IDR_JOB_ID",
+            value = "1"
+          },
+          {
             name  = "IDR_ENABLE_DATE_PARTITIONS"
             value = "0"
           },

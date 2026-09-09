@@ -45,6 +45,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-pipeline",
+              projectRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+              testsRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
