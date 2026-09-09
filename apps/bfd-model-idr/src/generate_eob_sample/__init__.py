@@ -1,6 +1,6 @@
 import click
 
-from .generate_eob_sample import run
+from .generate_eob_sample import SampleGenerator
 
 
 @click.command
@@ -10,8 +10,16 @@ from .generate_eob_sample import run
     required=True,
     help="Pass the claim unique ID.",
 )
-def main(clm_uniq_id: str):
-    run(clm_uniq_id)
+@click.option(
+    "--source-directory",
+    type=str,
+    required=False,
+    help="Pass the source directory containing the claim files.",
+    default="out"
+)
+def main(clm_uniq_id: str, source_directory: str) -> None:
+    generator = SampleGenerator(source_directory)
+    generator.run(clm_uniq_id=clm_uniq_id)
 
 
 if __name__ == "__main__":
