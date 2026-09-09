@@ -842,6 +842,8 @@ def generate(
         CLM_LINE_PRFNL: [],
         CLM_LINE_RX: [],
         CLM_RLT_COND_SGNTR_MBR: [],
+        CLM_OCRNC_SGNTR_MBR: [],
+        CLM_RLT_OCRNC_SGNTR_MBR: [],
         PRVDR_HSTRY: [],
         CNTRCT_PBP_NUM: [],
         PRAUC: [],
@@ -895,11 +897,23 @@ def generate(
     # does not take an exceedingly long time versus generation of entirely new data.
     clms_per_bene_sk = partition_rows(llist=files[CLM], part_by=lambda x: int(x[f.BENE_SK]))
     # HACK: See generation function for justification. CLM_UNIQ_ID is not a field of this table
-    sgntr_mbr_per_clm_uniq_id = {
+    cond_sgntr_mbr_per_clm_uniq_id = {
         str(row[f.CLM_UNIQ_ID]): row
         for row in files[CLM_RLT_COND_SGNTR_MBR]
         if row.get(f.CLM_UNIQ_ID)
     }
+    ocrnc_sgntr_mbr_per_clm_uniq_id = {
+        str(row[f.CLM_UNIQ_ID]): row
+        for row in files[CLM_OCRNC_SGNTR_MBR]
+        if row.get(f.CLM_UNIQ_ID)
+    }
+    rlt_ocrnc_sgntr_mbr_per_clm_uniq_id = {
+        str(row[f.CLM_UNIQ_ID]): row
+        for row in files[CLM_RLT_OCRNC_SGNTR_MBR]
+        if row.get(f.CLM_UNIQ_ID)
+    }
+    
+
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x for x in files[CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
     }
@@ -991,9 +1005,23 @@ def generate(
 
             clm_rlt_cond_sgntr_mbr = adj_util.gen_clm_rlt_cond_sgntr_mbr(
                 clm=clm,
-                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+                init_clm_rlt_cond_sgntr_mbr=cond_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
             )
             adj_clms_tbls[CLM_RLT_COND_SGNTR_MBR].append(clm_rlt_cond_sgntr_mbr)
+
+            clm_ocrnc_sgntr_mbr = adj_util.gen_clm_ocrnc_sgntr_mbr(
+                clm=clm,
+                init_clm_ocrnc_sgntr_mbr=ocrnc_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+            )
+            adj_clms_tbls[CLM_OCRNC_SGNTR_MBR].append(clm_ocrnc_sgntr_mbr)
+
+            clm_rlt_ocrnc_sgntr_mbr = adj_util.gen_clm_rlt_ocrnc_sgntr_mbr(
+                clm=clm,
+                init_clm_rlt_ocrnc_sgntr_mbr=rlt_ocrnc_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+            )
+            adj_clms_tbls[CLM_RLT_OCRNC_SGNTR_MBR].append(clm_rlt_ocrnc_sgntr_mbr)
+
+            
 
             clm_type_cd = int(clm[f.CLM_TYPE_CD])
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
@@ -1128,8 +1156,15 @@ def generate(
                 CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_RLT_COND_SGNTR_MBR: as_list(
-                    sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                    cond_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
                 ),
+                CLM_OCRNC_SGNTR_MBR: as_list(
+                    ocrnc_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                ),
+                CLM_RLT_OCRNC_SGNTR_MBR: as_list(
+                    rlt_ocrnc_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                ),
+            
                 CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
