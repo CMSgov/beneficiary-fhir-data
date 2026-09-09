@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
@@ -17,9 +16,8 @@ import gov.cms.bfd.server.ng.claim.model.common.Identifiers;
 import gov.cms.bfd.server.ng.claim.model.common.Meta;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.PatientReferenceFactory;
+import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
-import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -190,16 +188,6 @@ public abstract class ClaimBase {
   }
 
   /**
-   * Hook method to return the claim paid status code if applicable to this claim source type.
-   * Defaults to empty for base claims (like NCH/DDPS) that do not track this field.
-   *
-   * @return an optional containing the claim paid status code
-   */
-  public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
-    return Optional.empty();
-  }
-
-  /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail
    * logic. Standard base claims with no status code will ignore this, default implementation is to
    * return empty, and only Shared Systems wil override getClaimPaidStatusCode().
@@ -207,11 +195,8 @@ public abstract class ClaimBase {
    * @param eob the EOB being built
    */
   public void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    // Only Shared Systems claims derive outcome from CLM_PD_STUS_CD. Missing or unmapped paid
-    // status codes are resolved as PARTIAL to match the outcome search filter behavior.
-    if (this instanceof ClaimInstitutionalCmsSharedSystems
-        || this instanceof ClaimProfessionalCmsSharedSystems) {
-      ClaimPaidStatusCode.resolveOutcome(getClaimPaidStatusCode()).ifPresent(eob::setOutcome);
+    if (this instanceof SharedSystemsClaim claim) {
+      claim.resolveSharedSystemsOutcome(eob);
     }
   }
 }

@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
+import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
@@ -45,7 +46,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase {
+public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
+    implements SharedSystemsClaim {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;

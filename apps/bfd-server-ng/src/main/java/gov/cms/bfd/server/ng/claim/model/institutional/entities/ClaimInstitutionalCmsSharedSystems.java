@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
@@ -41,7 +42,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr")
 @SuppressWarnings({"java:S6539", "java:S2293"})
-public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase {
+public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase
+    implements SharedSystemsClaim {
 
   @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
   @Embedded private AdjudicationChargeCmsSharedSystems adjudicationCharge;

@@ -1,10 +1,13 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,6 +28,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_institutional_nch", schema = "idr")
 @Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -53,7 +60,7 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo() {
-    return List.of();
+    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
 
   @Override
