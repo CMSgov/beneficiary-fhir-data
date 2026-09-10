@@ -37,6 +37,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
+| <a name="input_ephemeral_locust_hook_override"></a> [ephemeral\_locust\_hook\_override](#input\_ephemeral\_locust\_hook\_override) | Enables the execution and creation of the locust-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments | `bool` | `false` | no |
 | <a name="input_log_router_repository_override"></a> [log\_router\_repository\_override](#input\_log\_router\_repository\_override) | Overrides the ECR repository for the log\_router container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_log_router_version_override"></a> [log\_router\_version\_override](#input\_log\_router\_version\_override) | Overrides the version for log\_router container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
@@ -56,6 +57,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ------ | ------- |
 | <a name="module_bucket_s3logs"></a> [bucket\_s3logs](#module\_bucket\_s3logs) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
+| <a name="module_log_group_locust_hook"></a> [log\_group\_locust\_hook](#module\_log\_group\_locust\_hook) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_log_router_messages"></a> [log\_group\_log\_router\_messages](#module\_log\_group\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_s3logs"></a> [log\_group\_s3logs](#module\_log\_group\_s3logs) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_server_healthchecks"></a> [log\_group\_server\_healthchecks](#module\_log\_group\_server\_healthchecks) | ../../terraform-modules/general/high-retention-log-group | n/a |
@@ -87,8 +89,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.locust_hook_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.locust_hook_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.locust_hook_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.rds](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.run_locust_hook_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3logs_cw_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3logs_firehose_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3logs_firehose_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
@@ -100,17 +106,23 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_role.deploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.execution_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.run_locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.s3logs_cw](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.s3logs_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.service_connect](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.deploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.execution](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.run_locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3logs_cw](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3logs_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.service_connect](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.s3logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/kinesis_firehose_delivery_stream) | resource |
+| [aws_lambda_function.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
+| [aws_lambda_function_event_invoke_config.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function_event_invoke_config) | resource |
 | [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb) | resource |
 | [aws_lb_listener.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_listener) | resource |
 | [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_target_group) | resource |
@@ -121,6 +133,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_vpc_security_group_egress_rule.server_allow_all_traffic_ipv4](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.server_allow_db_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.server_allow_tls_nlb](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [archive_file.locust_hook_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_acmpca_certificate_authority.pace](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/acmpca_certificate_authority) | data source |
 | [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_ecr_image.log_router](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_image) | data source |
@@ -135,8 +148,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy_document.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.execution_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.locust_hook_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.locust_hook_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.locust_hook_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.rds](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.run_locust_hook_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3logs_cw_assume](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3logs_cw_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3logs_firehose_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
@@ -147,6 +164,9 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy_document.service_connect_pca](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.service_connect_secrets_manager](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.ssm_params](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_lambda_function.run_locust](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/lambda_function) | data source |
+| [aws_network_interface.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/network_interface) | data source |
+| [aws_network_interfaces.load_balancer](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/network_interfaces) | data source |
 | [aws_ram_resource_share.pace_ca](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ram_resource_share) | data source |
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/rds_cluster) | data source |
 | [aws_route53_zone.parent_env](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/route53_zone) | data source |
