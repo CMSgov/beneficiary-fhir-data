@@ -19,6 +19,13 @@ variable "server_repository_override" {
   type        = string
 }
 
+variable "samhsa_hook_repository_override" {
+  default     = null
+  description = "Overrides the ECR repository for the samhsa-regression container image. If not provided, the default will be used"
+  sensitive   = false
+  type        = string
+}
+
 variable "log_router_version_override" {
   default     = null
   description = "Overrides the version for log_router container image resolution. If not provided, the latest BFD version will be used"
@@ -33,7 +40,22 @@ variable "server_version_override" {
   type        = string
 }
 
+variable "samhsa_hook_version_override" {
+  default     = null
+  description = "Overrides the version for samhsa-regression container image resolution. If not provided, the latest BFD version will be used"
+  sensitive   = false
+  type        = string
+}
+
 variable "ephemeral_locust_hook_override" {
+  default     = false
+  description = "Enables the execution and creation of the locust-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments"
+  sensitive   = false
+  nullable    = false
+  type        = bool
+}
+
+variable "ephemeral_samhsa_hook_override" {
   default     = false
   description = "Enables the execution and creation of the locust-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments"
   sensitive   = false
