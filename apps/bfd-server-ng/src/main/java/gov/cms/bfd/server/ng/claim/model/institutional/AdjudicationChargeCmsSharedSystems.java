@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class AdjudicationChargeCmsSharedSystems implements AdjudicationChargeBase {
 
-  @Embedded AdjudicationChargeRegularSharedSystems adjudicationChargeBase;
+  @Embedded AdjudicationChargeInstitutionalRegularSharedSystems adjudicationChargeBase;
 
   @Column(name = "clm_bene_intrst_pd_amt")
   private BigDecimal beneInterestPaidAmount;

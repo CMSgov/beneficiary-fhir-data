@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import jakarta.persistence.Column;
@@ -26,7 +25,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
   private BigDecimal benePaidAmount;
 
-  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
   @Embedded private DateSupportingInfo dateSupportingInfo;
   @Embedded private InstitutionalSupportingInfo supportingInfo; /**/
 
@@ -42,7 +40,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
 
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
   }
 

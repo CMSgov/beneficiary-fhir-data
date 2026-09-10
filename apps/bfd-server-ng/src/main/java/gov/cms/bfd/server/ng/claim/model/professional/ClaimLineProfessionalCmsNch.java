@@ -32,8 +32,7 @@ import org.hl7.fhir.r4.model.Reference;
 @Embeddable
 @Getter
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
-public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCmsBase
-    implements ClaimLineBase {
+public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implements ClaimLineBase {
 
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;

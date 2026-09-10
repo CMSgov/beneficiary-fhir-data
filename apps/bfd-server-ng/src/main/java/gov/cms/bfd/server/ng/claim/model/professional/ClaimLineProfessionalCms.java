@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Extension;
 /** ExplanationOfBenefit.Item component Professional domain, CMS profile. */
 @MappedSuperclass
 @Getter
-abstract class ClaimLineProfessionalCmsBase extends ClaimLineProfessionalBase {
+abstract class ClaimLineProfessionalCms extends ClaimLineProfessionalBase {
 
   @Embedded ClaimLineExtensionsCms extensions;
 

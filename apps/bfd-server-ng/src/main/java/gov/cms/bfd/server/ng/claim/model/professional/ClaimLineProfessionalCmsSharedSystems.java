@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @Getter
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pa_uniq_trkng_num"))
-public class ClaimLineProfessionalCmsSharedSystems extends ClaimLineProfessionalCmsBase {
+public class ClaimLineProfessionalCmsSharedSystems extends ClaimLineProfessionalCms {
 
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineAdjudicationChargeProfessionalSharedSystems adjudicationCharge;

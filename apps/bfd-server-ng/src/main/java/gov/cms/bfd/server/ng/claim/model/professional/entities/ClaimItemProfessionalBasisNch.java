@@ -4,6 +4,8 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalBasisNch;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -21,6 +23,7 @@ import lombok.Getter;
 public class ClaimItemProfessionalBasisNch implements ClaimItemBase {
 
   @EmbeddedId private ClaimItemId claimItemId;
+  @Embedded private ClaimLineProfessionalBasisNch claimLine;
 
   @Override
   public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {

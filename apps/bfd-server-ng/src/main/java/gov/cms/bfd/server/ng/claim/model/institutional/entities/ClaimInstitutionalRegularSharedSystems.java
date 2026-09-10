@@ -6,7 +6,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegularSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalRegularSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -49,7 +49,7 @@ public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRe
   @Embedded
   private ClaimRecordType claimRecordType;
 
-  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationChargeInstitutionalRegularSharedSystems adjudicationCharge;
 
   @Override
   public Optional<ClaimRecordType> getClaimRecordTypeOptional() {

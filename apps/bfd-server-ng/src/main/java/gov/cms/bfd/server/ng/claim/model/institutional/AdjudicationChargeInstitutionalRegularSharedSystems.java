@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adjudication fields for institutional claims, regular profile, shared systems. */
 @Embeddable
-public class AdjudicationChargeRegularSharedSystems implements AdjudicationChargeBase {
+public class AdjudicationChargeInstitutionalRegularSharedSystems implements AdjudicationChargeBase {
 
-  @Embedded AdjudicationChargeRegular adjudicationChargeBase;
+  @Embedded AdjudicationChargeInstitutionalRegular adjudicationChargeBase;
 
   @Column(name = "clm_bene_pmt_amt")
   private BigDecimal benePaymentAmount;

@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * fact that CMS is a superset of REGULAR.
  */
 @Embeddable
-public class AdjudicationChargeCmsNch implements AdjudicationChargeBase {
+public class AdjudicationChargeInstitutionalCmsNch implements AdjudicationChargeBase {
 
-  @Embedded AdjudicationChargeRegular adjudicationChargeBase;
+  @Embedded AdjudicationChargeInstitutionalRegular adjudicationChargeBase;
 
   @Column(name = "clm_blood_chrg_amt")
   private BigDecimal bloodChargeAmount;

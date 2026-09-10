@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * nch) because cartesian products are fun.
  */
 @Embeddable
-public class AdjudicationChargeRegular implements AdjudicationChargeBase {
+public class AdjudicationChargeInstitutionalRegular implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;

@@ -1,16 +1,13 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
 import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -38,11 +35,6 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return Collections.emptySortedSet();
   }
 
   // region PaymentComponent

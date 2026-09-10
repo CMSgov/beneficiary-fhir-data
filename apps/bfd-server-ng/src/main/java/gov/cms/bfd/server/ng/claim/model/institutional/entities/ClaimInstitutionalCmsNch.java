@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsNch;
@@ -47,7 +47,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
   @Embedded
   private ClaimRecordType claimRecordType;
 
-  @Embedded private AdjudicationChargeCmsNch adjudicationCharge;
+  @Embedded private AdjudicationChargeInstitutionalCmsNch adjudicationCharge;
   @Embedded private DateSupportingInfoCmsNch dateSupportingInfo;
   @Embedded private InstitutionalSupportingInfoCmsNch supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
