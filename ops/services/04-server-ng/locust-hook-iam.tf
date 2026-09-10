@@ -59,36 +59,62 @@ resource "aws_iam_policy" "locust_hook_kms" {
   policy      = one(data.aws_iam_policy_document.locust_hook_kms[*].json)
 }
 
-data "aws_iam_policy_document" "lambda_assume_locust_hook" {
-  count = local.locust_hook_enabled ? 1 : 0
-
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
 resource "aws_iam_role" "locust_hook" {
   count = local.locust_hook_enabled ? 1 : 0
 
   name                  = "${local.lh_lambda_full_name}-role"
   path                  = local.iam_path
   description           = "Role for the ${local.lh_lambda_full_name} Lambda"
-  assume_role_policy    = one(data.aws_iam_policy_document.lambda_assume_locust_hook[*].json)
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["lambda"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
 
 resource "aws_iam_role_policy_attachment" "locust_hook" {
   for_each = local.locust_hook_enabled ? {
-    logs       = one(aws_iam_policy.locust_hook_logs[*].arn)
-    lambda     = one(aws_iam_policy.locust_hook_lambda[*].arn)
-    kms        = one(aws_iam_policy.locust_hook_kms[*].arn)
+    logs   = one(aws_iam_policy.locust_hook_logs[*].arn)
+    lambda = one(aws_iam_policy.locust_hook_lambda[*].arn)
+    kms    = one(aws_iam_policy.locust_hook_kms[*].arn)
   } : {}
 
   role       = one(aws_iam_role.locust_hook[*].name)
+  policy_arn = each.value
+}
+
+data "aws_iam_policy_document" "run_locust_hook_lambda" {
+  count = local.locust_hook_enabled ? 1 : 0
+
+  statement {
+    sid       = "AllowUsageOfLocustHookLambda"
+    actions   = ["lambda:InvokeFunction", "lambda:GetFunction"]
+    resources = aws_lambda_function.locust_hook[*].arn
+  }
+}
+
+resource "aws_iam_policy" "run_locust_hook_lambda" {
+  count = local.locust_hook_enabled ? 1 : 0
+
+  name   = "${local.name_prefix}-run-locust-hook-lambda-policy"
+  path   = local.iam_path
+  policy = one(data.aws_iam_policy_document.run_locust_hook_lambda[*].json)
+}
+
+resource "aws_iam_role" "run_locust_hook" {
+  count = local.locust_hook_enabled ? 1 : 0
+
+  name                  = "${local.name_prefix}-run-locust-hook-role"
+  path                  = local.iam_path
+  description           = "Role for ${local.service} deploy hooks to run ${local.lh_lambda_full_name} Lambda"
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs"].json
+  permissions_boundary  = local.permissions_boundary_arn
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "run_locust_hook" {
+  for_each = local.locust_hook_enabled ? {
+    lambda = one(aws_iam_policy.run_locust_hook_lambda[*].arn)
+  } : {}
+
+  role       = one(aws_iam_role.run_locust_hook[*].name)
   policy_arn = each.value
 }
