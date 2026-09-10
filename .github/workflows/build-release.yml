@@ -442,7 +442,8 @@ jobs:
         bfd-platform-consume-idr-events,
         bfd-platform-run-idr-pipeline,
         bfd-platform-codebuild-runner,
-        bfd-platform-idr-bfd-validator
+        bfd-platform-idr-bfd-validator,
+        bfd-platform-samhsa-regression
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}

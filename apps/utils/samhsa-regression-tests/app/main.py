@@ -19,6 +19,8 @@ import asyncclick as click
 import psycopg
 import yaml
 from aiohttp import ClientSession, TCPConnector
+from aws_lambda_powertools.utilities import parameters
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -740,6 +742,40 @@ async def main(
         )
 
         return all_samhsa_filtered
+
+
+# TODO: Do this right, split the Lambda bits out
+def handler(event: dict[str, object], _: LambdaContext) -> dict[str, str]:
+    bfd_env = os.environ.get("BFD_ENVIRONMENT")
+    tmpdir = os.environ.get("TMPDIR", "/tmp")
+    non_samhsa_cert = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
+        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_cert", decrypt=True
+    )
+    non_samhsa_key = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
+        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_key", decrypt=True
+    )
+    samhsa_cert = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
+        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_samhsa_cert", decrypt=True
+    )
+    samhsa_key = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
+        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_samhsa_key", decrypt=True
+    )
+    non_samhsa_path = Path(tmpdir).joinpath("non_samhsa.pem")
+    non_samhsa_path.write_text(f"{non_samhsa_cert}\n{non_samhsa_key}")
+    samhsa_path = Path(tmpdir).joinpath("samhsa.pem")
+    samhsa_path.write_text(f"{samhsa_cert}\n{samhsa_key}")
+
+    # TODO: Dirty hack around click, remove this:
+    os.environ.setdefault("NO_SAMHSA_CERT", str(non_samhsa_path.absolute()))
+    os.environ.setdefault("NO_SAMHSA_CERT_KEY", str(non_samhsa_path.absolute()))
+    os.environ.setdefault("SAMHSA_CERT", str(samhsa_path.absolute()))
+    os.environ.setdefault("SAMHSA_CERT_KEY", str(samhsa_path.absolute()))
+
+    # TODO: Handle security labels
+
+    result = anyio.run(main)
+
+    return {"hookStatus": "SUCCEEDED" if result else "FAILED"}
 
 
 if __name__ == "__main__":

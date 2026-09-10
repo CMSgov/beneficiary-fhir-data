@@ -1,16 +1,11 @@
 [project]
-name = "samhsa-regression-tests"
-version = "1.0.0"
 requires-python = ">=3.14"
-dependencies = [
-    "aiohttp>=3.14.3",
-    "psycopg[binary]>=3.2.10",
-    "asyncclick>=8.3.0.5",
-    "anyio>=4.11.0",
-    "pydantic>=2.12.2",
-    "pyyaml>=6.0.3",
-    "aws-lambda-powertools"
-]
+name = "locust-hook"
+version = "1.0.0"
+dependencies = ["aws-lambda-powertools[all]", "boto3"]
+
+[dependency-groups]
+dev = ["boto3-stubs[lambda,codedeploy]", "ruff", "uv"]
 
 [tool.uv]
 exclude-newer = "7 days"
@@ -20,7 +15,7 @@ exclude-newer = "7 days"
 line-length = 100
 
 [tool.ruff.lint]
-select = [
+extend-select = [
     "D",    # pydocstyle
     "E501",
     # pycodestyle
