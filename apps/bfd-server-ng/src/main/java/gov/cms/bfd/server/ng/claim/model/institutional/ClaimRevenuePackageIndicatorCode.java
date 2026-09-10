@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Extension;
 
 /** The "Revenue Package Indicator Code" for a claim. */
 public sealed interface ClaimRevenuePackageIndicatorCode
-        permits ClaimRevenuePackageIndicatorCode.Valid, ClaimRevenuePackageIndicatorCode.Invalid{
+    permits ClaimRevenuePackageIndicatorCode.Valid, ClaimRevenuePackageIndicatorCode.Invalid {
 
   /**
    * Gets the code value.
