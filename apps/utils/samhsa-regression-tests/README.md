@@ -56,6 +56,7 @@ Options:
 Using `uv run main.py`, pass the required arguments, e.g.:
 
 ```bash
+cd app
 uv run main.py --hostname test.fhirv3.bfd.cmscloud.local \
   --security-labels ~/Repositories/beneficiary-fhir-data/apps/bfd-server-ng/src/main/resources/security_labels.yml \
   --host-cert ~/.certs/keystore.testv3.pem \
@@ -69,6 +70,7 @@ uv run main.py --hostname test.fhirv3.bfd.cmscloud.local \
 If running a local test (discerned via `--hostname`), any `--...cert` parameter may be omitted, e.g.:
 
 ```bash
+cd app
 uv run main.py --hostname localhost:8080 \
   --security-labels ~/Repositories/beneficiary-fhir-data/apps/bfd-server-ng/src/main/resources/security_labels.yml \
   --db-conn-str "database=..." # OR, pass via typical "PG..." environment variables!
