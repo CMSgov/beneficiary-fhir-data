@@ -26,6 +26,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_SBMT_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationSubmittedAmount(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_PRVDR_PMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidToProvider(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_BENE_PMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidByBene(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_MSP_COINSRNC_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidByBeneMcs(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_BENE_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidToBene(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_CVRD_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidByMedicare(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_BLOOD_DDCTBL_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationBloodDeductible(amt, tgtAdjudication) "Add amount";
@@ -350,6 +351,15 @@ group addAdjudicationPaidByBene(source src: String, target tgt: BackboneElement)
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add coding 1";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BENE_PMT_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+//CLM_LINE_MSP_COINSRNC_AMT
+group addAdjudicationPaidByBeneMcs(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_MSP_COINSRNC_AMT") "Add coding 2";
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }

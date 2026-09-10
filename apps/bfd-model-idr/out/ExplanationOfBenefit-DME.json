@@ -65,7 +65,12 @@
         "value" : "11D1343434"
       }
     }],
-    "valueString" : "1.11"
+    "valueQuantity" : {
+      "value" : 1.11,
+      "unit" : "g/dL",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "g/dL"
+    }
   }],
   "identifier" : [{
     "type" : {

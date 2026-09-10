@@ -81,6 +81,14 @@ tables = [
         "csv_name": "SYNTHETIC_PRAUC.csv",
         "table": SETTINGS.idr_prior_auth_table,
     },
+    {
+        "csv_name": "SYNTHETIC_CLM_LINE_MCS.csv",
+        "table": SETTINGS.idr_claim_line_mcs_table,
+    },
+    {
+        "csv_name": "SYNTHETIC_CLM_LINE_FISS.csv",
+        "table": SETTINGS.idr_claim_line_fiss_table,
+    },
 ]
 
 

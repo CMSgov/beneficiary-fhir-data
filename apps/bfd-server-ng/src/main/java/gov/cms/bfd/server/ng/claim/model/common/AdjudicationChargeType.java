@@ -49,6 +49,12 @@ public enum AdjudicationChargeType {
       "Paid by patient",
       "CLM_LINE_BENE_PMT_AMT",
       "Line Paid By Beneficiary Amount"),
+  LINE_MSP_COINSRNC_AMT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "paidbypatient",
+      "Secondary Payment Coinsurance Amount",
+      "CLM_LINE_MSP_COINSRNC_AMT",
+      "Secondary Payment Coinsurance Amount"),
   LINE_BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",

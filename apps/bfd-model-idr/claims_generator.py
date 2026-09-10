@@ -14,7 +14,13 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
-from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROFESSIONAL_CLAIM_TYPES
+from claims_static import (
+    FISS_CLM_TYPE_CDS,
+    INSTITUTIONAL_CLAIM_TYPES,
+    MCS_CLM_TYPE_CDS,
+    PHARMACY_CLM_TYPE_CDS,
+    PROFESSIONAL_CLAIM_TYPES,
+)
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     BENE_HSTRY,
@@ -27,7 +33,9 @@ from generator_util import (
     CLM_LCTN_HSTRY,
     CLM_LINE,
     CLM_LINE_DCMTN,
+    CLM_LINE_FISS,
     CLM_LINE_INSTNL,
+    CLM_LINE_MCS,
     CLM_LINE_PRFNL,
     CLM_LINE_RX,
     CLM_PRFNL,
@@ -204,6 +212,17 @@ class _ClaimsFile(StrEnum):
             f.CLM_NRLN_RIC_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            f.CLM_BNFT_ENHNCMT_1_CD,
+            f.CLM_BNFT_ENHNCMT_2_CD,
+            f.CLM_BNFT_ENHNCMT_3_CD,
+            f.CLM_BNFT_ENHNCMT_4_CD,
+            f.CLM_BNFT_ENHNCMT_5_CD,
+            f.CLM_NGACO_PBPMT_SW,
+            f.CLM_NGACO_CPTATN_SW,
+            f.CLM_NGACO_PDSCHRG_HCBS_SW,
+            f.CLM_NGACO_SNF_WVR_SW,
+            f.CLM_NGACO_TLHLTH_SW,
+            f.CLM_ACO_CARE_MGMT_HCBS_SW,
         ],
     )
     CLM_DT_SGNTR = (
@@ -420,6 +439,35 @@ class _ClaimsFile(StrEnum):
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
+    )
+    CLM_LINE_MCS = (
+        CLM_LINE_MCS,
+        [
+            f.GEO_BENE_SK,
+            f.CLM_DT_SGNTR_SK,
+            f.CLM_TYPE_CD,
+            f.CLM_NUM_SK,
+            f.CLM_LINE_NUM,
+            f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD,
+            f.CLM_LINE_RBNDLG_CRTFCTN_NUM,
+            f.CLM_LINE_HCT_LVL_NUM,
+            f.CLM_LINE_HGB_LVL_NUM,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+        ],
+    )
+    CLM_LINE_FISS = (
+        CLM_LINE_FISS,
+        [
+            f.GEO_BENE_SK,
+            f.CLM_DT_SGNTR_SK,
+            f.CLM_TYPE_CD,
+            f.CLM_NUM_SK,
+            f.CLM_LINE_NUM,
+            f.CLM_LINE_MSP_COINSRNC_AMT,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+        ]
     )
     CLM_LINE = (
         CLM_LINE,
@@ -810,6 +858,8 @@ def generate(
         CLM_PRFNL: [],
         CLM_LINE_PRFNL: [],
         CLM_LINE_RX: [],
+        CLM_LINE_MCS: [],
+        CLM_LINE_FISS: [],
         CLM_RLT_COND_SGNTR_MBR: [],
         PRVDR_HSTRY: [],
         CNTRCT_PBP_NUM: [],
@@ -902,6 +952,10 @@ def generate(
     clm_instnl_per_fpk = {four_part_key(row): row for row in files[CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=files[CLM_PRFNL],
+        part_by=lambda x: four_part_key(x),
+    )
+    clm_mcs_per_fpk = partition_rows(
+        llist=files[CLM_LINE_MCS],
         part_by=lambda x: four_part_key(x),
     )
     clm_line_instnls_per_fpk = partition_rows(
@@ -1103,6 +1157,7 @@ def generate(
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
                 ],
+                CLM_LINE_MCS: clm_mcs_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_PRFNL: clm_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_VAL: [
@@ -1257,6 +1312,25 @@ def generate(
                     for x in claims_tbls[CLM_PRFNL]
                 ]
                 out_tables[CLM_PRFNL].extend(clm_prfnls)
+                if clm_type_cd in MCS_CLM_TYPE_CDS:
+                    clm_line_mcs = [
+                        pac_util.gen_pac_clm_line_mcs(
+                            clm=pac_clm,
+                            clm_line_num=clm_line_num,
+                        )
+                    ]
+                    out_tables[CLM_LINE_MCS].extend(clm_line_mcs)
+
+            if clm_type_cd in FISS_CLM_TYPE_CDS:
+                clm_line_fiss = [
+                    pac_util.gen_pac_clm_line_fiss(
+                        clm=pac_clm,
+                        clm_line_num=clm_line_num,
+                    )
+                ]
+                out_tables[CLM_LINE_FISS].extend(clm_line_fiss)
+
+            
 
     print("Done generating synthetic claims data for provided BENE_SKs")
 
@@ -1271,7 +1345,7 @@ def generate(
         generated_type_2_npis=generated_type_2_npis,
     )
     out_tables[PRAUC].extend(prauc_rows)
-    print(f"Done generating synthetic prior authorization data.")
+    print("Done generating synthetic prior authorization data.")
 
     _save_claims_data({_ClaimsFile(k): v for k, v in out_tables.items() if k in _ClaimsFile})
 
