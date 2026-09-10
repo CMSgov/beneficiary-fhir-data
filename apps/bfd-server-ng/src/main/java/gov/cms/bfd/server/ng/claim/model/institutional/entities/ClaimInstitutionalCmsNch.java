@@ -3,15 +3,14 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalNch;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateSupportingInfo;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalNchSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -41,24 +40,22 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr")
 @SuppressWarnings({"java:S2293"})
-public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
-
-  @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
+public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase {
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
 
-  @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
+  @Embedded private AdjudicationChargeCmsNch adjudicationCharge;
+  @Embedded private DateSupportingInfoCmsNch dateSupportingInfo;
+  @Embedded private InstitutionalSupportingInfoCmsNch supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
-  @Embedded private ClaimRelatedCondition claimRelatedCondition;
   @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemInstitutionalNch> claimItems;
+  private SortedSet<ClaimItemCmsNch> claimItems;
 
   /** NCH record-type supporting info limited to one entry. */
   @Override
@@ -88,13 +85,13 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 
   @Override
   public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
+    return getClaimItems().stream().map(ClaimItemCmsNch::getClaimValue).toList();
   }
 
   /**
@@ -115,12 +112,15 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return new TreeSet<ClaimItemBase>(getClaimItems());
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    super.addSubclassAdjudication(eob);
+
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
   }
 
   @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
   }
 }

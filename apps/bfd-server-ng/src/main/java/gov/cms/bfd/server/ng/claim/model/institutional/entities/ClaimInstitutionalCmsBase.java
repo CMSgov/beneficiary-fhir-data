@@ -1,82 +1,105 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
-import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalCms;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import java.util.Collections;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
-import javax.annotation.processing.Generated;
+import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The institutional claim, full (CMS) profile base class. */
-@Generated("TODO - Remove after query optimization implementation")
-public class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
-  @Override
-  SupportingInfoComponentBase getClaimDateSupportingInfo() {
-    return null;
-  }
+@Getter
+@MappedSuperclass
+public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
+
+  @Column(name = "clm_disp_cd")
+  private Optional<ClaimDispositionCode> claimDispositionCode;
+
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+  @Embedded private AdjudicationChargeInstitutionalCms adjudicationChargeInstitutionalCms;
+  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
+
+  // region Claim IDR Load Date
+  @Embedded private ClaimIdrLoadDate claimIdrLoadDate;
 
   @Override
-  SupportingInfoComponentBase getSupportingInfo() {
-    return null;
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
+    return Optional.of(claimIdrLoadDate);
   }
+
+  // endregion
+
+  // region PaymentComponent
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
 
   @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
   }
+
+  // endregion
+
+  // region Claim Contractor Number
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
-    return List.of();
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return claimContractorNumber;
   }
 
-  @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
-  }
+  // endregion
 
+  // region Hook Methods
+
+  abstract List<ClaimValue> getClaimValues();
+
+  // endregion
+
+  // region Overrides
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
-    return List.of();
+      buildSubclassInitialSupportingInfo() {
+    return Stream.of(
+            super.buildSubclassInitialSupportingInfo().stream(),
+            Stream.of(
+                    nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+                    claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
+                .flatMap(Optional::stream),
+            benefitEnhancementCodes.toFhir(supportingInfoFactory).stream())
+        .flatMap(s -> s)
+        .toList();
   }
 
   @Override
-  public List<ClaimValue> getClaimValues() {
-    return List.of();
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    getAdjudicationChargeInstitutionalCms().toFhir(getClaimValues()).forEach(eob::addAdjudication);
+    getBenePaidAmount()
+        .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
+        .ifPresent(eob::addTotal);
   }
 
-  @Override
-  void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    // Empty
-  }
+  // endregion
 
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return null;
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return Collections.emptySortedSet();
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
+  /**
+   * Helper method to get the paid amount from the institutional adjudication charge.
+   *
+   * @return the bene paid amount
+   */
+  public Optional<BigDecimal> getBenePaidAmount() {
+    return Optional.of(getAdjudicationChargeInstitutionalCms().getBenePaidAmount());
   }
 }

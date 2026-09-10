@@ -2,11 +2,13 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /** Represents the "Obligated to Accept as Final One Indicator Code" (OTAF One Indicator Code). */
+@Embeddable
 public class ClaimObligatedToAcceptAsFinalOneIndicatorCode {
   @Column(name = "clm_otaf_one_ind_cd")
   private Optional<String> otafOneIndicatorCode;

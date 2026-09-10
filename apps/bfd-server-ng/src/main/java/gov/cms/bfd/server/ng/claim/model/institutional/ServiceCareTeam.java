@@ -8,7 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
 
-/** Service Provider History. * */
+/** Service Provider History, NCH specific. * */
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_srvc_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_srvc_careteam_name"))

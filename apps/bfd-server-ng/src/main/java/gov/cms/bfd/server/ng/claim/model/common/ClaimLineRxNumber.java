@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.StringType;
 
+/** Only present in the CMS profile. */
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:MissingJavadocMethod"})
 @Embeddable
 public class ClaimLineRxNumber {

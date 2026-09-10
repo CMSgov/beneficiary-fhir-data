@@ -87,7 +87,7 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
     return practitioner;
   }
 
-  HumanName toFhirName() {
+  private HumanName toFhirName() {
     var name = new HumanName();
     providerFirstName.ifPresent(name::addGiven);
     getProviderName().ifPresent(name::setFamily);

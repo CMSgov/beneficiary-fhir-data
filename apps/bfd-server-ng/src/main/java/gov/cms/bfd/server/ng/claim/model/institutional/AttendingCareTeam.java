@@ -8,7 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
 
-/** Attending Provider History. * */
+/** CareTeamComponent for an attending provider. * */
 @Embeddable
 @AttributeOverride(name = "providerNpiNumber", column = @Column(name = "prvdr_atndg_prvdr_npi_num"))
 @AttributeOverride(name = "providerName", column = @Column(name = "bfd_prvdr_atndg_careteam_name"))

@@ -30,6 +30,9 @@ public class SnapshotDeterministicOrderer {
           "careTeamSequence", "careTeam",
           "informationSequence", "supportingInfo");
 
+  private static final Set<String> UNSEQUENCED_COMPONENTS =
+      Set.of("insurance", "adjudication", "extension", "total");
+
   private record SequencedComponent(ObjectNode component, Integer oldSequence) {}
 
   /**
@@ -46,36 +49,29 @@ public class SnapshotDeterministicOrderer {
 
   private void orderInternal(ObjectNode eob) {
 
-    // Extensions can appear anywhere on the object, so we need to recursively scan the object for
-    // extension arrays.
-    orderExtensionsRecursively(eob);
-
     // EoB.Item contains important sequence references to 4 other component arrays, those are
     // handled together.
     orderItemArray(eob);
 
-    // Insurance is a top level array, but it doesn't have a sequence mapping back to .Line. This
-    // can be generalized
-    // in the future if there are additional unsequenced component arrays that we need to order.
-    var insuranceArrayNode = eob.path("insurance");
-    if (insuranceArrayNode.isArray()) {
-      orderUnsequencedArray((ArrayNode) insuranceArrayNode);
-    }
+    // Order unsequenced components
+    orderArraysRecursively(eob);
   }
 
   /**
-   * Recursive extension array finder and reorderer
+   * Recursive array finder and reorderer for all unsequenced components.
    *
    * @param node the component, wherever in the chain
    */
-  private static void orderExtensionsRecursively(JsonNode node) {
+  private static void orderArraysRecursively(JsonNode node) {
     if (node.isArray()) {
-      node.forEach(SnapshotDeterministicOrderer::orderExtensionsRecursively);
+      node.forEach(SnapshotDeterministicOrderer::orderArraysRecursively);
     } else if (node.isObject()) {
-      node.forEach(SnapshotDeterministicOrderer::orderExtensionsRecursively);
-      var extensionNode = node.path("extension");
-      if (extensionNode.isArray()) {
-        orderUnsequencedArray((ArrayNode) extensionNode);
+      node.forEach(SnapshotDeterministicOrderer::orderArraysRecursively);
+      for (var field : UNSEQUENCED_COMPONENTS) {
+        var fieldNode = node.path(field);
+        if (fieldNode.isArray()) {
+          orderUnsequencedArray((ArrayNode) fieldNode);
+        }
       }
     }
   }
