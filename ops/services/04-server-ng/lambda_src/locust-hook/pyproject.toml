@@ -1,0 +1,63 @@
+[project]
+requires-python = ">=3.14"
+name = "locust-hook"
+version = "1.0.0"
+dependencies = ["aws-lambda-powertools[all]", "boto3"]
+
+[dependency-groups]
+dev = ["boto3-stubs[lambda,codedeploy]", "ruff", "uv"]
+
+[tool.uv]
+exclude-newer = "7 days"
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = [
+    "D",    # pydocstyle
+    "E501",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    "ANN",
+    "LOG",
+    "G",
+    "PT",
+    "RSE",
+    "PIE",
+    "RET",
+    "SLF",
+    "ARG",
+    "PTH",
+    "PLE",
+    "PLW",
+    "PERF",
+    "FURB",
+    "RUF",
+]
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
