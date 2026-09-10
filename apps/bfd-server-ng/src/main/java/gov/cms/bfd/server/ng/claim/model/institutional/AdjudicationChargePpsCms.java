@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,10 +11,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Adjudication charge for institutional claims in the CMS profile, not system specific. */
+/** Pps adjudication charge for institutional claims in the CMS profile. */
 @Embeddable
 @Getter
-public class AdjudicationChargeInstitutionalCms {
+public class AdjudicationChargePpsCms implements AdjudicationChargeBase {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;
@@ -75,9 +76,6 @@ public class AdjudicationChargeInstitutionalCms {
   @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
   private BigDecimal beneDeductibleAmount;
 
-  @Column(name = "clm_mdcr_instnl_bene_pd_amt")
-  private BigDecimal benePaidAmount;
-
   @Column(name = "clm_finl_stdzd_pymt_amt")
   private BigDecimal standardizedPaymentAmount;
 
@@ -114,15 +112,18 @@ public class AdjudicationChargeInstitutionalCms {
   @Column(name = "clm_ss_outlier_std_pymt_amt")
   private BigDecimal shortStayOutlierPaymentAmount;
 
+  @Override
+  public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
+    return List.of();
+  }
+
   /**
    * Converts all the fields into a list of adjudication components.
    *
-   * @param claimValues claim values to also convert into adjudication components
    * @return a list of adjudication components
    */
-  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.of(
-            AdjudicationChargeClaimValue.toFhir(claimValues),
             List.of(
                 AdjudicationChargeType.BENE_MEDICARE_LRD_USED_COUNT.toFhirAdjudicationUnsignedType(
                     lifetimeReserveDaysUsed),

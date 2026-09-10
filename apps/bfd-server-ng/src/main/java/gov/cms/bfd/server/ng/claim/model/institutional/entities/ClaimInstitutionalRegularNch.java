@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegular;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -30,29 +30,23 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
     implements NchClaim {
 
-  @Embedded private AdjudicationChargeRegular adjudicationCharge;
+  @Embedded private ServiceCareTeam serviceProviderHistory;
+  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
 
-  /** NCH record-type supporting info limited to one entry. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
-    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
-  }
-
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemRegularNch> claimItems;
+
+  // region Overrides
 
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }
-
-  @Embedded private ServiceCareTeam serviceProviderHistory;
 
   @Override
   protected void addSubclassCareTeam(
@@ -61,4 +55,13 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
         .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
         .ifPresent(eob::addCareTeam);
   }
+
+  /** NCH record-type supporting info limited to one entry. */
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildRecordTypeSupportingInfo() {
+    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
+  }
+
+  // endregion
 }

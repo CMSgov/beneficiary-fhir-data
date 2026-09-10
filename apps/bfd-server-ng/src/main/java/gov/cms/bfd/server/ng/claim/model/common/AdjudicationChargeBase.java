@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Adjudication Charge Base interface. */
 public interface AdjudicationChargeBase {
   /**
-   * toFhir().
+   * toFhirTotal().
    *
    * @return an eob.TotalComponent
    */

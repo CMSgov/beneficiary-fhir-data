@@ -7,10 +7,20 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-class AdjudicationChargeClaimValue {
+/**
+ * Class to handle conversion of disproportionate and indirect amounts into adjudication components.
+ */
+public class AdjudicationChargeClaimValue {
   private AdjudicationChargeClaimValue() {}
 
-  static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
+  /**
+   * Takes a list of claim values and calculates two sums to generate two Adjudication Components.
+   *
+   * @param claimValues a list of Claim Values from the Leaf entity
+   * @return the adjudication components
+   */
+  public static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(
+      List<ClaimValue> claimValues) {
     var disproportionateAmount =
         mapSum(claimValues.stream().map(ClaimValue::getDisproportionateAmount));
     var imeAmount = mapSum(claimValues.stream().map(ClaimValue::getImeAmount));

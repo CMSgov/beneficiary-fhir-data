@@ -1,13 +1,17 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
@@ -19,8 +23,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
 
+  @Column(name = "clm_mdcr_instnl_bene_pd_amt")
+  private BigDecimal benePaidAmount;
+
+  @Embedded private AdjudicationChargeRegularSharedSystems adjudicationCharge;
   @Embedded private DateSupportingInfo dateSupportingInfo;
-  @Embedded private InstitutionalSupportingInfo supportingInfo;
+  @Embedded private InstitutionalSupportingInfo supportingInfo; /**/
 
   // region PaymentComponent
   @Embedded private ClaimPaymentComponentAmount paymentComponent;
@@ -31,6 +39,12 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   }
 
   // endregion
+
+  @Override
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
+    eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
+  }
 
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {

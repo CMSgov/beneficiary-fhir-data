@@ -42,7 +42,7 @@ public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRe
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
-  @Column(name = "meta_src_sk")
+  @Column(name = "meta_src_sk") /**/
   private MetaSourceSk metaSourceSk;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))

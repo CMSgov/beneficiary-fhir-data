@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Adjudication fields for institutional claims, regular profile, shared systems system. */
+/** Adjudication fields for institutional claims, regular profile, shared systems. */
 @Embeddable
 public class AdjudicationChargeRegularSharedSystems implements AdjudicationChargeBase {
 
