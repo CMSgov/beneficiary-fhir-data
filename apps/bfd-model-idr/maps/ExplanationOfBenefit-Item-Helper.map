@@ -77,7 +77,6 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     
     //Extensions with codes
     src.CLM_PRCNG_LCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addLocalityCode(inputCode, tgtExtension) "Add  code";
-    src.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addLocalityCodeMcs(inputCode, tgtExtension) "Add  code";
     src.CLM_PHYSN_ASTNT_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPACode(inputCode, tgtExtension) "Add  code";
     src.CLM_LINE_CARR_HPSA_SCRCTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addHPSACd(inputCode, tgtExtension) "Add  code";
     src.CLM_PRMRY_PYR_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPyrCd(inputCode, tgtExtension) "Add  code";
@@ -152,13 +151,6 @@ group addLocalityCode(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD" "Set system";
-        inputCode -> tgtCoding.code = inputCode "set code";
-      } "Set value";
-}
-group addLocalityCodeMcs(source src: String, target tgt: Extension){
-    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD" "Add extension url";
-    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-PRFRMG-PRVDR-LCLTY-CD" "Set system";
         inputCode -> tgtCoding.code = inputCode "set code";
       } "Set value";
 }

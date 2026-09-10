@@ -206,9 +206,4 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
     return Optional.empty();
   }
-
-  @Override
-  protected void addExtensions(ExplanationOfBenefit eob) {
-    getClaimItems().forEach(item -> item.toFhirExtension().forEach(eob::addExtension));
-  }
 }

@@ -26735,14 +26735,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -34662,14 +34654,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -42589,14 +42573,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -76555,14 +76531,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -83063,14 +83031,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -85409,14 +85369,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -89822,14 +89774,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -100478,14 +100422,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -106986,14 +106922,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -109332,14 +109260,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -113745,14 +113665,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -124401,14 +124313,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -130909,14 +130813,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -133255,14 +133151,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -137668,14 +137556,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -156797,14 +156677,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -175926,14 +175798,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
@@ -195055,14 +194919,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRFRMG-PRVDR-LCLTY-CD",
-        "valueCoding" : {
-          "code" : "73",
-          "display" : "AUSTIN, TX",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRFRMG-PRVDR-LCLTY-CD"
-        }
-      } ],
       "id" : "3351266481403",
       "identifier" : [ {
         "type" : {
