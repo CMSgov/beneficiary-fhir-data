@@ -38,12 +38,13 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase impl
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemBasisNch> claimItems;
 
+  @Embedded private ServiceCareTeam serviceProviderHistory;
+
+  // region Overrides
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }
-
-  @Embedded private ServiceCareTeam serviceProviderHistory;
 
   @Override
   protected void addSubclassCareTeam(
@@ -54,13 +55,8 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase impl
   }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
-    return List.of();
-  }
-
-  @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
+      buildSubclassSupportingInfo() {
     return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
 
@@ -71,6 +67,7 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase impl
 
   @Override
   public MetaSourceSk getMetaSourceSk() {
-    return null;
+    return MetaSourceSk.NCH;
   }
+  // endregion
 }

@@ -96,9 +96,11 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     return trackingSupportingInfo.stream().toList();
   }
 
+  // region Professional Hook Methods
   abstract ClaimLineAdjudicationChargeProfessional getAdjudicationCharge();
 
   abstract List<Extension> getExtensions(ClaimFilterOptions options);
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
+  // endregion
 }

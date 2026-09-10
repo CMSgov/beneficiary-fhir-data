@@ -58,17 +58,14 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemCmsNch> claimItems;
 
-  /** NCH record-type supporting info limited to one entry. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
-    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
-  }
-
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
+            claimRecordType.toFhir(supportingInfoFactory).stream()
+                .toList(), // NCH record-type supporting info limited to one entry.
+            getDateSupportingInfo().toFhir(supportingInfoFactory),
+            getSupportingInfo().toFhir(supportingInfoFactory),
             bloodPints.toFhir(supportingInfoFactory).stream().toList(),
             nchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)

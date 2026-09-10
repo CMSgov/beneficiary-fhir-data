@@ -8,7 +8,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
@@ -51,31 +50,33 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   // region Hook Methods
-
-  // Tied to Lombok @Getters
-  abstract SupportingInfoComponentBase getDateSupportingInfo();
-
-  // Tied to Lombok @Getters
-  abstract SupportingInfoComponentBase getSupportingInfo();
-
-  // Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
-  // produces this from its own concrete record-type field.
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo();
-
-  // Various supporting info components not covered by previous hooks
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+      buildSubclassSupportingInfo();
 
   protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();
   }
 
-  // Hook to add an adjudication and a total, just for CMS
+  // add an adjudication and a total, just for CMS
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
 
   // Adds care-team members that are unique to the subclass, irrelevant to SharedSystems
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
+
+  /**
+   * Overridable by subclasses to allow injecting profile specific supporting info.
+   *
+   * @return a list of supporting information components
+   */
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassInitialSupportingInfo() {
+    return Stream.of(
+            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
+        .flatMap(Optional::stream)
+        .toList();
+  }
 
   // endregion
 
@@ -97,20 +98,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   private void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
-  }
-
-  /**
-   * Overridable by subclasses to allow injecting profile specific supporting info.
-   *
-   * @return a list of supporting information components
-   */
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassInitialSupportingInfo() {
-    return Stream.of(
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
-        .toList();
   }
 
   private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
@@ -173,25 +160,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
-    var sharedInitialSupportingInfo =
-        Stream.of(
-                getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
-                buildSubclassSupportingInfo())
-            .flatMap(Collection::stream)
-            .toList();
-
-    // Handle claim related condition codes after BFD-4523
-    var claimRelatedConditionCodes =
-        getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList();
-
     Stream.of(
             buildSubclassInitialSupportingInfo(),
-            sharedInitialSupportingInfo,
-            getDateSupportingInfo().toFhir(supportingInfoFactory),
-            buildRecordTypeSupportingInfo(),
-            getSupportingInfo().toFhir(supportingInfoFactory),
+            getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
+            buildSubclassSupportingInfo(),
             getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),
-            claimRelatedConditionCodes)
+            getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }

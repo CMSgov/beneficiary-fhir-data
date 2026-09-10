@@ -42,7 +42,6 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
   private SortedSet<ClaimItemRegularNch> claimItems;
 
   // region Overrides
-
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
@@ -56,12 +55,11 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
         .ifPresent(eob::addCareTeam);
   }
 
-  /** NCH record-type supporting info limited to one entry. */
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
+      buildSubclassSupportingInfo() {
     return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
-
   // endregion
+
 }

@@ -24,6 +24,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -83,24 +84,22 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return List.of();
+    return Stream.of(
+            Stream.of(
+                    claimRecordType.toFhir(supportingInfoFactory),
+                    Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+                    buildAuditStatusSupportingInfo())
+                .flatMap(Optional::stream)
+                .toList(),
+            getDateSupportingInfo().toFhir(supportingInfoFactory),
+            getSupportingInfo().toFhir(supportingInfoFactory))
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   @Override
   public List<ClaimValue> getClaimValues() {
     return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
-  }
-
-  /** SS record-type supporting info from limited to one entry. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
-    return Stream.of(
-            claimRecordType.toFhir(supportingInfoFactory),
-            Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-            buildAuditStatusSupportingInfo())
-        .flatMap(Optional::stream)
-        .toList();
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */

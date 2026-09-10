@@ -44,13 +44,8 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
-    return List.of();
-  }
-
-  @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
+      buildSubclassSupportingInfo() {
     return List.of();
   }
 

@@ -61,13 +61,8 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
   }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
-    return List.of();
-  }
-
-  @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
+      buildSubclassSupportingInfo() {
     return List.of();
   }
 

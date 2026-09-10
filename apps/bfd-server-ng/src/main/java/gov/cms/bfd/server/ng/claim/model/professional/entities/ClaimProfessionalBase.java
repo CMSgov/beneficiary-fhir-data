@@ -29,6 +29,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
 
+  // region Hook Methods
+
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
   /**
@@ -61,6 +63,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    * @param sequenceGenerator shared sequence generator for care-team entries
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+
+  // endregion
 
   /** {@inheritDoc} */
   @Override
