@@ -28,6 +28,7 @@ import gov.cms.bfd.server.ng.claim.model.institutional.RenderingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.TypeOfBillCode;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -38,6 +39,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for institutional claim types (NCH and Shared Systems variants). */
@@ -54,6 +56,9 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
+
+  @Column(name = "clm_ptnt_cntl_num")
+  private Optional<String> patientControlNumber;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
@@ -114,12 +119,22 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     addCareTeam(eob);
     addAdjudicationAndPayment(eob);
     addInsurance(eob);
+    addPatientControlNumberIdentifier(eob);
 
     return sortedEob(eob);
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
+  }
+
+  private void addPatientControlNumberIdentifier(ExplanationOfBenefit eob) {
+    patientControlNumber.ifPresent(
+        s ->
+            eob.addIdentifier(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_PATIENT_CONTROL_NUMBER)
+                    .setValue(s)));
   }
 
   private List<ExplanationOfBenefit.SupportingInformationComponent>

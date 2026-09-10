@@ -882,6 +882,10 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
 
+  /** Blue Button identifier - patient control number. */
+  public static final String BLUE_BUTTON_PATIENT_CONTROL_NUMBER =
+      "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM";
+
   /** Blue Button identifier - unique tracking number. */
   public static final String BLUE_BUTTON_UNIQUE_TRACKING_NUMBER =
       "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number";
