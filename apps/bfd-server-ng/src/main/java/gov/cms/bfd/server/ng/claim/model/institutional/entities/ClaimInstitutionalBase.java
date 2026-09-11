@@ -4,10 +4,10 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
@@ -125,8 +125,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                         eob.addSupportingInfo(si);
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
                       });
-              item.getProcedure()
-                  .flatMap(ClaimProcedureBase::toFhirProcedure)
+              item.getProcedureOptional()
+                  .flatMap(ProcedureBase::toFhirProcedure)
                   .ifPresent(eob::addProcedure);
             });
   }
@@ -137,7 +137,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     // We ignore procedures with claim diagnosis type 1 since it's always the same as claim
     // diagnosis type E with sequence number 1
     for (var item : getItems()) {
-      item.getProcedure()
+      item.getProcedureOptional()
           .flatMap(
               procedure ->
                   procedure

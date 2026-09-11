@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Procedure and diagnosis info. */
 @Embeddable
 @Getter
-public class ClaimProcedureProfessional extends ClaimProcedureBase {
+public class ProcedureProfessional extends ProcedureBase {
 
   @Override
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(

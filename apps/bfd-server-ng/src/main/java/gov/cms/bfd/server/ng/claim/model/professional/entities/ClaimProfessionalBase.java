@@ -4,9 +4,9 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
@@ -101,8 +101,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         line -> {
           var hasLineDiagnosis = item.getClaimLine().getClaimLineDiagnosisCode().isPresent();
           if (hasLineDiagnosis) {
-            item.getProcedure()
-                .flatMap(ClaimProcedureBase::getDiagnosisKey)
+            item.getProcedureOptional()
+                .flatMap(ProcedureBase::getDiagnosisKey)
                 .map(diagnosisSequenceMap::get)
                 .ifPresent(sequences -> sequences.forEach(line::addDiagnosisSequence));
           }
@@ -129,7 +129,9 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         .ifPresent(eob::addCareTeam);
 
     // Procedure is present on SS items but not on NCH items; the item exposes it as Optional.
-    item.getProcedure().flatMap(ClaimProcedureBase::toFhirProcedure).ifPresent(eob::addProcedure);
+    item.getProcedureOptional()
+        .flatMap(ProcedureBase::toFhirProcedure)
+        .ifPresent(eob::addProcedure);
 
     // Line-level observation (NCH only; SS items return empty).
     item.getClaimLine()
@@ -183,7 +185,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var diagnosisSequenceMap = new HashMap<String, List<Integer>>();
 
     for (var item : getItems()) {
-      item.getProcedure()
+      item.getProcedureOptional()
           .ifPresent(
               procedure ->
                   addDiagnosisAndTrackSequence(
@@ -193,7 +195,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   }
 
   private void addDiagnosisAndTrackSequence(
-      ClaimProcedureBase procedure,
+      ProcedureBase procedure,
       ExplanationOfBenefit eob,
       SequenceGenerator sequenceGenerator,
       Map<String, List<Integer>> diagnosisSequenceMap) {

@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.converter.ClaimPoaIndicatorConverter;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Procedure and diagnosis info. */
 @Embeddable
 @Getter
-public class ClaimProcedureInstitutional extends ClaimProcedureBase {
+public class ProcedureInstitutional extends ProcedureBase {
 
   @Column(name = "clm_prcdr_prfrm_dt")
   private Optional<LocalDate> procedureDate;

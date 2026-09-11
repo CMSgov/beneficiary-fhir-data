@@ -50,6 +50,15 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
+  // region Professional Hook Methods
+  abstract ClaimLineAdjudicationChargeProfessional getAdjudicationCharge();
+
+  abstract List<Extension> getExtensions(ClaimFilterOptions options);
+
+  abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
+
+  // endregion
+
   @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       ClaimFilterOptions options) {
@@ -96,11 +105,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     return trackingSupportingInfo.stream().toList();
   }
 
-  // region Professional Hook Methods
-  abstract ClaimLineAdjudicationChargeProfessional getAdjudicationCharge();
-
-  abstract List<Extension> getExtensions(ClaimFilterOptions options);
-
-  abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
-  // endregion
+  @Override
+  public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
+    return Optional.of(getHcpcsCode());
+  }
 }

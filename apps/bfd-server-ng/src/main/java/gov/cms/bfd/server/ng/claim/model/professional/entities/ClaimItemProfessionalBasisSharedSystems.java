@@ -3,13 +3,11 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalBasisSharedSystems;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.Optional;
 import javax.annotation.processing.Generated;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,11 +22,6 @@ public class ClaimItemProfessionalBasisSharedSystems implements ClaimItemBase {
 
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineProfessionalBasisSharedSystems claimLine;
-
-  @Override
-  public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
-    return Optional.empty();
-  }
 
   @Override
   public ClaimLineBase getClaimLine() {

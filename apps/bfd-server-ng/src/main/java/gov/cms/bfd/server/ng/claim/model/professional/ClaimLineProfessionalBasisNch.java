@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import lombok.Getter;
@@ -12,7 +10,6 @@ import org.hl7.fhir.r4.model.Extension;
 /** Claim Line, Professional, Basis profile, Nch system. */
 @Embeddable
 @Getter
-@AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
 public class ClaimLineProfessionalBasisNch extends ClaimLineProfessionalBasis {
 
   @Override

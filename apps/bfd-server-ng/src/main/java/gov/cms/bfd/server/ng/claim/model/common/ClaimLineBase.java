@@ -60,4 +60,13 @@ public interface ClaimLineBase {
   default Optional<String> getClaimLineDiagnosisCode() {
     return Optional.empty();
   }
+
+  /**
+   * Returns the HCPCS code for this claim line, if present. Rx claims do not contain one.
+   *
+   * @return the claim line HCPCS code,
+   */
+  default Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
+    return Optional.empty();
+  }
 }

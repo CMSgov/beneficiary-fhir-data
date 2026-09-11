@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 @Getter
 @MappedSuperclass
-public abstract class ClaimProcedureBase {
+public abstract class ProcedureBase {
 
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_val_sqnc_num_prod")

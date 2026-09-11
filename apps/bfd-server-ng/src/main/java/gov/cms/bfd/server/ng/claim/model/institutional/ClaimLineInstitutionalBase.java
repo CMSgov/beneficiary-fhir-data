@@ -132,4 +132,9 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
 
     return Optional.of(line);
   }
+
+  @Override
+  public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
+    return Optional.of(getHcpcsCode());
+  }
 }
