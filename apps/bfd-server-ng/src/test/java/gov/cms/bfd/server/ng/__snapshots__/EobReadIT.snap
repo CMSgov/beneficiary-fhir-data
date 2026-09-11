@@ -5557,6 +5557,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
       "valueCoding" : {
         "code" : "0",
+        "display" : "NOT PACKAGED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
       }
     }, {
@@ -7339,6 +7340,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
       "valueCoding" : {
         "code" : "0",
+        "display" : "NOT PACKAGED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
       }
     }, {

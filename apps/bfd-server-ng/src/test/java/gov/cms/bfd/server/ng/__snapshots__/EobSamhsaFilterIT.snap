@@ -6485,6 +6485,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -9425,6 +9426,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -9729,6 +9731,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -10015,6 +10018,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "3",
+            "display" : "PACKAGED AS PART OF PARTIAL HOSPITALIZATION PER DIEM OR DAILY MENTAL HEALTH SERVICE PER DIEM",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -10298,6 +10302,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "1",
+            "display" : "PACKAGED SERVICE (SERVICE INDICATOR N)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -10602,6 +10607,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "1",
+            "display" : "PACKAGED SERVICE (SERVICE INDICATOR N)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -10906,6 +10912,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -11210,6 +11217,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -12909,6 +12917,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -13201,6 +13210,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         } ],
@@ -16156,6 +16166,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -19096,6 +19107,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -19400,6 +19412,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -19686,6 +19699,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "3",
+            "display" : "PACKAGED AS PART OF PARTIAL HOSPITALIZATION PER DIEM OR DAILY MENTAL HEALTH SERVICE PER DIEM",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -19969,6 +19983,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "1",
+            "display" : "PACKAGED SERVICE (SERVICE INDICATOR N)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -20273,6 +20288,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "1",
+            "display" : "PACKAGED SERVICE (SERVICE INDICATOR N)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -20577,6 +20593,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -20881,6 +20898,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -22580,6 +22598,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -22872,6 +22891,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "2",
+            "display" : "ARTIFICIAL CHARGES FOR SURGICAL PROCEDURE (EFF. 7/2004)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         } ],
