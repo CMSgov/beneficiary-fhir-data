@@ -3,8 +3,9 @@ from pathlib import Path
 import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from idr_pipeline.settings import SETTINGS
 from snowflake.connector import SnowflakeConnection
+
+from idr_pipeline.settings import SETTINGS
 
 from .settings import (
     output_dir,
