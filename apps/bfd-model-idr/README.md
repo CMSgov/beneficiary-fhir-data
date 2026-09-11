@@ -100,6 +100,10 @@ This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appro
 
 This will currently only work for Pharmacy types but will be continued to work on other types.
 
+There are two optional parameters .
+- --source-directory  Directory where the source csv files are located.  Default: ./out
+- --output-directory  Directory where to output the files.  Default: ./sample-data
+
 ### Create FHIR files with synthetic data
 
 Requires Matchbox to be active.
