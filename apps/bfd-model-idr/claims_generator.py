@@ -347,6 +347,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_REV_CNTR_TDAPA_AMT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            f.CLM_REV_APC_HIPPS_CD
         ],
     )
     CLM_LINE_PRFNL = (

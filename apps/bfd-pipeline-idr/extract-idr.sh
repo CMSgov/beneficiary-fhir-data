@@ -20,10 +20,17 @@ export IDR_WAREHOUSE
 IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_database --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_DATABASE
 export IDR_DATABASE
-IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_schema --with-decryption --query "Parameter.Value" --output text)"
+if ! IDR_SCHEMA="$(aws ssm get-parameter \
+    --name "/bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_schema" \
+    --with-decryption \
+    --query "Parameter.Value" \
+    --output text 2>/dev/null)" || [[ -z "${IDR_SCHEMA}" ]]; then
+  echo "WARN: Failed to retrieve IDR_SCHEMA from SSM; using default." >&2
+  IDR_SCHEMA="CMS_VDM_VIEW_MDCR_PRD"
+fi
 readonly IDR_SCHEMA
 export IDR_SCHEMA
-EXPORT_FILE_DIR="./out"
+EXPORT_FILE_DIR="../bfd-model-idr/out"
 readonly EXPORT_FILE_DIR
 export EXPORT_FILE_DIR
 

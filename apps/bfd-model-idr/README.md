@@ -94,11 +94,15 @@ This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the
 To generate a EOB sample that is not prior authorization.
 
 ```sh
-uv run generate_eob_sample.py --clm-uniq-id <clm_uniq_id_here>
+uv run generate_eob_sample --clm-uniq-id <clm_uniq_id_here>
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
 This will currently only work for Pharmacy types but will be continued to work on other types.
+
+There are two optional parameters .
+- --source-directory  Directory where the source csv files are located.  Default: ./out
+- --output-directory  Directory where to output the files.  Default: ./sample-data
 
 ### Create FHIR files with synthetic data
 
@@ -346,12 +350,3 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
 
-## Export from Test IDR
-
-We have a test snowflake environment. This process will take all of the tables that we use for Synthetic Data and will pull them to .csv of the approprate name
-that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
-
-```bash
-export BFD_ENV="1234_TEST"
-./export-idr.sh
-```
