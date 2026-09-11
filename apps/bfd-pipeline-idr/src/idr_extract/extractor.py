@@ -85,7 +85,7 @@ class SnowflakeExecutor:
 
     def get_tables(self) -> list[SnowflakeTable]:
         exception_list = table_exception_list().split(",")
-        el_placeholder = ", ".join(["%s"] * len(expection_list))
+        el_placeholder = ", ".join(["%s"] * len(exception_list))
         cur = self.conn.cursor()
         cur.execute(f"""
             SELECT table_schema, table_name
