@@ -20,7 +20,6 @@ class SnowflakeTable:
 
 
 class SnowflakeExecutor:
-
     def __init__(self) -> None:
         self.conn = SnowflakeExecutor.connect()
 
@@ -48,7 +47,7 @@ class SnowflakeExecutor:
     def prep(self) -> None:
         self.conn.execute("CREATE OR REPLACE STAGE export_stage")
 
-    def export(self, file_name:str, sql: str) -> None:
+    def export(self, file_name: str, sql: str) -> None:
         # Create directory if it does not exists
         dir_path = Path(output_dir())
         dir_path.mkdir(parents=True, exist_ok=True)
@@ -57,7 +56,8 @@ class SnowflakeExecutor:
         # Create Stage
         cursor.execute("CREATE OR REPLACE TEMPORARY STAGE tmp_export_stage")
         # GetData
-        cursor.execute("""
+        cursor.execute(
+            """
             COPY INTO @tmp_export_stage/{FILE_NAME}
             FROM (
                 {QUERY}
@@ -74,9 +74,8 @@ class SnowflakeExecutor:
             SINGLE = TRUE 
             OVERWRITE = TRUE 
             MAX_FILE_SIZE = 1073741824;
-        """
-        .replace("{FILE_NAME}",file_name)
-        .replace("{QUERY}",sql))
+        """.replace("{FILE_NAME}", file_name).replace("{QUERY}", sql)
+        )
 
         try:
             get_command = f"GET @tmp_export_stage/{file_name} file://{output_dir()}"
@@ -88,14 +87,14 @@ class SnowflakeExecutor:
         exception_list = table_exception_list().split(",")
         el_placeholder = ", ".join(["%s"] * len(exception_list))
         cur = self.conn.cursor()
-        cur.execute(f"""
+        cur.execute(
+            f"""
             SELECT table_schema, table_name
             FROM information_schema.tables
             WHERE table_type = 'BASE TABLE'
               AND table_name NOT IN ({el_placeholder})
             ORDER BY table_name
-        """,exception_list)
-        return [SnowflakeTable(row[0],row[1]) for row in cur.fetchall()]
-
-
-
+        """,
+            exception_list,
+        )
+        return [SnowflakeTable(row[0], row[1]) for row in cur.fetchall()]
