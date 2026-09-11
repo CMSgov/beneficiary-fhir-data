@@ -17,8 +17,15 @@ from .generate_eob_sample import SampleGenerator
     help="Pass the source directory containing the claim files.",
     default="out"
 )
-def main(clm_uniq_id: str, source_directory: str) -> None:
-    generator = SampleGenerator(source_directory)
+@click.option(
+    "--output-directory",
+    type=str,
+    required=False,
+    help="Pass the output directory for the result file.",
+    default="sample-data"
+)
+def main(clm_uniq_id: str, source_directory: str, output_directory: str) -> None:
+    generator = SampleGenerator(source_directory, output_directory)
     generator.run(clm_uniq_id=clm_uniq_id)
 
 

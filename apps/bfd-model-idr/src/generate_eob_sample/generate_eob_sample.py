@@ -23,8 +23,9 @@ class Result:
 
 
 class SampleGenerator:
-    def __init__(self, source_directory: str):
+    def __init__(self, source_directory: str, output_directory: str):
         self.source_directory = source_directory
+        self.output_directory = output_directory
 
     def run(self, clm_uniq_id: str) -> None:
         """Generate EOB sample JSON from SYNTHETIC_EOB.csv based on claim unique ID."""
@@ -51,6 +52,9 @@ class SampleGenerator:
                     print("Unknown Type")
                     sys.exit(1)
 
+        output_path = Path(result.output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
         with Path(result.output_file).open(mode="w", encoding="utf-8") as f:
             json.dump(result.result_json, f, indent=2)
 
@@ -304,7 +308,10 @@ class SampleGenerator:
             "CLM_DISP_CD": extract_col_str(claim_row, "CLM_DISP_CD"),
         }
 
-        return Result(result_json=output_json, output_file="sample-data/EOB-Base-Sample.json")
+        return Result(
+            result_json=output_json,
+            output_file=f"{self.output_directory}/EOB-Base-Sample-new.json"
+        )
 
     def create_pharmacy(self, clm_uniq_id: str, claim_row: dict[str, str]) -> Result:
 
@@ -430,7 +437,10 @@ class SampleGenerator:
             "CLM_DT_SGNTR_SK": extract_col_str(clm_sig_row, "CLM_DT_SGNTR_SK"),
         }
 
-        return Result(result_json=output_json, output_file="sample-data/EOB-Pharmacy-Sample.json")
+        return Result(
+            result_json=output_json, 
+            output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
+        )
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
         eob_path = f"{self.source_directory}/SYNTHETIC_CLM.csv"
@@ -607,7 +617,7 @@ def find_field_in_line_by_num(
     field_name: str,
 ) -> str:
     if not lines:
-        return ""
+        return None
 
     clm_line_num = extract_col_str(clm_line, "CLM_LINE_NUM")
 
@@ -617,10 +627,10 @@ def find_field_in_line_by_num(
     ]
 
     if not line_matches:
-        return ""
+        return None
 
     return extract_col_str(line_matches[0], field_name)
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str:
-    return str(row.get(name, "")).strip()
+    return str(row.get(name, "")).strip() or None
