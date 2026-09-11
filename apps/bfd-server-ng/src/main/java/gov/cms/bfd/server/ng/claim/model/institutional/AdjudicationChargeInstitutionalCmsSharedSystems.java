@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adjudication fields for institutional claim, cms profile, shared system. */
 @Embeddable
-public class AdjudicationChargeCmsSharedSystems implements AdjudicationChargeBase {
+public class AdjudicationChargeInstitutionalCmsSharedSystems implements AdjudicationChargeBase {
 
   @Embedded AdjudicationChargeInstitutionalRegularSharedSystems adjudicationChargeBase;
 

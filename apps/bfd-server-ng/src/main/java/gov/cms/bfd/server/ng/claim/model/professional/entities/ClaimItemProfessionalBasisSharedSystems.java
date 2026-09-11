@@ -12,7 +12,7 @@ import javax.annotation.processing.Generated;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-/** LineItem for a professional claim, basis profile, sourced from shared systems. */
+/** claim_item data for a professional claim, basis profile, sourced from shared systems. */
 @Entity
 @Getter
 @EqualsAndHashCode

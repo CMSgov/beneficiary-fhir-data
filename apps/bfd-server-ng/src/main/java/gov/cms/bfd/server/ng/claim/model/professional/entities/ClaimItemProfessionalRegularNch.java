@@ -10,7 +10,7 @@ import javax.annotation.processing.Generated;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-/** LineItem for a professional claim, regular profile, sourced from nch. */
+/** claim_item data for a professional claim, regular profile, sourced from nch. */
 @Entity
 @Getter
 @EqualsAndHashCode

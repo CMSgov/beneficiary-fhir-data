@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalBasisSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.ProcedureInstitutional;
 import jakarta.persistence.Embedded;
@@ -21,15 +21,15 @@ import lombok.Getter;
 @Entity
 @EqualsAndHashCode
 @Table(name = "claim_item_institutional_ss", schema = "idr")
-public class ClaimItemBasisSharedSystems implements ClaimItemBase {
+public class ClaimItemInstitutionalRegularSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
-  @Embedded private ClaimLineInstitutionalBasisSharedSystems claimLine;
+  @Embedded private ClaimLineInstitutionalRegularSharedSystems claimLine;
   @Embedded private ProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
-  private ClaimInstitutionalBasisSharedSystems claim;
+  private ClaimInstitutionalRegularSharedSystems claim;
 
   @Override
   public Optional<ProcedureBase> getProcedureOptional() {

@@ -39,7 +39,7 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemRegularNch> claimItems;
+  private SortedSet<ClaimItemInstitutionalRegularNch> claimItems;
 
   // region Overrides
   @Override

@@ -56,7 +56,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemCmsNch> claimItems;
+  private SortedSet<ClaimItemInstitutionalCmsNch> claimItems;
 
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
@@ -89,7 +89,7 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
 
   @Override
   public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemCmsNch::getClaimValue).toList();
+    return getClaimItems().stream().map(ClaimItemInstitutionalCmsNch::getClaimValue).toList();
   }
 
   /**

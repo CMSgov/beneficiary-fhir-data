@@ -36,7 +36,7 @@ public class ClaimInstitutionalBasisNch extends ClaimInstitutionalBasisBase impl
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemBasisNch> claimItems;
+  private SortedSet<ClaimItemInstitutionalBasisNch> claimItems;
 
   @Embedded private ServiceCareTeam serviceProviderHistory;
 

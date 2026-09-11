@@ -51,7 +51,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Column(name = "clm_line_thru_dt")
   private Optional<LocalDate> thruDate;
 
-  @Embedded private ClaimLineHippsCode hippsCode;
+  @Embedded private HippsCode hippsCode;
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;

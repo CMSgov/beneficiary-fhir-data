@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Coding;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-public class ClaimLineHippsCode {
+public class HippsCode {
   @Column(name = "clm_rev_apc_hipps_cd")
   private Optional<String> hippsCode;
 

@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Observation;
 
-/** Interface for Claim Line items. */
+/** Interface for clm_line row data. */
 public interface ClaimLineBase {
 
   /**

@@ -41,7 +41,7 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemBasisSharedSystems> claimItems;
+  private SortedSet<ClaimItemInstitutionalBasisSharedSystems> claimItems;
 
   @Column(name = "meta_src_sk")
   private MetaSourceSk metaSourceSk;

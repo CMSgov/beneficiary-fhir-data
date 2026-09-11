@@ -15,7 +15,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 
-/** ExplanationOfBenefit.Item component Professional domain, CMS profile. */
+/** clm_line row data, Professional domain, CMS profile, shared sources. */
 @MappedSuperclass
 @Getter
 abstract class ClaimLineProfessionalCms extends ClaimLineProfessionalBase {

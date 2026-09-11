@@ -37,7 +37,7 @@ public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRe
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemRegularSharedSystems> claimItems;
+  private SortedSet<ClaimItemInstitutionalRegularSharedSystems> claimItems;
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;

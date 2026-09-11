@@ -9,7 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
@@ -47,7 +47,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
     implements SharedSystemsClaim {
 
   @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
-  @Embedded private AdjudicationChargeCmsSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationChargeInstitutionalCmsSharedSystems adjudicationCharge;
   @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
@@ -65,7 +65,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemCmsSharedSystems> claimItems;
+  private SortedSet<ClaimItemInstitutionalCmsSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
@@ -99,7 +99,9 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
 
   @Override
   public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream().map(ClaimItemCmsSharedSystems::getClaimValue).toList();
+    return getClaimItems().stream()
+        .map(ClaimItemInstitutionalCmsSharedSystems::getClaimValue)
+        .toList();
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */
