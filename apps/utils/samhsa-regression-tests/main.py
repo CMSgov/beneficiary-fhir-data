@@ -90,12 +90,6 @@ class DatabaseDetailsModel(BaseModel):
 class BeneWithSamshaClaims:
     bene_sk: str
     samhsa_claim_ids: list[str]
-
-
-@dataclass(frozen=True, eq=True)
-class BeneWithSamshaClaimsAndPriorAuths:
-    bene_sk: str
-    samhsa_claim_ids: list[str]
     samhsa_prior_auth_utns: list[str]
 
 
@@ -367,17 +361,24 @@ async def query_samhsa_benes_with_claims(
             ]
         )
 
-        bene_sks_and_clms = [(str(row["bene_sk"]), str(row["clm_uniq_id"])) for row in result]
-        uniq_bene_sks = set(x[0] for x in bene_sks_and_clms)
+        samhsa_claim_ids_by_bene_sk: dict[str, list[str]] = {}
+        for row in result:
+            bene_sk = str(row["bene_sk"])
 
-        logger.info("%d potential SAMHSA bene_sks returned", len(uniq_bene_sks))
+            if bene_sk not in samhsa_claim_ids_by_bene_sk:
+                samhsa_claim_ids_by_bene_sk[bene_sk] = []
+
+            samhsa_claim_ids_by_bene_sk[bene_sk].append(str(row["clm_uniq_id"]))
+
+        logger.info("%d potential SAMHSA bene_sks returned", len(samhsa_claim_ids_by_bene_sk))
 
         return [
             BeneWithSamshaClaims(
                 bene_sk=bene_sk,
-                samhsa_claim_ids=[x[1] for x in bene_sks_and_clms if bene_sk == x[0]],
+                samhsa_claim_ids=samhsa_claim_ids,
+                samhsa_prior_auth_utns=[],
             )
-            for bene_sk in uniq_bene_sks
+            for bene_sk, samhsa_claim_ids in samhsa_claim_ids_by_bene_sk.items()
         ]
 
 
@@ -386,7 +387,7 @@ async def query_samhsa_benes_with_prior_auths(
     limit: int,
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
-) -> list[tuple[str, str]]:
+) -> list[BeneWithSamshaClaims]:
     query_params = default_code_generator(
         ClaimItemProfessionalNchColumn.CLM_LINE_HCPCS_CD,
         security_labels,
@@ -423,13 +424,15 @@ async def query_samhsa_benes_with_prior_auths(
                 INNER JOIN idr.beneficiary
                     ON {PRIOR_AUTH_TABLE:i}.mbi_num = beneficiary.bene_mbi_id
                 WHERE beneficiary.idr_ltst_trans_flg = 'Y'
-                    AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY({(list(query_params))})
+                    AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY(
+                        {(list(query_params))}
+                    )
                 LIMIT {limit:l};
                 """
             )
         ).fetchall()
 
-        bene_sks_and_prior_auths: set[tuple[str, str]] = set()
+        bene_sks_and_prior_auths: dict[str, set[str]] = {}
         for row in result:
             prior_auth_code = str(row["hcpcs_or_cpt_or_hipps"])
             if row["clm_type"] == "I":
@@ -455,16 +458,26 @@ async def query_samhsa_benes_with_prior_auths(
                 and row["utn_valid_st_dt"] >= matching_label.start_date
                 and row["utn_valid_st_dt"] <= matching_label.end_date
             ):
-                bene_sks_and_prior_auths.add((str(row["bene_sk"]), str(row["utn"])))
+                bene_sk = str(row["bene_sk"])
 
-        uniq_bene_sks = set(x[0] for x in bene_sks_and_prior_auths)
+                if bene_sk not in bene_sks_and_prior_auths:
+                    bene_sks_and_prior_auths[bene_sk] = set()
+
+                bene_sks_and_prior_auths[bene_sk].add(str(row["utn"]))
 
         logger.info(
             "%d potential SAMHSA prior auth bene_sks returned",
-            len(uniq_bene_sks),
+            len(bene_sks_and_prior_auths),
         )
 
-        return list(bene_sks_and_prior_auths)
+        return [
+            BeneWithSamshaClaims(
+                bene_sk=bene_sk,
+                samhsa_claim_ids=[],
+                samhsa_prior_auth_utns=list(utns),
+            )
+            for bene_sk, utns in bene_sks_and_prior_auths.items()
+        ]
 
 
 async def query_samhsa_benes(
@@ -472,7 +485,7 @@ async def query_samhsa_benes(
     limit: int,
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
-) -> list[BeneWithSamshaClaimsAndPriorAuths]:
+) -> list[BeneWithSamshaClaims]:
     claim_benes = await query_samhsa_benes_with_claims(
         tablesample=tablesample,
         limit=limit,
@@ -487,20 +500,17 @@ async def query_samhsa_benes(
     )
 
     # Combine claims and prior auths so both EOB types are checked for each beneficiary.
-    uniq_bene_sks = {x.bene_sk for x in claim_benes} | {x[0] for x in prior_auth_benes}
+    claim_ids_by_bene_sk = {bene.bene_sk: bene.samhsa_claim_ids for bene in claim_benes}
+    prior_auth_utns_by_bene_sk = {
+        bene.bene_sk: bene.samhsa_prior_auth_utns for bene in prior_auth_benes
+    }
+    uniq_bene_sks = set(claim_ids_by_bene_sk) | set(prior_auth_utns_by_bene_sk)
 
     return [
-        BeneWithSamshaClaimsAndPriorAuths(
+        BeneWithSamshaClaims(
             bene_sk=bene_sk,
-            samhsa_claim_ids=[
-                claim_id
-                for claim_bene in claim_benes
-                if claim_bene.bene_sk == bene_sk
-                for claim_id in claim_bene.samhsa_claim_ids
-            ],
-            samhsa_prior_auth_utns=[
-                utn for prior_auth_bene_sk, utn in prior_auth_benes if prior_auth_bene_sk == bene_sk
-            ],
+            samhsa_claim_ids=claim_ids_by_bene_sk.get(bene_sk, []),
+            samhsa_prior_auth_utns=prior_auth_utns_by_bene_sk.get(bene_sk, []),
         )
         for bene_sk in uniq_bene_sks
     ]
@@ -527,12 +537,8 @@ def verify_expected_samhsa_ids(
     expected_samhsa_ids: list[str],
 ) -> tuple[bool, bool, set[str], set[str]]:
     expected_samhsa_ids_set = set(expected_samhsa_ids)
-    unauthed_unfiltered_ids = set(filtered_response_ids).intersection(
-        expected_samhsa_ids_set
-    )
-    authed_ids_intersection = set(allowed_response_ids).intersection(
-        expected_samhsa_ids_set
-    )
+    unauthed_unfiltered_ids = set(filtered_response_ids).intersection(expected_samhsa_ids_set)
+    authed_ids_intersection = set(allowed_response_ids).intersection(expected_samhsa_ids_set)
 
     # A non-SAMHSA-authorized response should not return any expected SAMHSA IDs.
     filtered_when_not_authorized = len(unauthed_unfiltered_ids) == 0
@@ -552,7 +558,7 @@ async def verify_samhsa_filtering(
     url: str,
     samhsa_session: ClientSession,
     no_samhsa_session: ClientSession,
-    samhsa_bene: BeneWithSamshaClaimsAndPriorAuths,
+    samhsa_bene: BeneWithSamshaClaims,
 ) -> VerifyFilteringResult:
     patient_query = {"patient": samhsa_bene.bene_sk}
     try:
@@ -614,8 +620,8 @@ async def verify_samhsa_filtering(
             (
                 samhsa_prior_auths_filtered_when_not_authorized,
                 samhsa_prior_auths_unfiltered_when_authorized,
-                samhsa_unauthed_unfiltered_prior_auths,
-                samhsa_authed_prior_auths_intersection,
+                _samhsa_unauthed_unfiltered_prior_auths,
+                _samhsa_authed_prior_auths_intersection,
             ) = verify_expected_samhsa_ids(
                 allowed_response_ids=all_samhsa_allowed_prior_auth_utns,
                 filtered_response_ids=all_samhsa_filtered_prior_auth_utns,
