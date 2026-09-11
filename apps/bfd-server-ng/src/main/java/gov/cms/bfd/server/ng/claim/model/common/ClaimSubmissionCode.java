@@ -45,7 +45,6 @@ public sealed interface ClaimSubmissionCode
                         // this handles a code given that starts with zero to match the single digit
                         // integer
                         || (v.code.startsWith("0")
-                            && v.code.length() > 1
                             && v.code.substring(1).equals(code)))
             .map(v -> (ClaimSubmissionCode) v)
             .findFirst()
