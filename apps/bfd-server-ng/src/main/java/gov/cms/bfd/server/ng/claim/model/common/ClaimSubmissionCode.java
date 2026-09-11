@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings("java:S115")
 /** Submission clarification codes. */
 public sealed interface ClaimSubmissionCode
     permits ClaimSubmissionCode.Valid, ClaimSubmissionCode.Invalid {
