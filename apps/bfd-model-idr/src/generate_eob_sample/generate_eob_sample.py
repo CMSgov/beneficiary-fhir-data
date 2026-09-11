@@ -5,16 +5,17 @@ from typing import Any
 
 import pandas as pd
 
+# TODO this is done be because the claims_static is not in an importable module
+# Remove once that is done
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from claims_static import INSTITUTIONAL_CLAIM_TYPES  # noqa: E402
+from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS  # noqa: E402
 
 
 class Result:
-
-    def __init__(self, result_json: str, output_file:str):
+    def __init__(self, result_json: str, output_file: str):
         self.result_json = result_json
         self.output_file = output_file
 
@@ -38,23 +39,20 @@ class SampleGenerator:
         claim_row = self.read_clm(clm_uniq_id)
         claim_type = int(claim_row.get("CLM_TYPE_CD"))
 
-        match claim_type:
-            # pharmacy claim type
-            case 1 | 2 | 3 | 4:
-                result = self.create_pharmacy(clm_uniq_id, claim_row)
-            case _:
-                # this a default fallback for institutional claim types at the moment
-                # as this work continues we may add more specific handling
-                # for different institutional claim types
-                if claim_type in INSTITUTIONAL_CLAIM_TYPES:
-                    result = self.create_base(clm_uniq_id, claim_row)
-                else:
-                    print("Unknown Type")
-                    sys.exit(1)
+        if claim_type in PHARMACY_CLM_TYPE_CDS:
+            result = self.create_pharmacy(clm_uniq_id, claim_row)
+        # this a default fallback for institutional claim types at the moment
+        # as this work continues we may add more specific handling
+        # for different institutional claim types
+        elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
+            result = self.create_base(clm_uniq_id, claim_row)
+        else:
+            print("Unknown Type")
+            sys.exit(1)
 
         output_path = Path(result.output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with Path(result.output_file).open(mode="w", encoding="utf-8") as f:
             json.dump(result.result_json, f, indent=2)
 
@@ -112,8 +110,6 @@ class SampleGenerator:
                 "CLM_DDCTBL_COINSRNC_CD": find_field_in_line_by_num(
                     instnl_lines, clm_line, "CLM_DDCTBL_COINSRNC_CD"
                 ),
-                # This is hard coded in all the samples I cannot find it anywhere else in the code
-                "GEO_FAC_SSA_STATE_CD": "01",
                 "CLM_LINE_PRVDR_PMT_AMT": extract_col_str(clm_line, "CLM_LINE_PRVDR_PMT_AMT"),
                 "CLM_LINE_SBMT_CHRG_AMT": extract_col_str(clm_line, "CLM_LINE_SBMT_CHRG_AMT"),
                 "HCPCS_1_MDFR_CD": extract_col_str(clm_line, "HCPCS_1_MDFR_CD"),
@@ -218,9 +214,7 @@ class SampleGenerator:
                 "CLM_MDCR_IP_PPS_CPTL_TOT_AMT": extract_col_str(
                     instnl, "CLM_MDCR_IP_PPS_CPTL_TOT_AMT"
                 ),
-                "CLM_INSTNL_DRG_OUTLIER_AMT": extract_col_str(
-                    instnl, "CLM_INSTNL_DRG_OUTLIER_AMT"
-                ),
+                "CLM_INSTNL_DRG_OUTLIER_AMT": extract_col_str(instnl, "CLM_INSTNL_DRG_OUTLIER_AMT"),
                 "CLM_INSTNL_PRFNL_AMT": extract_col_str(instnl, "CLM_INSTNL_PRFNL_AMT"),
                 "CLM_FINL_STDZD_PYMT_AMT": extract_col_str(instnl, "CLM_FINL_STDZD_PYMT_AMT"),
                 "CLM_HAC_RDCTN_PYMT_AMT": extract_col_str(instnl, "CLM_HAC_RDCTN_PYMT_AMT"),
@@ -309,8 +303,7 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json,
-            output_file=f"{self.output_directory}/EOB-Base-Sample-new.json"
+            result_json=output_json, output_file=f"{self.output_directory}/EOB-Base-Sample-new.json"
         )
 
     def create_pharmacy(self, clm_uniq_id: str, claim_row: dict[str, str]) -> Result:
@@ -438,8 +431,7 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json, 
-            output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
+            result_json=output_json, output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
         )
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
@@ -596,7 +588,7 @@ class SampleGenerator:
         ].to_dict(orient="records")
 
     # leaving here ended up not needing but future work probably will
-    #def read_rlt_line(self, clm_rlt_cond_sgntr_sk: str) -> dict[str, str]:
+    # def read_rlt_line(self, clm_rlt_cond_sgntr_sk: str) -> dict[str, str]:
     #        clm_rlt_path = f"{self.source_directory}/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv"
     #
     #        if not Path(clm_rlt_path).exists():
@@ -615,16 +607,13 @@ def find_field_in_line_by_num(
     lines: list[dict[str, str]],
     clm_line: dict[str, str],
     field_name: str,
-) -> str:
+) -> str | None:
     if not lines:
         return None
 
     clm_line_num = extract_col_str(clm_line, "CLM_LINE_NUM")
 
-    line_matches = [
-        line for line in lines
-        if extract_col_str(line, "CLM_LINE_NUM") == clm_line_num
-    ]
+    line_matches = [line for line in lines if extract_col_str(line, "CLM_LINE_NUM") == clm_line_num]
 
     if not line_matches:
         return None

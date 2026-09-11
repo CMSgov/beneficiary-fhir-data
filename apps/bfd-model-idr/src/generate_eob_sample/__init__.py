@@ -15,14 +15,14 @@ from .generate_eob_sample import SampleGenerator
     type=str,
     required=False,
     help="Pass the source directory containing the claim files.",
-    default="out"
+    default="out",
 )
 @click.option(
     "--output-directory",
     type=str,
     required=False,
     help="Pass the output directory for the result file.",
-    default="sample-data"
+    default="sample-data",
 )
 def main(clm_uniq_id: str, source_directory: str, output_directory: str) -> None:
     generator = SampleGenerator(source_directory, output_directory)

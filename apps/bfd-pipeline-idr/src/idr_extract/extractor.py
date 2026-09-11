@@ -45,7 +45,7 @@ class SnowflakeExecutor:
         )
 
     def prep(self) -> None:
-        self.conn.execute("CREATE OR REPLACE STAGE export_stage")
+        self.conn.cursor().execute("CREATE OR REPLACE STAGE export_stage")
 
     def export(self, file_name: str, sql: str) -> None:
         # Create directory if it does not exists
