@@ -8,9 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimLineInstitutionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimProcedureInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
-import gov.cms.bfd.server.ng.converter.OptionalBigDecimalConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -39,7 +37,6 @@ public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
   @ManyToOne
   private ClaimInstitutionalCmsSharedSystems claim;
 
-  @Convert(converter = OptionalBigDecimalConverter.class)
   @Column(name = "clm_line_msp_coinsrnc_amt")
   private Optional<BigDecimal> benePaymentAmount;
 
