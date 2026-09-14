@@ -58,7 +58,7 @@ jobs:
               projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
               testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
               uvCommand: "uv sync",
-              pytestCommand: "uv run generate-bene-sample --bene-sk 1234",
+              pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
           ]
