@@ -1,7 +1,7 @@
 CodeSystem: CLM_LTC_DSPNSNG_MTHD_CD
 Title: "Submission clarification code"
 Id: CLM-LTC-DSPNSNG-MTHD-CD
-Description: "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days' supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event."
+Description: "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days' supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event.
 
 This variable is only populated when beneficiary lives in an LTC facility (i.e., when the CLM_PTNT_RSDNC_CD variable equals 03)"
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
