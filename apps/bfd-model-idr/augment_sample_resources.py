@@ -459,19 +459,19 @@ if ocrnc_sk:
     if ncvrd_mask.any():
         ncvrd_from = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
         if pd.notna(ncvrd_from):
-            cur_sample_data["CLM_NCVRD_FROM_DT"] = ncvrd_from.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_NCVRD_FROM_DT"] = ncvrd_from
         ncvrd_thru = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
         if pd.notna(ncvrd_thru):
-            cur_sample_data["CLM_NCVRD_THRU_DT"] = ncvrd_thru.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_NCVRD_THRU_DT"] = ncvrd_thru
     # qualifying stay from and thru
     qlfy_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "70")
     if qlfy_mask.any():
         qlfy_from = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
         if pd.notna(qlfy_from):
-            cur_sample_data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from
         qlfy_thru = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
         if pd.notna(qlfy_thru):
-            cur_sample_data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru
 
 ## related occurence signature mbr POC augments: future impl with non-POC samples should work with this logic too
 rlt_ocrnc_sk = cur_sample_data.get("CLM_RLT_OCRNC_SGNTR_SK")
@@ -482,13 +482,13 @@ if rlt_ocrnc_sk:
     if mdcr_exhstd_mask.any():
         mdcr_exhstd_dt = rlt_ocrnc_sk_df.loc[mdcr_exhstd_mask, "CLM_RLT_OCRNC_DT"].max()
         if pd.notna(mdcr_exhstd_dt):
-            cur_sample_data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt
     # active care thru
     actv_care_thru_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "22")
     if actv_care_thru_mask.any():
         actv_care_thru = rlt_ocrnc_sk_df.loc[actv_care_thru_mask, "CLM_RLT_OCRNC_DT"].max()
         if pd.notna(actv_care_thru):
-            cur_sample_data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru.dt.strftime("%Y-%m-%d")
+            cur_sample_data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru
 
 fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")
 clsfctn = cur_sample_data.get("CLM_BILL_CLSFCTN_CD")
