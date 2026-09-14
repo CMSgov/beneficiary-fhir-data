@@ -1,7 +1,7 @@
 CodeSystem: CLM_LTC_DSPNSNG_MTHD_CD
 Title: "Submission clarification code"
 Id: CLM-LTC-DSPNSNG-MTHD-CD
-Description: "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days' supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event.
+Description: "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days' supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event."
 
 This variable is only populated when beneficiary lives in an LTC facility (i.e., when the CLM_PTNT_RSDNC_CD variable equals 03)"
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
@@ -28,7 +28,7 @@ This variable is only populated when beneficiary lives in an LTC facility (i.e.,
 * #17 "LTC emergency supply remainder (remainder of drug from the emergency supply)"
 * #18 "LTC patient admit/readmission indicator. This status required new dispensing of medication."
 * #19 "Split billing. The quantity dispensed is the remainder billed to a subsequent payer after Medicare Part A benefits expired (partial payment under Part A)."
-* #20 ""340B. Purchased pursuant to rights available under Section 340B of the Public Health Act of 1992."
+* #20 "340B. Purchased pursuant to rights available under Section 340B of the Public Health Act of 1992."
 * #21 "LTC dispensing rule for <=14 day supply is not applicable due to CMS exclusion or the fact that the manufacturer’s packaging does not allow for special dispensing"
 * #22 "LTC dispensing, 7-day supply"
 * #23 "LTC dispensing, 4-day supply"
