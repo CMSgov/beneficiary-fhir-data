@@ -53,6 +53,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-generate-bene-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run generate-bene-sample --bene-sk 1234",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
