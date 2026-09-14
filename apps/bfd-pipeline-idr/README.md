@@ -50,7 +50,7 @@ in order to load data concurrently, but this does not play nicely with the debug
 and run using threads instead of processes. This incurs a performance hit due to blocking IO, but is necessary for breakpoints
 to work seamlessly.
 
-To run a specific test: 
+To run a specific test:
 
 ```sh
  uv run test/test_pipeline.py::{your_test_name}
@@ -130,3 +130,6 @@ export BFD_ENV="1234_TEST"
 ./export-idr.sh
 ```
 
+## Running the IDR Pipeline in ECS
+
+Refer to the documentation on the `run-idr-pipeline` Lambda in the [`idr-pipeline` Tofuservice README](../../ops/services/04-idr-pipeline/README.md)
