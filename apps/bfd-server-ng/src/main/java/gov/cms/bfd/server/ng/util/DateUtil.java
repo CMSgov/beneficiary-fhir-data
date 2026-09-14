@@ -21,10 +21,6 @@ public class DateUtil {
    */
   public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-  /** Minimum possible {@link ZonedDateTime}. */
-  public static final ZonedDateTime MIN_DATETIME =
-      ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);
-
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
    *
@@ -101,5 +97,14 @@ public class DateUtil {
    */
   public LocalDate nowAoe() {
     return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
+  }
+
+  /**
+   * Returns UTC now.
+   *
+   * @return local date
+   */
+  public LocalDate nowUtc() {
+    return LocalDate.now(clock.withZone(ZONE_ID_UTC));
   }
 }

@@ -65,6 +65,7 @@ def download_content_from_s3(s3_path, csv_format=True):
     s3 = boto3.resource("s3")
     bucket_name = re.findall(r"^s3://([^/]+)", s3_path)[0]
     key = re.findall(r"^s3://[^/]+[/](.+)", s3_path)[0]
+
     try:
         response = s3.Object(bucket_name, key).get()
     except s3.meta.client.exceptions.NoSuchKey:
@@ -414,3 +415,44 @@ def output_results_list_to_csv_file(result_list, output_file, include_header=Tru
         if include_header:
             dw.writeheader()
         dw.writerows(result_list)
+
+
+def send_metrics_data_csvs_to_bcda_bucket(session, params, bcda_bucket_name, kms_key):
+    """
+    Retrieves and transfers metrics CSV files from BFD to BCDA AWS Account
+    """
+
+    s3_client = boto3.client("s3")
+
+    # The impl_global_state_per_app table is not included
+    # as it is not used by any active Dashboards. Further, that table contains over 600K rows,
+    # and is expensive to transfer.
+    table_names = [
+        "prod_global_state",
+        "prod_global_state_per_app",
+        "impl_global_state",
+    ]
+    for table in table_names:
+        query = f"SELECT * FROM {table} ORDER BY report_date DESC;"
+        params["query"] = query
+        output_s3_path = run_athena_query_result_to_s3(session, params, 1000)
+
+        bucket = output_s3_path.split("//")[1]
+        source_bucket_name = bucket.split("/")[0]
+        source_bucket_key = bucket.split("/", 1)[-1]
+
+        s3_response = s3_client.get_object(
+            Bucket=source_bucket_name, Key=source_bucket_key
+        )
+        csv_data = s3_response["Body"].read()
+
+        # Transfer to BCDA s3 bucket.
+        bcda_file_name = "latest_" + table + ".csv"
+        s3_client.put_object(
+            Bucket=bcda_bucket_name,
+            Key=bcda_file_name,
+            Body=csv_data,
+            ContentType="text/csv",
+            ServerSideEncryption="aws:kms",
+            SSEKMSKeyId=kms_key,
+        )

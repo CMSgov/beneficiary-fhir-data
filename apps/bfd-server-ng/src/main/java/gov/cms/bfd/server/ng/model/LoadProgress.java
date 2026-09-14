@@ -14,11 +14,8 @@ public class LoadProgress {
   @Column(name = "table_name")
   String tableName;
 
-  @Column(name = "last_id")
-  String lastId;
-
-  @Column(name = "last_ts")
-  ZonedDateTime lastTimestamp;
+  @Column(name = "job_id")
+  Integer jobId;
 
   @Column(name = "batch_complete_ts")
   ZonedDateTime batchCompletionTimestamp;
