@@ -120,6 +120,16 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run idr-pipeline
 - If adding a new table, register it in `main` for the corresponding states (initial load vs incremental load and bene only vs claims only vs all claims load-in) in `pipeline.py`
 - If adding a new table, register it in the list of CSVs to load in `load_synthetic.py`
 
+## Export from Test IDR
+
+We have a test snowflake environment. This process will take all of the tables that we use for Synthetic Data and will pull them to .csv of the approprate name
+that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
+
+```bash
+export BFD_ENV="1234_TEST"
+./extract-idr.sh
+```
+
 ## Running the IDR Pipeline in ECS
 
 Refer to the documentation on the `run-idr-pipeline` Lambda in the [`idr-pipeline` Tofuservice README](../../ops/services/04-idr-pipeline/README.md)
