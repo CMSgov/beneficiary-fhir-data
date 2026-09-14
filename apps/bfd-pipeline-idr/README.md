@@ -127,7 +127,7 @@ that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
 
 ```bash
 export BFD_ENV="1234_TEST"
-./export-idr.sh
+./extract-idr.sh
 ```
 
 ## Running the IDR Pipeline in ECS
