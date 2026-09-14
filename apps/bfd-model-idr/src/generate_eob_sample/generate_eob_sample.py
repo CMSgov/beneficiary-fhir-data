@@ -286,7 +286,7 @@ class SampleGenerator:
             "CLM_ACTV_CARE_FROM_DT": extract_col_str(clm_sig_row, "CLM_ACTV_CARE_FROM_DT"),
             "CLM_DSCHRG_DT": extract_col_str(clm_sig_row, "CLM_DSCHRG_DT"),
             "CLM_MDCR_EXHSTD_DT": extract_col_str(clm_sig_row, "CLM_MDCR_EXHSTD_DT"),
-            "CLM_SUBMSN_DT": extract_col_str(clm_sig_row, "CLM_MDCR_EXHSTD_DT"),
+            "CLM_SUBMSN_DT": extract_col_str(clm_sig_row, "CLM_SUBMSN_DT"),
             "CLM_NCH_WKLY_PROC_DT": extract_col_str(clm_sig_row, "CLM_NCH_WKLY_PROC_DT"),
             "CLM_NCVRD_FROM_DT": extract_col_str(clm_sig_row, "CLM_NCVRD_FROM_DT"),
             "CLM_NCVRD_THRU_DT": extract_col_str(clm_sig_row, "CLM_NCVRD_THRU_DT"),
