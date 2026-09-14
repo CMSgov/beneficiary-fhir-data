@@ -154,7 +154,6 @@
         }
     ],
     "CLM_MDCR_DDCTBL_AMT": "17.85",
-    "CLM_OPRTNL_DSPRTNT_AMT": "14.14",
     "CLM_PMT_AMT": "3.50",
     "CLM_SBMT_CHRG_AMT": "9001.55",
     "CLM_NCVRD_CHRG_AMT": "11.50",
@@ -172,6 +171,48 @@
         "CLM_MDCR_NPMT_RSN_CD": "P",
         "CLM_FI_ACTN_CD": "1"
     },
+    "claimValues": [
+        {
+            "CLM_VAL_CD": "17",
+            "CLM_VAL_AMT": "05.32"
+        },
+        {
+            "CLM_VAL_CD": "18",
+            "CLM_VAL_AMT": "14.14"
+        },
+        {
+            "CLM_VAL_CD": "19",
+            "CLM_VAL_AMT": "12342.14"
+        },
+        {
+            "CLM_VAL_CD": "37",
+            "CLM_VAL_AMT": "15"
+        },
+        {
+            "CLM_VAL_CD": "73",
+            "CLM_VAL_AMT": "10.04"
+        },
+        {
+            "CLM_VAL_CD": "74",
+            "CLM_VAL_AMT": "10.05"
+        },
+        {
+            "CLM_VAL_CD": "77",
+            "CLM_VAL_AMT": "99.98"
+        },
+        {
+            "CLM_VAL_CD": "A1",
+            "CLM_VAL_AMT": "19.11"
+        },
+        {
+            "CLM_VAL_CD": "Q0",
+            "CLM_VAL_AMT": "11.38"
+        },
+        {
+            "CLM_VAL_CD": "Q1",
+            "CLM_VAL_AMT": "86.19"
+        }
+    ],
     "PRVDR_ATNDG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_OPRTG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_OTHR_PRVDR_NPI_NUM": "1942945159",
@@ -184,7 +225,6 @@
     "CLM_DSCHRG_DT": "2021-01-02",
     "CLM_SUBMSN_DT": "2020-01-13",
     "CLM_CMS_PROC_DT": "2025-01-01",
-    "CLM_BLOOD_PT_FRNSH_QTY": "15",
     "CLM_NCH_PRMRY_PYR_CD": "Z",
     "CLM_QUERY_CD": "3",
     "CLM_IDR_LD_DT": "2025-01-18",

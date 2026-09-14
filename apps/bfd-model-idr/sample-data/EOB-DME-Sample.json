@@ -154,6 +154,12 @@
         "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": "L",
         "CLM_CLNCL_TRIL_NUM": "1337"
     },
+    "claimValues": [
+        {
+            "CLM_VAL_CD": "37",
+            "CLM_VAL_AMT": "15"
+        }
+    ],
     "CLM_MDCR_DDCTBL_AMT": "17.85",
     "CLM_NRLN_RIC_CD": "M",
     "CLM_PMT_AMT": "3.50",
@@ -170,7 +176,6 @@
     "CLM_SUBMSN_DT": "2020-01-13",
     "CLM_NCH_WKLY_PROC_DT": "2025-01-18",
     "CLM_CMS_PROC_DT": "2025-01-01",
-    "CLM_BLOOD_PT_FRNSH_QTY": "15",
     "CLM_NCH_PRMRY_PYR_CD": "I",
     "CLM_QUERY_CD": "3",
     "CLM_IDR_LD_DT": "2025-01-18",

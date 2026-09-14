@@ -51,7 +51,7 @@
   },
   {
     "resourceType" : "Observation",
-    "id" : "line-observation-9",
+    "id" : "line-observation-8",
     "status" : "final",
     "code" : {
       "coding" : [{
@@ -145,27 +145,6 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-        "display" : "Blood Pints Furnished Quantity"
-      }]
-    },
-    "valueQuantity" : {
-      "value" : 15,
-      "unit" : "pint",
-      "system" : "http://unitsofmeasure.org",
-      "code" : "[pt_us]"
-    }
-  },
-  {
-    "sequence" : 3,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_CARR_PMT_DNL_CD",
         "display" : "Claim Payment Denial Code"
       }]
@@ -179,7 +158,7 @@
     }
   },
   {
-    "sequence" : 4,
+    "sequence" : 3,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -195,7 +174,7 @@
     "valueString" : "1337"
   },
   {
-    "sequence" : 5,
+    "sequence" : 4,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -211,7 +190,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 6,
+    "sequence" : 5,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -233,7 +212,7 @@
     }
   },
   {
-    "sequence" : 7,
+    "sequence" : 6,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -255,7 +234,7 @@
     }
   },
   {
-    "sequence" : 8,
+    "sequence" : 7,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -271,7 +250,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 9,
+    "sequence" : 8,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -285,11 +264,11 @@
       }]
     },
     "valueReference" : {
-      "reference" : "#line-observation-9"
+      "reference" : "#line-observation-8"
     }
   },
   {
-    "sequence" : 10,
+    "sequence" : 9,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -311,7 +290,7 @@
     }
   },
   {
-    "sequence" : 11,
+    "sequence" : 10,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -333,7 +312,7 @@
     }
   },
   {
-    "sequence" : 12,
+    "sequence" : 11,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -349,7 +328,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 13,
+    "sequence" : 12,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -371,7 +350,7 @@
     }
   },
   {
-    "sequence" : 14,
+    "sequence" : 13,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -393,7 +372,7 @@
     }
   },
   {
-    "sequence" : 15,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -401,6 +380,27 @@
       }]
     },
     "timingDate" : "2020-01-13"
+  },
+  {
+    "sequence" : 15,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "PRVDR_FAC_FIPS_ST_CD",
+        "display" : "Federal Information Processing Standards (FIPS) State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "04"
+      }]
+    }
   },
   {
     "sequence" : 16,
@@ -412,8 +412,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "PRVDR_FAC_FIPS_ST_CD",
-        "display" : "Federal Information Processing Standards (FIPS) State Code"
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code"
       }]
     },
     "code" : {
@@ -488,27 +488,6 @@
   },
   {
     "sequence" : 20,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
-        "display" : "Rendering Provider FIPS State Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
-        "code" : "04"
-      }]
-    }
-  },
-  {
-    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -656,8 +635,8 @@
       }
     }],
     "sequence" : 1,
-    "informationSequence" : [17,
-    9],
+    "informationSequence" : [16,
+    8],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -822,7 +801,7 @@
       }
     }],
     "sequence" : 2,
-    "informationSequence" : [18],
+    "informationSequence" : [17],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1003,7 +982,7 @@
       }
     }],
     "sequence" : 3,
-    "informationSequence" : [19],
+    "informationSequence" : [18],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1097,7 +1076,7 @@
       }
     }],
     "sequence" : 4,
-    "informationSequence" : [20],
+    "informationSequence" : [19],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",

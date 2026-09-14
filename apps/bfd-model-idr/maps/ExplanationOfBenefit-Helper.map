@@ -189,6 +189,23 @@ conceptmap "CLM_TYPE_CD" {
   s:2700 == t:"professional"
 }
 
+conceptmap "CLM_VAL_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"17" == t:"CLM_OPRTNL_OUTLR_AMT"
+  s:"18" == t:"CLM_OPRTNL_DSPRTNT_AMT"
+  s:"19" == t:"CLM_OPRTNL_IME_AMT"
+  s:"37" == t:"CLM_BLOOD_PT_FRNSH_QTY"
+  s:"73" == t:"CLM_SQSTRTN_RDCTN_AMT"
+  s:"74" == t:"CLM_INSTNL_LOW_VOL_PMT_AMT"
+  s:"77" == t:"CLM_MDCR_NEW_TECH_AMT"
+  s:"A1" == t:"CLM_MDCR_IP_BENE_DDCTBL_AMT"
+  s:"Q0" == t:"CLM_PBP_INCLSN_AMT"
+  s:"Q1" == t:"CLM_PBP_RDCTN_AMT"
+  s:"QM" == t:"CLM_MIPS_PMT_AMT"
+}
+
 conceptmap "RIC_CD" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"
