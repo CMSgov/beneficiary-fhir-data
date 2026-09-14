@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
@@ -28,7 +28,7 @@ public class ClaimLineRx implements ClaimLineBase {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
-  @Embedded private ClaimLineNdc ndc;
+  @Embedded private ClaimLineNdcQuantity ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineRxSupportingInfo supportingInfo;
 

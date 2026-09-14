@@ -14,8 +14,8 @@ import org.hl7.fhir.r4.model.Extension;
 
 /** Embedded container for professional claim line extensions. */
 @Embeddable
-public class ClaimLineExtensionsCms {
-  @Embedded ClaimLineExtensions base;
+public class ExtensionsProfessionalCms {
+  @Embedded ExtensionsProfessional base;
 
   @Column(name = "clm_fed_type_srvc_cd")
   private Optional<ClaimFederalTypeOfServiceCode> federalTypeOfServiceCode;

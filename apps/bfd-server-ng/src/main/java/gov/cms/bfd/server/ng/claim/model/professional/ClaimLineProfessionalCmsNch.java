@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
-import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -28,14 +26,15 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 
-/** clm_line row data. */
+/** clm_line data for Professional-CMS-NCH. */
 @Embeddable
 @Getter
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
 public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implements ClaimLineBase {
 
-  @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
-  @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
+  @Embedded private ClaimLineProfessionalNchCore nchCore;
+  @Embedded private ClaimLineAdjudicationProfessionalCmsNch adjudicationCharge;
+  @Embedded private ExtensionsProfessionalCmsNch extensionsProfessionalCmsNch;
   @Embedded private RenderingProviderSsaStateCode renderingProviderSsaStateCode;
 
   @Embedded
@@ -69,27 +68,9 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
 
-  @Column(name = "clm_line_ndc_cd")
-  private Optional<String> claimLineNdcCode;
-
   @Override
   void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
-    var productOrService = new CodeableConcept();
-    getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
-    claimLineNdcCode.map(this::toNdcDetail).ifPresent(line::addDetail);
-    line.setQuantity(getServiceUnitQuantity().toFhir());
-    line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-  }
-
-  private ExplanationOfBenefit.DetailComponent toNdcDetail(String ndcCode) {
-    var detail = new ExplanationOfBenefit.DetailComponent();
-    detail.setSequence(1);
-
-    // This doesn't use the main `ClaimLineNdc` class because the quantity isn't available here
-    var coding = new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode);
-    detail.setProductOrService(new CodeableConcept(coding));
-
-    return detail;
+    nchCore.populateProductAndQuantity(line, getHcpcsCode(), getServiceUnitQuantity());
   }
 
   /**
@@ -144,7 +125,12 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
   @Override
   public List<Extension> getExtensions(ClaimFilterOptions options) {
     var extensions = new ArrayList<>(super.getExtensions(options));
-    extensions.addAll(claimLineProfessionalNchExtensions.toFhir());
+    extensions.addAll(extensionsProfessionalCmsNch.toFhir());
     return extensions;
+  }
+
+  @Override
+  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+    return Optional.of(adjudicationCharge);
   }
 }

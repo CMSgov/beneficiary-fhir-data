@@ -2,28 +2,36 @@ package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 
-/** Claim Line, Professional, Basis profile, Nch system. */
+/** clm_line data for Professional-Basis-NCH. */
 @Embeddable
 @Getter
 public class ClaimLineProfessionalBasisNch extends ClaimLineProfessionalBasis {
 
+  @Embedded private ClaimLineProfessionalNchCore nchCore;
+  @Embedded private ExtensionsProfessionalAllNch extensionsNch;
+
   @Override
-  ClaimLineAdjudicationChargeProfessional getAdjudicationCharge() {
-    return null;
+  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+    return Optional.empty();
   }
 
   @Override
-  List<Extension> getExtensions(ClaimFilterOptions options) {
-    return List.of();
+  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
+    nchCore.populateProductAndQuantity(line, getHcpcsCode(), getServiceUnitQuantity());
   }
 
   @Override
-  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item) {
-    // TODO document why this method is empty
+  public List<Extension> getExtensions(ClaimFilterOptions options) {
+    var extensions = new ArrayList<>(super.getExtensions(options));
+    extensions.addAll(extensionsNch.toFhir());
+    return extensions;
   }
 }

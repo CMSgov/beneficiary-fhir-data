@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The CMS specific shared system adjudication charge columns. */
+/** clm_line adjudication information for Institutional-CMS-SharedSystems. */
 @Embeddable
 @Getter
-public class ClaimLineAdjudicationChargeInstitutionalCmsSharedSystems {
+public class ClaimLineAdjudicationInstitutionalCmsSharedSystems {
 
   @Embedded ClaimLineAdjudicationChargeInstitutionalSharedSystems baseAdjudicationCharge;
 

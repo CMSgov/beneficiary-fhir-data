@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
-/** Claim line info. */
+/** clm_line info base. */
 @MappedSuperclass
 @Getter
 @SuppressWarnings("java:S2201")
@@ -50,8 +50,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
-  // region Professional Hook Methods
-  abstract ClaimLineAdjudicationChargeProfessional getAdjudicationCharge();
+  // region Hook Methods
+  abstract Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge();
 
   abstract List<Extension> getExtensions(ClaimFilterOptions options);
 
@@ -79,7 +79,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
         },
         () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
 
-    getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
+    getAdjudicationCharge().ifPresent(ac -> ac.toFhir().forEach(line::addAdjudication));
     getExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);

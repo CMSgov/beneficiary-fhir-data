@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** CMS profile NCH adjudication charge for institutional claim lines. */
+/** clm_line adjudication information for Institutional-CMS-NCH. */
 @Embeddable
-public class ClaimLineAdjudicationChargeInstitutionalCmsNch {
+public class ClaimLineAdjudicationInstitutionalCmsNch {
 
   @Embedded ClaimLineAdjudicationChargeInstitutionalNch baseAdjudicationCharge;
 

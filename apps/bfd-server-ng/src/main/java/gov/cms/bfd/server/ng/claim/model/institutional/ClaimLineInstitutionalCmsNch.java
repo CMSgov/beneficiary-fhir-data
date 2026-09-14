@@ -20,7 +20,7 @@ public class ClaimLineInstitutionalCmsNch extends ClaimLineInstitutionalBase {
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;
 
   @Embedded private ClaimLineInstitutionalExtensions institutionalExtensions;
-  @Embedded private ClaimLineAdjudicationChargeInstitutionalCmsNch adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationInstitutionalCmsNch adjudicationCharge;
   @Embedded private ClaimAnsiSignature ansiSignature;
   @Embedded private ClaimLineInstitutionalNchExtensions claimLineInstitutionalNchExtensions;
 

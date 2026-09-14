@@ -1,29 +1,38 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 
-/** Line item, professional, regular profile nch data source. */
+/** clm_line data for Professional-Regular-NCH. */
 @Embeddable
 @Getter
-@AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
 public class ClaimLineProfessionalRegularNch extends ClaimLineProfessionalRegular {
+
+  @Embedded private ClaimLineProfessionalNchCore nchCore;
+  @Embedded private ExtensionsProfessionalAllNch extensionsNch;
+  @Embedded private ClaimLineAdjudicationProfessional adjudicationCharge;
+
   @Override
-  ClaimLineAdjudicationChargeProfessional getAdjudicationCharge() {
-    return null;
+  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+    return Optional.of(adjudicationCharge);
   }
 
   @Override
-  List<Extension> getExtensions(ClaimFilterOptions options) {
-    return List.of();
+  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
+    nchCore.populateProductAndQuantity(line, getHcpcsCode(), getServiceUnitQuantity());
   }
 
   @Override
-  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item) {}
+  public List<Extension> getExtensions(ClaimFilterOptions options) {
+    var extensions = new ArrayList<>(super.getExtensions(options));
+    extensions.addAll(extensionsNch.toFhir());
+    return extensions;
+  }
 }

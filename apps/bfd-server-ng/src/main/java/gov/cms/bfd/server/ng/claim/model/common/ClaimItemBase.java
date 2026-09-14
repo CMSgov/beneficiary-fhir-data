@@ -21,7 +21,8 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
   ClaimLineBase getClaimLine();
 
   /**
-   * Returns the procedure associated with this claim item, if present.
+   * Returns the procedure associated with this claim item, if present. Rx claims do not have
+   * procedures.
    *
    * @return the claim procedure,
    */

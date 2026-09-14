@@ -9,9 +9,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
-/** Embedded container for professional claim line extensions. */
+/** clm_line extensions for professional claims. */
 @Embeddable
-public class ClaimLineExtensions {
+public class ExtensionsProfessional {
 
   @Column(name = "clm_suplr_type_cd")
   private Optional<ClaimSupplierTypeCode> supplierTypeCode;

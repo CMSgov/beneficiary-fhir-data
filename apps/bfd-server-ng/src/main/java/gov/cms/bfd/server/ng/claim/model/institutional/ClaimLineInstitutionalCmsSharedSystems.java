@@ -19,7 +19,7 @@ public class ClaimLineInstitutionalCmsSharedSystems extends ClaimLineInstitution
   @Column(name = "clm_ddctbl_coinsrnc_cd")
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;
 
-  @Embedded private ClaimLineAdjudicationChargeInstitutionalCmsSharedSystems adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationInstitutionalCmsSharedSystems adjudicationCharge;
   @Embedded private ClaimLineInstitutionalExtensions institutionalExtensions;
 
   @Override

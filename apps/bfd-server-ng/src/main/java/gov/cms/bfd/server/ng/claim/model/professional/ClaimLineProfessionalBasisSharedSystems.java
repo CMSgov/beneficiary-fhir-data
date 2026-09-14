@@ -1,32 +1,33 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Embeddable;
-import java.util.List;
+import jakarta.persistence.Embedded;
+import java.util.Optional;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
 
-/** Claim Line, Professional, basis profile, shared systems system. */
+/** clm_line data, Professional-Basis-SharedSystems. */
 @Embeddable
 @Getter
-@AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pa_uniq_trkng_num"))
 public class ClaimLineProfessionalBasisSharedSystems extends ClaimLineProfessionalBasis {
 
+  @Embedded ClaimLineNdcQuantity ndc;
+
   @Override
-  ClaimLineAdjudicationChargeProfessional getAdjudicationCharge() {
-    return null;
+  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+    return Optional.empty();
   }
 
   @Override
-  List<Extension> getExtensions(ClaimFilterOptions options) {
-    return List.of();
-  }
-
-  @Override
-  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item) {
-    // TODO document why this method is empty
+  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
+    var productOrService = new CodeableConcept();
+    getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
+    var quantity = getServiceUnitQuantity().toFhir();
+    ndc.toFhirDetail().ifPresent(line::addDetail);
+    line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
+    line.setQuantity(quantity);
   }
 }

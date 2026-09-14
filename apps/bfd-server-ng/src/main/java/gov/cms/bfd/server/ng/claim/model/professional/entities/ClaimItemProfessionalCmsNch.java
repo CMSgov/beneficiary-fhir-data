@@ -15,7 +15,7 @@ import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-/** Claim item table. */
+/** claim_item data for Professional-CMS-NCH. */
 @Getter
 @Entity
 @EqualsAndHashCode

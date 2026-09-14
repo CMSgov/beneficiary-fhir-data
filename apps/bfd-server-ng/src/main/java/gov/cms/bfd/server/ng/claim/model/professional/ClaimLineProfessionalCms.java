@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Extension;
 @Getter
 abstract class ClaimLineProfessionalCms extends ClaimLineProfessionalBase {
 
-  @Embedded ClaimLineExtensionsCms extensions;
+  @Embedded ExtensionsProfessionalCms extensions;
 
   @Column(name = "clm_pos_cd")
   private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
