@@ -38,6 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
 /**
@@ -143,32 +144,42 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
                   supportingInfos.add(item.getClaimLineRxNum().toFhir(supportingInfoFactory));
                   var hctObs = item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId());
                   hctObs.ifPresent(
-                      observation -> {
-                        supportingInfos.add(
-                            Optional.of(
-                                supportingInfoFactory
-                                    .createSupportingInfo()
-                                    .setValue(new Reference(observation))
-                                    .setCategory(
-                                        BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
-                                            .toFhir())));
-                        eob.addContained(observation);
-                      });
+                      observation -> supportingInfos.add(
+                          Optional.of(
+                              supportingInfoFactory
+                                  .createSupportingInfo()
+                                  .setValue(new Reference(observation))
+                                  .setCategory(
+                                      BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
+                                          .toFhir()))));
                   var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
                   hgbObs.ifPresent(
-                      observation -> {
-                        supportingInfos.add(
-                            Optional.of(
-                                supportingInfoFactory
-                                    .createSupportingInfo()
-                                    .setValue(new Reference(observation))
-                                    .setCategory(
-                                        BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
-                                            .toFhir())));
-                        eob.addContained(observation);
-                      });
+                      observation -> supportingInfos.add(
+                          Optional.of(
+                              supportingInfoFactory
+                                  .createSupportingInfo()
+                                  .setValue(new Reference(observation))
+                                  .setCategory(
+                                      BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
+                                          .toFhir()))));
                   return supportingInfos.stream();
                 }));
+  }
+
+  /**
+   * Some duplicated effort to separate concerns (don't modify eob on getX methods), up for debate
+   * about usefulness.
+   */
+  @Override
+  protected List<Observation> getSubclassContainedObservations() {
+    return getClaimItems().stream()
+        .flatMap(
+            item ->
+                Stream.of(
+                        item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId()),
+                        item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId()))
+                    .flatMap(Optional::stream))
+        .toList();
   }
 
   /** SS adjudication: provider account-receivable offset amount. */

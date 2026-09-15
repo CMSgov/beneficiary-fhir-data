@@ -73,22 +73,22 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
   private ClaimPaidStatusCode claimPaidStatusCode;
 
-    /**
-     * Creates ExplanationOfBenefit components.
-     *
-     * @param options claim filter options
-     * @param claimState computed claim state
-     * @return ExplanationOfBenefit
-     */
-    @Override
-    public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
-        var eob = super.toFhir(options, claimState);
-        getClaimItems().stream()
-                .map(ClaimItemInstitutionalCmsSharedSystems::toFhir)
-                .filter(Optional::isPresent)
-                .forEach(adjudications -> adjudications.get().forEach(eob::addAdjudication));
-        return eob;
-    }
+  /**
+   * Creates ExplanationOfBenefit components.
+   *
+   * @param options claim filter options
+   * @param claimState computed claim state
+   * @return ExplanationOfBenefit
+   */
+  @Override
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
+    getClaimItems().stream()
+        .map(ClaimItemInstitutionalCmsSharedSystems::toFhir)
+        .filter(Optional::isPresent)
+        .forEach(adjudications -> adjudications.get().forEach(eob::addAdjudication));
+    return eob;
+  }
 
   @Override
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {

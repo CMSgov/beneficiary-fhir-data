@@ -14,9 +14,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim item table. */
 @Getter
@@ -40,11 +43,6 @@ public class ClaimItemInstitutionalCmsSharedSystems implements ClaimItemBase {
   @Override
   public Optional<ProcedureBase> getProcedureOptional() {
     return Optional.of(claimProcedure);
-  }
-
-  @Override
-  public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
-    return Optional.of(claimLine.getHcpcsCode());
   }
 
   /**

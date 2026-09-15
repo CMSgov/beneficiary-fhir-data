@@ -22,6 +22,7 @@ import lombok.Getter;
 @EqualsAndHashCode
 @Table(name = "claim_item_institutional_nch", schema = "idr")
 public class ClaimItemInstitutionalCmsNch implements ClaimItemBase {
+
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineInstitutionalCmsNch claimLine;
   @Embedded private ProcedureInstitutional claimProcedure;

@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for professional claim types (NCH and Shared Systems). */
@@ -33,14 +34,14 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   // region Hook Methods
 
   /**
-   * Hook to retrieve total components and adjudication components.
+   * retrieve total components and adjudication components.
    *
    * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
    */
   abstract Optional<AdjudicationEmbedded> getAdjudication();
 
   /**
-   * Hook method to get a ClaimContractorNumber from some data sources.
+   * get a ClaimContractorNumber from some data sources.
    *
    * @return the ClaimContractorNumber
    */
@@ -54,6 +55,15 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    * @return list of subclass-specific supporting-info components
    */
   abstract List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo();
+
+  /**
+   * return Observations while building SupportingInfo (Shared Systems), default no-op.
+   *
+   * @return Observations to be added to the eob's contained
+   */
+  protected List<Observation> getSubclassContainedObservations() {
+    return List.of();
+  }
 
   /**
    * Adds any adjudication entries that are unique to the subclass.
@@ -89,6 +99,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
+    addContainedObservations(eob);
 
     return sortedEob(eob);
   }
@@ -191,11 +202,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
-  @Override
-  public Optional<Integer> getDrgCode() {
-    return Optional.empty();
-  }
-
   private Map<String, List<Integer>> buildDiagnosisSequences(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     var diagnosisSequenceMap = new HashMap<String, List<Integer>>();
@@ -229,5 +235,14 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                 diagnosisSequenceMap
                     .computeIfAbsent(key, _ -> new ArrayList<>())
                     .add(diagnosisComponent.getSequence()));
+  }
+
+  private void addContainedObservations(ExplanationOfBenefit eob) {
+    getSubclassContainedObservations().forEach(eob::addContained);
+  }
+
+  @Override
+  public Optional<Integer> getDrgCode() {
+    return Optional.empty();
   }
 }
