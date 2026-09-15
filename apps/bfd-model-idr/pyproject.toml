@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-generate_eob_sample = "generate_eob_sample:main"
+generate-eob-sample = "generate_eob_sample:main"
 idr-extract = "idr_extract:main"
 generate-bene-sample = "generate_bene_sample:main"
 
