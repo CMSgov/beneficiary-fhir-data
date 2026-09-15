@@ -258,77 +258,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 2,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMT_FRMT_CD",
-        "display" : "Claim Submission Format Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "N",
-        "display" : "NCPDP ELECTRONIC SUBMISSION",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMTR_CNTRCT_NUM",
-        "display" : "Submitter Contract Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 4,
-    "valueString" : "Z0001"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
-        "display" : "Submitter Contract PBP Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 5,
-    "valueString" : "007"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 6,
-    "timingDate" : "2023-12-06"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "CLM_CMS_PROC_DT",
         "display" : "FI Claim Process Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -338,8 +267,95 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 2,
     "timingDate" : "2018-08-21"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CTSTRPHC_CVRG_IND_CD",
+        "display" : "Catastrophic Coverage Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "B",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_DRUG_CVRG_STUS_CD",
+        "display" : "Drug Coverage Status Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "E",
+        "display" : "Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
+      } ]
+    },
+    "sequence" : 4
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 5,
+    "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_LINE_RX_NUM",
+        "display" : "Claim Line Prescription Service Reference Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 6,
+    "valueString" : "54025.5"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
+        "display" : "Submission Clarification Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "22",
+        "display" : "LTC dispensing, 7-day supply",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
+      } ]
+    },
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -363,20 +379,71 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "rxorigincode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_PTNT_RSDNC_CD",
+        "display" : "Patient Residence Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "2",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode"
-      }, {
-        "code" : "2",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
+        "code" : "00",
+        "display" : "Not specified, other patient residence not identified below",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
     "sequence" : 9
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_NUM",
+        "display" : "Submitter Contract Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 10,
+    "valueString" : "Z0001"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
+        "display" : "Submitter Contract PBP Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 11,
+    "valueString" : "007"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMT_FRMT_CD",
+        "display" : "Claim Submission Format Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "N",
+        "display" : "NCPDP ELECTRONIC SUBMISSION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+      } ]
+    },
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -395,47 +462,16 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_PTNT_RSDNC_CD",
-        "display" : "Patient Residence Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "00",
-        "display" : "Not specified, other patient residence not identified below",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
-      } ]
-    },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
-        "display" : "Submission Clarification Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "22",
-        "display" : "LTC dispensing, 7-day supply",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
-      } ]
-    },
-    "sequence" : 12
+    "sequence" : 14,
+    "timingDate" : "2023-12-06"
   }, {
     "category" : {
       "coding" : [ {
@@ -454,31 +490,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
       } ]
     },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dayssupply",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 14,
-    "valueQuantity" : {
-      "unit" : "days",
-      "value" : 7
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "refillnum",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 15,
-    "valueQuantity" : {
-      "unit" : "fill",
-      "value" : 4
-    }
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -496,56 +508,44 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_DRUG_CVRG_STUS_CD",
-        "display" : "Drug Coverage Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "dayssupply",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 17,
+    "valueQuantity" : {
+      "unit" : "days",
+      "value" : 7
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "refillnum",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 18,
+    "valueQuantity" : {
+      "unit" : "fill",
+      "value" : 4
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "rxorigincode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "E",
-        "display" : "Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
-      } ]
-    },
-    "sequence" : 17
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CTSTRPHC_CVRG_IND_CD",
-        "display" : "Catastrophic Coverage Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+        "code" : "2",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode"
       }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "2",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "B",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
-      } ]
-    },
-    "sequence" : 18
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_LINE_RX_NUM",
-        "display" : "Claim Line Prescription Service Reference Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 19,
-    "valueString" : "54025.5"
+    "sequence" : 19
   } ],
   "total" : [ {
     "amount" : {
@@ -874,77 +874,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 2,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMT_FRMT_CD",
-        "display" : "Claim Submission Format Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "S",
-        "display" : "STATE-TO-PLAN PDES",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMTR_CNTRCT_NUM",
-        "display" : "Submitter Contract Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 4,
-    "valueString" : "Z0001"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
-        "display" : "Submitter Contract PBP Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 5,
-    "valueString" : "001"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "clmrecvddate",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 6,
-    "timingDate" : "2025-08-12"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "CLM_CMS_PROC_DT",
         "display" : "FI Claim Process Date",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -954,8 +883,96 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 2,
     "timingDate" : "2025-08-12"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CTSTRPHC_CVRG_IND_CD",
+        "display" : "Catastrophic Coverage Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "A",
+        "display" : "Attachment point met on this event",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_DRUG_CVRG_STUS_CD",
+        "display" : "Drug Coverage Status Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "O",
+        "display" : "Over-the-counter drugs",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
+      } ]
+    },
+    "sequence" : 4
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 5,
+    "timingDate" : "9999-12-31"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_LINE_RX_NUM",
+        "display" : "Claim Line Prescription Service Reference Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 6,
+    "valueString" : "15180.94"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
+        "display" : "Submission Clarification Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "35",
+        "display" : "LTC dispensing, other 8-14 day dispensing not listed above",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
+      } ]
+    },
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -979,20 +996,71 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "rxorigincode",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+        "code" : "CLM_PTNT_RSDNC_CD",
+        "display" : "Patient Residence Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "4",
-        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode"
-      }, {
-        "code" : "4",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
+        "code" : "06",
+        "display" : "Group home (e.g., congregate residential foster care)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
     "sequence" : 9
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_NUM",
+        "display" : "Submitter Contract Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 10,
+    "valueString" : "Z0001"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
+        "display" : "Submitter Contract PBP Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 11,
+    "valueString" : "001"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMT_FRMT_CD",
+        "display" : "Claim Submission Format Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "S",
+        "display" : "STATE-TO-PLAN PDES",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+      } ]
+    },
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -1011,47 +1079,16 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_PTNT_RSDNC_CD",
-        "display" : "Patient Residence Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "06",
-        "display" : "Group home (e.g., congregate residential foster care)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
-      } ]
-    },
-    "sequence" : 11
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
-        "display" : "Submission Clarification Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "35",
-        "display" : "LTC dispensing, other 8-14 day dispensing not listed above",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
-      } ]
-    },
-    "sequence" : 12
+    "sequence" : 14,
+    "timingDate" : "2025-08-12"
   }, {
     "category" : {
       "coding" : [ {
@@ -1070,31 +1107,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
       } ]
     },
-    "sequence" : 13
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "dayssupply",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 14,
-    "valueQuantity" : {
-      "unit" : "days",
-      "value" : 2
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "refillnum",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-      } ]
-    },
-    "sequence" : 15,
-    "valueQuantity" : {
-      "unit" : "fill",
-      "value" : 1
-    }
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -1112,57 +1125,44 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_DRUG_CVRG_STUS_CD",
-        "display" : "Drug Coverage Status Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "dayssupply",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 17,
+    "valueQuantity" : {
+      "unit" : "days",
+      "value" : 2
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "refillnum",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 18,
+    "valueQuantity" : {
+      "unit" : "fill",
+      "value" : 1
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "rxorigincode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
     "code" : {
       "coding" : [ {
-        "code" : "O",
-        "display" : "Over-the-counter drugs",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
-      } ]
-    },
-    "sequence" : 17
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_CTSTRPHC_CVRG_IND_CD",
-        "display" : "Catastrophic Coverage Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+        "code" : "4",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode"
       }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+        "code" : "4",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "code" : {
-      "coding" : [ {
-        "code" : "A",
-        "display" : "Attachment point met on this event",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
-      } ]
-    },
-    "sequence" : 18
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_LINE_RX_NUM",
-        "display" : "Claim Line Prescription Service Reference Number",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 19,
-    "valueString" : "15180.94"
+    "sequence" : 19
   } ],
   "total" : [ {
     "amount" : {

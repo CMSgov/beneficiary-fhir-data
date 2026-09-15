@@ -65,14 +65,6 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0";
 
   /**
-   * URL for the CARIN Digital Insurance Card Coverage Profile, version 1.1.0. <a
-   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">CARIN
-   * Digital Insurance Card Additional Card Information extension 1.1.0</a>
-   */
-  public static final String C4DIC_ADD_INFO_EXT_URL =
-      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension";
-
-  /**
    * URL for the CARIN Digital Insurance Card (C4DIC) Organization Profile, version 1.1.0. Used for
    * the referenced CMS Organization. <a
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization">C4DIC
@@ -1253,4 +1245,92 @@ public class SystemUrls {
 
   /** Code System URN for AuditEvent subtype codes. */
   public static final String AUDIT_EVENT_SUBTYPE_SYSTEM = "urn:cms:hte";
+
+  // region C4DIC
+
+  /**
+   * Code System URL for C4DIC Logo Extension URL <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension">Extension:
+   * C4DIC Logo </a>.
+   */
+  public static final String C4DIC_LOGO_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension";
+
+  /**
+   * URL for C4DIC Logo <a href="https://www.hhs.gov/sites/default/files/logo-white-lg.png">C4DIC
+   * Logo </a>.
+   */
+  public static final String C4DIC_LOGO_URL =
+      "https://www.hhs.gov/sites/default/files/logo-white-lg.png";
+
+  /**
+   * Code System URL for C4DIC Color Palette extension <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension">Extension:
+   * C4DIC Color Palette</a>.
+   */
+  public static final String C4DIC_COLOR_PALETTE_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ColorPalette-extension";
+
+  /**
+   * Code System URL for C4DIC Foreground Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
+   * C4DIC Foreground Color</a>.
+   */
+  public static final String C4DIC_FOREGROUNDCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension";
+
+  /**
+   * Code System for C4DIC color palette extension <a
+   * href="http://terminology.hl7.org/CodeSystem/IECColourManagement">Extension: C4DIC color palette
+   * extension</a>.
+   */
+  public static final String C4DIC_COLORS_CODE_SYSTEM =
+      "http://terminology.hl7.org/CodeSystem/IECColourManagement";
+
+  /**
+   * Value for C4DIC Foreground Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-ForegroundColor-extension">Extension:
+   * C4DIC Foreground Color</a>.
+   */
+  public static final String C4DIC_FOREGROUNDCOLOR = "#F4FEFF";
+
+  /**
+   * Code System URL for C4DIC Background Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension">Extension:
+   * C4DIC Background Color</a>.
+   */
+  public static final String C4DIC_BACKGROUNDCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension";
+
+  /**
+   * Value for C4DIC Background Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-BackgroundColor-extension">Extension:
+   * C4DIC Background Color</a>.
+   */
+  public static final String C4DIC_BACKGROUNDCOLOR = "#092E86";
+
+  /**
+   * Code System URL for C4DIC Highlight Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
+   * C4DIC Highlight Color</a>.
+   */
+  public static final String C4DIC_HIGHLIGHTCOLOR_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension";
+
+  /**
+   * Value for C4DIC Highlight Color <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
+   * C4DIC Highlight Color</a>.
+   */
+  public static final String C4DIC_HIGHLIGHTCOLOR = "#335097";
+
+  /**
+   * Code System URL for C4DIC Additional Insurance Card Information Extension URL <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">Extension:
+   * C4DIC Additional Insurance Card Information </a>.
+   */
+  public static final String C4DIC_ADD_INFO_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension";
+
+  // endregion
 }

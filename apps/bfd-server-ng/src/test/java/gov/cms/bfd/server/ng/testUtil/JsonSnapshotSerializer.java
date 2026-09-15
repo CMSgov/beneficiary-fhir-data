@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.regex.Pattern;
 import lombok.SneakyThrows;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
 
@@ -89,6 +90,12 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
             .reader()
             .with(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
             .readTree(json);
+
+    // Right now, we're reordering EoB snapshots so that the order of known arrays is deterministic.
+    if (object instanceof ExplanationOfBenefit) {
+      SnapshotDeterministicOrderer.order(orderedJsonNode);
+    }
+
     var orderedJsonString =
         keyOrderingObjectMapper
             .writerWithDefaultPrettyPrinter()

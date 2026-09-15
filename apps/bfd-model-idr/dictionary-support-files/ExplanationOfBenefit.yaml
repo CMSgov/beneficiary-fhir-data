@@ -1857,6 +1857,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
+    - Outpatient
     - SNF
   sources:
     - FISS
