@@ -17,7 +17,9 @@ dependencies = [
 ]
 
 [project.scripts]
-generate_eob_sample = "generate_eob_sample:main"
+generate-eob-sample = "generate_eob_sample:main"
+idr-extract = "idr_extract:main"
+generate-bene-sample = "generate_bene_sample:main"
 
 [dependency-groups]
 dev = [
@@ -25,10 +27,14 @@ dev = [
     "uv>=0.11.15",
     "pyright>=1.1.403",
     "debugpy>=1.8.19",
+    "pytest>=9.0.1",
 ]
 
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.sources]
+idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
 
 [build-system]
 requires = ["uv_build<=0.12"]
@@ -36,7 +42,7 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "idr_model"
-packages = ["src/idr_model", "src/generate_eob_sample"]
+packages = ["src/idr_model", "src/generate_eob_sample", "src/generate_bene_sample"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

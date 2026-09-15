@@ -4,6 +4,7 @@ StructureMaps/*
 batched_out/*
 !batched_out/.gitkeep
 out/*
+out-test/*
 !out/.gitkeep
 !out/AuditEvent.json
 !out/Patient.json

@@ -4,7 +4,7 @@ from datetime import date
 from typing import Any
 
 import field_constants as f
-from claims_static import (
+from idr_model.claims_static import (
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
