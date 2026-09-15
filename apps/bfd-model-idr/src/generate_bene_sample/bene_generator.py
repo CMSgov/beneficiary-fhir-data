@@ -158,7 +158,7 @@ def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
 
 
-def extract_col_bool(row: dict[str, str], name: str) -> str:
+def extract_col_bool(row: dict[str, str], name: str) -> str | None:
     val = row.get(name, "").strip().upper()
 
     if val in ("TRUE", "1", "YES", "Y"):
