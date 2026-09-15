@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ public class ClaimLineProfessionalRegularNch extends ClaimLineProfessionalRegula
 
   @Embedded private ClaimLineProfessionalNchCore nchCore;
   @Embedded private ExtensionsProfessionalAllNch extensionsNch;
-  @Embedded private ClaimLineAdjudicationProfessional adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationProfessionalRegularNch adjudicationCharge;
 
   @Override
-  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+  Optional<AdjudicationEmbedded> getClaimLineAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 

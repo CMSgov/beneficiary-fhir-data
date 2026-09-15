@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -31,7 +31,12 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   // region Hook Methods
 
-  abstract AdjudicationChargeBase getAdjudicationCharge();
+  /**
+   * Hook to retrieve total components and adjudication components.
+   *
+   * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
+   */
+  abstract Optional<AdjudicationEmbedded> getAdjudication();
 
   /**
    * Hook method to get a ClaimContractorNumber from some data sources.
@@ -47,7 +52,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    *
    * @return list of subclass-specific supporting-info components
    */
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo();
 
   /**
    * Adds any adjudication entries that are unique to the subclass.
@@ -77,8 +82,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addProviders(eob);
     addAllSupportingInfo(eob);
     addCareTeam(eob);
-    getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
-    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
+    getAdjudication().ifPresent(ac -> ac.toFhirTotal().forEach(eob::addTotal));
+    getAdjudication().ifPresent(ac -> ac.toFhirAdjudication().forEach(eob::addAdjudication));
     getPaymentComponent().toFhir().ifPresent(eob::setPayment);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
@@ -158,7 +163,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
             .flatMap(Optional::stream)
             .toList();
 
-    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo())
+    Stream.of(sharedHeaderSupportingInfo, getSubclassSupportingInfo())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }

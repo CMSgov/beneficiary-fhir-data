@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public class ClaimLineAdjudicationInstitutionalCmsSharedSystems {
 
-  @Embedded ClaimLineAdjudicationChargeInstitutionalSharedSystems baseAdjudicationCharge;
+  @Embedded ClaimLineAdjudicationInstitutionalSharedSystems baseAdjudicationCharge;
 
   @Column(name = "clm_line_ncvrd_pd_amt") // CMS
   private BigDecimal noncoveredProductPaidAmount;

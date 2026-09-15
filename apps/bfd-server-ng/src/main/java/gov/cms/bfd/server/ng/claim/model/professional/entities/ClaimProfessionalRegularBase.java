@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
@@ -18,13 +17,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
-  @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
-  }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
+  List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return List.of();
   }
 

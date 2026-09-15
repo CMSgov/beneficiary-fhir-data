@@ -4,7 +4,8 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** clm_line adjudication information for Professional-CMS-SharedSystems. */
@@ -16,11 +17,11 @@ class ClaimLineAdjudicationProfessionalCmsSharedSystems
   private BigDecimal providerObligationToAcceptFullAmount;
 
   @Override
-  Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
-    return Stream.concat(
-        super.subClassCharges(),
-        Stream.of(
-            AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudication(
-                providerObligationToAcceptFullAmount)));
+  List<ExplanationOfBenefit.AdjudicationComponent> addSubclassAdjudications() {
+    var adjudicationComponents = new ArrayList<>(super.addSubclassAdjudications());
+    adjudicationComponents.add(
+        AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudication(
+            providerObligationToAcceptFullAmount));
+    return adjudicationComponents;
   }
 }

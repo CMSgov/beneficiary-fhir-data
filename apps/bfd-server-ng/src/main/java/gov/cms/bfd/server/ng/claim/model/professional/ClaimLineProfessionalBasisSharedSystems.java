@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Embeddable;
@@ -17,7 +18,7 @@ public class ClaimLineProfessionalBasisSharedSystems extends ClaimLineProfession
   @Embedded ClaimLineNdcQuantity ndc;
 
   @Override
-  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+  Optional<AdjudicationEmbedded> getClaimLineAdjudication() {
     return Optional.empty();
   }
 

@@ -1,19 +1,20 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 // Shared REGULAR fields for both sources, also CMS fields.
 @MappedSuperclass
-abstract class ClaimLineAdjudicationProfessional {
+abstract class ClaimLineAdjudicationProfessional implements AdjudicationEmbedded {
 
   @Column(name = "clm_line_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -36,12 +37,15 @@ abstract class ClaimLineAdjudicationProfessional {
   @Column(name = "clm_line_prfnl_dme_price_amt")
   private BigDecimal purchasePriceAmount;
 
-  public final List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    return Stream.concat(subClassCharges(), Stream.of(benefitPaymentStatus())).toList();
+  @Override
+  public final List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    var charges = new ArrayList<>(addSubclassAdjudications());
+    charges.add(benefitPaymentStatus());
+    return charges;
   }
 
-  Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
-    return Stream.of(
+  List<ExplanationOfBenefit.AdjudicationComponent> addSubclassAdjudications() {
+    return List.of(
         AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
         AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
             submittedChargeAmount),

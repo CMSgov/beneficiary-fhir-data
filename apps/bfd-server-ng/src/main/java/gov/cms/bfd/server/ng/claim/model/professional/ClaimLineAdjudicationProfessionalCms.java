@@ -4,7 +4,8 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @MappedSuperclass
@@ -17,13 +18,14 @@ abstract class ClaimLineAdjudicationProfessionalCms extends ClaimLineAdjudicatio
   private BigDecimal therapyAmountAppliedToLimit;
 
   @Override
-  Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
-    return Stream.concat(
-        super.subClassCharges(),
-        Stream.of(
-            AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
-                providerPaymentAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
-                therapyAmountAppliedToLimit)));
+  List<ExplanationOfBenefit.AdjudicationComponent> addSubclassAdjudications() {
+    var charges = new ArrayList<>(super.addSubclassAdjudications());
+    charges.add(
+        AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
+            providerPaymentAmount));
+    charges.add(
+        AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
+            therapyAmountAppliedToLimit));
+    return charges;
   }
 }

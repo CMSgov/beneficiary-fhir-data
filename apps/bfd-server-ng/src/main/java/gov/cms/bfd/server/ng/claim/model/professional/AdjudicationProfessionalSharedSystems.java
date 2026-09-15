@@ -1,16 +1,16 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The adjudication charge for a professional claim from the shared system. */
+/** eob level adjudications for a professional claim from shared system. */
 @Embeddable
-public class AdjudicationChargeProfessionalSharedSystems implements AdjudicationChargeBase {
+public class AdjudicationProfessionalSharedSystems implements AdjudicationEmbedded {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;

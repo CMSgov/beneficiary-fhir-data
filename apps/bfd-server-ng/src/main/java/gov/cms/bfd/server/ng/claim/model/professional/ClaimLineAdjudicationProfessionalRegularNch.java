@@ -1,4 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-/** Stub. */
-public class ClaimLineAdjudicationProfessionalRegularNch {}
+import jakarta.persistence.Embeddable;
+
+/** ClaimLineAdjudicationProfessional implements everything. */
+@Embeddable
+public class ClaimLineAdjudicationProfessionalRegularNch
+    extends ClaimLineAdjudicationProfessional {}

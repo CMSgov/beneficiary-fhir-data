@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adjudication fields for institutional claim, cms profile, shared system. */
 @Embeddable
-public class AdjudicationChargeInstitutionalCmsSharedSystems implements AdjudicationChargeBase {
+public class AdjudicationInstitutionalCmsSharedSystems implements AdjudicationEmbedded {
 
-  @Embedded AdjudicationChargeInstitutionalRegularSharedSystems adjudicationChargeBase;
+  @Embedded AdjudicationInstitutionalRegularSharedSystems adjudicationChargeBase;
 
   @Column(name = "clm_bene_intrst_pd_amt")
   private BigDecimal beneInterestPaidAmount;

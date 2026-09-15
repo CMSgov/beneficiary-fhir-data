@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Pps adjudication charge for institutional claims in the CMS profile. */
 @Embeddable
 @Getter
-public class AdjudicationChargePpsCms implements AdjudicationChargeBase {
+public class AdjudicationPpsCms implements AdjudicationEmbedded {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;

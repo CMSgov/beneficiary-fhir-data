@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
@@ -130,7 +131,7 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
   }
 
   @Override
-  Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge() {
+  Optional<AdjudicationEmbedded> getClaimLineAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 }

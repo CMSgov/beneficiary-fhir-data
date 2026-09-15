@@ -51,8 +51,7 @@ public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
   @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo() {
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return clinicalTrialNumber.toFhir(supportingInfoFactory).stream().toList();
   }
 

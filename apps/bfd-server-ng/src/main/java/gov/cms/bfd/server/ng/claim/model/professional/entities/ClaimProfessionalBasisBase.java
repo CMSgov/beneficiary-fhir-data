@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -16,13 +17,20 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
-  @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
-  }
+  // region PaymentComponent
+
+  // Basis does not contain an amount field
+  @Embedded private ClaimPaymentComponent paymentComponent;
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo() {
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
+  }
+
+  // endregion
+
+  @Override
+  List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return List.of();
   }
 
@@ -37,15 +45,8 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
     return null;
   }
 
-  // region PaymentComponent
-
-  // Basis does not contain an amount field
-  @Embedded private ClaimPaymentComponent paymentComponent;
-
   @Override
-  public ClaimPaymentComponentBase getPaymentComponent() {
-    return paymentComponent;
+  Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.empty();
   }
-
-  // endregion
 }

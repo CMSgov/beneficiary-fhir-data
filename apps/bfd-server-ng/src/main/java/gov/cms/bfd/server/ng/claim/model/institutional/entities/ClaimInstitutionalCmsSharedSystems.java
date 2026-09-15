@@ -9,7 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
@@ -47,7 +47,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
     implements SharedSystemsClaim {
 
   @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutionalCmsSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationInstitutionalCmsSharedSystems adjudicationCharge;
   @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -14,7 +15,7 @@ import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -59,7 +60,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationProfessionalSharedSystems adjudicationCharge;
   @Embedded private OtherProfessionalSharedSystemsCareTeam otherProviderHistory;
 
   @Column(name = "clm_audt_trl_stus_cd")
@@ -87,15 +88,19 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
     return Optional.of(claimPaidStatusCode);
   }
 
+  @Override
+  public Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.of(adjudicationCharge);
+  }
+
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
    * date, provider assignment switch, and clinical trial number.
    */
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo() {
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return Stream.of(
-            super.buildSubclassSupportingInfo().stream(),
+            super.getSubclassSupportingInfo().stream(),
             nchPrimaryPayorCode.toFhir(supportingInfoFactory).stream(),
             providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)).stream(),
             Stream.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),

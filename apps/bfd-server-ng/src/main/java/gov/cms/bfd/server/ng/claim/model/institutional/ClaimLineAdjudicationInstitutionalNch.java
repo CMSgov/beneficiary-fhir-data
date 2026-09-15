@@ -8,7 +8,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class ClaimLineAdjudicationChargeInstitutionalNch {
+class ClaimLineAdjudicationInstitutionalNch {
 
   @Column(name = "clm_line_ncvrd_chrg_amt")
   private BigDecimal noncoveredChargeAmount; // REGULAR, CMS

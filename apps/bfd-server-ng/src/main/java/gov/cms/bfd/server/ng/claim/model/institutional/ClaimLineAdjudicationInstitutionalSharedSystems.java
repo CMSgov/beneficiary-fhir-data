@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The shared adjudication charge columns between CMS and REGULAR. */
 @Embeddable
-public class ClaimLineAdjudicationChargeInstitutionalSharedSystems {
+public class ClaimLineAdjudicationInstitutionalSharedSystems {
   @Column(name = "clm_line_ncvrd_chrg_amt") // REGULAR CMS
   private BigDecimal noncoveredChargeAmount;
 

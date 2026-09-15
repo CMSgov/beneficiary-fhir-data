@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 
-/** The professional claim, basis profile, sourced from nch. */
+/** Leaf entity, Professional-Basis-NCH. */
 @Getter
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")

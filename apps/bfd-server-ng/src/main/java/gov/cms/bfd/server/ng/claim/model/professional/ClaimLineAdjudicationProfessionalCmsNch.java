@@ -4,12 +4,11 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
-import java.util.stream.Stream;
-import lombok.Getter;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-@Getter
 class ClaimLineAdjudicationProfessionalCmsNch extends ClaimLineAdjudicationProfessionalCms {
 
   @Column(name = "clm_line_prfnl_intrst_amt")
@@ -25,17 +24,20 @@ class ClaimLineAdjudicationProfessionalCmsNch extends ClaimLineAdjudicationProfe
   private BigDecimal screenSavingsAmount;
 
   @Override
-  Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
-    return Stream.concat(
-        super.subClassCharges(),
-        Stream.of(
-            AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
-                professionalInterestAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT
-                .toFhirAdjudication(primaryPayerAllowedAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT.toFhirAdjudication(
-                primaryPayerPaidAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
-                screenSavingsAmount)));
+  List<ExplanationOfBenefit.AdjudicationComponent> addSubclassAdjudications() {
+    var adjudicationComponents = new ArrayList<>(super.addSubclassAdjudications());
+    adjudicationComponents.add(
+        AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
+            professionalInterestAmount));
+    adjudicationComponents.add(
+        AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT.toFhirAdjudication(
+            primaryPayerAllowedAmount));
+    adjudicationComponents.add(
+        AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT.toFhirAdjudication(
+            primaryPayerPaidAmount));
+    adjudicationComponents.add(
+        AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
+            screenSavingsAmount));
+    return adjudicationComponents;
   }
 }

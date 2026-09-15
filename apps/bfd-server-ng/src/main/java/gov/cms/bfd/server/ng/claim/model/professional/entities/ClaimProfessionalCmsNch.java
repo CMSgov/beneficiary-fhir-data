@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -13,7 +14,7 @@ import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalNch;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -56,7 +57,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
 
-  @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
+  @Embedded private AdjudicationProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private BloodPints bloodPints;
   @Embedded private ServiceCareTeam serviceProviderHistory;
@@ -69,11 +70,24 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemProfessionalCmsNch> claimItems;
 
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.NCH;
+  }
+
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo() {
+  public Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.of(adjudicationCharge);
+  }
+
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return Stream.concat(
-            super.buildSubclassSupportingInfo().stream(),
+            super.getSubclassSupportingInfo().stream(),
             Stream.of(
                     claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
                     claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
@@ -104,15 +118,6 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   @Override
   public MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.NCH;
-  }
-
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.NCH;
   }
 
   @Override

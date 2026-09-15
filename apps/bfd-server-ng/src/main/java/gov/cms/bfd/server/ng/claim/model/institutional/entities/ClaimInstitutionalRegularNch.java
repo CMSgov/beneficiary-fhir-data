@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalRegular;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalRegular;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -31,7 +31,7 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
     implements NchClaim {
 
   @Embedded private ServiceCareTeam serviceProviderHistory;
-  @Embedded private AdjudicationChargeInstitutionalRegular adjudicationCharge;
+  @Embedded private AdjudicationInstitutionalRegular adjudicationCharge;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
   @Embedded

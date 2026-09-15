@@ -10,8 +10,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /**
  * Class to handle conversion of disproportionate and indirect amounts into adjudication components.
  */
-public class AdjudicationChargeClaimValue {
-  private AdjudicationChargeClaimValue() {}
+public class AdjudicationClaimValue {
+  private AdjudicationClaimValue() {}
 
   /**
    * Takes a list of claim values and calculates two sums to generate two Adjudication Components.

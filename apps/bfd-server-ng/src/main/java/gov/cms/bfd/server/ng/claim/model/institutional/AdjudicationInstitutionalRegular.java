@@ -1,16 +1,19 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The adjudication charge for a professional claim from nch. */
+/**
+ * Adjudication fields for institutional claims, regular profile, both systems (but full set for
+ * nch) because cartesian products are fun.
+ */
 @Embeddable
-public class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
+public class AdjudicationInstitutionalRegular implements AdjudicationEmbedded {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -18,27 +21,33 @@ public class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase
   @Column(name = "clm_sbmt_chrg_amt")
   private BigDecimal submittedChargeAmount;
 
-  @Column(name = "clm_bene_pmt_amt")
-  private BigDecimal benePaymentAmount;
-
   @Column(name = "clm_prvdr_pmt_amt")
   private BigDecimal providerPaymentAmount;
 
   @Column(name = "clm_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
+  @Column(name = "clm_ncvrd_chrg_amt")
+  private BigDecimal noncoveredChargeAmount;
+
+  @Column(name = "clm_mdcr_coinsrnc_amt")
+  private BigDecimal coinsuranceAmount;
+
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
     return List.of(
         AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirTotal(allowedChargeAmount),
         AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount),
-        AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirTotal(benePaymentAmount),
         AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhirTotal(providerPaymentAmount),
-        AdjudicationChargeType.BENE_PART_B_DEDUCTIBLE_AMOUNT.toFhirTotal(deductibleAmount));
+        AdjudicationChargeType.BENE_PART_B_DEDUCTIBLE_AMOUNT.toFhirTotal(deductibleAmount),
+        AdjudicationChargeType.BENE_PART_A_COINSURANCE_LIABILITY_AMOUNT.toFhirTotal(
+            coinsuranceAmount),
+        AdjudicationChargeType.INPATIENT_NON_COVERED_CHARGE_AMOUNT.toFhirTotal(
+            noncoveredChargeAmount));
   }
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of();
+    return List.of(); // no-op, regular doesn't have the fields to create an adjudication component
   }
 }

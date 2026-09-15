@@ -298,8 +298,10 @@ def print_entity_tree(
         if parent in graph:
             print(f"{indent}└── extends {parent}")
             print_entity_tree(graph, profile_map, parent, profile, indent + FORMAT_SPACING, visited.copy(), debug_col)
-        else:
+        elif not node["columns"] and not node["embeddeds"]:
             print(f"{indent}└── extends {parent}  ⚠️  not resolved -- interface, or a missing/unparsed class")
+        else:
+            print(f"{indent}└── extends {parent}")
 
 
 def print_entity(graph: dict, profile_map: dict, entity_name: str, debug_col: str | None = None) -> tuple[str, list]:
@@ -649,6 +651,13 @@ def check_cms_superset(graph: dict, profile_map: dict, entity_index: dict) -> tu
     (check_profile_completeness already covers that more general case),
     but on the exact counterpart for this path.
 
+    (2) only considers columns that actually have a YAML dictionary
+    entry. A column with no entry falls back to ALL_PROFILES_ORDERED
+    for display purposes elsewhere, but that's not a real dictionary
+    assertion -- treating it as one here would flag columns that were
+    never actually confirmed to belong to that profile. Such columns
+    still surface separately via _print_unmatched_columns.
+
     A sibling with zero exposed columns is treated as an unbuilt stub
     and skipped rather than compared -- otherwise a fully-built CMS
     entity produces one finding per column against a placeholder class
@@ -684,7 +693,9 @@ def check_cms_superset(graph: dict, profile_map: dict, entity_index: dict) -> tu
                 )
 
             for db_col in sorted(cms_cols):
-                allowed = profile_map.get(db_col, ALL_PROFILES_ORDERED)
+                if db_col not in profile_map:
+                    continue
+                allowed = profile_map[db_col]
                 if profile in allowed and db_col not in sibling_cols:
                     findings.append(
                         {
@@ -811,17 +822,19 @@ def _print_unresolved_embeds(unresolved: dict) -> None:
 
 
 def find_unresolved_parents(graph: dict) -> dict[str, set[str]]:
-    """Every 'extends' target that never got parsed as its own class.
-    Unlike find_unresolved_embeds, this can't cleanly separate a
-    harmless plain interface (Comparable, ClaimLineBase) from a
-    genuinely missing/unparsed MappedSuperclass -- but an unresolved
-    parent silently empties out the ENTIRE tree of anything that
-    extends it (see print_entity_tree), which is a real problem
-    whichever case it turns out to be, so it's reported either way."""
+    """Every 'extends' target that never got parsed as its own class,
+    for classes that have nothing of their own to fall back on. A class
+    with real columns/embeds loses nothing visible when its parent
+    can't be resolved -- almost always a plain interface (Serializable,
+    Comparable) -- so that case stays silent. A class with NO content
+    of its own and an unresolved parent is a genuine black hole (its
+    entire tree silently empties out, see print_entity_tree), which is
+    worth flagging whether the parent turns out to be a missing/
+    unparsed class or something else entirely."""
     unresolved: dict[str, set[str]] = {}
     for class_name, node in graph.items():
         parent = node["parent"]
-        if parent and parent not in graph:
+        if parent and parent not in graph and not node["columns"] and not node["embeddeds"]:
             unresolved.setdefault(parent, set()).add(class_name)
     return unresolved
 

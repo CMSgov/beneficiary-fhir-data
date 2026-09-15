@@ -11,7 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
+import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
 import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
@@ -171,7 +171,7 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
-  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
+  protected Optional<AdjudicationRx> getAdjudicationChargeRx() {
     return Optional.empty();
   }
 

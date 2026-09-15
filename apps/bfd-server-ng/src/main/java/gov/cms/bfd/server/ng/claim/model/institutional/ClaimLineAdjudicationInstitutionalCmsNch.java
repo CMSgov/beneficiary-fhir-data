@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class ClaimLineAdjudicationInstitutionalCmsNch {
 
-  @Embedded ClaimLineAdjudicationChargeInstitutionalNch baseAdjudicationCharge;
+  @Embedded ClaimLineAdjudicationInstitutionalNch baseAdjudicationCharge;
 
   @Column(name = "clm_line_prvdr_pmt_amt")
   private BigDecimal providerPaymentAmount;

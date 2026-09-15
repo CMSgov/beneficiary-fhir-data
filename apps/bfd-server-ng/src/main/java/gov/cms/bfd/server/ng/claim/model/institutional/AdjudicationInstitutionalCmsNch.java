@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * fact that CMS is a superset of REGULAR.
  */
 @Embeddable
-public class AdjudicationChargeInstitutionalCmsNch implements AdjudicationChargeBase {
+public class AdjudicationInstitutionalCmsNch implements AdjudicationEmbedded {
 
-  @Embedded AdjudicationChargeInstitutionalRegular adjudicationChargeBase;
+  @Embedded AdjudicationInstitutionalRegular adjudicationChargeBase;
 
   @Column(name = "clm_blood_chrg_amt")
   private BigDecimal bloodChargeAmount;

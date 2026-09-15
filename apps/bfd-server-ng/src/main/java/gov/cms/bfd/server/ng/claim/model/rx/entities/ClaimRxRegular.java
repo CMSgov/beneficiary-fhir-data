@@ -5,7 +5,7 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationChargeRx;
+import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -30,10 +30,10 @@ public class ClaimRxRegular extends ClaimRxBase {
   }
 
   // region Adjudication Charge
-  @Embedded private AdjudicationChargeRx adjudicationCharge;
+  @Embedded private AdjudicationRx adjudicationCharge;
 
   @Override
-  protected Optional<AdjudicationChargeRx> getAdjudicationChargeRx() {
+  protected Optional<AdjudicationRx> getAdjudicationChargeRx() {
     return Optional.of(adjudicationCharge);
   }
 

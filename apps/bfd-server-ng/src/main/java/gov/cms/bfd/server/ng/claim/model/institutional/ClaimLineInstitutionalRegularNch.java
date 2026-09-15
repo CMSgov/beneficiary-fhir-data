@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("java:S2201")
 public class ClaimLineInstitutionalRegularNch extends ClaimLineInstitutionalBase {
 
-  @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignature ansiSignature;
 
   @Override

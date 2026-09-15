@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public class ClaimLineInstitutionalRegularSharedSystems extends ClaimLineInstitutionalBase {
 
-  @Embedded private ClaimLineAdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationInstitutionalSharedSystems adjudicationCharge;
 
   @Override
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {

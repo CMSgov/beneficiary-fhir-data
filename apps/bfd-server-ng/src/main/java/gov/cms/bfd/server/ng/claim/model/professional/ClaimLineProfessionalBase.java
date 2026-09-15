@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
@@ -51,7 +52,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   // region Hook Methods
-  abstract Optional<ClaimLineAdjudicationProfessional> getAdjudicationCharge();
+
+  abstract Optional<AdjudicationEmbedded> getClaimLineAdjudication();
 
   abstract List<Extension> getExtensions(ClaimFilterOptions options);
 
@@ -79,7 +81,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
         },
         () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
 
-    getAdjudicationCharge().ifPresent(ac -> ac.toFhir().forEach(line::addAdjudication));
+    getClaimLineAdjudication()
+        .ifPresent(ac -> ac.toFhirAdjudication().forEach(line::addAdjudication));
     getExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);
