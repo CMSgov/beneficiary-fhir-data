@@ -14,7 +14,13 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
-from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROFESSIONAL_CLAIM_TYPES
+from idr_model.claims_static import (
+    FISS_CLM_TYPE_CDS,
+    INSTITUTIONAL_CLAIM_TYPES,
+    MCS_CLM_TYPE_CDS,
+    PHARMACY_CLM_TYPE_CDS,
+    PROFESSIONAL_CLAIM_TYPES,
+)
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     BENE_HSTRY,
