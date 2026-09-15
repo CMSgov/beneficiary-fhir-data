@@ -1,6 +1,7 @@
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -88,7 +89,7 @@ class SampleGenerator:
 
         return record_matches.iloc[0]
 
-    def read_mbi_lines(self, bene_hist_line: dict[str, str]) -> list[dict[str, str]]:
+    def read_mbi_lines(self, bene_hist_line: dict[str, str]) -> list[dict[str, Any]]:
         file_path = f"{self.source_directory}/SYNTHETIC_BENE_MBI_ID.csv"
 
         if not Path(file_path).exists():
@@ -96,9 +97,9 @@ class SampleGenerator:
 
         records_found = pd.read_csv(file_path, dtype=str, keep_default_na=False)
 
-        return records_found[
-            (records_found["BENE_MBI_ID"] == bene_hist_line["BENE_MBI_ID"])
-        ].to_dict("records")
+        matches = records_found[(records_found["BENE_MBI_ID"] == bene_hist_line["BENE_MBI_ID"])]
+
+        return matches.to_dict("records")
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
