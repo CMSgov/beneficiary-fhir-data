@@ -99,7 +99,7 @@ class SampleGenerator:
 
         matches = records_found[(records_found["BENE_MBI_ID"] == bene_hist_line["BENE_MBI_ID"])]
 
-        return matches.to_dict("records")
+        return matches.to_dict(orient='records')  
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
