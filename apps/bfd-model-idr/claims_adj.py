@@ -3,7 +3,7 @@ import string
 from datetime import date
 from typing import Any
 
-import field_constants as f
+import constants as f
 from claims_static import (
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
     AVAIL_CLM_RLT_COND_SK,
@@ -28,12 +28,11 @@ from generator_util import (
     AVAIL_CONTRACT_NUMS,
     AVAIL_PBP_NUMS,
     GeneratorUtil,
-    RandomIdGenerator,
-    RowAdapter,
     gen_thru_dt,
     probability,
     random_date,
 )
+from row_adapter import RowAdapter
 
 
 class AdjudicatedGeneratorUtil:
@@ -286,7 +285,7 @@ class AdjudicatedGeneratorUtil:
             clm_dt_sgntr[f.CLM_ACTV_CARE_FROM_DT] = clm[f.CLM_FROM_DT]
             clm_dt_sgntr[f.CLM_DSCHRG_DT] = clm[f.CLM_THRU_DT]
             if clm_type_cd in (20, 30):
-                if random.choice([0, 1]):
+                if random.choice([0, 1]):  # TODO: this is changing the date!
                     clm_dt_sgntr[f.CLM_QLFY_STAY_FROM_DT] = clm[f.CLM_FROM_DT]
                     clm_dt_sgntr[f.CLM_QLFY_STAY_THRU_DT] = clm[f.CLM_THRU_DT]
                 else:
@@ -295,7 +294,7 @@ class AdjudicatedGeneratorUtil:
 
             if clm_type_cd in (50, 60, 61, 62, 63, 64):
                 clm_dt_sgntr[f.CLM_MDCR_EXHSTD_DT] = clm[f.CLM_THRU_DT]
-                if random.choice([0, 1]):
+                if random.choice([0, 1]):  # TODO: this is changing the date!
                     clm_dt_sgntr[f.CLM_NCVRD_FROM_DT] = clm[f.CLM_THRU_DT]
                     clm_dt_sgntr[f.CLM_NCVRD_THRU_DT] = clm[f.CLM_THRU_DT]
                 else:
@@ -477,7 +476,12 @@ class AdjudicatedGeneratorUtil:
         def match_diag(subdict: dict[str, Any]):
             # Find the row with matching columns so that we can run regeneration on diagnosis rows
             return next(
-                (x for x in init_diagnoses if subdict.items() <= x.kv.items()), None
+                (
+                    x
+                    for x in init_diagnoses
+                    if subdict.items() <= {k: str(v) for k, v in x.kv.items()}.items()
+                ),
+                None,
             ) or RowAdapter({})
 
         diagnoses: list[RowAdapter] = []

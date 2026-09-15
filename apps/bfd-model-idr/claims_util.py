@@ -3,9 +3,9 @@ from datetime import date, datetime
 
 from faker import Faker
 
-import field_constants as f
+import constants as f
 from claims_static import NOW
-from generator_util import RowAdapter
+from row_adapter import RowAdapter
 
 _faker = Faker()
 
@@ -51,17 +51,19 @@ def add_meta_timestamps(
     clm: RowAdapter,
     max_date: str = str(NOW),
 ):
-    if (
-        date.fromisoformat(clm[f.CLM_IDR_LD_DT]) < date(2021, 4, 19)
-        and obj.get(f.IDR_INSRT_TS) is None
-    ):
+    clm_load_dt = (
+        date.fromisoformat(clm[f.CLM_IDR_LD_DT])
+        if isinstance(clm[f.CLM_IDR_LD_DT], str)
+        else clm[f.CLM_IDR_LD_DT]
+    )
+    if clm_load_dt < date(2021, 4, 19) and obj.get(f.IDR_INSRT_TS) is None:
         has_insrt_ts = random.random() > 0.5
     else:
         has_insrt_ts = True
 
     insrt_ts = (
         _faker.date_time_between_dates(
-            datetime.fromisoformat(clm[f.CLM_IDR_LD_DT]),
+            clm_load_dt,
             datetime.fromisoformat(max_date),
         )
         if has_insrt_ts

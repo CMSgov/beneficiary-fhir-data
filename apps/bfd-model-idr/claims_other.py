@@ -5,7 +5,7 @@ from typing import Any
 import pandas as pd
 from faker import Faker
 
-import field_constants as f
+import constants as f
 from claims_static import (
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
@@ -15,7 +15,8 @@ from claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
-from generator_util import CLM_ANSI_SGNTR, GeneratorUtil, RandomIdGenerator, RowAdapter
+from generator_util import GeneratorUtil
+from row_adapter import RowAdapter
 
 _faker = Faker()
 
@@ -50,7 +51,7 @@ class OtherGeneratorUtil:
         else:
             obj[f.META_LST_UPDT_SK] = 0
 
-    def gen_synthetic_clm_ansi_sgntr(self, src_path: str = f"sample-data/{CLM_ANSI_SGNTR}.csv"):
+    def gen_synthetic_clm_ansi_sgntr(self, src_path: str = f"sample-data/{f.CLM_ANSI_SGNTR}.csv"):
         csv_df = pd.read_csv(  # type: ignore
             src_path,
             dtype=str,

@@ -7,7 +7,7 @@ export IDR_USERNAME
 readonly IDR_USERNAME
 IDR_PRIVATE_KEY="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_private_key --with-decryption --query "Parameter.Value" --output text)"
 export IDR_PRIVATE_KEY
-export IDR_PRIVATE_KEY
+readonly IDR_PRIVATE_KEY
 IDR_ACCOUNT="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/synthetic_env_account --with-decryption --query "Parameter.Value" --output text)"
 readonly IDR_ACCOUNT
 export IDR_ACCOUNT

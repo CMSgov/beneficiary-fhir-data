@@ -1,7 +1,7 @@
 import random
 from collections.abc import Callable
 
-import field_constants as f
+import constants as f
 from claims_static import (
     FISS_CLM_TYPE_CDS,
     MCS_CLM_TYPE_CDS,
@@ -10,7 +10,8 @@ from claims_static import (
     VMS_CDS,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
-from generator_util import GeneratorUtil, RowAdapter
+from generator_util import GeneratorUtil
+from row_adapter import RowAdapter
 
 
 class PacGeneratorUtil:
@@ -417,11 +418,15 @@ class PacGeneratorUtil:
     def gen_pac_clm_rlt_cond_sgntr_mbr(
         self, clm: RowAdapter, init_clm_rlt_cond_sgntr_mbr: RowAdapter, gen_utils: GeneratorUtil
     ):
+        if not init_clm_rlt_cond_sgntr_mbr:
+            init_clm_rlt_cond_sgntr_mbr = RowAdapter({})
+
         clm_rlt_cond_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_rlt_cond_sgntr_mbr,
             is_pac_predicate=lambda: (
-                f.CLM_UNIQ_ID in init_clm_rlt_cond_sgntr_mbr
-                and init_clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID]
+                f.CLM_RLT_COND_SGNTR_SK in init_clm_rlt_cond_sgntr_mbr
+                and init_clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK]
+                == clm[f.CLM_RLT_COND_SGNTR_SK]
             ),
             exclude_fields_always=set(),
             exclude_fields_adj={
@@ -443,9 +448,6 @@ class PacGeneratorUtil:
             TARGET_SEQUENCE_NUMBERS
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_CD] = random.choice(TARGET_RLT_COND_CODES)
-
-        # HACK: See corresponding adjudicated generation function for justification
-        clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
 
         add_meta_timestamps(clm_rlt_cond_sgntr_mbr, clm)
 

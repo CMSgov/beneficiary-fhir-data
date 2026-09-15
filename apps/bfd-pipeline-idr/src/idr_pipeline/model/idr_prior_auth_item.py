@@ -75,7 +75,7 @@ class IdrPriorAuthItem(IdrBaseModel):
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn, current_segment ORDER BY mbi_num) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > '{MIN_PRIOR_AUTH_LOAD_DATE}'
+                WHERE pa_req_rec_dt >= '{MIN_PRIOR_AUTH_LOAD_DATE}'
             )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
             {{WHERE_CLAUSE}} AND row_order = 1;

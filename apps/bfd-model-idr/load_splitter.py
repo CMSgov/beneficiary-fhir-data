@@ -40,11 +40,11 @@ from generator_util import (
     CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
-    RowAdapter,
     adapters_to_dicts,
     load_file_dict,
     partition_rows,
 )
+from row_adapter import RowAdapter
 
 
 @click.command

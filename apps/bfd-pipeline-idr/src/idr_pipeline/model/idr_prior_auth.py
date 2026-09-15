@@ -98,7 +98,7 @@ class IdrPriorAuth(IdrBaseModel):
                 SELECT *, ROW_NUMBER()
                     OVER (PARTITION BY mbi_num, utn ORDER BY current_segment) as row_order
                 FROM {IDR_PRIOR_AUTH_TABLE}
-                WHERE pa_req_rec_dt > '{MIN_PRIOR_AUTH_LOAD_DATE}'
+                WHERE pa_req_rec_dt >= '{MIN_PRIOR_AUTH_LOAD_DATE}'
             )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_att_phy}

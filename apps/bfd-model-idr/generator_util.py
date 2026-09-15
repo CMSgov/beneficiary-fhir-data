@@ -12,7 +12,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 
 import pandas as pd
 import tqdm
@@ -20,39 +20,29 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 
+from constants import (
+    BENE_DUAL,
+    BENE_ENTLMT,
+    BENE_ENTLMT_RSN,
+    BENE_HSTRY,
+    BENE_LIS_CMBND,
+    BENE_MAPD_ENRLMT,
+    BENE_MAPD_ENRLMT_RX,
+    BENE_MBI_ID,
+    BENE_STUS,
+    BENE_TP,
+    BENE_XREF,
+    CLM,
+    CLM_DT_SGNTR,
+    CLM_LINE,
+    CLM_RLT_COND_SGNTR_MBR,
+    CNTRCT_PBP_CNTCT,
+    CNTRCT_PBP_NUM,
+    PRVDR_HSTRY,
+)
 from load_synthetic_output import OutputDestinationWriter, SnowflakeWriter
+from row_adapter import RowAdapter
 
-BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
-BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
-BENE_STUS = "SYNTHETIC_BENE_MDCR_STUS"
-BENE_ENTLMT_RSN = "SYNTHETIC_BENE_MDCR_ENTLMT_RSN"
-BENE_ENTLMT = "SYNTHETIC_BENE_MDCR_ENTLMT"
-BENE_TP = "SYNTHETIC_BENE_TP"
-BENE_XREF = "SYNTHETIC_BENE_XREF"
-BENE_DUAL = "SYNTHETIC_BENE_CMBND_DUAL_MDCR"
-BENE_MAPD_ENRLMT = "SYNTHETIC_BENE_MAPD_ENRLMT"
-BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
-BENE_LIS_CMBND = "SYNTHETIC_BENE_CMBND_LIS"
-CLM = "SYNTHETIC_CLM"
-CLM_LINE = "SYNTHETIC_CLM_LINE"
-CLM_LINE_DCMTN = "SYNTHETIC_CLM_LINE_DCMTN"
-CLM_VAL = "SYNTHETIC_CLM_VAL"
-CLM_DT_SGNTR = "SYNTHETIC_CLM_DT_SGNTR"
-CLM_PROD = "SYNTHETIC_CLM_PROD"
-CLM_INSTNL = "SYNTHETIC_CLM_INSTNL"
-CLM_LINE_INSTNL = "SYNTHETIC_CLM_LINE_INSTNL"
-CLM_DCMTN = "SYNTHETIC_CLM_DCMTN"
-CLM_LCTN_HSTRY = "SYNTHETIC_CLM_LCTN_HSTRY"
-CLM_FISS = "SYNTHETIC_CLM_FISS"
-CLM_PRFNL = "SYNTHETIC_CLM_PRFNL"
-CLM_LINE_PRFNL = "SYNTHETIC_CLM_LINE_PRFNL"
-CLM_LINE_RX = "SYNTHETIC_CLM_LINE_RX"
-CLM_RLT_COND_SGNTR_MBR = "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR"
-CLM_ANSI_SGNTR = "SYNTHETIC_CLM_ANSI_SGNTR"
-PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
-CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
-CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
-PRAUC = "SYNTHETIC_PRAUC"
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 AVAIL_CONTRACT_NUMS = [
     "Z0001",
@@ -84,32 +74,6 @@ NOW = date.today()
 _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 _faker = Faker()
-
-
-class RowAdapter:
-    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
-        self.kv = kv
-        self.loaded_from_file = loaded_from_file
-
-    def __getitem__(self, key: str):
-        return self.kv[key]
-
-    def __setitem__(self, key: str, new_value: Any):
-        if key not in self.kv:
-            self.kv[key] = new_value
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.kv
-
-    def get(self, key: str, default: Any | None = None) -> Any:
-        return self.kv.get(key, default)
-
-    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
-        cur = self if not overwrite else self.kv
-        other_dict = other if isinstance(other, dict) else other.kv
-
-        for k, v in other_dict.items():
-            cur[k] = v
 
 
 class IdGenerator(ABC):
@@ -457,15 +421,23 @@ def add_days(input_dt: str, days_to_add: int = 0):
     return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
 
 
-def random_date(start_date: str, end_date: str):
-    start_formatted = date.fromisoformat(start_date).toordinal()
-    end_formatted = date.fromisoformat(end_date).toordinal()
+def random_date(start_date: str | date, end_date: str | date):
+    start_formatted = (
+        date.fromisoformat(start_date).toordinal()
+        if isinstance(start_date, str)
+        else start_date.toordinal()
+    )
+    end_formatted = (
+        date.fromisoformat(end_date).toordinal()
+        if isinstance(end_date, str)
+        else end_date.toordinal()
+    )
     rand_date = random.randint(start_formatted, end_formatted)
     return date.fromordinal(rand_date).isoformat()
 
 
-def gen_thru_dt(frm_dt: str, max_days: int = 30):
-    from_date = date.fromisoformat(frm_dt)
+def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
+    from_date = date.fromisoformat(frm_dt) if isinstance(frm_dt, str) else frm_dt
     days_to_add = random.randint(0, max_days)
     return (from_date + timedelta(days=days_to_add)).isoformat()
 
@@ -548,6 +520,11 @@ def output_table_contains_by_bene_sk(
         _tables_by_bene_sk[for_file] = {str(row["BENE_SK"]): row for row in table}
 
     return bene_sk in _tables_by_bene_sk[for_file]
+
+
+def reset_bene_sk_cache() -> None:
+    # Clear at the start of every batch
+    _tables_by_bene_sk.clear()
 
 
 def convert_tilde_str(val: str) -> str:
@@ -799,9 +776,12 @@ class GeneratorUtil:
             medicare_start_date = NOW + datetime.timedelta(days=365)
             medicare_end_date = NOW + datetime.timedelta(days=730)
         else:
-            medicare_start_date = parse(
-                self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
-            ).date()
+            medicare_start_date_val = self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
+            medicare_start_date = (
+                parse(medicare_start_date_val).date()
+                if isinstance(medicare_start_date_val, str)
+                else medicare_start_date_val
+            )
             medicare_end_date = datetime.date(9999, 12, 31)
         mdcr_stus_cd = "~"
         while mdcr_stus_cd in ("0", "~", "00"):
@@ -1237,4 +1217,7 @@ class GeneratorUtil:
         cols: list[str] | str = ALL_KEYS,
         truncate: bool = False,
     ):
-        destination.write_table(data, table_name, cols, truncate)
+        if isinstance(destination, SnowflakeWriter) and not truncate:
+            destination.merge_batch(data, table_name)
+        else:
+            destination.write_table(data, table_name, cols, truncate)
