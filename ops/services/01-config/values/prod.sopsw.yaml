@@ -156,8 +156,8 @@
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
-/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 1
-/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/enabled: "true"
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: bfd-${env}/rda-pipeline
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/interval: PT1M
