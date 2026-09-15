@@ -98,14 +98,14 @@ class SampleGenerator:
 
         return records_found[
             (records_found["BENE_MBI_ID"] == bene_hist_line["BENE_MBI_ID"])
-        ].to_dict(orient="records")
+        ].to_dict("records")
 
 
-def extract_col_str(row: dict[str, str], name: str) -> str:
+def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
 
 
-def extract_col_bool(row: dict[str, str], name: str) -> str | None:
+def extract_col_bool(row: dict[str, str], name: str) -> str:
     val = row.get(name, "").strip().upper()
 
     if val in ("TRUE", "1", "YES", "Y"):
