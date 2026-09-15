@@ -532,7 +532,7 @@ class SampleGenerator:
             & (line_rx_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_rx_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_rx_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict("records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
         return {} if not line_rx_matches else line_rx_matches[0]
 
@@ -549,7 +549,7 @@ class SampleGenerator:
             & (line_prod_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_prod_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_prod_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict("records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_instnl_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         line_instnl_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_INSTNL.csv"
@@ -564,7 +564,7 @@ class SampleGenerator:
             & (line_instnl_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_instnl_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_instnl_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict("records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_clm_val(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         line_val_path = f"{self.source_directory}/SYNTHETIC_CLM_VAL.csv"
@@ -579,7 +579,7 @@ class SampleGenerator:
             & (line_val_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_val_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_val_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict("records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     # leaving here ended up not needing but future work probably will
     # def read_rlt_line(self, clm_rlt_cond_sgntr_sk: str) -> dict[str, str]:
