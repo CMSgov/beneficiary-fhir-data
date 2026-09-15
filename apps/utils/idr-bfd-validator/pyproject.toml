@@ -4,7 +4,14 @@ version = "0.1.0"
 description = "Validates that data is correctly loaded incrementally from IDR"
 readme = "README.md"
 requires-python = ">=3.14.3"
-dependencies = ["idr-pipeline", "anyio", "loguru", "pydantic-partial", "boto3"]
+dependencies = [
+    "idr-pipeline",
+    "anyio",
+    "loguru",
+    "pydantic-partial",
+    "boto3",
+    "click>=8.4.2",
+]
 
 [dependency-groups]
 dev = [

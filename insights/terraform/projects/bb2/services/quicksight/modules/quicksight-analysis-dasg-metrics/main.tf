@@ -570,6 +570,11 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 field_id     = "db26ea0b-c755-4881-8152-ee1ec448f042.27.1772214152630"
                 visibility   = "VISIBLE"
               }
+              selected_field_options {
+                custom_label = "TOTAL V3 EOB Shared Systems Calls Made"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_fhir_v3_eob_shared_systems_call_real_count.28.1788284681644"
+                visibility   = "VISIBLE"
+              }
             }
             field_wells {
               pivot_table_aggregated_field_wells {
@@ -1047,6 +1052,20 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                           }
                         }
                       }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.app_all_fhir_v3_eob_shared_systems_call_real_count.28.1788284681644"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_fhir_v3_eob_shared_systems_call_real_count"
+                      data_set_identifier = "prod_global_state"
                     }
                   }
                 }

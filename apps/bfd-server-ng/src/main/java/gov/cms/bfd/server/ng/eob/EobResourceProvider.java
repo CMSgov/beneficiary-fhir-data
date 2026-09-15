@@ -44,7 +44,6 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
   private static final String OUTCOME = "outcome";
-  private static final String SOURCE_QUERY_PARAM = "_source";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {

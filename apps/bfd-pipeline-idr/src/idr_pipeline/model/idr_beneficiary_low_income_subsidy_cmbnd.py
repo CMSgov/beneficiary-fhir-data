@@ -22,7 +22,7 @@ from ..settings import SETTINGS
 
 class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    bene_cmbnd_deemd_efctv_dt: Annotated[datetime, {PRIMARY_KEY_ORDER: 1}]
+    bene_cmbnd_deemd_efctv_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
     bene_cmbnd_deemd_trmntn_dt: date
     bene_cmbnd_deemd_copmt_lvl_id: str
     bene_cmbnd_deemd_prm_pct: str
@@ -56,11 +56,12 @@ class IdrBeneficiaryLowIncomeSubsidyCmbnd(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM {SETTINGS.idr_bene_low_income_subsidy_cmbnd_table} bene_lis
+                FROM {SETTINGS.idr_bene_low_income_subsidy_cmbnd_table} bene_lis {{TABLESAMPLE}}
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = bene_lis.bene_sk
                 )
                 {{ORDER_BY}}
+                {{LIMIT}}
             """
