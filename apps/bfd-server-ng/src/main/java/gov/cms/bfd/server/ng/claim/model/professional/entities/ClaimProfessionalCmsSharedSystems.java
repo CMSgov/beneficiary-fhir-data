@@ -4,6 +4,7 @@ import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -28,6 +29,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -36,6 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
@@ -132,7 +135,40 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
             .stream(),
         // Line-level: Rx number from each claim item.
         getClaimItems().stream()
-            .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory)));
+            .flatMap(
+                item -> {
+                  var supportingInfos =
+                      new ArrayList<
+                          Optional<ExplanationOfBenefit.SupportingInformationComponent>>();
+                  supportingInfos.add(item.getClaimLineRxNum().toFhir(supportingInfoFactory));
+                  var hctObs = item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId());
+                  hctObs.ifPresent(
+                      observation -> {
+                        supportingInfos.add(
+                            Optional.of(
+                                supportingInfoFactory
+                                    .createSupportingInfo()
+                                    .setValue(new Reference(observation))
+                                    .setCategory(
+                                        BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
+                                            .toFhir())));
+                        eob.addContained(observation);
+                      });
+                  var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
+                  hgbObs.ifPresent(
+                      observation -> {
+                        supportingInfos.add(
+                            Optional.of(
+                                supportingInfoFactory
+                                    .createSupportingInfo()
+                                    .setValue(new Reference(observation))
+                                    .setCategory(
+                                        BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
+                                            .toFhir())));
+                        eob.addContained(observation);
+                      });
+                  return supportingInfos.stream();
+                }));
   }
 
   /** SS adjudication: provider account-receivable offset amount. */
