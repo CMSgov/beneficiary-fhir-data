@@ -53,7 +53,7 @@
   },
   {
     "resourceType" : "Observation",
-    "id" : "line-observation-9",
+    "id" : "line-observation-10",
     "status" : "final",
     "code" : {
       "coding" : [{
@@ -201,6 +201,22 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_ACTV_CARE_THRU_DT",
+        "display" : "Covered Care Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-12"
+  },
+  {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_ADJSTMT_TYPE_CD",
         "display" : "Claim Adjustment Type Code"
       }]
@@ -214,7 +230,7 @@
     }
   },
   {
-    "sequence" : 2,
+    "sequence" : 3,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -235,7 +251,7 @@
     }
   },
   {
-    "sequence" : 3,
+    "sequence" : 4,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -257,7 +273,7 @@
     }
   },
   {
-    "sequence" : 4,
+    "sequence" : 5,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -273,7 +289,7 @@
     "valueString" : "1337"
   },
   {
-    "sequence" : 5,
+    "sequence" : 6,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -289,7 +305,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 6,
+    "sequence" : 7,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -311,7 +327,7 @@
     }
   },
   {
-    "sequence" : 7,
+    "sequence" : 8,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -333,7 +349,7 @@
     }
   },
   {
-    "sequence" : 8,
+    "sequence" : 9,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -349,7 +365,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 9,
+    "sequence" : 10,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -363,11 +379,27 @@
       }]
     },
     "valueReference" : {
-      "reference" : "#line-observation-9"
+      "reference" : "#line-observation-10"
     }
   },
   {
-    "sequence" : 10,
+    "sequence" : 11,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_MDCR_EXHSTD_DT",
+        "display" : "Medicare Benefits Exhausted Date"
+      }]
+    },
+    "timingDate" : "2025-01-12"
+  },
+  {
+    "sequence" : 12,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -389,7 +421,7 @@
     }
   },
   {
-    "sequence" : 11,
+    "sequence" : 13,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -411,7 +443,7 @@
     }
   },
   {
-    "sequence" : 12,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -427,7 +459,39 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 13,
+    "sequence" : 15,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCVRD_FROM_DT",
+        "display" : "Noncovered Stay From Date"
+      }]
+    },
+    "timingDate" : "2025-01-02"
+  },
+  {
+    "sequence" : 16,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCVRD_THRU_DT",
+        "display" : "Noncovered Stay Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 17,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -449,7 +513,39 @@
     }
   },
   {
-    "sequence" : 14,
+    "sequence" : 18,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_FROM_DT",
+        "display" : "Qualified Stay From Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 19,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_THRU_DT",
+        "display" : "Qualified Stay Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-02"
+  },
+  {
+    "sequence" : 20,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -471,7 +567,7 @@
     }
   },
   {
-    "sequence" : 15,
+    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -481,7 +577,7 @@
     "timingDate" : "2020-01-13"
   },
   {
-    "sequence" : 16,
+    "sequence" : 22,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -502,7 +598,7 @@
     }
   },
   {
-    "sequence" : 17,
+    "sequence" : 23,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -523,7 +619,7 @@
     }
   },
   {
-    "sequence" : 18,
+    "sequence" : 24,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -544,7 +640,7 @@
     }
   },
   {
-    "sequence" : 19,
+    "sequence" : 25,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -565,7 +661,7 @@
     }
   },
   {
-    "sequence" : 20,
+    "sequence" : 26,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -592,7 +688,7 @@
     }
   },
   {
-    "sequence" : 9,
+    "sequence" : 10,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -608,7 +704,7 @@
     "valueString" : "ALA00000047747"
   },
   {
-    "sequence" : 18,
+    "sequence" : 24,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -786,8 +882,8 @@
     "sequence" : 1,
     "careTeamSequence" : [1],
     "diagnosisSequence" : [2],
-    "informationSequence" : [16,
-    9],
+    "informationSequence" : [22,
+    10],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -991,7 +1087,7 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
-    "informationSequence" : [18],
+    "informationSequence" : [24],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1196,7 +1292,7 @@
     }],
     "sequence" : 3,
     "careTeamSequence" : [2],
-    "informationSequence" : [19],
+    "informationSequence" : [25],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1311,7 +1407,7 @@
     }],
     "sequence" : 4,
     "careTeamSequence" : [2],
-    "informationSequence" : [17],
+    "informationSequence" : [23],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
