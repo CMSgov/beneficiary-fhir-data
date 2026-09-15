@@ -49,7 +49,11 @@ public class AuditEventResourceProvider implements IResourceProvider {
     } catch (IllegalArgumentException _) {
       throw new ResourceNotFoundException(fhirId);
     }
-    return auditEventHandler.getAuditEventById(id);
+    var audit = auditEventHandler.getAuditEventById(id);
+    if (audit == null) {
+      throw new ResourceNotFoundException(fhirId);
+    }
+    return audit;
   }
 
   /**
