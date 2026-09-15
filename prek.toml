@@ -1,0 +1,59 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "check-added-large-files" },
+  { id = "check-case-conflict" },
+  { id = "fix-byte-order-marker" },
+  { id = "mixed-line-ending", args = [
+    "--fix=lf",
+  ] },
+  { id = "check-symlinks" },
+  { id = "destroyed-symlinks" },
+  { id = "check-merge-conflict" },
+  { id = "check-shebang-scripts-are-executable" },
+  { id = "check-executables-have-shebangs" },
+]
+
+
+[[repos]]
+repo = "https://github.com/shellcheck-py/shellcheck-py"
+rev = "v0.11.0.1-1"
+hooks = [{ id = "shellcheck", args = ["--severity=warning"] }]
+
+[[repos]]
+repo = "https://github.com/google/yamlfmt"
+rev = "v0.19.0"
+hooks = [{ id = "yamlfmt" }]
+
+
+[[repos]]
+repo = "https://github.com/scop/pre-commit-shfmt"
+rev = "v3.14.1-1"
+hooks = [{ id = "shfmt" }]
+
+[[repos]]
+repo = "https://github.com/tofuutils/pre-commit-opentofu"
+rev = "v2.4.2"
+hooks = [{ id = "tofu_fmt" }, { id = "tofu_docs" }]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "gitleaks", name = "gitleaks", language = "system", pass_filenames = false, entry = "gitleaks protect --staged --verbose" },
+  { id = "java", name = "java", language = "system", types = [
+    "java",
+  ], entry = "./hooks/java-format.sh" },
+  { id = "sops", name = "sops", language = "system", files = "\\.sopsw.yaml$", entry = "./hooks/sops.sh" },
+  { id = "toml", name = "toml", language = "system", types = [
+    "toml",
+  ], entry = "taplo format" },
+  { id = "xml", name = "xml", language = "system", types = [
+    "xml",
+  ], entry = "./hooks/xml-format.sh", pass_filenames = 1 },
+]
