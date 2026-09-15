@@ -131,7 +131,25 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_FINL_ACTN_IND] = "N"
 
         clm_ltst_clm_ind = "N"
-        if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82) and probability(0.10):
+        if clm_type_cd in (
+            1,
+            2,
+            3,
+            4,
+            10,
+            20,
+            30,
+            40,
+            50,
+            60,
+            61,
+            62,
+            63,
+            71,
+            72,
+            81,
+            82,
+        ) and probability(0.10):
             clm_ltst_clm_ind = random.choice(["Y", "N"])
         clm[f.CLM_LTST_CLM_IND] = clm_ltst_clm_ind
 
@@ -919,6 +937,15 @@ class AdjudicatedGeneratorUtil:
 
         add_meta_timestamps(clm_line_instnl, clm)
 
+        clm_line_instnl[f.CLM_REV_APC_HIPPS_CD] = random.choice(
+            [
+                "A0101",
+                "BA203",
+                "BA203",
+                "AAA00",
+            ]
+        )
+
         return clm_line_instnl
 
     def gen_clm_line_prfnl(
@@ -954,10 +981,9 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_PHYSN_ASTNT_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PHYSN_ASTNT_CD]
         )
-        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(  
-              gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
         )
-
 
         clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_CHRG_AMT] = round(random.uniform(0, 10000), 2)
         clm_line_prfnl[f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT] = round(random.uniform(0, 10000), 2)
