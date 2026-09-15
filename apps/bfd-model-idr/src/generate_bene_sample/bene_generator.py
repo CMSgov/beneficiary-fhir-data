@@ -5,9 +5,6 @@ from typing import Any
 
 import pandas as pd
 
-class Result: 
-    result_json: dict[str, Any]
-    output_file: str
 
 class SampleGenerator:
     def __init__(self, source_directory: str, output_directory: str):
@@ -26,6 +23,17 @@ class SampleGenerator:
 
         bene_line = self.read_bene_hist(bene_sk=bene_sk)
 
+        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
+
+        mbi_lines = [
+            {
+                "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
+                "BENE_MBI_EFCTV_DT": extract_col_str(mbi_line, "BENE_MBI_EFCTV_DT"),
+                "BENE_MBI_OBSLT_DT": extract_col_str(mbi_line, "BENE_MBI_OBSLT_DT"),
+            }
+            for mbi_line in self.read_mbi_lines(bene_hist_line=bene_line)
+        ]
+
         result_json = {
             "resourceType": "Beneficiary",
             "BENE_SK": bene_sk,
@@ -35,6 +43,11 @@ class SampleGenerator:
             "BENE_BRTH_DT": extract_col_str(bene_line, "BENE_BRTH_DT"),
             "BENE_DEATH_DT": extract_col_str(bene_line, "BENE_DEATH_DT"),
             "BENE_VRFY_DEATH_DAY_SW": extract_col_bool(bene_line, "BENE_VRFY_DEATH_DAY_SW"),
+            "mbi": mbi_lines,
+            "BENE_XREF_EFCTV_SK": bene_xref_efctv_sk,
+            "ALL_BENE_SKs": [bene_sk]
+            if bene_sk == bene_xref_efctv_sk
+            else [bene_sk, bene_xref_efctv_sk],
             "GEO_USPS_STATE_CD": extract_col_str(bene_line, "GEO_USPS_STATE_CD"),
             "GEO_ZIP5_CD": extract_col_str(bene_line, "GEO_ZIP5_CD"),
             "BENE_LINE_1_ADR": extract_col_str(bene_line, "BENE_LINE_1_ADR"),
@@ -61,8 +74,9 @@ class SampleGenerator:
     def read_bene_hist(self, bene_sk: str) -> dict[str, str]:
         file_path = f"{self.source_directory}/SYNTHETIC_BENE_HSTRY.csv"
         if not Path(file_path).exists():
-            print("SYNTHETIC_BENE_HSTRY file not found. " \
-                "Run the generator or this will not go well.")
+            print(
+                "SYNTHETIC_BENE_HSTRY file not found. Run the generator or this will not go well."
+            )
             sys.exit(1)
 
         records_found = pd.read_csv(file_path, dtype=str, keep_default_na=False)
@@ -75,14 +89,27 @@ class SampleGenerator:
 
         return record_matches.iloc[0]
 
+    def read_mbi_lines(self, bene_hist_line: dict[str, str]) -> list[dict[str, str]]:
+            file_path = f"{self.source_directory}/SYNTHETIC_BENE_MBI_ID.csv"
+    
+            if not Path(file_path).exists():
+                return []
+    
+            records_found = pd.read_csv(file_path, dtype=str, keep_default_na=False)
+    
+            return records_found[
+                (records_found["BENE_MBI_ID"] == bene_hist_line["BENE_MBI_ID"])
+            ].to_dict(orient="records")
+
+
 def extract_col_str(row: dict[str, str], name: str) -> str:
     return str(row.get(name, "")).strip() or None
 
+
 def extract_col_bool(row: dict[str, str], name: str) -> str:
     val = row.get(name, "").strip().upper()
-    
+
     if val in ("TRUE", "1", "YES", "Y"):
         return "true"
-        
-    return "false"
 
+    return "false"
