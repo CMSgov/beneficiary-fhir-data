@@ -149,7 +149,7 @@ class SampleGenerator:
             "id": str(clm_uniq_id.replace("-", "")).strip(),
             "lastUpdated": extract_col_str(claim_row, "IDR_UPDT_TS"),
             "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
-            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD") or "0"),
             "META_SRC_SK": extract_col_str(claim_row, "META_SRC_SK"),
             "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
             "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
