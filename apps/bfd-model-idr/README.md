@@ -338,10 +338,10 @@ To generate the data dictionary:
 
 ```sh
 ./compile-all-resources.sh
-uv run gen_dd.py
+uv run gen_dd
 ```
 
-If the gen_dd.py script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+If the gen_dd script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
 Run:
 
 ```sql

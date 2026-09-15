@@ -24,6 +24,7 @@ class SampleGenerator:
 
         bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
 
+        # initialize list of all mbi with the current bene_sk
         mbi_lines = [
             {
                 "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
@@ -32,6 +33,24 @@ class SampleGenerator:
             }
             for mbi_line in self.read_mbi_lines(bene_hist_line=bene_line)
         ]
+
+        # add current bene_sk to the list of all_bene_sks
+        all_bene_sks = [bene_sk]
+
+        # get all other bene_sks and their mbi lines associated with the current bene_xref_efctv_sk
+        for xref_line in self.read_bene_hist_by_xref(
+            bene_sk=bene_sk, bene_xref_efctv_sk=bene_xref_efctv_sk
+        ):
+            print(xref_line)
+            all_bene_sks.extend([extract_col_str(xref_line, "BENE_SK")])
+            for mbi_line in self.read_mbi_lines(bene_hist_line=xref_line):
+                new_mbi_line = {
+                    "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
+                    "BENE_MBI_EFCTV_DT": extract_col_str(mbi_line, "BENE_MBI_EFCTV_DT"),
+                    "BENE_MBI_OBSLT_DT": extract_col_str(mbi_line, "BENE_MBI_OBSLT_DT"),
+                }
+                if new_mbi_line not in mbi_lines:
+                    mbi_lines.append(new_mbi_line)
 
         result_json = {
             "resourceType": "Beneficiary",
@@ -44,9 +63,7 @@ class SampleGenerator:
             "BENE_VRFY_DEATH_DAY_SW": extract_col_bool(bene_line, "BENE_VRFY_DEATH_DAY_SW"),
             "mbi": mbi_lines,
             "BENE_XREF_EFCTV_SK": bene_xref_efctv_sk,
-            "ALL_BENE_SKs": [bene_sk]
-            if bene_sk == bene_xref_efctv_sk
-            else [bene_sk, bene_xref_efctv_sk],
+            "ALL_BENE_SKs": all_bene_sks,
             "GEO_USPS_STATE_CD": extract_col_str(bene_line, "GEO_USPS_STATE_CD"),
             "GEO_ZIP5_CD": extract_col_str(bene_line, "GEO_ZIP5_CD"),
             "BENE_LINE_1_ADR": extract_col_str(bene_line, "BENE_LINE_1_ADR"),
@@ -83,10 +100,30 @@ class SampleGenerator:
         record_matches = records_found[records_found["BENE_SK"] == bene_sk]
 
         if record_matches.empty:
-            print(f"No claims found for claim unique ID: {bene_sk}")
+            print(f"No bene found for BENE_SK: {bene_sk}")
             sys.exit(1)
 
         return record_matches.iloc[0]
+
+    def read_bene_hist_by_xref(self, bene_sk: str, bene_xref_efctv_sk: str) -> list[dict[str, str]]:
+        file_path = f"{self.source_directory}/SYNTHETIC_BENE_HSTRY.csv"
+        if not Path(file_path).exists():
+            print(
+                "SYNTHETIC_BENE_HSTRY file not found. Run the generator or this will not go well."
+            )
+            sys.exit(1)
+
+        records_found = pd.read_csv(file_path, dtype=str, keep_default_na=False)
+
+        record_matches = records_found[
+            (records_found["BENE_XREF_EFCTV_SK"] == bene_xref_efctv_sk)
+            & (records_found["BENE_SK"] != bene_sk)
+        ]
+
+        if record_matches.empty:
+            return []
+
+        return record_matches.to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_mbi_lines(self, bene_hist_line: dict[str, str]) -> list[dict[str, str]]:
         file_path = f"{self.source_directory}/SYNTHETIC_BENE_MBI_ID.csv"

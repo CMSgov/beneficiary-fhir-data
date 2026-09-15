@@ -301,7 +301,7 @@ jobs:
         working-directory: apps/bfd-model-idr
 
       - name: Generate v3 Data Dictionary
-        run: uv run gen_dd.py
+        run: uv run gen_dd
         working-directory: apps/bfd-model-idr
 
       - name: Prepare artifacts
