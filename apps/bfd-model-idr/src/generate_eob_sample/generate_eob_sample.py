@@ -621,5 +621,5 @@ def find_field_in_line_by_num(
     return extract_col_str(line_matches[0], field_name)
 
 
-def extract_col_str(row: dict[str, str], name: str) -> str:
+def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
