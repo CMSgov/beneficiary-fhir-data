@@ -144,24 +144,28 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
                   supportingInfos.add(item.getClaimLineRxNum().toFhir(supportingInfoFactory));
                   var hctObs = item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId());
                   hctObs.ifPresent(
-                      observation -> supportingInfos.add(
-                          Optional.of(
-                              supportingInfoFactory
-                                  .createSupportingInfo()
-                                  .setValue(new Reference(observation))
-                                  .setCategory(
-                                      BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
-                                          .toFhir()))));
+                      observation -> {
+                        supportingInfos.add(
+                            Optional.of(
+                                supportingInfoFactory
+                                    .createSupportingInfo()
+                                    .setValue(new Reference(observation))
+                                    .setCategory(
+                                        BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
+                                            .toFhir())));
+                      });
                   var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
                   hgbObs.ifPresent(
-                      observation -> supportingInfos.add(
-                          Optional.of(
-                              supportingInfoFactory
-                                  .createSupportingInfo()
-                                  .setValue(new Reference(observation))
-                                  .setCategory(
-                                      BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
-                                          .toFhir()))));
+                      observation -> {
+                        supportingInfos.add(
+                            Optional.of(
+                                supportingInfoFactory
+                                    .createSupportingInfo()
+                                    .setValue(new Reference(observation))
+                                    .setCategory(
+                                        BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
+                                            .toFhir())));
+                      });
                   return supportingInfos.stream();
                 }));
   }
