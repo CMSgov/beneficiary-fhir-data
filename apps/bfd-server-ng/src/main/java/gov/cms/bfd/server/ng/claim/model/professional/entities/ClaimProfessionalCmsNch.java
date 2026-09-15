@@ -1,19 +1,20 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDenialCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalNch;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -42,7 +43,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements NchClaim {
 
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
@@ -56,7 +57,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
 
-  @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
+  @Embedded private AdjudicationProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private BloodPints bloodPints;
   @Embedded private ServiceCareTeam serviceProviderHistory;
@@ -69,21 +70,36 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemProfessionalCmsNch> claimItems;
 
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.NCH;
+  }
+
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
-      ExplanationOfBenefit eob) {
-    return Stream.of(
-            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            bloodPints.toFhir(supportingInfoFactory),
-            claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
+  public Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.of(adjudicationCharge);
+  }
+
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
+    return Stream.concat(
+            super.getSubclassSupportingInfo().stream(),
+            Stream.of(
+                    claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    bloodPints.toFhir(supportingInfoFactory),
+                    claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
+                .flatMap(Optional::stream))
         .toList();
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
   }
 
@@ -104,15 +120,6 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
     return MetaSourceSk.NCH;
   }
 
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.NCH;
-  }
-
   @Override
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
@@ -124,10 +131,5 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

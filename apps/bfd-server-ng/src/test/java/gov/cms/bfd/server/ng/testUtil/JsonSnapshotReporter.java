@@ -9,12 +9,14 @@ import com.deblock.jsondiff.matcher.StrictJsonObjectPartialMatcher;
 import com.deblock.jsondiff.matcher.StrictPrimitivePartialMatcher;
 import com.deblock.jsondiff.viewer.OnlyErrorDiffViewer;
 import com.deblock.jsondiff.viewer.PatchDiffViewer;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.opentest4j.AssertionFailedError;
 
 public class JsonSnapshotReporter implements SnapshotReporter {
+
   @Override
   public boolean supportsFormat(String outputFormat) {
     return outputFormat.equals("json") || outputFormat.equals("fhir+json");
@@ -23,34 +25,42 @@ public class JsonSnapshotReporter implements SnapshotReporter {
   @SneakyThrows
   @Override
   public void report(Snapshot previous, Snapshot current) {
-    // Our custom JSON serializer should already normalize everything appropriately, so we can use
-    // strict matching here.
+    if (previous.getBody().isEmpty()) {
+      return;
+    }
+
+    // We need to canonicalize the both the snapshot and the test output so that the diff is
+    // meaningful and not randomly
+    // mismatched or unordered issues.
+    var keyOrderingObjectMapper =
+        JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
+
+    final var previousCanonical =
+        keyOrderingObjectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(EobSnapshotCanonicalizer.canonicalize(previous.getBody()));
+    final var currentCanonical =
+        keyOrderingObjectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(EobSnapshotCanonicalizer.canonicalize(current.getBody()));
+
     final var jsonMatcher =
         new CompositeJsonMatcher(
             new StrictJsonArrayPartialMatcher(),
             new StrictJsonObjectPartialMatcher(),
             new StrictPrimitivePartialMatcher());
 
-    if (previous.getBody().isEmpty()) {
-      return;
-    }
+    final var jsondiff = DiffGenerator.diff(previousCanonical, currentCanonical, jsonMatcher);
 
-    final var jsondiff = DiffGenerator.diff(previous.getBody(), current.getBody(), jsonMatcher);
-
-    // Adds a helpful bit of text at the end that spits out the specific JSON paths that have diffs
     final var errorsView = OnlyErrorDiffViewer.from(jsondiff).toString();
     final var diff = PatchDiffViewer.from(jsondiff);
-
     final var diffStr = diff.toString();
 
-    // Save the diff to a patch file, so it can be viewed using a diff tool if desired
     FileUtils.writeStringToFile(
         SnapshotHelper.getPatchfile(getClass(), current.getName()),
         diffStr,
         StandardCharsets.UTF_8);
 
-    // Generates a GitHub style diff with a few extra lines below and above the diff marker to add
-    // context
     final var extraLines = 5;
     final var newline = "\n";
     final var diffMarkerAdd = "+";

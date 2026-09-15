@@ -3,20 +3,20 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
+import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -34,9 +34,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
 /**
@@ -49,7 +51,8 @@ import org.hl7.fhir.r4.model.Reference;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
-public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
+public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
+    implements SharedSystemsClaim {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -61,7 +64,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationProfessionalSharedSystems adjudicationCharge;
   @Embedded private OtherProfessionalSharedSystemsCareTeam otherProviderHistory;
 
   @Column(name = "clm_audt_trl_stus_cd")
@@ -89,21 +92,25 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
     return Optional.of(claimPaidStatusCode);
   }
 
+  @Override
+  public Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.of(adjudicationCharge);
+  }
+
   /**
    * SS-specific supporting info: blood pints, primary payor code, contractor number, submission
    * date, provider assignment switch, and clinical trial number.
    */
   @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
-      ExplanationOfBenefit eob) {
-    return Stream.concat(
-            Stream.of(
-                nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-                buildAuditStatusSupportingInfo()),
-            buildItemSupportingInfo(eob))
-        .flatMap(Optional::stream)
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
+    return Stream.of(
+            super.getSubclassSupportingInfo().stream(),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory).stream(),
+            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)).stream(),
+            Stream.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+            buildAuditStatusSupportingInfo().stream(),
+            buildRxSupportingInfo().flatMap(Optional::stream))
+        .flatMap(Function.identity())
         .toList();
   }
 
@@ -120,7 +127,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   }
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>
-      buildItemSupportingInfo(ExplanationOfBenefit eob) {
+      buildRxSupportingInfo() {
     return Stream.concat(
         // Header-level: format code, only when this is a PDE subtype claim.
         claimFormatCode
@@ -146,7 +153,6 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
                                     .setCategory(
                                         BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
                                             .toFhir())));
-                        eob.addContained(observation);
                       });
                   var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
                   hgbObs.ifPresent(
@@ -159,14 +165,25 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
                                     .setCategory(
                                         BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
                                             .toFhir())));
-                        eob.addContained(observation);
                       });
                   return supportingInfos.stream();
                 }));
   }
 
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
+  /**
+   * Some duplicated effort to separate concerns (don't modify eob on getX methods), up for debate
+   * about usefulness.
+   */
+  @Override
+  protected List<Observation> getSubclassContainedObservations() {
+    return getClaimItems().stream()
+        .flatMap(
+            item ->
+                Stream.of(
+                        item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId()),
+                        item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId()))
+                    .flatMap(Optional::stream))
+        .toList();
   }
 
   /** SS adjudication: provider account-receivable offset amount. */
@@ -200,10 +217,5 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
   }
 }

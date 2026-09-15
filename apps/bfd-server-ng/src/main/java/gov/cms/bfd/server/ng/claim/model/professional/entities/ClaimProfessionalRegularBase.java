@@ -1,30 +1,25 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.SortedSet;
 import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
+@MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
-  @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
-  }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
-      ExplanationOfBenefit eob) {
+  List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
     return List.of();
   }
 
@@ -33,16 +28,6 @@ public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase
 
   @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
-
-  @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
-  }
-
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return null;
-  }
 
   @Override
   public MetaSourceSk getMetaSourceSk() {
@@ -54,8 +39,13 @@ public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase
     return Collections.emptySortedSet();
   }
 
+  // region PaymentComponent
+  @Embedded private ClaimPaymentComponentAmount paymentComponent;
+
   @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
+  public ClaimPaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
   }
+
+  // endregion
 }

@@ -1,0 +1,34 @@
+package gov.cms.bfd.server.ng.claim.model.professional;
+
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
+import gov.cms.bfd.server.ng.util.FhirUtil;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import java.util.Optional;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+
+/** clm_line data, Professional-Basis-SharedSystems. */
+@Embeddable
+@Getter
+public class ClaimLineProfessionalBasisSharedSystems extends ClaimLineProfessionalBasis {
+
+  @Embedded ClaimLineNdcQuantity ndc;
+
+  @Override
+  Optional<AdjudicationEmbedded> getClaimLineAdjudication() {
+    return Optional.empty();
+  }
+
+  @Override
+  void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
+    var productOrService = new CodeableConcept();
+    getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
+    var quantity = getServiceUnitQuantity().toFhir();
+    ndc.toFhirDetail().ifPresent(line::addDetail);
+    line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
+    line.setQuantity(quantity);
+  }
+}
