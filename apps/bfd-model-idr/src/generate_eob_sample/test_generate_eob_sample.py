@@ -45,6 +45,7 @@ def test_generate_eob_sample_base() -> None:
     )
 
 
+
 def test_generate_eob_sample_pharmacy() -> None:
     result = CliRunner().invoke(
         main,
