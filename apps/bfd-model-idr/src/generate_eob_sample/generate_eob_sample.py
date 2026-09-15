@@ -9,7 +9,7 @@ from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE
 
 
 class Result:
-    def __init__(self, result_json: str, output_file: str):
+    def __init__(self, result_json: dict[str, Any], output_file: str):
         self.result_json = result_json
         self.output_file = output_file
 
@@ -31,7 +31,7 @@ class SampleGenerator:
             sys.exit(1)
 
         claim_row = self.read_clm(clm_uniq_id)
-        claim_type = int(claim_row.get("CLM_TYPE_CD"))
+        claim_type = int(claim_row.get("CLM_TYPE_CD") or "0")
 
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             result = self.create_pharmacy(clm_uniq_id, claim_row)
@@ -326,7 +326,7 @@ class SampleGenerator:
             "CLM_FINL_ACTN_IND": extract_col_str(claim_row, "CLM_FINL_ACTN_IND"),
             "CLM_SRC_ID": extract_col_str(claim_row, "CLM_SRC_ID"),
             "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
-            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD") or "0"),
             "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
             "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
             "CLM_ORIG_CNTL_NUM": extract_col_str(claim_row, "CLM_ORIG_CNTL_NUM"),
@@ -516,7 +516,7 @@ class SampleGenerator:
             & (line_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_rx_line(self, clm_line: dict[str, str]) -> dict[str, str]:
         line_rx_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_RX.csv"
