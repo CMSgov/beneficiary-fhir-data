@@ -16,7 +16,7 @@ import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitch;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -64,7 +64,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationProfessionalSharedSystems adjudicationCharge;
+  @Embedded private AdjudicationProfessionalCmsSharedSystems adjudicationCharge;
   @Embedded private OtherProfessionalSharedSystemsCareTeam otherProviderHistory;
 
   @Column(name = "clm_audt_trl_stus_cd")

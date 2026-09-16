@@ -6,17 +6,15 @@ import gov.cms.bfd.server.ng.claim.model.common.BloodPints;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentDenialCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalNchCore;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -48,23 +46,16 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
-  @Column(name = "clm_query_cd")
-  private Optional<ClaimQueryCode> claimQueryCode;
-
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
   private BigDecimal primaryProviderPaidAmount;
 
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
 
+  @Embedded private ClaimProfessionalNchCore nchCore;
   @Embedded private AdjudicationProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private BloodPints bloodPints;
-  @Embedded private ServiceCareTeam serviceProviderHistory;
-
-  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
-  @Embedded
-  private ClaimRecordType claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -90,7 +81,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
             super.getSubclassSupportingInfo().stream(),
             Stream.of(
                     claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    nchCore.getClaimQueryCode().map(c -> c.toFhir(supportingInfoFactory)),
                     nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
                     bloodPints.toFhir(supportingInfoFactory),
                     claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
@@ -100,7 +91,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
 
   @Override
   public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.of(claimRecordType);
+    return Optional.of(nchCore.getClaimRecordType());
   }
 
   /** NCH adjudication: payer-paid (primary provider paid) amount. */
@@ -123,9 +114,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   @Override
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    serviceProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
-        .ifPresent(eob::addCareTeam);
+    nchCore.addServiceCareTeam(eob, sequenceGenerator, getClaimTypeCode());
   }
 
   @Override

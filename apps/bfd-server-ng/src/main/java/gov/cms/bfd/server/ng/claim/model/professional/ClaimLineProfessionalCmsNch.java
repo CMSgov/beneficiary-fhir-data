@@ -22,10 +22,8 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
 
 /** clm_line data for Professional-CMS-NCH. */
 @Embeddable
@@ -66,9 +64,6 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
   @Convert(converter = NonZeroDoubleConverter.class)
   private Optional<Double> claimLineHCTHGBTestResult;
 
-  @Column(name = "clm_line_carr_clncl_lab_num")
-  private Optional<String> claimLineCarrierClinicalLabNumber;
-
   @Override
   void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent line) {
     nchCore.populateProductAndQuantity(line, getHcpcsCode(), getServiceUnitQuantity());
@@ -105,12 +100,7 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
           observation.setValue(quantity);
         });
 
-    claimLineCarrierClinicalLabNumber.ifPresent(
-        labNumber -> {
-          var identifier = new Identifier().setSystem(SystemUrls.CLIA).setValue(labNumber);
-
-          observation.addPerformer(new Reference().setIdentifier(identifier));
-        });
+    nchCore.addClinicalLabPerformer(observation);
 
     return Optional.of(observation);
   }

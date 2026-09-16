@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRxNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineHCTHGBTestTypeCode;
@@ -53,11 +54,6 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
   private ClaimProfessionalCmsSharedSystems claim;
-
-  @Override
-  public Optional<ProcedureBase> getProcedureOptional() {
-    return Optional.of(claimProcedure);
-  }
 
   /**
    * Return claim observation data if available.
@@ -121,5 +117,15 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
           observation.addPerformer(new Reference().setIdentifier(identifier));
         });
     return Optional.of(observation);
+  }
+
+  @Override
+  public Optional<ProcedureBase> getProcedureOptional() {
+    return Optional.of(claimProcedure);
+  }
+
+  @Override
+  public ClaimLineBase getClaimLine() {
+    return claimLine;
   }
 }
