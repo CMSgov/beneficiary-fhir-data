@@ -40,7 +40,7 @@ class SampleGenerator:
             print("No primary bene found.")
             sys.exit(1)
 
-        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
+        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK") or ""
 
         # add current bene_sk to the list of all_bene_sks
         all_bene_sks = [bene_sk]
