@@ -95,11 +95,13 @@ class _ClaimsFile(StrEnum):
     CLM = (
         CLM,
         [
-            f.CLM_DT_SGNTR_SK,
             f.CLM_UNIQ_ID,
-            f.CLM_RLT_COND_SGNTR_SK,
             f.CLM_TYPE_CD,
             f.CLM_SRC_ID,
+            f.CLM_DT_SGNTR_SK,
+            f.CLM_RLT_COND_SGNTR_SK,
+            f.CLM_OCRNC_SGNTR_SK,
+            f.CLM_RLT_OCRNC_SGNTR_SK,
             f.META_SRC_SK,
             f.CLM_FROM_DT,
             f.CLM_THRU_DT,
@@ -150,12 +152,18 @@ class _ClaimsFile(StrEnum):
             f.CLM_PRVDR_PMT_AMT,
             f.CLM_RIC_CD,
             f.CLM_BLG_PRVDR_NPI_NUM,
+            f.CLM_BLG_PRVDR_TAX_NUM, # TODO: not generated yet
+            f.GEO_BLG_SSA_STATE_CD,
+            f.CLM_BLG_PRVDR_NAME, # TODO: not generated yet
             f.CLM_RFRG_PRVDR_PIN_NUM,
+            f.CLM_RFRG_FED_PRVDR_SPCLTY_CD, # TODO: not generated yet
+            f.CLM_RFRG_PRVDR_NAME, # TODO: not generated yet
             f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD,
             f.CLM_OPRTG_PRVDR_NAME,
             f.CLM_OTHR_FED_PRVDR_SPCLTY_CD,
             f.CLM_OTHR_PRVDR_NAME,
             f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD,
+            f.GEO_RNDRG_SSA_STATE_CD, # TODO: not generated yet
             f.CLM_RNDRG_PRVDR_NAME,
             f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD,
             f.CLM_ATNDG_PRVDR_NAME,
@@ -171,6 +179,7 @@ class _ClaimsFile(StrEnum):
             f.PRVDR_SRVC_PRVDR_NPI_NUM,
             f.CLM_PD_DT,
             f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM,
+            f.CLM_PRNT_CNTL_NUM, # TODO: not generated yet
             f.CLM_SBMT_FRMT_CD,
             f.CLM_SBMTR_CNTRCT_NUM,
             f.CLM_SBMTR_CNTRCT_PBP_NUM,
@@ -187,7 +196,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_NGACO_CPTATN_SW,
             f.CLM_ACO_CARE_MGMT_HCBS_SW,
             f.CLM_PD_STUS_CD,
-            f.GEO_BLG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -396,6 +404,10 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
+            f.CLM_FED_TYPE_SRVC_CD, # TODO: not generated yet
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD, # TODO: not generated yet
+            f.CLM_PRMRY_PYR_CD, # TODO: not generated yet
+            f.CLM_PRCNG_LCLTY_CD, # TODO: not generated yet
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
@@ -625,6 +637,8 @@ class _ClaimsFile(StrEnum):
             f.CLM_VAL_CD,
             f.CLM_VAL_AMT,
             f.CLM_VAL_SQNC_NUM,
+            f.CLM_VAL_ANSI_RSN_CD, # TODO: not generated yet
+            f.CLM_VAL_ANSI_GRP_CD, # TODO: not generated yet
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
