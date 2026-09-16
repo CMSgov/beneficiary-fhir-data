@@ -22,6 +22,9 @@ class ClaimLineAdjudicationProfessionalCms implements AdjudicationEmbedded {
   @Column(name = "clm_line_carr_psych_ot_lmt_amt")
   private BigDecimal therapyAmountAppliedToLimit;
 
+  @Column(name = "clm_line_prfnl_dme_price_amt") // CMS
+  private BigDecimal purchasePriceAmount;
+
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.concat(
@@ -30,7 +33,9 @@ class ClaimLineAdjudicationProfessionalCms implements AdjudicationEmbedded {
                 AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
                     providerPaymentAmount),
                 AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
-                    therapyAmountAppliedToLimit)))
+                    therapyAmountAppliedToLimit),
+                AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
+                    purchasePriceAmount)))
         .toList();
   }
 }

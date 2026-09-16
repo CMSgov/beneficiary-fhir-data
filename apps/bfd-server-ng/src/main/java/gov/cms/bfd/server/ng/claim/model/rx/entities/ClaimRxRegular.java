@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
@@ -37,13 +38,13 @@ public class ClaimRxRegular extends ClaimRxBase {
   }
 
   @Override
-  protected Optional<AdjudicationRx> getAdjudicationChargeRx() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 
   @Override
   protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
-      submissionFormatSupportingInfo() {
+      getSubmissionFormatSupportingInfo() {
     return claimSubmissionFormatCode
         .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
         .map(c -> c.toFhir(supportingInfoFactory));

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
@@ -11,7 +12,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
 import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
@@ -98,7 +98,7 @@ public abstract class ClaimRxBase extends ClaimBase {
 
   protected void addSupportingInfo(ExplanationOfBenefit eob) {
     buildHeaderSupportingInfo().forEach(eob::addSupportingInfo);
-    buildLineSupportingInfo().forEach(eob::addSupportingInfo);
+    getLineSupportingInfo().forEach(eob::addSupportingInfo);
   }
 
   protected void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
@@ -109,7 +109,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationChargeRx()
+    getAdjudication()
         .ifPresent(
             charge -> {
               charge.toFhirTotal().forEach(eob::addTotal);
@@ -156,7 +156,7 @@ public abstract class ClaimRxBase extends ClaimBase {
    */
   protected List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
     return Stream.of(
-            submissionFormatSupportingInfo(),
+            getSubmissionFormatSupportingInfo(),
             getSubmitterContractNumber().toFhir(supportingInfoFactory).stream().findFirst(),
             getSubmitterContractPBPNumber().toFhir(supportingInfoFactory).stream().findFirst(),
             getClaimSubmissionDate().toFhir(supportingInfoFactory),
@@ -166,12 +166,13 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   // region Hook Methods
+
   protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
-      submissionFormatSupportingInfo() {
+      getSubmissionFormatSupportingInfo() {
     return Optional.empty();
   }
 
-  protected Optional<AdjudicationRx> getAdjudicationChargeRx() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.empty();
   }
 
@@ -179,7 +180,7 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getLineSupportingInfo() {
     return List.of();
   }
 

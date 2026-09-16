@@ -33,9 +33,6 @@ public class ClaimLineAdjudicationProfessionalRegular implements AdjudicationEmb
   @Column(name = "clm_line_mdcr_coinsrnc_amt")
   private BigDecimal coinsrncAmount;
 
-  @Column(name = "clm_line_prfnl_dme_price_amt")
-  private BigDecimal purchasePriceAmount;
-
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     var charges = new ArrayList<ExplanationOfBenefit.AdjudicationComponent>();
@@ -53,9 +50,6 @@ public class ClaimLineAdjudicationProfessionalRegular implements AdjudicationEmb
             deductibleAmount));
     charges.add(
         AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(coinsrncAmount));
-    charges.add(
-        AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
-            purchasePriceAmount));
     return charges;
   }
 }
