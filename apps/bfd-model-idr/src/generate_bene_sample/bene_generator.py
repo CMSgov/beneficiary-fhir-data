@@ -41,8 +41,9 @@ class SampleGenerator:
         for xref_line in self.read_bene_hist_by_xref(
             bene_sk=bene_sk, bene_xref_efctv_sk=bene_xref_efctv_sk
         ):
-            print(xref_line)
-            all_bene_sks.extend([extract_col_str(xref_line, "BENE_SK")])
+            new_bene_sk = extract_col_str(xref_line, "BENE_SK")
+            if new_bene_sk:
+                all_bene_sks.extend([new_bene_sk])
             for mbi_line in self.read_mbi_lines(bene_hist_line=xref_line):
                 new_mbi_line = {
                     "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),

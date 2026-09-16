@@ -70,7 +70,7 @@ jobs:
               pythonVersion: "3.14",
             },
             {
-              projectName: "run-idr-model-generate-eob-sample",
+              projectName: "run-idr-model-gen-dd",
               projectRoot: "apps/bfd-model-idr/src/gen_dd",
               testsRoot: "apps/bfd-model-idr/src/gen_dd",
               uvCommand: "uv sync",

@@ -127,7 +127,7 @@ for walk_info in os.walk(dd_support_folder):
                     else:
                         entry["FHIR Resource"] = "AuditEvent"
 
-                    # This opportunistically populates examples based upon the samples 
+                    # This opportunistically populates examples based upon the samples
                     # created from executing FML
                     result = run_subprocess(
                         [
