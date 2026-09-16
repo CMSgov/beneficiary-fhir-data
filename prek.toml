@@ -43,9 +43,13 @@ rev = "v2.4.2"
 hooks = [{ id = "tofu_fmt" }, { id = "tofu_docs" }]
 
 [[repos]]
+repo = "https://github.com/gitleaks/gitleaks"
+rev = "v8.24.2"
+hooks = [{ id = "gitleaks" }]
+
+[[repos]]
 repo = "local"
 hooks = [
-  { id = "gitleaks", name = "gitleaks", language = "system", pass_filenames = false, entry = "gitleaks protect --staged --verbose" },
   { id = "java", name = "java", language = "system", types = [
     "java",
   ], entry = "./hooks/java-format.sh" },
