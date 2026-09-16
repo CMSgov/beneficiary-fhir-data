@@ -50,12 +50,12 @@ public class AuditEventRepository {
    * @param id ID of resource to pull
    * @return Audit Event
    */
-  public AuditEvent findById(AuditEventId id) {
+  public Optional<AuditEvent> findById(AuditEventId id) {
     try {
       var key = Key.builder().partitionValue(id.beneId()).sortValue(id.toDynamoSortKey()).build();
       var item = getTable().getItem(key);
 
-      return Optional.ofNullable(item).map(AuditEventBase::toFhir).orElse(null);
+      return Optional.ofNullable(item).map(AuditEventBase::toFhir);
     } catch (DynamoDbException e) {
       throw new IllegalStateException("Failed to query audit event by id", e);
     }

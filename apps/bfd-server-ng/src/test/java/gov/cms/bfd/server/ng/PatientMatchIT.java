@@ -735,6 +735,16 @@ class PatientMatchIT extends IntegrationTestBase {
     assertThrows(ResourceNotFoundException.class, res::execute);
   }
 
+  @Test
+  void testAuditEventByValidIdNotFound() {
+    var res =
+        getFhirClient()
+            .read()
+            .resource(AuditEvent.class)
+            .withId("-731271436-20260914164040787646024");
+    assertThrows(ResourceNotFoundException.class, res::execute);
+  }
+
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void testAuditSnapGetById(SearchStyleEnum searchStyle) {
