@@ -733,7 +733,7 @@ class PatientMatchIT extends IntegrationTestBase {
   @ValueSource(strings = {"999999999999-20260101000000000", "-731271436-20260914164040787646024"})
   void testAuditEventByIdNotFound(String badId) {
     var res =
-        getFhirClient().read().resource(AuditEvent.class).withId("999999999999-20260101000000000");
+        getFhirClient().read().resource(AuditEvent.class).withId(badId);
     assertThrows(ResourceNotFoundException.class, res::execute);
   }
 
