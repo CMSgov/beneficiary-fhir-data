@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -38,14 +39,13 @@ public sealed interface ClaimSubmissionCode
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
+    var testCode = String.format("%02d", code);
     return Optional.of(
         Arrays.stream(Valid.values())
             .filter(
                 v ->
-                    v.code.equals(code)
-                        // this handles a code given that starts with zero to match the single digit
-                        // integer
-                        || (v.code.startsWith("0") && v.code.substring(1).equals(code)))
+                    // this handles a code given that starts with zero to match the single digit
+                    v.code.equals(StringUtils.leftPad(code, 2, '0')))
             .map(v -> (ClaimSubmissionCode) v)
             .findFirst()
             .orElseGet(() -> new Invalid(code)));
