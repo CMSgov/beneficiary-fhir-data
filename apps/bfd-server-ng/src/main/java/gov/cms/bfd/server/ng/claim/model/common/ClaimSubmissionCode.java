@@ -39,7 +39,6 @@ public sealed interface ClaimSubmissionCode
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
-    var testCode = String.format("%02d", code);
     return Optional.of(
         Arrays.stream(Valid.values())
             .filter(
