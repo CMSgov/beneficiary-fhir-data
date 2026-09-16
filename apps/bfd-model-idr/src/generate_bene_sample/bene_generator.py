@@ -106,12 +106,13 @@ class SampleGenerator:
 
         return record_matches.iloc[0]
 
-    def read_bene_hist_by_xref(self, bene_sk: str, 
-            bene_xref_efctv_sk: str| None) -> list[dict[str, str]]:
+    def read_bene_hist_by_xref(
+        self, bene_sk: str, bene_xref_efctv_sk: str | None
+    ) -> list[dict[str, str]]:
 
         if not bene_xref_efctv_sk:
             return []
-        
+
         file_path = f"{self.source_directory}/SYNTHETIC_BENE_HSTRY.csv"
         if not Path(file_path).exists():
             print(
