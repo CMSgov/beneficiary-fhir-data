@@ -71,7 +71,7 @@ def run(utn: str, source_directory: str, output_directory: str):
 
     # Sort matching rows by CURRENT_SEGMENT (cast to int to sort correctly)
     matching_rows_df["CURRENT_SEGMENT"] = matching_rows_df["CURRENT_SEGMENT"].astype(int)
-    matching_rows_df = matching_rows_df.sort_values(by=["CURRENT_SEGMENT"])
+    matching_rows_df = matching_rows_df.set_index("CURRENT_SEGMENT", drop=False).sort_index()
 
     # Collect provider NPIs and ensure they exist in sample-data/PRVDR_HSTRY_POC.csv
     npi_cols = [c for c in matching_rows_df.columns if "NPI" in c]
