@@ -22,7 +22,7 @@ class SampleGenerator:
 
         bene_line = self.read_bene_hist(bene_sk=bene_sk)
 
-        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
+        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK") or ""
 
         # initialize list of all mbi with the current bene_sk
         mbi_lines = [
