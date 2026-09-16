@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
+import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -20,6 +21,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Table(name = "claim_rx", schema = "idr")
 public class ClaimRxRegular extends ClaimRxBase {
 
+  @Column(name = "clm_sbmt_frmt_cd")
+  private Optional<ClaimSubmissionFormatCode> claimSubmissionFormatCode;
+
+  @Embedded private AdjudicationRx adjudicationCharge;
+  @Embedded private ClaimItemRx claimItem;
+
   /**
    * Returns the system type.
    *
@@ -29,19 +36,10 @@ public class ClaimRxRegular extends ClaimRxBase {
     return SystemType.DDPS;
   }
 
-  // region Adjudication Charge
-  @Embedded private AdjudicationRx adjudicationCharge;
-
   @Override
   protected Optional<AdjudicationRx> getAdjudicationChargeRx() {
     return Optional.of(adjudicationCharge);
   }
-
-  // endregion
-
-  // region Claim Submission Format Code
-  @Column(name = "clm_sbmt_frmt_cd")
-  private Optional<ClaimSubmissionFormatCode> claimSubmissionFormatCode;
 
   @Override
   protected Optional<ExplanationOfBenefit.SupportingInformationComponent>
@@ -51,10 +49,8 @@ public class ClaimRxRegular extends ClaimRxBase {
         .map(c -> c.toFhir(supportingInfoFactory));
   }
 
-  // endregion
-
   @Override
   protected ClaimItemBase getClaimItem() {
-    return null;
+    return claimItem;
   }
 }

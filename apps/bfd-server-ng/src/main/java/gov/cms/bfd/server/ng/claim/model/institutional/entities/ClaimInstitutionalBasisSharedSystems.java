@@ -68,7 +68,7 @@ public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasi
 
   @Override
   public MetaSourceSk getMetaSourceSk() {
-    return null;
+    return metaSourceSk;
   }
 
   @Override

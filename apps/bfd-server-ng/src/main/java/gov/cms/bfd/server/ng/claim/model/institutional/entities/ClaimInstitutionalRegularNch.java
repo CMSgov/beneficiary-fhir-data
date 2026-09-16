@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalRegular;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
@@ -59,6 +61,16 @@ public class ClaimInstitutionalRegularNch extends ClaimInstitutionalRegularBase
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
+  }
+
+  @Override
+  public ClaimSourceId getClaimSourceId() {
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
   }
   // endregion
 

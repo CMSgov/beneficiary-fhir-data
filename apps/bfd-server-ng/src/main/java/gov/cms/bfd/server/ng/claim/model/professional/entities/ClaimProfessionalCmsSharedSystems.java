@@ -17,7 +17,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ProviderAssignmentIndicatorSwitc
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.professional.OtherProfessionalSharedSystemsCareTeam;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystemsCore;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
@@ -63,10 +63,6 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   @Column(name = "clm_mdcr_prfnl_prvdr_asgnmt_sw")
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private AdjudicationProfessionalCmsSharedSystems adjudicationCharge;
-  @Embedded private OtherProfessionalSharedSystemsCareTeam otherProviderHistory;
-
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<String> claimAuditTrailStatusCode;
 
@@ -86,6 +82,10 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
   private ClaimPaidStatusCode claimPaidStatusCode;
+
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+  @Embedded private AdjudicationProfessionalCmsSharedSystems adjudicationCharge;
+  @Embedded private ClaimProfessionalSharedSystemsCore sharedSystemsCore;
 
   @Override
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
@@ -209,9 +209,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   @Override
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    otherProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next(), Optional.of(getClaimTypeCode()))
-        .ifPresent(eob::addCareTeam);
+    sharedSystemsCore.addOtherCareTeam(eob, sequenceGenerator, getClaimTypeCode());
   }
 
   @Override

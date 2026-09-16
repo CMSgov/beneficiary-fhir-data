@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -28,11 +27,6 @@ public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase
 
   @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
 
   @Override
   public SortedSet<ClaimItemBase> getItems() {

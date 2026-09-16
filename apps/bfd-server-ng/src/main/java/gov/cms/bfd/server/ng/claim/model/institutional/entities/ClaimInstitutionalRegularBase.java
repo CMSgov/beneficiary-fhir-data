@@ -3,8 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
-import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import jakarta.persistence.Column;
@@ -47,15 +45,5 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return List.of();
-  }
-
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return null;
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return null;
   }
 }

@@ -143,6 +143,11 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }
 
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return metaSourceSk;
+  }
+
   /**
    * Returns the system type.
    *

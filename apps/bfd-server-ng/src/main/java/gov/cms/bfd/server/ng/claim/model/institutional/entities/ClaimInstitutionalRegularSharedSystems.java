@@ -65,4 +65,14 @@ public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRe
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
     return Optional.of(claimPaidStatusCode);
   }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return metaSourceSk;
+  }
+
+  @Override
+  public ClaimSourceId getClaimSourceId() {
+    return claimSourceId;
+  }
 }

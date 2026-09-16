@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -17,8 +16,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
-  // region PaymentComponent
-
   // Basis does not contain an amount field
   @Embedded private ClaimPaymentComponent paymentComponent;
 
@@ -26,8 +23,6 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
   public ClaimPaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
-
-  // endregion
 
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
@@ -40,11 +35,7 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
   @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
-
+  // Basis does not provide adjudications.
   @Override
   Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.empty();

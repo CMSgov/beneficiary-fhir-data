@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalNch;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalNchCore;
@@ -54,6 +55,11 @@ public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase im
   @Override
   public ClaimSourceId getClaimSourceId() {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
   }
 
   @Override
