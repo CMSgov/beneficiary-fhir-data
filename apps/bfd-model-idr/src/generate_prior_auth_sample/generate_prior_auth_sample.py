@@ -40,9 +40,9 @@ def ensure_provider_history_exists(npis: set[str], source_directory: str) -> Non
         return
 
     df_synth = pd.read_csv(synth_path, dtype=str, keep_default_na=False)
-    matches = df_synth[df_synth["PRVDR_SK"].isin(missing_npis)]
+    matches = df_synth[df_synth["PRVDR_SK"].isin(list(missing_npis))]
     if not matches.empty:
-        new_rows = matches[df_poc.columns].drop_duplicates(subset=["PRVDR_SK"])
+        new_rows = matches.loc[:, df_poc.columns.to_list()].drop_duplicates(subset="PRVDR_SK")
         pd.concat([df_poc, new_rows], ignore_index=True).to_csv(poc_path, index=False)
 
 
@@ -71,7 +71,7 @@ def run(utn: str, source_directory: str, output_directory: str):
 
     # Sort matching rows by CURRENT_SEGMENT (cast to int to sort correctly)
     matching_rows_df["CURRENT_SEGMENT"] = matching_rows_df["CURRENT_SEGMENT"].astype(int)
-    matching_rows_df = matching_rows_df.sort_values(by="CURRENT_SEGMENT")
+    matching_rows_df = matching_rows_df.sort_values(by=["CURRENT_SEGMENT"])
 
     # Collect provider NPIs and ensure they exist in sample-data/PRVDR_HSTRY_POC.csv
     npi_cols = [c for c in matching_rows_df.columns if "NPI" in c]
