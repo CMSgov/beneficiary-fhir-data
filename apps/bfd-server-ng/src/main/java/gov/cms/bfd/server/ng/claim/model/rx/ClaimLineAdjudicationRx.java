@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
@@ -12,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-public class ClaimLineAdjudicationChargeRx {
+public class ClaimLineAdjudicationRx implements AdjudicationEmbedded {
   @Column(name = "clm_line_ingrdnt_cst_amt")
   private BigDecimal ingredientCostAmount;
 
@@ -47,7 +48,8 @@ public class ClaimLineAdjudicationChargeRx {
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
-  public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return new ArrayList<>(
         List.of(
             AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(

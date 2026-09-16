@@ -8,16 +8,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Quantity;
 
 @Embeddable
-class ClaimLineRxFillNumber {
-  @Column(name = "clm_line_rx_fill_num")
-  private int fullNumber;
+class ClaimLineDaysSupplyQuantityRx {
+  @Column(name = "clm_line_days_suply_qty")
+  private int daysSupply;
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(CarinSupportingInfoCategory.REFILL_NUM.toFhir())
-        .setValue(new Quantity().setValue(fullNumber).setUnit("fill"));
+        .setCategory(CarinSupportingInfoCategory.DAYS_SUPPLY.toFhir())
+        .setValue(new Quantity().setValue(daysSupply).setUnit("days"));
   }
 }

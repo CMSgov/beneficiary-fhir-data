@@ -26,7 +26,7 @@ public class ClaimLineInstitutionalCmsNch extends ClaimLineInstitutionalBase {
 
   @Override
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
-    adjudicationCharge.toFhir().forEach(line::addAdjudication);
+    adjudicationCharge.toFhirAdjudication().forEach(line::addAdjudication);
     ansiSignature.toFhir().ifPresent(line::addAdjudication);
   }
 

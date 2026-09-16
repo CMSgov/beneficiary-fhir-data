@@ -14,6 +14,6 @@ public class ClaimLineInstitutionalRegularSharedSystems extends ClaimLineInstitu
 
   @Override
   protected void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
-    adjudicationCharge.toFhir().forEach(line::addAdjudication);
+    adjudicationCharge.toFhirAdjudication().forEach(line::addAdjudication);
   }
 }

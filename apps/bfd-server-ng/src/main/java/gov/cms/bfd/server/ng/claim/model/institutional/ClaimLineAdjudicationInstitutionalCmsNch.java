@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -11,7 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** clm_line adjudication information for Institutional-CMS-NCH. */
 @Embeddable
-public class ClaimLineAdjudicationInstitutionalCmsNch {
+public class ClaimLineAdjudicationInstitutionalCmsNch implements AdjudicationEmbedded {
 
   @Embedded ClaimLineAdjudicationInstitutionalNch baseAdjudicationCharge;
 
@@ -47,9 +48,10 @@ public class ClaimLineAdjudicationInstitutionalCmsNch {
    *
    * @return list of adjudication components
    */
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.concat(
-            baseAdjudicationCharge.toFhir().stream(),
+            baseAdjudicationCharge.toFhirAdjudication().stream(),
             Stream.of(
                 AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
                     bloodDeductibleAmount),

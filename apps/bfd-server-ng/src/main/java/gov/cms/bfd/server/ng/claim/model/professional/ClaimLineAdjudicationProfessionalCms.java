@@ -1,15 +1,20 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@MappedSuperclass
-abstract class ClaimLineAdjudicationProfessionalCms extends ClaimLineAdjudicationProfessional {
+/** clm_line adjudication data shared by CMS (both sources). */
+@Embeddable
+class ClaimLineAdjudicationProfessionalCms implements AdjudicationEmbedded {
+
+  @Embedded private ClaimLineAdjudicationProfessionalRegular baseAdjudications;
 
   @Column(name = "clm_line_prvdr_pmt_amt")
   private BigDecimal providerPaymentAmount;
@@ -18,14 +23,14 @@ abstract class ClaimLineAdjudicationProfessionalCms extends ClaimLineAdjudicatio
   private BigDecimal therapyAmountAppliedToLimit;
 
   @Override
-  List<ExplanationOfBenefit.AdjudicationComponent> addSubclassAdjudications() {
-    var charges = new ArrayList<>(super.addSubclassAdjudications());
-    charges.add(
-        AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
-            providerPaymentAmount));
-    charges.add(
-        AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
-            therapyAmountAppliedToLimit));
-    return charges;
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    return Stream.concat(
+            baseAdjudications.toFhirAdjudication().stream(),
+            Stream.of(
+                AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
+                    providerPaymentAmount),
+                AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
+                    therapyAmountAppliedToLimit)))
+        .toList();
   }
 }

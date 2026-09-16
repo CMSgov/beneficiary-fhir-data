@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-public class ClaimLineRxSupportingInfoCms {
+public class ClaimLineSupportingInfoRxCms {
 
   @Column(name = "clm_phrmcy_srvc_type_cd")
   private Optional<PharmacySrvcTypeCode> pharmacyServiceTypeCode;

@@ -18,8 +18,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimLineRxCms implements ClaimLineBase {
 
   @Embedded private ClaimLineRx claimLine; // Composition over inheritance :nod:
-  @Embedded private ClaimLineAdjudicationChargeRx adjudicationCharge;
-  @Embedded private ClaimLineRxSupportingInfoCms claimRxSupportingInfoCms;
+  @Embedded private ClaimLineAdjudicationRx adjudicationCharge;
+  @Embedded private ClaimLineSupportingInfoRxCms claimRxSupportingInfoCms;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
@@ -35,7 +35,8 @@ public class ClaimLineRxCms implements ClaimLineBase {
       ClaimFilterOptions options) {
     var line = claimLine.toFhirItemComponent(options);
     line.ifPresent(
-        adjudication -> adjudicationCharge.toFhir().forEach(adjudication::addAdjudication));
+        adjudication ->
+            adjudicationCharge.toFhirAdjudication().forEach(adjudication::addAdjudication));
     return line;
   }
 

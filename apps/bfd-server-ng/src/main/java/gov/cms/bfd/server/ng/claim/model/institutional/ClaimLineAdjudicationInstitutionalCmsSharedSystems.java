@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -13,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** clm_line adjudication information for Institutional-CMS-SharedSystems. */
 @Embeddable
 @Getter
-public class ClaimLineAdjudicationInstitutionalCmsSharedSystems {
+public class ClaimLineAdjudicationInstitutionalCmsSharedSystems implements AdjudicationEmbedded {
 
   @Embedded ClaimLineAdjudicationInstitutionalSharedSystems baseAdjudicationCharge;
 
@@ -50,9 +51,10 @@ public class ClaimLineAdjudicationInstitutionalCmsSharedSystems {
   @Column(name = "clm_line_non_ehr_rdctn_amt") // CMS
   private BigDecimal nonEHRReductionAmount;
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.concat(
-            baseAdjudicationCharge.toFhir().stream(),
+            baseAdjudicationCharge.toFhirAdjudication().stream(),
             Stream.of(
                 AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT.toFhirAdjudication(
                     noncoveredProductPaidAmount),

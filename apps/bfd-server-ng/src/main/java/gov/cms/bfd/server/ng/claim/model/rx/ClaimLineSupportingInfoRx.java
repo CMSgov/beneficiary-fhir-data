@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 @Getter
-public class ClaimLineRxSupportingInfo {
+public class ClaimLineSupportingInfoRx {
 
   @Column(name = "clm_line_rx_orgn_cd")
   private Optional<ClaimPrescriptionOriginCode> claimPrescriptionOriginCode;
@@ -33,8 +33,8 @@ public class ClaimLineRxSupportingInfo {
   @Column(name = "clm_daw_prod_slctn_cd")
   private Optional<ClaimDispenseAsWrittenCode> claimDispenseAsWrittenCode;
 
-  @Embedded private ClaimLineRxDaysSupplyQuantity daysSupply;
-  @Embedded private ClaimLineRxFillNumber fillNumber;
+  @Embedded private ClaimLineDaysSupplyQuantityRx daysSupply;
+  @Embedded private ClaimLineFillNumberRx fillNumber;
 
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {

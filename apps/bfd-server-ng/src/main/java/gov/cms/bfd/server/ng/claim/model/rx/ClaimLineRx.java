@@ -30,7 +30,7 @@ public class ClaimLineRx implements ClaimLineBase {
 
   @Embedded private ClaimLineNdcQuantity ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
-  @Embedded private ClaimLineRxSupportingInfo supportingInfo;
+  @Embedded private ClaimLineSupportingInfoRx supportingInfo;
 
   @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(

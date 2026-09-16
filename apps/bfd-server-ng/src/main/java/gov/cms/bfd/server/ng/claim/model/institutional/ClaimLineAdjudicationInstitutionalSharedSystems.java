@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
@@ -9,7 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The shared adjudication charge columns between CMS and REGULAR. */
 @Embeddable
-public class ClaimLineAdjudicationInstitutionalSharedSystems {
+public class ClaimLineAdjudicationInstitutionalSharedSystems implements AdjudicationEmbedded {
   @Column(name = "clm_line_ncvrd_chrg_amt") // REGULAR CMS
   private BigDecimal noncoveredChargeAmount;
 
@@ -31,7 +32,8 @@ public class ClaimLineAdjudicationInstitutionalSharedSystems {
   @Column(name = "clm_line_mdcr_ddctbl_amt") // REGULAR CMS
   private BigDecimal deductibleAmount;
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return List.of(
         AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
         AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount),

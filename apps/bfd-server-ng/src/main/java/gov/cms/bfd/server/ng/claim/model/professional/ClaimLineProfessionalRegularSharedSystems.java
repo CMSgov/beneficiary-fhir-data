@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimLineProfessionalRegularSharedSystems extends ClaimLineProfessionalRegular {
 
   @Embedded private ClaimLineProfessionalSharedSystemsCore sharedSystemsCore;
-  @Embedded private ClaimLineAdjudicationProfessionalRegularSharedSystems adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationProfessionalRegular adjudicationCharge;
 
   @Override
   Optional<AdjudicationEmbedded> getClaimLineAdjudication() {
