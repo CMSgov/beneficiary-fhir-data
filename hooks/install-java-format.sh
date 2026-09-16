@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 GOOGLE_JAVA_FORMAT_VERSION="1.36.1"

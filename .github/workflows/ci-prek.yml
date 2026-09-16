@@ -20,4 +20,4 @@ jobs:
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       - uses: j178/prek-action@5337cb91e0fa35a7ff31b9ca345126d8bbbcdf16 # v2.0.6
         with:
-          extra_args: --files ${{ steps.changed-files.outputs.all_changed_files }}
+          extra-args: --files ${{ steps.changed-files.outputs.all_changed_files }}
