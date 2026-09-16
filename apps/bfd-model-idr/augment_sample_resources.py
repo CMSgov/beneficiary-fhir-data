@@ -450,45 +450,39 @@ if cond_sk:
         if pd.notna(cond_cd) and str(cond_cd) != "~":
             supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
 
-## occurence signature mbr POC augments: future impl with non-POC samples should work with this logic too
-ocrnc_sk = cur_sample_data.get("CLM_OCRNC_SGNTR_SK")
-if ocrnc_sk:
-    matching_sks = ocrnc_sk_df["CLM_OCRNC_SGNTR_SK"] == ocrnc_sk
-    # not covered from and thru
-    ncvrd_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "74")
-    if ncvrd_mask.any():
-        ncvrd_from = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
-        if pd.notna(ncvrd_from):
-            cur_sample_data["CLM_NCVRD_FROM_DT"] = ncvrd_from
-        ncvrd_thru = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
-        if pd.notna(ncvrd_thru):
-            cur_sample_data["CLM_NCVRD_THRU_DT"] = ncvrd_thru
-    # qualifying stay from and thru
-    qlfy_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "70")
-    if qlfy_mask.any():
-        qlfy_from = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
-        if pd.notna(qlfy_from):
-            cur_sample_data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from
-        qlfy_thru = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
-        if pd.notna(qlfy_thru):
-            cur_sample_data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru
+## mapping ocrnc_sgntr_mbr and rlt_ocrnc_sgntr_mbr to clm_dt_sgntr equivalent columns
+def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
+    if ocrnc_sk := data.get("CLM_OCRNC_SGNTR_SK"):
+        matching_sks = ocrnc_sk_df["CLM_OCRNC_SGNTR_SK"] == ocrnc_sk
+        # not covered from and thru
+        ncvrd_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "74")
+        if ncvrd_mask.any():
+            ncvrd_from = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
+            data["CLM_NCVRD_FROM_DT"] = ncvrd_from if pd.notna(ncvrd_from) else data["CLM_NCVRD_FROM_DT"]
+            ncvrd_thru = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
+            data["CLM_NCVRD_THRU_DT"] = ncvrd_thru if pd.notna(ncvrd_thru) else data["CLM_NCVRD_THRU_DT"]
+        # qualifying stay from and thru
+        qlfy_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "70")
+        if qlfy_mask.any():
+            qlfy_from = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
+            data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from if pd.notna(qlfy_from) else data["CLM_QLFY_STAY_FROM_DT"]
+            qlfy_thru = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
+            data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru if pd.notna(qlfy_thru) else data["CLM_QLFY_STAY_THRU_DT"]
 
-## related occurence signature mbr POC augments: future impl with non-POC samples should work with this logic too
-rlt_ocrnc_sk = cur_sample_data.get("CLM_RLT_OCRNC_SGNTR_SK")
-if rlt_ocrnc_sk:
-    matching_sks = rlt_ocrnc_sk_df["CLM_RLT_OCRNC_SGNTR_SK"] == rlt_ocrnc_sk
-    # medicare exhausted date
-    mdcr_exhstd_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "A3")
-    if mdcr_exhstd_mask.any():
-        mdcr_exhstd_dt = rlt_ocrnc_sk_df.loc[mdcr_exhstd_mask, "CLM_RLT_OCRNC_DT"].max()
-        if pd.notna(mdcr_exhstd_dt):
-            cur_sample_data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt
-    # active care thru
-    actv_care_thru_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "22")
-    if actv_care_thru_mask.any():
-        actv_care_thru = rlt_ocrnc_sk_df.loc[actv_care_thru_mask, "CLM_RLT_OCRNC_DT"].max()
-        if pd.notna(actv_care_thru):
-            cur_sample_data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru
+    if rlt_ocrnc_sk := data.get("CLM_RLT_OCRNC_SGNTR_SK"):
+        matching_sks = rlt_ocrnc_sk_df["CLM_RLT_OCRNC_SGNTR_SK"] == rlt_ocrnc_sk
+        # medicare exhausted date
+        mdcr_exhstd_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "A3")
+        if mdcr_exhstd_mask.any():
+            mdcr_exhstd_dt = rlt_ocrnc_sk_df.loc[mdcr_exhstd_mask, "CLM_RLT_OCRNC_DT"].max()
+            data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt if pd.notna(mdcr_exhstd_dt) else data["CLM_MDCR_EXHSTD_DT"]
+        # active care thru
+        actv_care_thru_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "22")
+        if actv_care_thru_mask.any():
+            actv_care_thru = rlt_ocrnc_sk_df.loc[actv_care_thru_mask, "CLM_RLT_OCRNC_DT"].max()
+            data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru if pd.notna(actv_care_thru) else data["CLM_ACTV_CARE_THRU_DT"]
+
+map_ocrnc_sgntr_to_clm_dt_sgntr_cols(cur_sample_data, ocrnc_sk_df, rlt_ocrnc_sk_df)
 
 fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")
 clsfctn = cur_sample_data.get("CLM_BILL_CLSFCTN_CD")

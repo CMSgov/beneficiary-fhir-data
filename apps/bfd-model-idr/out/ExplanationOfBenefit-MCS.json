@@ -53,7 +53,7 @@
   },
   {
     "resourceType" : "Observation",
-    "id" : "line-observation-hgb-12",
+    "id" : "line-observation-hgb-13",
     "status" : "final",
     "code" : {
       "coding" : [{
@@ -76,7 +76,7 @@
   },
   {
     "resourceType" : "Observation",
-    "id" : "line-observation-hct-11",
+    "id" : "line-observation-hct-12",
     "status" : "final",
     "code" : {
       "coding" : [{
@@ -364,7 +364,7 @@
       }]
     },
     "valueReference" : {
-      "reference" : "#line-observation-hct-11"
+      "reference" : "#line-observation-hct-12"
     }
   },
   {
@@ -381,11 +381,11 @@
       }]
     },
     "valueReference" : {
-      "reference" : "#line-observation-hgb-12"
+      "reference" : "#line-observation-hgb-13"
     }
   },
   {
-    "sequence" : 13,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -401,7 +401,7 @@
     "timingDate" : "2025-01-12"
   },
   {
-    "sequence" : 14,
+    "sequence" : 15,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -423,7 +423,7 @@
     }
   },
   {
-    "sequence" : 15,
+    "sequence" : 16,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -445,7 +445,7 @@
     }
   },
   {
-    "sequence" : 16,
+    "sequence" : 17,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -461,7 +461,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 17,
+    "sequence" : 18,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -477,7 +477,7 @@
     "timingDate" : "2025-01-02"
   },
   {
-    "sequence" : 18,
+    "sequence" : 19,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -493,7 +493,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 19,
+    "sequence" : 20,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -514,7 +514,7 @@
     }
   },
   {
-    "sequence" : 20,
+    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -530,7 +530,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 21,
+    "sequence" : 22,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -546,7 +546,7 @@
     "timingDate" : "2025-01-02"
   },
   {
-    "sequence" : 22,
+    "sequence" : 23,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -568,7 +568,7 @@
     }
   },
   {
-    "sequence" : 23,
+    "sequence" : 24,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -590,7 +590,7 @@
     }
   },
   {
-    "sequence" : 24,
+    "sequence" : 25,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -600,7 +600,7 @@
     "timingDate" : "2020-01-13"
   },
   {
-    "sequence" : 25,
+    "sequence" : 26,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -780,7 +780,8 @@
       }
     }],
     "sequence" : 1,
-    "informationSequence" : [12],
+    "informationSequence" : [13,
+    12],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
