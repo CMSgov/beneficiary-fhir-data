@@ -22,16 +22,19 @@ public class ClaimLineNdcQuantity {
   private Optional<IdrUnit> ndcQuantityQualifierCode;
 
   public Optional<ExplanationOfBenefit.DetailComponent> toFhirDetail() {
-    if (claimLineNdc.getNdcCode().isEmpty()) {
-      return Optional.empty();
-    }
-    var detail = new ExplanationOfBenefit.DetailComponent();
-    detail.setSequence(1);
-    detail.setProductOrService(
-        new CodeableConcept(
-            new Coding().setSystem(SystemUrls.NDC).setCode(claimLineNdc.getNdcCode().get())));
-    ndcQuantityQualifierCode.ifPresent(c -> detail.setQuantity(c.toFhir(ndcQuantity.get())));
-    return Optional.of(detail);
+    return claimLineNdc
+        .getNdcCode()
+        .map(
+            code -> {
+              var detail = new ExplanationOfBenefit.DetailComponent();
+              detail.setSequence(1);
+              detail.setProductOrService(
+                  new CodeableConcept(new Coding().setSystem(SystemUrls.NDC).setCode(code)));
+              ndcQuantityQualifierCode
+                  .flatMap(c -> ndcQuantity.map(c::toFhir))
+                  .ifPresent(detail::setQuantity);
+              return detail;
+            });
   }
 
   public Optional<Coding> toFhirCoding() {
