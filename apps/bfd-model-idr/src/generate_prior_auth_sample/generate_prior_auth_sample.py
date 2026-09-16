@@ -1,23 +1,22 @@
-import argparse
 import json
-import os
 import sys
-from datetime import datetime, timezone
+from pathlib import Path
+
 import pandas as pd
 
 
 # we should only really need this for prior auth, since PA doesn't have it.
-def find_bene_sk(mbi_num: str) -> str:
-    bene_history_path = "out/SYNTHETIC_BENE_HSTRY.csv"
-    if os.path.exists(bene_history_path):
+def find_bene_sk(mbi_num: str, source_directory: str) -> str:
+    bene_history_path = f"{source_directory}/SYNTHETIC_BENE_HSTRY.csv"
+    if Path(bene_history_path).exists():
         df_bene = pd.read_csv(bene_history_path, dtype=str, keep_default_na=False)
         match = df_bene[df_bene["BENE_MBI_ID"] == mbi_num]
         if not match.empty:
             return match.iloc[0].get("BENE_SK", "123456789")
 
     # Try mapping using BENE_MBI_ID table if history doesn't have it
-    mbi_table_path = "out/SYNTHETIC_BENE_MBI_ID.csv"
-    if os.path.exists(mbi_table_path):
+    mbi_table_path = f"{source_directory}/SYNTHETIC_BENE_MBI_ID.csv"
+    if Path(mbi_table_path).exists():
         df_mbi = pd.read_csv(mbi_table_path, dtype=str, keep_default_na=False)
         match = df_mbi[df_mbi["BENE_MBI_ID"] == mbi_num]
         if not match.empty:
@@ -26,10 +25,12 @@ def find_bene_sk(mbi_num: str) -> str:
     return "123456789"
 
 
-def ensure_provider_history_exists(npis: set[str]) -> None:
+def ensure_provider_history_exists(npis: set[str], source_directory: str) -> None:
+    # TODO this is feels wrong and needs to be pathable.
+    # Not sure what that looks like
     poc_path = "sample-data/PRVDR_HSTRY_POC.csv"
-    synth_path = "out/SYNTHETIC_PRVDR_HSTRY.csv"
-    if not os.path.exists(poc_path) or not os.path.exists(synth_path):
+    synth_path = f"{source_directory}/SYNTHETIC_PRVDR_HSTRY.csv"
+    if not Path(poc_path).exists() or not Path(synth_path).exists():
         return
 
     df_poc = pd.read_csv(poc_path, dtype=str, keep_default_na=False)
@@ -45,24 +46,19 @@ def ensure_provider_history_exists(npis: set[str]) -> None:
         pd.concat([df_poc, new_rows], ignore_index=True).to_csv(poc_path, index=False)
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate a prior auth sample JSON from SYNTHETIC_PRAUC.csv based on UTN."
-    )
-    parser.add_argument("--utn", required=True, help="Pass the UTN ")
-    args = parser.parse_args()
+def run(utn: str, source_directory: str, output_directory: str):
 
-    prauc_path = "out/SYNTHETIC_PRAUC.csv"
-    if not os.path.exists(prauc_path):
-        print(f"Run the generator or this will not go well.")
+    prauc_path = f"{source_directory}/SYNTHETIC_PRAUC.csv"
+    if not Path(prauc_path).exists:
+        print("Run the generator or this will not go well.")
         sys.exit(1)
 
     df_prauc = pd.read_csv(prauc_path, dtype=str, keep_default_na=False)
 
     # Find matches for the specified UTN
-    utn_matches = df_prauc[df_prauc["UTN"] == args.utn]
+    utn_matches = df_prauc[df_prauc["UTN"] == utn]
     if utn_matches.empty:
-        print(f"Error: No records found for UTN: {args.utn}")
+        print(f"Error: No records found for UTN: {utn}")
         sys.exit(1)
 
     # Extract target MBI from the first match
@@ -70,7 +66,7 @@ def main():
 
     # Filter all rows matching target_mbi and UTN
     matching_rows_df = df_prauc[
-        (df_prauc["UTN"] == args.utn) & (df_prauc["MBI_NUM"] == target_mbi)
+        (df_prauc["UTN"] == utn) & (df_prauc["MBI_NUM"] == target_mbi)
     ].copy()
 
     # Sort matching rows by CURRENT_SEGMENT (cast to int to sort correctly)
@@ -80,10 +76,10 @@ def main():
     # Collect provider NPIs and ensure they exist in sample-data/PRVDR_HSTRY_POC.csv
     npi_cols = [c for c in matching_rows_df.columns if "NPI" in c]
     npis = set(matching_rows_df[npi_cols].to_numpy().ravel())
-    ensure_provider_history_exists(npis)
+    ensure_provider_history_exists(npis, source_directory=source_directory)
 
     # Get bene_sk
-    bene_sk = find_bene_sk(target_mbi)
+    bene_sk = find_bene_sk(target_mbi, source_directory=source_directory)
 
     # First row for header information
     first_row = matching_rows_df.iloc[0]
@@ -131,12 +127,12 @@ def main():
     # Now we build our actual sample data.
     output_json = {
         "resourceType": "ExplanationOfBenefit-PriorAuth",
-        "id": f"pa-{args.utn.replace('-', '')}",
+        "id": f"pa-{utn.replace('-', '')}",
         "createdDate": str(first_row.get("PA_DT_UPDATED", "")).strip(),
         "derivedOutcome": derived_outcome,
         "beneficiarySk": bene_sk,
         "CLM_TYPE": str(first_row.get("CLM_TYPE", "")).strip(),
-        "UTN": args.utn,
+        "UTN": utn,
         "ICN_DCN": str(first_row.get("ICN_DCN", "")).strip(),
         "UTN_VALID_ST_DT": str(first_row.get("UTN_VALID_ST_DT", "")).strip(),
         "UTN_VALID_EN_DT": str(first_row.get("UTN_VALID_EN_DT", "")).strip(),
@@ -155,13 +151,10 @@ def main():
         "priorAuthItem": prior_auth_items,
     }
 
-    output_file = "sample-data/EOB-PriorAuth-Sample.json"
+    output_file = Path(f"{output_directory}/EOB-PriorAuth-Sample.json")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_file, mode="w", encoding="utf-8") as f:
+    with output_file.open(mode="w", encoding="utf-8") as f:
         json.dump(output_json, f, indent=2)
 
     print(f"Successfully generated sample JSON: {output_file}")
-
-
-if __name__ == "__main__":
-    main()

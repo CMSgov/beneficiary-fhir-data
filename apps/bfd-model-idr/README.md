@@ -351,10 +351,10 @@ To generate the data dictionary:
 
 ```sh
 ./compile-all-resources.sh
-uv run gen_dd
+uv run gen-dd
 ```
 
-If the gen_dd script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+If the gen-dd script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
 Run:
 
 ```sql

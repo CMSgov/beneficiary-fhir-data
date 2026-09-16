@@ -77,6 +77,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-gen-dd",
+              projectRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:

@@ -20,7 +20,8 @@ dependencies = [
 generate-eob-sample = "generate_eob_sample:main"
 idr-extract = "idr_extract:main"
 generate-bene-sample = "generate_bene_sample:main"
-gen_dd = "gen_dd:main"
+gen-dd = "gen_dd:main"
+generate-prior-auth-sample = "generate_prior_auth_sample:main"
 
 [dependency-groups]
 dev = [
@@ -43,7 +44,7 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "idr_model"
-packages = ["src/idr_model", "src/generate_eob_sample", "src/generate_bene_sample", "src/gen_dd"]
+packages = ["src/idr_model", "src/generate_eob_sample", "src/generate_bene_sample", "src/gen_dd", "src/generate_prior_auth_sample"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

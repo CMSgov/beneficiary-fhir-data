@@ -4,7 +4,7 @@ from pathlib import Path
 
 def test_gen_dd_runs_successfully() -> None:
     result = subprocess.run(
-        ["uv", "run", "gen_dd"],
+        ["uv", "run", "gen-dd"],
         cwd=Path(__file__).parent.parent.parent,
         capture_output=True,
         check=False,
