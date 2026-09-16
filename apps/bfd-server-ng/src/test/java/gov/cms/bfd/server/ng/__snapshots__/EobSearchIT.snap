@@ -23445,6 +23445,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -24862,6 +24878,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -26671,6 +26703,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -27044,6 +27122,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -31260,6 +31370,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -32677,6 +32803,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -34486,6 +34628,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -34859,6 +35047,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -39075,6 +39295,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -40492,6 +40728,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -42301,6 +42553,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -42674,6 +42972,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -48170,6 +48500,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -49587,6 +49933,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -55914,6 +56276,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -57331,6 +57709,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -63658,6 +64052,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -65075,6 +65485,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -74290,6 +74716,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -76096,6 +76538,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -76469,6 +76957,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -80701,6 +81221,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -82507,6 +83043,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -82880,6 +83462,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -83557,6 +84171,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -84752,6 +85382,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -85125,6 +85801,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -86434,6 +87142,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -87857,6 +88581,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -89049,6 +89789,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -89422,6 +90208,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -97806,6 +98624,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -99612,6 +100446,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -99985,6 +100865,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -104217,6 +105129,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -106023,6 +106951,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -106396,6 +107370,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -107073,6 +108079,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -108268,6 +109290,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -108641,6 +109709,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -109950,6 +111050,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -111373,6 +112489,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -112565,6 +113697,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -112938,6 +114116,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -121322,6 +122532,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -123128,6 +124354,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -123501,6 +124773,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -127733,6 +129037,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -129539,6 +130859,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -129912,6 +131278,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -130589,6 +131987,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -131784,6 +133198,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -132157,6 +133617,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -133466,6 +134958,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -134889,6 +136397,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -136081,6 +137605,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -136454,6 +138024,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -138890,6 +140492,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -140307,6 +141925,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -145354,6 +146988,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -146771,6 +148421,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -151818,6 +153484,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -153235,6 +154917,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -155044,6 +156742,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -155417,6 +157161,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -157853,6 +159629,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -159270,6 +161062,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -164317,6 +166125,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -165734,6 +167558,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -170781,6 +172621,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -172198,6 +174054,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -174007,6 +175879,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -174380,6 +176298,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
@@ -176816,6 +178766,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -178233,6 +180199,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -183280,6 +185262,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -184697,6 +186695,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -189744,6 +191758,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 20.63
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2021-10-03",
@@ -191161,6 +193191,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "coding" : [ {
             "code" : "CLM_TOT_CNTRCTL_AMT",
             "display" : "Total Contractual Amount Discrepancy",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 69.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Secondary Payment Coinsurance Amount",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_LINE_MSP_COINSRNC_AMT",
+            "display" : "Secondary Payment Coinsurance Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -192970,6 +195016,52 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         },
         "name" : "CBS Health Corporation",
         "resourceType" : "Organization"
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "4544-3",
+            "display" : "Hematocrit [Volume Fraction] of Blood by Automated count",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hct-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "%",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "%",
+          "value" : 31.6
+        }
+      }, {
+        "code" : {
+          "coding" : [ {
+            "code" : "718-7",
+            "display" : "Hemoglobin [Mass/volume] in Blood",
+            "system" : "http://loinc.org"
+          } ]
+        },
+        "id" : "hgb-1",
+        "performer" : [ {
+          "identifier" : {
+            "system" : "http://terminology.hl7.org/NamingSystem/CLIA",
+            "value" : "22D2222222"
+          }
+        } ],
+        "resourceType" : "Observation",
+        "status" : "final",
+        "valueQuantity" : {
+          "code" : "g/dL",
+          "system" : "http://unitsofmeasure.org",
+          "unit" : "g/dL",
+          "value" : 13.1
+        }
       } ],
       "created" : "2025-08-15T00:00:00+00:00",
       "id" : "3351266481403",
@@ -193343,6 +195435,38 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           } ]
         },
         "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HCT_LVL_NUM",
+            "display" : "HCT Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 8,
+        "valueReference" : {
+          "reference" : "#hct-1"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_LINE_HGB_LVL_NUM",
+            "display" : "HGB Test Result",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 9,
+        "valueReference" : {
+          "reference" : "#hgb-1"
+        }
       } ],
       "total" : [ {
         "amount" : {
