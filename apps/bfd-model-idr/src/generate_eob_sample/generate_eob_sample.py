@@ -31,7 +31,13 @@ class SampleGenerator:
             sys.exit(1)
 
         claim_row = self.read_clm(clm_uniq_id)
-        claim_type = int(claim_row.get("CLM_TYPE_CD") or "0")
+        claim_type_raw = claim_row.get("CLM_TYPE_CD")
+
+        if not claim_type_raw:
+            print("Claim type not found. Exiting.")
+            sys.exit(1)
+
+        claim_type = int(claim_type_raw)
 
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             result = self.create_pharmacy(clm_uniq_id, claim_row)
