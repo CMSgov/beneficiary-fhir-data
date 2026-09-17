@@ -43,7 +43,7 @@ USER nonroot
 WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
-COPY pyproject.toml uv.lock ./
+COPY ../../ ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --locked --no-install-project
 

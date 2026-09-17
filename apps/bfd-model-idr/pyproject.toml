@@ -5,34 +5,20 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
-    "idr-pipeline",
-    "faker>=37.1.0",
-    "pandas>=3.0.2",
-    "xlsxwriter>=3.2.5",
-    "pyyaml>=6.0.2",
-    "pydantic>=2.12.3",
-    "tqdm>=4.67.1",
-    "click>=8.3.1",
-    "requests>=2.32.5",
-    "cryptography>=50.0.0",
+  "faker>=37.1.0",
+  "pandas>=3.0.2",
+  "xlsxwriter>=3.2.5",
+  "pyyaml>=6.0.2",
+  "pydantic>=2.12.3",
+  "tqdm>=4.67.1",
+  "click>=8.3.1",
+  "requests>=2.32.5",
+  "cryptography>=50.0.0",
 ]
 
 [project.scripts]
 idr-extract = "idr_extract:main"
 
-[dependency-groups]
-dev = [
-    "ruff>=0.12.9",
-    "uv>=0.11.15",
-    "pyright>=1.1.403",
-    "debugpy>=1.8.19",
-]
-
-[tool.uv]
-exclude-newer = "7 days"
-
-[tool.uv.sources]
-idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
 
 [build-system]
 requires = ["uv_build<=0.12"]
@@ -41,50 +27,3 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "idr_model"
 packages = ["src/idr_model", "src/idr_extract"]
-
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    # "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
-]
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true

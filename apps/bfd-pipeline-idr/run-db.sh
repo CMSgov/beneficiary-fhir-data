@@ -69,7 +69,7 @@ BFD_ENV=local "$SCRIPT_DIR/../bfd-db-migrator-ng/migrate.sh"
 echo
 echo Schema created successfully.
 
-uv sync
+uv sync --all-packages
 
 if [[ -d "$1/0" ]]; then
   echo "Loading batches in $1..."
