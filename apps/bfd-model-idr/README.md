@@ -213,7 +213,7 @@ The patient generator creates synthetic beneficiary data with realistic but _syn
 
 <!-- TODO: Provide an official location for downloading synthetic claims data -->
 > [!IMPORTANT]
-> Synthetic claims data is _much_ larger in size relative to patient data, and so it is not stored in the repository under `./synthetic-data`. If you are looking to regnerate this data, please reach out in #bfd so that the existing dataset can be provided to you.
+> Synthetic claims data is _much_ larger in size relative to patient data, and so only a subset is stored in the repository under `../bfd-pipeline-idr/test-samples` and `../bfd-pipeline-idr/test-samples2`. If you are looking to regnerate this data, please reach out in #bfd so that the existing dataset can be provided to you. Or ask about the `../bfd-pipeline-idr/extract-idr.sh` workflow to extract the snowflake data yourself.
 
 #### `claims_generator.py` usage
 
@@ -285,7 +285,7 @@ The below will _re-generate_ **existing claims data** (assume `<PATH_TO_CLAIMS_D
 ```sh
 uv run claims_generator.py \
     --sushi \
-    ./synthetic-data <PATH_TO_CLAIMS_DATA>
+    ./out <PATH_TO_CLAIMS_DATA>
 ```
 
 If _any_ claims-related tables have had columns added to their respective generation functions, those new columns will be populated with values without impacting existing values in other columns.

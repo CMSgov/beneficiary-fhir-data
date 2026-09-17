@@ -15,7 +15,7 @@ uv sync
 > [!IMPORTANT]
 >
 > - Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
-> - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, this synthetic data already exists in `apps/bfd-model-idr/synthetic-data`. Consult the `README.md` in that directory for further detail.
+> - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, some synthetic data already exists in `./test_samples1` and `./test_samples2`. Consult the `README.md` in `../bfd-model-idr` for further detail generating/regenerating.
 
 To load from `apps/bfd-model-idr/out`, run:
 
@@ -33,7 +33,6 @@ Or, you can pass the directory to load from as the first positional argument to 
 
 This is useful for loading our synthetic data stored in our repository, or the test data, e.g.:
 
-- `./run-db.sh ../bfd-model-idr/synthetic-data`
 - `./run-db.sh ./test_samples1`
 - `./run-db.sh ./test_samples2`
 
@@ -85,7 +84,7 @@ BFD_ENV=1234-test ./load-synthetic-env.sh
 To first ingest new data into Snowflake before loading, supply a folder containing the CSV files you wish to load as a positional argument.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
+BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/out
 ```
 
 > [!NOTE]
@@ -98,7 +97,7 @@ This will first _replace_ the contents in Snowflake with the given CSV data and 
 Only the tables matching the files given will be truncated.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data --truncate
+BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/out --truncate
 ```
 
 ## Loading synthetic data into your local database
