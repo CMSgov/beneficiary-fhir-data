@@ -20,14 +20,12 @@ class SampleGenerator:
             print("Source directory not found. Run the generator or this will not go well.")
             sys.exit(1)
 
-
-
         bene_line = None
         mbi_lines = []
-        
+
         for bene_tmp_line in self.read_bene_hist(bene_sk=bene_sk):
             lastest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")
-            if (lastest_flag and lastest_flag == "Y"):
+            if lastest_flag and lastest_flag == "Y":
                 bene_line = bene_tmp_line
             for mbi_line in self.read_mbi_lines(bene_hist_line=bene_tmp_line):
                 new_mbi_line = {
