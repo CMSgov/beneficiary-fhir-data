@@ -84,7 +84,7 @@ BFD_ENV=1234-test ./load-synthetic-env.sh
 To first ingest new data into Snowflake before loading, supply a folder containing the CSV files you wish to load as a positional argument.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/out
+BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out
 ```
 
 > [!NOTE]
@@ -97,7 +97,7 @@ This will first _replace_ the contents in Snowflake with the given CSV data and 
 Only the tables matching the files given will be truncated.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/out --truncate
+BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out --truncate
 ```
 
 ## Loading synthetic data into your local database
