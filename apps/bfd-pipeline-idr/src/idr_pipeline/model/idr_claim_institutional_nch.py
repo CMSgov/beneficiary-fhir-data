@@ -154,6 +154,9 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
 
     # Columns from v2_mdcr_clm_dcmtn
+    clm_ptnt_cntl_num: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
     clm_bnft_enhncmt_1_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)

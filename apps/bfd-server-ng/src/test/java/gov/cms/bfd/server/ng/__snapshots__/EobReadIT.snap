@@ -3180,6 +3180,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
     "value" : "28977596005798RIF"
+  }, {
+    "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+    "value" : "00000000000002ABC"
   } ],
   "insurance" : [ {
     "coverage" : {
