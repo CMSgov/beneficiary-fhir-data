@@ -92,17 +92,17 @@ tables = [
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False) -> None:
+def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False, is_snowflake: bool = False) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
         file = table["csv_name"]
-        _load_file(extractor, src_folder, file, sql_table, truncate)
+        _load_file(extractor, src_folder, file, sql_table, truncate, is_snowflake)
         extractor.commit()
 
 
 def _load_file(
-    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool
+    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool, is_snowflake: bool
 ) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
@@ -118,12 +118,18 @@ def _load_file(
             # skip empty files
             if reader.fieldnames is None:
                 continue
-            sql_table = full_table.split(".")[1]
             # Only truncate once we know we have a matching table.
             if truncate:
-                extractor.execute(f"TRUNCATE TABLE {sql_table}")
+                extractor.execute(f"TRUNCATE TABLE {full_table}")
+
+            # snowflake wants us to declare our database first.
+            print("is this snowflake??" + str(is_snowflake))
+            if is_snowflake:
+                extractor.execute(f"USE {SETTINGS.idr_database}")
+
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
+            sql_table = full_table.split(".")[1]
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
@@ -169,5 +175,6 @@ if __name__ == "__main__":
         if args.database_type == "snowflake"
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         args.base_dir or default_dir,
+        args.database_type == "snowflake",
         args.truncate,
     )
