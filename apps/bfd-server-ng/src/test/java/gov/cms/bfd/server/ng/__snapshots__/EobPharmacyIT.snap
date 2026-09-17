@@ -110,6 +110,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
+        "value" : 2256829.86
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "TOT_RX_CST_AMT",
+          "display" : "Total RX Cost Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 388684.08
       },
       "category" : {
@@ -164,22 +180,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_RPTD_GAP_DSCNT_AMT",
           "display" : "Claim Line Reported Gap Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 2256829.86
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "submitted",
-          "display" : "Submitted Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "code" : "TOT_RX_CST_AMT",
-          "display" : "Total RX Cost Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -725,6 +725,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
+        "value" : 2575607.57
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "TOT_RX_CST_AMT",
+          "display" : "Total RX Cost Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 585091.77
       },
       "category" : {
@@ -779,22 +795,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_RPTD_GAP_DSCNT_AMT",
           "display" : "Claim Line Reported Gap Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 2575607.57
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "submitted",
-          "display" : "Submitted Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "code" : "TOT_RX_CST_AMT",
-          "display" : "Total RX Cost Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }

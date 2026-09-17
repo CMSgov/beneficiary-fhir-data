@@ -703,18 +703,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -795,30 +783,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_NCVRD_PD_AMT",
-          "display" : "Amount Paid for Noncovered Product or Service",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-          "display" : "Other Third Party Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.35
       },
       "category" : {
@@ -829,30 +793,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         }, {
           "code" : "CLM_LINE_SBMT_CHRG_AMT",
           "display" : "Line Submitted Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -885,6 +825,66 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         }, {
           "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
           "display" : "Revenue Center 2nd MSP Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_NCVRD_PD_AMT",
+          "display" : "Amount Paid for Noncovered Product or Service",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
+          "display" : "Other Third Party Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2142,18 +2142,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -2234,30 +2222,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_NCVRD_PD_AMT",
-          "display" : "Amount Paid for Noncovered Product or Service",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-          "display" : "Other Third Party Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.35
       },
       "category" : {
@@ -2268,30 +2232,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         }, {
           "code" : "CLM_LINE_SBMT_CHRG_AMT",
           "display" : "Line Submitted Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2324,6 +2264,66 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         }, {
           "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
           "display" : "Revenue Center 2nd MSP Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_NCVRD_PD_AMT",
+          "display" : "Amount Paid for Noncovered Product or Service",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
+          "display" : "Other Third Party Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3201,18 +3201,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
-          "display" : "Therapy Amount Applied to Limit",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
           "code" : "coinsurance",
           "display" : "Co-insurance",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
@@ -3305,18 +3293,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
-          "display" : "Purchase Price Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.35
       },
       "category" : {
@@ -3354,6 +3330,30 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "coding" : [ {
           "code" : "CLM_LINE_OTAF_AMT",
           "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
+          "display" : "Therapy Amount Applied to Limit",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
+          "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3957,18 +3957,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
-        "value" : 992.09
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
-          "display" : "Therapy Amount Applied to Limit",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0
       },
       "category" : {
@@ -4065,18 +4053,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
-          "display" : "Purchase Price Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.35
       },
       "category" : {
@@ -4108,30 +4084,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 9650.03
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
-          "display" : "Professional Interest Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 2676.69
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
-          "display" : "Line Primary Payer Allowed Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 4517.0
       },
       "category" : {
@@ -4158,6 +4110,54 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         }, {
           "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
           "display" : "Screen Savings Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 9650.03
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
+          "display" : "Professional Interest Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 2676.69
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
+          "display" : "Line Primary Payer Allowed Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 992.09
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
+          "display" : "Therapy Amount Applied to Limit",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
+          "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5388,18 +5388,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 13.45
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-          "display" : "Blood Deductible Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -5496,30 +5484,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 1378.33
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 255.83
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-          "display" : "Revenue Center Reduced Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 12.95
       },
       "category" : {
@@ -5546,6 +5510,42 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         }, {
           "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
           "display" : "Revenue Center 2nd MSP Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 13.45
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+          "display" : "Blood Deductible Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 1378.33
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 255.83
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7171,18 +7171,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 13.45
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-          "display" : "Blood Deductible Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -7279,30 +7267,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 1378.33
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 255.83
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-          "display" : "Revenue Center Reduced Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 12.95
       },
       "category" : {
@@ -7329,6 +7293,42 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         }, {
           "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
           "display" : "Revenue Center 2nd MSP Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 13.45
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+          "display" : "Blood Deductible Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 1378.33
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 255.83
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+          "display" : "Revenue Center Reduced Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
