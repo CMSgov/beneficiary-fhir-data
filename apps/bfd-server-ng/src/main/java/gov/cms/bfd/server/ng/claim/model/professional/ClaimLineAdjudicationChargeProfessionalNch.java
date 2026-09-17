@@ -27,14 +27,16 @@ class ClaimLineAdjudicationChargeProfessionalNch
 
   @Override
   Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
-    return Stream.of(
-        AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
-            professionalInterestAmount),
-        AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT.toFhirAdjudication(
-            primaryPayerAllowedAmount),
-        AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT.toFhirAdjudication(
-            primaryPayerPaidAmount),
-        AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
-            screenSavingsAmount));
+    return Stream.concat(
+        Stream.of(
+            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT.toFhirAdjudication(
+                primaryPayerPaidAmount),
+            AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
+                screenSavingsAmount)),
+        Stream.of(
+            AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
+                professionalInterestAmount),
+            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT
+                .toFhirAdjudication(primaryPayerAllowedAmount)));
   }
 }

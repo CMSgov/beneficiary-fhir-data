@@ -60,26 +60,28 @@ public abstract class ClaimLineAdjudicationChargeProfessionalBase {
                     .setDisplay("Other")));
 
     return Stream.concat(
+            Stream.concat(
+                Stream.of(
+                    AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(
+                        coinsrncAmount),
+                    AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(
+                        allowedChargeAmount),
+                    AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
+                        deductibleAmount),
+                    AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
+                    AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
+                        providerPaymentAmount),
+                    AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(
+                        coveredPaidAmount),
+                    AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
+                        submittedChargeAmount),
+                    benefitPaymentStatus),
+                subClassCharges()),
             Stream.of(
                 AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
                     therapyAmountAppliedToLimit),
-                AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(
-                    coinsrncAmount),
-                AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(
-                    allowedChargeAmount),
-                AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-                    deductibleAmount),
-                AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
-                AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
-                    providerPaymentAmount),
-                AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(
-                    coveredPaidAmount),
                 AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
-                    purchasePriceAmount),
-                AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
-                    submittedChargeAmount),
-                benefitPaymentStatus),
-            subClassCharges())
+                    purchasePriceAmount)))
         .toList();
   }
 
