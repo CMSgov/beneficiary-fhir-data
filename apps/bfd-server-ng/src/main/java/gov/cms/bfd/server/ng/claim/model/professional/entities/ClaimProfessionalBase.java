@@ -1,33 +1,25 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
-import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for professional claim types (NCH and Shared Systems). */
@@ -35,25 +27,43 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 public abstract class ClaimProfessionalBase extends ClaimBase {
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
-  @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
-  abstract AdjudicationChargeBase getAdjudicationCharge();
+  // region Hook Methods
+
+  /**
+   * retrieve total components and adjudication components.
+   *
+   * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
+   */
+  abstract Optional<AdjudicationEmbedded> getAdjudication();
+
+  /**
+   * get a ClaimContractorNumber from some data sources.
+   *
+   * @return the ClaimContractorNumber
+   */
+  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
 
   /**
    * Returns supporting-info components that are specific to the subclass.
    *
-   * @param eob ExplanationOfBenefit
    * @return list of subclass-specific supporting-info components
    */
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
-      ExplanationOfBenefit eob);
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo();
+
+  /**
+   * return Observations while building SupportingInfo (Shared Systems), default no-op.
+   *
+   * @return Observations to be added to the eob's contained
+   */
+  protected List<Observation> getSubclassContainedObservations() {
+    return List.of();
+  }
 
   /**
    * Adds any adjudication entries that are unique to the subclass.
@@ -70,7 +80,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
 
-  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
+  // endregion
 
   /** {@inheritDoc} */
   @Override
@@ -83,12 +93,13 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     addProviders(eob);
     addAllSupportingInfo(eob);
     addCareTeam(eob);
-    getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
-    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
-    eob.setPayment(getClaimPaymentAmount().toFhir());
+    getAdjudication().ifPresent(ac -> ac.toFhirTotal().forEach(eob::addTotal));
+    getAdjudication().ifPresent(ac -> ac.toFhirAdjudication().forEach(eob::addAdjudication));
+    getPaymentComponent().toFhir().ifPresent(eob::setPayment);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
+    addContainedObservations(eob);
 
     return sortedEob(eob);
   }
@@ -107,8 +118,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         line -> {
           var hasLineDiagnosis = item.getClaimLine().getClaimLineDiagnosisCode().isPresent();
           if (hasLineDiagnosis) {
-            item.getProcedure()
-                .flatMap(ClaimProcedureBase::getDiagnosisKey)
+            item.getProcedureOptional()
+                .flatMap(ProcedureBase::getDiagnosisKey)
                 .map(diagnosisSequenceMap::get)
                 .ifPresent(sequences -> sequences.forEach(line::addDiagnosisSequence));
           }
@@ -135,7 +146,9 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         .ifPresent(eob::addCareTeam);
 
     // Procedure is present on SS items but not on NCH items; the item exposes it as Optional.
-    item.getProcedure().flatMap(ClaimProcedureBase::toFhirProcedure).ifPresent(eob::addProcedure);
+    item.getProcedureOptional()
+        .flatMap(ProcedureBase::toFhirProcedure)
+        .ifPresent(eob::addProcedure);
 
     // Line-level observation (NCH only; SS items return empty).
     item.getClaimLine()
@@ -168,14 +181,11 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var sharedHeaderSupportingInfo =
         Stream.of(
                 claimSubmissionDate.toFhir(supportingInfoFactory),
-                Optional.of(claimContractorNumber)
-                    .flatMap(opt -> opt)
-                    .map(c -> c.toFhir(supportingInfoFactory)),
-                clinicalTrialNumber.toFhir(supportingInfoFactory))
+                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
-    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo(eob))
+    Stream.of(sharedHeaderSupportingInfo, getSubclassSupportingInfo())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
@@ -192,17 +202,12 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
-  @Override
-  public Optional<Integer> getDrgCode() {
-    return Optional.empty();
-  }
-
   private Map<String, List<Integer>> buildDiagnosisSequences(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     var diagnosisSequenceMap = new HashMap<String, List<Integer>>();
 
     for (var item : getItems()) {
-      item.getProcedure()
+      item.getProcedureOptional()
           .ifPresent(
               procedure ->
                   addDiagnosisAndTrackSequence(
@@ -212,7 +217,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   }
 
   private void addDiagnosisAndTrackSequence(
-      ClaimProcedureBase procedure,
+      ProcedureBase procedure,
       ExplanationOfBenefit eob,
       SequenceGenerator sequenceGenerator,
       Map<String, List<Integer>> diagnosisSequenceMap) {
@@ -230,5 +235,14 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
                 diagnosisSequenceMap
                     .computeIfAbsent(key, _ -> new ArrayList<>())
                     .add(diagnosisComponent.getSequence()));
+  }
+
+  private void addContainedObservations(ExplanationOfBenefit eob) {
+    getSubclassContainedObservations().forEach(eob::addContained);
+  }
+
+  @Override
+  public Optional<Integer> getDrgCode() {
+    return Optional.empty();
   }
 }

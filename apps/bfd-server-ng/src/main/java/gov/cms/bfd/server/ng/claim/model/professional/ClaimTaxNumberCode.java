@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -9,7 +10,12 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 
-/** Represents the claim tax number code as an extension on an EOB.line. */
+/**
+ * Represents the claim tax number code as an extension on an EOB.line. Resource -
+ * ExplanationOfBenefit.ItemComponent.Extension Domain - [ Professional ] Profiles - [ CMS ] Source
+ * - [ SS, NCH ]
+ */
+@Embeddable
 public class ClaimTaxNumberCode {
   @Column(name = "clm_rndrg_prvdr_tax_num")
   private Optional<String> taxNumber;

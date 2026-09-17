@@ -2,12 +2,12 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRxNumber;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineHCTHGBTestTypeCode;
-import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.professional.ClaimProcedureProfessional;
+import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.ProcedureProfessional;
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -34,9 +34,10 @@ import org.hl7.fhir.r4.model.Reference;
 @EqualsAndHashCode
 @Table(name = "claim_item_professional_ss", schema = "idr")
 public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
+
   @EmbeddedId private ClaimItemId claimItemId;
-  @Embedded private ClaimLineProfessionalSharedSystems claimLine;
-  @Embedded private ClaimProcedureProfessional claimProcedure;
+  @Embedded private ClaimLineProfessionalCmsSharedSystems claimLine;
+  @Embedded private ProcedureProfessional claimProcedure;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @Column(name = "clm_line_hct_lvl_num")
@@ -53,16 +54,6 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
   private ClaimProfessionalCmsSharedSystems claim;
-
-  @Override
-  public Optional<ClaimProcedureBase> getProcedure() {
-    return Optional.of(claimProcedure);
-  }
-
-  @Override
-  public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
-    return Optional.of(claimLine.getHcpcsCode());
-  }
 
   /**
    * Return claim observation data if available.
@@ -126,5 +117,15 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
           observation.addPerformer(new Reference().setIdentifier(identifier));
         });
     return Optional.of(observation);
+  }
+
+  @Override
+  public Optional<ProcedureBase> getProcedureOptional() {
+    return Optional.of(claimProcedure);
+  }
+
+  @Override
+  public ClaimLineBase getClaimLine() {
+    return claimLine;
   }
 }

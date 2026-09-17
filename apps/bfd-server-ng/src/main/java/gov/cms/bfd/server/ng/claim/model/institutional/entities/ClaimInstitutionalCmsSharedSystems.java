@@ -6,15 +6,15 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalCmsSharedSystemsSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -26,6 +26,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -44,17 +45,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr")
 @SuppressWarnings({"java:S6539", "java:S2293"})
-public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
+public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase
+    implements SharedSystemsClaim {
 
-  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
-  @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
+  @Embedded private AdjudicationInstitutionalCmsSharedSystems adjudicationCharge;
+  @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded
   private ClaimRecordType claimRecordType;
-
-  @Embedded private ClaimInstitutionalCmsSharedSystemsSupportingInfo supportingInfo;
 
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
@@ -67,11 +67,28 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
+  private SortedSet<ClaimItemInstitutionalCmsSharedSystems> claimItems;
 
   @Column(name = "clm_pd_stus_cd")
   @Convert(converter = ClaimPaidStatusCodeConverter.class)
   private ClaimPaidStatusCode claimPaidStatusCode;
+
+  /**
+   * Creates ExplanationOfBenefit components.
+   *
+   * @param options claim filter options
+   * @param claimState computed claim state
+   * @return ExplanationOfBenefit
+   */
+  @Override
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
+    getClaimItems().stream()
+        .map(ClaimItemInstitutionalCmsSharedSystems::toFhir)
+        .filter(Optional::isPresent)
+        .forEach(adjudications -> adjudications.get().forEach(eob::addAdjudication));
+    return eob;
+  }
 
   @Override
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {
@@ -79,21 +96,56 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
   }
 
   @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+  public Optional<ClaimRecordType> getClaimRecordTypeOptional() {
     return Optional.of(claimRecordType);
-  }
-
-  @Override
-  public List<ClaimValue> getClaimValues() {
-    return getClaimItems().stream()
-        .map(ClaimItemInstitutionalSharedSystems::getClaimValue)
-        .toList();
   }
 
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return List.of();
+    return Stream.of(
+            Stream.of(
+                    claimRecordType.toFhir(supportingInfoFactory),
+                    Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
+                    buildAuditStatusSupportingInfo())
+                .flatMap(Optional::stream)
+                .toList(),
+            getDateSupportingInfo().toFhir(supportingInfoFactory),
+            getSupportingInfo().toFhir(supportingInfoFactory))
+        .flatMap(Collection::stream)
+        .toList();
+  }
+
+  @Override
+  public List<ClaimValue> getClaimValues() {
+    return getClaimItems().stream()
+        .map(ClaimItemInstitutionalCmsSharedSystems::getClaimValue)
+        .toList();
+  }
+
+  /** NCH has no additional care-team members beyond the referring provider added by the base. */
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    // no-op for SS
+  }
+
+  @Override
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
+    super.addSubclassAdjudication(eob);
+
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+  }
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return metaSourceSk;
   }
 
   /**
@@ -103,18 +155,6 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
    */
   public static SystemType getSystemType() {
     return SystemType.SS;
-  }
-
-  /** SS record-type supporting info from limited to one entry. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo() {
-    return Stream.of(
-            claimRecordType.toFhir(supportingInfoFactory),
-            Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),
-            buildAuditStatusSupportingInfo())
-        .flatMap(Optional::stream)
-        .toList();
   }
 
   private Optional<ExplanationOfBenefit.SupportingInformationComponent>
@@ -128,39 +168,5 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalBase {
                 ClaimAuditTrailStatusCode.tryFromCode(
                     getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA))
         .map(code -> code.toFhir(supportingInfoFactory));
-  }
-
-  /** NCH has no additional care-team members beyond the referring provider added by the base. */
-  @Override
-  protected void addSubclassCareTeam(
-      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
-    // no-op for SS
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return new TreeSet<ClaimItemBase>(getClaimItems());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
-  }
-
-  /**
-   * Creates ExplanationOfBenefit components.
-   *
-   * @param options claim filter options
-   * @param claimState computed claim state
-   * @return ExplanationOfBenefit
-   */
-  @Override
-  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
-    var eob = super.toFhir(options, claimState);
-    getClaimItems().stream()
-        .map(ClaimItemInstitutionalSharedSystems::toFhir)
-        .filter(Optional::isPresent)
-        .forEach(adjudications -> adjudications.get().forEach(eob::addAdjudication));
-    return eob;
   }
 }
