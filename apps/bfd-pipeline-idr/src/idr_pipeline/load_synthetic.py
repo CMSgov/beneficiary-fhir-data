@@ -96,14 +96,14 @@ def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
-        if truncate:
-            extractor.execute(f"TRUNCATE TABLE {sql_table}")
         file = table["csv_name"]
-        _load_file(extractor, src_folder, file, sql_table)
+        _load_file(extractor, src_folder, file, sql_table, truncate)
         extractor.commit()
 
 
-def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: str) -> None:
+def _load_file(
+    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool
+) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
     # valid path
@@ -119,6 +119,9 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             if reader.fieldnames is None:
                 continue
             sql_table = full_table.split(".")[1]
+            # Only truncate once we know we have a matching table.
+            if truncate:
+                extractor.execute(f"TRUNCATE TABLE {sql_table}")
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
             db_columns = extractor.query(

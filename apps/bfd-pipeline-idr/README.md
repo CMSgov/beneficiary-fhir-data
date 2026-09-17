@@ -78,19 +78,27 @@ Data is loaded into a live environment from our Snowflake dev instance
 
 This will load the current contents of Snowflake into the environment.
 
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh
+```
+
+To first ingest new data into Snowflake before loading, supply a folder containing the CSV files you wish to load as a positional argument.
+
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
+```
+
 > [!NOTE]
 >
 > By default, loading synthetic data does not truncate existing tables before loading. This allows additional synthetic data to be appended.
 > To perform a fresh load, pass the '--truncate' flag to the pipeline or in 'load_synthetic.py'
 
-```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh
-```
 
 This will first _replace_ the contents in Snowflake with the given CSV data and then load it into the environment.
+Only the tables matching the files given will be truncated.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
+BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data --truncate
 ```
 
 ## Loading synthetic data into your local database
