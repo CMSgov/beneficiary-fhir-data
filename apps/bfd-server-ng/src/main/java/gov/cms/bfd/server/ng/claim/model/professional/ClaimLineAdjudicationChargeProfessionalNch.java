@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -14,10 +17,12 @@ class ClaimLineAdjudicationChargeProfessionalNch
     extends ClaimLineAdjudicationChargeProfessionalBase {
 
   @Column(name = "clm_line_prfnl_intrst_amt")
-  private BigDecimal professionalInterestAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> professionalInterestAmount;
 
   @Column(name = "clm_mdcr_prmry_pyr_alowd_amt")
-  private BigDecimal primaryPayerAllowedAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> primaryPayerAllowedAmount;
 
   @Column(name = "clm_bene_prmry_pyr_pd_amt")
   private BigDecimal primaryPayerPaidAmount;
@@ -29,14 +34,15 @@ class ClaimLineAdjudicationChargeProfessionalNch
   Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
     return Stream.concat(
         Stream.of(
-            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT.toFhirAdjudication(
-                primaryPayerPaidAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
-                screenSavingsAmount)),
+            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT
+                .toFhirAdjudicationNonOptional(primaryPayerPaidAmount),
+            AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT
+                .toFhirAdjudicationNonOptional(screenSavingsAmount)),
         Stream.of(
-            AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
-                professionalInterestAmount),
-            AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT
-                .toFhirAdjudication(primaryPayerAllowedAmount)));
+                AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
+                    professionalInterestAmount),
+                AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT
+                    .toFhirAdjudication(primaryPayerAllowedAmount))
+            .flatMap(Optional::stream));
   }
 }

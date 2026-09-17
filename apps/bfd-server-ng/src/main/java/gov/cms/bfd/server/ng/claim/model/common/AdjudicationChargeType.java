@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.math.BigDecimal;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -457,29 +458,47 @@ public enum AdjudicationChargeType {
     return category;
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(BigDecimal value) {
+  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationNonOptional(
+      BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(int value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(Integer.toUnsignedLong(value));
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication(
+      Optional<BigDecimal> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setAmount(USD.toFhir(adjudicationValue)));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(long value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(value);
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationUnsignedType(
+      Optional<Integer> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(Integer.toUnsignedLong(adjudicationValue)));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(
-      BigDecimal value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(value);
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationLong(
+      Optional<Long> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(adjudicationValue));
+  }
+
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationDecimalType(
+      Optional<BigDecimal> value) { // is this method needed? seems like a dupe of the normal one??
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(adjudicationValue));
   }
 
   public ExplanationOfBenefit.TotalComponent toFhirTotal(BigDecimal value) {
