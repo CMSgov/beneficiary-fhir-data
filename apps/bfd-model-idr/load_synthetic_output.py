@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -31,7 +32,6 @@ from constants import (
     BENE_TP,
     BENE_XREF,
     CLM,
-    CLM_ANSI_SGNTR,
     CLM_DCMTN,
     CLM_DT_SGNTR,
     CLM_FISS,
@@ -83,9 +83,6 @@ class OutputDestinationWriter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def get_cntrct_pbp_nums(self) -> list[dict[str, Any]]: ...
-
-    @abstractmethod
     def close(self) -> None: ...
 
 
@@ -106,9 +103,6 @@ class CsvWriter(OutputDestinationWriter):
             df = df[cols]
         df.to_csv(self.out_dir / f"{table_name}.csv", index=False)
 
-    def get_cntrct_pbp_nums(self) -> list[dict[str, Any]]:
-        return []
-
     def close(self) -> None:
         pass
 
@@ -116,11 +110,9 @@ class CsvWriter(OutputDestinationWriter):
 class SnowflakeWriter(OutputDestinationWriter):
     def __init__(
         self,
-        chunk_size: int = 20000,
         parallel: int = 8,
         compression: str = "snappy",
     ) -> None:
-        self.chunk_size = chunk_size
         self.parallel = parallel
         self.compression = compression
         self.database = _require_env("IDR_DATABASE")
@@ -186,12 +178,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             yield buffer
 
     def get_cntrct_pbp_nums(self) -> list[dict[str, Any]]:
-        rows = (
-            self.qualified_table(CNTRCT_PBP_NUM)
-            .select("CNTRCT_PBP_SK", "CNTRCT_NUM", "CNTRCT_PBP_NUM")
-            .sort("CNTRCT_PBP_SK")
-            .collect()
-        )
+        rows = self.qualified_table(CNTRCT_PBP_NUM).collect()
         return [row.as_dict() for row in rows]
 
     def get_cntrct_pbp_cntcts(self) -> list[dict[str, Any]]:
@@ -242,46 +229,35 @@ class SnowflakeWriter(OutputDestinationWriter):
         self, df: pd.DataFrame, database: str, schema: str, table_name: str
     ) -> pd.DataFrame:
         col_types = self._get_column_types(database, schema, table_name)
+        # perf_start = time.perf_counter()
         for column in df.columns:
             metadata = col_types.get(column.upper())
             data_type = metadata["data_type"]
             scale = metadata["scale"]
             if data_type == "TIMESTAMP_TZ":
-                # TODO: unify the below plz
-                # print(table_name)
-                # print(df[column])
-                # works for patients gen:
-                # cleaned = df[column].astype(str).str.strip().str.replace("T", " ")
-                # df[column] = cleaned.apply(
-                # lambda x: pd.Timestamp(x, unit="us", tz="UTC")
-                # if x and x != "None" and x != "nan"
-                # else pd.NaT
-                # )
-                # works for claims gen:
-                # .astype('datetime64[ns, UTC]')
-                # dt_series.dt.strftime('%Y-%m-%d').where(dt_series.notna(), None)
-
-                df[column] = pd.to_datetime(df[column], errors="coerce", utc=True)
-                # print("after transform")
-                # print(df[column])
-            elif data_type == "DATE":
+                df[column] = df[column].apply(
+                    lambda x: datetime.datetime.fromisoformat(str(x)).replace(tzinfo=None)
+                    if pd.notna(x) and str(x) not in ("", "NaT")
+                    else None
+                )
                 df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
-                # format="%Y-%m-%d",
-                #'YYYY-MM-DD"T"HH24:MI:SS.FF6'
+            if data_type == "DATE":
+                df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
             elif data_type == "NUMBER":
                 df[column] = pd.to_numeric(
                     df[column],
                     errors="coerce",
                 )
                 if scale == 0:
-                    df[column] = df[column].where(df[column].notnull(), None).astype(object)
+                    df[column] = np.where(df[column].notnull(), df[column], None)
             elif data_type == "TEXT":
-                df[column] = df[column].apply(
-                    lambda x: None
-                    if pd.isna(x) or str(x).strip().lower() in ["nan", "none"]
-                    else str(x)
-                )
+                stringified_col = df[column].astype(str)
+                cleaned_col = stringified_col.str.strip().str.lower()
+                mask = df[column].isna() | cleaned_col.isin(["nan", "none"])
+                df[column] = np.where(mask, None, stringified_col)
                 df[column] = df[column].astype(object)
+        # duration = time.perf_counter() - perf_start
+        # print(f"It took {duration:.6f} seconds to coerce types for {table_name}")
         return df
 
     def write_table(
@@ -296,6 +272,7 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         df = pd.DataFrame(data)
+        # source_df = df.to_snowpark()
 
         # filter out columns not in our schema. Only used in generation for certain fields we
         # actually use
@@ -306,6 +283,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         # coerce the types so Pandas doesn't guess the types
         df = self._coerce_dataframe_types(df, database, schema, resolved_table_name)
 
+        perf_start = time.perf_counter()
         success, _, num_rows, _ = write_pandas(
             conn=self.conn,
             df=df,
@@ -313,15 +291,16 @@ class SnowflakeWriter(OutputDestinationWriter):
             database=database,
             schema=schema,
             overwrite=truncate,
-            chunk_size=self.chunk_size,
             parallel=self.parallel,
             compression=self.compression,
             use_logical_type=True,
         )
+        duration = time.perf_counter() - perf_start
+        print(f"It took {duration:.6f} seconds to insert rows {table_name}")
 
         if not success:
             raise RuntimeError(f"write_pandas reported failures writing to {table_name}")
-        print(f"Wrote {num_rows} rows to {table_name}")
+        print(f"Inserted {num_rows} rows to {table_name}")
 
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
@@ -399,24 +378,23 @@ class SnowflakeWriter(OutputDestinationWriter):
             auto_create_table=True,
             overwrite=True,
             table_type="temporary",
-            chunk_size=self.chunk_size,
             parallel=self.parallel,
             compression=self.compression,
             use_logical_type=True,
         )
         target = self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
+        pks = self.get_primary_keys(table_name)
 
-        excluded_columns = [*_PRIMARY_KEYS[table_name], IDR_INSRT_TS, IDR_UPDT_TS]
+        excluded_columns = [*pks, IDR_INSRT_TS, IDR_UPDT_TS]
         update_cols = [c for c in df.columns if c not in excluded_columns]
 
         join_expr = None
-        for pk_col in _PRIMARY_KEYS[table_name]:
-            cond = target[pk_col] == source[pk_col]
+        for pk in pks:
+            cond = target[pk] == source[pk]
             join_expr = cond if join_expr is None else (join_expr & cond)
 
         merge_clauses = []
 
-        # TODO: can simplify this
         if update_cols:
             # v2_mdcr_clm_rlt_cond_sgntr_mbr would not have any columns left to check for updates
             # after the exclusion from above
@@ -446,86 +424,22 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.close()
         self.conn.close()
 
+    def get_primary_keys(self, table_name: str) -> list[str]:
+        cleaned_table_name, database, schema = self.resolve_target_table(table_name)
+        qualified_table = f"{database}.{schema}.{cleaned_table_name}"
+        pk_df = self.session.sql(f"SHOW PRIMARY KEYS IN TABLE {qualified_table}")
+        return [row["column_name"] for row in pk_df.select('"column_name"').collect()]
+
 
 def _require_env(name: str) -> str:
     val = os.environ.get(name)
     if not val:
         print(
             f"Missing required env variable {name}. "
-            + "Source medicare_start_date_val with BFD_ENV set before running."
+            + "Source load-synthetic-credentials.sh with BFD_ENV set before running."
         )
         sys.exit(1)
     return val
-
-
-_PRIMARY_KEYS: dict[str, list[str]] = {
-    BENE_HSTRY: ["BENE_SK", "IDR_TRANS_EFCTV_TS"],
-    BENE_MBI_ID: ["BENE_MBI_ID", "IDR_TRANS_EFCTV_TS"],
-    BENE_STUS: ["BENE_SK", "MDCR_STUS_BGN_DT", "MDCR_STUS_END_DT", "IDR_TRANS_EFCTV_TS"],
-    BENE_ENTLMT: [
-        "BENE_SK",
-        "BENE_RNG_BGN_DT",
-        "BENE_RNG_END_DT",
-        "BENE_MDCR_ENTLMT_TYPE_CD",
-        "IDR_TRANS_EFCTV_TS",
-    ],
-    BENE_ENTLMT_RSN: ["BENE_SK", "BENE_RNG_BGN_DT", "BENE_RNG_END_DT", "IDR_TRANS_EFCTV_TS"],
-    BENE_TP: [
-        "BENE_SK",
-        "BENE_RNG_BGN_DT",
-        "BENE_RNG_END_DT",
-        "BENE_TP_TYPE_CD",
-        "IDR_TRANS_EFCTV_TS",
-    ],
-    BENE_XREF: ["BENE_SK", "BENE_HICN_NUM", "SRC_REC_CRTE_TS"],
-    BENE_DUAL: ["BENE_SK", "BENE_MDCD_ELGBLTY_BGN_DT", "IDR_TRANS_EFCTV_TS"],
-    BENE_MAPD_ENRLMT: ["BENE_SK", "BENE_ENRLMT_BGN_DT", "BENE_ENRLMT_PGM_TYPE_CD"],
-    BENE_MAPD_ENRLMT_RX: ["BENE_SK", "BENE_ENRLMT_PDP_RX_INFO_BGN_DT"],
-    BENE_LIS_CMBND: ["BENE_SK", "BENE_CMBND_DEEMD_EFCTV_DT", "IDR_TRANS_OBSLT_TS"],
-    CLM: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"],
-    CLM_DT_SGNTR: ["CLM_DT_SGNTR_SK"],
-    CLM_DCMTN: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"],
-    CLM_FISS: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"],
-    CLM_INSTNL: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"],
-    CLM_VAL: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK", "CLM_VAL_SQNC_NUM"],
-    CLM_PROD: [
-        "GEO_BENE_SK",
-        "CLM_DT_SGNTR_SK",
-        "CLM_TYPE_CD",
-        "CLM_NUM_SK",
-        "CLM_PROD_TYPE_CD",
-        "CLM_VAL_SQNC_NUM",
-    ],
-    CLM_PRFNL: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_NUM_SK", "CLM_TYPE_CD"],
-    CLM_LINE: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK", "CLM_LINE_NUM"],
-    CLM_LINE_INSTNL: [
-        "GEO_BENE_SK",
-        "CLM_DT_SGNTR_SK",
-        "CLM_TYPE_CD",
-        "CLM_NUM_SK",
-        "CLM_LINE_NUM",
-    ],
-    CLM_LINE_PRFNL: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK", "CLM_LINE_NUM"],
-    CLM_LINE_DCMTN: ["GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK", "CLM_LINE_NUM"],
-    CLM_LCTN_HSTRY: [
-        "GEO_BENE_SK",
-        "CLM_DT_SGNTR_SK",
-        "CLM_TYPE_CD",
-        "CLM_NUM_SK",
-        "CLM_LCTN_CD_SQNC_NUM",
-    ],
-    CLM_LINE_RX: ["CLM_UNIQ_ID", "CLM_LINE_NUM"],
-    CLM_RLT_COND_SGNTR_MBR: [
-        "CLM_RLT_COND_SGNTR_SK",
-        "CLM_RLT_COND_SGNTR_SQNC_NUM",
-        "CLM_RLT_COND_CD",
-    ],
-    CLM_ANSI_SGNTR: ["CLM_ANSI_SGNTR_SK"],
-    PRVDR_HSTRY: ["PRVDR_NPI_NUM"],
-    PRAUC: ["MBI_NUM", "UTN", "CURRENT_SEGMENT"],
-    CNTRCT_PBP_NUM: ["CNTRCT_PBP_SK"],
-    CNTRCT_PBP_CNTCT: ["CNTRCT_PBP_SK"],
-}
 
 
 class ClaimKeyRelation(StrEnum):

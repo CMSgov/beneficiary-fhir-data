@@ -24,8 +24,6 @@ class PriorAuthGeneratorUtil:
             if mbi and (row.get("IDR_LTST_TRANS_FLG") == "Y" or sk not in bene_sk_to_mbi):
                 bene_sk_to_mbi[sk] = mbi
 
-        print(f"length of bene_sk_to_mbi inside generator {len(bene_sk_to_mbi)}")
-
         # Build mapping of four_part_key and CLM_UNIQ_ID to the claim row
         fpk_to_clm = {four_part_key(row): row for row in out_tables[f.CLM]}
         uniq_id_to_clm = {row[f.CLM_UNIQ_ID]: row for row in out_tables[f.CLM]}

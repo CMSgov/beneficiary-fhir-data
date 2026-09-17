@@ -904,15 +904,18 @@ def generate(
             generated_type_1_npis,
             generated_type_2_npis,
         )
-        bene_sk_to_mbi = _get_bene_sk_to_mbi(files, writer, bene_sks_batch)
-        out_tables[f.PRAUC] = _generate_prior_auth(
-            gen_utils,
-            out_tables,
-            bene_sk_to_mbi,
-            generated_provider_histories,
-            generated_type_1_npis,
-            generated_type_2_npis,
-        )
+
+        if isinstance(writer, SnowflakeWriter) and truncate:
+            # Do not regenerate PRAUC directly from Snowflake. Punted for future work.
+            bene_sk_to_mbi = _get_bene_sk_to_mbi(files, writer, bene_sks_batch)
+            out_tables[f.PRAUC] = _generate_prior_auth(
+                gen_utils,
+                out_tables,
+                bene_sk_to_mbi,
+                generated_provider_histories,
+                generated_type_1_npis,
+                generated_type_2_npis,
+            )
 
         for table_name, rows in out_tables.items():
             if table_name == f.PRVDR_HSTRY or table_name not in _ClaimsFile:
@@ -925,7 +928,7 @@ def generate(
                 )
 
     writer.close()
-    print("Done generating synthetic claims and prior auth data for provided BENE_SKs")
+    print("Done generating synthetic claims/prior auth data for provided BENE_SKs")
 
 
 def get_bene_sks(
@@ -997,7 +1000,6 @@ def _generate_batch(
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in existing}
     clms_per_bene_sk = partition_rows(llist=existing[f.CLM], part_by=lambda x: int(x[f.BENE_SK]))
 
-    print(f"length of existing CLM_RLT_COND_SGNTR_MBR is {len(existing[f.CLM_RLT_COND_SGNTR_MBR])}")
     sgntr_mbr_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
         part_by=lambda x: str(x[f.CLM_RLT_COND_SGNTR_SK]),

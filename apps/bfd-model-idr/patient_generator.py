@@ -39,6 +39,8 @@ from row_adapter import RowAdapter
 
 fake = Faker()
 
+_BATCH_SIZE = 50_000
+
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
 parser.add_argument(
@@ -58,15 +60,15 @@ parser.add_argument(
     default=0,
     type=int,
     help=(
-        "Number of NEW patients to generate. Does not affect patients regenerated when a "
-        f"{BENE_HSTRY} file is provided"
+        "Number of NEW patients to generate. Does not affect patients regenerated when "
+        f"{BENE_HSTRY} is provided"
     ),
 )
 parser.add_argument(
     "--claims",
     action="store_true",
     help="Automatically generate claims after patient generation using the generated "
-    "SYNTHETIC_BENE_HSTRY.csv file",
+    "SYNTHETIC_BENE_HSTRY",
 )
 parser.add_argument(
     "--exclude-empty",
@@ -102,7 +104,7 @@ parser.add_argument(
 parser.add_argument(
     "--batch-size",
     type=int,
-    default=5_000,
+    default=_BATCH_SIZE,
     dest="batch_size",
     help="Batch size of BENE_SKs to process",
 )
@@ -216,8 +218,7 @@ def load_inputs():
     if isinstance(writer, SnowflakeWriter) and args.paths:
         print("CSV files should not be provided when destination is snowflake")
         sys.exit(1)
-
-    if isinstance(writer, SnowflakeWriter):
+    elif isinstance(writer, SnowflakeWriter):
         id_state = load_id_state(writer)
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
     else:
@@ -454,9 +455,11 @@ def _generate_contracts(
     generator: GeneratorUtil, writer: OutputDestinationWriter, truncate: bool, amount: int = 10
 ) -> None:
     # todo: check if we still want contracts amount to be fixed
-    existing_contracts = [
-        RowAdapter(row, loaded_from_file=True) for row in writer.get_cntrct_pbp_nums()
-    ]
+    existing_contracts = (
+        [RowAdapter(row, loaded_from_file=True) for row in writer.get_cntrct_pbp_nums()]
+        if isinstance(writer, SnowflakeWriter)
+        else []
+    )
     existing_contacts = (
         [RowAdapter(row, loaded_from_file=True) for row in writer.get_cntrct_pbp_cntcts()]
         if isinstance(writer, SnowflakeWriter)
@@ -501,7 +504,7 @@ if __name__ == "__main__":
     if args.claims:
         print("Generating claims for generated benes")
         try:
-            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
+            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY
             claims_args = [
                 sys.executable,
                 "claims_generator.py",
@@ -509,6 +512,8 @@ if __name__ == "__main__":
 
             if args.destination == "snowflake":
                 claims_args.extend(["--destination", "snowflake"])
+                if args.truncate:
+                    claims_args.extend(["--truncate", "True"])
             else:
                 claims_args.extend(
                     [

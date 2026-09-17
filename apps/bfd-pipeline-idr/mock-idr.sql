@@ -165,7 +165,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
-    cntrct_pbp_sk BIGINT NOT NULL,
+    cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
     cntrct_drug_plan_ind_cd VARCHAR(1) NOT NULL,
     cntrct_pbp_type_cd VARCHAR(2) NOT NULL,
     cntrct_pbp_sk_efctv_dt DATE,

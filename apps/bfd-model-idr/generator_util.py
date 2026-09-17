@@ -40,7 +40,7 @@ from constants import (
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
 )
-from load_synthetic_output import OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
@@ -250,9 +250,9 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
     }
 
     _TEXT_MULTIPART_FIELDS: dict[str, tuple[str, list[tuple[str, int]]]] = {
-        "CLM_LINE_PMD_UNIQ_TRKNG_NUM": (CLM_LINE, [(string.ascii_letters + string.digits, 13)]),
-        "CLM_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_letters, 3)]),
-        "CLM_ORIG_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_letters, 3)]),
+        "CLM_LINE_PMD_UNIQ_TRKNG_NUM": (CLM_LINE, [(string.ascii_uppercase + string.digits, 13)]),
+        "CLM_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_uppercase, 3)]),
+        "CLM_ORIG_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_uppercase, 3)]),
         "PRVDR_EMPLR_ID_NUM": (PRVDR_HSTRY, [(string.digits, 9)]),
         "PRVDR_OSCAR_NUM": (PRVDR_HSTRY, [(string.digits, 6)]),
     }
@@ -315,8 +315,10 @@ the next valid identifier _encode_identifier """
 
 def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
     position = 0
-    for char, alphabet in zip(value, position_alphabets, strict=False):
-        position = position * len(alphabet) + alphabet.index(char)
+    multiplier = 1
+    for char, alphabet in zip(reversed(value), reversed(position_alphabets), strict=False):
+        position += alphabet.index(char) * multiplier
+        multiplier *= len(alphabet)
     return position
 
 
@@ -1200,9 +1202,15 @@ class GeneratorUtil:
                 GeneratorUtil.ALL_KEYS,
             ),
             (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_num, CNTRCT_PBP_NUM, GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, GeneratorUtil.ALL_KEYS),
         ]
+
+        if isinstance(destination, CsvWriter):
+            beneficiary_and_contract_exports.append(
+                (self.cntrct_pbp_num, CNTRCT_PBP_NUM, GeneratorUtil.ALL_KEYS)
+            )
+            beneficiary_and_contract_exports.append(
+                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, GeneratorUtil.ALL_KEYS)
+            )
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
             for data, table_name, cols in t:
