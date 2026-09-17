@@ -2,10 +2,14 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The adjudication charge for an institutional claim from nch. */
@@ -25,7 +29,8 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
   private BigDecimal deductibleAmount;
 
   @Column(name = "clm_blood_ncvrd_chrg_amt")
-  private BigDecimal bloodNoncoveredChargeAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodNoncoveredChargeAmount;
 
   @Column(name = "clm_ncvrd_chrg_amt")
   private BigDecimal noncoveredChargeAmount;
@@ -34,10 +39,12 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
   private BigDecimal coinsuranceAmount;
 
   @Column(name = "clm_blood_chrg_amt")
-  private BigDecimal bloodChargeAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodChargeAmount;
 
   @Column(name = "clm_blood_lblty_amt")
-  private BigDecimal bloodLiabilityAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodLiabilityAmount;
 
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
@@ -54,11 +61,13 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of(
-        AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
-        AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
-            bloodLiabilityAmount),
-        AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            bloodNoncoveredChargeAmount));
+    return Stream.of(
+            AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
+            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+                bloodLiabilityAmount),
+            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+                bloodNoncoveredChargeAmount))
+        .flatMap(Optional::stream)
+        .toList();
   }
 }

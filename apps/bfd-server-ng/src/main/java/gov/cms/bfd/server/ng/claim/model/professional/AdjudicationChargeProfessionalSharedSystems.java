@@ -2,10 +2,14 @@ package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The adjudication charge for a professional claim from the shared system. */
@@ -25,7 +29,8 @@ public class AdjudicationChargeProfessionalSharedSystems implements Adjudication
   private BigDecimal providerPaymentAmount;
 
   @Column(name = "clm_bene_intrst_pd_amt")
-  private BigDecimal beneInterestPaidAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> beneInterestPaidAmount;
 
   @Column(name = "clm_bene_pmt_coinsrnc_amt")
   private BigDecimal beneCoinsuranceAmount;
@@ -43,22 +48,28 @@ public class AdjudicationChargeProfessionalSharedSystems implements Adjudication
   private BigDecimal otherThirdPartyPayerPaidAmount;
 
   @Column(name = "clm_blood_lblty_amt")
-  private BigDecimal bloodLiabilityAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodLiabilityAmount;
 
   @Column(name = "clm_cob_ptnt_resp_amt")
-  private BigDecimal cobPatientResponsibilityAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> cobPatientResponsibilityAmount;
 
   @Column(name = "clm_prvdr_otaf_amt")
-  private BigDecimal providerObligationToAcceptAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> providerObligationToAcceptAmount;
 
   @Column(name = "clm_prvdr_rmng_due_amt")
-  private BigDecimal remainingAmountToProvider;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> remainingAmountToProvider;
 
   @Column(name = "clm_blood_ncvrd_chrg_amt")
-  private BigDecimal bloodNoncoveredChargeAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodNoncoveredChargeAmount;
 
   @Column(name = "clm_prvdr_intrst_pd_amt")
-  private BigDecimal providerInterestPaidAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> providerInterestPaidAmount;
 
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
@@ -79,19 +90,22 @@ public class AdjudicationChargeProfessionalSharedSystems implements Adjudication
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of(
-        AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(beneInterestPaidAmount),
-        AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
-            bloodLiabilityAmount),
-        AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            bloodNoncoveredChargeAmount),
-        AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudication(
-            cobPatientResponsibilityAmount),
-        AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudication(
-            providerInterestPaidAmount),
-        AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudication(
-            providerObligationToAcceptAmount),
-        AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudication(
-            remainingAmountToProvider));
+    return Stream.of(
+            AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+                beneInterestPaidAmount),
+            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+                bloodLiabilityAmount),
+            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+                bloodNoncoveredChargeAmount),
+            AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudication(
+                cobPatientResponsibilityAmount),
+            AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+                providerInterestPaidAmount),
+            AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudication(
+                providerObligationToAcceptAmount),
+            AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudication(
+                remainingAmountToProvider))
+        .flatMap(Optional::stream)
+        .toList();
   }
 }

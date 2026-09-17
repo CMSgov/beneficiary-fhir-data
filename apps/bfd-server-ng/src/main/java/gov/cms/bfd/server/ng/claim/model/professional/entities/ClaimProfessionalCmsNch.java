@@ -14,9 +14,11 @@ import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationChargeProfessionalNch;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -51,7 +53,8 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   private Optional<ClaimQueryCode> claimQueryCode;
 
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
-  private BigDecimal primaryProviderPaidAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> primaryProviderPaidAmount;
 
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
@@ -90,8 +93,12 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   /** NCH adjudication: payer-paid (primary provider paid) amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    eob.addAdjudication(
-        AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirAdjudication(primaryProviderPaidAmount));
+    if (primaryProviderPaidAmount.isPresent()) {
+      eob.addAdjudication(
+          AdjudicationChargeType.PAYER_PAID_AMOUNT
+              .toFhirAdjudication(primaryProviderPaidAmount)
+              .get());
+    }
   }
 
   @Override

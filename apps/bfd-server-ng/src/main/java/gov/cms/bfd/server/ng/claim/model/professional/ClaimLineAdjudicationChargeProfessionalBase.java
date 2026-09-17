@@ -1,11 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -37,10 +40,12 @@ public abstract class ClaimLineAdjudicationChargeProfessionalBase {
   private BigDecimal coinsrncAmount;
 
   @Column(name = "clm_line_carr_psych_ot_lmt_amt")
-  private BigDecimal therapyAmountAppliedToLimit;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> therapyAmountAppliedToLimit;
 
   @Column(name = "clm_line_prfnl_dme_price_amt")
-  private BigDecimal purchasePriceAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> purchasePriceAmount;
 
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     var benefitPaymentStatus = new ExplanationOfBenefit.AdjudicationComponent();
@@ -62,26 +67,28 @@ public abstract class ClaimLineAdjudicationChargeProfessionalBase {
     return Stream.concat(
             Stream.concat(
                 Stream.of(
-                    AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(
-                        coinsrncAmount),
-                    AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(
+                    AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT
+                        .toFhirAdjudicationNonOptional(coinsrncAmount),
+                    AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudicationNonOptional(
                         allowedChargeAmount),
-                    AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-                        deductibleAmount),
-                    AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
-                    AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
-                        providerPaymentAmount),
-                    AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(
+                    AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT
+                        .toFhirAdjudicationNonOptional(deductibleAmount),
+                    AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudicationNonOptional(
+                        benePaidAmount),
+                    AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT
+                        .toFhirAdjudicationNonOptional(providerPaymentAmount),
+                    AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudicationNonOptional(
                         coveredPaidAmount),
-                    AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
-                        submittedChargeAmount),
+                    AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT
+                        .toFhirAdjudicationNonOptional(submittedChargeAmount),
                     benefitPaymentStatus),
                 subClassCharges()),
             Stream.of(
-                AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
-                    therapyAmountAppliedToLimit),
-                AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
-                    purchasePriceAmount)))
+                    AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
+                        therapyAmountAppliedToLimit),
+                    AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT
+                        .toFhirAdjudication(purchasePriceAmount))
+                .flatMap(Optional::stream))
         .toList();
   }
 
