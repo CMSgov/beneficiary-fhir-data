@@ -58,6 +58,8 @@ public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
   public Optional<List<ExplanationOfBenefit.AdjudicationComponent>> toFhir() {
     return benePaymentAmount.map(
         bigDecimal ->
-            List.of(AdjudicationChargeType.LINE_MSP_COINSRNC_AMT.toFhirAdjudication(bigDecimal)));
+            List.of(
+                AdjudicationChargeType.LINE_MSP_COINSRNC_AMT.toFhirAdjudicationNonOptional(
+                    bigDecimal)));
   }
 }
