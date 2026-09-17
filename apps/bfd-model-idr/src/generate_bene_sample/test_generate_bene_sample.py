@@ -8,7 +8,7 @@ def test_generate_bene_sample_for_beneficiary() -> None:
         main,
         [
             "--bene-sk",
-            "313081892",
+            "47347082",
             "--source-directory",
             "../../../bfd-pipeline-idr/test_samples1",
             "--output-directory",

@@ -20,19 +20,29 @@ class SampleGenerator:
             print("Source directory not found. Run the generator or this will not go well.")
             sys.exit(1)
 
-        bene_line = self.read_bene_hist(bene_sk=bene_sk)
+
+
+        bene_line = None
+        mbi_lines = []
+        
+        for bene_tmp_line in self.read_bene_hist(bene_sk=bene_sk):
+            lastest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")
+            if (lastest_flag and lastest_flag == "Y"):
+                bene_line = bene_tmp_line
+            for mbi_line in self.read_mbi_lines(bene_hist_line=bene_tmp_line):
+                new_mbi_line = {
+                    "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
+                    "BENE_MBI_EFCTV_DT": extract_col_str(mbi_line, "BENE_MBI_EFCTV_DT"),
+                    "BENE_MBI_OBSLT_DT": extract_col_str(mbi_line, "BENE_MBI_OBSLT_DT"),
+                }
+                if new_mbi_line not in mbi_lines:
+                    mbi_lines.append(new_mbi_line)
+
+        if not bene_line:
+            print("No primary bene found.")
+            sys.exit(1)
 
         bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
-
-        # initialize list of all mbi with the current bene_sk
-        mbi_lines = [
-            {
-                "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
-                "BENE_MBI_EFCTV_DT": extract_col_str(mbi_line, "BENE_MBI_EFCTV_DT"),
-                "BENE_MBI_OBSLT_DT": extract_col_str(mbi_line, "BENE_MBI_OBSLT_DT"),
-            }
-            for mbi_line in self.read_mbi_lines(bene_hist_line=bene_line)
-        ]
 
         # add current bene_sk to the list of all_bene_sks
         all_bene_sks = [bene_sk]
@@ -56,6 +66,7 @@ class SampleGenerator:
         result_json = {
             "resourceType": "Beneficiary",
             "BENE_SK": bene_sk,
+            "lastUpdated": extract_col_str(bene_line, "IDR_UPDT_TS"),
             "BENE_1ST_NAME": extract_col_str(bene_line, "BENE_1ST_NAME"),
             "BENE_LAST_NAME": extract_col_str(bene_line, "BENE_LAST_NAME"),
             "BENE_MIDL_NAME": extract_col_str(bene_line, "BENE_MIDL_NAME"),
@@ -88,7 +99,7 @@ class SampleGenerator:
 
         print(f"Successfully generated sample JSON: {output_file_name}")
 
-    def read_bene_hist(self, bene_sk: str) -> dict[str, str]:
+    def read_bene_hist(self, bene_sk: str) -> list[dict[str, str]]:
         file_path = f"{self.source_directory}/SYNTHETIC_BENE_HSTRY.csv"
         if not Path(file_path).exists():
             print(
@@ -104,7 +115,7 @@ class SampleGenerator:
             print(f"No bene found for BENE_SK: {bene_sk}")
             sys.exit(1)
 
-        return record_matches.iloc[0]
+        return record_matches.to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_bene_hist_by_xref(
         self, bene_sk: str, bene_xref_efctv_sk: str | None
