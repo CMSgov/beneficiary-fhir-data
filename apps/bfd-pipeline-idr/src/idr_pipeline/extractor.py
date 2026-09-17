@@ -392,11 +392,16 @@ class SnowflakeExecutor(DbExecutor):
 
     @override
     def copy(self, file: CsvFile) -> None:
-        self.session.sql("create or replace temp stage source_stage").collect()
-        self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
+        db_schema=""
+        if "PRAUC" in str(file.csv_file):
+            db_schema = f"{SETTINGS.idr_database}.{SETTINGS._IDR_PRIOR_AUTH_SCHEMA}"
+        else:
+            db_schema = f"{SETTINGS.idr_database}.{SETTINGS._IDR_SCHEMA}"
+        self.session.sql(f"create or replace temp stage {db_schema}.source_stage").collect()
+        self.session.file.put(str(file.csv_file.absolute()), f"@{db_schema}.source_stage")
         self.session.sql(f"""COPY INTO
                             {file.table}
-                            FROM @source_stage/{file.csv_file.name}
+                            FROM @{db_schema}.source_stage/{file.csv_file.name}
                             FILE_FORMAT = (
                                 TYPE = 'CSV',
                                 PARSE_HEADER = TRUE

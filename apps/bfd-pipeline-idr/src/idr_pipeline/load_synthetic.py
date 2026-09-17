@@ -123,13 +123,12 @@ def _load_file(
                 extractor.execute(f"TRUNCATE TABLE {full_table}")
 
             # snowflake wants us to declare our database first.
-            print("is this snowflake??" + str(is_snowflake))
             if is_snowflake:
                 extractor.execute(f"USE {SETTINGS.idr_database}")
 
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
-            sql_table = full_table.split(".")[1]
+            sql_table = full_table.split(".")[2]
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
@@ -147,6 +146,7 @@ def _load_file(
             ]
             # skip empty files since we won't have any valid columns
             # which causes the COPY command below to fail
+
             if cols:
                 extractor.copy(CsvFile(cols, full_table, match))
 
