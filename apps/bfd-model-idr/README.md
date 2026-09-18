@@ -2,7 +2,7 @@
 
 ## `synthetic-data`
 
-The `synthetic-data` directory contains the synthetic data loaded into each of our environment's databases.
+The `../bfd-pipeline-idr/test_samples1` directory contains some synthetic-data, along with `../bfd-pipeline-idr/test_samples2`.
 
 **When adding new fields, take care to pass _every_ CSV into the `patient_generator.py` (see below) or else the resulting data may be invalid.**
 

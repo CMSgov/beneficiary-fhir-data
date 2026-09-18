@@ -92,7 +92,10 @@ tables = [
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False, is_snowflake: bool = False) -> None:
+def load_from_csv(
+    extractor: DbExecutor, src_folder: str, truncate: bool = False,
+    is_snowflake: bool = False
+) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
@@ -102,7 +105,8 @@ def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False
 
 
 def _load_file(
-    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool, is_snowflake: bool
+    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool,
+    is_snowflake: bool
 ) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
@@ -128,7 +132,7 @@ def _load_file(
 
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
-            sql_table = full_table.split(".")[2]
+            sql_table = full_table.split(".").pop()
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
@@ -175,6 +179,6 @@ if __name__ == "__main__":
         if args.database_type == "snowflake"
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         args.base_dir or default_dir,
-        args.database_type == "snowflake",
         args.truncate,
+        args.database_type == "snowflake",
     )
