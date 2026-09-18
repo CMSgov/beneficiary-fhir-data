@@ -200,7 +200,7 @@ uv run patient_generator.py
 Or, to load the v3 synthetic data (to add new fields):
 
 ```sh
-uv run patient_generator.py synthetic-data/*.csv
+uv run patient_generator.py ../bfd-pipeline-idr/test_samples1/*.csv
 ```
 
 _**NOTE**: the `bene_id` column in `SYNTHETIC_BENE_HSTRY.csv` is to reference the `bene_id` field used in V1/V2. It's not used for sample data generation here._
