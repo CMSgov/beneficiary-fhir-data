@@ -14,7 +14,7 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
-from claims_static import (
+from idr_model.claims_static import (
     FISS_CLM_TYPE_CDS,
     INSTITUTIONAL_CLAIM_TYPES,
     MCS_CLM_TYPE_CDS,
@@ -1354,3 +1354,4 @@ def generate(
 
 if __name__ == "__main__":
     generate()
+    

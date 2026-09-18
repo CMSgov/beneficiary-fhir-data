@@ -3,7 +3,7 @@ import string
 from collections.abc import Callable
 
 import field_constants as f
-from claims_static import (
+from idr_model.claims_static import (
     FISS_CLM_TYPE_CDS,
     MCS_CLM_TYPE_CDS,
     TARGET_RLT_COND_CODES,
