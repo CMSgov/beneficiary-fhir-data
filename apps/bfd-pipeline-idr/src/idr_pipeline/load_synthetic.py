@@ -93,8 +93,7 @@ tables = [
 
 
 def load_from_csv(
-    extractor: DbExecutor, src_folder: str, truncate: bool = False,
-    is_snowflake: bool = False
+    extractor: DbExecutor, src_folder: str, truncate: bool = False, is_snowflake: bool = False
 ) -> None:
     for table in tables:
         # Clear out any previous data
@@ -105,8 +104,12 @@ def load_from_csv(
 
 
 def _load_file(
-    extractor: DbExecutor, src_folder: str, file: str, full_table: str, truncate: bool,
-    is_snowflake: bool
+    extractor: DbExecutor,
+    src_folder: str,
+    file: str,
+    full_table: str,
+    truncate: bool,
+    is_snowflake: bool,
 ) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
