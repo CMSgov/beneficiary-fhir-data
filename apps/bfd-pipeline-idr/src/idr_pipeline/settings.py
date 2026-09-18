@@ -234,8 +234,7 @@ class _Settings:
     def idr_schema_by_table(self, table: str) -> str:
         if "PRAUC" in table:
             return self._IDR_PRIOR_AUTH_SCHEMA
-        else:
-            return self.idr_schema if self.idr_schema else self._IDR_SCHEMA
+        return self.idr_schema or self._IDR_SCHEMA
 
     # Beneficiary History Tables
     @property
