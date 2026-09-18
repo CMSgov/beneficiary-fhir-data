@@ -2178,6 +2178,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -3593,6 +3596,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -5008,6 +5014,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -6423,6 +6432,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -7838,6 +7850,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -9253,6 +9268,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "28977596005798RIF"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000002ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -11441,6 +11459,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -13238,6 +13257,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -15035,6 +15055,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -16832,6 +16853,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -18422,6 +18444,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -18666,6 +18691,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -20411,6 +20437,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -21980,6 +22007,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -22224,6 +22254,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -28334,6 +28365,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -29903,6 +29935,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -30147,6 +30182,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -36257,6 +36293,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -37826,6 +37863,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -38070,6 +38110,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -44196,6 +44237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -45765,6 +45807,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -46009,6 +46054,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -51970,6 +52016,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -53539,6 +53586,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -53783,6 +53833,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -59744,6 +59795,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -61313,6 +61365,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -61557,6 +61612,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -67502,6 +67558,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -69071,6 +69128,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -69315,6 +69375,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -71668,6 +71729,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -73237,6 +73299,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -73481,6 +73546,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -78171,6 +78237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -79740,6 +79807,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -79984,6 +80054,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -91404,6 +91475,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -92973,6 +93045,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -93217,6 +93292,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -95570,6 +95646,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -97139,6 +97216,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -97383,6 +97463,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -102073,6 +102154,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -103642,6 +103724,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -103886,6 +103971,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -115306,6 +115392,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -116875,6 +116962,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -117119,6 +117209,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -119472,6 +119563,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -121041,6 +121133,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -121285,6 +121380,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -125975,6 +126071,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -127544,6 +127641,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -127788,6 +127888,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -138998,6 +139099,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -139242,6 +139346,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -143923,6 +144028,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -145492,6 +145598,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -145736,6 +145845,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -150417,6 +150527,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -151986,6 +152097,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -152230,6 +152344,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -158130,6 +158245,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -158374,6 +158492,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -163055,6 +163174,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -164624,6 +164744,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -164868,6 +164991,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -169549,6 +169673,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -171118,6 +171243,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -171362,6 +171490,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -177262,6 +177391,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -177506,6 +177638,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -182187,6 +182320,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -183756,6 +183890,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -184000,6 +184137,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -188681,6 +188819,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "0",
+            "display" : "NOT PACKAGED",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {
@@ -190250,6 +190389,9 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value" : "67289832423923BIX"
+      }, {
+        "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+        "value" : "00000000000001ABC"
       } ],
       "insurance" : [ {
         "coverage" : {
@@ -190494,6 +190636,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
           "valueCoding" : {
             "code" : "4",
+            "display" : "Drug Admin",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
           }
         }, {

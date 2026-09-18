@@ -32,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
@@ -728,10 +729,10 @@ class PatientMatchIT extends IntegrationTestBase {
     assertThrows(ResourceNotFoundException.class, res::execute);
   }
 
-  @Test
-  void testAuditEventByIdNotFound() {
-    var res =
-        getFhirClient().read().resource(AuditEvent.class).withId("999999999999-20260101000000000");
+  @ParameterizedTest
+  @ValueSource(strings = {"999999999999-20260101000000000", "-731271436-20260914164040787646024"})
+  void testAuditEventByIdNotFound(String badId) {
+    var res = getFhirClient().read().resource(AuditEvent.class).withId(badId);
     assertThrows(ResourceNotFoundException.class, res::execute);
   }
 

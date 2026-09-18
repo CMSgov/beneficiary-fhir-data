@@ -11,7 +11,7 @@ class SampleGenerator:
         self.output_directory = output_directory
 
     def run(self, bene_sk: str) -> None:
-        """Generate Bene samp sample JSON from given source directory."""
+        """Generate Bene sample JSON from given source directory."""
         print(f"Generating for bene_sk: {bene_sk}")
         print(f"Source Directory: {self.source_directory}")
         print(f"Target Directory: {self.output_directory}")
