@@ -53,6 +53,38 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-generate-bene-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-generate-eob-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_eob_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_eob_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-gen-dd",
+              projectRoot: "apps/bfd-model-idr/src/gen_dd",
+              testsRoot: "apps/bfd-model-idr/src/gen_dd",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-generate-prior-auth-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:

@@ -3180,6 +3180,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
     "value" : "28977596005798RIF"
+  }, {
+    "system" : "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
+    "value" : "00000000000002ABC"
   } ],
   "insurance" : [ {
     "coverage" : {
@@ -5605,6 +5608,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
       "valueCoding" : {
         "code" : "0",
+        "display" : "NOT PACKAGED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
       }
     }, {
@@ -7387,6 +7391,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
       "valueCoding" : {
         "code" : "0",
+        "display" : "NOT PACKAGED",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"
       }
     }, {

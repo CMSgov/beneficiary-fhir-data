@@ -94,15 +94,28 @@ This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the
 To generate a EOB sample that is not prior authorization.
 
 ```sh
-uv run generate_eob_sample --clm-uniq-id <clm_uniq_id_here>
+uv run generate-eob-sample --clm-uniq-id <clm_uniq_id_here>
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
-This will currently only work for Pharmacy types but will be continued to work on other types.
+This will currently only work for Pharmacy and Basic types but will be continued to work on other types.
 
 There are two optional parameters .
 - --source-directory  Directory where the source csv files are located.  Default: ./out
 - --output-directory  Directory where to output the files.  Default: ./sample-data
+
+### Bene Sample Generator
+
+```sh
+uv run generate-bene-sample --bene-sk <bene_sk>
+```
+This will search for the bene_sk in out/SYNTHETIC_BENE_HIST.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
+
+
+There are two optional parameters .
+- --source-directory  Directory where the source csv files are located.  Default: ./out
+- --output-directory  Directory where to output the files.  Default: ./sample-data
+
 
 ### Create FHIR files with synthetic data
 
@@ -338,10 +351,10 @@ To generate the data dictionary:
 
 ```sh
 ./compile-all-resources.sh
-uv run gen_dd.py
+uv run gen-dd
 ```
 
-If the gen_dd.py script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+If the gen-dd script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
 Run:
 
 ```sql
