@@ -1010,4 +1010,16 @@ class AdjudicatedGeneratorUtil:
 
         add_meta_timestamps(clm_line_prfnl, clm)
 
+        clm_line_prfnl[f.CLM_FED_TYPE_SRVC_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_FED_TYPE_SRVC_CD])
+
+        clm_line_prfnl[f.CLM_LINE_CARR_HPSA_SCRCTY_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD])
+
+        clm_line_prfnl[f.CLM_PRCNG_LCLTY_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRCNG_LCLTY_CD])
+
+        clm_line_prfnl[f.CLM_PRMRY_PYR_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRMRY_PYR_CD])        
+
         return clm_line_prfnl
