@@ -392,11 +392,14 @@ class SnowflakeExecutor(DbExecutor):
 
     @override
     def copy(self, file: CsvFile) -> None:
-        self.session.sql("create or replace temp stage source_stage").collect()
-        self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
+        db_schema = ".".join(
+            (SETTINGS.idr_database, SETTINGS.idr_schema_by_table(str(file.csv_file)))
+        )
+        self.session.sql(f"create or replace temp stage {db_schema}.source_stage").collect()
+        self.session.file.put(str(file.csv_file.absolute()), f"@{db_schema}.source_stage")
         self.session.sql(f"""COPY INTO
                             {file.table}
-                            FROM @source_stage/{file.csv_file.name}
+                            FROM @{db_schema}.source_stage/{file.csv_file.name}
                             FILE_FORMAT = (
                                 TYPE = 'CSV',
                                 PARSE_HEADER = TRUE
