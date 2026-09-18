@@ -398,6 +398,10 @@ class _ClaimsFile(StrEnum):
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_PRCNG_LCLTY_CD,
+            f.CLM_PRMRY_PYR_CD,
         ],
     )
     CLM_LINE_RX = (
