@@ -52,7 +52,7 @@ hooks = [
   { id = "java", name = "java", language = "system", types = [
     "java",
   ], entry = "./hooks/java-format.sh" },
-  { id = "sops", name = "sops", language = "system", files = "\\.sopsw.yaml$", entry = "./hooks/sops.sh" },
+  { id = "sops", name = "sops", language = "system", files = "\\.sopsw\\.yaml$", entry = "./hooks/sops.sh" },
   { id = "toml", name = "toml", language = "system", types = [
     "toml",
   ], entry = "taplo format" },
