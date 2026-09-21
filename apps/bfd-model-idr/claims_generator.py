@@ -1,6 +1,7 @@
 import csv
 import random
 import sys
+import time
 from collections import OrderedDict, defaultdict
 from collections.abc import Iterator
 from enum import StrEnum, auto
@@ -871,7 +872,6 @@ def generate(
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
     _write_static_tables(gen_utils, writer, f.CLM_ANSI_SGNTR, clm_ansi_sgntr_rows, truncate)
 
-    print("Generating synthetic claims data for provided BENE_SKs...")
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=enable_samhsa)
     pac_util = PacGeneratorUtil()
     claim_child_tables = [
@@ -890,7 +890,9 @@ def generate(
                 {k: [] for k in [f.CLM, *claim_child_tables]}
             else:
                 claim_child_tables = [claim_child.value for claim_child in claim_child_tables]
+                perf_start = time.perf_counter()
                 exisiting = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
+                duration = time.perf_counter() - perf_start
 
         out_tables = _generate_batch(
             bene_sks_batch,
@@ -1009,7 +1011,7 @@ def _generate_batch(
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
-        part_by=lambda x: str(x[f.CLM_UNIQ_ID]),
+        part_by=lambda x: x[f.CLM_UNIQ_ID],
         filter_by=lambda x: not x.get(f.CLM_LINE_RX_NUM),
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
@@ -1174,7 +1176,7 @@ def _generate_batch(
                 ]
                 adj_clms_tbls[f.CLM_PRFNL].extend(clm_prfnls)
 
-            init_clm_lines = norm_clm_lines_per_clm_uniq_id.get(str(clm[f.CLM_UNIQ_ID])) or [
+            init_clm_lines = norm_clm_lines_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]) or [
                 RowAdapter({}) for _ in range(random.randint(1, 15))
             ]
             for idx, init_clm_line in enumerate(init_clm_lines, start=1):

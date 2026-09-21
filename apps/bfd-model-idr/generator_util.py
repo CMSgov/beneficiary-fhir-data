@@ -204,16 +204,12 @@ def _qualified_table(writer: SnowflakeWriter, table_name: str) -> str:
 
 
 def _query(writer: SnowflakeWriter, sql: str) -> Any:
-    with writer.conn.cursor() as cur:
-        cur.execute(sql)
-        row = cur.fetchone()
-    return row[0] if row else None
+    result = writer.session.sql(sql).collect()
+    return result[0][0] if result else None
 
 
 def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[tuple[Any, ...]]:
-    with writer.conn.cursor() as cur:
-        cur.execute(sql)
-        return cur.fetchall()
+    return writer.session.sql(sql).collect()
 
 
 def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:

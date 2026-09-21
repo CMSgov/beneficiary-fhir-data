@@ -161,12 +161,12 @@ class SnowflakeWriter(OutputDestinationWriter):
             self.schema,
         )
 
-    def qualified_table(self, table_name: str) -> Any:
+    def qualified_session_table(self, table_name: str) -> Any:
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         return self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
 
     def iter_bene_sk_batches(self, batch_size: int) -> Iterator[list[int]]:
-        df = self.qualified_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
+        df = self.qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
         buffer: list[int] = []
         for pdf in df.to_pandas_batches():
             buffer.extend(int(bene_sk) for bene_sk in pdf["BENE_SK"])
@@ -178,20 +178,20 @@ class SnowflakeWriter(OutputDestinationWriter):
             yield buffer
 
     def get_cntrct_pbp_nums(self) -> list[dict[str, Any]]:
-        rows = self.qualified_table(CNTRCT_PBP_NUM).collect()
+        rows = self.qualified_session_table(CNTRCT_PBP_NUM).collect()
         return [row.as_dict() for row in rows]
 
     def get_cntrct_pbp_cntcts(self) -> list[dict[str, Any]]:
-        rows = self.qualified_table(CNTRCT_PBP_CNTCT).collect()
+        rows = self.qualified_session_table(CNTRCT_PBP_CNTCT).collect()
         return [row.as_dict() for row in rows]
 
     def get_provider_histories(self) -> list[dict[str, Any]]:
-        rows = self.qualified_table(PRVDR_HSTRY).collect()
+        rows = self.qualified_session_table(PRVDR_HSTRY).collect()
         return [row.as_dict() for row in rows]
 
     def get_bene_sk_to_mbi(self, bene_sks: list[int]) -> list[RowAdapter]:
         rows = (
-            self.qualified_table(BENE_HSTRY)
+            self.qualified_session_table(BENE_HSTRY)
             .filter(col("BENE_SK").isin(bene_sks))
             .select("BENE_SK", "BENE_MBI_ID", "IDR_LTST_TRANS_FLG")
             .collect()
@@ -229,7 +229,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         self, df: pd.DataFrame, database: str, schema: str, table_name: str
     ) -> pd.DataFrame:
         col_types = self._get_column_types(database, schema, table_name)
-        # perf_start = time.perf_counter()
         for column in df.columns:
             metadata = col_types.get(column.upper())
             data_type = metadata["data_type"]
@@ -256,8 +255,6 @@ class SnowflakeWriter(OutputDestinationWriter):
                 mask = df[column].isna() | cleaned_col.isin(["nan", "none"])
                 df[column] = np.where(mask, None, stringified_col)
                 df[column] = df[column].astype(object)
-        # duration = time.perf_counter() - perf_start
-        # print(f"It took {duration:.6f} seconds to coerce types for {table_name}")
         return df
 
     def write_table(
@@ -272,7 +269,6 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         df = pd.DataFrame(data)
-        # source_df = df.to_snowpark()
 
         # filter out columns not in our schema. Only used in generation for certain fields we
         # actually use
@@ -305,7 +301,9 @@ class SnowflakeWriter(OutputDestinationWriter):
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
     ) -> dict[str, list[RowAdapter]]:
-        bene_hstry_df = self.qualified_table(BENE_HSTRY).filter(col("BENE_SK").isin(bene_sks))
+        bene_hstry_df = self.qualified_session_table(BENE_HSTRY).filter(
+            col("BENE_SK").isin(bene_sks)
+        )
         result: dict[str, list[RowAdapter]] = {
             BENE_HSTRY: [
                 RowAdapter(r.as_dict(), loaded_from_file=True) for r in bene_hstry_df.collect()
@@ -314,13 +312,15 @@ class SnowflakeWriter(OutputDestinationWriter):
         mbi_ids_df = bene_hstry_df.select("BENE_MBI_ID").filter(col("BENE_MBI_ID").is_not_null())
 
         for table_name in table_names:
-            if _PATIENT_TABLE_RELATIONS[table_name] is PatientKeyRelation.BENE_SK:
+            if _TABLE_RELATIONS[table_name] is KeyRelation.BENE_SK:
                 rows = (
-                    self.qualified_table(table_name).filter(col("BENE_SK").isin(bene_sks)).collect()
+                    self.qualified_session_table(table_name)
+                    .filter(col("BENE_SK").isin(bene_sks))
+                    .collect()
                 )
             else:
                 rows = (
-                    self.qualified_table(table_name)
+                    self.qualified_session_table(table_name)
                     .join(mbi_ids_df, using_columns=["BENE_MBI_ID"])
                     .collect()
                 )
@@ -330,29 +330,38 @@ class SnowflakeWriter(OutputDestinationWriter):
     def get_claims_batch(
         self, bene_sks: list[int], table_names: list[str]
     ) -> dict[str, list[RowAdapter]]:
-        clm_df = self.qualified_table(CLM).filter(col("BENE_SK").isin(bene_sks))
-        clm_rows = [RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.collect()]
+        self.session.use_database(self.database)
+        self.session.use_schema(self.schema)
+        clm_df = (
+            self.qualified_session_table(CLM).filter(col("BENE_SK").isin(bene_sks)).cache_result()
+        )
 
         key_dfs = {
-            ClaimKeyRelation.FOUR_PART_KEY: clm_df.select(
+            KeyRelation.FOUR_PART_KEY: clm_df.select(
                 "GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"
             ),
-            ClaimKeyRelation.CLM_UNIQ_ID: clm_df.select("CLM_UNIQ_ID"),
-            ClaimKeyRelation.CLM_RLT_COND_SGNTR_SK: clm_df.select("CLM_RLT_COND_SGNTR_SK").filter(
-                col("CLM_RLT_COND_SGNTR_SK").is_not_null()
-            ),
-            ClaimKeyRelation.CLM_DT_SGNTR_SK: clm_df.select("CLM_DT_SGNTR_SK"),
+            KeyRelation.CLM_UNIQ_ID: clm_df.select("CLM_UNIQ_ID").distinct(),
+            KeyRelation.CLM_RLT_COND_SGNTR_SK: clm_df.select("CLM_RLT_COND_SGNTR_SK")
+            .filter(col("CLM_RLT_COND_SGNTR_SK").is_not_null())
+            .distinct(),
+            KeyRelation.CLM_DT_SGNTR_SK: clm_df.select("CLM_DT_SGNTR_SK").distinct(),
         }
 
-        result: dict[str, list[RowAdapter]] = {CLM: clm_rows}
+        result: dict[str, list[RowAdapter]] = {}
+        result[CLM] = [
+            RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.to_local_iterator()
+        ]
+
         for table_name in table_names:
             key_df = key_dfs[_TABLE_RELATIONS[table_name]]
-            joined = self.qualified_table(table_name).join(
+            joined = self.qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
             )
             result[table_name] = [
-                RowAdapter(row.as_dict(), loaded_from_file=True) for row in joined.collect()
+                RowAdapter(row.as_dict(), loaded_from_file=True)
+                for row in joined.to_local_iterator()
             ]
+
         return result
 
     def merge_batch(self, data: list[dict[str, Any]], table_name: str) -> None:
@@ -370,6 +379,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         # coerce the types so Pandas doesn't guess the types
         df = self._coerce_dataframe_types(df, database, schema, resolved_table_name)
 
+        perf_start = time.perf_counter()
         source = self.session.write_pandas(
             df=df,
             table_name=f"{resolved_table_name}_STAGING",
@@ -382,11 +392,12 @@ class SnowflakeWriter(OutputDestinationWriter):
             compression=self.compression,
             use_logical_type=True,
         )
+        duration = time.perf_counter() - perf_start
+        print(f"{duration:.6f} seconds to writer to staging table")
         target = self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
         pks = self.get_primary_keys(table_name)
 
-        excluded_columns = [*pks, IDR_INSRT_TS, IDR_UPDT_TS]
-        update_cols = [c for c in df.columns if c not in excluded_columns]
+        update_cols = [c for c in df.columns if c not in pks]
 
         join_expr = None
         for pk in pks:
@@ -411,11 +422,14 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         merge_clauses.append(when_not_matched().insert({c: source[c] for c in df.columns}))
 
+        perf_start = time.perf_counter()
         result = target.merge(
             source,
             join_expr,
             merge_clauses,
         )
+        duration = time.perf_counter() - perf_start
+        print(f"{duration:.6f} seconds to merge into {table_name}")
         print(
             f"Merged {resolved_table_name}: {result.rows_inserted} inserted, {result.rows_updated} updated"
         )
@@ -442,47 +456,39 @@ def _require_env(name: str) -> str:
     return val
 
 
-class ClaimKeyRelation(StrEnum):
-    DIRECT_BENE_SK = auto()
+class KeyRelation(StrEnum):
+    BENE_SK = auto()
+    BENE_MBI_ID = auto()
     FOUR_PART_KEY = auto()
     CLM_UNIQ_ID = auto()
     CLM_RLT_COND_SGNTR_SK = auto()
     CLM_DT_SGNTR_SK = auto()
 
 
-_TABLE_RELATIONS: dict[str, ClaimKeyRelation] = {
-    CLM: ClaimKeyRelation.DIRECT_BENE_SK,
-    CLM_DT_SGNTR: ClaimKeyRelation.CLM_DT_SGNTR_SK,
-    CLM_DCMTN: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_FISS: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_INSTNL: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_VAL: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_PROD: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_PRFNL: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LINE: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LINE_INSTNL: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LINE_PRFNL: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LINE_DCMTN: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LCTN_HSTRY: ClaimKeyRelation.FOUR_PART_KEY,
-    CLM_LINE_RX: ClaimKeyRelation.CLM_UNIQ_ID,
-    CLM_RLT_COND_SGNTR_MBR: ClaimKeyRelation.CLM_RLT_COND_SGNTR_SK,
-}
-
-
-class PatientKeyRelation(StrEnum):
-    BENE_SK = auto()
-    BENE_MBI_ID = auto()
-
-
-_PATIENT_TABLE_RELATIONS: dict[str, PatientKeyRelation] = {
-    BENE_MBI_ID: PatientKeyRelation.BENE_MBI_ID,
-    BENE_STUS: PatientKeyRelation.BENE_SK,
-    BENE_ENTLMT_RSN: PatientKeyRelation.BENE_SK,
-    BENE_ENTLMT: PatientKeyRelation.BENE_SK,
-    BENE_TP: PatientKeyRelation.BENE_SK,
-    BENE_XREF: PatientKeyRelation.BENE_SK,
-    BENE_DUAL: PatientKeyRelation.BENE_SK,
-    BENE_MAPD_ENRLMT: PatientKeyRelation.BENE_SK,
-    BENE_MAPD_ENRLMT_RX: PatientKeyRelation.BENE_SK,
-    BENE_LIS_CMBND: PatientKeyRelation.BENE_SK,
+_TABLE_RELATIONS: dict[str, KeyRelation] = {
+    BENE_MBI_ID: KeyRelation.BENE_MBI_ID,
+    BENE_STUS: KeyRelation.BENE_SK,
+    BENE_ENTLMT_RSN: KeyRelation.BENE_SK,
+    BENE_ENTLMT: KeyRelation.BENE_SK,
+    BENE_TP: KeyRelation.BENE_SK,
+    BENE_XREF: KeyRelation.BENE_SK,
+    BENE_DUAL: KeyRelation.BENE_SK,
+    BENE_MAPD_ENRLMT: KeyRelation.BENE_SK,
+    BENE_MAPD_ENRLMT_RX: KeyRelation.BENE_SK,
+    BENE_LIS_CMBND: KeyRelation.BENE_SK,
+    CLM: KeyRelation.BENE_SK,
+    CLM_DT_SGNTR: KeyRelation.CLM_DT_SGNTR_SK,
+    CLM_DCMTN: KeyRelation.FOUR_PART_KEY,
+    CLM_FISS: KeyRelation.FOUR_PART_KEY,
+    CLM_INSTNL: KeyRelation.FOUR_PART_KEY,
+    CLM_VAL: KeyRelation.FOUR_PART_KEY,
+    CLM_PROD: KeyRelation.FOUR_PART_KEY,
+    CLM_PRFNL: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE_INSTNL: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE_PRFNL: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE_DCMTN: KeyRelation.FOUR_PART_KEY,
+    CLM_LCTN_HSTRY: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE_RX: KeyRelation.CLM_UNIQ_ID,
+    CLM_RLT_COND_SGNTR_MBR: KeyRelation.CLM_RLT_COND_SGNTR_SK,
 }

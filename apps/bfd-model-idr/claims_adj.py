@@ -264,15 +264,6 @@ class AdjudicatedGeneratorUtil:
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_CD] = random.choice(TARGET_RLT_COND_CODES)
 
-        # HACK: Of all claims tables that are derived from CLM, this particular table is the only
-        # one where rows can be orphaned from their root CLM row as some CLM rows may set their
-        # CLM_RLT_COND_SGNTR_SK to an invalid value. There are no other fields from which a
-        # foreign-key relationship can be derived, so we must store the CLM_UNIQ_ID of the parent
-        # CLM for each row of this table, otherwise we would have to special-case the logic for
-        # generating this table. CLM_UNIQ_ID will be ignored by the pipeline when loading, so this
-        # is OK
-        clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
-
         add_meta_timestamps(clm_rlt_cond_sgntr_mbr, clm)
 
         return clm_rlt_cond_sgntr_mbr

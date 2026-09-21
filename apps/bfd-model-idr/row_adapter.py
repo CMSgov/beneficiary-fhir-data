@@ -1,7 +1,7 @@
 from typing import Any, Self
 
 
-class RowAdapter:  # TODO: change so accepts int not just string
+class RowAdapter:
     def __init__(self, kv: dict[str | int, Any], loaded_from_file: bool = False):
         self.kv = kv
         self.loaded_from_file = loaded_from_file
