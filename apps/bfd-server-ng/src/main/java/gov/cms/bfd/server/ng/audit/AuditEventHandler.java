@@ -27,7 +27,7 @@ public class AuditEventHandler {
    * @param id AuditEventId
    * @return AuditEvent
    */
-  public AuditEvent getAuditEventById(AuditEventId id) {
+  public Optional<AuditEvent> getAuditEventById(AuditEventId id) {
     return auditEventRepository.findById(id);
   }
 

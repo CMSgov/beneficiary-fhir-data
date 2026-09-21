@@ -33,7 +33,7 @@ jobs:
         run: uv sync
         working-directory: apps/bfd-model-idr
       - name: Generate v3 Data Dictionary
-        run: uv run gen_dd.py
+        run: uv run gen-dd
         working-directory: apps/bfd-model-idr
       - name: Ensure synthetic data pipeline runs
         run: |

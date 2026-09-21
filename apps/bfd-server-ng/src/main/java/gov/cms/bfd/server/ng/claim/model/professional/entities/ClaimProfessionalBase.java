@@ -13,12 +13,15 @@ import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessiona
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -27,6 +30,13 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 public abstract class ClaimProfessionalBase extends ClaimBase {
 
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Column(name = "clm_ptnt_cntl_num")
+  private Optional<String> patientControlNumber;
+
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
@@ -96,6 +106,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     getAdjudication().ifPresent(ac -> ac.toFhirTotal().forEach(eob::addTotal));
     getAdjudication().ifPresent(ac -> ac.toFhirAdjudication().forEach(eob::addAdjudication));
     getPaymentComponent().toFhir().ifPresent(eob::setPayment);
+    addPatientControlNumberIdentifier(eob);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
@@ -202,6 +213,20 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
+  private void addPatientControlNumberIdentifier(ExplanationOfBenefit eob) {
+    patientControlNumber.ifPresent(
+        s ->
+            eob.addIdentifier(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_PATIENT_CONTROL_NUMBER)
+                    .setValue(s)));
+  }
+
+  @Override
+  public Optional<Integer> getDrgCode() {
+    return Optional.empty();
+  }
+
   private Map<String, List<Integer>> buildDiagnosisSequences(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     var diagnosisSequenceMap = new HashMap<String, List<Integer>>();
@@ -239,10 +264,5 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   private void addContainedObservations(ExplanationOfBenefit eob) {
     getSubclassContainedObservations().forEach(eob::addContained);
-  }
-
-  @Override
-  public Optional<Integer> getDrgCode() {
-    return Optional.empty();
   }
 }

@@ -378,11 +378,10 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             """
         else:
             sql += """
-            (SELECT last_ts 
+            (SELECT MAX(last_ts)
              FROM idr.load_progress
              WHERE job_id = %(default_job_id)s
                AND table_name = %(table)s
-               AND batch_partition = %(partition)s
             )
             """
 
@@ -396,11 +395,10 @@ class BatchLoader(Generic[T]):  # noqa: UP046
 
         if self.job_id != DEFAULT_JOB_ID:
             sql += """
-            ,max_run_ts = (SELECT last_ts 
+            ,max_run_ts = (SELECT MAX(last_ts) 
                          FROM idr.load_progress
                          WHERE job_id = %(job_id)s
                            AND table_name = %(table)s
-                           AND batch_partition = %(partition)s
                         )
             """
 

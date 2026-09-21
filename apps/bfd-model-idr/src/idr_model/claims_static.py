@@ -20,7 +20,7 @@ class SecurityLabelModel(BaseModel):
         return self.code.replace(".", "")
 
 
-SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
+SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("../../security_labels.yml")
 SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
     yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
 )

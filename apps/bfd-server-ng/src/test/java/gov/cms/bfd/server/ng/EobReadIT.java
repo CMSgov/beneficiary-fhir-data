@@ -10,13 +10,17 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -103,6 +107,40 @@ class EobReadIT extends IntegrationTestBase {
     }
 
     expectFhir().toMatchSnapshot(eob);
+  }
+
+  private static Stream<Arguments> providePatientControlNumberIdentifierScenarios() {
+    return Stream.of(
+        Arguments.of(
+            "institutional", CLAIM_ID_INSTITUTIONAL, CLAIM_PATIENT_CONTROL_NUMBER_INSTITUTIONAL),
+        Arguments.of(
+            "professional", CLAIM_ID_PROFESSIONAL, CLAIM_PATIENT_CONTROL_NUMBER_PROFESSIONAL));
+  }
+
+  @ParameterizedTest
+  @MethodSource("providePatientControlNumberIdentifierScenarios")
+  void eobReadIncludesPatientControlNumberIdentifier(
+      String claimPath, String claimId, String expectedPatientControlNumber) {
+    var eob = eobRead().withId(claimId).execute();
+
+    assertFalse(eob.isEmpty());
+
+    assertTrue(
+        eob.getType().hasCoding(SystemUrls.HL7_CLAIM_TYPE, claimPath),
+        String.format("Expected EOB %s to be a %s claim", claimId, claimPath));
+
+    var hasPatientControlNumberIdentifier =
+        eob.getIdentifier().stream()
+            .anyMatch(
+                identifier ->
+                    SystemUrls.BLUE_BUTTON_PATIENT_CONTROL_NUMBER.equals(identifier.getSystem())
+                        && expectedPatientControlNumber.equals(identifier.getValue()));
+
+    assertTrue(
+        hasPatientControlNumberIdentifier,
+        String.format(
+            "Expected %s EOB to include patient control number identifier '%s'",
+            claimPath, expectedPatientControlNumber));
   }
 
   @Test

@@ -70,6 +70,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
     } "Add CLM_CNTL_NUM as identifier";
 
+    //CLM_PTNT_CNTL_NUM
+    src.CLM_PTNT_CNTL_NUM as patientControlNumber -> tgt.identifier = create('Identifier') as tgtIdentifier then {
+      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM" "set system";
+      src -> tgtIdentifier.value = patientControlNumber "Set identifier Value";
+    } "Add CLM_PTNT_CNTL_NUM as identifier";
+
     src.CLM_ORIG_CNTL_NUM as otherClaimNumber -> tgt.related = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.relationship = cc("http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship","prior") "Add relationshipp";
       src -> tgtBBElement.reference = create('Identifier') as tgtId then{
