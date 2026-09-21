@@ -16,10 +16,10 @@ class AdjudicationChargeClaimValue {
     var imeAmount = mapSum(claimValues.stream().map(ClaimValue::getImeAmount));
 
     return List.of(
-        AdjudicationChargeType.OPERATING_DISPROPORTIONATE_SHARE_AMOUNT
-            .toFhirAdjudicationNonOptional(disproportionateAmount),
-        AdjudicationChargeType.OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT
-            .toFhirAdjudicationNonOptional(imeAmount));
+        AdjudicationChargeType.OPERATING_DISPROPORTIONATE_SHARE_AMOUNT.toFhirAdjudication(
+            disproportionateAmount),
+        AdjudicationChargeType.OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT.toFhirAdjudication(
+            imeAmount));
   }
 
   private static BigDecimal mapSum(Stream<Optional<BigDecimal>> inputStream) {

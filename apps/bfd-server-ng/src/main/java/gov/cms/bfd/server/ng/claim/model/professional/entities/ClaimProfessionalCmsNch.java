@@ -94,7 +94,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
     AdjudicationChargeType.PAYER_PAID_AMOUNT
-        .toFhirAdjudication(primaryProviderPaidAmount)
+        .toFhirAdjudicationCMS(primaryProviderPaidAmount)
         .ifPresent(eob::addAdjudication);
   }
 

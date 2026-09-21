@@ -62,10 +62,10 @@ public class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBas
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.of(
-            AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
-            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudicationCMS(bloodChargeAmount),
+            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudicationCMS(
                 bloodLiabilityAmount),
-            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudicationCMS(
                 bloodNoncoveredChargeAmount))
         .flatMap(Optional::stream)
         .toList();

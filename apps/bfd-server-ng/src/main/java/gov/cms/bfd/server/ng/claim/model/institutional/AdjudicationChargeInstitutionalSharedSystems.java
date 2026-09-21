@@ -91,21 +91,21 @@ public class AdjudicationChargeInstitutionalSharedSystems implements Adjudicatio
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.of(
-            AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudicationCMS(
                 beneInterestPaidAmount),
-            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudicationCMS(
                 bloodLiabilityAmount),
-            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudicationCMS(
                 bloodNoncoveredChargeAmount),
-            AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudicationCMS(
                 cobPatientResponsibilityAmount),
-            AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudicationCMS(
                 providerInterestPaidAmount),
-            AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudication(
+            AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudicationCMS(
                 providerObligationToAcceptAmount),
-            AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudication(
+            AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudicationCMS(
                 remainingAmountToProvider),
-            AdjudicationChargeType.TOTAL_CONTRACTUAL_AMOUNT_DISCREPANCY.toFhirAdjudication(
+            AdjudicationChargeType.TOTAL_CONTRACTUAL_AMOUNT_DISCREPANCY.toFhirAdjudicationCMS(
                 totalContractualAmountDiscrepancy))
         .flatMap(Optional::stream)
         .toList();

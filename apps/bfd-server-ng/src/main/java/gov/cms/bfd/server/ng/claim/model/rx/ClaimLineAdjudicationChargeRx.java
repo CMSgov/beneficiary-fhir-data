@@ -57,19 +57,19 @@ public class ClaimLineAdjudicationChargeRx {
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return Stream.concat(
             Stream.of(
-                AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudicationNonOptional(
+                AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
                     getTotalDrugCost())),
             Stream.of(
-                    AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(
+                    AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudicationCMS(
                         patientLiabReductPaidAmount),
-                    AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudication(
+                    AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudicationCMS(
                         lowIncomeCostShareSubAmount),
-                    AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudication(
-                        grossCostBelowThresholdAmount),
+                    AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT
+                        .toFhirAdjudicationCMS(grossCostBelowThresholdAmount),
                     AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT
-                        .toFhirAdjudication(grossCostAboveThresholdAmount),
-                    AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT.toFhirAdjudication(
-                        reportedGapDiscountAmount))
+                        .toFhirAdjudicationCMS(grossCostAboveThresholdAmount),
+                    AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT
+                        .toFhirAdjudicationCMS(reportedGapDiscountAmount))
                 .flatMap(Optional::stream))
         .toList();
   }
