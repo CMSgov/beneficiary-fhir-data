@@ -18,12 +18,14 @@ public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  // todo thomasw BFD-4625
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
   @Embedded private NoncoveredThroughDate noncoveredThroughDate;
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  // todo thomasw BFD-4625
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override

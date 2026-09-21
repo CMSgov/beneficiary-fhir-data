@@ -17,7 +17,10 @@ public class ClaimDateInstitutionalSharedSystems implements SupportingInfoCompon
 
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
+  // not sure this one will map, considering we have another column for shared systems.
+  // Will review the snap to see if its mapping.
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
+  //  todo thomasw probably add rest here for ClaimDate Institutional SharedSystems
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override
