@@ -1,1561 +1,1561 @@
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA36"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA36"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA36"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA36"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[GET]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=999"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?_id=999"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[GET_WITH_SEARCH]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=999"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?_id=999"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[POST]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?_id=617782589"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "617782589",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA39",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA41",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA42",
+        "period": {
+          "start": "2020-12-19T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
-      }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "617782589",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
+      "link": [ {
+        "other": {
+          "reference": "Patient/617782591",
+          "display": "617782591"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA39"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA41"
-      }, {
-        "period" : {
-          "start" : "2020-12-19T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA42"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "617782591",
-          "reference" : "Patient/617782591"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=617782589"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?_id=617782589"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "617782589",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA39",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA41",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA42",
+        "period": {
+          "start": "2020-12-19T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
-      }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "617782589",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
+      "link": [ {
+        "other": {
+          "reference": "Patient/617782591",
+          "display": "617782591"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA39"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA41"
-      }, {
-        "period" : {
-          "start" : "2020-12-19T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA42"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "617782591",
-          "reference" : "Patient/617782591"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=617782589"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "617782589",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA39",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA41",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA42",
+        "period": {
+          "start": "2020-12-19T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
-      }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "617782589",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
+      "link": [ {
+        "other": {
+          "reference": "Patient/617782591",
+          "display": "617782591"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA39"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA41"
-      }, {
-        "period" : {
-          "start" : "2020-12-19T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA42"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "617782591",
-          "reference" : "Patient/617782591"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=848484848"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?_id=848484848"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "848484848",
+      "link": [ {
+        "other": {
+          "reference": "Patient/517782585",
+          "display": "517782585"
+        },
+        "type": "replaced-by"
+      } ]
+    }
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=848484848"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?_id=848484848"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "848484848",
+      "link": [ {
+        "other": {
+          "reference": "Patient/517782585",
+          "display": "517782585"
+        },
+        "type": "replaced-by"
+      } ]
+    }
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "848484848",
+      "link": [ {
+        "other": {
+          "reference": "Patient/517782585",
+          "display": "517782585"
+        },
+        "type": "replaced-by"
+      } ]
+    }
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillCredit[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?_id=232323232"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "232323232",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
           }
         }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "232323232",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "2B19C89AA37"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA37",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=232323232"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillCredit[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?_id=232323232"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "232323232",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
           }
         }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "232323232",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "2B19C89AA37"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA37",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=232323232"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillCredit[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "232323232",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
           }
         }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "232323232",
-      "identifier" : [ {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "2B19C89AA37"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA37",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
-      "birthDate" : "1922-04-01",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?_id=178083966"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "178083966",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "1002-5",
-            "display" : "American Indian or Alaska Native",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "1002-5",
+            "display": "American Indian or Alaska Native"
           }
         }, {
-          "url" : "text",
-          "valueString" : "American Indian or Alaska Native"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "American Indian or Alaska Native"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "178083966",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2019-12-02T00:00:00+00:00",
-          "start" : "2030-06-27T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "9OJ2CG2UC85"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "9OJ2CG2UC85",
+        "period": {
+          "start": "2030-06-27T00:00:00+00:00",
+          "end": "2019-12-02T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Jones",
-        "given" : [ "Abby" ]
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Abby" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1922-04-01",
+      "address": [ {
+        "state": "TX",
+        "postalCode": "77551"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=178083966"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
-      "birthDate" : "1922-04-01",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?_id=178083966"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "178083966",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "1002-5",
-            "display" : "American Indian or Alaska Native",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "1002-5",
+            "display": "American Indian or Alaska Native"
           }
         }, {
-          "url" : "text",
-          "valueString" : "American Indian or Alaska Native"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "American Indian or Alaska Native"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "178083966",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2019-12-02T00:00:00+00:00",
-          "start" : "2030-06-27T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "9OJ2CG2UC85"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "9OJ2CG2UC85",
+        "period": {
+          "start": "2030-06-27T00:00:00+00:00",
+          "end": "2019-12-02T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Jones",
-        "given" : [ "Abby" ]
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Abby" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1922-04-01",
+      "address": [ {
+        "state": "TX",
+        "postalCode": "77551"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=178083966"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
-      "birthDate" : "1922-04-01",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
-          } ]
-        }
-      } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "178083966",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "1002-5",
-            "display" : "American Indian or Alaska Native",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "1002-5",
+            "display": "American Indian or Alaska Native"
           }
         }, {
-          "url" : "text",
-          "valueString" : "American Indian or Alaska Native"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+          "url": "text",
+          "valueString": "American Indian or Alaska Native"
+        } ]
       } ],
-      "gender" : "male",
-      "id" : "178083966",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2019-12-02T00:00:00+00:00",
-          "start" : "2030-06-27T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
           } ]
         },
-        "value" : "9OJ2CG2UC85"
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "9OJ2CG2UC85",
+        "period": {
+          "start": "2030-06-27T00:00:00+00:00",
+          "end": "2019-12-02T00:00:00+00:00"
+        }
       } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Jones",
-        "given" : [ "Abby" ]
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Abby" ]
       } ],
-      "resourceType" : "Patient"
+      "gender": "male",
+      "birthDate": "1922-04-01",
+      "address": [ {
+        "state": "TX",
+        "postalCode": "77551"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
+          } ]
+        }
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[GET]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[GET_WITH_SEARCH]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[POST]=[
 {
+  "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
   },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
 
 
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
 {
-  "entry" : [ {
-    "resource" : {
-      "address" : [ {
-        "postalCode" : "58054",
-        "state" : "ND"
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "517782585",
+      "meta": {
+        "lastUpdated": "9999-12-31T00:00:00.000+00:00",
+        "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode": "248153007"
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        }, {
+          "url": "text",
+          "valueString": "Asian"
+        } ]
       } ],
-      "birthDate" : "1959-03-14",
-      "communication" : [ {
-        "language" : {
-          "coding" : [ {
-            "code" : "unknown",
-            "system" : "urn:ietf:bcp:47"
+      "identifier": [ {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA36",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00",
+          "end": "2024-12-31T00:00:00+00:00"
+        }
+      }, {
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MB"
+          } ]
+        },
+        "system": "http://hl7.org/fhir/sid/us-mbi",
+        "value": "2B19C89AA35",
+        "period": {
+          "start": "2020-04-21T00:00:00+00:00"
+        }
+      } ],
+      "name": [ {
+        "family": "Heeler",
+        "given": [ "Alex", "Joey" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1959-03-14",
+      "address": [ {
+        "state": "ND",
+        "postalCode": "58054"
+      } ],
+      "communication": [ {
+        "language": {
+          "coding": [ {
+            "system": "urn:ietf:bcp:47",
+            "code": "unknown"
           } ]
         }
       } ],
-      "extension" : [ {
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248153007"
+      "link": [ {
+        "other": {
+          "reference": "Patient/121212121",
+          "display": "121212121"
+        },
+        "type": "replaces"
       }, {
-        "extension" : [ {
-          "url" : "ombCategory",
-          "valueCoding" : {
-            "code" : "2028-9",
-            "display" : "Asian",
-            "system" : "urn:oid:2.16.840.1.113883.6.238"
-          }
-        }, {
-          "url" : "text",
-          "valueString" : "Asian"
-        } ],
-        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-      } ],
-      "gender" : "male",
-      "id" : "517782585",
-      "identifier" : [ {
-        "period" : {
-          "end" : "2024-12-31T00:00:00+00:00",
-          "start" : "2020-04-21T00:00:00+00:00"
+        "other": {
+          "reference": "Patient/848484848",
+          "display": "848484848"
         },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA36"
-      }, {
-        "period" : {
-          "start" : "2020-04-21T00:00:00+00:00"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "2B19C89AA35"
-      } ],
-      "link" : [ {
-        "other" : {
-          "display" : "121212121",
-          "reference" : "Patient/121212121"
-        },
-        "type" : "replaces"
-      }, {
-        "other" : {
-          "display" : "848484848",
-          "reference" : "Patient/848484848"
-        },
-        "type" : "replaces"
-      } ],
-      "meta" : {
-        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
-      },
-      "name" : [ {
-        "family" : "Heeler",
-        "given" : [ "Alex", "Joey" ]
-      } ],
-      "resourceType" : "Patient"
+        "type": "replaces"
+      } ]
     }
-  } ],
-  "id" : "00000000-0000-0000-0000-000000000000",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "total" : 1,
-  "type" : "searchset"
+  } ]
 }
 ]
