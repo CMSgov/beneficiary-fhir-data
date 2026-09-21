@@ -21,7 +21,6 @@ from ..constants import (
     FISS_CLM_SOURCE,
     MCS_CLM_SOURCE,
     MIN_CLAIM_LOAD_DATE,
-    PART_D_CLAIM_TYPE_CODES,
     PHASE_1_CUTOFF,
     PHASE_1_SS_MAX,
     PHASE_1_SS_MIN,
@@ -726,17 +725,7 @@ def idr_dates_from_meta_sk() -> str:
 
 def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
-    # For part D, we want ALL the claims
-    # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
-    if SETTINGS.latest_claims and (
-        (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
-    ):
-        codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
-        latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
-    elif SETTINGS.latest_claims:
-        latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
-    else:
-        latest_claim_ind = ""
+    latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y') " if SETTINGS.latest_claims else ""
 
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=PHASE_1_CUTOFF)
@@ -935,7 +924,7 @@ def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
     """
 
 
-def stale_non_part_d_claims_query(claim_table: str) -> str:
+def non_latest_claim_ids_query(claim_table: str) -> str:
     return f"""
         SELECT clm.clm_uniq_id
         FROM {claim_table} clm
