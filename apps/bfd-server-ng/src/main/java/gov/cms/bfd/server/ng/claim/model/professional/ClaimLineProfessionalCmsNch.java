@@ -13,7 +13,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -118,9 +117,9 @@ public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implem
 
   @Override
   public List<Extension> getExtensions(ClaimFilterOptions options) {
-    var extensions = new ArrayList<>(super.getExtensions(options));
-    extensions.addAll(extensionsProfessionalCmsNch.toFhir());
-    return extensions;
+    return Stream.concat(
+            super.getExtensions(options).stream(), extensionsProfessionalCmsNch.toFhir().stream())
+        .toList();
   }
 
   @Override

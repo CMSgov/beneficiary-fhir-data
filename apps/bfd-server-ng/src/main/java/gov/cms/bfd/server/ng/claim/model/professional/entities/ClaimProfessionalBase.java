@@ -30,9 +30,6 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 public abstract class ClaimProfessionalBase extends ClaimBase {
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;
 

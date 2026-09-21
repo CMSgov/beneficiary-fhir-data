@@ -8,7 +8,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The shared adjudication charge columns between CMS and REGULAR. */
+/**
+ * Base class for clm_line adjudication data, institutional, Shared Systems (complete data for
+ * Regular-SharedSystems).
+ */
 @Embeddable
 public class ClaimLineAdjudicationInstitutionalSharedSystems implements AdjudicationEmbedded {
   @Column(name = "clm_line_ncvrd_chrg_amt") // REGULAR CMS

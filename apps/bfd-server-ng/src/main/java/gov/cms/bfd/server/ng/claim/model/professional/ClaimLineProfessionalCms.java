@@ -8,9 +8,9 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
@@ -54,9 +54,10 @@ abstract class ClaimLineProfessionalCms extends ClaimLineProfessionalBase {
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    var supportingInfo = new ArrayList<>(super.toFhirSupportingInfo(supportingInfoFactory));
-    supportingInfo.addAll(lineBenefitEnhancementCodes.toFhir(supportingInfoFactory));
-    return supportingInfo;
+    return Stream.concat(
+            super.toFhirSupportingInfo(supportingInfoFactory).stream(),
+            lineBenefitEnhancementCodes.toFhir(supportingInfoFactory).stream())
+        .toList();
   }
 
   @Override

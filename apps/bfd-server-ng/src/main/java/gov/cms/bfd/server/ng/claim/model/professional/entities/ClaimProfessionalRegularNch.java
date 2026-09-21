@@ -14,10 +14,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -36,9 +36,10 @@ public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase im
 
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
-    var result = new ArrayList<>(super.getSubclassSupportingInfo());
-    nchCore.getClaimQueryCode().map(c -> c.toFhir(supportingInfoFactory)).ifPresent(result::add);
-    return result;
+    return Stream.concat(
+            super.getSubclassSupportingInfo().stream(),
+            nchCore.getClaimQueryCode().map(c -> c.toFhir(supportingInfoFactory)).stream())
+        .toList();
   }
 
   @Override

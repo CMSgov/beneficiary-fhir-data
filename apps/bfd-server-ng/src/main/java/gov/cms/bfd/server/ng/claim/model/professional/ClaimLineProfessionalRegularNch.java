@@ -4,9 +4,9 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
@@ -32,8 +32,7 @@ public class ClaimLineProfessionalRegularNch extends ClaimLineProfessionalRegula
 
   @Override
   public List<Extension> getExtensions(ClaimFilterOptions options) {
-    var extensions = new ArrayList<>(super.getExtensions(options));
-    extensions.addAll(extensionsNch.toFhir());
-    return extensions;
+    return Stream.concat(super.getExtensions(options).stream(), extensionsNch.toFhir().stream())
+        .toList();
   }
 }

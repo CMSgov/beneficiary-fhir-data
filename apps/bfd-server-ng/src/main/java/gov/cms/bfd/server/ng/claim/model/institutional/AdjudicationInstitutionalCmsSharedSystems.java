@@ -6,8 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adjudication fields for institutional claim, cms profile, shared system. */
@@ -47,31 +47,25 @@ public class AdjudicationInstitutionalCmsSharedSystems implements AdjudicationEm
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    var result = new ArrayList<>(adjudicationChargeBase.toFhirAdjudication());
-    result.add(
-        AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(
-            beneInterestPaidAmount));
-    result.add(
-        AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
-            bloodLiabilityAmount));
-    result.add(
-        AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            bloodNoncoveredChargeAmount));
-    result.add(
-        AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudication(
-            cobPatientResponsibilityAmount));
-    result.add(
-        AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudication(
-            providerInterestPaidAmount));
-    result.add(
-        AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudication(
-            providerObligationToAcceptAmount));
-    result.add(
-        AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudication(
-            remainingAmountToProvider));
-    result.add(
-        AdjudicationChargeType.TOTAL_CONTRACTUAL_AMOUNT_DISCREPANCY.toFhirAdjudication(
-            totalContractualAmountDiscrepancy));
-    return result;
+    return Stream.concat(
+            adjudicationChargeBase.toFhirAdjudication().stream(),
+            Stream.of(
+                AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+                    beneInterestPaidAmount),
+                AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+                    bloodLiabilityAmount),
+                AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+                    bloodNoncoveredChargeAmount),
+                AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudication(
+                    cobPatientResponsibilityAmount),
+                AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudication(
+                    providerInterestPaidAmount),
+                AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudication(
+                    providerObligationToAcceptAmount),
+                AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudication(
+                    remainingAmountToProvider),
+                AdjudicationChargeType.TOTAL_CONTRACTUAL_AMOUNT_DISCREPANCY.toFhirAdjudication(
+                    totalContractualAmountDiscrepancy)))
+        .toList();
   }
 }

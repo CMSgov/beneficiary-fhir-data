@@ -6,8 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
@@ -35,14 +35,14 @@ public class AdjudicationInstitutionalCmsNch implements AdjudicationEmbedded {
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    var result = new ArrayList<>(adjudicationChargeBase.toFhirAdjudication());
-    result.add(AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount));
-    result.add(
-        AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
-            bloodLiabilityAmount));
-    result.add(
-        AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            bloodNoncoveredChargeAmount));
-    return result;
+    return Stream.concat(
+            adjudicationChargeBase.toFhirAdjudication().stream(),
+            Stream.of(
+                AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
+                AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
+                    bloodLiabilityAmount),
+                AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
+                    bloodNoncoveredChargeAmount)))
+        .toList();
   }
 }

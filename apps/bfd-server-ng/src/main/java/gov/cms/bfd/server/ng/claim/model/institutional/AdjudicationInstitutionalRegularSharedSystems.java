@@ -6,8 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adjudication fields for institutional claims, regular profile, shared systems. */
@@ -24,12 +24,13 @@ public class AdjudicationInstitutionalRegularSharedSystems implements Adjudicati
 
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
-    var result = new ArrayList<>(adjudicationChargeBase.toFhirTotal());
-    result.add(AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirTotal(benePaymentAmount));
-    result.add(
-        AdjudicationChargeType.OTHER_THIRD_PARTY_PAYER_PAID_AMOUNT.toFhirTotal(
-            otherThirdPartyPayerPaidAmount));
-    return result;
+    return Stream.concat(
+            adjudicationChargeBase.toFhirTotal().stream(),
+            Stream.of(
+                AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirTotal(benePaymentAmount),
+                AdjudicationChargeType.OTHER_THIRD_PARTY_PAYER_PAID_AMOUNT.toFhirTotal(
+                    otherThirdPartyPayerPaidAmount)))
+        .toList();
   }
 
   @Override

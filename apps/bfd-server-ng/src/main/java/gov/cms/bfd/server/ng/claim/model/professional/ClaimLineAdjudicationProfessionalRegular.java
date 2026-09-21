@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -35,21 +34,14 @@ public class ClaimLineAdjudicationProfessionalRegular implements AdjudicationEmb
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    var charges = new ArrayList<ExplanationOfBenefit.AdjudicationComponent>();
-    charges.add(AdjudicationEmbedded.getProfessionalBenefitPaymentStatus());
-    charges.add(
-        AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount));
-    charges.add(
+    return List.of(
+        AdjudicationEmbedded.getProfessionalBenefitPaymentStatus(),
+        AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
         AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
-            submittedChargeAmount));
-    charges.add(AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount));
-    charges.add(
-        AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount));
-    charges.add(
-        AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-            deductibleAmount));
-    charges.add(
+            submittedChargeAmount),
+        AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
+        AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount),
+        AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount),
         AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(coinsrncAmount));
-    return charges;
   }
 }
