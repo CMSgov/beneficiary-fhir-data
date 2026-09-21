@@ -36,7 +36,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;
 
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;

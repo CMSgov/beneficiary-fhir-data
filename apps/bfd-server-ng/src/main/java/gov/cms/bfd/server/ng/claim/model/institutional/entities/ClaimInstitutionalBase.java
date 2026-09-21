@@ -44,7 +44,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;

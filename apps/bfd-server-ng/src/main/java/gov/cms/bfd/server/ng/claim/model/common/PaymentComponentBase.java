@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Interface for an ExplanationofBenefit.PaymentComponent. */
-public interface ClaimPaymentComponentBase {
+public interface PaymentComponentBase {
 
   /**
    * toFhir().

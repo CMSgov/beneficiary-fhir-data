@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Embeddable
 @Getter
-public class ClaimPaymentComponent implements ClaimPaymentComponentBase {
+public class PaymentComponent implements PaymentComponentBase {
   @Column(name = "clm_pd_dt")
   private Optional<LocalDate> paymentDate;
 

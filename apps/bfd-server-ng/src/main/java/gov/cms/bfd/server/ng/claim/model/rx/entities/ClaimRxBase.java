@@ -4,13 +4,13 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
@@ -50,7 +50,7 @@ public abstract class ClaimRxBase extends ClaimBase {
 
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
-  @Embedded private ClaimPaymentComponent paymentComponent;
+  @Embedded private PaymentComponent paymentComponent;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;

@@ -5,9 +5,9 @@ import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationPpsCms;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
@@ -47,10 +47,10 @@ public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   // endregion
 
   // region PaymentComponent
-  @Embedded private ClaimPaymentComponentAmount paymentComponent;
+  @Embedded private PaymentComponentAmount paymentComponent;
 
   @Override
-  public ClaimPaymentComponentBase getPaymentComponent() {
+  public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
 

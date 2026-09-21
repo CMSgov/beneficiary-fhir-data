@@ -12,8 +12,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** ExplanationOfBeneift.PaymentComponent A payment component with a payment attached to it. */
 @Embeddable
 @Getter
-public class ClaimPaymentComponentAmount implements ClaimPaymentComponentBase {
-  @Embedded private ClaimPaymentComponent base;
+public class PaymentComponentAmount implements PaymentComponentBase {
+  @Embedded private PaymentComponent base;
 
   @Column(name = "clm_pmt_amt")
   private BigDecimal paymentAmount;

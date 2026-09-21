@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponent;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -17,10 +17,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
   // Basis does not contain an amount field
-  @Embedded private ClaimPaymentComponent paymentComponent;
+  @Embedded private PaymentComponent paymentComponent;
 
   @Override
-  public ClaimPaymentComponentBase getPaymentComponent() {
+  public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
 

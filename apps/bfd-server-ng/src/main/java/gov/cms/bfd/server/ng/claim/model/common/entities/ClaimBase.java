@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -16,6 +15,7 @@ import gov.cms.bfd.server.ng.claim.model.common.Identifiers;
 import gov.cms.bfd.server.ng.claim.model.common.Meta;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.PatientReferenceFactory;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
@@ -139,7 +139,7 @@ public abstract class ClaimBase {
    *
    * @return The class data for a PaymentComponent
    */
-  public abstract ClaimPaymentComponentBase getPaymentComponent();
+  public abstract PaymentComponentBase getPaymentComponent();
 
   /**
    * Return the claim source id.

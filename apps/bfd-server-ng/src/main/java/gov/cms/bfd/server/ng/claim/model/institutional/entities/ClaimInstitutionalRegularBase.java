@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentAmount;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
 import jakarta.persistence.Column;
@@ -27,10 +27,10 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Embedded private InstitutionalSupportingInfo supportingInfo; /**/
 
   // region PaymentComponent
-  @Embedded private ClaimPaymentComponentAmount paymentComponent;
+  @Embedded private PaymentComponentAmount paymentComponent;
 
   @Override
-  public ClaimPaymentComponentBase getPaymentComponent() {
+  public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
 
