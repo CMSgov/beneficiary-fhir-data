@@ -174,12 +174,9 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   /** SS adjudication: provider account-receivable offset amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    if (providerOffsetAmount.isPresent()) {
-      eob.addAdjudication(
-          AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT
-              .toFhirAdjudication(providerOffsetAmount)
-              .get());
-    }
+    AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT
+        .toFhirAdjudication(providerOffsetAmount)
+        .ifPresent(eob::addAdjudication);
   }
 
   /**

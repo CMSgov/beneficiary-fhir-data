@@ -93,12 +93,9 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalBase {
   /** NCH adjudication: payer-paid (primary provider paid) amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    if (primaryProviderPaidAmount.isPresent()) {
-      eob.addAdjudication(
-          AdjudicationChargeType.PAYER_PAID_AMOUNT
-              .toFhirAdjudication(primaryProviderPaidAmount)
-              .get());
-    }
+    AdjudicationChargeType.PAYER_PAID_AMOUNT
+        .toFhirAdjudication(primaryProviderPaidAmount)
+        .ifPresent(eob::addAdjudication);
   }
 
   @Override
