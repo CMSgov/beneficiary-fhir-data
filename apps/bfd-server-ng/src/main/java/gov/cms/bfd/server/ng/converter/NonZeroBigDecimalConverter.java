@@ -5,7 +5,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
 
-/** Converts any zero double values to None. */
+/**
+ * Converts any null float values to an empty Optional. This should be manually invoked on fields
+ * where a zero value should not be rendered in the FHIR. Note: This converter uses a scale of 2
+ * with HALF_UP rounding to handle precision mismatches caused by conversion (e.g., preventing
+ * 320.0899963378906 from being truncated incorrectly). If a future IDR field requires more than 2
+ * decimal places, this logic may need to be changed or moved to individual field mappings.
+ */
 public class NonZeroBigDecimalConverter
     implements AttributeConverter<Optional<BigDecimal>, BigDecimal> {
   @Override

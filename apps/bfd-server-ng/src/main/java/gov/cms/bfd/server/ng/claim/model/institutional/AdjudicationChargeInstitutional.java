@@ -43,7 +43,7 @@ public class AdjudicationChargeInstitutional {
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> ppsDrgWeight;
 
-  @Column(name = "clm_instnl_cvrd_day_cnt") // was a big decimal... why?
+  @Column(name = "clm_instnl_cvrd_day_cnt")
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> totalCoveredDays;
 
