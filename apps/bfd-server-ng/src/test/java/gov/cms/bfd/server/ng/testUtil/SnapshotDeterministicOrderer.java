@@ -30,6 +30,7 @@ public class SnapshotDeterministicOrderer {
           "careTeamSequence", "careTeam",
           "informationSequence", "supportingInfo");
 
+  // These are component lists that we want to order, but do not contain a 'sequence' element and can be ordered as is.
   private static final Set<String> UNSEQUENCED_COMPONENTS =
       Set.of("insurance", "adjudication", "extension", "total");
 
@@ -93,10 +94,13 @@ public class SnapshotDeterministicOrderer {
    * Orders each SEQUENCED_COMPONENTS array first, remember their old sequence, map to new sequence,
    * then populate item array with the new sequence numbers so that the numbers are all correct
    * still.
+   *
+   * @param eob the ObjectNode that represents the root of an Item array
    */
   private void orderItemArray(ObjectNode eob) {
     var sequenceMap = new HashMap<String, Map<Integer, Integer>>();
 
+    // Remember old sequence
     for (var field : SEQUENCED_COMPONENTS) {
       var componentArrayNode = eob.path(field);
       if (componentArrayNode.isArray()) {
@@ -122,6 +126,7 @@ public class SnapshotDeterministicOrderer {
             continue;
           }
 
+          // Populate new sequence
           var newSequence = remap.get(itemComponent.get(itemSequenceName).asInt());
           if (newSequence != null) {
             itemComponent.set(itemSequenceName, IntNode.valueOf(newSequence));
@@ -129,6 +134,7 @@ public class SnapshotDeterministicOrderer {
         }
       }
 
+      // With sequences fixed, we can order the ItemComponent array
       sortAndRenumber(itemArray);
     }
   }
@@ -136,6 +142,9 @@ public class SnapshotDeterministicOrderer {
   /**
    * Sorts elements by toString after removing sequence, then renumbers them and re-adds the
    * sequence element.
+   *
+   * @param node an ArrayNode to be sorted (after removing the sequence element)
+   * @return the old and new positions of the sequences (for tracking the ItemComponent sequence of children arrays)
    */
   private static Map<Integer, Integer> sortAndRenumber(ArrayNode node) {
     var elements = removeAndRecordSequence(node);
@@ -154,7 +163,7 @@ public class SnapshotDeterministicOrderer {
   }
 
   /**
-   * Strips the sequence element, creates a tuple of the element and the old sequence
+   * Strips the sequence element, creates a tuple of the element and the old sequence.
    *
    * @param node the array we're stripping and recording
    * @return a list of Tuple(component, sequence)

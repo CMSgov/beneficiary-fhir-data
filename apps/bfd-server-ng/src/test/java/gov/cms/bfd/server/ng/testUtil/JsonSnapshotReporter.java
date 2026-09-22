@@ -15,6 +15,9 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.opentest4j.AssertionFailedError;
 
+/**
+ * Snapshot reporter implementation, handles pretty printing and comparing differently ordered snapshots.
+ */
 public class JsonSnapshotReporter implements SnapshotReporter {
 
   @Override
@@ -52,15 +55,19 @@ public class JsonSnapshotReporter implements SnapshotReporter {
 
     final var jsondiff = DiffGenerator.diff(previousCanonical, currentCanonical, jsonMatcher);
 
+    // Adds a helpful bit of text at the end that spits out the specific JSON paths that have diffs
     final var errorsView = OnlyErrorDiffViewer.from(jsondiff).toString();
     final var diff = PatchDiffViewer.from(jsondiff);
     final var diffStr = diff.toString();
 
+    // Save the diff to a patch file, so it can be viewed using a diff tool if desired
     FileUtils.writeStringToFile(
         SnapshotHelper.getPatchfile(getClass(), current.getName()),
         diffStr,
         StandardCharsets.UTF_8);
 
+    // Generates a GitHub style diff with a few extra lines below and above the diff marker to add
+    // context
     final var extraLines = 5;
     final var newline = "\n";
     final var diffMarkerAdd = "+";

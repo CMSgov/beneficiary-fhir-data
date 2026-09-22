@@ -9,12 +9,17 @@ public final class EobSnapshotCanonicalizer {
 
   private EobSnapshotCanonicalizer() {}
 
+  /**
+   * Searches and orders EoBs in a JSON string.
+   * @param rawJson the JSON string from a result or snapshot
+   * @return a JsonNode with all the EoB's reordered
+   */
   @SneakyThrows
   public static JsonNode canonicalize(String rawJson) {
     var keyOrderingObjectMapper =
         JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
     var node = keyOrderingObjectMapper.reader().readTree(rawJson);
-    canonicalizeRecursively(node);
+    searchAndCanonicalizeEobRecursive(node);
     return node;
   }
 
@@ -25,14 +30,15 @@ public final class EobSnapshotCanonicalizer {
    *
    * @param node the root node of whatever test output and snapshot input we have
    */
-  private static void canonicalizeRecursively(JsonNode node) {
+  private static void searchAndCanonicalizeEobRecursive(JsonNode node) {
     if (node.isArray()) {
-      node.forEach(EobSnapshotCanonicalizer::canonicalizeRecursively);
+      node.forEach(EobSnapshotCanonicalizer::searchAndCanonicalizeEobRecursive);
     } else if (node.isObject()) {
+      // We've found an EoB, order the elements it
       if (node.path("resourceType").asText("").equals("ExplanationOfBenefit")) {
         SnapshotDeterministicOrderer.order(node);
       } else {
-        node.forEach(EobSnapshotCanonicalizer::canonicalizeRecursively);
+        node.forEach(EobSnapshotCanonicalizer::searchAndCanonicalizeEobRecursive);
       }
     }
   }
