@@ -596,9 +596,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_OCRNC_SPAN_THRU_DT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
-            # HACK: See generation function for justification. This is not a real field of this
-            # table
-            f.CLM_UNIQ_ID,
         ],
     )
     CLM_RLT_OCRNC_SGNTR_MBR = (
@@ -610,9 +607,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_RLT_OCRNC_DT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
-            # HACK: See generation function for justification. This is not a real field of this
-            # table
-            f.CLM_UNIQ_ID,
         ],
     )
     CLM_RLT_COND_SGNTR_MBR = (
