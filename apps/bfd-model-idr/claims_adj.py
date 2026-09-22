@@ -55,8 +55,11 @@ class AdjudicatedGeneratorUtil:
         type_2_npis: list = [0],
     ):
         clm = init_clm or RowAdapter({})
-        clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
         clm[f.CLM_UNIQ_ID] = gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
+        clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
+
+        clm[f.CLM_OCRNC_SGNTR_SK] = gen_numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
+        clm[f.CLM_RLT_OCRNC_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, start=-2)
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
 
         clm_type_cd = (
