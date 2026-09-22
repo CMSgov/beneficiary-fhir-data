@@ -139,8 +139,8 @@ class PacGeneratorUtil:
         if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
             clm[f.CLM_RIC_CD] = get_ric_cd_for_clm_type_cd(pac_clm_type_cd)
 
-        clm[f.CLM_OCRNC_SGNTR_SK] = gen_numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
-        clm[f.CLM_RLT_OCRNC_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, start=-2)
+        clm[f.CLM_OCRNC_SGNTR_SK] = gen_basic_id(field=f.CLM_OCRNC_SGNTR_SK, length=9)
+        clm[f.CLM_RLT_OCRNC_SGNTR_SK] = gen_basic_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, length=9)
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
 
         return clm
