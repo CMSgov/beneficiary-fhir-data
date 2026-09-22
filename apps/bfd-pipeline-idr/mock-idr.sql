@@ -284,7 +284,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_prvdr_rmng_due_amt NUMERIC,
     clm_blood_ncvrd_chrg_amt NUMERIC,
     clm_prvdr_intrst_pd_amt NUMERIC,
-    meta_src_sk NUMERIC,
+    meta_src_sk INT,
     clm_pd_stus_cd VARCHAR(1),
     clm_rlt_ocrnc_sgntr_sk BIGINT,
     clm_ocrnc_sgntr_sk BIGINT,
