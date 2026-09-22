@@ -59,7 +59,7 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
 
         clm[f.CLM_OCRNC_SGNTR_SK] = gen_basic_id(field=f.CLM_OCRNC_SGNTR_SK, length=9)
-        clm[f.CLM_RLT_OCRNC_SGNTR_SK] = gen_basic_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, length=9)
+        clm[f.CLM_RLT_OCRNC_SGNTR_SK] = gen_basic_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, length=12)
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
 
         clm_type_cd = (
