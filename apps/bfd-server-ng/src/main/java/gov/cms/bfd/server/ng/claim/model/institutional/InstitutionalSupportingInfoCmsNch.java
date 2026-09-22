@@ -22,7 +22,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public class InstitutionalSupportingInfoCmsNch implements SupportingInfoComponentBase {
 
-  @Embedded private InstitutionalSupportingInfo claimInstitutionalSupportingInfo;
+  @Embedded private SupportingInfoInstitutional claimSupportingInfoInstitutional;
   @Embedded private BillingProviderSsaStateCode billingProviderSsaStateCode;
 
   @Column(name = "clm_mdcr_instnl_mco_pd_sw")
@@ -52,7 +52,7 @@ public class InstitutionalSupportingInfoCmsNch implements SupportingInfoComponen
       SupportingInfoFactory supportingInfoFactory) {
 
     return Stream.concat(
-            claimInstitutionalSupportingInfo.toFhir(supportingInfoFactory).stream(),
+            claimSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
             Stream.of(
                     mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
                     nonpaymentReasonCode.map(c -> c.toFhir(supportingInfoFactory)),

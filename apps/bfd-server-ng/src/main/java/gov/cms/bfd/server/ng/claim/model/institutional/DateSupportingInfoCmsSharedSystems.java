@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class DateSupportingInfoCmsSharedSystems implements SupportingInfoComponentBase {
 
-  @Embedded private DateSupportingInfo dateSupportingInfo;
+  @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private ClaimProcessDate claimProcessDate;
 
@@ -26,7 +26,7 @@ public class DateSupportingInfoCmsSharedSystems implements SupportingInfoCompone
                     qualifyStayFromDate.toFhir(supportingInfoFactory),
                     claimProcessDate.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream),
-            dateSupportingInfo.toFhir(supportingInfoFactory).stream())
+            supportingInfoDateInstitutional.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }

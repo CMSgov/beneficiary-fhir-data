@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The claim date for a supporting info component, shared across all profiles. */
 @Embeddable
-public class DateSupportingInfo implements SupportingInfoComponentBase {
+public class SupportingInfoDateInstitutional implements SupportingInfoComponentBase {
 
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;

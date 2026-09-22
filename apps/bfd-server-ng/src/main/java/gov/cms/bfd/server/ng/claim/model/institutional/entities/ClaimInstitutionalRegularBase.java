@@ -3,8 +3,8 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfo;
-import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoDateInstitutional;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoInstitutional;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -23,8 +23,8 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
   private BigDecimal benePaidAmount;
 
-  @Embedded private DateSupportingInfo dateSupportingInfo;
-  @Embedded private InstitutionalSupportingInfo supportingInfo; /**/
+  @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
+  @Embedded private SupportingInfoInstitutional supportingInfo; /**/
 
   // region PaymentComponent
   @Embedded private PaymentComponentAmount paymentComponent;

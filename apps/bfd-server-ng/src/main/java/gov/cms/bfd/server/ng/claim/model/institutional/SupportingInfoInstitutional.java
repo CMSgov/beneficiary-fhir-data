@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** The institutional supporting info base. */
 @Embeddable
 @Getter
-public class InstitutionalSupportingInfo implements SupportingInfoComponentBase {
+public class SupportingInfoInstitutional implements SupportingInfoComponentBase {
   @Column(name = "clm_admsn_src_cd")
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 

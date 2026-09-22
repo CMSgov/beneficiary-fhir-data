@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
 
-  @Embedded private DateSupportingInfo dateSupportingInfo;
+  @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
 
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
@@ -40,7 +40,7 @@ public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
                     qualifyStayThruDate.toFhir(supportingInfoFactory),
                     claimProcessDate.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream),
-            dateSupportingInfo.toFhir(supportingInfoFactory).stream())
+            supportingInfoDateInstitutional.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }

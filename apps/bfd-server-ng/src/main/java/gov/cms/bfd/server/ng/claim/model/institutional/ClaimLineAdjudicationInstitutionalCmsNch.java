@@ -44,7 +44,7 @@ public class ClaimLineAdjudicationInstitutionalCmsNch implements AdjudicationEmb
   private BigDecimal transitionalDrugAddOnPaymentAmount;
 
   /**
-   * you already know what it is, toFhir().
+   * Compiles a list of AdjudicationComponents from columns.
    *
    * @return list of adjudication components
    */
