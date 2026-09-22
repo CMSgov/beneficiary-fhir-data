@@ -11,6 +11,7 @@ public final class EobSnapshotCanonicalizer {
 
   /**
    * Searches and orders EoBs in a JSON string.
+   *
    * @param rawJson the JSON string from a result or snapshot
    * @return a JsonNode with all the EoB's reordered
    */

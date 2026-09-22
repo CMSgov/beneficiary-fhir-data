@@ -16,7 +16,8 @@ import org.apache.commons.io.FileUtils;
 import org.opentest4j.AssertionFailedError;
 
 /**
- * Snapshot reporter implementation, handles pretty printing and comparing differently ordered snapshots.
+ * Snapshot reporter implementation, handles pretty printing and comparing differently ordered
+ * snapshots.
  */
 public class JsonSnapshotReporter implements SnapshotReporter {
 

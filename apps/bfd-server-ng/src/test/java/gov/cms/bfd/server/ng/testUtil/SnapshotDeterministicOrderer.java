@@ -30,7 +30,8 @@ public class SnapshotDeterministicOrderer {
           "careTeamSequence", "careTeam",
           "informationSequence", "supportingInfo");
 
-  // These are component lists that we want to order, but do not contain a 'sequence' element and can be ordered as is.
+  // These are component lists that we want to order, but do not contain a 'sequence' element and
+  // can be ordered as is.
   private static final Set<String> UNSEQUENCED_COMPONENTS =
       Set.of("insurance", "adjudication", "extension", "total");
 
@@ -144,7 +145,8 @@ public class SnapshotDeterministicOrderer {
    * sequence element.
    *
    * @param node an ArrayNode to be sorted (after removing the sequence element)
-   * @return the old and new positions of the sequences (for tracking the ItemComponent sequence of children arrays)
+   * @return the old and new positions of the sequences (for tracking the ItemComponent sequence of
+   *     children arrays)
    */
   private static Map<Integer, Integer> sortAndRenumber(ArrayNode node) {
     var elements = removeAndRecordSequence(node);
@@ -165,8 +167,8 @@ public class SnapshotDeterministicOrderer {
   /**
    * Strips the sequence element, creates a tuple of the element and the old sequence.
    *
-   * @param node the array we're stripping and recording
-   * @return a list of Tuple(component, sequence)
+   * @param node the array we're stripping and recording.
+   * @return a list of Tuple(component, sequence).
    */
   private static List<SequencedComponent> removeAndRecordSequence(ArrayNode node) {
     var elements = new ArrayList<SequencedComponent>();
