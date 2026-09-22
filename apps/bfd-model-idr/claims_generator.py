@@ -962,15 +962,15 @@ def generate(
         for row in files[CLM_RLT_COND_SGNTR_MBR]
         if row.get(f.CLM_UNIQ_ID)
     }
-    ocrnc_sgntr_mbr_per_clm_uniq_id = {
-        str(row[f.CLM_UNIQ_ID]): row
+    ocrnc_sgntr_mbr_per_ocrnc_sk = {
+        str(row[f.CLM_OCRNC_SGNTR_SK]): row
         for row in files[CLM_OCRNC_SGNTR_MBR]
-        if row.get(f.CLM_UNIQ_ID)
+        if row.get(f.CLM_OCRNC_SGNTR_SK)
     }
-    rlt_ocrnc_sgntr_mbr_per_clm_uniq_id = {
-        str(row[f.CLM_UNIQ_ID]): row
+    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = {
+        str(row[f.CLM_RLT_OCRNC_SGNTR_SK]): row
         for row in files[CLM_RLT_OCRNC_SGNTR_MBR]
-        if row.get(f.CLM_UNIQ_ID)
+        if row.get(f.CLM_RLT_OCRNC_SGNTR_SK)
     }
     
 
@@ -1075,13 +1075,13 @@ def generate(
 
             clm_ocrnc_sgntr_mbr = adj_util.gen_clm_ocrnc_sgntr_mbr(
                 clm=clm,
-                init_clm_ocrnc_sgntr_mbr=ocrnc_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+                init_clm_ocrnc_sgntr_mbr=ocrnc_sgntr_mbr_per_ocrnc_sk.get(clm[f.CLM_OCRNC_SGNTR_SK]),
             )
             adj_clms_tbls[CLM_OCRNC_SGNTR_MBR].append(clm_ocrnc_sgntr_mbr)
 
             clm_rlt_ocrnc_sgntr_mbr = adj_util.gen_clm_rlt_ocrnc_sgntr_mbr(
                 clm=clm,
-                init_clm_rlt_ocrnc_sgntr_mbr=rlt_ocrnc_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+                init_clm_rlt_ocrnc_sgntr_mbr=rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(clm[f.CLM_RLT_OCRNC_SGNTR_SK]),
             )
             adj_clms_tbls[CLM_RLT_OCRNC_SGNTR_MBR].append(clm_rlt_ocrnc_sgntr_mbr)
 
@@ -1223,10 +1223,10 @@ def generate(
                     cond_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
                 ),
                 CLM_OCRNC_SGNTR_MBR: as_list(
-                    ocrnc_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                    ocrnc_sgntr_mbr_per_ocrnc_sk.get(file_pac_clm[f.CLM_OCRNC_SGNTR_SK])
                 ),
                 CLM_RLT_OCRNC_SGNTR_MBR: as_list(
-                    rlt_ocrnc_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK])
                 ),
             
                 CLM_LINE: [

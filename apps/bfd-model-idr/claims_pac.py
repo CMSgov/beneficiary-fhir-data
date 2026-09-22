@@ -550,9 +550,6 @@ class PacGeneratorUtil:
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = "1000-01-01"
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = "1000-01-01"
 
-        # HACK: See corresponding adjudicated generation function for justification
-        clm_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
-
         add_meta_timestamps(clm_ocrnc_sgntr_mbr, clm)
 
         return clm_ocrnc_sgntr_mbr
@@ -587,9 +584,6 @@ class PacGeneratorUtil:
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_CD] = random.choice(TARGET_RLT_OCRNC_CODES)
 
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = clm[f.CLM_THRU_DT] if clm[f.CLM_THRU_DT] else "1000-01-01"
-
-        # HACK: See corresponding adjudicated generation function for justification
-        clm_rlt_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
 
         add_meta_timestamps(clm_rlt_ocrnc_sgntr_mbr, clm)
 

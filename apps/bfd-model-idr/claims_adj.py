@@ -314,15 +314,6 @@ class AdjudicatedGeneratorUtil:
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = "1000-01-01"
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = "1000-01-01"
 
-        # HACK: Of all claims tables that are derived from CLM, this particular table is the only
-        # one where rows can be orphaned from their root CLM row as some CLM rows may set their
-        # CLM_OCRNC_SGNTR_SK to an invalid value. There are no other fields from which a
-        # foreign-key relationship can be derived, so we must store the CLM_UNIQ_ID of the parent
-        # CLM for each row of this table, otherwise we would have to special-case the logic for
-        # generating this table. CLM_UNIQ_ID will be ignored by the pipeline when loading, so this
-        # is OK
-        clm_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
-
         add_meta_timestamps(clm_ocrnc_sgntr_mbr, clm)
 
         return clm_ocrnc_sgntr_mbr
@@ -343,15 +334,6 @@ class AdjudicatedGeneratorUtil:
 
         # add field for date
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = clm[f.CLM_THRU_DT]
-
-        # HACK: Of all claims tables that are derived from CLM, this particular table is the only
-        # one where rows can be orphaned from their root CLM row as some CLM rows may set their
-        # CLM_RLT_OCRNC_SGNTR_SK to an invalid value. There are no other fields from which a
-        # foreign-key relationship can be derived, so we must store the CLM_UNIQ_ID of the parent
-        # CLM for each row of this table, otherwise we would have to special-case the logic for
-        # generating this table. CLM_UNIQ_ID will be ignored by the pipeline when loading, so this
-        # is OK
-        clm_rlt_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
 
         add_meta_timestamps(clm_rlt_ocrnc_sgntr_mbr, clm)
 
