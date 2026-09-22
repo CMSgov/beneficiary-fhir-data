@@ -493,7 +493,7 @@ public enum AdjudicationChargeType {
   }
 
   public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationDecimalType(
-      Optional<BigDecimal> value) { // is this method needed? seems like a dupe of the normal one??
+      Optional<BigDecimal> value) {
     return value.map(
         adjudicationValue ->
             new ExplanationOfBenefit.AdjudicationComponent()
