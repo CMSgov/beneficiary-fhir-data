@@ -3,16 +3,18 @@
 ## Project Members
 Roles to include, but not limited to: Project Owner, Technical Lead, Developers/Contributors, Community Manager, Security Team, Policy Advisor, Contracting Officer's Representative, Compliance Officer, Procurement Officer -->
 
-| Role | Github Handle | Affiliation |
-| :----- | :------ | :------------- |
-| Technical Lead | mjburling | CMS/DASG  |
-| Technical Lead | aschey-forpeople | CMS/DASG/Contractor  |
-| Developers/Contributors | malessi | CMS/DASG/Contractor  |
-| Developers/Contributors | MahiFentaye | CMS/DASG/Contractor |
-| Developers/Contributors | TimRotenSB | CMS/DASG/Contractor |
-| Developers/Contributors | jrpbc | CMS/DASG/Contractor |
-| FHIR SME | alex-dzeda | CMS/DASG/Contractor |
-| Security Team | sb-benohe | CMS/DASG/Contractor |
+| Role                    | Github Handle       | Affiliation         |
+|:------------------------|:--------------------|:--------------------|
+| Technical Lead          | aschey-forpeople    | CMS/DDIP/Contractor |
+| Developers/Contributors | malessi             | CMS/DDIP/Contractor |
+| Developers/Contributors | mel1-G              | CMS/DDIP/Contractor |
+| Developers/Contributors | patrickgmayday      | CMS/DDIP/Contractor |
+| Developers/Contributors | clewellyn-nava      | CMS/DDIP/Contractor |
+| Developers/Contributors | marshallweekley-eng | CMS/DDIP/Contractor |
+| Developers/Contributors | JFisk42             | CMS/DDIP/Contractor |
+| Developers/Contributors | thomaswilson-eng    | CMS/DDIP/Contractor |
+| FHIR SME                | Daniel Bell         | CMS/DDIP/Contractor |
+| Security Team           | sb-benohe           | CMS/DDIP/Contractor |
 
 For past contributions see [Contributors](https://github.com/CMSgov/beneficiary-fhir-data/graphs/contributors).
 
