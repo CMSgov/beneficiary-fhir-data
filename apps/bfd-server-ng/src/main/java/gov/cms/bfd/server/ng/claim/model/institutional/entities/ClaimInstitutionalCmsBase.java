@@ -41,13 +41,13 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   @Embedded private ClaimIdrLoadDate claimIdrLoadDate;
   @Embedded private PaymentComponentAmount paymentComponent;
 
-  //region Hook Methods
+  // region Hook Methods
 
   abstract List<ClaimValue> getClaimValues();
 
-  //endregion
+  // endregion
 
-  //region Overrides
+  // region Overrides
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
@@ -85,5 +85,5 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
     eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
   }
 
-  //endregion
+  // endregion
 }
