@@ -44,7 +44,7 @@ jobs:
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims ./synthetic-data
+          uv run patient_generator.py --claims ../bfd-pipeline-idr/test_samples1
           # Split claims output into 1000 CLMs batches
           uv run load_splitter.py -c 1000
           cd ../bfd-pipeline-idr
