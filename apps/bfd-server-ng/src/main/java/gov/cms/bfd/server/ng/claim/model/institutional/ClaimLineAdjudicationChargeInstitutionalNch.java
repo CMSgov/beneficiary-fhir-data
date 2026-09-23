@@ -85,19 +85,19 @@ class ClaimLineAdjudicationChargeInstitutionalNch {
                 AdjudicationChargeType.LINE_INSTITUTIONAL_2ND_PAID_AMOUNT.toFhirAdjudication(
                     msp2PaidAmount)),
             Stream.of(
-                    AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudicationCMS(
+                    AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudicationOptional(
                         bloodDeductibleAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudicationCMS(
-                        adjustedAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT.toFhirAdjudicationCMS(
-                        reducedAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT.toFhirAdjudicationCMS(
-                        rateAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT
+                        .toFhirAdjudicationOptional(adjustedAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT
+                        .toFhirAdjudicationOptional(reducedAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT
+                        .toFhirAdjudicationOptional(rateAmount),
                     AdjudicationChargeType.LINE_INSTITUTIONAL_ADD_ON_PAYMENT_AMOUNT
-                        .toFhirAdjudicationCMS(addOnPaymentAmount),
+                        .toFhirAdjudicationOptional(addOnPaymentAmount),
                     AdjudicationChargeType
                         .LINE_INSTITUTIONAL_TRANSITIONAL_DRG_ADD_ON_PAYMENT_ADJUSTMENT
-                        .toFhirAdjudicationCMS(transitionalDrugAddOnPaymentAmount))
+                        .toFhirAdjudicationOptional(transitionalDrugAddOnPaymentAmount))
                 .flatMap(Optional::stream))
         .toList();
   }

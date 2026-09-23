@@ -465,7 +465,7 @@ public enum AdjudicationChargeType {
   }
 
   /* Adjudication values that are CMS-specific should not be returned when null/zero. */
-  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationCMS(
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationOptional(
       Optional<BigDecimal> value) {
     return value.map(
         adjudicationValue ->

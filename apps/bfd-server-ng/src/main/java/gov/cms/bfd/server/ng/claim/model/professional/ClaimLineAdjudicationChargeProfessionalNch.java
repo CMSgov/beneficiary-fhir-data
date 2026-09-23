@@ -39,10 +39,10 @@ class ClaimLineAdjudicationChargeProfessionalNch
             AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
                 screenSavingsAmount)),
         Stream.of(
-                AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudicationCMS(
+                AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudicationOptional(
                     professionalInterestAmount),
                 AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT
-                    .toFhirAdjudicationCMS(primaryPayerAllowedAmount))
+                    .toFhirAdjudicationOptional(primaryPayerAllowedAmount))
             .flatMap(Optional::stream));
   }
 }

@@ -99,21 +99,21 @@ class ClaimLineAdjudicationChargeInstitutionalSharedSystems {
                     msp2PaidAmount)),
             Stream.of(
                     AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT
-                        .toFhirAdjudicationCMS(providerObligationToAcceptFullAmount),
+                        .toFhirAdjudicationOptional(providerObligationToAcceptFullAmount),
                     AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT
-                        .toFhirAdjudicationCMS(noncoveredProductPaidAmount),
-                    AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT.toFhirAdjudicationCMS(
-                        otherThirdPartyPaidAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudicationCMS(
-                        adjustedAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT.toFhirAdjudicationCMS(
-                        reducedAmount),
-                    AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT.toFhirAdjudicationCMS(
-                        rateAmount),
+                        .toFhirAdjudicationOptional(noncoveredProductPaidAmount),
+                    AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT
+                        .toFhirAdjudicationOptional(otherThirdPartyPaidAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT
+                        .toFhirAdjudicationOptional(adjustedAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT
+                        .toFhirAdjudicationOptional(reducedAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT
+                        .toFhirAdjudicationOptional(rateAmount),
                     AdjudicationChargeType.LINE_INSTITUTIONAL_ADD_ON_PAYMENT_AMOUNT
-                        .toFhirAdjudicationCMS(addOnPaymentAmount),
+                        .toFhirAdjudicationOptional(addOnPaymentAmount),
                     AdjudicationChargeType.LINE_INSTITUTIONAL_NON_EHR_REDUCTION_AMOUNT
-                        .toFhirAdjudicationCMS(nonEHRReductionAmount))
+                        .toFhirAdjudicationOptional(nonEHRReductionAmount))
                 .flatMap(Optional::stream))
         .toList();
   }

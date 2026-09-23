@@ -60,16 +60,16 @@ public class ClaimLineAdjudicationChargeRx {
                 AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
                     getTotalDrugCost())),
             Stream.of(
-                    AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudicationCMS(
-                        patientLiabReductPaidAmount),
-                    AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudicationCMS(
-                        lowIncomeCostShareSubAmount),
+                    AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT
+                        .toFhirAdjudicationOptional(patientLiabReductPaidAmount),
+                    AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT
+                        .toFhirAdjudicationOptional(lowIncomeCostShareSubAmount),
                     AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT
-                        .toFhirAdjudicationCMS(grossCostBelowThresholdAmount),
+                        .toFhirAdjudicationOptional(grossCostBelowThresholdAmount),
                     AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT
-                        .toFhirAdjudicationCMS(grossCostAboveThresholdAmount),
+                        .toFhirAdjudicationOptional(grossCostAboveThresholdAmount),
                     AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT
-                        .toFhirAdjudicationCMS(reportedGapDiscountAmount))
+                        .toFhirAdjudicationOptional(reportedGapDiscountAmount))
                 .flatMap(Optional::stream))
         .toList();
   }

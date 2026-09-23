@@ -84,9 +84,9 @@ public abstract class ClaimLineAdjudicationChargeProfessionalBase {
                 subClassCharges()),
             Stream.of(
                     AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT
-                        .toFhirAdjudicationCMS(therapyAmountAppliedToLimit),
+                        .toFhirAdjudicationOptional(therapyAmountAppliedToLimit),
                     AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT
-                        .toFhirAdjudicationCMS(purchasePriceAmount))
+                        .toFhirAdjudicationOptional(purchasePriceAmount))
                 .flatMap(Optional::stream))
         .toList();
   }

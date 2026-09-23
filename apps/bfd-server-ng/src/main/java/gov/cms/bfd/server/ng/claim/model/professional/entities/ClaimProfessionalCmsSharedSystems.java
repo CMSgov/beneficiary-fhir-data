@@ -175,7 +175,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalBase {
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
     AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT
-        .toFhirAdjudicationCMS(providerOffsetAmount)
+        .toFhirAdjudicationOptional(providerOffsetAmount)
         .ifPresent(eob::addAdjudication);
   }
 

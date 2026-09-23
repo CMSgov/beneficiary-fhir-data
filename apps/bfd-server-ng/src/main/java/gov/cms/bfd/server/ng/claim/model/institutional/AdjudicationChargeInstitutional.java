@@ -169,55 +169,56 @@ public class AdjudicationChargeInstitutional {
                     // These are always whole numbers, but IDR stores them as floats
                     AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationLong(
                         Optional.of(totalCoveredDays.get().longValue())),
-                    AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudicationCMS(perDiemAmount),
+                    AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudicationOptional(
+                        perDiemAmount),
                     AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT
-                        .toFhirAdjudicationCMS(ppsDisproportionateAmount),
-                    AdjudicationChargeType.PPS_CAPITAL_EXCEPTION_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(ppsDisproportionateAmount),
+                    AdjudicationChargeType.PPS_CAPITAL_EXCEPTION_AMOUNT.toFhirAdjudicationOptional(
                         ppsExceptionAmount),
                     AdjudicationChargeType.PPS_CAPITAL_FEDERAL_SPECIFIC_PORTION_AMOUNT
-                        .toFhirAdjudicationCMS(ppsCapitalFspAmount),
+                        .toFhirAdjudicationOptional(ppsCapitalFspAmount),
                     AdjudicationChargeType.PPS_CAPITAL_INDIRECT_MEDICAL_EDUCATION_AMOUNT
-                        .toFhirAdjudicationCMS(ppsCapitalImeAmount),
-                    AdjudicationChargeType.PPS_CAPITAL_OUTLIER_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(ppsCapitalImeAmount),
+                    AdjudicationChargeType.PPS_CAPITAL_OUTLIER_AMOUNT.toFhirAdjudicationOptional(
                         ppsOutlierAmount),
                     AdjudicationChargeType.PPS_OLD_CAPITAL_HOLD_HARMLESS_AMOUNT
-                        .toFhirAdjudicationCMS(ppsCapitalHarmlessAmount),
-                    AdjudicationChargeType.PPS_CAPITAL_HOLD_TOTAL_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(ppsCapitalHarmlessAmount),
+                    AdjudicationChargeType.PPS_CAPITAL_HOLD_TOTAL_AMOUNT.toFhirAdjudicationOptional(
                         ppsCapitalTotalAmount),
                     AdjudicationChargeType.PRIMARY_PAYER_NON_MEDICARE_PAID_AMOUNT
-                        .toFhirAdjudicationCMS(primaryPayerAmount),
+                        .toFhirAdjudicationOptional(primaryPayerAmount),
                     AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT
-                        .toFhirAdjudicationCMS(professionalAmount),
+                        .toFhirAdjudicationOptional(professionalAmount),
                     AdjudicationChargeType.DRUG_OUTLIER_APPROVED_PAYMENT_AMOUNT
-                        .toFhirAdjudicationCMS(drgOutlierAmount),
-                    AdjudicationChargeType.UNCOMPENSATED_CARE_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
-                        hippsUncompensatedCareAmount),
-                    AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT.toFhirAdjudicationCMS(
-                        beneDeductibleAmount),
-                    AdjudicationChargeType.STANDARDIZED_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(drgOutlierAmount),
+                    AdjudicationChargeType.UNCOMPENSATED_CARE_PAYMENT_AMOUNT
+                        .toFhirAdjudicationOptional(hippsUncompensatedCareAmount),
+                    AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT
+                        .toFhirAdjudicationOptional(beneDeductibleAmount),
+                    AdjudicationChargeType.STANDARDIZED_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
                         standardizedPaymentAmount),
                     AdjudicationChargeType.HOSPITAL_ACQUIRED_CONDITION_REDUCTION_AMOUNT
-                        .toFhirAdjudicationCMS(hospitalAcquiredConditionReductionAmount),
-                    AdjudicationChargeType.BLENDED_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(hospitalAcquiredConditionReductionAmount),
+                    AdjudicationChargeType.BLENDED_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
                         blendedPaymentAmount),
-                    AdjudicationChargeType.READMISSION_REDUCTION_AMOUNT.toFhirAdjudicationCMS(
+                    AdjudicationChargeType.READMISSION_REDUCTION_AMOUNT.toFhirAdjudicationOptional(
                         readmissionReductionAmount),
                     AdjudicationChargeType.HIPPS_VALUE_BASED_PURCHASING_AMOUNT
-                        .toFhirAdjudicationCMS(hippsPurchasingAmount),
-                    AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
+                        .toFhirAdjudicationOptional(hippsPurchasingAmount),
+                    AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
                         lowVolumePaymentAmount),
-                    AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudicationCMS(
+                    AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
                         firstYearRateAmount),
-                    AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudicationCMS(
+                    AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
                         secondYearRateAmount),
                     AdjudicationChargeType.MARYLAND_WAIVER_STANDARDIZED_AMOUNT
-                        .toFhirAdjudicationCMS(marylandWaiverStandardizedAmount),
+                        .toFhirAdjudicationOptional(marylandWaiverStandardizedAmount),
                     AdjudicationChargeType.SITE_NEUTRAL_COST_BASED_PAYMENT_AMOUNT
-                        .toFhirAdjudicationCMS(siteNeutralCostBasedPaymentAmount),
-                    AdjudicationChargeType.SITE_NEUTRAL_IPPS_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
-                        siteNeutralIPPSPaymentAmount),
-                    AdjudicationChargeType.SHORT_STAY_OUTLIER_PAYMENT_AMOUNT.toFhirAdjudicationCMS(
-                        shortStayOutlierPaymentAmount))
+                        .toFhirAdjudicationOptional(siteNeutralCostBasedPaymentAmount),
+                    AdjudicationChargeType.SITE_NEUTRAL_IPPS_PAYMENT_AMOUNT
+                        .toFhirAdjudicationOptional(siteNeutralIPPSPaymentAmount),
+                    AdjudicationChargeType.SHORT_STAY_OUTLIER_PAYMENT_AMOUNT
+                        .toFhirAdjudicationOptional(shortStayOutlierPaymentAmount))
                 .flatMap(Optional::stream)
                 .toList())
         .flatMap(Collection::stream)

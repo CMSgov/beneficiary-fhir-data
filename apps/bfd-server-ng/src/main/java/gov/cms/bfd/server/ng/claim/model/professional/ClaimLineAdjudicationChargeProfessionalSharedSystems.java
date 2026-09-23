@@ -21,7 +21,7 @@ class ClaimLineAdjudicationChargeProfessionalSharedSystems
   @Override
   Stream<ExplanationOfBenefit.AdjudicationComponent> subClassCharges() {
     return Stream.of(
-            AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudicationOptional(
                 providerObligationToAcceptFullAmount))
         .flatMap(Optional::stream);
   }

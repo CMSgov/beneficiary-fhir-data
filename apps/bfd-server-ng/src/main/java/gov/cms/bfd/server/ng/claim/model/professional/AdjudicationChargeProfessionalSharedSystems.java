@@ -91,19 +91,19 @@ public class AdjudicationChargeProfessionalSharedSystems implements Adjudication
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.of(
-            AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudicationOptional(
                 beneInterestPaidAmount),
-            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudicationCMS(
-                bloodLiabilityAmount),
-            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT
+                .toFhirAdjudicationOptional(bloodLiabilityAmount),
+            AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudicationOptional(
                 bloodNoncoveredChargeAmount),
-            AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.COB_PATIENT_RESPONSIBILITY_AMOUNT.toFhirAdjudicationOptional(
                 cobPatientResponsibilityAmount),
-            AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.PROVIDER_INTEREST_PAID_AMOUNT.toFhirAdjudicationOptional(
                 providerInterestPaidAmount),
-            AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudicationCMS(
+            AdjudicationChargeType.PROVIDER_OBLIGATION_TO_ACCEPT_AMOUNT.toFhirAdjudicationOptional(
                 providerObligationToAcceptAmount),
-            AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudicationCMS(
+            AdjudicationChargeType.REMAINING_AMOUNT_TO_PROVIDER.toFhirAdjudicationOptional(
                 remainingAmountToProvider))
         .flatMap(Optional::stream)
         .toList();
