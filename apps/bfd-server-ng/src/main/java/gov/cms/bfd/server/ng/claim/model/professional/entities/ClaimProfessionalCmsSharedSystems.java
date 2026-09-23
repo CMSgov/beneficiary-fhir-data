@@ -93,7 +93,7 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   }
 
   @Override
-  public Optional<AdjudicationEmbedded> getAdjudication() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 

@@ -104,6 +104,7 @@ public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBas
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
+            super.buildSubclassSupportingInfo().stream().toList(),
             Stream.of(
                     claimRecordType.toFhir(supportingInfoFactory),
                     Optional.of(claimPaidStatusCode.toFhir(supportingInfoFactory)),

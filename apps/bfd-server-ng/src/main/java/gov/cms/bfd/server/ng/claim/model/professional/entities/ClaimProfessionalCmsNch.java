@@ -71,7 +71,7 @@ public class ClaimProfessionalCmsNch extends ClaimProfessionalCmsBase implements
   }
 
   @Override
-  public Optional<AdjudicationEmbedded> getAdjudication() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 

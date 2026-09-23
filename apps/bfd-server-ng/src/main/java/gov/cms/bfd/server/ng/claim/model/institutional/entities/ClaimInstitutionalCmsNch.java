@@ -62,10 +62,10 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
-            claimRecordType.toFhir(supportingInfoFactory).stream()
-                .toList(), // NCH record-type supporting info limited to one entry.
+            super.buildSubclassSupportingInfo().stream().toList(),
             getDateSupportingInfo().toFhir(supportingInfoFactory),
             getSupportingInfo().toFhir(supportingInfoFactory),
+            claimRecordType.toFhir(supportingInfoFactory).stream().toList(),
             bloodPints.toFhir(supportingInfoFactory).stream().toList(),
             nchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)

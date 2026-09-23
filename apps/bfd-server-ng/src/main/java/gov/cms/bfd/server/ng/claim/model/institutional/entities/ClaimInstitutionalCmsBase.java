@@ -32,53 +32,43 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
   private BigDecimal benePaidAmount;
 
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private AdjudicationPpsCms adjudicationPpsCms;
   @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
-
-  // region Claim IDR Load Date
   @Embedded private ClaimIdrLoadDate claimIdrLoadDate;
+  @Embedded private PaymentComponentAmount paymentComponent;
+
+  //region Hook Methods
+
+  abstract List<ClaimValue> getClaimValues();
+
+  //endregion
+
+  //region Overrides
 
   @Override
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
     return Optional.of(claimIdrLoadDate);
   }
 
-  // endregion
-
-  // region PaymentComponent
-  @Embedded private PaymentComponentAmount paymentComponent;
-
   @Override
   public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
-
-  // endregion
-
-  // region Claim Contractor Number
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
 
   @Override
   protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return claimContractorNumber;
   }
 
-  // endregion
-
-  // region Hook Methods
-
-  abstract List<ClaimValue> getClaimValues();
-
-  // endregion
-
-  // region Overrides
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassInitialSupportingInfo() {
+      buildSubclassSupportingInfo() {
     return Stream.of(
-            super.buildSubclassInitialSupportingInfo().stream(),
+            super.buildSubclassSupportingInfo().stream(),
             Stream.of(
                     nchPrimaryPayorCode.toFhir(supportingInfoFactory),
                     claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
@@ -94,5 +84,6 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
     AdjudicationClaimValue.toFhir(getClaimValues()).forEach(eob::addAdjudication);
     eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
   }
-  // endregion
+
+  //endregion
 }

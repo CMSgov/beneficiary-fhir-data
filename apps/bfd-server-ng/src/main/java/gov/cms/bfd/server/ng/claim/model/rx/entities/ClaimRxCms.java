@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The CMS profile of a pharmacy claim, Rx-CMS */
+/** The CMS profile of a pharmacy claim, Rx-CMS. */
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")

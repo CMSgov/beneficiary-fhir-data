@@ -73,7 +73,7 @@ public class ClaimProfessionalRegularSharedSystems extends ClaimProfessionalRegu
   }
 
   @Override
-  public Optional<AdjudicationEmbedded> getAdjudication() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 

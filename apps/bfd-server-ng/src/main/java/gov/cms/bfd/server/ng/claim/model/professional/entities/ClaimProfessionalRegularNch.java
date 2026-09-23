@@ -64,7 +64,7 @@ public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase im
   }
 
   @Override
-  public Optional<AdjudicationEmbedded> getAdjudication() {
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
     return Optional.of(adjudicationCharge);
   }
 }

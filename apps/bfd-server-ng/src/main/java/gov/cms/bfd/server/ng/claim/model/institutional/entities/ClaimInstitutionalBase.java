@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -55,8 +56,12 @@ abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   // region Hook Methods
-  protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassSupportingInfo();
+
+  // construct a list of supportinginfo from all base classes, call super.
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassSupportingInfo() {
+    return List.of();
+  }
 
   protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();
@@ -69,18 +74,8 @@ abstract class ClaimInstitutionalBase extends ClaimBase {
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
-  /**
-   * Overridable by subclasses to allow injecting profile specific supporting info.
-   *
-   * @return a list of supporting information components
-   */
-  protected List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassInitialSupportingInfo() {
-    return Stream.of(
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
-        .toList();
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.empty();
   }
 
   // endregion
@@ -175,8 +170,15 @@ abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
+    var initialSupportingInfo =
+        Stream.of(
+                claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
+            .flatMap(Optional::stream)
+            .toList();
+
     Stream.of(
-            buildSubclassInitialSupportingInfo(),
+            initialSupportingInfo,
             getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
             buildSubclassSupportingInfo(),
             getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),

@@ -40,27 +40,22 @@ abstract class ClaimProfessionalBase extends ClaimBase {
   // region Hook Methods
 
   /**
-   * retrieve total components and adjudication components.
+   * retrieve total components and adjudication components, default to empty (basis).
    *
    * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
    */
-  abstract Optional<AdjudicationEmbedded> getAdjudication();
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.empty();
+  }
 
   /**
    * get a ClaimContractorNumber from some data sources.
    *
    * @return the ClaimContractorNumber
    */
-  public Optional<ClaimContractorNumber> getClaimContractorNumber() {
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
     return Optional.empty();
   }
-
-  /**
-   * Returns supporting-info components that are specific to the subclass.
-   *
-   * @return list of subclass-specific supporting-info components
-   */
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo();
 
   /**
    * return Observations while building SupportingInfo (Shared Systems), default no-op.
@@ -72,7 +67,14 @@ abstract class ClaimProfessionalBase extends ClaimBase {
   }
 
   /**
-   * Adds any adjudication entries that are unique to the subclass.
+   * Returns supporting-info components that are specific to the subclass.
+   *
+   * @return list of subclass-specific supporting-info components
+   */
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo();
+
+  /**
+   * Adds any adjudication entries that are unique to the subclass. Must call super.
    *
    * @param eob the EOB being built
    */
