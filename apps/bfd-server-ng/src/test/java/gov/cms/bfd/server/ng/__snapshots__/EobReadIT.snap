@@ -1388,7 +1388,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 69.16
+      "value" : 69.17
     },
     "category" : {
       "coding" : [ {
@@ -3385,7 +3385,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "diagnosisSequence" : [ 1 ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT",
-      "valueDecimal" : 4.0
+      "valueDecimal" : 5.0
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
       "valueDecimal" : 2.0
