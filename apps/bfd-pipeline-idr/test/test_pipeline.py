@@ -1019,15 +1019,12 @@ def _test_load_progress_concurrent(conn: Connection[DictRow]) -> None:
     rows_2 = cur.fetchmany(1)
     assert len(rows_2) == 1
     job_row = rows_2[0]
-    partition: str = job_row["batch_partition"]
     table: str = job_row["table_name"]
     cur = conn.execute(
-        """select * from idr.load_progress where job_id = 1 
-        and batch_partition = %(batch_partition)s 
+        """select MAX(last_ts) as last_ts from idr.load_progress where job_id = 1 
         and table_name = %(table_name)s
     """,
         {
-            "batch_partition": partition,
             "table_name": table,
         },
     )

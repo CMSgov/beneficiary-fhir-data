@@ -6,7 +6,7 @@ import pandas as pd
 from faker import Faker
 
 import field_constants as f
-from claims_static import (
+from idr_model.claims_static import (
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
     AVAILABLE_PROVIDER_LEGAL_NAMES,

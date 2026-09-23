@@ -53,13 +53,13 @@ structure_def_names_descriptions = {}
 def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
     return subprocess.run(
         args,
-        cwd=Path().parent,
+        cwd=Path(__file__).parent.parent.parent,
         check=True,
         stdout=subprocess.PIPE,
     )
 
 
-if not Path("./sushi/fsh-generated/resources").exists():
+if not Path(structure_def_folder).exists():
     print("Generating sushi files")
     run_subprocess(["npm", "install"])
     run_subprocess(["npm", "run", "sushi-build"])
@@ -127,7 +127,8 @@ for walk_info in os.walk(dd_support_folder):
                     else:
                         entry["FHIR Resource"] = "AuditEvent"
 
-                    # This opportunistically populates examples based upon the samples created from executing FML
+                    # This opportunistically populates examples based upon the samples
+                    # created from executing FML
                     result = run_subprocess(
                         [
                             "node",
