@@ -107,8 +107,8 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["mbi_num"] == "1OX4Y88RV68"
 
-    # Seed stale non-Part-D parent claims so the prune job has rows to delete.
-    # CSVs cover item pruning because stale non-Part-D parents do not load.
+    # Seed non-latest claims so the prune job has rows to delete.
+    # CSVs cover item pruning for claims with separate item tables.
     if load_type == LoadType.INCREMENTAL:
         claim_table = sql.Identifier("idr", "claim_institutional_nch")
         cur = conn.execute(
@@ -222,6 +222,32 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
                 {columns:q}
             )
             VALUES (
+                {values:q}
+            )
+            """
+        )
+
+        claim_table = sql.Identifier("idr", "claim_rx")
+        cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -8797257401798")
+        assert cur.rowcount == 1
+        row = cur.fetchone()
+        assert row is not None
+
+        non_latest_part_d_claim = dict(row)
+        non_latest_part_d_claim["clm_uniq_id"] = 999999488700
+        non_latest_part_d_claim["clm_ltst_clm_ind"] = "N"
+
+        columns = sql.SQL(", ").join(sql.Identifier(k) for k in non_latest_part_d_claim)
+        values = sql.SQL(", ").join(non_latest_part_d_claim.values())
+
+        conn.execute(
+            t"""
+            INSERT INTO {claim_table:i}
+            (
+                {columns:q}
+            )
+            VALUES
+            (
                 {values:q}
             )
             """
@@ -345,7 +371,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == -9879437343384
 
-    # Stale non-Part-D parent claims do not remain in the final claim tables
+    # Non-latest claims do not remain in the final claim tables.
     cur = conn.execute("select * from idr.claim_institutional_nch where clm_uniq_id = 999999434801")
     assert cur.rowcount == 0
 
@@ -356,6 +382,9 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_professional_ss where clm_uniq_id = 999999434803")
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = 999999488700")
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
@@ -381,7 +410,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == -9879437343384
 
-    # Items for stale non-Part-D claims are pruned on incremental loads
+    # Items for non-latest claims are pruned on incremental loads.
     cur = conn.execute(
         "select * from idr.claim_item_institutional_nch where clm_uniq_id = 999999434801"
     )
