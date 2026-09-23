@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.converter;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 /** Converts null BigDecimal values to an empty Optional. */
@@ -20,6 +21,6 @@ public class OptionalBigDecimalConverter
     if (value == null) {
       return Optional.empty();
     }
-    return Optional.of(value);
+    return Optional.of(value.setScale(2, RoundingMode.HALF_UP));
   }
 }
