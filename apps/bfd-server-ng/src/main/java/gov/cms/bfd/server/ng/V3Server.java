@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
+import gov.cms.bfd.server.ng.interceptor.CapabilityStatementCustomizer;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class V3Server extends RestfulServer {
   private final transient List<IResourceProvider> resourceProviders;
   private final transient RequestMetricsInterceptor requestMetricsInterceptor;
+  private final transient CapabilityStatementCustomizer capabilityStatementCustomizer;
   private final Configuration configuration;
 
   /** Represents the capabilities publisher value. */
@@ -48,6 +50,7 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
+    this.registerInterceptor(capabilityStatementCustomizer);
     this.registerInterceptor(requestMetricsInterceptor);
   }
 
