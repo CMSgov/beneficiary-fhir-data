@@ -18,23 +18,21 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
-public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
+abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
 
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
   private BigDecimal benePaidAmount;
 
   @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
   @Embedded private SupportingInfoInstitutional supportingInfo; /**/
-
-  // region PaymentComponent
   @Embedded private PaymentComponentAmount paymentComponent;
+
+  // region Overrides
 
   @Override
   public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
   }
-
-  // endregion
 
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
@@ -46,4 +44,6 @@ public abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBa
       buildSubclassSupportingInfo() {
     return List.of();
   }
+
+  // endregion
 }

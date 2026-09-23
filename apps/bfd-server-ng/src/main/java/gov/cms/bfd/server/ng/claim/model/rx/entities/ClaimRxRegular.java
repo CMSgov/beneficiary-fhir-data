@@ -16,7 +16,7 @@ import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The regular profile pharmacy claim. */
+/** The regular profile pharmacy claim, Rx-Regular. */
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")
@@ -28,14 +28,7 @@ public class ClaimRxRegular extends ClaimRxBase {
   @Embedded private AdjudicationRx adjudicationCharge;
   @Embedded private ClaimItemRx claimItem;
 
-  /**
-   * Returns the system type.
-   *
-   * @return system type
-   */
-  public static SystemType getSystemType() {
-    return SystemType.DDPS;
-  }
+  // region Overrides
 
   @Override
   protected Optional<AdjudicationEmbedded> getAdjudication() {
@@ -53,5 +46,16 @@ public class ClaimRxRegular extends ClaimRxBase {
   @Override
   protected ClaimItemBase getClaimItem() {
     return claimItem;
+  }
+
+  // endregion
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.DDPS;
   }
 }

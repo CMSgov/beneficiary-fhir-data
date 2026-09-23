@@ -15,7 +15,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Shared base for regular profile professional claims. */
 @MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
-public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
+abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
+
+  @Embedded private PaymentComponentAmount paymentComponent;
+
+  // region Overrides
 
   @Override
   List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
@@ -32,9 +36,6 @@ public abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase
   public SortedSet<ClaimItemBase> getItems() {
     return Collections.emptySortedSet();
   }
-
-  // region PaymentComponent
-  @Embedded private PaymentComponentAmount paymentComponent;
 
   @Override
   public PaymentComponentBase getPaymentComponent() {

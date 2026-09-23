@@ -34,10 +34,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
-/**
- * Base claim table for pharmacy ExplanationOfBenefits. Resource - ExplanationOfBenefit Domain - [
- * Rx ] Profile - [ CMS ] Source - [ Rx ]
- */
+/** Base claim table for pharmacy, Rx-Base */
 @MappedSuperclass
 @Getter
 public abstract class ClaimRxBase extends ClaimBase {

@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for CMS profile professional claim types (NCH and Shared Systems). */
 @MappedSuperclass
-public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
+abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;

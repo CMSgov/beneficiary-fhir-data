@@ -28,7 +28,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Shared base for professional claim types (NCH and Shared Systems). */
 @MappedSuperclass
 @Getter
-public abstract class ClaimProfessionalBase extends ClaimBase {
+abstract class ClaimProfessionalBase extends ClaimBase {
 
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;

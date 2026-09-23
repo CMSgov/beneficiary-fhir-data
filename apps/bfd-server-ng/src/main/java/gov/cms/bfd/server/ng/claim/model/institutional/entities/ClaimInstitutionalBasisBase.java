@@ -9,11 +9,11 @@ import jakarta.persistence.MappedSuperclass;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 
-/** the institutional claim basis profile base. */
+/** the Institutional-Basis base class. */
 @Getter
 @MappedSuperclass
 @Generated("TODO - Remove after query optimization implementation")
-public abstract class ClaimInstitutionalBasisBase extends ClaimInstitutionalBase {
+abstract class ClaimInstitutionalBasisBase extends ClaimInstitutionalBase {
 
   @Embedded private SupportingInfoInstitutional supportingInfo;
   @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;

@@ -8,7 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
-/** The basis profile of a Rx Claim. */
+/** The basis profile of a Rx-Basis. */
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr")

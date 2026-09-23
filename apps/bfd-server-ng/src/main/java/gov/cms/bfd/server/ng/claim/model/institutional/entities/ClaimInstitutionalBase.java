@@ -36,7 +36,7 @@ import org.hl7.fhir.r4.model.Reference;
 @MappedSuperclass
 @Getter
 @SuppressWarnings("java:S6539")
-public abstract class ClaimInstitutionalBase extends ClaimBase {
+abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;

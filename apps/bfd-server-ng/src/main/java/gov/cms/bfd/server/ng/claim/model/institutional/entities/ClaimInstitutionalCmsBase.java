@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** The institutional claim, full (CMS) profile base class. */
 @Getter
 @MappedSuperclass
-public abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
+abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
 
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
