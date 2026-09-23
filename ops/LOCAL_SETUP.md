@@ -10,8 +10,10 @@ Below is a recommended setup for you kion.yml. This creates short cuts to connec
 ---
 kion:
   url: https://cloudtamer.cms.gov
-  username: <your EUA id here>
-  idms_id: 2
+  idms_id: 5 # `idms_id` maps to "CMS Cloud Services" in the cloudtamer.cms.gov for EUA authentication. I think.
+  saml_metadata_file: https://idm.cms.gov/app/exk10wd8mvjHwLRKa298/sso/saml/metadata
+  saml_sp_issuer: https://cloudtamer.cms.gov/api/v1/saml/auth
+  disable_cache: false
 
 browser:
   firefox_containers: true
