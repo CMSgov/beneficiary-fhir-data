@@ -13,7 +13,7 @@ Roles to include, but not limited to: Project Owner, Technical Lead, Developers/
 | Developers/Contributors | marshallweekley-eng | CMS/DDIP/Contractor |
 | Developers/Contributors | JFisk42             | CMS/DDIP/Contractor |
 | Developers/Contributors | thomaswilson-eng    | CMS/DDIP/Contractor |
-| FHIR SME                | Daniel Bell         | CMS/DDIP/Contractor |
+| FHIR SME                | belldans            | CMS/DDIP/Contractor |
 | Security Team           | sb-benohe           | CMS/DDIP/Contractor |
 
 For past contributions see [Contributors](https://github.com/CMSgov/beneficiary-fhir-data/graphs/contributors).

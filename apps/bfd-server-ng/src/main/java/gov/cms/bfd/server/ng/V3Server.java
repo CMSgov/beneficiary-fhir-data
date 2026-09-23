@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
@@ -19,6 +20,13 @@ import org.springframework.stereotype.Component;
 public class V3Server extends RestfulServer {
   private final transient List<IResourceProvider> resourceProviders;
   private final transient RequestMetricsInterceptor requestMetricsInterceptor;
+  private final Configuration configuration;
+
+  /** Represents the capabilities publisher value. */
+  static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
+
+  /** Represents the capabilities server name. */
+  static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
   @Override
   public void initialize() {
@@ -32,6 +40,7 @@ public class V3Server extends RestfulServer {
     // See:
     // https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html#isIgnoreServerParsedRequestParameters()
     this.setIgnoreServerParsedRequestParameters(false);
+    this.configureServerInfoMetadata();
 
     this.setFhirContext(FhirContext.forR4());
 
@@ -40,5 +49,17 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
     this.registerInterceptor(requestMetricsInterceptor);
+  }
+
+  private void configureServerInfoMetadata() {
+    setServerName(CAPABILITIES_SERVER_NAME);
+    setImplementationDescription(configuration.getProject().getId());
+    setServerVersion(configuration.getProject().getVersion());
+
+    // Lightly customize the capability provider to set publisher name.
+    ServerCapabilityStatementProvider capabilityStatementProvider =
+        new ServerCapabilityStatementProvider(this);
+    capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
+    setServerConformanceProvider(capabilityStatementProvider);
   }
 }

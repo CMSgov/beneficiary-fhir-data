@@ -73,6 +73,7 @@ public class Configuration implements Serializable {
   private Local local = new Local();
   private Sensitive sensitive = new Sensitive();
   private Nonsensitive nonsensitive = new Nonsensitive();
+  private Project project = new Project();
 
   @Getter(lazy = true)
   private final Map<String, String> clientCertsToAliases = getClientCertsToAliasesInternal();
@@ -266,9 +267,15 @@ public class Configuration implements Serializable {
         .build();
   }
 
+  /** Configuration Project ID and Version for CapabilityStatement. */
+  @Data
+  public static class Project {
+    private String id;
+    private String version;
+  }
+
   /** Configuration for local-only properties. */
   @Data
-  @ConfigurationProperties
   public static class Local {
     // in AWS, this is loaded dynamically using the RDS API.
     private String dbHost = "localhost";
@@ -276,13 +283,11 @@ public class Configuration implements Serializable {
 
   /** Sensitive configuration. */
   @Data
-  @ConfigurationProperties
   public static class Sensitive {
     private Db db = new Db();
 
     /** Sensitive Database configuration. */
     @Data
-    @ConfigurationProperties
     public static class Db {
       private String username;
       private String password;
@@ -291,7 +296,6 @@ public class Configuration implements Serializable {
 
   /** Nonsensitive configuration. */
   @Data
-  @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
     private String disabledUrisJson = "[]";
@@ -300,7 +304,6 @@ public class Configuration implements Serializable {
 
     /** Nonsensitive database configuration. */
     @Data
-    @ConfigurationProperties
     public static class Db {
       private Hikari hikari = new Hikari();
       private Wrapper wrapper = new Wrapper();
@@ -311,7 +314,6 @@ public class Configuration implements Serializable {
 
       /** Hikari configuration. */
       @Data
-      @ConfigurationProperties
       public static class Hikari {
         // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
         private int maxPoolSize = Runtime.getRuntime().availableProcessors();
@@ -326,7 +328,6 @@ public class Configuration implements Serializable {
 
       /** AWS JDBC wrapper configuration. */
       @Data
-      @ConfigurationProperties
       public static class Wrapper {
         private String pluginsCsv = "auroraConnectionTracker,failover,efm2";
         private String hostSelectorStrategy = "roundRobin";
