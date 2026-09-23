@@ -32,7 +32,6 @@ from generator_util import (
     load_id_state,
     output_table_contains_by_bene_sk,
     probability,
-    reset_bene_sk_cache,
 )
 from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
@@ -211,14 +210,14 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
 
 
 def load_inputs():
-    writer: OutputDestinationWriter = (
-        SnowflakeWriter() if args.destination == "snowflake" else CsvWriter()
-    )
+    is_snowflake = args.destination == "snowflake"
+    writer: OutputDestinationWriter = SnowflakeWriter() if is_snowflake else CsvWriter()
 
-    if isinstance(writer, SnowflakeWriter) and args.paths:
+    if is_snowflake and args.paths:
         print("CSV files should not be provided when destination is snowflake")
         sys.exit(1)
-    elif isinstance(writer, SnowflakeWriter):
+
+    if is_snowflake:
         id_state = load_id_state(writer)
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
     else:
@@ -226,64 +225,62 @@ def load_inputs():
 
     generator = GeneratorUtil(id_gen=id_gen)
 
-    if isinstance(writer, CsvWriter):
-        files: dict[str, list[RowAdapter]] = {
-            BENE_HSTRY: [],
-            BENE_MBI_ID: [],
-            BENE_STUS: [],
-            BENE_ENTLMT_RSN: [],
-            BENE_ENTLMT: [],
-            BENE_TP: [],
-            BENE_XREF: [],
-            BENE_DUAL: [],
-            BENE_MAPD_ENRLMT: [],
-            BENE_MAPD_ENRLMT_RX: [],
-            BENE_LIS_CMBND: [],
-            CNTRCT_PBP_NUM: [],
-            CNTRCT_PBP_CNTCT: [],
-        }
-        load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
+    if is_snowflake:
+        _handle_snowflake_flow(generator, writer)
+    else:
+        _handle_csv_flow(generator, writer)
 
-        generator.gen_contract_plan(
-            amount=10,
-            init_contract_pbp_nums=files[CNTRCT_PBP_NUM],
-            init_contract_pbp_contacts=files[CNTRCT_PBP_CNTCT],
-        )
 
-        if any(file for file in files.values()):
-            regenerate_static_tables(generator, files)
+def _handle_csv_flow(generator: GeneratorUtil, writer: CsvWriter):
+    csv_tables = [
+        BENE_HSTRY,
+        BENE_MBI_ID,
+        BENE_STUS,
+        BENE_ENTLMT_RSN,
+        BENE_ENTLMT,
+        BENE_TP,
+        BENE_XREF,
+        BENE_DUAL,
+        BENE_MAPD_ENRLMT,
+        BENE_MAPD_ENRLMT_RX,
+        BENE_LIS_CMBND,
+        CNTRCT_PBP_NUM,
+        CNTRCT_PBP_CNTCT,
+    ]
 
-        num_existing = len(files[BENE_HSTRY])
-        num_new = int(args.patients)
-        if num_existing == 0 and num_new == 0:
-            print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
-            sys.exit(1)
+    files: dict[str, list[RowAdapter]] = {table: [] for table in csv_tables}
+    load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
 
-        patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
-        patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
+    generator.gen_contract_plan(
+        amount=10,
+        init_contract_pbp_nums=files[CNTRCT_PBP_NUM],
+        init_contract_pbp_contacts=files[CNTRCT_PBP_CNTCT],
+    )
 
-        print(
-            f"{
-                ', and '.join(
-                    x
-                    for x in [
-                        f'regenerating {num_existing} existing patients' if num_existing else None,
-                        f'generating {num_new} new patients' if num_new > 0 else None,
-                    ]
-                    if x
-                )
-            }...".capitalize()
-        )
+    if any(files.values()):
+        regenerate_static_tables(generator, files)
 
-        _generate_patients_batch(generator, patients, patient_mbi_id_rows, args.force_ztm)
-        generator.save_output_files(
-            writer,
-            truncate=args.truncate,
-        )
-        return
+    num_existing = len(files[BENE_HSTRY])
+    num_new = int(args.patients)
+    if num_existing == 0 and num_new == 0:
+        print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
+        sys.exit(1)
 
-    # Snowflake flow
-    reset_bene_sk_cache()
+    log_messages = []
+    if num_existing:
+        log_messages.append(f"regenerating {num_existing} existing patients")
+    if num_new > 0:
+        log_messages.append(f"generating {num_new} new patients")
+    print(f"{', and '.join(log_messages)}...".capitalize())
+
+    patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
+    patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
+
+    _generate_patients_batch(generator, patients, patient_mbi_id_rows, args.force_ztm)
+    generator.save_output_files(writer, truncate=args.truncate)
+
+
+def _handle_snowflake_flow(generator: GeneratorUtil, writer: SnowflakeWriter):
     _generate_contracts(generator, writer, truncate=args.truncate)
 
     patient_tables = [
@@ -299,25 +296,26 @@ def load_inputs():
         BENE_LIS_CMBND,
     ]
 
+    # Process existing data updates in batches
     if not args.truncate:
         for bene_sks_batch in writer.iter_bene_sk_batches(args.batch_size):
-            reset_bene_sk_cache()
             existing = writer.get_patient_batch(bene_sks_batch, patient_tables)
             regenerate_static_tables(generator, existing)
             patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in existing[BENE_MBI_ID]}
+
             _generate_patients_batch(
                 generator, existing[BENE_HSTRY], patient_mbi_id_rows, args.force_ztm
             )
-            _flush_batch(generator, writer, truncate=False)
-
-    num_new_patients = int(args.patients)
-    for i in range(0, num_new_patients, args.batch_size):
-        chunk = min(args.batch_size, num_new_patients - i)
-        reset_bene_sk_cache()
-        _generate_patients_batch(
-            generator, [RowAdapter({}) for _ in range(chunk)], {}, args.force_ztm
-        )
-        _flush_batch(generator, writer, truncate=(args.truncate and i == 0))
+            generator.flush_batch(writer)
+    else:
+        # Generate new synthetic patients in batches
+        num_new_patients = int(args.patients)
+        for i in range(0, num_new_patients, args.batch_size):
+            chunk = min(args.batch_size, num_new_patients - i)
+            _generate_patients_batch(
+                generator, [RowAdapter({}) for _ in range(chunk)], {}, args.force_ztm
+            )
+            generator.flush_batch(writer, truncate=(args.truncate and i == 0))
 
     writer.close()
     print("Patient data generation complete!")
@@ -455,46 +453,27 @@ def _generate_contracts(
     generator: GeneratorUtil, writer: OutputDestinationWriter, truncate: bool, amount: int = 10
 ) -> None:
     # todo: check if we still want contracts amount to be fixed
-    existing_contracts = (
-        [RowAdapter(row, loaded_from_file=True) for row in writer.get_cntrct_pbp_nums()]
-        if isinstance(writer, SnowflakeWriter)
-        else []
-    )
-    existing_contacts = (
-        [RowAdapter(row, loaded_from_file=True) for row in writer.get_cntrct_pbp_cntcts()]
-        if isinstance(writer, SnowflakeWriter)
-        else []
-    )
+    existing_contracts = [
+        RowAdapter(row, loaded_from_file=True) for row in writer.get_rows(CNTRCT_PBP_NUM)
+    ]
+    existing_contacts = [
+        RowAdapter(row, loaded_from_file=True) for row in writer.get_rows(CNTRCT_PBP_CNTCT)
+    ]
     contract_pbp_nums, contract_pbp_contacts = generator.gen_contract_plan(
         amount=amount,
         init_contract_pbp_nums=existing_contracts,
         init_contract_pbp_contacts=existing_contacts,
     )
     generator.export_table(
-        adapters_to_dicts(contract_pbp_nums), CNTRCT_PBP_NUM, destination=writer, truncate=truncate
+        adapters_to_dicts(contract_pbp_nums), CNTRCT_PBP_NUM, writer=writer, truncate=truncate
     )
 
     generator.export_table(
         adapters_to_dicts(contract_pbp_contacts),
         CNTRCT_PBP_CNTCT,
-        destination=writer,
+        writer=writer,
         truncate=truncate,
     )
-
-
-def _flush_batch(generator: GeneratorUtil, writer: OutputDestinationWriter, truncate: bool) -> None:
-    generator.save_output_files(writer, truncate=truncate)
-    generator.bene_hstry_table = []
-    generator.bene_xref_table = []
-    generator.mbi_table = {}
-    generator.mdcr_stus = []
-    generator.mdcr_entlmt = []
-    generator.mdcr_tp = []
-    generator.mdcr_rsn = []
-    generator.bene_cmbnd_dual_mdcr = []
-    generator.bene_lis_cmbnd = []
-    generator.bene_mapd_enrlmt_rx = []
-    generator.bene_mapd_enrlmt = []
 
 
 if __name__ == "__main__":

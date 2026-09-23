@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import StrEnum, auto
@@ -20,6 +21,7 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, when_matched, when_not_matched
 
 from constants import (
+    _INT_TO_STRING_COLS,
     BENE_DUAL,
     BENE_ENTLMT,
     BENE_ENTLMT_RSN,
@@ -28,6 +30,7 @@ from constants import (
     BENE_MAPD_ENRLMT,
     BENE_MAPD_ENRLMT_RX,
     BENE_MBI_ID,
+    BENE_SK,
     BENE_STUS,
     BENE_TP,
     BENE_XREF,
@@ -46,10 +49,7 @@ from constants import (
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
     CLM_VAL,
-    CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
-    IDR_INSRT_TS,
-    IDR_UPDT_TS,
     PRAUC,
     PRVDR_HSTRY,
 )
@@ -72,36 +72,127 @@ _TABLE_OVERRIDES: dict[str, TableTarget] = {
 }
 
 
+class BeneSkMode(StrEnum):
+    BENE_HSTRY = auto()
+    CLM = auto()
+    BOTH = auto()
+
+
 class OutputDestinationWriter(ABC):
     @abstractmethod
     def write_table(
         self,
-        data: list[dict[str, Any]],
+        data: list[Any],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
         truncate: bool = False,
     ) -> None: ...
 
     @abstractmethod
+    def get_provider_histories(self, files: dict[str, list[RowAdapter]]) -> list[RowAdapter]: ...
+
+    @abstractmethod
+    def get_cntrct_pbp_nums(
+        self,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[dict[str, Any]]: ...
+
+    @abstractmethod
+    def get_bene_sks(
+        self,
+        files: dict[str, list[RowAdapter]],
+        bene_sk_mode: BeneSkMode,
+        batch_size: int,
+    ) -> Iterator[list[int]]: ...
+
+    @abstractmethod
     def close(self) -> None: ...
+
+    # get_claims_batch
 
 
 class CsvWriter(OutputDestinationWriter):
     def __init__(self, out_dir: str = "out") -> None:
         self.out_dir = Path(out_dir)
-        self.out_dir.mkdir(exist_ok=True)
+
+    def _clean_int_columns(self, rows: list[dict[str, Any]]):
+        for column in _INT_TO_STRING_COLS:
+            for row in rows:
+                if column in row:
+                    row[column] = str(row[column])
+        return rows
 
     def write_table(
         self,
-        data: list[dict[str, Any]],
+        data: list[Any],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
         truncate: bool = False,  # noqa: ARG002
     ) -> None:
-        df = pd.json_normalize(data)
-        if cols != ALL_KEYS:
-            df = df[cols]
-        df.to_csv(self.out_dir / f"{table_name}.csv", index=False)
+        if not data:
+            return
+
+        if hasattr(data[0], "kv"):
+            data = [x.kv for x in data]
+
+        dict_rows = self._clean_int_columns(data)
+        df = pd.json_normalize(dict_rows)
+
+        if cols is not None and not isinstance(cols, str):
+            df = df.reindex(columns=cols).fillna("")
+
+        out_path = self.out_dir / f"{table_name}.csv"
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(out_path, index=False)
+
+    def get_provider_histories(
+        self,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]:
+        return files[PRVDR_HSTRY]
+
+    def get_cntrct_pbp_nums(
+        self,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[dict[str, Any]]:
+        return [row.kv for row in files[CNTRCT_PBP_NUM]]
+
+    def get_bene_sks(
+        self,
+        files: dict[str, list[RowAdapter]],
+        bene_sk_mode: BeneSkMode,
+        batch_size: int,  # noqa: ARG002
+    ) -> Iterator[list[int]]:
+        clm_bene_sks = (
+            [int(row[BENE_SK]) for row in files[CLM]]
+            if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
+            else []
+        )
+        bene_hstry_bene_sks = (
+            [int(row[BENE_SK]) for row in files[BENE_HSTRY]]
+            if bene_sk_mode == BeneSkMode.BENE_HSTRY or bene_sk_mode == BeneSkMode.BOTH
+            else []
+        )
+        all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
+        yield list(OrderedDict.fromkeys(x for x in all_bene_sks))
+
+    def get_bene_sk_to_mbi(
+        self,
+        bene_sks: list[int],
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]:
+        return {
+            RowAdapter(
+                {
+                    "BENE_SK": str(row["BENE_SK"]),
+                    "BENE_MBI_ID": row["BENE_MBI_ID"],
+                    "IDR_LTST_TRANS_FLG": row["IDR_LTST_TRANS_FLG"],
+                },
+                loaded_from_file=True,
+            )
+            for row in files[BENE_HSTRY]
+            if row.get("BENE_MBI_ID") and int(row["BENE_SK"]) in bene_sks
+        }
 
     def close(self) -> None:
         pass
@@ -124,7 +215,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             warehouse=_require_env("IDR_WAREHOUSE"),
         )
         self.session = Session.builder.configs({"connection": self.conn}).create()
-        self._column_types_cache: dict[str, dict[str, Any]] = {}
+        self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     def _connect(
         self, account: str, user: str, private_key: str, warehouse: str
@@ -177,19 +268,15 @@ class SnowflakeWriter(OutputDestinationWriter):
             print(f"length of buffer {len(buffer)}")
             yield buffer
 
-    def get_cntrct_pbp_nums(self) -> list[dict[str, Any]]:
-        rows = self.qualified_session_table(CNTRCT_PBP_NUM).collect()
+    def get_rows(self, table_name: str) -> list[dict[str, Any]]:
+        rows = self.qualified_session_table(table_name).collect()
         return [row.as_dict() for row in rows]
 
-    def get_cntrct_pbp_cntcts(self) -> list[dict[str, Any]]:
-        rows = self.qualified_session_table(CNTRCT_PBP_CNTCT).collect()
-        return [row.as_dict() for row in rows]
-
-    def get_provider_histories(self) -> list[dict[str, Any]]:
-        rows = self.qualified_session_table(PRVDR_HSTRY).collect()
-        return [row.as_dict() for row in rows]
-
-    def get_bene_sk_to_mbi(self, bene_sks: list[int]) -> list[RowAdapter]:
+    def get_bene_sk_to_mbi(
+        self,
+        bene_sks: list[int],
+        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+    ) -> list[RowAdapter]:
         rows = (
             self.qualified_session_table(BENE_HSTRY)
             .filter(col("BENE_SK").isin(bene_sks))
@@ -211,19 +298,19 @@ class SnowflakeWriter(OutputDestinationWriter):
         ]
 
     def _get_column_types(self, database: str, schema: str, table_name: str) -> dict[str, Any]:
-        qualified_table = f"{database}.{schema}.{table_name}"
-        if qualified_table not in self._column_types_cache:
+        cache_key = (database, schema, table_name)
+        if cache_key not in self._column_types_cache:
             rows = (
                 self.session.table(f'"{database}".information_schema.columns')
                 .filter((col("TABLE_SCHEMA") == schema) & (col("TABLE_NAME") == table_name))
                 .select("COLUMN_NAME", "DATA_TYPE", "NUMERIC_SCALE")
                 .collect()
             )
-            self._column_types_cache[qualified_table] = {
+            self._column_types_cache[cache_key] = {
                 row["COLUMN_NAME"]: {"data_type": row["DATA_TYPE"], "scale": row["NUMERIC_SCALE"]}
                 for row in rows
             }
-        return self._column_types_cache[qualified_table]
+        return self._column_types_cache[cache_key]
 
     def _coerce_dataframe_types(
         self, df: pd.DataFrame, database: str, schema: str, table_name: str
@@ -240,7 +327,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                     else None
                 )
                 df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
-            if data_type == "DATE":
+            elif data_type == "DATE":
                 df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
             elif data_type == "NUMBER":
                 df[column] = pd.to_numeric(
@@ -257,16 +344,11 @@ class SnowflakeWriter(OutputDestinationWriter):
                 df[column] = df[column].astype(object)
         return df
 
-    def write_table(
+    def _prepare_dataframe(
         self,
         data: list[dict[str, Any]],
         table_name: str,
-        cols: list[str] | str = ALL_KEYS,  # noqa: ARG002
-        truncate: bool = False,
-    ) -> None:
-        if not data:
-            return
-
+    ) -> tuple[pd.DataFrame, str, str, str]:
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         df = pd.DataFrame(data)
 
@@ -278,7 +360,60 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         # coerce the types so Pandas doesn't guess the types
         df = self._coerce_dataframe_types(df, database, schema, resolved_table_name)
+        return df, resolved_table_name, database, schema
 
+    def write_table(
+        self,
+        data: list[dict[str, Any]],
+        table_name: str,
+        cols: list[str] | str = ALL_KEYS,  # noqa: ARG002
+        truncate: bool = False,
+    ) -> None:
+        if not data:
+            return
+
+        df, resolved_table_name, database, schema = self._prepare_dataframe(data, table_name)
+        """
+        qualified_table = f"{database}.{schema}.{resolved_table_name}"
+
+        perf_start = time.perf_counter()
+        file_path = "data.parquet"
+        df.to_parquet(file_path, compression="snappy")
+        cursor = self.conn.cursor()
+
+        try:
+            if truncate:
+                cursor.execute(f"TRUNCATE TABLE IF EXISTS {qualified_table}")
+
+            self.session.use_database(f'"{database}"')
+            self.session.use_schema(f'"{schema}"')
+            cursor.execute("CREATE TEMP STAGE IF NOT EXISTS temp_stage")
+            cursor.execute(f"PUT file://{file_path} @temp_stage AUTO_COMPRESS=TRUE")
+
+            cursor.execute(
+
+                    COPY INTO {qualified_table}
+                    FROM @temp_stage/data.parquet
+                    FILE_FORMAT = (
+                    TYPE = PARQUET
+                    USE_VECTORIZED_SCANNER = TRUE
+                    USE_LOGICAL_TYPE = TRUE
+                    )
+                    MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+
+            )
+
+            result = cursor.fetchall()
+            print("Snowflake Copy Result:", result)
+
+        finally:
+            if Path.exists(file_path):
+                Path.unlink(file_path)
+                cursor.close()
+            duration = time.perf_counter() - perf_start
+            print(f"It took {duration:.6f} seconds to insert rows {table_name}")
+
+        """
         perf_start = time.perf_counter()
         success, _, num_rows, _ = write_pandas(
             conn=self.conn,
@@ -367,17 +502,8 @@ class SnowflakeWriter(OutputDestinationWriter):
     def merge_batch(self, data: list[dict[str, Any]], table_name: str) -> None:
         if not data:
             return
-        resolved_table_name, database, schema = self.resolve_target_table(table_name)
-        df = pd.DataFrame(data)
 
-        # filter out columns not in our schema. Only used in generation for certain fields we
-        # actually use
-        col_types = self._get_column_types(database, schema, resolved_table_name)
-        known_columns = {col.upper() for col in col_types}
-        df = df[[col for col in df.columns if col.upper() in known_columns]]
-
-        # coerce the types so Pandas doesn't guess the types
-        df = self._coerce_dataframe_types(df, database, schema, resolved_table_name)
+        df, resolved_table_name, database, schema = self._prepare_dataframe(data, table_name)
 
         perf_start = time.perf_counter()
         source = self.session.write_pandas(
@@ -395,7 +521,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         duration = time.perf_counter() - perf_start
         print(f"{duration:.6f} seconds to writer to staging table")
         target = self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
-        pks = self.get_primary_keys(table_name)
+        pks = self._get_primary_keys(table_name)
 
         update_cols = [c for c in df.columns if c not in pks]
 
@@ -438,11 +564,31 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.close()
         self.conn.close()
 
-    def get_primary_keys(self, table_name: str) -> list[str]:
+    def _get_primary_keys(self, table_name: str) -> list[str]:
         cleaned_table_name, database, schema = self.resolve_target_table(table_name)
         qualified_table = f"{database}.{schema}.{cleaned_table_name}"
         pk_df = self.session.sql(f"SHOW PRIMARY KEYS IN TABLE {qualified_table}")
         return [row["column_name"] for row in pk_df.select('"column_name"').collect()]
+
+    def get_provider_histories(
+        self,
+        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+    ) -> list[RowAdapter]:
+        return [RowAdapter(row, loaded_from_file=True) for row in self.get_rows(PRVDR_HSTRY)]
+
+    def get_cntrct_pbp_nums(
+        self,
+        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+    ) -> list[dict[str, Any]]:
+        return self.get_rows(CNTRCT_PBP_NUM)
+
+    def get_bene_sks(
+        self,
+        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+        bene_sk_mode: BeneSkMode,
+        batch_size: int,
+    ) -> Iterator[list[int]]:
+        yield from self.iter_bene_sk_batches(batch_size)
 
 
 def _require_env(name: str) -> str:

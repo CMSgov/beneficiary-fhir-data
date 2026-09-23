@@ -40,7 +40,7 @@ from constants import (
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
 )
-from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
@@ -520,11 +520,6 @@ def output_table_contains_by_bene_sk(
     return bene_sk in _tables_by_bene_sk[for_file]
 
 
-def reset_bene_sk_cache() -> None:
-    # Clear at the start of every batch
-    _tables_by_bene_sk.clear()
-
-
 def convert_tilde_str(val: str) -> str:
     if val == "~":
         return ""
@@ -533,7 +528,6 @@ def convert_tilde_str(val: str) -> str:
 
 class GeneratorUtil:
     USE_COLS = "use_cols"
-    ALL_KEYS = "all_keys"
 
     def __init__(self, id_gen: IdGenerator | None = None):
         self.id_gen = id_gen or RandomIdGenerator()
@@ -1173,55 +1167,68 @@ class GeneratorUtil:
 
     def save_output_files(
         self,
-        destination: OutputDestinationWriter,
+        writer: OutputDestinationWriter,
         truncate: bool = False,
-    ):
+    ) -> None:
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
-            (self.bene_hstry_table, BENE_HSTRY, GeneratorUtil.ALL_KEYS),
-            (mbi_arr, BENE_MBI_ID, GeneratorUtil.ALL_KEYS),
-            (self.mdcr_stus, BENE_STUS, GeneratorUtil.ALL_KEYS),
-            (self.mdcr_entlmt, BENE_ENTLMT, GeneratorUtil.ALL_KEYS),
-            (self.mdcr_tp, BENE_TP, GeneratorUtil.ALL_KEYS),
-            (self.mdcr_rsn, BENE_ENTLMT_RSN, GeneratorUtil.ALL_KEYS),
-            (self.bene_xref_table, BENE_XREF, GeneratorUtil.ALL_KEYS),
+            (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
+            (mbi_arr, BENE_MBI_ID, ALL_KEYS),
+            (self.mdcr_stus, BENE_STUS, ALL_KEYS),
+            (self.mdcr_entlmt, BENE_ENTLMT, ALL_KEYS),
+            (self.mdcr_tp, BENE_TP, ALL_KEYS),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN, ALL_KEYS),
+            (self.bene_xref_table, BENE_XREF, ALL_KEYS),
             (
                 self.bene_cmbnd_dual_mdcr,
                 BENE_DUAL,
-                GeneratorUtil.ALL_KEYS,
+                ALL_KEYS,
             ),
-            (self.bene_lis_cmbnd, BENE_LIS_CMBND, GeneratorUtil.ALL_KEYS),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND, ALL_KEYS),
             (
                 self.bene_mapd_enrlmt_rx,
                 BENE_MAPD_ENRLMT_RX,
-                GeneratorUtil.ALL_KEYS,
+                ALL_KEYS,
             ),
-            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, GeneratorUtil.ALL_KEYS),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, ALL_KEYS),
         ]
 
-        if isinstance(destination, CsvWriter):
+        if isinstance(writer, CsvWriter):
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
             beneficiary_and_contract_exports.append(
-                (self.cntrct_pbp_num, CNTRCT_PBP_NUM, GeneratorUtil.ALL_KEYS)
-            )
-            beneficiary_and_contract_exports.append(
-                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, GeneratorUtil.ALL_KEYS)
+                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
             )
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
             for data, table_name, cols in t:
                 t.set_postfix(file=table_name)  # type: ignore
-                self.export_table(data, table_name, destination, cols, truncate)
+                self.export_table(data, table_name, writer, cols, truncate)
 
     def export_table(
         self,
         data: list[dict[str, Any]],
         table_name: str,
-        destination: OutputDestinationWriter,
+        writer: OutputDestinationWriter,
         cols: list[str] | str = ALL_KEYS,
         truncate: bool = False,
-    ):
-        if isinstance(destination, SnowflakeWriter) and not truncate:
-            destination.merge_batch(data, table_name)
+    ) -> None:
+        if isinstance(writer, SnowflakeWriter) and not truncate:
+            writer.merge_batch(data, table_name)
         else:
-            destination.write_table(data, table_name, cols, truncate)
+            writer.write_table(data, table_name, cols, truncate)
+
+    def flush_batch(self, writer: OutputDestinationWriter, truncate: bool = False) -> None:
+        self.save_output_files(writer, truncate=truncate)
+        self.bene_hstry_table.clear()
+        self.bene_xref_table.clear()
+        self.mbi_table = {}
+        self.mdcr_stus.clear()
+        self.mdcr_entlmt.clear()
+        self.mdcr_tp.clear()
+        self.mdcr_rsn.clear()
+        self.bene_cmbnd_dual_mdcr.clear()
+        self.bene_lis_cmbnd.clear()
+        self.bene_mapd_enrlmt_rx.clear()
+        self.bene_mapd_enrlmt.clear()
+        _tables_by_bene_sk.clear()

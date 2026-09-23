@@ -1,12 +1,8 @@
-import csv
 import random
 import sys
-import time
-from collections import OrderedDict, defaultdict
-from collections.abc import Iterator
+from collections import defaultdict
 from enum import StrEnum, auto
 from pathlib import Path
-from typing import Any
 
 import click
 import tqdm
@@ -31,29 +27,14 @@ from generator_util import (
     probability,
     run_command,
 )
-from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import (
+    ALL_KEYS,
+    BeneSkMode,
+    CsvWriter,
+    OutputDestinationWriter,
+    SnowflakeWriter,
+)
 from row_adapter import RowAdapter
-
-_INT_TO_STRING_COLS = [
-    f.BENE_SK,
-    f.CLM_TYPE_CD,
-    f.CLM_NUM_SK,
-    f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM,
-    f.PRVDR_RFRG_PRVDR_NPI_NUM,
-    f.PRVDR_BLG_PRVDR_NPI_NUM,
-    f.CLM_ATNDG_PRVDR_NPI_NUM,
-    f.CLM_OPRTG_PRVDR_NPI_NUM,
-    f.CLM_OTHR_PRVDR_NPI_NUM,
-    f.CLM_RNDRG_PRVDR_NPI_NUM,
-    f.CLM_BLG_PRVDR_NPI_NUM,
-    f.CLM_RFRG_PRVDR_PIN_NUM,
-    f.PRVDR_ATNDG_PRVDR_NPI_NUM,
-    f.PRVDR_SRVC_PRVDR_NPI_NUM,
-    f.PRVDR_OTHR_PRVDR_NPI_NUM,
-    f.PRVDR_RNDRNG_PRVDR_NPI_NUM,
-    f.PRVDR_OPRTG_PRVDR_NPI_NUM,
-]
-"""Columns you want as string without decimal/nan"""
 
 _BATCH_SIZE = 50_000
 
@@ -62,12 +43,6 @@ class GeneratePacDataMode(StrEnum):
     NO = auto()
     IF_NONE = auto()
     ALWAYS = auto()
-
-
-class BeneSkMode(StrEnum):
-    BENE_HSTRY = auto()
-    CLM = auto()
-    BOTH = auto()
 
 
 class _ClaimsFile(StrEnum):
@@ -660,28 +635,6 @@ class _ClaimsFile(StrEnum):
         return obj
 
 
-def _write_claims_file(
-    claims_file: _ClaimsFile,
-    data: list[RowAdapter],
-):
-    cleaned_data = _clean_int_columns(adapters_to_dicts(data), _INT_TO_STRING_COLS)
-
-    with Path(claims_file.out_path).open("w") as csv_file:
-        writer = csv.DictWriter(
-            csv_file, fieldnames=claims_file.ordered_headers, restval="", quoting=csv.QUOTE_MINIMAL
-        )
-        writer.writeheader()
-        writer.writerows(cleaned_data)
-
-
-def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
-    for col in cols:
-        for row in rows:
-            if col in row:
-                row[col] = str(row[col])
-    return rows
-
-
 @click.command
 @click.option(
     "--sushi/--no-sushi",
@@ -846,18 +799,11 @@ def generate(
         )
         sys.exit(1)
 
-    gen_utils.cntrct_pbp_num = get_cntrct_pbp_nums(
-        files=files,
-        writer=writer,
-    )
+    gen_utils.cntrct_pbp_num = writer.get_cntrct_pbp_nums(files)
 
     other_util = OtherGeneratorUtil()
 
-    existing_providers = (
-        [RowAdapter(row, loaded_from_file=True) for row in writer.get_provider_histories()]
-        if isinstance(writer, SnowflakeWriter)
-        else files[f.PRVDR_HSTRY]
-    )
+    existing_providers = writer.get_provider_histories(files)
     generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
         other_util.gen_provider_history(
             amount=14,
@@ -883,20 +829,18 @@ def generate(
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
-    for bene_sks_batch in get_bene_sks(files, writer, bene_sk_mode, batch_size):
-        exisiting = files
+    for bene_sks_batch in writer.get_bene_sks(files, bene_sk_mode, batch_size):
+        exisiting_claims = files
         if isinstance(writer, SnowflakeWriter):
             if truncate:
-                {k: [] for k in [f.CLM, *claim_child_tables]}
+                exisiting_claims = {k: [] for k in [f.CLM, *claim_child_tables]}
             else:
                 claim_child_tables = [claim_child.value for claim_child in claim_child_tables]
-                perf_start = time.perf_counter()
-                exisiting = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
-                duration = time.perf_counter() - perf_start
+                exisiting_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
 
         out_tables = _generate_batch(
             bene_sks_batch,
-            exisiting,
+            exisiting_claims,
             gen_utils,
             adj_util,
             pac_util,
@@ -907,84 +851,32 @@ def generate(
             generated_type_2_npis,
         )
 
-        if isinstance(writer, SnowflakeWriter) and truncate:
-            # Do not regenerate PRAUC directly from Snowflake. Punted for future work.
-            bene_sk_to_mbi = _get_bene_sk_to_mbi(files, writer, bene_sks_batch)
-            out_tables[f.PRAUC] = _generate_prior_auth(
-                gen_utils,
-                out_tables,
-                bene_sk_to_mbi,
-                generated_provider_histories,
-                generated_type_1_npis,
-                generated_type_2_npis,
-            )
+        bene_sk_to_mbi = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
+        out_tables[f.PRAUC] = _generate_prior_auth(
+            gen_utils,
+            out_tables,
+            bene_sk_to_mbi,
+            generated_provider_histories,
+            generated_type_1_npis,
+            generated_type_2_npis,
+        )
+
+        if isinstance(writer, SnowflakeWriter) and not truncate:
+            # Do not regenerate PRAUC directly from Snowflake. TODO: Punted for future ticket.
+            out_tables[f.PRAUC].clear()
 
         for table_name, rows in out_tables.items():
             if table_name == f.PRVDR_HSTRY or table_name not in _ClaimsFile:
                 continue
             if isinstance(writer, CsvWriter):
-                _write_claims_file(claims_file=_ClaimsFile(table_name), data=rows)
+                writer.write_table(rows, table_name, ALL_KEYS, truncate)
             else:
                 gen_utils.export_table(
-                    adapters_to_dicts(rows), table_name, destination=writer, truncate=truncate
+                    adapters_to_dicts(rows), table_name, writer=writer, truncate=truncate
                 )
 
     writer.close()
     print("Done generating synthetic claims/prior auth data for provided BENE_SKs")
-
-
-def get_bene_sks(
-    files: dict[str, list[RowAdapter]],
-    writer: OutputDestinationWriter,
-    bene_sk_mode: BeneSkMode,
-    batch_size: int,
-) -> Iterator[list[int]]:
-    if isinstance(writer, SnowflakeWriter):
-        yield from writer.iter_bene_sk_batches(batch_size)
-        return
-
-    # for CSV branch one batch = everything
-    clm_bene_sks = (
-        [int(row[f.BENE_SK]) for row in files[f.CLM]]
-        if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
-        else []
-    )
-    bene_hstry_bene_sks = (
-        [int(row[f.BENE_SK]) for row in files[f.BENE_HSTRY]]
-        if bene_sk_mode == BeneSkMode.BENE_HSTRY or bene_sk_mode == BeneSkMode.BOTH
-        else []
-    )
-    all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
-    yield list(OrderedDict.fromkeys(x for x in all_bene_sks))
-
-
-def _get_bene_sk_to_mbi(
-    files: dict[str, list[RowAdapter]], writer: OutputDestinationWriter, bene_sks: list[int]
-) -> list[RowAdapter]:
-    if isinstance(writer, SnowflakeWriter):
-        return writer.get_bene_sk_to_mbi(bene_sks)
-    return {
-        RowAdapter(
-            {
-                "BENE_SK": str(r["BENE_SK"]),
-                "BENE_MBI_ID": r["BENE_MBI_ID"],
-                "IDR_LTST_TRANS_FLG": r["IDR_LTST_TRANS_FLG"],
-            },
-            loaded_from_file=True,
-        )
-        for r in files[f.BENE_HSTRY]
-        if r.get("BENE_MBI_ID") and int(r["BENE_SK"]) in bene_sks
-    }
-
-
-def get_cntrct_pbp_nums(
-    files: dict[str, list[RowAdapter]],
-    writer: OutputDestinationWriter,
-) -> list[dict[str, Any]]:
-    if isinstance(writer, SnowflakeWriter):
-        return writer.get_cntrct_pbp_nums()
-
-    return [row.kv for row in files[f.CNTRCT_PBP_NUM]]
 
 
 def _generate_batch(
@@ -1410,10 +1302,10 @@ def _write_static_tables(
     truncate: bool,
 ) -> None:
     if isinstance(writer, CsvWriter):
-        _write_claims_file(claims_file=_ClaimsFile(table_name), data=rows)
+        writer.write_table(rows, table_name, ALL_KEYS, truncate)
     else:
         gen_utils.export_table(
-            adapters_to_dicts(rows), table_name, destination=writer, truncate=truncate
+            adapters_to_dicts(rows), table_name, writer=writer, truncate=truncate
         )
 
 
