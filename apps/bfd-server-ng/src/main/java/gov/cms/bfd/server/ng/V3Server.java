@@ -51,6 +51,7 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(requestMetricsInterceptor);
   }
 
+  /** Configure FHIR Capability Statement. */
   private void configureServerInfoMetadata() {
     setServerName(CAPABILITIES_SERVER_NAME);
     setImplementationDescription(configuration.getProject().getId());
