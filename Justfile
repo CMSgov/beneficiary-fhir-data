@@ -85,10 +85,10 @@ stop-matchbox:
 matchbox-logs:
     cd ./apps/bfd-model-idr && docker-compose logs --follow
 
-[arg("resource", long)]
+[arg("type", long)]
 [arg("all", long, value="1")]
-gen-structure-map resource="" *all: upload-sushi
-    cd ./apps/bfd-model-idr && ./gen-structure-map.sh --resource="{{resource}}" \
+gen-structure-map type="" *all: upload-sushi
+    cd ./apps/bfd-model-idr && ./gen-structure-map.sh --type="{{type}}" \
     {{ if all == "1" { "--all" } else { "" } }}
 
 [arg("resource", long)]
