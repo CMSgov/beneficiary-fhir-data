@@ -5,7 +5,11 @@ from typing import Any
 
 import pandas as pd
 
-from idr_model.claims_static import ADJUDICATED_PROFESSIONAL_CLAIM_TYPES ,INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS
+from idr_model.claims_static import (
+    ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+)
 
 
 class Result:
@@ -46,7 +50,7 @@ class SampleGenerator:
         # for different institutional claim types
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
             result = self.create_base(clm_uniq_id, claim_row)
-        elif claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+        elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
             result = self.create_adjudicated_professional(clm_uniq_id, claim_row)
         else:
             print("Unknown Type")
@@ -436,11 +440,12 @@ class SampleGenerator:
             result_json=output_json, output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
         )
 
-    def create_adjudicated_professional(self, clm_uniq_id: str,
-            claim_row: dict[str, str]) -> Result:
+    def create_adjudicated_professional(
+        self, clm_uniq_id: str, claim_row: dict[str, str]
+    ) -> Result:
 
         prod_lines = self.read_prod_lines(claim_row)
-        
+
         diagnoses_lines = [
             {
                 "CLM_VAL_SQNC_NUM": extract_col_str(prod_line, "CLM_VAL_SQNC_NUM"),
@@ -512,20 +517,20 @@ class SampleGenerator:
                     instnl_lines, clm_line, "CLM_LINE_INSTNL_RDCD_AMT"
                 ),
                 "CLM_LINE_MDCR_COINSRNC_AMT": extract_col_str(
-                    clm_line, "CLM_LINE_MDCR_COINSRNC_AMT"),
-                "CLM_LINE_MDCR_DDCTBL_AMT": extract_col_str(
-                    clm_line, "CLM_LINE_MDCR_DDCTBL_AMT"),
-                "CLM_LINE_NCVRD_CHRG_AMT": extract_col_str(
-                    clm_line, "CLM_LINE_NCVRD_CHRG_AMT"),
+                    clm_line, "CLM_LINE_MDCR_COINSRNC_AMT"
+                ),
+                "CLM_LINE_MDCR_DDCTBL_AMT": extract_col_str(clm_line, "CLM_LINE_MDCR_DDCTBL_AMT"),
+                "CLM_LINE_NCVRD_CHRG_AMT": extract_col_str(clm_line, "CLM_LINE_NCVRD_CHRG_AMT"),
                 "CLM_LINE_NDC_CD": extract_col_str(clm_line, "CLM_LINE_NDC_CD"),
-                "CLM_LINE_NDC_QTY": extract_col_str(clm_line, "CLM_LINE_NDC_QTY"), 
+                "CLM_LINE_NDC_QTY": extract_col_str(clm_line, "CLM_LINE_NDC_QTY"),
                 "CLM_LINE_NDC_QTY_QLFYR_CD": extract_col_str(clm_line, "CLM_LINE_NDC_QTY_QLFYR_CD"),
                 "CLM_LINE_NUM": extract_col_str(clm_line, "CLM_LINE_NUM"),
                 "CLM_LINE_PA_UNIQ_TRKNG_NUM": find_field_in_line_by_num(
                     dcmtn_lines, clm_line, "CLM_LINE_PA_UNIQ_TRKNG_NUM"
                 ),
                 "CLM_LINE_PMD_UNIQ_TRKNG_NUM": extract_col_str(
-                    clm_line, "CLM_LINE_PMD_UNIQ_TRKNG_NUM"),
+                    clm_line, "CLM_LINE_PMD_UNIQ_TRKNG_NUM"
+                ),
                 "CLM_LINE_PRFNL_DME_PRICE_AMT": find_field_in_line_by_num(
                     prfnl_lines, clm_line, "CLM_LINE_PRFNL_DME_PRICE_AMT"
                 ),
@@ -570,25 +575,25 @@ class SampleGenerator:
                     instnl_lines, clm_line, "CLM_REV_APC_HIPPS_CD"
                 ),
                 "CLM_RNDRG_FED_PRVDR_SPCLTY_CD": extract_col_str(
-                    clm_line, "CLM_RNDRG_FED_PRVDR_SPCLTY_CD"),
+                    clm_line, "CLM_RNDRG_FED_PRVDR_SPCLTY_CD"
+                ),
                 "CLM_RNDRG_PRVDR_PRTCPTG_CD": extract_col_str(
-                    clm_line, "CLM_RNDRG_PRVDR_PRTCPTG_CD"),
-                "CLM_RNDRG_PRVDR_TAX_NUM": extract_col_str(
-                    clm_line, "CLM_RNDRG_PRVDR_TAX_NUM"),
-                "CLM_RNDRG_PRVDR_TYPE_CD": extract_col_str(
-                    clm_line, "CLM_RNDRG_PRVDR_TYPE_CD"),
+                    clm_line, "CLM_RNDRG_PRVDR_PRTCPTG_CD"
+                ),
+                "CLM_RNDRG_PRVDR_TAX_NUM": extract_col_str(clm_line, "CLM_RNDRG_PRVDR_TAX_NUM"),
+                "CLM_RNDRG_PRVDR_TYPE_CD": extract_col_str(clm_line, "CLM_RNDRG_PRVDR_TYPE_CD"),
                 "CLM_SRVC_DDCTBL_SW": find_field_in_line_by_num(
                     prfnl_lines, clm_line, "CLM_SRVC_DDCTBL_SW"
                 ),
-                "GEO_RNDRG_SSA_STATE_CD": extract_col_str(
-                    clm_line, "GEO_RNDRG_SSA_STATE_CD"),
+                "GEO_RNDRG_SSA_STATE_CD": extract_col_str(clm_line, "GEO_RNDRG_SSA_STATE_CD"),
                 "HCPCS_1_MDFR_CD": extract_col_str(clm_line, "HCPCS_1_MDFR_CD"),
                 "HCPCS_2_MDFR_CD": extract_col_str(clm_line, "HCPCS_2_MDFR_CD"),
                 "HCPCS_3_MDFR_CD": extract_col_str(clm_line, "HCPCS_3_MDFR_CD"),
                 "HCPCS_4_MDFR_CD": extract_col_str(clm_line, "HCPCS_4_MDFR_CD"),
                 "HCPCS_5_MDFR_CD": extract_col_str(clm_line, "HCPCS_5_MDFR_CD"),
                 "PRVDR_RNDRNG_PRVDR_NPI_NUM": extract_col_str(
-                    clm_line, "PRVDR_RNDRNG_PRVDR_NPI_NUM"),
+                    clm_line, "PRVDR_RNDRNG_PRVDR_NPI_NUM"
+                ),
             }
             for clm_line in clm_lines
         ]
@@ -618,17 +623,17 @@ class SampleGenerator:
             "lineItemComponents": line_item_components,
             "profComponents": {
                 "CLM_PRVDR_ACNT_RCVBL_OFST_AMT": extract_col_str(
-                    prfnl, "CLM_PRVDR_ACNT_RCVBL_OFST_AMT"),
+                    prfnl, "CLM_PRVDR_ACNT_RCVBL_OFST_AMT"
+                ),
                 "CLM_MDCR_PRFNL_PRMRY_PYR_AMT": extract_col_str(
-                    prfnl, "CLM_MDCR_PRFNL_PRMRY_PYR_AMT"),
-                "CLM_AUDT_TRL_STUS_CD": extract_col_str(
-                    lctn_hist, "CLM_AUDT_TRL_STUS_CD"),
-                "CLM_CARR_PMT_DNL_CD": extract_col_str(
-                    prfnl, "CLM_CARR_PMT_DNL_CD"),
+                    prfnl, "CLM_MDCR_PRFNL_PRMRY_PYR_AMT"
+                ),
+                "CLM_AUDT_TRL_STUS_CD": extract_col_str(lctn_hist, "CLM_AUDT_TRL_STUS_CD"),
+                "CLM_CARR_PMT_DNL_CD": extract_col_str(prfnl, "CLM_CARR_PMT_DNL_CD"),
                 "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": extract_col_str(
-                    prfnl, "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW"),
-                "CLM_CLNCL_TRIL_NUM": extract_col_str(
-                    prfnl, "CLM_CLNCL_TRIL_NUM"),
+                    prfnl, "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW"
+                ),
+                "CLM_CLNCL_TRIL_NUM": extract_col_str(prfnl, "CLM_CLNCL_TRIL_NUM"),
             },
             "CLM_NRLN_RIC_CD": extract_col_str(dcmtn, "CLM_NRLN_RIC_CD"),
             "CLM_MDCR_DDCTBL_AMT": extract_col_str(claim_row, "CLM_MDCR_DDCTBL_AMT"),
@@ -738,38 +743,38 @@ class SampleGenerator:
         return {} if clm_instnl_matches.empty else clm_instnl_matches.iloc[0]
 
     def read_prfnl(self, clm_row: dict[str, str]) -> dict[str, str]:
-            clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_PRFNL.csv"
-    
-            if not Path(clm_prfnl).exists():
-                return {}
-    
-            clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
-    
-            clm_prfnl_matches = clm_prfnl_found[
-                (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
-                & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
-                & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
-                & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
-            ]
-    
-            return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
+        clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_PRFNL.csv"
+
+        if not Path(clm_prfnl).exists():
+            return {}
+
+        clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
+
+        clm_prfnl_matches = clm_prfnl_found[
+            (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
+            & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
+            & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
+            & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
+        ]
+
+        return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
 
     def read_lctn_hist(self, clm_row: dict[str, str]) -> dict[str, str]:
-                clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_PRFNL.csv"
-        
-                if not Path(clm_prfnl).exists():
-                    return {}
-        
-                clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
-        
-                clm_prfnl_matches = clm_prfnl_found[
-                    (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
-                    & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
-                    & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
-                    & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
-                ]
-        
-                return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
+        clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_LCTN_HSTRY.csv"
+
+        if not Path(clm_prfnl).exists():
+            return {}
+
+        clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
+
+        clm_prfnl_matches = clm_prfnl_found[
+            (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
+            & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
+            & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
+            & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
+        ]
+
+        return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
 
     def read_dcmtn(self, clm_row: dict[str, str]) -> dict[str, str]:
         clm_dcmtn = f"{self.source_directory}/SYNTHETIC_CLM_DCMTN.csv"
