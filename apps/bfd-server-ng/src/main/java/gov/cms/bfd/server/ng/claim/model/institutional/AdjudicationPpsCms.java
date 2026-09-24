@@ -2,11 +2,14 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
+import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -17,100 +20,132 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class AdjudicationPpsCms implements AdjudicationEmbedded {
 
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
-  private int lifetimeReserveDaysUsed;
+  @Convert(converter = NonZeroIntConverter.class)
+  private Optional<Integer> lifetimeReserveDaysUsed;
 
   @Column(name = "clm_instnl_mdcr_coins_day_cnt")
-  private int totalCoinsuranceDays;
+  @Convert(converter = NonZeroIntConverter.class)
+  private Optional<Integer> totalCoinsuranceDays;
 
   @Column(name = "clm_instnl_ncvrd_day_cnt")
-  private int nonUtilizationDays;
+  @Convert(converter = NonZeroIntConverter.class)
+  private Optional<Integer> nonUtilizationDays;
 
   @Column(name = "clm_mdcr_hospc_prd_cnt")
-  private int totalHospicePeriodCount;
+  @Convert(converter = NonZeroIntConverter.class)
+  private Optional<Integer> totalHospicePeriodCount;
 
   @Column(name = "clm_mdcr_hha_tot_visit_cnt")
-  private int totalHHAVisits;
+  @Convert(converter = NonZeroIntConverter.class)
+  private Optional<Integer> totalHHAVisits;
 
   @Column(name = "clm_mdcr_ip_pps_drg_wt_num")
-  private BigDecimal ppsDrgWeight;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsDrgWeight;
 
   @Column(name = "clm_instnl_cvrd_day_cnt")
-  private BigDecimal totalCoveredDays;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> totalCoveredDays;
 
   @Column(name = "clm_instnl_per_diem_amt")
-  private BigDecimal perDiemAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> perDiemAmount;
 
   @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
-  private BigDecimal ppsDisproportionateAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsDisproportionateAmount;
 
   @Column(name = "clm_mdcr_ip_pps_excptn_amt")
-  private BigDecimal ppsExceptionAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsExceptionAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_fsp_amt")
-  private BigDecimal ppsCapitalFspAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsCapitalFspAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_ime_amt")
-  private BigDecimal ppsCapitalImeAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsCapitalImeAmount;
 
   @Column(name = "clm_mdcr_ip_pps_outlier_amt")
-  private BigDecimal ppsOutlierAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsOutlierAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_hrmls_amt")
-  private BigDecimal ppsCapitalHarmlessAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsCapitalHarmlessAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_tot_amt")
-  private BigDecimal ppsCapitalTotalAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ppsCapitalTotalAmount;
 
   @Column(name = "clm_mdcr_instnl_prmry_pyr_amt")
-  private BigDecimal primaryPayerAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> primaryPayerAmount;
 
   @Column(name = "clm_instnl_prfnl_amt")
-  private BigDecimal professionalAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> professionalAmount;
 
   @Column(name = "clm_instnl_drg_outlier_amt")
-  private BigDecimal drgOutlierAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> drgOutlierAmount;
 
   @Column(name = "clm_hipps_uncompd_care_amt")
-  private BigDecimal hippsUncompensatedCareAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> hippsUncompensatedCareAmount;
 
   @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
-  private BigDecimal beneDeductibleAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> beneDeductibleAmount;
 
   @Column(name = "clm_finl_stdzd_pymt_amt")
-  private BigDecimal standardizedPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> standardizedPaymentAmount;
 
   @Column(name = "clm_hac_rdctn_pymt_amt")
-  private BigDecimal hospitalAcquiredConditionReductionAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> hospitalAcquiredConditionReductionAmount;
 
   @Column(name = "clm_hipps_model_bndld_pmt_amt")
-  private BigDecimal blendedPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> blendedPaymentAmount;
 
   @Column(name = "clm_hipps_readmsn_rdctn_amt")
-  private BigDecimal readmissionReductionAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> readmissionReductionAmount;
 
   @Column(name = "clm_hipps_vbp_amt")
-  private BigDecimal hippsPurchasingAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> hippsPurchasingAmount;
 
   @Column(name = "clm_instnl_low_vol_pmt_amt")
-  private BigDecimal lowVolumePaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> lowVolumePaymentAmount;
 
   @Column(name = "clm_mdcr_ip_1st_yr_rate_amt")
-  private BigDecimal firstYearRateAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> firstYearRateAmount;
 
   @Column(name = "clm_mdcr_ip_scnd_yr_rate_amt")
-  private BigDecimal secondYearRateAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> secondYearRateAmount;
 
   @Column(name = "clm_pps_md_wvr_stdzd_val_amt")
-  private BigDecimal marylandWaiverStandardizedAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> marylandWaiverStandardizedAmount;
 
   @Column(name = "clm_site_ntrl_cst_bsd_pymt_amt")
-  private BigDecimal siteNeutralCostBasedPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> siteNeutralCostBasedPaymentAmount;
 
   @Column(name = "clm_site_ntrl_ip_pps_pymt_amt")
-  private BigDecimal siteNeutralIPPSPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> siteNeutralIPPSPaymentAmount;
 
   @Column(name = "clm_ss_outlier_std_pymt_amt")
-  private BigDecimal shortStayOutlierPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> shortStayOutlierPaymentAmount;
 
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
@@ -124,72 +159,70 @@ public class AdjudicationPpsCms implements AdjudicationEmbedded {
    */
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return Stream.of(
-            List.of(
-                AdjudicationChargeType.BENE_MEDICARE_LRD_USED_COUNT.toFhirAdjudicationUnsignedType(
-                    lifetimeReserveDaysUsed),
-                AdjudicationChargeType.BENE_TOTAL_COINSURANCE_DAYS_COUNT
-                    .toFhirAdjudicationUnsignedType(totalCoinsuranceDays),
-                AdjudicationChargeType.NON_UTILIZATION_DAYS_COUNT.toFhirAdjudicationUnsignedType(
-                    nonUtilizationDays),
-                AdjudicationChargeType.HOSPICE_PERIOD_COUNT.toFhirAdjudicationUnsignedType(
-                    totalHospicePeriodCount),
-                AdjudicationChargeType.HHA_TOTAL_VISIT_COUNT.toFhirAdjudicationUnsignedType(
-                    totalHHAVisits),
-                AdjudicationChargeType.PPS_CAPITAL_DRUG_WEIGHT_NUMBER.toFhirAdjudicationDecimalType(
-                    ppsDrgWeight),
-                AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationUnsignedType(
-                    // These are always whole numbers, but IDR stores them as floats
-                    totalCoveredDays.longValue()),
-                AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudication(perDiemAmount),
-                AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT.toFhirAdjudication(
-                    ppsDisproportionateAmount),
-                AdjudicationChargeType.PPS_CAPITAL_EXCEPTION_AMOUNT.toFhirAdjudication(
-                    ppsExceptionAmount),
-                AdjudicationChargeType.PPS_CAPITAL_FEDERAL_SPECIFIC_PORTION_AMOUNT
-                    .toFhirAdjudication(ppsCapitalFspAmount),
-                AdjudicationChargeType.PPS_CAPITAL_INDIRECT_MEDICAL_EDUCATION_AMOUNT
-                    .toFhirAdjudication(ppsCapitalImeAmount),
-                AdjudicationChargeType.PPS_CAPITAL_OUTLIER_AMOUNT.toFhirAdjudication(
-                    ppsOutlierAmount),
-                AdjudicationChargeType.PPS_OLD_CAPITAL_HOLD_HARMLESS_AMOUNT.toFhirAdjudication(
-                    ppsCapitalHarmlessAmount),
-                AdjudicationChargeType.PPS_CAPITAL_HOLD_TOTAL_AMOUNT.toFhirAdjudication(
-                    ppsCapitalTotalAmount),
-                AdjudicationChargeType.PRIMARY_PAYER_NON_MEDICARE_PAID_AMOUNT.toFhirAdjudication(
-                    primaryPayerAmount),
-                AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT.toFhirAdjudication(
-                    professionalAmount),
-                AdjudicationChargeType.DRUG_OUTLIER_APPROVED_PAYMENT_AMOUNT.toFhirAdjudication(
-                    drgOutlierAmount),
-                AdjudicationChargeType.UNCOMPENSATED_CARE_PAYMENT_AMOUNT.toFhirAdjudication(
-                    hippsUncompensatedCareAmount),
-                AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-                    beneDeductibleAmount),
-                AdjudicationChargeType.STANDARDIZED_PAYMENT_AMOUNT.toFhirAdjudication(
-                    standardizedPaymentAmount),
-                AdjudicationChargeType.HOSPITAL_ACQUIRED_CONDITION_REDUCTION_AMOUNT
-                    .toFhirAdjudication(hospitalAcquiredConditionReductionAmount),
-                AdjudicationChargeType.BLENDED_PAYMENT_AMOUNT.toFhirAdjudication(
-                    blendedPaymentAmount),
-                AdjudicationChargeType.READMISSION_REDUCTION_AMOUNT.toFhirAdjudication(
-                    readmissionReductionAmount),
-                AdjudicationChargeType.HIPPS_VALUE_BASED_PURCHASING_AMOUNT.toFhirAdjudication(
-                    hippsPurchasingAmount),
-                AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudication(
-                    lowVolumePaymentAmount),
-                AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudication(
-                    firstYearRateAmount),
-                AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudication(
-                    secondYearRateAmount),
-                AdjudicationChargeType.MARYLAND_WAIVER_STANDARDIZED_AMOUNT.toFhirAdjudication(
-                    marylandWaiverStandardizedAmount),
-                AdjudicationChargeType.SITE_NEUTRAL_COST_BASED_PAYMENT_AMOUNT.toFhirAdjudication(
-                    siteNeutralCostBasedPaymentAmount),
-                AdjudicationChargeType.SITE_NEUTRAL_IPPS_PAYMENT_AMOUNT.toFhirAdjudication(
-                    siteNeutralIPPSPaymentAmount),
-                AdjudicationChargeType.SHORT_STAY_OUTLIER_PAYMENT_AMOUNT.toFhirAdjudication(
-                    shortStayOutlierPaymentAmount)))
-        .flatMap(Collection::stream)
+            AdjudicationChargeType.BENE_MEDICARE_LRD_USED_COUNT.toFhirAdjudicationUnsignedType(
+                lifetimeReserveDaysUsed),
+            AdjudicationChargeType.BENE_TOTAL_COINSURANCE_DAYS_COUNT.toFhirAdjudicationUnsignedType(
+                totalCoinsuranceDays),
+            AdjudicationChargeType.NON_UTILIZATION_DAYS_COUNT.toFhirAdjudicationUnsignedType(
+                nonUtilizationDays),
+            AdjudicationChargeType.HOSPICE_PERIOD_COUNT.toFhirAdjudicationUnsignedType(
+                totalHospicePeriodCount),
+            AdjudicationChargeType.HHA_TOTAL_VISIT_COUNT.toFhirAdjudicationUnsignedType(
+                totalHHAVisits),
+            AdjudicationChargeType.PPS_CAPITAL_DRUG_WEIGHT_NUMBER.toFhirAdjudicationDecimalType(
+                ppsDrgWeight),
+            AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationLong(
+                Optional.of(totalCoveredDays.get().longValue())),
+            AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudicationOptional(perDiemAmount),
+            AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT
+                .toFhirAdjudicationOptional(ppsDisproportionateAmount),
+            AdjudicationChargeType.PPS_CAPITAL_EXCEPTION_AMOUNT.toFhirAdjudicationOptional(
+                ppsExceptionAmount),
+            AdjudicationChargeType.PPS_CAPITAL_FEDERAL_SPECIFIC_PORTION_AMOUNT
+                .toFhirAdjudicationOptional(ppsCapitalFspAmount),
+            AdjudicationChargeType.PPS_CAPITAL_INDIRECT_MEDICAL_EDUCATION_AMOUNT
+                .toFhirAdjudicationOptional(ppsCapitalImeAmount),
+            AdjudicationChargeType.PPS_CAPITAL_OUTLIER_AMOUNT.toFhirAdjudicationOptional(
+                ppsOutlierAmount),
+            AdjudicationChargeType.PPS_OLD_CAPITAL_HOLD_HARMLESS_AMOUNT.toFhirAdjudicationOptional(
+                ppsCapitalHarmlessAmount),
+            AdjudicationChargeType.PPS_CAPITAL_HOLD_TOTAL_AMOUNT.toFhirAdjudicationOptional(
+                ppsCapitalTotalAmount),
+            AdjudicationChargeType.PRIMARY_PAYER_NON_MEDICARE_PAID_AMOUNT
+                .toFhirAdjudicationOptional(primaryPayerAmount),
+            AdjudicationChargeType.PROFESSIONAL_COMPONENT_CHARGE_AMOUNT.toFhirAdjudicationOptional(
+                professionalAmount),
+            AdjudicationChargeType.DRUG_OUTLIER_APPROVED_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                drgOutlierAmount),
+            AdjudicationChargeType.UNCOMPENSATED_CARE_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                hippsUncompensatedCareAmount),
+            AdjudicationChargeType.BENE_INPATIENT_DEDUCTIBLE_AMOUNT.toFhirAdjudicationOptional(
+                beneDeductibleAmount),
+            AdjudicationChargeType.STANDARDIZED_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                standardizedPaymentAmount),
+            AdjudicationChargeType.HOSPITAL_ACQUIRED_CONDITION_REDUCTION_AMOUNT
+                .toFhirAdjudicationOptional(hospitalAcquiredConditionReductionAmount),
+            AdjudicationChargeType.BLENDED_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                blendedPaymentAmount),
+            AdjudicationChargeType.READMISSION_REDUCTION_AMOUNT.toFhirAdjudicationOptional(
+                readmissionReductionAmount),
+            AdjudicationChargeType.HIPPS_VALUE_BASED_PURCHASING_AMOUNT.toFhirAdjudicationOptional(
+                hippsPurchasingAmount),
+            AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                lowVolumePaymentAmount),
+            AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
+                firstYearRateAmount),
+            AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
+                secondYearRateAmount),
+            AdjudicationChargeType.MARYLAND_WAIVER_STANDARDIZED_AMOUNT.toFhirAdjudicationOptional(
+                marylandWaiverStandardizedAmount),
+            AdjudicationChargeType.SITE_NEUTRAL_COST_BASED_PAYMENT_AMOUNT
+                .toFhirAdjudicationOptional(siteNeutralCostBasedPaymentAmount),
+            AdjudicationChargeType.SITE_NEUTRAL_IPPS_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                siteNeutralIPPSPaymentAmount),
+            AdjudicationChargeType.SHORT_STAY_OUTLIER_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
+                shortStayOutlierPaymentAmount))
+        .flatMap(Optional::stream)
         .toList();
   }
 }

@@ -19,6 +19,7 @@ import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.professional.AdjudicationProfessionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimProfessionalSharedSystemsCore;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -58,7 +59,8 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
 
   @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
-  private BigDecimal providerOffsetAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> providerOffsetAmount;
 
   @Column(name = "clm_mdcr_prfnl_prvdr_asgnmt_sw")
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
@@ -189,8 +191,9 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
   /** SS adjudication: provider account-receivable offset amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
-    eob.addAdjudication(
-        AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT.toFhirAdjudication(providerOffsetAmount));
+    AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT
+        .toFhirAdjudicationOptional(providerOffsetAmount)
+        .ifPresent(eob::addAdjudication);
   }
 
   /**

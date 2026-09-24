@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineHCTHGBTestTypeCode;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.ProcedureProfessional;
-import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -41,12 +41,12 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
   @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @Column(name = "clm_line_hct_lvl_num")
-  @Convert(converter = NonZeroDoubleConverter.class)
-  private Optional<Double> claimLineHCTTestResult;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> claimLineHCTTestResult;
 
   @Column(name = "clm_line_hgb_lvl_num")
-  @Convert(converter = NonZeroDoubleConverter.class)
-  private Optional<Double> claimLineHGBTestResult;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> claimLineHGBTestResult;
 
   @Column(name = "clm_line_rbndlg_crtfctn_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
@@ -74,7 +74,7 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
     observation.setStatus(Observation.ObservationStatus.FINAL);
     observation.setValue(
         new Quantity()
-            .setValue(BigDecimal.valueOf(claimLineHCTTestResult.get()))
+            .setValue(claimLineHCTTestResult.get())
             .setUnit("%") // or the proper UCUM unit
             .setSystem(SystemUrls.UNITS_OF_MEASURE)
             .setCode("%"));
@@ -106,7 +106,7 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
     observation.setStatus(Observation.ObservationStatus.FINAL);
     observation.setValue(
         new Quantity()
-            .setValue(BigDecimal.valueOf(claimLineHGBTestResult.get()))
+            .setValue(claimLineHGBTestResult.get())
             .setUnit("g/dL") // or the proper UCUM unit
             .setSystem(SystemUrls.UNITS_OF_MEASURE)
             .setCode("g/dL"));

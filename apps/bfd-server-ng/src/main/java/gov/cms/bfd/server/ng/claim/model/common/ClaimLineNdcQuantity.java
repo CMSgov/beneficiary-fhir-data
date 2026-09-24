@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -16,7 +19,8 @@ public class ClaimLineNdcQuantity {
   @Embedded ClaimLineNdc claimLineNdc;
 
   @Column(name = "clm_line_ndc_qty")
-  private Optional<Double> ndcQuantity;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> ndcQuantity;
 
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;

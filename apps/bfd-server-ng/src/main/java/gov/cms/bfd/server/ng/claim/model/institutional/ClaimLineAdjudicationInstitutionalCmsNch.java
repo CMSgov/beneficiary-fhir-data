@@ -2,11 +2,15 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -20,13 +24,16 @@ public class ClaimLineAdjudicationInstitutionalCmsNch implements AdjudicationEmb
   private BigDecimal providerPaymentAmount;
 
   @Column(name = "clm_line_blood_ddctbl_amt")
-  private BigDecimal bloodDeductibleAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> bloodDeductibleAmount;
 
   @Column(name = "clm_line_instnl_adjstd_amt")
-  private BigDecimal adjustedAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> adjustedAmount;
 
   @Column(name = "clm_line_instnl_rdcd_amt")
-  private BigDecimal reducedAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> reducedAmount;
 
   @Column(name = "clm_line_instnl_msp1_pd_amt")
   private BigDecimal msp1PaidAmount;
@@ -35,13 +42,16 @@ public class ClaimLineAdjudicationInstitutionalCmsNch implements AdjudicationEmb
   private BigDecimal msp2PaidAmount;
 
   @Column(name = "clm_line_instnl_rate_amt")
-  private BigDecimal rateAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> rateAmount;
 
   @Column(name = "clm_line_add_on_pymt_amt")
-  private BigDecimal addOnPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> addOnPaymentAmount;
 
   @Column(name = "clm_rev_cntr_tdapa_amt")
-  private BigDecimal transitionalDrugAddOnPaymentAmount;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> transitionalDrugAddOnPaymentAmount;
 
   /**
    * Compiles a list of AdjudicationComponents from columns.
@@ -50,27 +60,31 @@ public class ClaimLineAdjudicationInstitutionalCmsNch implements AdjudicationEmb
    */
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return Stream.concat(
+    return Stream.of(
             baseAdjudicationCharge.toFhirAdjudication().stream(),
             Stream.of(
-                AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-                    bloodDeductibleAmount),
                 AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
                     providerPaymentAmount),
-                AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudication(
-                    adjustedAmount),
-                AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT.toFhirAdjudication(
-                    reducedAmount),
                 AdjudicationChargeType.LINE_INSTITUTIONAL_1ST_MSP_PAID_AMOUNT.toFhirAdjudication(
                     msp1PaidAmount),
                 AdjudicationChargeType.LINE_INSTITUTIONAL_2ND_PAID_AMOUNT.toFhirAdjudication(
-                    msp2PaidAmount),
-                AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT.toFhirAdjudication(
-                    rateAmount),
-                AdjudicationChargeType.LINE_INSTITUTIONAL_ADD_ON_PAYMENT_AMOUNT.toFhirAdjudication(
-                    addOnPaymentAmount),
-                AdjudicationChargeType.LINE_INSTITUTIONAL_TRANSITIONAL_DRG_ADD_ON_PAYMENT_ADJUSTMENT
-                    .toFhirAdjudication(transitionalDrugAddOnPaymentAmount)))
+                    msp2PaidAmount)),
+            Stream.of(
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT
+                        .toFhirAdjudicationOptional(rateAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADD_ON_PAYMENT_AMOUNT
+                        .toFhirAdjudicationOptional(addOnPaymentAmount),
+                    AdjudicationChargeType
+                        .LINE_INSTITUTIONAL_TRANSITIONAL_DRG_ADD_ON_PAYMENT_ADJUSTMENT
+                        .toFhirAdjudicationOptional(transitionalDrugAddOnPaymentAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT
+                        .toFhirAdjudicationOptional(adjustedAmount),
+                    AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT
+                        .toFhirAdjudicationOptional(reducedAmount),
+                    AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudicationOptional(
+                        bloodDeductibleAmount))
+                .flatMap(Optional::stream))
+        .flatMap(Function.identity())
         .toList();
   }
 }
