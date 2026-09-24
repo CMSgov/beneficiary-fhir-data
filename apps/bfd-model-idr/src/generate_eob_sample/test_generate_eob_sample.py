@@ -71,6 +71,7 @@ def test_generate_eob_sample_pharmacy() -> None:
     assert int(result_data["CLM_TYPE_CD"]) in PHARMACY_CLM_TYPE_CDS
 
 
+
 def test_generate_eob_sample_carrier() -> None:
     result = CliRunner().invoke(
         main,
