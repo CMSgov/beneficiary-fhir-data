@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
-import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
@@ -64,8 +64,8 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
 
   @Column(name = "clm_line_hct_hgb_rslt_num")
-  @Convert(converter = NonZeroDoubleConverter.class)
-  private Optional<Double> claimLineHCTHGBTestResult;
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> claimLineHCTHGBTestResult;
 
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
@@ -120,7 +120,7 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
     observation.setStatus(Observation.ObservationStatus.FINAL);
     claimLineHCTHGBTestResult.ifPresent(
         result -> {
-          quantity.setValue(BigDecimal.valueOf(result));
+          quantity.setValue(result);
           observation.setValue(quantity);
         });
 

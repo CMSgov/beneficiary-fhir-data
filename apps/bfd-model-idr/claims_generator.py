@@ -41,6 +41,8 @@ from generator_util import (
     CLM_PRFNL,
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
+    CLM_OCRNC_SGNTR_MBR,
+    CLM_RLT_OCRNC_SGNTR_MBR,
     CLM_VAL,
     CNTRCT_PBP_NUM,
     PRAUC,
@@ -93,11 +95,13 @@ class _ClaimsFile(StrEnum):
     CLM = (
         CLM,
         [
-            f.CLM_DT_SGNTR_SK,
             f.CLM_UNIQ_ID,
-            f.CLM_RLT_COND_SGNTR_SK,
             f.CLM_TYPE_CD,
             f.CLM_SRC_ID,
+            f.CLM_DT_SGNTR_SK,
+            f.CLM_RLT_COND_SGNTR_SK,
+            f.CLM_OCRNC_SGNTR_SK,
+            f.CLM_RLT_OCRNC_SGNTR_SK,
             f.META_SRC_SK,
             f.CLM_FROM_DT,
             f.CLM_THRU_DT,
@@ -148,12 +152,18 @@ class _ClaimsFile(StrEnum):
             f.CLM_PRVDR_PMT_AMT,
             f.CLM_RIC_CD,
             f.CLM_BLG_PRVDR_NPI_NUM,
+            f.CLM_BLG_PRVDR_TAX_NUM, # TODO: not generated yet
+            f.GEO_BLG_SSA_STATE_CD,
+            f.CLM_BLG_PRVDR_NAME, # TODO: not generated yet
             f.CLM_RFRG_PRVDR_PIN_NUM,
+            f.CLM_RFRG_FED_PRVDR_SPCLTY_CD, # TODO: not generated yet
+            f.CLM_RFRG_PRVDR_NAME, # TODO: not generated yet
             f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD,
             f.CLM_OPRTG_PRVDR_NAME,
             f.CLM_OTHR_FED_PRVDR_SPCLTY_CD,
             f.CLM_OTHR_PRVDR_NAME,
             f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD,
+            f.GEO_RNDRG_SSA_STATE_CD, # TODO: not generated yet
             f.CLM_RNDRG_PRVDR_NAME,
             f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD,
             f.CLM_ATNDG_PRVDR_NAME,
@@ -169,6 +179,7 @@ class _ClaimsFile(StrEnum):
             f.PRVDR_SRVC_PRVDR_NPI_NUM,
             f.CLM_PD_DT,
             f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM,
+            f.CLM_PRNT_CNTL_NUM, # TODO: not generated yet
             f.CLM_SBMT_FRMT_CD,
             f.CLM_SBMTR_CNTRCT_NUM,
             f.CLM_SBMTR_CNTRCT_PBP_NUM,
@@ -185,7 +196,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_NGACO_CPTATN_SW,
             f.CLM_ACO_CARE_MGMT_HCBS_SW,
             f.CLM_PD_STUS_CD,
-            f.GEO_BLG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -395,6 +405,10 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
+            f.CLM_FED_TYPE_SRVC_CD, # TODO: not generated yet
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD, # TODO: not generated yet
+            f.CLM_PRMRY_PYR_CD, # TODO: not generated yet
+            f.CLM_PRCNG_LCLTY_CD, # TODO: not generated yet
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
@@ -576,6 +590,29 @@ class _ClaimsFile(StrEnum):
             f.IDR_UPDT_TS,
         ],
     )
+    CLM_OCRNC_SGNTR_MBR = (
+        CLM_OCRNC_SGNTR_MBR,
+        [
+            f.CLM_OCRNC_SGNTR_SK,
+            f.CLM_OCRNC_SGNTR_SQNC_NUM,
+            f.CLM_OCRNC_SPAN_CD,
+            f.CLM_OCRNC_SPAN_FROM_DT,
+            f.CLM_OCRNC_SPAN_THRU_DT,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+        ],
+    )
+    CLM_RLT_OCRNC_SGNTR_MBR = (
+        CLM_RLT_OCRNC_SGNTR_MBR,
+        [
+            f.CLM_RLT_OCRNC_SGNTR_SK,
+            f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM,
+            f.CLM_RLT_OCRNC_CD,
+            f.CLM_RLT_OCRNC_DT,
+            f.IDR_INSRT_TS,
+            f.IDR_UPDT_TS,
+        ],
+    )
     CLM_RLT_COND_SGNTR_MBR = (
         CLM_RLT_COND_SGNTR_MBR,
         [
@@ -599,6 +636,8 @@ class _ClaimsFile(StrEnum):
             f.CLM_VAL_CD,
             f.CLM_VAL_AMT,
             f.CLM_VAL_SQNC_NUM,
+            f.CLM_VAL_ANSI_RSN_CD, # TODO: not generated yet
+            f.CLM_VAL_ANSI_GRP_CD, # TODO: not generated yet
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -867,6 +906,8 @@ def generate(
         CLM_LINE_MCS: [],
         CLM_LINE_FISS: [],
         CLM_RLT_COND_SGNTR_MBR: [],
+        CLM_OCRNC_SGNTR_MBR: [],
+        CLM_RLT_OCRNC_SGNTR_MBR: [],
         PRVDR_HSTRY: [],
         CNTRCT_PBP_NUM: [],
         PRAUC: [],
@@ -920,11 +961,23 @@ def generate(
     # does not take an exceedingly long time versus generation of entirely new data.
     clms_per_bene_sk = partition_rows(llist=files[CLM], part_by=lambda x: int(x[f.BENE_SK]))
     # HACK: See generation function for justification. CLM_UNIQ_ID is not a field of this table
-    sgntr_mbr_per_clm_uniq_id = {
+    cond_sgntr_mbr_per_clm_uniq_id = {
         str(row[f.CLM_UNIQ_ID]): row
         for row in files[CLM_RLT_COND_SGNTR_MBR]
         if row.get(f.CLM_UNIQ_ID)
     }
+    ocrnc_sgntr_mbr_per_ocrnc_sk = {
+        str(row[f.CLM_OCRNC_SGNTR_SK]): row
+        for row in files[CLM_OCRNC_SGNTR_MBR]
+        if row.get(f.CLM_OCRNC_SGNTR_SK)
+    }
+    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = {
+        str(row[f.CLM_RLT_OCRNC_SGNTR_SK]): row
+        for row in files[CLM_RLT_OCRNC_SGNTR_MBR]
+        if row.get(f.CLM_RLT_OCRNC_SGNTR_SK)
+    }
+    
+
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x for x in files[CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
     }
@@ -1020,9 +1073,23 @@ def generate(
 
             clm_rlt_cond_sgntr_mbr = adj_util.gen_clm_rlt_cond_sgntr_mbr(
                 clm=clm,
-                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
+                init_clm_rlt_cond_sgntr_mbr=cond_sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
             )
             adj_clms_tbls[CLM_RLT_COND_SGNTR_MBR].append(clm_rlt_cond_sgntr_mbr)
+
+            clm_ocrnc_sgntr_mbr = adj_util.gen_clm_ocrnc_sgntr_mbr(
+                clm=clm,
+                init_clm_ocrnc_sgntr_mbr=ocrnc_sgntr_mbr_per_ocrnc_sk.get(clm[f.CLM_OCRNC_SGNTR_SK]),
+            )
+            adj_clms_tbls[CLM_OCRNC_SGNTR_MBR].append(clm_ocrnc_sgntr_mbr)
+
+            clm_rlt_ocrnc_sgntr_mbr = adj_util.gen_clm_rlt_ocrnc_sgntr_mbr(
+                clm=clm,
+                init_clm_rlt_ocrnc_sgntr_mbr=rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(clm[f.CLM_RLT_OCRNC_SGNTR_SK]),
+            )
+            adj_clms_tbls[CLM_RLT_OCRNC_SGNTR_MBR].append(clm_rlt_ocrnc_sgntr_mbr)
+
+            
 
             clm_type_cd = int(clm[f.CLM_TYPE_CD])
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
@@ -1157,8 +1224,15 @@ def generate(
                 CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_RLT_COND_SGNTR_MBR: as_list(
-                    sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
+                    cond_sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
                 ),
+                CLM_OCRNC_SGNTR_MBR: as_list(
+                    ocrnc_sgntr_mbr_per_ocrnc_sk.get(file_pac_clm[f.CLM_OCRNC_SGNTR_SK])
+                ),
+                CLM_RLT_OCRNC_SGNTR_MBR: as_list(
+                    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK])
+                ),
+            
                 CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
