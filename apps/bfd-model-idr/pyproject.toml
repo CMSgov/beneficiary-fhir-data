@@ -5,15 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
-    "faker>=37.1.0",
-    "pandas>=3.0.2",
-    "xlsxwriter>=3.2.5",
-    "pyyaml>=6.0.2",
-    "pydantic>=2.12.3",
-    "tqdm>=4.67.1",
-    "click>=8.3.1",
-    "requests>=2.32.5",
-    "cryptography>=50.0.0",
+  "faker>=37.1.0",
+  "pandas>=3.0.2",
+  "xlsxwriter>=3.2.5",
+  "pyyaml>=6.0.2",
+  "pydantic>=2.12.3",
+  "tqdm>=4.67.1",
+  "click>=8.3.1",
+  "requests>=2.32.5",
+  "cryptography>=50.0.0",
 ]
 
 [project.scripts]
@@ -25,11 +25,11 @@ generate-prior-auth-sample = "generate_prior_auth_sample:main"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.9",
-    "uv>=0.11.15",
-    "pyright>=1.1.403",
-    "debugpy>=1.8.19",
-    "pytest>=9.0.1",
+  "ruff>=0.12.9",
+  "uv>=0.11.15",
+  "pyright>=1.1.403",
+  "debugpy>=1.8.19",
+  "pytest>=9.0.1",
 ]
 
 [tool.uv]
@@ -44,7 +44,13 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "idr_model"
-packages = ["src/idr_model", "src/generate_eob_sample", "src/generate_bene_sample", "src/gen_dd", "src/generate_prior_auth_sample"]
+packages = [
+  "src/idr_model",
+  "src/generate_eob_sample",
+  "src/generate_bene_sample",
+  "src/gen_dd",
+  "src/generate_prior_auth_sample",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.
@@ -52,35 +58,35 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    # "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
+  "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  # "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF",
 ]
 # Don't require docstrings
 ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
