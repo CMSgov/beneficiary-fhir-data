@@ -66,4 +66,6 @@ def run_conformance_test(input_file, output_file):
 
 
 if __name__ == "__main__":
-    run_conformance_test(sys.argv[1], "out/Validator-Output.json")
+    input = sys.argv[1]
+    output = input.replace(".json", "-validator-output.json")
+    run_conformance_test(input, output)

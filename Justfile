@@ -70,46 +70,36 @@ install-model-dependencies:
 sushi: install-model-dependencies
     cd ./apps/bfd-model-idr && npm run sushi-build
 
-wait-for-matchbox:
+wait-for-matchbox: start-matchbox
     cd ./apps/bfd-model-idr && uv run wait_for_matchbox.py
 
-compile-resources: sushi wait-for-matchbox
-    cd ./apps/bfd-model-idr && uv run upload_sushi.py && ./compile-all-resources.sh
+upload-sushi: sushi wait-for-matchbox
+    cd ./apps/bfd-model-idr && uv run upload_sushi.py
 
-model-docker:
-    cd ./apps/bfd-model-idr && docker-compose up
+start-matchbox:
+    cd ./apps/bfd-model-idr && docker-compose up -d
 
-[arg("map", long)]
+stop-matchbox:
+    cd ./apps/bfd-model-idr && docker-compose down
+
+matchbox-logs:
+    cd ./apps/bfd-model-idr && docker-compose logs --follow
+
 [arg("resource", long)]
-gen-structure-map map resource: wait-for-matchbox
-    cd ./apps/bfd-model-idr && ./gen-structure-map.sh --map={{map}} --resource={{resource}}
+[arg("all", long, value="1")]
+gen-structure-map resource="" *all: upload-sushi
+    cd ./apps/bfd-model-idr && ./gen-structure-map.sh --resource="{{resource}}" \
+    {{ if all == "1" { "--all" } else { "" } }}
 
 [arg("resource", long)]
 [arg("profile-type", long, pattern="Basis|Regular|CMS")]
-fhir-transform resource="" profile-type="CMS":
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    cd ./apps/bfd-model-idr
-    choice="$(uv run resources.py {{resource}})"
-    echo "$choice"
-    map="$(echo "$choice" | jq -r ".map")"
-    resource="$(echo "$choice" | jq -r ".resource")"
-    input="$(echo "$choice" | jq -r ".sample")"
-    output="$(echo "$choice" | jq -r ".output")"
-    ./fhir-transform.sh --map "$map" --resource "$resource" \
-        --input "$input" --output "$output" --profile-type {{profile-type}}
+[arg("all", long, value="1")]
+fhir-transform resource="" profile-type="CMS" *all: upload-sushi
+    cd ./apps/bfd-model-idr && ./fhir-transform.sh --resource "{{resource}}" \
+    --profile-type "{{profile-type}}" {{ if all == "1" { "--all" } else { "" } }}
 
 [arg("resource", long)]
-conformance-test resource="":
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    cd ./apps/bfd-model-idr
-    choice="$(uv run resources.py {{resource}})"
-    output="$(echo "$choice" | jq -r ".output")"
-    uv run conformance_test.py "$output"
-    cat out/validator-output.json
-
-[parallel]
-compile-all-resources: compile-resources model-docker
+[arg("all", long, value="1")]
+conformance-test resource="" *all: upload-sushi
+    cd ./apps/bfd-model-idr && ./fhir-transform.sh --resource "{{resource}}" \
+    {{ if all == "1" { "--all" } else { "" } }}
