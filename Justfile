@@ -8,7 +8,8 @@ export BFD_LOCAL_DB_CONTAINER:="bfd-db"
 bootstrap:
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
-    brew install yq taplo prek tenv argc
+    # Install dependencies used in our scripts
+    brew install yq taplo prek tenv argc bash fd jq
     # We overwrite the default prek hook with our own script
     # that will automatically re-add any formatting changes before committing
     # This is not possible out of the box at the time of writing this
@@ -83,17 +84,32 @@ model-docker:
 gen-structure-map map resource: wait-for-matchbox
     cd ./apps/bfd-model-idr && ./gen-structure-map.sh --map={{map}} --resource={{resource}}
 
-[arg("map", long)]
 [arg("resource", long)]
-[arg("input", long)]
-[arg("output", long)]
 [arg("profile-type", long, pattern="Basis|Regular|CMS")]
-fhir-transform map resource input output profile-type="CMS":
-    cd ./apps/bfd-model-idr && ./fhir-transform.sh --map {{map}} --resource {{resource}} \
-        --input {{input}} --output {{output}} --profile-type {{profile-type}}
+fhir-transform resource="" profile-type="CMS":
+    #!/usr/bin/env bash
+    set -euo pipefail
 
-[arg("output", long)]
-conformance-test output:
-    cd ./apps/bfd-model-idr && uv run conformance_test.py {{output}}
+    cd ./apps/bfd-model-idr
+    choice="$(uv run resources.py {{resource}})"
+    echo "$choice"
+    map="$(echo "$choice" | jq -r ".map")"
+    resource="$(echo "$choice" | jq -r ".resource")"
+    input="$(echo "$choice" | jq -r ".sample")"
+    output="$(echo "$choice" | jq -r ".output")"
+    ./fhir-transform.sh --map "$map" --resource "$resource" \
+        --input "$input" --output "$output" --profile-type {{profile-type}}
+
+[arg("resource", long)]
+conformance-test resource="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    cd ./apps/bfd-model-idr
+    choice="$(uv run resources.py {{resource}})"
+    output="$(echo "$choice" | jq -r ".output")"
+    uv run conformance_test.py "$output"
+    cat out/validator-output.json
+
 [parallel]
 compile-all-resources: compile-resources model-docker
