@@ -33,3 +33,19 @@ def test_generate_eob_sample_pharmacy() -> None:
     )
 
     assert result.exit_code == 0
+
+
+def test_generate_eob_sample_carrier() -> None:
+    result = CliRunner().invoke(
+        main,
+        [
+            "--clm-uniq-id",
+            "4045037817088",
+            "--source-directory",
+            "../../../bfd-pipeline-idr/test_samples1",
+            "--output-directory",
+            "../../out-test",
+        ],
+    )
+
+    assert result.exit_code == 0

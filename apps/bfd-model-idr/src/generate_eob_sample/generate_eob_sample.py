@@ -5,7 +5,11 @@ from typing import Any
 
 import pandas as pd
 
-from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS
+from idr_model.claims_static import (
+    ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+)
 
 
 class Result:
@@ -46,6 +50,8 @@ class SampleGenerator:
         # for different institutional claim types
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
             result = self.create_base(clm_uniq_id, claim_row)
+        elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
+            result = self.create_adjudicated_professional(clm_uniq_id, claim_row)
         else:
             print("Unknown Type")
             sys.exit(1)
@@ -434,6 +440,234 @@ class SampleGenerator:
             result_json=output_json, output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
         )
 
+    def create_adjudicated_professional(
+        self, clm_uniq_id: str, claim_row: dict[str, str]
+    ) -> Result:
+
+        prod_lines = self.read_prod_lines(claim_row)
+
+        diagnoses_lines = [
+            {
+                "CLM_VAL_SQNC_NUM": extract_col_str(prod_line, "CLM_VAL_SQNC_NUM"),
+                "ROW_NUM": f"{prod_lines.index(prod_line) + 1}",
+                "CLM_DGNS_CD": extract_col_str(prod_line, "CLM_DGNS_CD"),
+                "CLM_DGNS_PRCDR_ICD_IND": extract_col_str(prod_line, "CLM_DGNS_PRCDR_ICD_IND"),
+                "CLM_PROD_TYPE_CD": extract_col_str(prod_line, "CLM_PROD_TYPE_CD"),
+                "CLM_POA_IND": extract_col_str(prod_line, "CLM_POA_IND"),
+            }
+            for prod_line in (prod_lines or [])
+        ]
+
+        clm_lines = self.read_line(claim_row)
+        instnl_lines = self.read_instnl_lines(claim_row)
+        prfnl_lines = self.read_prfnl_lines(claim_row)
+        dcmtn_lines = self.read_dcmtn_lines(claim_row)
+
+        line_item_components = [
+            {
+                "CLM_BENE_PRMRY_PYR_PD_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_DDCTBL_COINSRNC_CD"
+                ),
+                "CLM_DDCTBL_COINSRNC_CD": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_DDCTBL_COINSRNC_CD"
+                ),
+                "CLM_FED_TYPE_SRVC_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_FED_TYPE_SRVC_CD"
+                ),
+                "CLM_LINE_ALOWD_CHRG_AMT": extract_col_str(clm_line, "CLM_LINE_ALOWD_CHRG_AMT"),
+                "CLM_LINE_ANSTHSA_UNIT_CNT": extract_col_str(clm_line, "CLM_LINE_ANSTHSA_UNIT_CNT"),
+                "CLM_LINE_BENE_PD_AMT": extract_col_str(clm_line, "CLM_LINE_BENE_PD_AMT"),
+                "CLM_LINE_BENE_PMT_AMT": extract_col_str(clm_line, "CLM_LINE_BENE_PMT_AMT"),
+                "CLM_LINE_BLOOD_DDCTBL_AMT": extract_col_str(clm_line, "CLM_LINE_BLOOD_DDCTBL_AMT"),
+                "CLM_LINE_CARR_CLNCL_CHRG_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_CARR_CLNCL_CHRG_AMT"
+                ),
+                "CLM_LINE_CARR_CLNCL_LAB_NUM": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_CARR_CLNCL_LAB_NUM"
+                ),
+                "CLM_LINE_CARR_HPSA_SCRCTY_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_CARR_HPSA_SCRCTY_CD"
+                ),
+                "CLM_LINE_CARR_PSYCH_OT_LMT_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_CARR_PSYCH_OT_LMT_AMT"
+                ),
+                "CLM_LINE_CVRD_PD_AMT": extract_col_str(clm_line, "CLM_LINE_CVRD_PD_AMT"),
+                "CLM_LINE_DGNS_CD": extract_col_str(clm_line, "CLM_LINE_DGNS_CD"),
+                "CLM_LINE_FROM_DT": extract_col_str(clm_line, "CLM_LINE_FROM_DT"),
+                "CLM_LINE_HCPCS_CD": extract_col_str(clm_line, "CLM_LINE_HCPCS_CD"),
+                "CLM_LINE_HCT_HGB_RSLT_NUM": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_HCT_HGB_RSLT_NUM"
+                ),
+                "CLM_LINE_HCT_HGB_TYPE_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_HCT_HGB_TYPE_CD"
+                ),
+                "CLM_LINE_INSTNL_ADJSTD_AMT": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_LINE_INSTNL_ADJSTD_AMT"
+                ),
+                "CLM_LINE_INSTNL_MSP1_PD_AMT": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_LINE_INSTNL_MSP1_PD_AMT"
+                ),
+                "CLM_LINE_INSTNL_MSP2_PD_AMT": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_LINE_INSTNL_MSP2_PD_AMT"
+                ),
+                "CLM_LINE_INSTNL_RATE_AMT": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_LINE_INSTNL_RATE_AMT"
+                ),
+                "CLM_LINE_INSTNL_RDCD_AMT": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_LINE_INSTNL_RDCD_AMT"
+                ),
+                "CLM_LINE_MDCR_COINSRNC_AMT": extract_col_str(
+                    clm_line, "CLM_LINE_MDCR_COINSRNC_AMT"
+                ),
+                "CLM_LINE_MDCR_DDCTBL_AMT": extract_col_str(clm_line, "CLM_LINE_MDCR_DDCTBL_AMT"),
+                "CLM_LINE_NCVRD_CHRG_AMT": extract_col_str(clm_line, "CLM_LINE_NCVRD_CHRG_AMT"),
+                "CLM_LINE_NDC_CD": extract_col_str(clm_line, "CLM_LINE_NDC_CD"),
+                "CLM_LINE_NDC_QTY": extract_col_str(clm_line, "CLM_LINE_NDC_QTY"),
+                "CLM_LINE_NDC_QTY_QLFYR_CD": extract_col_str(clm_line, "CLM_LINE_NDC_QTY_QLFYR_CD"),
+                "CLM_LINE_NUM": extract_col_str(clm_line, "CLM_LINE_NUM"),
+                "CLM_LINE_PA_UNIQ_TRKNG_NUM": find_field_in_line_by_num(
+                    dcmtn_lines, clm_line, "CLM_LINE_PA_UNIQ_TRKNG_NUM"
+                ),
+                "CLM_LINE_PMD_UNIQ_TRKNG_NUM": extract_col_str(
+                    clm_line, "CLM_LINE_PMD_UNIQ_TRKNG_NUM"
+                ),
+                "CLM_LINE_PRFNL_DME_PRICE_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_PRFNL_DME_PRICE_AMT"
+                ),
+                "CLM_LINE_PRFNL_INTRST_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_PRFNL_INTRST_AMT"
+                ),
+                "CLM_LINE_PRFNL_MTUS_CNT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_LINE_PRFNL_MTUS_CNT"
+                ),
+                "CLM_LINE_PRVDR_PMT_AMT": extract_col_str(clm_line, "CLM_LINE_PRVDR_PMT_AMT"),
+                "CLM_LINE_REV_CTR_CD": extract_col_str(clm_line, "CLM_LINE_REV_CTR_CD"),
+                "CLM_LINE_RX_NUM": extract_col_str(clm_line, "CLM_LINE_RX_NUM"),
+                "CLM_LINE_SBMT_CHRG_AMT": extract_col_str(clm_line, "CLM_LINE_SBMT_CHRG_AMT"),
+                "CLM_LINE_SRVC_UNIT_QTY": extract_col_str(clm_line, "CLM_LINE_SRVC_UNIT_QTY"),
+                "CLM_LINE_THRU_DT": extract_col_str(clm_line, "CLM_LINE_THRU_DT"),
+                "CLM_MDCR_PRMRY_PYR_ALOWD_AMT": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_MDCR_PRMRY_PYR_ALOWD_AMT"
+                ),
+                "CLM_MTUS_IND_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_MTUS_IND_CD"
+                ),
+                "CLM_PHYSN_ASTNT_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PHYSN_ASTNT_CD"
+                ),
+                "CLM_PMT_80_100_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PMT_80_100_CD"
+                ),
+                "CLM_POS_CD": extract_col_str(clm_line, "CLM_POS_CD"),
+                "CLM_PRCNG_LCLTY_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PRCNG_LCLTY_CD"
+                ),
+                "CLM_PRCSG_IND_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PRCSG_IND_CD"
+                ),
+                "CLM_PRMRY_PYR_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PRMRY_PYR_CD"
+                ),
+                "CLM_PRVDR_SPCLTY_CD": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_PRVDR_SPCLTY_CD"
+                ),
+                "CLM_REV_APC_HIPPS_CD": find_field_in_line_by_num(
+                    instnl_lines, clm_line, "CLM_REV_APC_HIPPS_CD"
+                ),
+                "CLM_RNDRG_FED_PRVDR_SPCLTY_CD": extract_col_str(
+                    clm_line, "CLM_RNDRG_FED_PRVDR_SPCLTY_CD"
+                ),
+                "CLM_RNDRG_PRVDR_PRTCPTG_CD": extract_col_str(
+                    clm_line, "CLM_RNDRG_PRVDR_PRTCPTG_CD"
+                ),
+                "CLM_RNDRG_PRVDR_TAX_NUM": extract_col_str(clm_line, "CLM_RNDRG_PRVDR_TAX_NUM"),
+                "CLM_RNDRG_PRVDR_TYPE_CD": extract_col_str(clm_line, "CLM_RNDRG_PRVDR_TYPE_CD"),
+                "CLM_SRVC_DDCTBL_SW": find_field_in_line_by_num(
+                    prfnl_lines, clm_line, "CLM_SRVC_DDCTBL_SW"
+                ),
+                "GEO_RNDRG_SSA_STATE_CD": extract_col_str(clm_line, "GEO_RNDRG_SSA_STATE_CD"),
+                "HCPCS_1_MDFR_CD": extract_col_str(clm_line, "HCPCS_1_MDFR_CD"),
+                "HCPCS_2_MDFR_CD": extract_col_str(clm_line, "HCPCS_2_MDFR_CD"),
+                "HCPCS_3_MDFR_CD": extract_col_str(clm_line, "HCPCS_3_MDFR_CD"),
+                "HCPCS_4_MDFR_CD": extract_col_str(clm_line, "HCPCS_4_MDFR_CD"),
+                "HCPCS_5_MDFR_CD": extract_col_str(clm_line, "HCPCS_5_MDFR_CD"),
+                "PRVDR_RNDRNG_PRVDR_NPI_NUM": extract_col_str(
+                    clm_line, "PRVDR_RNDRNG_PRVDR_NPI_NUM"
+                ),
+            }
+            for clm_line in clm_lines
+        ]
+
+        prfnl = self.read_prfnl(clm_row=claim_row)
+        lctn_hist = self.read_lctn_hist(clm_row=claim_row)
+        dcmtn = self.read_dcmtn(clm_row=claim_row)
+        sig_line = self.read_sig_line(str(claim_row.get("CLM_DT_SGNTR_SK", "")).strip())
+
+        output_json = {
+            "resourceType": "ExplanationOfBenefitBase",
+            "id": str(clm_uniq_id.replace("-", "")).strip(),
+            "lastUpdated": extract_col_str(claim_row, "IDR_UPDT_TS"),
+            "CLM_FINL_ACTN_IND": extract_col_str(claim_row, "CLM_FINL_ACTN_IND"),
+            "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
+            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
+            "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
+            "CLM_FROM_DT": extract_col_str(claim_row, "CLM_FROM_DT"),
+            "CLM_THRU_DT": extract_col_str(claim_row, "CLM_THRU_DT"),
+            "CLM_EFCTV_DT": extract_col_str(claim_row, "CLM_EFCTV_DT"),
+            "CLM_SRC_ID": extract_col_str(claim_row, "CLM_SRC_ID"),
+            "META_SRC_SK": extract_col_str(claim_row, "META_SRC_SK"),
+            "PRVDR_BLG_PRVDR_NPI_NUM": extract_col_str(claim_row, "PRVDR_BLG_PRVDR_NPI_NUM"),
+            "diagnoses": diagnoses_lines,
+            "supportingInfoComponents": [],
+            "lineItemComponents": line_item_components,
+            "profComponents": {
+                "CLM_PRVDR_ACNT_RCVBL_OFST_AMT": extract_col_str(
+                    prfnl, "CLM_PRVDR_ACNT_RCVBL_OFST_AMT"
+                ),
+                "CLM_MDCR_PRFNL_PRMRY_PYR_AMT": extract_col_str(
+                    prfnl, "CLM_MDCR_PRFNL_PRMRY_PYR_AMT"
+                ),
+                "CLM_AUDT_TRL_STUS_CD": extract_col_str(lctn_hist, "CLM_AUDT_TRL_STUS_CD"),
+                "CLM_CARR_PMT_DNL_CD": extract_col_str(prfnl, "CLM_CARR_PMT_DNL_CD"),
+                "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": extract_col_str(
+                    prfnl, "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW"
+                ),
+                "CLM_CLNCL_TRIL_NUM": extract_col_str(prfnl, "CLM_CLNCL_TRIL_NUM"),
+            },
+            "CLM_NRLN_RIC_CD": extract_col_str(dcmtn, "CLM_NRLN_RIC_CD"),
+            "CLM_MDCR_DDCTBL_AMT": extract_col_str(claim_row, "CLM_MDCR_DDCTBL_AMT"),
+            "CLM_PMT_AMT": extract_col_str(claim_row, "CLM_PMT_AMT"),
+            "CLM_PRVDR_PMT_AMT": extract_col_str(claim_row, "CLM_PRVDR_PMT_AMT"),
+            "CLM_SBMT_CHRG_AMT": extract_col_str(claim_row, "CLM_SBMT_CHRG_AMT"),
+            "CLM_MDCR_COINSRNC_AMT": extract_col_str(claim_row, "CLM_MDCR_COINSRNC_AMT"),
+            "CLM_NCVRD_CHRG_AMT": extract_col_str(claim_row, "CLM_NCVRD_CHRG_AMT"),
+            "CLM_BLOOD_LBLTY_AMT": extract_col_str(claim_row, "CLM_BLOOD_LBLTY_AMT"),
+            "CLM_BLG_PRVDR_OSCAR_NUM": extract_col_str(claim_row, "CLM_BLG_PRVDR_OSCAR_NUM"),
+            "CLM_RFRG_PRVDR_PIN_NUM": extract_col_str(claim_row, "CLM_RFRG_PRVDR_PIN_NUM"),
+            "CLM_BENE_PMT_AMT": extract_col_str(claim_row, "CLM_BENE_PMT_AMT"),
+            "CLM_ALOWD_CHRG_AMT": extract_col_str(claim_row, "CLM_ALOWD_CHRG_AMT"),
+            "CLM_BENE_PMT_COINSRNC_AMT": extract_col_str(claim_row, "CLM_BENE_PMT_COINSRNC_AMT"),
+            "PRVDR_RNDRNG_PRVDR_NPI_NUM": extract_col_str(claim_row, "PRVDR_RNDRNG_PRVDR_NPI_NUM"),
+            "CLM_BILL_FAC_TYPE_CD": extract_col_str(claim_row, "CLM_BILL_FAC_TYPE_CD"),
+            "CLM_BILL_CLSFCTN_CD": extract_col_str(claim_row, "CLM_BILL_CLSFCTN_CD"),
+            "CLM_BILL_FREQ_CD": extract_col_str(claim_row, "CLM_BILL_FREQ_CD"),
+            "CLM_SUBMSN_DT": extract_col_str(sig_line, "CLM_SUBMSN_DT"),
+            "CLM_NCH_WKLY_PROC_DT": extract_col_str(sig_line, "CLM_NCH_WKLY_PROC_DT"),
+            "CLM_CMS_PROC_DT": extract_col_str(sig_line, "CLM_CMS_PROC_DT"),
+            "CLM_BLOOD_PT_FRNSH_QTY": extract_col_str(claim_row, "CLM_BLOOD_PT_FRNSH_QTY"),
+            "CLM_NCH_PRMRY_PYR_CD": extract_col_str(claim_row, "CLM_NCH_PRMRY_PYR_CD"),
+            "CLM_QUERY_CD": extract_col_str(claim_row, "CLM_QUERY_CD"),
+            "CLM_IDR_LD_DT": extract_col_str(claim_row, "CLM_IDR_LD_DT"),
+            "CLM_CNTRCTR_NUM": extract_col_str(claim_row, "CLM_CNTRCTR_NUM"),
+            "CLM_ADJSTMT_TYPE_CD": extract_col_str(claim_row, "CLM_ADJSTMT_TYPE_CD"),
+            "CLM_DISP_CD": extract_col_str(claim_row, "CLM_DISP_CD"),
+        }
+
+        return Result(
+            result_json=output_json, output_file=f"{self.output_directory}/EOB-Carrier-Sample.json"
+        )
+
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
         eob_path = f"{self.source_directory}/SYNTHETIC_CLM.csv"
         if not Path(eob_path).exists():
@@ -508,6 +742,57 @@ class SampleGenerator:
 
         return {} if clm_instnl_matches.empty else clm_instnl_matches.iloc[0]
 
+    def read_prfnl(self, clm_row: dict[str, str]) -> dict[str, str]:
+        clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_PRFNL.csv"
+
+        if not Path(clm_prfnl).exists():
+            return {}
+
+        clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
+
+        clm_prfnl_matches = clm_prfnl_found[
+            (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
+            & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
+            & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
+            & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
+        ]
+
+        return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
+
+    def read_lctn_hist(self, clm_row: dict[str, str]) -> dict[str, str]:
+        clm_prfnl = f"{self.source_directory}/SYNTHETIC_CLM_LCTN_HSTRY.csv"
+
+        if not Path(clm_prfnl).exists():
+            return {}
+
+        clm_prfnl_found = pd.read_csv(clm_prfnl, dtype=str, keep_default_na=False)
+
+        clm_prfnl_matches = clm_prfnl_found[
+            (clm_prfnl_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
+            & (clm_prfnl_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
+            & (clm_prfnl_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
+            & (clm_prfnl_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
+        ]
+
+        return {} if clm_prfnl_matches.empty else clm_prfnl_matches.iloc[0]
+
+    def read_dcmtn(self, clm_row: dict[str, str]) -> dict[str, str]:
+        clm_dcmtn = f"{self.source_directory}/SYNTHETIC_CLM_DCMTN.csv"
+
+        if not Path(clm_dcmtn).exists():
+            return {}
+
+        clm_dcmtn_found = pd.read_csv(clm_dcmtn, dtype=str, keep_default_na=False)
+
+        clm_dcmtn_matches = clm_dcmtn_found[
+            (clm_dcmtn_found["GEO_BENE_SK"] == clm_row["GEO_BENE_SK"])
+            & (clm_dcmtn_found["CLM_DT_SGNTR_SK"] == clm_row["CLM_DT_SGNTR_SK"])
+            & (clm_dcmtn_found["CLM_TYPE_CD"] == clm_row["CLM_TYPE_CD"])
+            & (clm_dcmtn_found["CLM_NUM_SK"] == clm_row["CLM_NUM_SK"])
+        ]
+
+        return {} if clm_dcmtn_matches.empty else clm_dcmtn_matches.iloc[0]
+
     def read_line(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         line_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE.csv"
 
@@ -570,6 +855,36 @@ class SampleGenerator:
             & (line_instnl_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_instnl_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_instnl_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
+
+    def read_prfnl_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
+        line_prfnl_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_PRFNL.csv"
+
+        if not Path(line_prfnl_path).exists():
+            return []
+
+        line_prfnl_found = pd.read_csv(line_prfnl_path, dtype=str, keep_default_na=False)
+
+        return line_prfnl_found[
+            (line_prfnl_found["GEO_BENE_SK"] == clm_line["GEO_BENE_SK"])
+            & (line_prfnl_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
+            & (line_prfnl_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
+            & (line_prfnl_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
+
+    def read_dcmtn_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
+        line_dcmtn_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_DCMTN.csv"
+
+        if not Path(line_dcmtn_path).exists():
+            return []
+
+        line_dcmtn_found = pd.read_csv(line_dcmtn_path, dtype=str, keep_default_na=False)
+
+        return line_dcmtn_found[
+            (line_dcmtn_found["GEO_BENE_SK"] == clm_line["GEO_BENE_SK"])
+            & (line_dcmtn_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
+            & (line_dcmtn_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
+            & (line_dcmtn_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
         ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_clm_val(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
