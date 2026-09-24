@@ -9,7 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutionalNch;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateSupportingInfo;
+import gov.cms.bfd.server.ng.claim.model.institutional.ClaimDateInstitutionalNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimInstitutionalNchSupportingInfo;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
@@ -43,7 +43,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"java:S2293"})
 public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
 
-  @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
+  @Embedded private ClaimDateInstitutionalNch claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))

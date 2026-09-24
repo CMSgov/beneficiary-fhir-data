@@ -17,10 +17,13 @@ public class ClaimDateInstitutionalSharedSystems implements SupportingInfoCompon
 
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  // not sure this one will map, considering we have another column for shared systems.
-  // Will review the snap to see if its mapping.
+  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
+  @Embedded private ActiveCareThroughDate activeCareThroughDate;
+  @Embedded private NoncoveredFromDate noncoveredFromDate;
+  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
-  //  todo thomasw probably add rest here for ClaimDate Institutional SharedSystems
+  @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  //  todo thomasw create IT addressing this change in SharedSystems claims****
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override
@@ -29,7 +32,12 @@ public class ClaimDateInstitutionalSharedSystems implements SupportingInfoCompon
     return Stream.of(
             admissionPeriod.toFhir(supportingInfoFactory),
             claimSubmissionDate.toFhir(supportingInfoFactory),
+            benefitsExhaustedDate.toFhir(supportingInfoFactory),
+            activeCareThroughDate.toFhir(supportingInfoFactory),
+            noncoveredFromDate.toFhir(supportingInfoFactory),
+            noncoveredThroughDate.toFhir(supportingInfoFactory),
             qualifyStayFromDate.toFhir(supportingInfoFactory),
+            qualifyStayThruDate.toFhir(supportingInfoFactory),
             claimProcessDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
         .toList();

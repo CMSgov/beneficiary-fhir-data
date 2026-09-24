@@ -15,9 +15,17 @@ class NoncoveredFromDate {
   @Column(name = "clm_ncvrd_from_dt")
   private Optional<LocalDate> noncoveredFromDate;
 
+  @Column(name = "bfd_clm_ncvrd_from_dt")
+  private Optional<LocalDate> bfdNoncoveredFromDate;
+
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (noncoveredFromDate.isEmpty()) {
+    Optional<LocalDate> localDate;
+    if (noncoveredFromDate.isPresent()) {
+      localDate = noncoveredFromDate;
+    } else if (bfdNoncoveredFromDate.isPresent()) {
+      localDate = bfdNoncoveredFromDate;
+    } else {
       return Optional.empty();
     }
 
@@ -25,7 +33,7 @@ class NoncoveredFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredFromDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
     return Optional.of(component);
   }
 }

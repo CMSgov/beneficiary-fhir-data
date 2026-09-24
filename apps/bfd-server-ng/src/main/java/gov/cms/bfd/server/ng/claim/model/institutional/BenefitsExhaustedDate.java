@@ -16,9 +16,17 @@ public class BenefitsExhaustedDate {
   @Column(name = "clm_mdcr_exhstd_dt")
   private Optional<LocalDate> benefitsExhaustedDate;
 
+  @Column(name = "bfd_clm_mdcr_exhstd_dt")
+  private Optional<LocalDate> bfdBenefitsExhaustedDate;
+
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (benefitsExhaustedDate.isEmpty()) {
+    Optional<LocalDate> localDate;
+    if (benefitsExhaustedDate.isPresent()) {
+      localDate = benefitsExhaustedDate;
+    } else if (bfdBenefitsExhaustedDate.isPresent()) {
+      localDate = bfdBenefitsExhaustedDate;
+    } else {
       return Optional.empty();
     }
 
@@ -26,7 +34,7 @@ public class BenefitsExhaustedDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(benefitsExhaustedDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
     return Optional.of(component);
   }
 }

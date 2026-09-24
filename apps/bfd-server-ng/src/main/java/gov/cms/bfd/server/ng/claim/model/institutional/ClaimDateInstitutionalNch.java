@@ -14,18 +14,16 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The claim date for a supporting info component. */
 @Embeddable
-public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
+public class ClaimDateInstitutionalNch implements SupportingInfoComponentBase {
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
-  // todo thomasw BFD-4625
+  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
   @Embedded private NoncoveredThroughDate noncoveredThroughDate;
-  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
-  // todo thomasw BFD-4625
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override

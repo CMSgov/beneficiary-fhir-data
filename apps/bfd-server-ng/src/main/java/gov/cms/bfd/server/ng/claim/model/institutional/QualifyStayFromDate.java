@@ -16,9 +16,17 @@ public class QualifyStayFromDate {
   @Column(name = "clm_qlfy_stay_from_dt")
   private Optional<LocalDate> qualifyStayFromDate;
 
+  @Column(name = "bfd_clm_qlfy_stay_from_dt")
+  private Optional<LocalDate> bfdQualifyStayFromDate;
+
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (qualifyStayFromDate.isEmpty()) {
+    Optional<LocalDate> localDate;
+    if (qualifyStayFromDate.isPresent()) {
+      localDate = qualifyStayFromDate;
+    } else if (bfdQualifyStayFromDate.isPresent()) {
+      localDate = bfdQualifyStayFromDate;
+    } else {
       return Optional.empty();
     }
 
@@ -26,7 +34,7 @@ public class QualifyStayFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
     return Optional.of(component);
   }
 }
