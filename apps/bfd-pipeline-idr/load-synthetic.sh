@@ -19,7 +19,7 @@ fi
 # shellcheck disable=SC2154
 source ./apps/utils/scripts/load-idr-credentials.sh "$argc_load_mode"
 if [ "$1" = "synthetic" ]; then
-	source ./apps/bfd-pipeline-idr/load-bfd-credentials.sh
+	source ./apps/utils/scripts/load-bfd-credentials.sh
 fi
 # shellcheck disable=SC2154
 args=('--load-type' 'initial' '--source' 'snowflake' "--load-mode=$argc_load_mode")

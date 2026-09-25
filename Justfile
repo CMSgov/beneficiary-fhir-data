@@ -72,6 +72,10 @@ load-synthetic load-mode env *truncate:
 extract-idr env:
     cd ./apps/bfd-pipeline-idr && BFD_ENV="{{env}}" ./extract-idr.sh
 
+[arg("env", long, pattern="(\\d+-)?(test|sandbox|prod)")]
+idr-bfd-validator env:
+    cd ./apps/utils/idr-bfd-validator && BFD_ENV="{{env}}" ./run-validator.sh
+
 install-model-dependencies:
     cd ./apps/bfd-model-idr && npm install
 
