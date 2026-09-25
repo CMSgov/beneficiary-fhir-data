@@ -68,6 +68,10 @@ load-synthetic load-mode env *truncate:
     fi
     BFD_ENV="{{env}}" ./apps/bfd-pipeline-idr/load-synthetic.sh "${args[@]}"
 
+[arg("env", long, pattern="(\\d+-)?(test|sandbox|prod)")]
+extract-idr env:
+    cd ./apps/bfd-pipeline-idr && BFD_ENV="{{env}}" ./extract-idr.sh
+
 install-model-dependencies:
     cd ./apps/bfd-model-idr && npm install
 
