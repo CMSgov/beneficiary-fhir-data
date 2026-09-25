@@ -11,6 +11,7 @@ readonly SCRIPT_DIR
 bfd_env="${BFD_ENV:-"${1:-"local"}"}"
 readonly bfd_env
 
+source "$SCRIPT_DIR/../utils/scripts/local-db-constants.sh"
 env_username="$BFD_LOCAL_DB_USERNAME"
 env_password="$BFD_LOCAL_DB_PASSWORD"
 env_db_endpoint="jdbc:postgresql://localhost:5432/fhirdb"

@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 image=postgres:16.6
 max_connections=500
+
+SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
+readonly SCRIPT_DIR
+
+source "$SCRIPT_DIR/local-db-constants.sh"
 
 docker pull $image
 

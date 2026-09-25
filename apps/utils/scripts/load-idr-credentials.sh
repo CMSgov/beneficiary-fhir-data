@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 # argc doesn't work here because the arg parsing gets messed up
 # when sourcing the script

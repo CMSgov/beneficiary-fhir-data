@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
-set -e
+set -Eeuo pipefail
 
 SCRIPT_DIR=$(path=$(realpath "$0") && dirname "$path")
 readonly SCRIPT_DIR
+INVOKE_DIR="$PWD"
+
+source "$SCRIPT_DIR/../utils/scripts/local-db-constants.sh"
 
 function do_load() {
-	BFD_DB_USERNAME="$BFD_LOCAL_DB_USERNAME" \
+	(cd "$SCRIPT_DIR" && BFD_DB_USERNAME="$BFD_LOCAL_DB_USERNAME" \
 		BFD_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD" \
 		BFD_DB_ENDPOINT="localhost" \
 		IDR_ENABLE_DATE_PARTITIONS=0 \
@@ -14,7 +17,7 @@ function do_load() {
 		--source postgres \
 		--load-mode synthetic \
 		--load-type initial \
-		--seed-from "${1}"
+		--seed-from "$INVOKE_DIR/${1}")
 }
 
 if [[ -d "$1/0" ]]; then

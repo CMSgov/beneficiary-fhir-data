@@ -1,10 +1,3 @@
-set unstable
-set lists
-
-export BFD_LOCAL_DB_USERNAME:="bfd"
-export BFD_LOCAL_DB_PASSWORD:="InsecureLocalDev"
-export BFD_LOCAL_DB_CONTAINER:="bfd-db"
-
 bootstrap:
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
@@ -23,7 +16,7 @@ remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 remove-db:
-    docker stop {{BFD_LOCAL_DB_CONTAINER}} && docker rm {{BFD_LOCAL_DB_CONTAINER}}
+    ./apps/utils/scripts/remove-local-db.sh
 
 create-db:
     ./apps/utils/scripts/create-bfd-db.sh
@@ -40,7 +33,7 @@ pipeline csv_folder: migrate-db create-mock-idr
 # Run server-ng, optionally running the pipeline first if `csv_folder` is provided
 server-ng csv_folder="":
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -Eeuo pipefail
 
     if [ "{{csv_folder}}" != "" ]; then
         just pipeline {{csv_folder}};
@@ -56,7 +49,7 @@ migrate-synthetic env:
 [arg("truncate", long, value="1")]
 load-synthetic load-mode env *truncate:
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -Eeuo pipefail
 
     if [ "{{load-mode}}" = "local" ]; then
         just migrate-db
