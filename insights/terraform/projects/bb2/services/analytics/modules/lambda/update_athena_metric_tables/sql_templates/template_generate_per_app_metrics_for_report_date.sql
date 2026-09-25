@@ -110,7 +110,13 @@ WITH report_params AS (
       'app_successful_client_credentials_call',
       'app_unsuccessful_client_credentials_call',
       'app_successful_patient_match_call',
-      'app_unsuccessful_patient_match_call'
+      'app_unsuccessful_patient_match_call',
+      'app_auth_samhsa_presented_sharing_real_bene_count',
+      'app_auth_samhsa_presented_sharing_synthetic_bene_count',
+      'app_auth_samhsa_presented_not_sharing_real_bene_count',
+      'app_auth_samhsa_presented_not_sharing_synthetic_bene_count',
+      'app_auth_samhsa_not_presented_real_bene_count',
+      'app_auth_samhsa_not_presented_synthetic_bene_count'
     ] as enabled_metrics_list 
 ),
 
@@ -553,7 +559,19 @@ SELECT
   COALESCE(t232.app_successful_patient_match_call, 0)
     app_successful_patient_match_call,
   COALESCE(t233.app_unsuccessful_patient_match_call, 0)
-    app_unsuccessful_patient_match_call
+    app_unsuccessful_patient_match_call,
+  COALESCE(t234.app_auth_samhsa_presented_sharing_real_bene_count, 0)
+    app_auth_samhsa_presented_sharing_real_bene_count,
+  COALESCE(t235.app_auth_samhsa_presented_sharing_synthetic_bene_count, 0)
+    app_auth_samhsa_presented_sharing_synthetic_bene_count,
+  COALESCE(t236.app_auth_samhsa_presented_not_sharing_real_bene_count, 0)
+    app_auth_samhsa_presented_not_sharing_real_bene_count,
+  COALESCE(t237.app_auth_samhsa_presented_not_sharing_synthetic_bene_count, 0)
+    app_auth_samhsa_presented_not_sharing_synthetic_bene_count,
+  COALESCE(t238.app_auth_samhsa_not_presented_real_bene_count, 0)
+    app_auth_samhsa_not_presented_real_bene_count,
+  COALESCE(t239.app_auth_samhsa_not_presented_synthetic_bene_count, 0)
+    app_auth_samhsa_not_presented_synthetic_bene_count
 
 FROM
   (
@@ -3104,3 +3122,172 @@ FROM
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
   ) t233 ON t233.app_name = t0.name 
+
+  /* SAMHSA data sharing choice stats per application */
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_presented_sharing_real_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_presented_sharing_real_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'True'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t234 ON t234.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_presented_sharing_synthetic_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_presented_sharing_synthetic_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'True'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t235 ON t235.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_presented_not_sharing_real_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_presented_not_sharing_real_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'False'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t236 ON t236.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_presented_not_sharing_synthetic_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_presented_not_sharing_synthetic_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'False'
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t237 ON t237.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_not_presented_real_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_not_presented_real_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data IS NULL
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t238 ON t238.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_auth_samhsa_not_presented_synthetic_bene_count
+    FROM
+      api_audit_events 
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_auth_samhsa_not_presented_synthetic_bene_count')
+        AND type = 'Authorization'
+
+        AND (
+          try_cast(crosswalk_fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data IS NULL
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t239 ON t239.app_name = t0.name 

@@ -72,6 +72,12 @@ WITH report_params AS (
       'auth_demoscope_not_required_not_sharing_synthetic_bene_count',
       'auth_demoscope_not_required_deny_real_bene_count',
       'auth_demoscope_not_required_deny_synthetic_bene_count',
+      'auth_samhsa_presented_sharing_real_bene_count',
+      'auth_samhsa_presented_sharing_synthetic_bene_count',
+      'auth_samhsa_presented_not_sharing_real_bene_count',
+      'auth_samhsa_presented_not_sharing_synthetic_bene_count',
+      'auth_samhsa_not_presented_real_bene_count',
+      'auth_samhsa_not_presented_synthetic_bene_count',
       'sdk_requests_python_count',
       'sdk_requests_node_count'
     ] as enabled_metrics_list 
@@ -587,6 +593,24 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
         app_auth_demoscope_not_required_deny_synthetic_bene_count
       ) app_all_auth_demoscope_not_required_deny_synthetic_bene_count,
       "sum"(
+        app_auth_samhsa_presented_sharing_real_bene_count
+      ) app_all_auth_samhsa_presented_sharing_real_bene_count,
+      "sum"(
+        app_auth_samhsa_presented_sharing_synthetic_bene_count
+      ) app_all_auth_samhsa_presented_sharing_synthetic_bene_count,
+      "sum"(
+        app_auth_samhsa_presented_not_sharing_real_bene_count
+      ) app_all_auth_samhsa_presented_not_sharing_real_bene_count,
+      "sum"(
+        app_auth_samhsa_presented_not_sharing_synthetic_bene_count
+      ) app_all_auth_samhsa_presented_not_sharing_synthetic_bene_count,
+      "sum"(
+        app_auth_samhsa_not_presented_real_bene_count
+      ) app_all_auth_samhsa_not_presented_real_bene_count,
+      "sum"(
+        app_auth_samhsa_not_presented_synthetic_bene_count
+      ) app_all_auth_samhsa_not_presented_synthetic_bene_count,
+      "sum"(
         app_token_authorization_code_2xx_count
       ) app_all_token_authorization_code_2xx_count,
       "sum"(
@@ -809,6 +833,7 @@ auth_events AS (
     auth_status,
     share_demographic_scopes,
     allow,
+    auth_share_samhsa_data,
     json_extract(user, '$$.crosswalk.fhir_id_v2') as fhir_id,
     json_extract(user, '$$.crosswalk.fhir_id_v3') as fhir_id_v3
   from
@@ -1857,7 +1882,117 @@ SELECT
           'sdk_requests_node_count')
         AND req_header_bluebutton_sdk = 'node'
       )
-  ) as sdk_requests_node_count
+  ) as sdk_requests_node_count,
+
+  /* SAMHSA data sharing choice stats top level */
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_presented_sharing_real_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'True'
+      )
+  ) as auth_samhsa_presented_sharing_real_bene_count,
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_presented_sharing_synthetic_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'True'
+      )
+  ) as auth_samhsa_presented_sharing_synthetic_bene_count,
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_presented_not_sharing_real_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'False'
+      )
+  ) as auth_samhsa_presented_not_sharing_real_bene_count,
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_presented_not_sharing_synthetic_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data = 'False'
+      )
+  ) as auth_samhsa_presented_not_sharing_synthetic_bene_count,
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_not_presented_real_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) > 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) > 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data IS NULL
+      )
+  ) as auth_samhsa_not_presented_real_bene_count,
+  (
+    select
+      count(*)
+    from
+      auth_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_samhsa_not_presented_synthetic_bene_count')
+        and (
+          try_cast(fhir_id as BIGINT) < 0
+          OR COALESCE(try_cast(fhir_id_v3 as BIGINT), 0) < 0
+        )
+        and auth_status = 'OK'
+        and allow = True
+        and auth_share_samhsa_data IS NULL
+      )
+  ) as auth_samhsa_not_presented_synthetic_bene_count
 
 FROM
   (
