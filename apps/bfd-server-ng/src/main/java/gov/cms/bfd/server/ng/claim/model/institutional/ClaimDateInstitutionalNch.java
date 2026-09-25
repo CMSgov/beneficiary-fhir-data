@@ -1,8 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.model.common.ActiveCareThroughDate;
+import gov.cms.bfd.server.ng.claim.model.common.BenefitsExhaustedDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
 import gov.cms.bfd.server.ng.claim.model.common.NchWeeklyProcessingDate;
+import gov.cms.bfd.server.ng.claim.model.common.NoncoveredFromDate;
+import gov.cms.bfd.server.ng.claim.model.common.NoncoveredThroughDate;
+import gov.cms.bfd.server.ng.claim.model.common.QualifyStayFromDate;
+import gov.cms.bfd.server.ng.claim.model.common.QualifyStayThruDate;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Embeddable;
@@ -14,14 +20,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The claim date for a supporting info component. */
 @Embeddable
-public class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
+public class ClaimDateInstitutionalNch implements SupportingInfoComponentBase {
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
   @Embedded private NoncoveredThroughDate noncoveredThroughDate;
-  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
   @Embedded private ClaimProcessDate claimProcessDate;

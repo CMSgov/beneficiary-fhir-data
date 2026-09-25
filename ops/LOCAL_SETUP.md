@@ -10,8 +10,10 @@ Below is a recommended setup for you kion.yml. This creates short cuts to connec
 ---
 kion:
   url: https://cloudtamer.cms.gov
-  username: <your EUA id here>
-  idms_id: 2
+  idms_id: 5 # `idms_id` maps to "CMS Cloud Services" in the cloudtamer.cms.gov for EUA authentication. I think.
+  saml_metadata_file: https://idm.cms.gov/app/exk10wd8mvjHwLRKa298/sso/saml/metadata
+  saml_sp_issuer: https://cloudtamer.cms.gov/api/v1/saml/auth
+  disable_cache: false
 
 browser:
   firefox_containers: true
@@ -61,7 +63,7 @@ favorites:
     cloud_access_role: BFD Application Admin
     browser: firefox
 
-# <any additional favorites below> 
+# <any additional favorites below>
 ```
 ### Details
 The naming pattern is as follows
@@ -152,7 +154,7 @@ alias kwp="k f wp"
 
 ## tofu Helpers
 
-The following functions and aliases are useful for working with the tofu CLI. Add to .bashrc or .zshrc. These assume you have installed the tofu CLI and have it in your PATH. If you are using tenv, you may need to adjust the path to the tofu binary. 
+The following functions and aliases are useful for working with the tofu CLI. Add to .bashrc or .zshrc. These assume you have installed the tofu CLI and have it in your PATH. If you are using tenv, you may need to adjust the path to the tofu binary.
 ```tenv (brew install tenv)```
 
 ```bash
@@ -175,7 +177,7 @@ tofu_workspace() {
     TF_WORKSPACE=default tenv_tofu init -var account_type="$wksp" -reconfigure && tenv_tofu workspace select -var account_type="$wksp" -or-create "$wksp"
   else
     local parent_env="$(rg -o "(test|prod|sandbox)$" --replace '$1' <<<"$wksp")"
-    TF_WORKSPACE=default tenv_tofu init -var parent_env="$parent_env" -reconfigure && tenv_tofu workspace select -var parent_env="$parent_env" -or-create "$wksp" 
+    TF_WORKSPACE=default tenv_tofu init -var parent_env="$parent_env" -reconfigure && tenv_tofu workspace select -var parent_env="$parent_env" -or-create "$wksp"
   fi
 }
 

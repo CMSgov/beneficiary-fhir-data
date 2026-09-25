@@ -1,7 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model.institutional;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,14 +8,17 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
-class NoncoveredFromDate {
-  @Column(name = "clm_ncvrd_from_dt")
-  private Optional<LocalDate> noncoveredFromDate;
+public class NoncoveredFromDate {
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @Column(name = "bfd_clm_ncvrd_from_dt")
+  private Optional<LocalDate> bfdNoncoveredFromDate;
+
+  @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (noncoveredFromDate.isEmpty()) {
+    if (bfdNoncoveredFromDate.isEmpty()) {
       return Optional.empty();
     }
 
@@ -25,7 +26,7 @@ class NoncoveredFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredFromDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(bfdNoncoveredFromDate.get())));
     return Optional.of(component);
   }
 }

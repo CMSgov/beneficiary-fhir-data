@@ -51,6 +51,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
+  //  abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
+
   /**
    * Returns supporting-info components that are specific to the subclass.
    *
@@ -182,6 +184,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
             .toList();
 
     Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo(eob))
+        //            getClaimDateSupportingInfo().toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
