@@ -63,7 +63,7 @@ favorites:
     cloud_access_role: BFD Application Admin
     browser: firefox
 
-# <any additional favorites below> 
+# <any additional favorites below>
 ```
 ### Details
 The naming pattern is as follows
@@ -154,7 +154,7 @@ alias kwp="k f wp"
 
 ## tofu Helpers
 
-The following functions and aliases are useful for working with the tofu CLI. Add to .bashrc or .zshrc. These assume you have installed the tofu CLI and have it in your PATH. If you are using tenv, you may need to adjust the path to the tofu binary. 
+The following functions and aliases are useful for working with the tofu CLI. Add to .bashrc or .zshrc. These assume you have installed the tofu CLI and have it in your PATH. If you are using tenv, you may need to adjust the path to the tofu binary.
 ```tenv (brew install tenv)```
 
 ```bash
@@ -177,7 +177,7 @@ tofu_workspace() {
     TF_WORKSPACE=default tenv_tofu init -var account_type="$wksp" -reconfigure && tenv_tofu workspace select -var account_type="$wksp" -or-create "$wksp"
   else
     local parent_env="$(rg -o "(test|prod|sandbox)$" --replace '$1' <<<"$wksp")"
-    TF_WORKSPACE=default tenv_tofu init -var parent_env="$parent_env" -reconfigure && tenv_tofu workspace select -var parent_env="$parent_env" -or-create "$wksp" 
+    TF_WORKSPACE=default tenv_tofu init -var parent_env="$parent_env" -reconfigure && tenv_tofu workspace select -var parent_env="$parent_env" -or-create "$wksp"
   fi
 }
 
