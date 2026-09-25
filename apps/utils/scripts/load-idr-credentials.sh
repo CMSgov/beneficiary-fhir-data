@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# @option	--load-mode[local|synthetic|prod]
-eval "$(argc --argc-eval "$0" "$@")"
-
-if [ "$argc_load_mode" != "prod" ]; then
+# argc doesn't work here because the arg parsing gets messed up
+# when sourcing the script
+load_mode="$1"
+if [ "$load_mode" != "prod" ]; then
 	is_synthetic=true
 	creds_prefix="synthetic_env"
 else

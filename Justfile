@@ -9,7 +9,7 @@ bootstrap:
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install yq taplo prek tenv argc bash fd jq
+    brew install yq taplo prek tenv argc bash fd jq terraform-docs
     # We overwrite the default prek hook with our own script
     # that will automatically re-add any formatting changes before committing
     # This is not possible out of the box at the time of writing this
@@ -46,6 +46,10 @@ server-ng csv_folder="":
         just pipeline {{csv_folder}};
     fi
     cd ./apps/bfd-server-ng && mvn clean spring-boot:run
+
+[arg("env", long, pattern="(\\d+-)?(test|sandbox|prod)")]
+migrate-synthetic env:
+    BFD_ENV={{env}} ./apps/bfd-db-migrator-synthetic/migrate.sh
 
 [arg("load-mode", long, pattern="(local|synthetic)")]
 [arg("env", long, pattern="(\\d+-)?(test|sandbox|prod)")]
