@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
-
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaidStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
@@ -20,10 +18,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
-import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -55,17 +51,6 @@ public class ClaimProfessionalRegularSharedSystems extends ClaimProfessionalRegu
 
   @Embedded AdjudicationProfessionalSharedSystems adjudicationCharge;
   @Embedded ClaimProfessionalSharedSystemsCore sharedSystemsCore;
-
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
-    return Stream.concat(
-            super.getSubclassSupportingInfo().stream(),
-            claimFormatCode
-                .filter(_ -> getClaimTypeCode().isClaimSubtype(PDE))
-                .map(c -> c.toFhir(supportingInfoFactory))
-                .stream())
-        .toList();
-  }
 
   @Override
   public Optional<ClaimPaidStatusCode> getClaimPaidStatusCode() {

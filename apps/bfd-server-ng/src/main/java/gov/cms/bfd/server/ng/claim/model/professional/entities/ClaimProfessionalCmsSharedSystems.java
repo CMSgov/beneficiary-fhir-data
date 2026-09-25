@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
-
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
@@ -130,46 +128,39 @@ public class ClaimProfessionalCmsSharedSystems extends ClaimProfessionalCmsBase
 
   private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>
       buildRxSupportingInfo() {
-    return Stream.concat(
-        // Header-level: format code, only when this is a PDE subtype claim.
-        claimFormatCode
-            .filter(_ -> getClaimTypeCode().isClaimSubtype(PDE))
-            .map(c -> Optional.of(c.toFhir(supportingInfoFactory)))
-            .stream(),
-        // Line-level: Rx number from each claim item.
-        getClaimItems().stream()
-            .flatMap(
-                item -> {
-                  var supportingInfos =
-                      new ArrayList<
-                          Optional<ExplanationOfBenefit.SupportingInformationComponent>>();
-                  supportingInfos.add(item.getClaimLineRxNum().toFhir(supportingInfoFactory));
-                  var hctObs = item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId());
-                  hctObs.ifPresent(
-                      observation -> {
-                        supportingInfos.add(
-                            Optional.of(
-                                supportingInfoFactory
-                                    .createSupportingInfo()
-                                    .setValue(new Reference(observation))
-                                    .setCategory(
-                                        BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
-                                            .toFhir())));
-                      });
-                  var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
-                  hgbObs.ifPresent(
-                      observation -> {
-                        supportingInfos.add(
-                            Optional.of(
-                                supportingInfoFactory
-                                    .createSupportingInfo()
-                                    .setValue(new Reference(observation))
-                                    .setCategory(
-                                        BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
-                                            .toFhir())));
-                      });
-                  return supportingInfos.stream();
-                }));
+    // Line-level: Rx number from each claim item.
+    return getClaimItems().stream()
+        .flatMap(
+            item -> {
+              var supportingInfos =
+                  new ArrayList<Optional<ExplanationOfBenefit.SupportingInformationComponent>>();
+              supportingInfos.add(item.getClaimLineRxNum().toFhir(supportingInfoFactory));
+              var hctObs = item.toFhirObservationHCT(item.getClaimItemId().getBfdRowId());
+              hctObs.ifPresent(
+                  observation -> {
+                    supportingInfos.add(
+                        Optional.of(
+                            supportingInfoFactory
+                                .createSupportingInfo()
+                                .setValue(new Reference(observation))
+                                .setCategory(
+                                    BlueButtonSupportingInfoCategory.CLM_LINE_HCT_LVL_NUM
+                                        .toFhir())));
+                  });
+              var hgbObs = item.toFhirObservationHGB(item.getClaimItemId().getBfdRowId());
+              hgbObs.ifPresent(
+                  observation -> {
+                    supportingInfos.add(
+                        Optional.of(
+                            supportingInfoFactory
+                                .createSupportingInfo()
+                                .setValue(new Reference(observation))
+                                .setCategory(
+                                    BlueButtonSupportingInfoCategory.CLM_LINE_HGB_LVL_NUM
+                                        .toFhir())));
+                  });
+              return supportingInfos.stream();
+            });
   }
 
   /**
