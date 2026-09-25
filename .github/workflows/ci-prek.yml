@@ -11,7 +11,7 @@ jobs:
         with:
           distribution: corretto
           java-version: "25"
-      - uses: sigoden/install-binary@v1
+      - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
         with:
           repo: terraform-docs/terraform-docs
       - run: |
