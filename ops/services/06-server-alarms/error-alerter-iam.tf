@@ -45,6 +45,21 @@ resource "aws_iam_policy" "alerter_query_log" {
   policy = data.aws_iam_policy_document.alerter_query_log.json
 }
 
+data "aws_iam_policy_document" "alerter_kms" {
+  statement {
+    sid       = "AllowEncryptAndDecryptWithEnvCmk"
+    actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "alerter_kms" {
+  name        = "${local.alerter_lambda_full_name}-kms"
+  path        = local.iam_path
+  description = "Grants permission for the ${local.alerter_lambda_full_name} Lambda to use the environment's CMK"
+  policy      = data.aws_iam_policy_document.alerter_kms.json
+}
+
 data "aws_iam_policy_document" "invoke_alerter" {
   statement {
     sid       = "AllowInvokeErrorAlerterLambda"
@@ -87,6 +102,7 @@ resource "aws_iam_role_policy_attachment" "alerter" {
   for_each = {
     logs      = aws_iam_policy.alerter_logs.arn
     query_log = aws_iam_policy.alerter_query_log.arn
+    kms       = aws_iam_policy.alerter_kms.arn
   }
 
   role       = aws_iam_role.alerter.name
