@@ -13,20 +13,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
 public class BenefitsExhaustedDate {
-  @Column(name = "clm_mdcr_exhstd_dt")
-  private Optional<LocalDate> benefitsExhaustedDate;
 
   @Column(name = "bfd_clm_mdcr_exhstd_dt")
   private Optional<LocalDate> bfdBenefitsExhaustedDate;
 
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    Optional<LocalDate> localDate;
-    if (benefitsExhaustedDate.isPresent()) {
-      localDate = benefitsExhaustedDate;
-    } else if (bfdBenefitsExhaustedDate.isPresent()) {
-      localDate = bfdBenefitsExhaustedDate;
-    } else {
+    if (bfdBenefitsExhaustedDate.isEmpty()) {
       return Optional.empty();
     }
 
@@ -34,7 +27,7 @@ public class BenefitsExhaustedDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(bfdBenefitsExhaustedDate.get())));
     return Optional.of(component);
   }
 }

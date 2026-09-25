@@ -12,20 +12,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ActiveCareThroughDate {
-  @Column(name = "clm_actv_care_thru_dt")
-  private Optional<LocalDate> activeCareThroughDate;
 
   @Column(name = "bfd_clm_actv_care_thru_dt")
   private Optional<LocalDate> bfdActiveCareThroughDate;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    Optional<LocalDate> localDate;
-    if (activeCareThroughDate.isPresent()) {
-      localDate = activeCareThroughDate;
-    } else if (bfdActiveCareThroughDate.isPresent()) {
-      localDate = bfdActiveCareThroughDate;
-    } else {
+    if (bfdActiveCareThroughDate.isEmpty()) {
       return Optional.empty();
     }
 
@@ -33,7 +26,7 @@ class ActiveCareThroughDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(bfdActiveCareThroughDate.get())));
     return Optional.of(component);
   }
 }

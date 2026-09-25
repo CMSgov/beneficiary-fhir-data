@@ -13,20 +13,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** The "Qualify Stay From Date" for a claim. */
 @Embeddable
 public class QualifyStayFromDate {
-  @Column(name = "clm_qlfy_stay_from_dt")
-  private Optional<LocalDate> qualifyStayFromDate;
 
   @Column(name = "bfd_clm_qlfy_stay_from_dt")
   private Optional<LocalDate> bfdQualifyStayFromDate;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    Optional<LocalDate> localDate;
-    if (qualifyStayFromDate.isPresent()) {
-      localDate = qualifyStayFromDate;
-    } else if (bfdQualifyStayFromDate.isPresent()) {
-      localDate = bfdQualifyStayFromDate;
-    } else {
+    if (bfdQualifyStayFromDate.isEmpty()) {
       return Optional.empty();
     }
 
@@ -34,7 +27,7 @@ public class QualifyStayFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(bfdQualifyStayFromDate.get())));
     return Optional.of(component);
   }
 }

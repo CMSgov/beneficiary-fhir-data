@@ -14,20 +14,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * period.
  */
 public class QualifyStayThruDate {
-  @Column(name = "clm_qlfy_stay_thru_dt")
-  private Optional<LocalDate> qualifyStayThruDate;
 
   @Column(name = "bfd_clm_qlfy_stay_thru_dt")
   private Optional<LocalDate> bfdQualifyStayThruDate;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    Optional<LocalDate> localDate;
-    if (qualifyStayThruDate.isPresent()) {
-      localDate = qualifyStayThruDate;
-    } else if (bfdQualifyStayThruDate.isPresent()) {
-      localDate = bfdQualifyStayThruDate;
-    } else {
+    if (bfdQualifyStayThruDate.isEmpty()) {
       return Optional.empty();
     }
 
@@ -35,7 +28,7 @@ public class QualifyStayThruDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_THRU_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(localDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(bfdQualifyStayThruDate.get())));
     return Optional.of(component);
   }
 }

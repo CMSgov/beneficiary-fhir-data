@@ -7402,34 +7402,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "2019-11-17"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "2019-12-03"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_CMS_PROC_DT",
             "display" : "FI Claim Process Date",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7439,7 +7411,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 14,
+        "sequence" : 12,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -7460,7 +7432,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -7478,7 +7450,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -7496,7 +7468,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -7514,7 +7486,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -7534,7 +7506,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -7554,7 +7526,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -7574,7 +7546,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 21
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -7593,7 +7565,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 22
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -7612,7 +7584,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 21
       }, {
         "category" : {
           "coding" : [ {
@@ -7626,7 +7598,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 24
+        "sequence" : 22
       } ],
       "total" : [ {
         "amount" : {
@@ -17083,34 +17055,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "2019-11-17"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "2019-12-03"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_CMS_PROC_DT",
             "display" : "FI Claim Process Date",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -17120,7 +17064,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 14,
+        "sequence" : 12,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -17141,7 +17085,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -17159,7 +17103,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -17177,7 +17121,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -17195,7 +17139,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -17215,7 +17159,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -17235,7 +17179,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -17255,7 +17199,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 21
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -17274,7 +17218,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 22
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -17293,7 +17237,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 21
       }, {
         "category" : {
           "coding" : [ {
@@ -17307,7 +17251,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 24
+        "sequence" : 22
       } ],
       "total" : [ {
         "amount" : {
