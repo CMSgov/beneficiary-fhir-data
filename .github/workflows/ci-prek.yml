@@ -10,7 +10,10 @@ jobs:
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: corretto
-          java-version: '25'
+          java-version: "25"
+      - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
+        with:
+          repo: terraform-docs/terraform-docs
       - run: |
           sudo apt-get update
           sudo apt-get install yq libxml2-utils
