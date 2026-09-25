@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.converter;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
  * 320.0899963378906 from being truncated incorrectly). If a future IDR field requires more than 2
  * decimal places, this logic may need to be changed or moved to individual field mappings.
  */
+@Converter
 public class NonZeroBigDecimalConverter
     implements AttributeConverter<Optional<BigDecimal>, BigDecimal> {
   @Override

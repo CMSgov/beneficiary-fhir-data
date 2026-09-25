@@ -1,61 +1,50 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimSourceId;
-import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import java.util.Collections;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
+import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
+import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
-import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for CMS profile professional claim types (NCH and Shared Systems). */
-@Generated("TODO - Remove after query optimization implementation")
-public abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
+@MappedSuperclass
+abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
+
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Embedded private ClaimIdrLoadDate claimIdrLoadDate;
+  @Embedded private PaymentComponentAmount paymentComponent;
+  @Embedded private ClinicalTrialNumber clinicalTrialNumber;
+
   @Override
-  AdjudicationChargeBase getAdjudicationCharge() {
-    return null;
+  public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
+    return Optional.of(claimIdrLoadDate);
+  }
+
+  // region Overrides
+
+  @Override
+  public PaymentComponentBase getPaymentComponent() {
+    return paymentComponent;
   }
 
   @Override
-  List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo(
-      ExplanationOfBenefit eob) {
-    return List.of();
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return claimContractorNumber;
   }
 
   @Override
-  void addSubclassAdjudication(ExplanationOfBenefit eob) {}
-
-  @Override
-  void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
-
-  @Override
-  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
-    return Optional.empty();
+  protected List<ExplanationOfBenefit.SupportingInformationComponent> getSubclassSupportingInfo() {
+    return clinicalTrialNumber.toFhir(supportingInfoFactory).stream().toList();
   }
 
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return null;
-  }
+  // endregion
 
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return null;
-  }
-
-  @Override
-  public SortedSet<ClaimItemBase> getItems() {
-    return Collections.emptySortedSet();
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
-  }
 }

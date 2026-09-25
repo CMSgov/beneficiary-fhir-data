@@ -1,25 +1,17 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.FIRST;
+import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeBase;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimDispositionCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentAmount;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimRecordType;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
-import gov.cms.bfd.server.ng.claim.model.common.NchPrimaryPayorCode;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationChargeInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.BillingProviderInstitutional;
-import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.DiagnosisDrgCode;
 import gov.cms.bfd.server.ng.claim.model.institutional.OperatingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.OtherInstitutionalCareTeam;
@@ -32,7 +24,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -46,13 +37,7 @@ import org.hl7.fhir.r4.model.Reference;
 @MappedSuperclass
 @Getter
 @SuppressWarnings("java:S6539")
-public abstract class ClaimInstitutionalBase extends ClaimBase {
-
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
-  @Column(name = "clm_disp_cd")
-  private Optional<ClaimDispositionCode> claimDispositionCode;
+abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
@@ -60,9 +45,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;
 
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
   @Embedded private BillingProviderInstitutional billingProviderHistory;
   @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
@@ -70,42 +53,32 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
-  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
+  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
-  abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
+  // region Hook Methods
 
-  abstract SupportingInfoComponentBase getSupportingInfo();
+  // construct a list of supportinginfo from all base classes, call super.
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassSupportingInfo() {
+    return List.of();
+  }
 
-  abstract AdjudicationChargeBase getAdjudicationCharge();
+  protected Optional<ClaimContractorNumber> getClaimContractorNumber() {
+    return Optional.empty();
+  }
 
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+  // add an adjudication and a total, just for CMS
+  protected void addSubclassAdjudication(ExplanationOfBenefit eob) {}
 
-  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
+  // Adds care-team members that are unique to the subclass, irrelevant to SharedSystems
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
-  /**
-   * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
-   * produces this from its own concrete record-type field.
-   *
-   * @return list containing at most one record-type supporting-info component
-   */
-  protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildRecordTypeSupportingInfo();
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.empty();
+  }
 
-  /**
-   * Returns the claim values from all items, used to populate institutional adjudication.
-   *
-   * @return list of ClaimValues from each item
-   */
-  public abstract List<ClaimValue> getClaimValues();
-
-  /**
-   * Adds care-team members that are unique to the subclass.
-   *
-   * @param eob the EOB being built
-   * @param sequenceGenerator shared sequence generator for care-team entries
-   */
-  abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+  // endregion
 
   @Override
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
@@ -137,19 +110,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                     .setValue(s)));
   }
 
-  private List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassInitialSupportingInfo() {
-    return Stream.of(
-            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
-        .toList();
-  }
-
   private void addClaimItems(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-
     getItems()
         .forEach(
             item -> {
@@ -174,8 +135,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                         eob.addSupportingInfo(si);
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
                       });
-              item.getProcedure()
-                  .flatMap(ClaimProcedureBase::toFhirProcedure)
+              item.getProcedureOptional()
+                  .flatMap(ProcedureBase::toFhirProcedure)
                   .ifPresent(eob::addProcedure);
             });
   }
@@ -186,7 +147,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     // We ignore procedures with claim diagnosis type 1 since it's always the same as claim
     // diagnosis type E with sequence number 1
     for (var item : getItems()) {
-      item.getProcedure()
+      item.getProcedureOptional()
           .flatMap(
               procedure ->
                   procedure
@@ -209,28 +170,19 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
-    var sharedInitialSupportingInfo =
+    var initialSupportingInfo =
         Stream.of(
-                getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
-                buildSubclassSupportingInfo(),
-                benefitEnhancementCodes.toFhir(supportingInfoFactory))
-            .flatMap(Collection::stream)
-            .toList();
-
-    // Handle claim related condition codes after BFD-4523
-    var claimRelatedConditionCodes =
-        getClaimRelatedCondition().stream()
-            .flatMap(c -> c.toFhir(supportingInfoFactory).stream())
+                claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
+            .flatMap(Optional::stream)
             .toList();
 
     Stream.of(
-            buildSubclassInitialSupportingInfo(),
-            sharedInitialSupportingInfo,
-            getClaimDateSupportingInfo().toFhir(supportingInfoFactory),
-            buildRecordTypeSupportingInfo(),
-            getSupportingInfo().toFhir(supportingInfoFactory),
+            initialSupportingInfo,
+            getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
+            buildSubclassSupportingInfo(),
             getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),
-            claimRelatedConditionCodes)
+            getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
@@ -255,22 +207,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
-    getAdjudicationChargeInstitutional().toFhir(getClaimValues()).forEach(eob::addAdjudication);
-    getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
-    getBenePaidAmount()
-        .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
-        .ifPresent(eob::addTotal);
-    getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
-    eob.setPayment(getClaimPaymentAmount().toFhir());
-  }
-
-  /**
-   * Returns the beneficiary-paid amount from the institutional adjudication charge.
-   *
-   * @return the bene paid amount
-   */
-  public Optional<BigDecimal> getBenePaidAmount() {
-    return Optional.of(getAdjudicationChargeInstitutional().getBenePaidAmount());
+    getPaymentComponent().toFhir().ifPresent(eob::setPayment);
+    addSubclassAdjudication(eob);
   }
 
   @Override

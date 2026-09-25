@@ -13,7 +13,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Claim header-level benefit enhancement codes. */
+/**
+ * Claim header-level benefit enhancement codes. Resource -
+ * ExplanationOfBenefit.SupportingInformationComponent Domain - [ Professional, Institutional ]
+ * Profiles - [ CMS ] Source - [ SS, NCH ]
+ */
 @Embeddable
 @Getter
 public class BenefitEnhancementCodes {
