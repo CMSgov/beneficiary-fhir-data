@@ -297,9 +297,9 @@ def load_inputs():
             # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
             # any of those are true
             if probability(0.5) and not output_table_contains_by_bene_sk(
-                    table=generator.bene_lis_cmbnd,
-                    for_file=BENE_LIS_CMBND,
-                    bene_sk=patient["BENE_SK"],
+                table=generator.bene_lis_cmbnd,
+                for_file=BENE_LIS_CMBND,
+                bene_sk=patient["BENE_SK"],
             ):
                 generator.generate_bene_lis_cmbnd(RowAdapter(initial_kv_template.copy()))
 
