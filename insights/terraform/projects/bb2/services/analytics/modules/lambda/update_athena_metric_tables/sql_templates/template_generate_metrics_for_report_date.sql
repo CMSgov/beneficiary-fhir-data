@@ -80,7 +80,7 @@ WITH report_params AS (
       'auth_samhsa_not_presented_synthetic_bene_count',
       'sdk_requests_python_count',
       'sdk_requests_node_count'
-    ] as enabled_metrics_list 
+    ] as enabled_metrics_list
 ),
 
 /* All perf_mon application log events. Is a base for other sub-queries
@@ -110,7 +110,7 @@ perf_mon_events_all AS (
         FROM
           report_params
       )
-      /* 
+      /*
         Restricting select by partitions.
          NOTE: This significantly speeds up the SQL!
       */
@@ -118,16 +118,16 @@ perf_mon_events_all AS (
     )
 ),
 
-/* Find the max(group_timestamp) from 
+/* Find the max(group_timestamp) from
    nightly global state events
    NOTE: We are wanting the entries that get logged
    on the actual report_date vs. other metrics to
    just include <= end_date.
 */
 max_group_timestamp AS (
-  SELECT 
+  SELECT
     max(group_timestamp) as max_group_timestamp
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics'
@@ -156,7 +156,7 @@ request_response_middleware_events AS (
   WHERE
     (
       type = 'request_response_middleware'
-      AND 
+      AND
         ( path LIKE '/v%/o/authorize%'
           OR path = '/mymedicare/login'
           OR path = '/mymedicare/sls-callback'
@@ -185,17 +185,17 @@ api_audit_events AS (
     )
 ),
 
-/* Select all application names and metrics from 
+/* Select all application names and metrics from
    nightly global state per application events
 */
 applications_state_metrics AS (
-  SELECT 
+  SELECT
     *
   /*
     DISTINCT name app_name,
     group_timestamp max_group_timestamp,
   */
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics_per_app'
@@ -210,15 +210,15 @@ applications_state_metrics AS (
       name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
                    'MyMedicare PROD', 'new-relic', 'datadog')
 ),
-/* Select all top level global state metrics from 
+/* Select all top level global state metrics from
    nightly global state event
 */
 global_state_metrics_for_max_group_timestamp AS (
-  SELECT 
+  SELECT
     '${ENV}' as vpc,
-    CAST('${START_DATE}' as Date) as start_date, 
-    CAST('${END_DATE}' as Date) as end_date, 
-    CAST('${REPORT_DATE}' as Date) as report_date, 
+    CAST('${START_DATE}' as Date) as start_date,
+    CAST('${END_DATE}' as Date) as end_date,
+    CAST('${REPORT_DATE}' as Date) as report_date,
     group_timestamp max_group_timestamp,
     real_bene_cnt max_real_bene_cnt,
     synth_bene_cnt max_synth_bene_cnt,
@@ -247,7 +247,7 @@ global_state_metrics_for_max_group_timestamp AS (
     global_developer_distinct_organization_name_count max_global_developer_distinct_organization_name_count,
     global_developer_with_first_api_call_count max_global_developer_with_first_api_call_count,
     global_developer_with_registered_app_count max_global_developer_with_registered_app_count
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics'
@@ -271,8 +271,8 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
       report_date,
       max_group_timestamp,
       /*
-       NOTE: Metrics in this section prefixed by "total_" come from the 
-       type = "global_state_metrics", 
+       NOTE: Metrics in this section prefixed by "total_" come from the
+       type = "global_state_metrics",
        where counts are performed at time of logging.
        */
       max_crosswalk_real_bene_count total_crosswalk_real_bene,
@@ -301,7 +301,7 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
       max_global_developer_with_first_api_call_count total_developer_with_first_api_call_count,
       max_global_developer_with_registered_app_count total_developer_with_registered_app_count,
       /*
-       NOTE: Metrics in this section prefixed by "app_" come from the 
+       NOTE: Metrics in this section prefixed by "app_" come from the
        type = "global_state_metrics_per_app",
        per the vw_${ENV}_global_state_per_app view
        where the counts/sums are performed in SQL below.
@@ -849,7 +849,7 @@ auth_events AS (
 )
 
 
-SELECT 
+SELECT
   t0.*,
   (
     total_crosswalk_real_bene - app_all_grant_real_bene
@@ -1535,7 +1535,7 @@ SELECT
           OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) > 0
         )
         AND type = 'Authentication:success'
-        AND 
+        AND
         ( path = 'v1/mymedicare/sls-callback'
           OR path = 'v2/mymedicare/sls-callback'
         )
@@ -1996,15 +1996,15 @@ SELECT
 
 FROM
   (
-    SELECT 
+    SELECT
       *
     FROM global_state_metrics_per_app_for_max_group_timestamp
   ) t0
 
   LEFT JOIN
   (
-    SELECT 
+    SELECT
       *
     FROM global_state_metrics_for_max_group_timestamp
-  ) t1 
+  ) t1
   ON t1.max_group_timestamp = t0.max_group_timestamp

@@ -117,7 +117,7 @@ WITH report_params AS (
       'app_auth_samhsa_presented_not_sharing_synthetic_bene_count',
       'app_auth_samhsa_not_presented_real_bene_count',
       'app_auth_samhsa_not_presented_synthetic_bene_count'
-    ] as enabled_metrics_list 
+    ] as enabled_metrics_list
 ),
 
 /* All perf_mon application log events. Is a base for other sub-queries
@@ -147,7 +147,7 @@ perf_mon_events_all AS (
         FROM
           report_params
       )
-      /* 
+      /*
         Restricting select by partitions.
          NOTE: This significantly speeds up the SQL!
       */
@@ -155,7 +155,7 @@ perf_mon_events_all AS (
     )
 ),
 
-/* Find the max(group_timestamp) from 
+/* Find the max(group_timestamp) from
    nightly global state per application events
 
    NOTE: We are wanting the entries that get logged
@@ -163,9 +163,9 @@ perf_mon_events_all AS (
    just include <= end_date.
 */
 max_group_timestamp AS (
-  SELECT 
+  SELECT
     max(group_timestamp) as max_group_timestamp
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics_per_app'
@@ -194,7 +194,7 @@ request_response_middleware_events AS (
   WHERE
     (
       type = 'request_response_middleware'
-      AND 
+      AND
         ( path LIKE '/v%/o/authorize%'
           OR path = '/mymedicare/login'
           OR path = '/mymedicare/sls-callback'
@@ -223,17 +223,17 @@ api_audit_events AS (
     )
 ),
 
-/* Select all application names and metrics from 
+/* Select all application names and metrics from
    nightly global state per application events
 */
 applications_state_metrics AS (
-  SELECT 
+  SELECT
     *
   /*
     DISTINCT name app_name,
     group_timestamp max_group_timestamp,
   */
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics_per_app'
@@ -248,11 +248,11 @@ applications_state_metrics AS (
       name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
                    'MyMedicare PROD', 'new-relic', 'datadog')
 ),
-/* Select all top level global state metrics from 
+/* Select all top level global state metrics from
    nightly global state event
 */
 global_state_metrics_for_max_group_timestamp AS (
-  SELECT 
+  SELECT
     group_timestamp max_group_timestamp,
     real_bene_cnt max_real_bene_cnt,
     synth_bene_cnt max_synth_bene_cnt,
@@ -281,7 +281,7 @@ global_state_metrics_for_max_group_timestamp AS (
     global_developer_distinct_organization_name_count max_global_developer_distinct_organization_name_count,
     global_developer_with_first_api_call_count max_global_developer_with_first_api_call_count,
     global_developer_with_registered_app_count max_global_developer_with_registered_app_count
-  FROM 
+  FROM
     perf_mon_events_all
   WHERE
     type = 'global_state_metrics'
@@ -294,11 +294,11 @@ global_state_metrics_for_max_group_timestamp AS (
       )
 )
 
-SELECT 
+SELECT
   '${ENV}' as vpc,
-  CAST('${START_DATE}' as Date) as start_date, 
-  CAST('${END_DATE}' as Date) as end_date, 
-  CAST('${REPORT_DATE}' as Date) as report_date, 
+  CAST('${START_DATE}' as Date) as start_date,
+  CAST('${END_DATE}' as Date) as end_date,
+  CAST('${REPORT_DATE}' as Date) as report_date,
   t0.group_timestamp max_group_timestamp,
 
   t9999.max_real_bene_cnt,
@@ -575,14 +575,14 @@ SELECT
 
 FROM
   (
-    SELECT 
+    SELECT
       *
     FROM applications_state_metrics
   ) t0
 
   LEFT JOIN
   (
-    SELECT 
+    SELECT
       *
     FROM global_state_metrics_for_max_group_timestamp
   ) t9999 ON t9999.max_group_timestamp = t0.group_timestamp
@@ -613,7 +613,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t1 ON t1.app_name = t0.name 
+  ) t1 ON t1.app_name = t0.name
 
   LEFT JOIN
   (
@@ -640,7 +640,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t2 ON t2.app_name = t0.name 
+  ) t2 ON t2.app_name = t0.name
 
 
   LEFT JOIN
@@ -668,7 +668,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t3 ON t3.app_name = t0.name 
+  ) t3 ON t3.app_name = t0.name
 
   LEFT JOIN
   (
@@ -695,7 +695,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t4 ON t4.app_name = t0.name 
+  ) t4 ON t4.app_name = t0.name
 
   LEFT JOIN
   (
@@ -722,7 +722,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t5 ON t5.app_name = t0.name 
+  ) t5 ON t5.app_name = t0.name
 
   LEFT JOIN
   (
@@ -749,7 +749,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t6 ON t6.app_name = t0.name 
+  ) t6 ON t6.app_name = t0.name
 
   LEFT JOIN
   (
@@ -776,7 +776,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t7 ON t7.app_name = t0.name 
+  ) t7 ON t7.app_name = t0.name
 
   LEFT JOIN
   (
@@ -803,7 +803,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t8 ON t8.app_name = t0.name 
+  ) t8 ON t8.app_name = t0.name
 
   LEFT JOIN
   (
@@ -826,7 +826,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t9 ON t9.app_name = t0.name 
+  ) t9 ON t9.app_name = t0.name
 
   LEFT JOIN
   (
@@ -855,7 +855,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t10 ON t10.app_name = t0.name 
+  ) t10 ON t10.app_name = t0.name
 
   LEFT JOIN
   (
@@ -884,7 +884,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t11 ON t11.app_name = t0.name 
+  ) t11 ON t11.app_name = t0.name
 
   LEFT JOIN
   (
@@ -913,7 +913,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t12 ON t12.app_name = t0.name 
+  ) t12 ON t12.app_name = t0.name
 
   LEFT JOIN
   (
@@ -942,7 +942,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t13 ON t13.app_name = t0.name 
+  ) t13 ON t13.app_name = t0.name
 
 
   /* V2 FHIR resource stats per application */
@@ -971,7 +971,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t21 ON t21.app_name = t0.name 
+  ) t21 ON t21.app_name = t0.name
 
   LEFT JOIN
   (
@@ -998,7 +998,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t22 ON t22.app_name = t0.name 
+  ) t22 ON t22.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1025,7 +1025,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t23 ON t23.app_name = t0.name 
+  ) t23 ON t23.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1052,7 +1052,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t24 ON t24.app_name = t0.name 
+  ) t24 ON t24.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1079,7 +1079,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t25 ON t25.app_name = t0.name 
+  ) t25 ON t25.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1106,7 +1106,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t26 ON t26.app_name = t0.name 
+  ) t26 ON t26.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1133,7 +1133,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t27 ON t27.app_name = t0.name 
+  ) t27 ON t27.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1160,7 +1160,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t28 ON t28.app_name = t0.name 
+  ) t28 ON t28.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1183,7 +1183,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t29 ON t29.app_name = t0.name 
+  ) t29 ON t29.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1212,7 +1212,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t30 ON t30.app_name = t0.name 
+  ) t30 ON t30.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1241,7 +1241,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t31 ON t31.app_name = t0.name 
+  ) t31 ON t31.app_name = t0.name
 
 
   LEFT JOIN
@@ -1271,7 +1271,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t32 ON t32.app_name = t0.name 
+  ) t32 ON t32.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1300,7 +1300,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t33 ON t33.app_name = t0.name 
+  ) t33 ON t33.app_name = t0.name
 
   /* V3 FHIR resource stats per application */
   LEFT JOIN
@@ -1328,7 +1328,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t34 ON t34.app_name = t0.name 
+  ) t34 ON t34.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1355,7 +1355,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t35 ON t35.app_name = t0.name 
+  ) t35 ON t35.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1382,7 +1382,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t36 ON t36.app_name = t0.name 
+  ) t36 ON t36.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1409,7 +1409,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t37 ON t37.app_name = t0.name 
+  ) t37 ON t37.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1436,7 +1436,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t38 ON t38.app_name = t0.name 
+  ) t38 ON t38.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1463,7 +1463,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t39 ON t39.app_name = t0.name 
+  ) t39 ON t39.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1490,7 +1490,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t40 ON t40.app_name = t0.name 
+  ) t40 ON t40.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1517,7 +1517,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t41 ON t41.app_name = t0.name 
+  ) t41 ON t41.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1540,7 +1540,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t42 ON t42.app_name = t0.name 
+  ) t42 ON t42.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1569,7 +1569,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t43 ON t43.app_name = t0.name 
+  ) t43 ON t43.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1598,7 +1598,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t44 ON t44.app_name = t0.name 
+  ) t44 ON t44.app_name = t0.name
 
 
   LEFT JOIN
@@ -1628,7 +1628,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t45 ON t45.app_name = t0.name 
+  ) t45 ON t45.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1742,8 +1742,8 @@ FROM
         )
         -- Shared systems filtering
         AND (
-          LOWER(req_qparam__source) LIKE '%fiss%' OR LOWER(req_qparam__source) LIKE '%mcs%' OR 
-          LOWER(req_qparam__source) LIKE '%vms%' OR LOWER(req_qparam__source) LIKE '%map%' OR 
+          LOWER(req_qparam__source) LIKE '%fiss%' OR LOWER(req_qparam__source) LIKE '%mcs%' OR
+          LOWER(req_qparam__source) LIKE '%vms%' OR LOWER(req_qparam__source) LIKE '%map%' OR
           LOWER(req_qparam__source) LIKE '%cwf%'
           OR
           req_qparam__tag LIKE '%https://bluebutton.cms.gov/fhir/CodeSystem/System-Type|SharedSystem%'
@@ -1752,7 +1752,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t49 ON t49.app_name = t0.name 
+  ) t49 ON t49.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1777,8 +1777,8 @@ FROM
         )
         -- Shared systems filtering
         AND (
-          LOWER(req_qparam__source) LIKE '%fiss%' OR LOWER(req_qparam__source) LIKE '%mcs%' OR 
-          LOWER(req_qparam__source) LIKE '%vms%' OR LOWER(req_qparam__source) LIKE '%map%' OR 
+          LOWER(req_qparam__source) LIKE '%fiss%' OR LOWER(req_qparam__source) LIKE '%mcs%' OR
+          LOWER(req_qparam__source) LIKE '%vms%' OR LOWER(req_qparam__source) LIKE '%map%' OR
           LOWER(req_qparam__source) LIKE '%cwf%'
           OR
           req_qparam__tag LIKE '%https://bluebutton.cms.gov/fhir/CodeSystem/System-Type|SharedSystem%'
@@ -1787,7 +1787,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t50 ON t50.app_name = t0.name 
+  ) t50 ON t50.app_name = t0.name
 
   /* AUTH per application */
   LEFT JOIN
@@ -1798,7 +1798,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_ok_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1814,7 +1814,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t101 ON t101.app_name = t0.name 
+  ) t101 ON t101.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1824,7 +1824,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_ok_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1840,7 +1840,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t102 ON t102.app_name = t0.name 
+  ) t102 ON t102.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1850,7 +1850,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(DISTINCT auth_uuid) as app_auth_ok_real_bene_distinct_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1866,7 +1866,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t103 ON t103.app_name = t0.name 
+  ) t103 ON t103.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1876,7 +1876,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(DISTINCT auth_uuid) as app_auth_ok_synthetic_bene_distinct_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1892,7 +1892,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t104 ON t104.app_name = t0.name 
+  ) t104 ON t104.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1902,7 +1902,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_fail_or_deny_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1917,7 +1917,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t105 ON t105.app_name = t0.name 
+  ) t105 ON t105.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1927,7 +1927,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_fail_or_deny_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1942,7 +1942,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t106 ON t106.app_name = t0.name 
+  ) t106 ON t106.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1952,7 +1952,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(DISTINCT auth_uuid) as app_auth_fail_or_deny_real_bene_distinct_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1967,7 +1967,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t107 ON t107.app_name = t0.name 
+  ) t107 ON t107.app_name = t0.name
 
   LEFT JOIN
   (
@@ -1977,7 +1977,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(DISTINCT auth_uuid) as app_auth_fail_or_deny_synthetic_bene_distinct_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -1992,7 +1992,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t108 ON t108.app_name = t0.name 
+  ) t108 ON t108.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2002,7 +2002,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_required_choice_sharing_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2022,7 +2022,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t109 ON t109.app_name = t0.name 
+  ) t109 ON t109.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2030,9 +2030,9 @@ FROM
       COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,'')) as app_name,
-      count(*) as app_auth_demoscope_required_choice_sharing_synthetic_bene_count 
+      count(*) as app_auth_demoscope_required_choice_sharing_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2052,7 +2052,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t110 ON t110.app_name = t0.name 
+  ) t110 ON t110.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2062,7 +2062,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_required_choice_not_sharing_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2081,7 +2081,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t111 ON t111.app_name = t0.name 
+  ) t111 ON t111.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2091,7 +2091,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_required_choice_not_sharing_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2110,7 +2110,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t112 ON t112.app_name = t0.name 
+  ) t112 ON t112.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2120,7 +2120,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_required_choice_deny_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2137,7 +2137,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t113 ON t113.app_name = t0.name 
+  ) t113 ON t113.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2147,13 +2147,13 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_required_choice_deny_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'app_auth_demoscope_required_choice_deny_synthetic_bene_count')
         AND type = 'Authorization'
-        
+
         AND (
           try_cast(crosswalk_fhir_id as BIGINT) < 0
           OR COALESCE(try_cast(crosswalk_fhir_id_v3 as BIGINT), 0) < 0
@@ -2164,7 +2164,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t114 ON t114.app_name = t0.name 
+  ) t114 ON t114.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2174,7 +2174,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_not_required_not_sharing_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2192,7 +2192,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t115 ON t115.app_name = t0.name 
+  ) t115 ON t115.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2202,7 +2202,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_not_required_not_sharing_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2220,7 +2220,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t116 ON t116.app_name = t0.name 
+  ) t116 ON t116.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2230,7 +2230,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_not_required_deny_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2247,7 +2247,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t117 ON t117.app_name = t0.name 
+  ) t117 ON t117.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2257,7 +2257,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_demoscope_not_required_deny_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2274,7 +2274,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t118 ON t118.app_name = t0.name 
+  ) t118 ON t118.app_name = t0.name
 
   /* Token stats per application */
   LEFT JOIN
@@ -2285,7 +2285,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_token_refresh_for_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2302,7 +2302,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t200 ON t200.app_name = t0.name 
+  ) t200 ON t200.app_name = t0.name
 
 
   LEFT JOIN
@@ -2313,7 +2313,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_token_refresh_for_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2330,7 +2330,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t201 ON t201.app_name = t0.name 
+  ) t201 ON t201.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2340,7 +2340,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_token_authorization_code_for_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2356,7 +2356,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t202 ON t202.app_name = t0.name 
+  ) t202 ON t202.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2366,7 +2366,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_token_authorization_code_for_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2382,7 +2382,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t203 ON t203.app_name = t0.name 
+  ) t203 ON t203.app_name = t0.name
 
   /* Token request stats per application */
   LEFT JOIN
@@ -2408,7 +2408,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t204 ON t204.app_name = t0.name 
+  ) t204 ON t204.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2433,7 +2433,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t205 ON t205.app_name = t0.name 
+  ) t205 ON t205.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2457,7 +2457,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t206 ON t206.app_name = t0.name 
+  ) t206 ON t206.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2482,7 +2482,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t207 ON t207.app_name = t0.name 
+  ) t207 ON t207.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2507,7 +2507,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t208 ON t208.app_name = t0.name 
+  ) t208 ON t208.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2531,7 +2531,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t209 ON t209.app_name = t0.name 
+  ) t209 ON t209.app_name = t0.name
 
   /* Auth flow stats per application */
   LEFT JOIN
@@ -2553,7 +2553,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t210 ON t210.app_name = t0.name 
+  ) t210 ON t210.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2575,7 +2575,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t211 ON t211.app_name = t0.name 
+  ) t211 ON t211.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2597,7 +2597,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t212 ON t212.app_name = t0.name 
+  ) t212 ON t212.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2607,7 +2607,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_start_ok_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2619,7 +2619,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t213 ON t213.app_name = t0.name 
+  ) t213 ON t213.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2629,7 +2629,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_start_fail_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2641,7 +2641,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t214 ON t214.app_name = t0.name 
+  ) t214 ON t214.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2651,7 +2651,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_matched_new_bene_real_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2668,7 +2668,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t215 ON t215.app_name = t0.name 
+  ) t215 ON t215.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2678,7 +2678,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_matched_new_bene_synthetic_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2694,7 +2694,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t216 ON t216.app_name = t0.name 
+  ) t216 ON t216.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2704,7 +2704,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_matched_returning_bene_real_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2720,7 +2720,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t217 ON t217.app_name = t0.name 
+  ) t217 ON t217.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2730,7 +2730,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_authentication_matched_returning_bene_synthetic_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -2746,7 +2746,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t218 ON t218.app_name = t0.name 
+  ) t218 ON t218.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2772,7 +2772,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t219 ON t219.app_name = t0.name 
+  ) t219 ON t219.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2798,7 +2798,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t220 ON t220.app_name = t0.name 
+  ) t220 ON t220.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2820,7 +2820,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t221 ON t221.app_name = t0.name 
+  ) t221 ON t221.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2847,7 +2847,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t222 ON t222.app_name = t0.name 
+  ) t222 ON t222.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2874,7 +2874,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t223 ON t223.app_name = t0.name 
+  ) t223 ON t223.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2897,7 +2897,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t224 ON t224.app_name = t0.name 
+  ) t224 ON t224.app_name = t0.name
 
 
   LEFT JOIN
@@ -2925,7 +2925,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t225 ON t225.app_name = t0.name 
+  ) t225 ON t225.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2952,7 +2952,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t226 ON t226.app_name = t0.name 
+  ) t226 ON t226.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2975,7 +2975,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t227 ON t227.app_name = t0.name 
+  ) t227 ON t227.app_name = t0.name
 
   LEFT JOIN
   (
@@ -2996,7 +2996,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t228 ON t228.app_name = t0.name 
+  ) t228 ON t228.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3017,7 +3017,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t229 ON t229.app_name = t0.name 
+  ) t229 ON t229.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3044,7 +3044,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t230 ON t230.app_name = t0.name 
+  ) t230 ON t230.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3071,7 +3071,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t231 ON t231.app_name = t0.name 
+  ) t231 ON t231.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3096,7 +3096,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t232 ON t232.app_name = t0.name 
+  ) t232 ON t232.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3121,7 +3121,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t233 ON t233.app_name = t0.name 
+  ) t233 ON t233.app_name = t0.name
 
   /* SAMHSA data sharing choice stats per application */
   LEFT JOIN
@@ -3132,7 +3132,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_presented_sharing_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3150,7 +3150,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t234 ON t234.app_name = t0.name 
+  ) t234 ON t234.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3160,7 +3160,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_presented_sharing_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3178,7 +3178,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t235 ON t235.app_name = t0.name 
+  ) t235 ON t235.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3188,7 +3188,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_presented_not_sharing_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3206,7 +3206,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t236 ON t236.app_name = t0.name 
+  ) t236 ON t236.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3216,7 +3216,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_presented_not_sharing_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3234,7 +3234,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t237 ON t237.app_name = t0.name 
+  ) t237 ON t237.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3244,7 +3244,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_not_presented_real_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3262,7 +3262,7 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t238 ON t238.app_name = t0.name 
+  ) t238 ON t238.app_name = t0.name
 
   LEFT JOIN
   (
@@ -3272,7 +3272,7 @@ FROM
         NULLIF(resp_app_name,'')) as app_name,
       count(*) as app_auth_samhsa_not_presented_synthetic_bene_count
     FROM
-      api_audit_events 
+      api_audit_events
     WHERE
       (
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
@@ -3290,4 +3290,4 @@ FROM
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
-  ) t239 ON t239.app_name = t0.name 
+  ) t239 ON t239.app_name = t0.name
