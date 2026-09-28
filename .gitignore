@@ -31,3 +31,4 @@
 .terraform/
 node_modules/
 
+google-java-format.jar

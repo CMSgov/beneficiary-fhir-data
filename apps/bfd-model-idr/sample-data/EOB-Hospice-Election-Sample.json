@@ -35,6 +35,8 @@
     "CLM_BILL_FAC_TYPE_CD": "8",
     "CLM_BILL_CLSFCTN_CD": "1",
     "CLM_BILL_FREQ_CD": "A",
+    "CLM_OCRNC_SGNTR_SK": "118815",
+    "CLM_RLT_OCRNC_SGNTR_SK": "119817",
     "CLM_ACTV_CARE_FROM_DT": "2021-01-01",
     "CLM_DSCHRG_DT": "2021-01-02",
     "institutionalComponents": {

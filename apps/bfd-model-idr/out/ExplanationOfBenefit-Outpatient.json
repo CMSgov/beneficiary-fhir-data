@@ -279,7 +279,7 @@
         "display" : "Covered Care Through Date"
       }]
     },
-    "timingDate" : "2025-01-11"
+    "timingDate" : "2025-01-12"
   },
   {
     "sequence" : 4,
@@ -476,7 +476,7 @@
         "display" : "Medicare Benefits Exhausted Date"
       }]
     },
-    "timingDate" : "2025-01-11"
+    "timingDate" : "2025-01-12"
   },
   {
     "sequence" : 14,
@@ -574,7 +574,7 @@
         "display" : "Noncovered Stay From Date"
       }]
     },
-    "timingDate" : "2025-01-01"
+    "timingDate" : "2025-01-02"
   },
   {
     "sequence" : 19,
@@ -590,7 +590,7 @@
         "display" : "Noncovered Stay Through Date"
       }]
     },
-    "timingDate" : "2025-01-02"
+    "timingDate" : "2025-01-01"
   },
   {
     "sequence" : 20,
@@ -668,6 +668,38 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_FROM_DT",
+        "display" : "Qualified Stay From Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 24,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_THRU_DT",
+        "display" : "Qualified Stay Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-02"
+  },
+  {
+    "sequence" : 25,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_QUERY_CD",
         "display" : "Claim Query Code"
       }]
@@ -681,7 +713,7 @@
     }
   },
   {
-    "sequence" : 24,
+    "sequence" : 26,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -691,7 +723,7 @@
     "timingDate" : "2020-01-13"
   },
   {
-    "sequence" : 25,
+    "sequence" : 27,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -706,7 +738,7 @@
     }
   },
   {
-    "sequence" : 26,
+    "sequence" : 28,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -727,7 +759,7 @@
     }
   },
   {
-    "sequence" : 27,
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",

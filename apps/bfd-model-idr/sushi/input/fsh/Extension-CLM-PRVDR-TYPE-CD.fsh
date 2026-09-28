@@ -1,7 +1,7 @@
 Extension: CLM_PRVDR_TYPE_CD
 Title: "Provider Type Code"
 Description: "Code identifying the type of provider furnishing the service for this line item on the claim. Also used for conveying supplier types."
-Id: CLM-PRVDR-PRTCPTG-CD
+Id: CLM-PRVDR-TYPE-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" 
 * ^context[+].type = #element
 * ^context[=].expression = "ExplanationOfBenefit.item"
