@@ -7,7 +7,7 @@ max_connections=500
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR
 
-source "$SCRIPT_DIR/local-db-constants.sh"
+source "$SCRIPT_DIR/local-constants.sh"
 
 docker pull $image
 

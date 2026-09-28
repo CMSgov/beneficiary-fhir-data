@@ -6,7 +6,7 @@ SCRIPT_DIR=$(path=$(realpath "$0") && dirname "$path")
 readonly SCRIPT_DIR
 INVOKE_DIR="$PWD"
 
-source "$SCRIPT_DIR/../utils/scripts/local-db-constants.sh"
+source "$SCRIPT_DIR/../utils/scripts/local-constants.sh"
 
 function do_load() {
 	(cd "$SCRIPT_DIR" && BFD_DB_USERNAME="$BFD_LOCAL_DB_USERNAME" \

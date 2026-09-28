@@ -6,7 +6,7 @@ export TZ=UTC
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR
 
-source ./apps/utils/scripts/load-idr-credentials.sh synthetic
+source "$SCRIPT_DIR/../utils/scripts/load-idr-credentials.sh" synthetic
 
 TEMP_KEY_FILE="${TMPDIR:-'/tmp'}/idr_private.p8"
 
