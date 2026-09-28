@@ -1,7 +1,7 @@
-name: 'CI - Java'
+name: "CI - Java"
 on:
   schedule:
-    - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
+    - cron: "13 8 * * 1-5" # Early morning continental US hours, Monday through Friday
   pull_request:
   merge_group:
   workflow_dispatch:
@@ -58,12 +58,12 @@ jobs:
         with:
           fetch-depth: 2
           ref: ${{ inputs.branch }}
-      - name: 'Setup JDK'
+      - name: "Setup JDK"
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          java-version: '25'
-          distribution: 'corretto'
-      - name: 'Run maven ${{ matrix.mvn_commmand }}'
+          java-version: "25"
+          distribution: "corretto"
+      - name: "Run maven ${{ matrix.mvn_commmand }}"
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
 
@@ -72,7 +72,7 @@ jobs:
     needs: workflow
     if: ${{ needs.workflow.outputs.files || (github.actor != 'actions-user' && github.ref_name == 'master') }}
     steps:
-      - name: 'Checkout repo'
+      - name: "Checkout repo"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -81,12 +81,12 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
-      - name: 'Setup JDK'
+      - name: "Setup JDK"
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          java-version: '25'
-          distribution: 'corretto'
-          cache: 'maven'
+          java-version: "25"
+          distribution: "corretto"
+          cache: "maven"
       - name: Install uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
@@ -108,7 +108,7 @@ jobs:
           params: |
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
 
-      - name: 'Run Maven Build'
+      - name: "Run Maven Build"
         run: |
           mvn clean install \
           --threads 1C \
@@ -118,7 +118,7 @@ jobs:
           -Dmaven.jacoco.skip=false
         working-directory: ./apps
 
-      - name: 'Convert JaCoCo to Generic Coverage'
+      - name: "Convert JaCoCo to Generic Coverage"
         if: ${{ github.event_name != 'merge_group' }}
         run: |
           python utils/scripts/jacoco-to-generic.py \
@@ -127,7 +127,7 @@ jobs:
           --out coverage.xml
         working-directory: ./apps
 
-      - name: 'Upload Analysis'
+      - name: "Upload Analysis"
         if: ${{ github.event_name != 'merge_group' }}
         env:
           BFD_BRANCH: ${{ inputs.branch }}
@@ -144,6 +144,5 @@ jobs:
             -Dsonar.qualitygate.wait=true \
             -Dsonar.coverageReportPaths=coverage.xml
         working-directory: ./apps
-
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.

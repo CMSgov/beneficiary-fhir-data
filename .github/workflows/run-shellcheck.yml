@@ -1,7 +1,7 @@
-name: 'Run shellcheck'
+name: "Run shellcheck"
 on:
   pull_request:
-permissions: 
+permissions:
   contents: read
 jobs:
   lint:
@@ -16,7 +16,7 @@ jobs:
         id: ShellCheck
         uses: redhat-plumbers-in-action/differential-shellcheck@f51c7c0d32777d00de777131d25918617a246415 # v5
         env:
-          SHELLCHECK_OPTS: '-e SC1071 -e SC2239'
+          SHELLCHECK_OPTS: "-e SC1071 -e SC2239"
         with:
           severity: warning
           triggering-event: pull_request

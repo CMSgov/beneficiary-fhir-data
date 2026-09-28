@@ -85,7 +85,6 @@ on:
         description: The BFD snapshot development version that corresponds to the next release version
         value: ${{ jobs.compute-version-strings.outputs.bfd_dev_version }}
 
-
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
@@ -191,7 +190,7 @@ jobs:
       - name: Retrieve base java image
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: '*bfd-platform-base-java*'
+          pattern: "*bfd-platform-base-java*"
           merge-multiple: true
           path: ${{ runner.temp }}
 
