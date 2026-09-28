@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
@@ -134,8 +135,19 @@ public abstract class ClaimBase {
     return eob;
   }
 
+  // region Hook Methods
+
   /**
-   * Hook method for payment component information, shared across all claims.
+   * retrieve total components and adjudication components, default to empty (basis).
+   *
+   * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
+   */
+  protected Optional<AdjudicationEmbedded> getAdjudication() {
+    return Optional.empty();
+  }
+
+  /**
+   * payment component information, shared across all claims.
    *
    * @return The class data for a PaymentComponent
    */
@@ -156,7 +168,7 @@ public abstract class ClaimBase {
   public abstract MetaSourceSk getMetaSourceSk();
 
   /**
-   * Returns the set of claim items associated with this claim.
+   * claim items associated with this claim.
    *
    * @return a sorted set of claim items.
    */
@@ -186,6 +198,8 @@ public abstract class ClaimBase {
   public Optional<ClaimIdrLoadDate> getClaimIdrLoadDate() {
     return Optional.empty();
   }
+
+  // endregion
 
   /**
    * Shared Systems claims use CLM_PD_STUS_CD to determine outcome, no longer using audit-trail

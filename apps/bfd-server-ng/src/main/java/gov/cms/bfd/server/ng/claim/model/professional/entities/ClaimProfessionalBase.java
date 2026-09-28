@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -38,15 +37,6 @@ abstract class ClaimProfessionalBase extends ClaimBase {
   @Embedded private BillingProviderProfessional billingProviderHistory;
 
   // region Hook Methods
-
-  /**
-   * retrieve total components and adjudication components, default to empty (basis).
-   *
-   * @return an AdjudicationEmbedded with toFhirTotal and toFhirAdjudication
-   */
-  protected Optional<AdjudicationEmbedded> getAdjudication() {
-    return Optional.empty();
-  }
 
   /**
    * get a ClaimContractorNumber from some data sources.

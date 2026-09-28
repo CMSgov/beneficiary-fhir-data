@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
-import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimProcessDate;
@@ -169,10 +168,6 @@ public abstract class ClaimRxBase extends ClaimBase {
     return Optional.empty();
   }
 
-  protected Optional<AdjudicationEmbedded> getAdjudication() {
-    return Optional.empty();
-  }
-
   protected Optional<ClaimProcessDate> getClaimProcessDate() {
     return Optional.empty();
   }
@@ -184,6 +179,8 @@ public abstract class ClaimRxBase extends ClaimBase {
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.empty();
   }
+
+  protected abstract ClaimItemBase getClaimItem();
 
   // endregion
 
@@ -209,6 +206,4 @@ public abstract class ClaimRxBase extends ClaimBase {
     items.add(getClaimItem());
     return items;
   }
-
-  protected abstract ClaimItemBase getClaimItem();
 }
