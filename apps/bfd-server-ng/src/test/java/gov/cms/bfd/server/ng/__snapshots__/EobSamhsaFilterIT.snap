@@ -71,24 +71,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -203,42 +185,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_INSTNL_PRMRY_PYR_AMT",
-            "display" : "Primary Payer (if not Medicare) Claim Paid Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_PRFNL_AMT",
-            "display" : "Professional Component Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_DRG_OUTLIER_AMT",
-            "display" : "DRG Outlier Approved Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 154.54
         },
         "category" : {
@@ -251,252 +197,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_BENE_DDCTBL_AMT",
-            "display" : "Beneficiary Inpatient (or other Part A) Deductible Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_READMSN_RDCTN_AMT",
-            "display" : "Readmission Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_VBP_AMT",
-            "display" : "HIPPS Value Based Purchasing Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display" : "Low Volume Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_1ST_YR_RATE_AMT",
-            "display" : "First Year Rate Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_IP_SCND_YR_RATE_AMT",
-            "display" : "Second Year Rate Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
-            "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BENE_INTRST_PD_AMT",
-            "display" : "Beneficiary Interest Paid Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 3.15
         },
         "category" : {
           "coding" : [ {
             "code" : "CLM_BLOOD_LBLTY_AMT",
             "display" : "Beneficiary Blood Deductible Liability Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
-            "display" : "Blood Noncovered Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_COB_PTNT_RESP_AMT",
-            "display" : "Coordination of Benefits Patient Responsibility Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PRVDR_INTRST_PD_AMT",
-            "display" : "Provider Interest Paid Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PRVDR_OTAF_AMT",
-            "display" : "Provider Obligation To Accept as Full Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_PRVDR_RMNG_DUE_AMT",
-            "display" : "Remaining Amount to Provider",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_TOT_CNTRCTL_AMT",
-            "display" : "Total Contractual Amount Discrepancy",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -882,18 +588,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.29
           },
           "category" : {
@@ -974,30 +668,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.93
           },
           "category" : {
@@ -1008,30 +678,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1064,42 +710,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1197,18 +807,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.71
           },
           "category" : {
@@ -1289,30 +887,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.96
           },
           "category" : {
@@ -1323,30 +897,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1379,42 +929,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1479,18 +993,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1577,30 +1079,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.97
           },
           "category" : {
@@ -1611,30 +1089,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1667,42 +1121,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1800,18 +1218,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.26
           },
           "category" : {
@@ -1892,30 +1298,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.31
           },
           "category" : {
@@ -1926,30 +1308,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1982,42 +1340,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2091,18 +1413,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2189,30 +1499,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.11
           },
           "category" : {
@@ -2223,30 +1509,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2279,42 +1541,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2394,18 +1620,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2492,30 +1706,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 0.61
           },
           "category" : {
@@ -2526,30 +1716,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2582,42 +1748,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2688,18 +1818,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2786,30 +1904,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.29
           },
           "category" : {
@@ -2820,30 +1914,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2876,42 +1946,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3003,18 +2037,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.93
           },
           "category" : {
@@ -3095,30 +2117,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.12
           },
           "category" : {
@@ -3129,30 +2127,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3185,42 +2159,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3312,18 +2250,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.65
           },
           "category" : {
@@ -3404,30 +2330,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 0.92
           },
           "category" : {
@@ -3438,30 +2340,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3494,42 +2372,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3609,18 +2451,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTAF_AMT",
-              "display" : "Provider Obligation To Accept as Full Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.65
           },
           "category" : {
@@ -3701,30 +2531,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NCVRD_PD_AMT",
-              "display" : "Amount Paid for Noncovered Product or Service",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_OTHR_TP_PD_AMT",
-              "display" : "Other Third Party Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 0.92
           },
           "category" : {
@@ -3735,30 +2541,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_SBMT_CHRG_AMT",
               "display" : "Line Submitted Charge Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3791,42 +2573,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RATE_AMT",
-              "display" : "Revenue Center Rate Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_ADD_ON_PYMT_AMT",
-              "display" : "Add On Payment Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 0
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_NON_EHR_RDCTN_AMT",
-              "display" : "Non-EHR Reduction Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5577,24 +4323,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -5769,42 +4497,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 2246.9
         },
         "category" : {
@@ -5871,42 +4563,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
             "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -6250,18 +4906,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 6.51
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.58
           },
           "category" : {
@@ -6358,30 +5002,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 386.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 4965.28
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 27.44
           },
           "category" : {
@@ -6408,6 +5028,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 6.51
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 386.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 4965.28
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -6558,18 +5214,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.62
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.03
           },
           "category" : {
@@ -6666,30 +5310,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 396.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 962.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 37.44
           },
           "category" : {
@@ -6716,6 +5336,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 396.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 962.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -6845,18 +5501,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1.7
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.77
           },
           "category" : {
@@ -6953,30 +5597,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 399.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 965.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 40.44
           },
           "category" : {
@@ -7003,6 +5623,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1.7
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 399.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 965.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7800,24 +6456,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -8581,18 +7219,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 8.86
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.29
           },
           "category" : {
@@ -8689,30 +7315,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1395.62
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1153.23
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.86
           },
           "category" : {
@@ -8739,6 +7341,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 8.86
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1395.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1153.23
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8886,18 +7524,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 2.92
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.71
           },
           "category" : {
@@ -8994,30 +7620,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 898.49
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1204.17
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.61
           },
           "category" : {
@@ -9044,6 +7646,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 2.92
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 898.49
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1204.17
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9163,18 +7801,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 7.73
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.71
           },
           "category" : {
@@ -9271,30 +7897,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1355.07
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 999.98
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.49
           },
           "category" : {
@@ -9321,6 +7923,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 7.73
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1355.07
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 999.98
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9474,18 +8112,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.15
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.26
           },
           "category" : {
@@ -9582,30 +8208,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 549.09
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 436.08
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 9.48
           },
           "category" : {
@@ -9632,6 +8234,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.15
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 549.09
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 436.08
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9761,18 +8399,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 9.93
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.57
           },
           "category" : {
@@ -9869,30 +8495,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 197.67
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1460.8
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.2
           },
           "category" : {
@@ -9919,6 +8521,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 9.93
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 197.67
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1460.8
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -10054,18 +8692,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 14.56
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.07
           },
           "category" : {
@@ -10162,30 +8788,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1025.3
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 957.58
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 12.44
           },
           "category" : {
@@ -10212,6 +8814,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 14.56
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1025.3
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 957.58
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -10344,18 +8982,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 11.88
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.32
           },
           "category" : {
@@ -10452,30 +9078,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 613.08
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1456.76
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 7.37
           },
           "category" : {
@@ -10502,6 +9104,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 11.88
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 613.08
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1456.76
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -10649,18 +9287,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 3.16
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.93
           },
           "category" : {
@@ -10757,30 +9383,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 641.11
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 631.29
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 8.33
           },
           "category" : {
@@ -10807,6 +9409,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 3.16
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 641.11
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 631.29
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -10954,18 +9592,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 12.47
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.65
           },
           "category" : {
@@ -11062,30 +9688,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 654.22
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 962.26
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.65
           },
           "category" : {
@@ -11112,6 +9714,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 12.47
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 654.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 962.26
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11830,24 +10468,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -12022,42 +10642,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 913.74
         },
         "category" : {
@@ -12124,42 +10708,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
             "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -12371,18 +10919,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.12
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 0.41
           },
           "category" : {
@@ -12479,30 +11015,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 395.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 961.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 36.44
           },
           "category" : {
@@ -12529,6 +11041,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.12
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 395.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 961.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -12654,18 +11202,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.22
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.83
           },
           "category" : {
@@ -12762,30 +11298,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 385.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 4625.3
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 26.44
           },
           "category" : {
@@ -12812,6 +11324,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 385.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 4625.3
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -12947,18 +11495,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.39
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.04
           },
           "category" : {
@@ -13055,30 +11591,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 404.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 970.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 45.44
           },
           "category" : {
@@ -13105,6 +11617,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.39
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 404.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 970.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15230,24 +13778,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -15422,42 +13952,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 2246.9
         },
         "category" : {
@@ -15524,42 +14018,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
             "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -15903,18 +14361,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 6.51
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.58
           },
           "category" : {
@@ -16011,30 +14457,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 386.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 4965.28
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 27.44
           },
           "category" : {
@@ -16061,6 +14483,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 6.51
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 386.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 4965.28
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16211,18 +14669,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.62
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.03
           },
           "category" : {
@@ -16319,30 +14765,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 396.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 962.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 37.44
           },
           "category" : {
@@ -16369,6 +14791,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 396.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 962.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16498,18 +14956,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1.7
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.77
           },
           "category" : {
@@ -16606,30 +15052,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 399.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 965.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 40.44
           },
           "category" : {
@@ -16656,6 +15078,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1.7
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 399.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 965.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17453,24 +15911,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -18234,18 +16674,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 8.86
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.29
           },
           "category" : {
@@ -18342,30 +16770,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1395.62
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1153.23
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.86
           },
           "category" : {
@@ -18392,6 +16796,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 8.86
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1395.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1153.23
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -18539,18 +16979,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 2.92
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.71
           },
           "category" : {
@@ -18647,30 +17075,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 898.49
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1204.17
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.61
           },
           "category" : {
@@ -18697,6 +17101,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 2.92
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 898.49
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1204.17
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -18816,18 +17256,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 7.73
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.71
           },
           "category" : {
@@ -18924,30 +17352,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1355.07
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 999.98
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.49
           },
           "category" : {
@@ -18974,6 +17378,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 7.73
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1355.07
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 999.98
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19127,18 +17567,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.15
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.26
           },
           "category" : {
@@ -19235,30 +17663,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 549.09
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 436.08
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 9.48
           },
           "category" : {
@@ -19285,6 +17689,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.15
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 549.09
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 436.08
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19414,18 +17854,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 9.93
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 2.57
           },
           "category" : {
@@ -19522,30 +17950,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 197.67
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1460.8
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.2
           },
           "category" : {
@@ -19572,6 +17976,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 9.93
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 197.67
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1460.8
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19707,18 +18147,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 14.56
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 3.07
           },
           "category" : {
@@ -19815,30 +18243,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 1025.3
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 957.58
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 12.44
           },
           "category" : {
@@ -19865,6 +18269,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 14.56
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1025.3
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 957.58
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19997,18 +18437,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 11.88
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.32
           },
           "category" : {
@@ -20105,30 +18533,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 613.08
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 1456.76
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 7.37
           },
           "category" : {
@@ -20155,6 +18559,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 11.88
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 613.08
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1456.76
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -20302,18 +18742,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 3.16
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.93
           },
           "category" : {
@@ -20410,30 +18838,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 641.11
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 631.29
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 8.33
           },
           "category" : {
@@ -20460,6 +18864,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 3.16
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 641.11
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 631.29
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -20607,18 +19047,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 12.47
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 4.65
           },
           "category" : {
@@ -20715,30 +19143,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 654.22
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 962.26
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 14.65
           },
           "category" : {
@@ -20765,6 +19169,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 12.47
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 654.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 962.26
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -21483,24 +19923,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-            "display" : "Hospice Period Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-            "display" : "Claim HHA Visit Count",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        },
-        "value" : 0
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
             "display" : "PPS DRG Weight Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -21675,42 +20097,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_FINL_STDZD_PYMT_AMT",
-            "display" : "Standardized Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HAC_RDCTN_PYMT_AMT",
-            "display" : "Hospital Acquired Condition Reduction Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_HIPPS_MODEL_BNDLD_PMT_AMT",
-            "display" : "Blended Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 913.74
         },
         "category" : {
@@ -21777,42 +20163,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "CLM_PPS_MD_WVR_STDZD_VAL_AMT",
             "display" : "Maryland Waiver Standardized Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_CST_BSD_PYMT_AMT",
-            "display" : "Site-Neutral Cost-Based Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SITE_NTRL_IP_PPS_PYMT_AMT",
-            "display" : "Site-Neutral IPPS Payment Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
-            "display" : "Short Stay Outlier Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -22024,18 +20374,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.12
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 0.41
           },
           "category" : {
@@ -22132,30 +20470,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 395.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 961.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 36.44
           },
           "category" : {
@@ -22182,6 +20496,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.12
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 395.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 961.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -22307,18 +20657,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.22
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.83
           },
           "category" : {
@@ -22415,30 +20753,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 385.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 4625.3
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 26.44
           },
           "category" : {
@@ -22465,6 +20779,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 385.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 4625.3
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -22600,18 +20950,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 5.39
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Blood Deductible Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 1.04
           },
           "category" : {
@@ -22708,30 +21046,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 404.9
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
-              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
-            "value" : 970.35
-          },
-          "category" : {
-            "coding" : [ {
-              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
-              "display" : "Revenue Center Reduced Coinsurance Amount",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-            } ]
-          }
-        }, {
-          "amount" : {
-            "currency" : "USD",
             "value" : 45.44
           },
           "category" : {
@@ -22758,6 +21072,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_INSTNL_MSP2_PD_AMT",
               "display" : "Revenue Center 2nd MSP Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.39
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 404.9
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_ADJSTD_AMT",
+              "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 970.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_INSTNL_RDCD_AMT",
+              "display" : "Revenue Center Reduced Coinsurance Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }

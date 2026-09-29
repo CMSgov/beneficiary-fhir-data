@@ -6,7 +6,7 @@
 repo = "builtin"
 hooks = [
   { id = "trailing-whitespace" },
-  { id = "end-of-file-fixer" },
+  { id = "end-of-file-fixer", exclude = "\\.snap" },
   { id = "check-added-large-files" },
   { id = "check-case-conflict" },
   { id = "fix-byte-order-marker" },
@@ -24,11 +24,6 @@ hooks = [
 repo = "https://github.com/shellcheck-py/shellcheck-py"
 rev = "v0.11.0.1-1"
 hooks = [{ id = "shellcheck", args = ["--severity=warning"] }]
-
-[[repos]]
-repo = "https://github.com/google/yamlfmt"
-rev = "v0.19.0"
-hooks = [{ id = "yamlfmt" }]
 
 
 [[repos]]
@@ -60,4 +55,13 @@ hooks = [
   { id = "xml", name = "xml", language = "system", types = [
     "xml",
   ], entry = "./hooks/xml-format.sh", pass_filenames = 1 },
+  { id = "prettier", name = "prettier", entry = "prettier", args = [
+    "--check",
+    "--write",
+    "--ignore-unknown",
+  ], language = "node", types = [
+    "yaml",
+  ], additional_dependencies = [
+    "prettier",
+  ] },
 ]
