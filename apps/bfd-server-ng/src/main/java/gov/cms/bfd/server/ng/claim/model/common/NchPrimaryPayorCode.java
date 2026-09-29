@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @Getter
 public class NchPrimaryPayorCode {
+
   @Column(name = "clm_nch_prmry_pyr_cd")
   private Optional<String> nchPrimaryPayorCode;
 

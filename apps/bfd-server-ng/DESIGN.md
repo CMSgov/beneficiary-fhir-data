@@ -92,3 +92,6 @@ class MyEntityOptional {
 
 This is a pretty unfortunate hack, but it's currently the only way to ensure type safety.
 There's a property in Hibernate to force this (`hibernate.create_empty_composites.enabled`), but it's currently deprecated and marked for removal.
+
+
+
