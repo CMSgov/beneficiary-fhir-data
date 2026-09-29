@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailLocationCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAuditTrailStatusCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;

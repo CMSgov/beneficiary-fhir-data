@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;

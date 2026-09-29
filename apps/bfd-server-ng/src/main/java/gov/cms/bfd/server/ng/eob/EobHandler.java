@@ -3,12 +3,12 @@ package gov.cms.bfd.server.ng.eob;
 import static gov.cms.bfd.server.ng.util.MetricRecorder.SAMHSA_FILTER_MODE;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
-import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
+import gov.cms.bfd.server.ng.claim.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
@@ -108,7 +108,8 @@ public class EobHandler {
             criteria.tagCriteria(),
             criteria.claimTypeCodes(),
             criteria.outcomes(),
-            criteria.sources());
+            criteria.sources(),
+            criteria.profile());
 
     var claimAndAuthResult = claimRepository.findByBeneXrefSk(repositoryCriteria);
     var claims = claimAndAuthResult.claims();

@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.priorauth;
 
 import static gov.cms.bfd.server.ng.util.SystemUrls.PROFILE_PRIOR_AUTH;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.claim.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;

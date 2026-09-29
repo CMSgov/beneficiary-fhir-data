@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;

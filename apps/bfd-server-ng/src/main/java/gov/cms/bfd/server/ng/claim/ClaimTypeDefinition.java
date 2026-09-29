@@ -11,9 +11,13 @@ import java.util.List;
  * @param baseQuery base query
  * @param claimClass entity class
  * @param systemType system type which indicates a claim's source
+ * @param profile the profile to fit the queries to
  */
 public record ClaimTypeDefinition(
-    String baseQuery, Class<? extends ClaimBase> claimClass, SystemType systemType) {
+    String baseQuery,
+    Class<? extends ClaimBase> claimClass,
+    SystemType systemType,
+    ClaimProfile profile) {
 
   /**
    * Determine whether this claim type definition is compatible with any active filters. Inactive
@@ -24,5 +28,15 @@ public record ClaimTypeDefinition(
    */
   public boolean matchesSystemType(List<DbFilterBuilder> filters) {
     return filters.stream().allMatch(filter -> filter.matchesSystemType(systemType));
+  }
+
+  /**
+   * Determine whether this claim type definition belongs to the requested profile.
+   *
+   * @param requestedProfile the profile requested for this search
+   * @return boolean
+   */
+  public boolean matchesProfile(ClaimProfile requestedProfile) {
+    return profile == requestedProfile;
   }
 }

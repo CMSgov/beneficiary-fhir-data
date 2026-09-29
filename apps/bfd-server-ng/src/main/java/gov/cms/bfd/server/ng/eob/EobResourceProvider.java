@@ -15,9 +15,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
-import gov.cms.bfd.server.ng.SamhsaFilterMode;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
@@ -137,7 +138,8 @@ public class EobResourceProvider implements IResourceProvider {
             tagCriteria,
             claimTypeCodes,
             outcomeCriteria,
-            FhirInputConverter.parseSourceParameter(source));
+            FhirInputConverter.parseSourceParameter(source),
+            ClaimProfile.CMS); // TODO - change this to a query param
 
     return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
   }

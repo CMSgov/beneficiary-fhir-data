@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
