@@ -168,7 +168,7 @@ public class AdjudicationChargeInstitutional {
                         .toFhirAdjudicationDecimalType(ppsDrgWeight),
                     // These are always whole numbers, but IDR stores them as floats
                     AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationLong(
-                        Optional.of(totalCoveredDays.get().longValue())),
+                        totalCoveredDays.map(BigDecimal::longValue)),
                     AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudicationOptional(
                         perDiemAmount),
                     AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT
