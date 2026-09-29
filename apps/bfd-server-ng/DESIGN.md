@@ -7,6 +7,15 @@ This process lends itself to a somewhat unique set of challenges due to the natu
 - **Deep data**: many beneficiaries have many thousands of claims, claim line items can multiply the volume of rows by an order of magnitude past that.
 - **Optional fields**: The vast majority of columns we store are optional, meaning there is a large possibility of null reference exceptions if adequate care is not taken.
 
+## Profiles and Naming Conventions
+
+The default profile for any call will be CMS, so any CMS leaf entity is the maximum amount of mapped information, and at parity with what was before profile work.
+
+At the moment, we're operating off of a Domain-Profile-Source convention for organizing the concrete leaf entities that represent profiles.
+For example:
+- ClaimLineProfessionalCmsNch (Professional-Cms-Nch)
+- AdjudicationInstitutionalBasisSharedSystems (Institutional-Basis-SharedSystems)
+
 ## Handling Wide Data
 
 We use a modular approach to segment large tables. Many JPA libraries support `@Embedded` classes to split large entities into smaller classes.
