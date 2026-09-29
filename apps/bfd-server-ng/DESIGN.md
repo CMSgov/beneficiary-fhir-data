@@ -47,7 +47,7 @@ The result looks like this:
 
 ```java
 class MyEntity {
-    @Embedded private MyEntityOptional myEntityOptional.
+    @Embedded private MyEntityOptional myEntityOptional;
 }
 
 @Embeddable
