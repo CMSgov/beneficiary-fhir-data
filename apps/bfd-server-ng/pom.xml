@@ -1,22 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
     <version>2.272.0-SNAPSHOT</version>
   </parent>
-
   <artifactId>bfd-server-ng</artifactId>
   <packaging>jar</packaging>
-
   <!-- The timezone MUST be set to UTC in order to avoid any inconsistencies in date conversion -->
   <properties>
     <spring-boot.run.jvmArguments>-Duser.timezone=UTC</spring-boot.run.jvmArguments>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -35,14 +30,12 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>gov.cms.bfd</groupId>
       <artifactId>bfd-shared-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <!-- Spring Boot -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -108,20 +101,17 @@
       <version>${rest-assured.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>${snakeyaml.version}</version>
     </dependency>
-
     <dependency>
       <!-- Used to run our unit and integration tests. -->
       <groupId>org.junit.jupiter</groupId>
@@ -167,8 +157,6 @@
       <artifactId>flyway-database-postgresql</artifactId>
       <scope>test</scope>
     </dependency>
-
-
     <!-- Spring Cloud -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -180,14 +168,12 @@
       <artifactId>spring-cloud-context</artifactId>
       <version>${spring-cloud.version}</version>
     </dependency>
-
     <!-- Spring Cloud AWS -->
     <dependency>
       <groupId>io.awspring.cloud</groupId>
       <artifactId>spring-cloud-aws-starter-parameter-store</artifactId>
       <version>${spring-cloud-aws.version}</version>
     </dependency>
-
     <dependency>
       <!-- At least one "structures" JAR must also be included -->
       <groupId>ca.uhn.hapi.fhir</groupId>
@@ -209,13 +195,11 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-server</artifactId>
@@ -236,7 +220,6 @@
       <artifactId>bfd-server-openapi</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <!-- Used to interact with AWS' SSM service -->
       <groupId>software.amazon.awssdk</groupId>
@@ -257,7 +240,6 @@
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>cloudwatch</artifactId>
     </dependency>
-
     <dependency>
       <!-- Used to transmit metrics to CloudWatch for alerts and dashboards.
                 CloudWatch2 is required for the AWS SDK v2 -->
@@ -304,5 +286,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
