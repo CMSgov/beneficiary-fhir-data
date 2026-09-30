@@ -1,13 +1,5 @@
-package gov.cms.bfd.server.ng.claim.model.professional;
+package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.model.common.ActiveCareThroughDate;
-import gov.cms.bfd.server.ng.claim.model.common.BenefitsExhaustedDate;
-import gov.cms.bfd.server.ng.claim.model.common.NoncoveredFromDate;
-import gov.cms.bfd.server.ng.claim.model.common.NoncoveredThroughDate;
-import gov.cms.bfd.server.ng.claim.model.common.QualifyStayFromDate;
-import gov.cms.bfd.server.ng.claim.model.common.QualifyStayThruDate;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
@@ -15,9 +7,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The claim date for institutional claims in the shared system. */
+/** The claim date for institutional or professional claims. */
 @Embeddable
-public class ClaimDateProfessional implements SupportingInfoComponentBase {
+public class DateSupportingInfoInstitutionalProfessional implements SupportingInfoComponentBase {
 
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
