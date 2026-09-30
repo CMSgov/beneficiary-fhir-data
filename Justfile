@@ -4,10 +4,19 @@ default:
     just --choose
 
 bootstrap:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
     brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs
+    # Some people may not have installed VS Code from brew,
+    # so skip if it already exists
+    if !command -v code >/dev/null 2>&1
+    then
+        brew install --cask visual-studio-code
+    fi
     # We overwrite the default prek hook with our own script
     # that will automatically re-add any formatting changes before committing
     # This is not possible out of the box at the time of writing this
@@ -16,6 +25,9 @@ bootstrap:
     mv .git/hooks/pre-commit .git/hooks/pre-commit.prek
     cp -p ./hooks/run-pre-commit.sh .git/hooks/pre-commit
     cp -p ./hooks/rerun-changed.sh .git/hooks/pre-commit.rerun
+
+java-build-all:
+    cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
 
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
@@ -44,6 +56,16 @@ server-ng csv_folder="":
         just pipeline {{ csv_folder }};
     fi
     cd ./apps/bfd-server-ng && mvn clean spring-boot:run
+
+[arg("update-snapshots", long, value="1")]
+server-ng-test update-snapshots="":
+    cd ./apps/bfd-server-ng && mvn clean verify {{ if update-snapshots == "1" { "-DupdateSnapshot=" } else { "" } }}
+
+server-ng-test-logs:
+    code ./apps/bfd-server-ng/target/failsafe-reports/logs
+
+swagger:
+    open http://localhost:8080/v3/fhir/swagger-ui/
 
 [arg("env", long, pattern=env_pattern)]
 migrate-synthetic env:
