@@ -43,8 +43,7 @@ EOF
   ])
 
   slos_metrics = {
-    all_latency        = "http-requests.latency.all.avg"
-    all_http500s_count = "http-requests.count.5xx-responses.count"
+    all_latency = "http-requests.latency.all.avg"
   }
 
 
@@ -187,9 +186,19 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
 
   metric_query {
     id = "m1"
-    # This can be done this way because the window is under 3 hours
-    expression  = "SELECT SUM(\"${local.slos_metrics.all_http500s_count}\") FROM SCHEMA(\"${local.namespace}\", response_status)"
-    period      = 300
+    # this is using the load balancer data
+    # the metrics published from the app have dimensions
+    # there are limitations for how many dimensions we can look at per alarm that this works around
+    metric {
+      metric_name = "HTTPCode_ELB_5XX_Count"
+      namespace   = "AWS/ApplicationELB"
+      period      = 300
+      stat        = "Sum"
+      unit        = "Count"
+      dimensions = {
+        LoadBalancer = data.aws_lb.main.arn_suffix
+      }
+    }
     return_data = true
   }
 
