@@ -20,7 +20,7 @@ class SecurityLabelModel(BaseModel):
         return self.code.replace(".", "")
 
 
-SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
+SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("../../security_labels.yml")
 SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
     yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
 )
@@ -172,6 +172,8 @@ SAMHSA_DGNS_DRG_CDS = [
 ]
 TARGET_SEQUENCE_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7]
 TARGET_RLT_COND_CODES = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
+TARGET_RLT_OCRNC_CODES = ["A3", "22"]
+TARGET_OCRNC_SPAN_CODES = ["74", "70"]
 AVAILABLE_GIVEN_NAMES = [
     "Wallace",
     "Gromit",

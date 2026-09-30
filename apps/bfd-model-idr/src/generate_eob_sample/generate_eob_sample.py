@@ -5,17 +5,11 @@ from typing import Any
 
 import pandas as pd
 
-# TODO this is done be because the claims_static is not in an importable module
-# Remove once that is done
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS  # noqa: E402
+from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS
 
 
 class Result:
-    def __init__(self, result_json: str, output_file: str):
+    def __init__(self, result_json: dict[str, Any], output_file: str):
         self.result_json = result_json
         self.output_file = output_file
 
@@ -37,7 +31,13 @@ class SampleGenerator:
             sys.exit(1)
 
         claim_row = self.read_clm(clm_uniq_id)
-        claim_type = int(claim_row.get("CLM_TYPE_CD"))
+        claim_type_raw = claim_row.get("CLM_TYPE_CD")
+
+        if not claim_type_raw:
+            print("Claim type not found. Exiting.")
+            sys.exit(1)
+
+        claim_type = int(claim_type_raw)
 
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             result = self.create_pharmacy(clm_uniq_id, claim_row)
@@ -155,7 +155,7 @@ class SampleGenerator:
             "id": str(clm_uniq_id.replace("-", "")).strip(),
             "lastUpdated": extract_col_str(claim_row, "IDR_UPDT_TS"),
             "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
-            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD") or "0"),
             "META_SRC_SK": extract_col_str(claim_row, "META_SRC_SK"),
             "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
             "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
@@ -332,7 +332,7 @@ class SampleGenerator:
             "CLM_FINL_ACTN_IND": extract_col_str(claim_row, "CLM_FINL_ACTN_IND"),
             "CLM_SRC_ID": extract_col_str(claim_row, "CLM_SRC_ID"),
             "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
-            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD") or "0"),
             "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
             "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
             "CLM_ORIG_CNTL_NUM": extract_col_str(claim_row, "CLM_ORIG_CNTL_NUM"),
@@ -522,9 +522,9 @@ class SampleGenerator:
             & (line_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
-    def read_rx_line(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
+    def read_rx_line(self, clm_line: dict[str, str]) -> dict[str, str]:
         line_rx_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_RX.csv"
 
         if not Path(line_rx_path).exists():
@@ -538,7 +538,7 @@ class SampleGenerator:
             & (line_rx_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_rx_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_rx_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
         return {} if not line_rx_matches else line_rx_matches[0]
 
@@ -555,7 +555,7 @@ class SampleGenerator:
             & (line_prod_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_prod_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_prod_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_instnl_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         line_instnl_path = f"{self.source_directory}/SYNTHETIC_CLM_LINE_INSTNL.csv"
@@ -570,7 +570,7 @@ class SampleGenerator:
             & (line_instnl_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_instnl_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_instnl_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     def read_clm_val(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         line_val_path = f"{self.source_directory}/SYNTHETIC_CLM_VAL.csv"
@@ -585,7 +585,7 @@ class SampleGenerator:
             & (line_val_found["CLM_DT_SGNTR_SK"] == clm_line["CLM_DT_SGNTR_SK"])
             & (line_val_found["CLM_TYPE_CD"] == clm_line["CLM_TYPE_CD"])
             & (line_val_found["CLM_NUM_SK"] == clm_line["CLM_NUM_SK"])
-        ].to_dict(orient="records")
+        ].to_dict(orient="records")  # type: ignore[reportCallIssue]
 
     # leaving here ended up not needing but future work probably will
     # def read_rlt_line(self, clm_rlt_cond_sgntr_sk: str) -> dict[str, str]:
@@ -621,5 +621,5 @@ def find_field_in_line_by_num(
     return extract_col_str(line_matches[0], field_name)
 
 
-def extract_col_str(row: dict[str, str], name: str) -> str:
+def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None

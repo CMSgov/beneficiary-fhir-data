@@ -4,7 +4,7 @@ from datetime import date, datetime
 from faker import Faker
 
 import field_constants as f
-from claims_static import NOW
+from idr_model.claims_static import NOW
 from generator_util import RowAdapter
 
 _faker = Faker()

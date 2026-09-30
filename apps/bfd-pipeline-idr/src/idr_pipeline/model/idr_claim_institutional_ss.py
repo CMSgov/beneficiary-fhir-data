@@ -175,6 +175,9 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     # Columns from v2_mdcr_clm_dcmtn
+    clm_ptnt_cntl_num: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
     clm_bnft_enhncmt_1_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]

@@ -49,7 +49,9 @@ public class AuditEventResourceProvider implements IResourceProvider {
     } catch (IllegalArgumentException _) {
       throw new ResourceNotFoundException(fhirId);
     }
-    return auditEventHandler.getAuditEventById(id);
+    return auditEventHandler
+        .getAuditEventById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
   /**

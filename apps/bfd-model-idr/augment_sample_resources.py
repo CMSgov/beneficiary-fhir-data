@@ -14,7 +14,13 @@ prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 
 cond_sk_info_file = "sample-data/CLM_RLT_COND_SGNTR_MBR_POC.csv"
-cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str})
+cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str, "CLM_RLT_COND_CD": str})
+
+ocrnc_sk_info_file = "sample-data/CLM_OCRNC_SGNTR_MBR_POC.csv"
+ocrnc_sk_df = pd.read_csv(ocrnc_sk_info_file, parse_dates=["CLM_OCRNC_SPAN_FROM_DT", "CLM_OCRNC_SPAN_THRU_DT"], dtype={"CLM_OCRNC_SGNTR_SK": str, "CLM_OCRNC_SPAN_CD": str})
+
+rlt_ocrnc_sk_info_file = "sample-data/CLM_RLT_OCRNC_SGNTR_MBR_POC.csv"
+rlt_ocrnc_sk_df = pd.read_csv(rlt_ocrnc_sk_info_file, parse_dates=["CLM_RLT_OCRNC_DT"], dtype={"CLM_RLT_OCRNC_SGNTR_SK": str, "CLM_RLT_OCRNC_CD": str})
 
 synth_df = None
 synth_prvdr_file = "out/SYNTHETIC_PRVDR_HSTRY.csv"
@@ -171,7 +177,6 @@ header_to_supp_info_cols = {
     "CLM_NRLN_RIC_CD": "CLM_NRLN_RIC_CD",
     "CLM_RIC_CD": "CLM_RIC_CD",
     "GEO_BLG_SSA_STATE_CD": "GEO_BLG_SSA_STATE_CD",
-    "CLM_MDCR_EXHSTD_DT": "CLM_MDCR_EXHSTD_DT",
     "BENE_PTNT_STUS_CD": "BENE_PTNT_STUS_CD",
     "CLM_ADMSN_SRC_CD": "CLM_ADMSN_SRC_CD",
     "CLM_ADMSN_TYPE_CD": "CLM_ADMSN_TYPE_CD",
@@ -186,9 +191,10 @@ header_to_supp_info_cols = {
     "CLM_PPS_IND": "CLM_PPS_IND",
     "DGNS_DRG_CD": "DGNS_DRG_CD",
     "DGNS_DRG_OUTLIER_CD": "DGNS_DRG_OUTLIER_CD",
-    "CLM_ACTV_CARE_THRU_DT": "CLM_ACTV_CARE_THRU_DT",
     "CLM_CMS_PROC_DT": "CLM_CMS_PROC_DT",
     "CLM_NCH_WKLY_PROC_DT": "CLM_NCH_WKLY_PROC_DT",
+    "CLM_ACTV_CARE_THRU_DT": "CLM_ACTV_CARE_THRU_DT",
+    "CLM_MDCR_EXHSTD_DT": "CLM_MDCR_EXHSTD_DT",
     "CLM_NCVRD_FROM_DT": "CLM_NCVRD_FROM_DT",
     "CLM_NCVRD_THRU_DT": "CLM_NCVRD_THRU_DT",
     "CLM_QLFY_STAY_FROM_DT": "CLM_QLFY_STAY_FROM_DT",
@@ -435,6 +441,7 @@ if "supportingInfoComponents" not in cur_sample_data:
     cur_sample_data["supportingInfoComponents"] = []
 supporting_info_components = cur_sample_data["supportingInfoComponents"]
 
+# related condition signature mbr POC augments
 cond_sk = cur_sample_data.get("CLM_RLT_COND_SGNTR_SK")
 if cond_sk:
     matching_rows = cond_sk_df[cond_sk_df["CLM_RLT_COND_SGNTR_SK"] == str(cond_sk)]
@@ -442,6 +449,40 @@ if cond_sk:
         cond_cd = row.get("CLM_RLT_COND_CD")
         if pd.notna(cond_cd) and str(cond_cd) != "~":
             supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
+
+## mapping ocrnc_sgntr_mbr and rlt_ocrnc_sgntr_mbr to clm_dt_sgntr equivalent columns
+def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
+    if ocrnc_sk := data.get("CLM_OCRNC_SGNTR_SK"):
+        matching_sks = ocrnc_sk_df["CLM_OCRNC_SGNTR_SK"] == ocrnc_sk
+        # not covered from and thru
+        ncvrd_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "74")
+        if ncvrd_mask.any():
+            ncvrd_from = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
+            data["CLM_NCVRD_FROM_DT"] = ncvrd_from if pd.notna(ncvrd_from) else data["CLM_NCVRD_FROM_DT"]
+            ncvrd_thru = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
+            data["CLM_NCVRD_THRU_DT"] = ncvrd_thru if pd.notna(ncvrd_thru) else data["CLM_NCVRD_THRU_DT"]
+        # qualifying stay from and thru
+        qlfy_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "70")
+        if qlfy_mask.any():
+            qlfy_from = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
+            data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from if pd.notna(qlfy_from) else data["CLM_QLFY_STAY_FROM_DT"]
+            qlfy_thru = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
+            data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru if pd.notna(qlfy_thru) else data["CLM_QLFY_STAY_THRU_DT"]
+
+    if rlt_ocrnc_sk := data.get("CLM_RLT_OCRNC_SGNTR_SK"):
+        matching_sks = rlt_ocrnc_sk_df["CLM_RLT_OCRNC_SGNTR_SK"] == rlt_ocrnc_sk
+        # medicare exhausted date
+        mdcr_exhstd_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "A3")
+        if mdcr_exhstd_mask.any():
+            mdcr_exhstd_dt = rlt_ocrnc_sk_df.loc[mdcr_exhstd_mask, "CLM_RLT_OCRNC_DT"].max()
+            data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt if pd.notna(mdcr_exhstd_dt) else data["CLM_MDCR_EXHSTD_DT"]
+        # active care thru
+        actv_care_thru_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "22")
+        if actv_care_thru_mask.any():
+            actv_care_thru = rlt_ocrnc_sk_df.loc[actv_care_thru_mask, "CLM_RLT_OCRNC_DT"].max()
+            data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru if pd.notna(actv_care_thru) else data["CLM_ACTV_CARE_THRU_DT"]
+
+map_ocrnc_sgntr_to_clm_dt_sgntr_cols(cur_sample_data, ocrnc_sk_df, rlt_ocrnc_sk_df)
 
 fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")
 clsfctn = cur_sample_data.get("CLM_BILL_CLSFCTN_CD")
