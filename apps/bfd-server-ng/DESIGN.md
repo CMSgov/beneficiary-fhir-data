@@ -34,7 +34,7 @@ In our entity classes, we use `Optional<T>` types to represent fields which coul
 This is somewhat unconventional, as doing so contradicts the generally recommended practice of only using `Optional` for return values.
 However, we need a way to protect against null reference exceptions with the vast amount of potentially nullable fields we have.
 Without the type system to protect us, we would need to be very diligent in always checking for null before attempting to reference
-any of the hundreds of optional fields we store. 
+any of the hundreds of optional fields we store.
 It isn't feasible to check every combination of missing/present values in our test data due to the volume of fields.
 
 ### Left Joins
