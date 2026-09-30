@@ -1,12 +1,11 @@
 import argparse
 import datetime
+import logging
 import random
 import subprocess
 import sys
 
 import tqdm
-from faker import Faker
-
 from constants import (
     BENE_DUAL,
     BENE_ENTLMT,
@@ -22,6 +21,7 @@ from constants import (
     CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
 )
+from faker import Faker
 from generator_util import (
     GeneratorUtil,
     IdGenerator,
@@ -35,6 +35,8 @@ from generator_util import (
 )
 from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
+
+logger = logging.getLogger(__name__)
 
 fake = Faker()
 
@@ -87,14 +89,6 @@ parser.add_argument(
     dest="force_ztm",
 )
 parser.add_argument(
-    "--destination",
-    choices=["csv", "snowflake"],
-    default="csv",
-    help="Destination to write generated synthetic data where snowflake is our synthetic snowflake "
-    "environment and csv is the default out directory. Requires load-synthetic-credentials.sh "
-    "sourced first.",
-)
-parser.add_argument(
     "--truncate",
     action="store_true",
     default=False,
@@ -131,7 +125,9 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
-    print(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
+    message = f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}..."
+    print(message)
+    logger.info(message)
 
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
@@ -206,17 +202,22 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
         )
 
-    print("Finished regenerating/updating all files")
+    message = "Finished regenerating/updating all files"
+    print(message)
+    logger.info(message)
 
 
-def load_inputs():
-    is_snowflake = args.destination == "snowflake"
-    writer: OutputDestinationWriter = SnowflakeWriter() if is_snowflake else CsvWriter()
+def load_inputs(
+    patients: int,
+    force_ztm: bool,
+    batch_size: int,
+    truncate: bool,
+    writer: OutputDestinationWriter | None = None,
+):
+    if writer is None:
+        writer = CsvWriter()
 
-    if is_snowflake and args.paths:
-        print("CSV files should not be provided when destination is snowflake")
-        sys.exit(1)
-
+    is_snowflake = isinstance(writer, SnowflakeWriter)
     if is_snowflake:
         id_state = load_id_state(writer)
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
@@ -226,7 +227,7 @@ def load_inputs():
     generator = GeneratorUtil(id_gen=id_gen)
 
     if is_snowflake:
-        _handle_snowflake_flow(generator, writer)
+        _handle_snowflake_flow(generator, writer, patients, force_ztm, batch_size, truncate)
     else:
         _handle_csv_flow(generator, writer)
 
@@ -271,7 +272,9 @@ def _handle_csv_flow(generator: GeneratorUtil, writer: CsvWriter):
         log_messages.append(f"regenerating {num_existing} existing patients")
     if num_new > 0:
         log_messages.append(f"generating {num_new} new patients")
-    print(f"{', and '.join(log_messages)}...".capitalize())
+    message = f"{', and '.join(log_messages)}...".capitalize()
+    print(message)
+    logger.info(message)
 
     patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
@@ -280,8 +283,15 @@ def _handle_csv_flow(generator: GeneratorUtil, writer: CsvWriter):
     generator.save_output_files(writer, truncate=args.truncate)
 
 
-def _handle_snowflake_flow(generator: GeneratorUtil, writer: SnowflakeWriter):
-    _generate_contracts(generator, writer, truncate=args.truncate)
+def _handle_snowflake_flow(
+    generator: GeneratorUtil,
+    writer: SnowflakeWriter,
+    patients: int,
+    force_ztm: bool,
+    batch_size: int,
+    truncate: bool,
+):
+    _generate_contracts(generator, writer, truncate=truncate)
 
     patient_tables = [
         BENE_MBI_ID,
@@ -297,28 +307,29 @@ def _handle_snowflake_flow(generator: GeneratorUtil, writer: SnowflakeWriter):
     ]
 
     # Process existing data updates in batches
-    if not args.truncate:
-        for bene_sks_batch in writer.iter_bene_sk_batches(args.batch_size):
+    if not truncate:
+        for bene_sks_batch in writer.iter_bene_sk_batches(batch_size):
             existing = writer.get_patient_batch(bene_sks_batch, patient_tables)
             regenerate_static_tables(generator, existing)
             patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in existing[BENE_MBI_ID]}
 
             _generate_patients_batch(
-                generator, existing[BENE_HSTRY], patient_mbi_id_rows, args.force_ztm
+                generator, existing[BENE_HSTRY], patient_mbi_id_rows, force_ztm
             )
             generator.flush_batch(writer)
     else:
         # Generate new synthetic patients in batches
-        num_new_patients = int(args.patients)
-        for i in range(0, num_new_patients, args.batch_size):
-            chunk = min(args.batch_size, num_new_patients - i)
+        num_new_patients = int(patients)
+        for i in range(0, num_new_patients, batch_size):
+            chunk = min(batch_size, num_new_patients - i)
             _generate_patients_batch(
-                generator, [RowAdapter({}) for _ in range(chunk)], {}, args.force_ztm
+                generator, [RowAdapter({}) for _ in range(chunk)], {}, force_ztm
             )
-            generator.flush_batch(writer, truncate=(args.truncate and i == 0))
+            generator.flush_batch(writer, truncate=(truncate and i == 0))
 
-    writer.close()
-    print("Patient data generation complete!")
+    message = "Patient data generation complete!"
+    print(message)
+    logger.info(message)
 
 
 def _generate_patients_batch(
@@ -446,7 +457,9 @@ def _generate_patients_batch(
 
         generator.bene_hstry_table.append(patient.kv)
 
-    print(f"Done generating {len(patients)} patients")
+    message = f"Done generating {len(patients)} patients"
+    print(message)
+    logger.info(message)
 
 
 def _generate_contracts(
@@ -477,29 +490,24 @@ def _generate_contracts(
 
 
 if __name__ == "__main__":
-    load_inputs()
+    load_inputs(
+        patients=args.patients,
+        force_ztm=args.force_ztm,
+        batch_size=args.batch_size,
+        truncate=args.truncate,
+    )
 
     # If --claims flag is provided, automatically call claims_generator.py
     if args.claims:
         print("Generating claims for generated benes")
         try:
-            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY
+            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY and SYNTHETIC_CNTRCT_PBP_NUM
             claims_args = [
                 sys.executable,
                 "claims_generator.py",
+                f"out/{BENE_HSTRY}.csv",
+                f"out/{CNTRCT_PBP_NUM}.csv",
             ]
-
-            if args.destination == "snowflake":
-                claims_args.extend(["--destination", "snowflake"])
-                if args.truncate:
-                    claims_args.extend(["--truncate", "True"])
-            else:
-                claims_args.extend(
-                    [
-                        f"out/{BENE_HSTRY}.csv",
-                        f"out/{CNTRCT_PBP_NUM}.csv",
-                    ]
-                )
 
             result = subprocess.run(
                 args=claims_args,

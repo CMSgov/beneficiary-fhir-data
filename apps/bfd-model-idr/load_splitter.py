@@ -7,9 +7,9 @@ from pathlib import Path
 import click
 import tqdm
 
-import field_constants as f
-from claims_util import four_part_key
-from generator_util import (
+import bfd_synthetic_generator.field_constants as f
+from bfd_synthetic_generator.claims_util import four_part_key
+from bfd_synthetic_generator.generator_util import (
     BENE_DUAL,
     BENE_ENTLMT,
     BENE_ENTLMT_RSN,
@@ -44,7 +44,7 @@ from generator_util import (
     load_file_dict,
     partition_rows,
 )
-from row_adapter import RowAdapter
+from bfd_synthetic_generator.row_adapter import RowAdapter
 
 
 @click.command

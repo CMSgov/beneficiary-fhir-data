@@ -1,3 +1,4 @@
+import logging
 import random
 import sys
 from collections import defaultdict
@@ -5,9 +6,8 @@ from enum import StrEnum, auto
 from pathlib import Path
 
 import click
-import tqdm
-
 import constants as f
+import tqdm
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
@@ -35,6 +35,8 @@ from load_synthetic_output import (
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
+
+logger = logging.getLogger(__name__)
 
 _BATCH_SIZE = 50_000
 
@@ -695,17 +697,6 @@ class _ClaimsFile(StrEnum):
     ),
 )
 @click.option(
-    "--destination",
-    type=click.Choice(["csv", "snowflake"]),
-    default="csv",
-    show_default=True,
-    help=(
-        "Destination to write generated synthetic data where snowflake is our synthetic snowflake "
-        "environment and csv is the default out directory. "
-        "Requires load-synthetic-credentials.sh sourced first."
-    ),
-)
-@click.option(
     "--truncate",
     type=bool,
     default=False,
@@ -720,17 +711,43 @@ class _ClaimsFile(StrEnum):
     help="Batch size of claims to process",
 )
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
-def generate(
-    sushi: bool,
+def generate_locally(
     min_claims: int,
     max_claims: int,
     enable_samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
-    destination: str = "csv",
+    writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    sushi: bool = False,
+):
+    generate(
+        min_claims,
+        max_claims,
+        enable_samhsa,
+        pac_gen,
+        bene_sk_mode,
+        paths,
+        writer,
+        truncate,
+        batch_size,
+        sushi,
+    )
+
+
+def generate(
+    min_claims: int,
+    max_claims: int,
+    enable_samhsa: bool,
+    pac_gen: GeneratePacDataMode,
+    bene_sk_mode: BeneSkMode,
+    paths: tuple[Path, ...] | None = None,
+    writer: OutputDestinationWriter | None = None,
+    truncate: bool = False,
+    batch_size: int = _BATCH_SIZE,
+    sushi: bool = False,
 ):
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
@@ -739,12 +756,8 @@ def generate(
             "{max_claims}"
         )
 
-    if destination == "snowflake" and paths:
-        raise click.UsageError("Input paths should not be provided when destination is snowflake.")
-
-    writer: OutputDestinationWriter = (
-        SnowflakeWriter() if destination == "snowflake" else CsvWriter()
-    )
+    if writer is None:
+        writer = CsvWriter()
 
     if isinstance(writer, SnowflakeWriter):
         id_state = load_id_state(writer)
@@ -783,12 +796,13 @@ def generate(
         f.CNTRCT_PBP_NUM: [],
         f.PRAUC: [],
     }
-    load_file_dict(files=files, paths=list(paths))
+    if isinstance(writer, CsvWriter):
+        load_file_dict(files=files, paths=list(paths))
 
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in files}
 
     if (
-        destination == "csv"
+        isinstance(writer, CsvWriter)
         and not files[f.BENE_HSTRY]
         and not files[f.CLM]
         and not files[f.CNTRCT_PBP_NUM]
@@ -875,8 +889,9 @@ def generate(
                     adapters_to_dicts(rows), table_name, writer=writer, truncate=truncate
                 )
 
-    writer.close()
-    print("Done generating synthetic claims/prior auth data for provided BENE_SKs")
+    message = "Done generating synthetic claims/prior auth data for provided BENE_SKs"
+    print(message)
+    logger.info(message)
 
 
 def _generate_batch(
@@ -927,7 +942,7 @@ def _generate_batch(
         part_by=lambda x: four_part_key(x),
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] != "S",
     )
-    clm_dt_sgntr_per_sk = {str(row[f.CLM_DT_SGNTR_SK]): row for row in existing[f.CLM_DT_SGNTR]}
+    clm_dt_sgntr_per_sk = {int(row[f.CLM_DT_SGNTR_SK]): row for row in existing[f.CLM_DT_SGNTR]}
     clm_instnl_per_fpk = {four_part_key(row): row for row in existing[f.CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=existing[f.CLM_PRFNL],
@@ -955,7 +970,10 @@ def _generate_batch(
         not any_pac_clms and pac_gen == GeneratePacDataMode.IF_NONE
     )
 
-    print("Generating synthetic claims data for provided BENE_SKs...")
+    message = "Generating synthetic claims data for provided BENE_SKs..."
+    print(message)
+    logger.info(message)
+
     for pt_bene_sk in tqdm.tqdm(bene_sks):
         existing_clms = clms_per_bene_sk.get(pt_bene_sk, [])
         existing_adj_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) < 1011]
@@ -1044,7 +1062,7 @@ def _generate_batch(
             adj_clms_tbls[f.CLM_PROD].extend(diagnoses)
 
             clm_dt_sgntr = adj_util.gen_clm_dt_sgntr(
-                clm=clm, init_clm_dt_sgntr=clm_dt_sgntr_per_sk.get(str(clm[f.CLM_DT_SGNTR_SK]))
+                clm=clm, init_clm_dt_sgntr=clm_dt_sgntr_per_sk.get(int(clm[f.CLM_DT_SGNTR_SK]))
             )
             adj_clms_tbls[f.CLM_DT_SGNTR].append(clm_dt_sgntr)
 
@@ -1329,4 +1347,4 @@ def _generate_prior_auth(
 
 
 if __name__ == "__main__":
-    generate()
+    generate_locally()

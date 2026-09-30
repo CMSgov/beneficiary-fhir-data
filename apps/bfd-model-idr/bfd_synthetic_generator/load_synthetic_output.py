@@ -1,25 +1,18 @@
-import datetime
-import os
-import sys
+import csv
+import io
+import logging
 import time
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import snowflake.connector
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from snowflake.connector import SnowflakeConnection
-from snowflake.connector.pandas_tools import write_pandas
-from snowflake.snowpark import Session
-from snowflake.snowpark.functions import col, when_matched, when_not_matched
-
 from constants import (
     _INT_TO_STRING_COLS,
     BENE_DUAL,
@@ -53,7 +46,15 @@ from constants import (
     PRAUC,
     PRVDR_HSTRY,
 )
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from row_adapter import RowAdapter
+from snowflake.connector import SnowflakeConnection
+from snowflake.snowpark import Session
+from snowflake.snowpark.functions import col, when_matched, when_not_matched
+from snowflake.snowpark.functions import hash as snowpark_hash
+
+logger = logging.getLogger(__name__)
 
 ALL_KEYS = "all_keys"
 _SYNTHETIC_PREX = "SYNTHETIC"
@@ -105,11 +106,6 @@ class OutputDestinationWriter(ABC):
         batch_size: int,
     ) -> Iterator[list[int]]: ...
 
-    @abstractmethod
-    def close(self) -> None: ...
-
-    # get_claims_batch
-
 
 class CsvWriter(OutputDestinationWriter):
     def __init__(self, out_dir: str = "out") -> None:
@@ -134,9 +130,9 @@ class CsvWriter(OutputDestinationWriter):
 
         if hasattr(data[0], "kv"):
             data = [x.kv for x in data]
+            data = self._clean_int_columns(data)
 
-        dict_rows = self._clean_int_columns(data)
-        df = pd.json_normalize(dict_rows)
+        df = pd.json_normalize(data)
 
         if cols is not None and not isinstance(cols, str):
             df = df.reindex(columns=cols).fillna("")
@@ -194,27 +190,12 @@ class CsvWriter(OutputDestinationWriter):
             if row.get("BENE_MBI_ID") and int(row["BENE_SK"]) in bene_sks
         }
 
-    def close(self) -> None:
-        pass
-
 
 class SnowflakeWriter(OutputDestinationWriter):
-    def __init__(
-        self,
-        parallel: int = 8,
-        compression: str = "snappy",
-    ) -> None:
-        self.parallel = parallel
-        self.compression = compression
-        self.database = _require_env("IDR_DATABASE")
-        self.schema = _require_env("IDR_SCHEMA")
-        self.conn = self._connect(
-            account=_require_env("IDR_ACCOUNT"),
-            user=_require_env("IDR_USERNAME"),
-            private_key=_require_env("IDR_PRIVATE_KEY"),
-            warehouse=_require_env("IDR_WAREHOUSE"),
-        )
-        self.session = Session.builder.configs({"connection": self.conn}).create()
+    def __init__(self, session: Session, database: str, schema: str) -> None:
+        self.session = session
+        self.database = database
+        self.schema = schema
         self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     def _connect(
@@ -254,19 +235,23 @@ class SnowflakeWriter(OutputDestinationWriter):
 
     def qualified_session_table(self, table_name: str) -> Any:
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
-        return self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
+        return self.session.table(f"{database}.{schema}.{resolved_table_name}")
 
     def iter_bene_sk_batches(self, batch_size: int) -> Iterator[list[int]]:
+        perf_start = time.perf_counter()
         df = self.qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
-        buffer: list[int] = []
-        for pdf in df.to_pandas_batches():
-            buffer.extend(int(bene_sk) for bene_sk in pdf["BENE_SK"])
-            while len(buffer) >= batch_size:
-                yield buffer[:batch_size]
-                buffer = buffer[batch_size:]
-        if buffer:
-            print(f"length of buffer {len(buffer)}")
-            yield buffer
+        batch = []
+        for row in df.to_local_iterator():
+            batch.append(int(row["BENE_SK"]))
+            if len(batch) == batch_size:
+                yield batch
+                batch = []
+        if batch:
+            duration = time.perf_counter() - perf_start
+            message = f"Took {duration:.6f} seconds to get batch of benes"
+            logger.info(message)
+            print(f"length of buffer {len(batch)}")
+            yield batch
 
     def get_rows(self, table_name: str) -> list[dict[str, Any]]:
         rows = self.qualified_session_table(table_name).collect()
@@ -297,70 +282,22 @@ class SnowflakeWriter(OutputDestinationWriter):
             if row["BENE_MBI_ID"]
         ]
 
-    def _get_column_types(self, database: str, schema: str, table_name: str) -> dict[str, Any]:
+    def _get_known_columns(self, database: str, schema: str, table_name: str) -> set[str]:
         cache_key = (database, schema, table_name)
+
         if cache_key not in self._column_types_cache:
             rows = (
                 self.session.table(f'"{database}".information_schema.columns')
-                .filter((col("TABLE_SCHEMA") == schema) & (col("TABLE_NAME") == table_name))
-                .select("COLUMN_NAME", "DATA_TYPE", "NUMERIC_SCALE")
+                .filter(
+                    (col("TABLE_SCHEMA") == schema.upper())
+                    & (col("TABLE_NAME") == table_name.upper())
+                )
+                .select("COLUMN_NAME")
                 .collect()
             )
-            self._column_types_cache[cache_key] = {
-                row["COLUMN_NAME"]: {"data_type": row["DATA_TYPE"], "scale": row["NUMERIC_SCALE"]}
-                for row in rows
-            }
+            self._column_types_cache[cache_key] = {row["COLUMN_NAME"].upper() for row in rows}
+
         return self._column_types_cache[cache_key]
-
-    def _coerce_dataframe_types(
-        self, df: pd.DataFrame, database: str, schema: str, table_name: str
-    ) -> pd.DataFrame:
-        col_types = self._get_column_types(database, schema, table_name)
-        for column in df.columns:
-            metadata = col_types.get(column.upper())
-            data_type = metadata["data_type"]
-            scale = metadata["scale"]
-            if data_type == "TIMESTAMP_TZ":
-                df[column] = df[column].apply(
-                    lambda x: datetime.datetime.fromisoformat(str(x)).replace(tzinfo=None)
-                    if pd.notna(x) and str(x) not in ("", "NaT")
-                    else None
-                )
-                df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
-            elif data_type == "DATE":
-                df[column] = df[column].apply(lambda x: pd.Timestamp(x, unit="us", tz="UTC"))
-            elif data_type == "NUMBER":
-                df[column] = pd.to_numeric(
-                    df[column],
-                    errors="coerce",
-                )
-                if scale == 0:
-                    df[column] = np.where(df[column].notnull(), df[column], None)
-            elif data_type == "TEXT":
-                stringified_col = df[column].astype(str)
-                cleaned_col = stringified_col.str.strip().str.lower()
-                mask = df[column].isna() | cleaned_col.isin(["nan", "none"])
-                df[column] = np.where(mask, None, stringified_col)
-                df[column] = df[column].astype(object)
-        return df
-
-    def _prepare_dataframe(
-        self,
-        data: list[dict[str, Any]],
-        table_name: str,
-    ) -> tuple[pd.DataFrame, str, str, str]:
-        resolved_table_name, database, schema = self.resolve_target_table(table_name)
-        df = pd.DataFrame(data)
-
-        # filter out columns not in our schema. Only used in generation for certain fields we
-        # actually use
-        col_types = self._get_column_types(database, schema, resolved_table_name)
-        known_columns = {col.upper() for col in col_types}
-        df = df[[col for col in df.columns if col.upper() in known_columns]]
-
-        # coerce the types so Pandas doesn't guess the types
-        df = self._coerce_dataframe_types(df, database, schema, resolved_table_name)
-        return df, resolved_table_name, database, schema
 
     def write_table(
         self,
@@ -372,66 +309,33 @@ class SnowflakeWriter(OutputDestinationWriter):
         if not data:
             return
 
-        df, resolved_table_name, database, schema = self._prepare_dataframe(data, table_name)
-        """
+        perf_start = time.perf_counter()
+        resolved_table_name, database, schema = self.resolve_target_table(table_name)
         qualified_table = f"{database}.{schema}.{resolved_table_name}"
+        known_columns = self._get_known_columns(database, schema, resolved_table_name)
 
-        perf_start = time.perf_counter()
-        file_path = "data.parquet"
-        df.to_parquet(file_path, compression="snappy")
-        cursor = self.conn.cursor()
-
-        try:
-            if truncate:
-                cursor.execute(f"TRUNCATE TABLE IF EXISTS {qualified_table}")
-
-            self.session.use_database(f'"{database}"')
-            self.session.use_schema(f'"{schema}"')
-            cursor.execute("CREATE TEMP STAGE IF NOT EXISTS temp_stage")
-            cursor.execute(f"PUT file://{file_path} @temp_stage AUTO_COMPRESS=TRUE")
-
-            cursor.execute(
-
-                    COPY INTO {qualified_table}
-                    FROM @temp_stage/data.parquet
-                    FILE_FORMAT = (
-                    TYPE = PARQUET
-                    USE_VECTORIZED_SCANNER = TRUE
-                    USE_LOGICAL_TYPE = TRUE
-                    )
-                    MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-
-            )
-
-            result = cursor.fetchall()
-            print("Snowflake Copy Result:", result)
-
-        finally:
-            if Path.exists(file_path):
-                Path.unlink(file_path)
-                cursor.close()
-            duration = time.perf_counter() - perf_start
-            print(f"It took {duration:.6f} seconds to insert rows {table_name}")
-
-        """
-        perf_start = time.perf_counter()
-        success, _, num_rows, _ = write_pandas(
-            conn=self.conn,
-            df=df,
-            table_name=resolved_table_name,
-            database=database,
-            schema=schema,
-            overwrite=truncate,
-            parallel=self.parallel,
-            compression=self.compression,
-            use_logical_type=True,
-        )
+        clean_rows = []
+        for x in data:
+            row_dict = x.kv if hasattr(x, "kv") else x
+            if isinstance(row_dict, dict):
+                # Only keep fields that actually match a target table column name
+                filtered_row = {k: v for k, v in row_dict.items() if k.upper() in known_columns}
+                clean_rows.append(filtered_row)
         duration = time.perf_counter() - perf_start
-        print(f"It took {duration:.6f} seconds to insert rows {table_name}")
+        message = f"Clean up before insertion took {duration:.6f} seconds"
+        logger.info(message)
 
-        if not success:
-            raise RuntimeError(f"write_pandas reported failures writing to {table_name}")
-        print(f"Inserted {num_rows} rows to {table_name}")
+        perf_start = time.perf_counter()
+        df = self.session.create_dataframe(clean_rows)
+        duration = time.perf_counter() - perf_start
+        logger.info(f"created dataframe in {duration:.6f} seconds")
+
+        perf_start = time.perf_counter()
+        write_mode = "truncate" if truncate else "append"
+        df.write.mode(write_mode).save_as_table(qualified_table)
+        duration = time.perf_counter() - perf_start
+        message = f"Inserted into {table_name} in {duration:.6f} seconds"
+        logger.info(message)
 
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
@@ -465,21 +369,24 @@ class SnowflakeWriter(OutputDestinationWriter):
     def get_claims_batch(
         self, bene_sks: list[int], table_names: list[str]
     ) -> dict[str, list[RowAdapter]]:
-        self.session.use_database(self.database)
-        self.session.use_schema(self.schema)
-        clm_df = (
-            self.qualified_session_table(CLM).filter(col("BENE_SK").isin(bene_sks)).cache_result()
-        )
+        perf_start = time.perf_counter()
+        temp_table = f"{self.database}.{self.schema}.TEMP_BATCH_KEYS"
+        self.session.sql(f"DROP TABLE IF EXISTS {temp_table}").collect()
+        bene_df = self.session.create_dataframe([[b] for b in bene_sks], schema=["BENE_SK"])
+        bene_df.write.mode("overwrite").save_as_table(temp_table, table_type="transient")
+        temp_keys_df = self.session.table(temp_table)
+        clm_df = self.qualified_session_table(CLM).join(temp_keys_df, on="BENE_SK")
 
         key_dfs = {
             KeyRelation.FOUR_PART_KEY: clm_df.select(
                 "GEO_BENE_SK", "CLM_DT_SGNTR_SK", "CLM_TYPE_CD", "CLM_NUM_SK"
-            ),
-            KeyRelation.CLM_UNIQ_ID: clm_df.select("CLM_UNIQ_ID").distinct(),
+            ).cache_result(),
+            KeyRelation.CLM_UNIQ_ID: clm_df.select("CLM_UNIQ_ID").distinct().cache_result(),
             KeyRelation.CLM_RLT_COND_SGNTR_SK: clm_df.select("CLM_RLT_COND_SGNTR_SK")
             .filter(col("CLM_RLT_COND_SGNTR_SK").is_not_null())
-            .distinct(),
-            KeyRelation.CLM_DT_SGNTR_SK: clm_df.select("CLM_DT_SGNTR_SK").distinct(),
+            .distinct()
+            .cache_result(),
+            KeyRelation.CLM_DT_SGNTR_SK: clm_df.select("CLM_DT_SGNTR_SK").distinct().cache_result(),
         }
 
         result: dict[str, list[RowAdapter]] = {}
@@ -487,15 +394,26 @@ class SnowflakeWriter(OutputDestinationWriter):
             RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.to_local_iterator()
         ]
 
-        for table_name in table_names:
+        def fetch_table_data(table_name):
             key_df = key_dfs[_TABLE_RELATIONS[table_name]]
             joined = self.qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
             )
-            result[table_name] = [
+            return table_name, [
                 RowAdapter(row.as_dict(), loaded_from_file=True)
                 for row in joined.to_local_iterator()
             ]
+
+        with ThreadPoolExecutor(max_workers=min(len(table_names), 4)) as executor:
+            futures = [executor.submit(fetch_table_data, name) for name in table_names]
+            for future in futures:
+                table_name, adapter_list = future.result()
+                result[table_name] = adapter_list
+
+        self.session.sql(f"DROP TABLE IF EXISTS {temp_table}").collect()
+
+        duration = time.perf_counter() - perf_start
+        logger.info(f"Took {duration:.6f} seconds to fetch existing claims")
 
         return result
 
@@ -503,27 +421,71 @@ class SnowflakeWriter(OutputDestinationWriter):
         if not data:
             return
 
-        df, resolved_table_name, database, schema = self._prepare_dataframe(data, table_name)
+        perf_start = time.perf_counter()
+        resolved_table_name, database, schema = self.resolve_target_table(table_name)
+        qualified_table = f"{database}.{schema}.{resolved_table_name}"
+        known_columns = self._get_known_columns(database, schema, resolved_table_name)
+
+        # CSV file structure has to match the table schema order
+        target = self.session.table(qualified_table)
+        target_columns = [
+            field.name for field in target.schema.fields if field.name in known_columns
+        ]
+
+        csv_buffer = io.StringIO()
+        writer = csv.DictWriter(
+            csv_buffer, fieldnames=target_columns, extrasaction="ignore", restval=None
+        )
+
+        writer.writeheader()
+        for row_dict in data:
+            writer.writerow(row_dict)
+
+        csv_payload = csv_buffer.getvalue().encode("utf-8")
+        csv_buffer.close()
+
+        duration = time.perf_counter() - perf_start
+        logger.info(f"Packaging data into CSV completed in {duration:.6f} seconds")
+
+        staging_table_name = f"{database}.{schema}.MERGE_STAGE_{resolved_table_name}"
+        target_filename = f"batch_{resolved_table_name}.csv"
 
         perf_start = time.perf_counter()
-        source = self.session.write_pandas(
-            df=df,
-            table_name=f"{resolved_table_name}_STAGING",
-            database=database,
-            schema=schema,
-            auto_create_table=True,
-            overwrite=True,
-            table_type="temporary",
-            parallel=self.parallel,
-            compression=self.compression,
-            use_logical_type=True,
-        )
-        duration = time.perf_counter() - perf_start
-        print(f"{duration:.6f} seconds to writer to staging table")
-        target = self.session.table(f'"{database}"."{schema}"."{resolved_table_name}"')
-        pks = self._get_primary_keys(table_name)
 
-        update_cols = [c for c in df.columns if c not in pks]
+        self.session.sql(f"DROP TABLE IF EXISTS {staging_table_name}").collect()
+        self.session.sql(
+            f"CREATE TRANSIENT TABLE {staging_table_name} LIKE {qualified_table}"
+        ).collect()
+
+        file_input_stream = io.BytesIO(csv_payload)
+        self.session.file.put_stream(
+            input_stream=file_input_stream,
+            stage_location=f"@{database}.{schema}.generator_files_stage/{target_filename}",
+            auto_compress=True,
+            overwrite=True,
+        )
+
+        self.session.sql(
+            f"""
+            COPY INTO {staging_table_name}
+            FROM @{database}.{schema}.generator_files_stage/batch_{resolved_table_name}.csv
+            FILE_FORMAT = (
+                TYPE = 'CSV'
+                SKIP_HEADER = 1
+                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+            )   
+            PURGE = TRUE
+            """
+        ).collect()
+
+        source = self.session.table(staging_table_name)
+
+        duration = time.perf_counter() - perf_start
+        logger.info(f"Staged data to merge in {duration:.6f} seconds")
+
+        pks = self._get_primary_keys(table_name)
+        update_cols = [c for c in target_columns if c not in pks]
 
         join_expr = None
         for pk in pks:
@@ -533,20 +495,15 @@ class SnowflakeWriter(OutputDestinationWriter):
         merge_clauses = []
 
         if update_cols:
-            # v2_mdcr_clm_rlt_cond_sgntr_mbr would not have any columns left to check for updates
-            # after the exclusion from above
-            change_condition = None
-            for c in update_cols:
-                is_changed = target[c] != source[c]
-                change_condition = (
-                    is_changed if change_condition is None else (change_condition | is_changed)
-                )
+            target_hash = snowpark_hash(*[target[c] for c in update_cols])
+            source_hash = snowpark_hash(*[source[c] for c in update_cols])
+            change_condition = target_hash != source_hash
 
             merge_clauses.append(
                 when_matched(change_condition).update({c: source[c] for c in update_cols})
             )
 
-        merge_clauses.append(when_not_matched().insert({c: source[c] for c in df.columns}))
+        merge_clauses.append(when_not_matched().insert({c: source[c] for c in target_columns}))
 
         perf_start = time.perf_counter()
         result = target.merge(
@@ -554,15 +511,11 @@ class SnowflakeWriter(OutputDestinationWriter):
             join_expr,
             merge_clauses,
         )
+        self.session.sql(f"DROP TABLE IF EXISTS {staging_table_name}").collect()
         duration = time.perf_counter() - perf_start
-        print(f"{duration:.6f} seconds to merge into {table_name}")
-        print(
-            f"Merged {resolved_table_name}: {result.rows_inserted} inserted, {result.rows_updated} updated"
-        )
 
-    def close(self) -> None:
-        self.session.close()
-        self.conn.close()
+        message = f"Merged {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"
+        logger.info(message)
 
     def _get_primary_keys(self, table_name: str) -> list[str]:
         cleaned_table_name, database, schema = self.resolve_target_table(table_name)
@@ -589,17 +542,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         batch_size: int,
     ) -> Iterator[list[int]]:
         yield from self.iter_bene_sk_batches(batch_size)
-
-
-def _require_env(name: str) -> str:
-    val = os.environ.get(name)
-    if not val:
-        print(
-            f"Missing required env variable {name}. "
-            + "Source load-synthetic-credentials.sh with BFD_ENV set before running."
-        )
-        sys.exit(1)
-    return val
 
 
 class KeyRelation(StrEnum):

@@ -1,11 +1,14 @@
+import csv
+import io
+import os
+from pathlib import Path
 import random
 from datetime import date, datetime
 from typing import Any
-
-import pandas as pd
-from faker import Faker
+import zipfile
 
 import constants as f
+import pandas as pd
 from claims_static import (
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
@@ -15,6 +18,7 @@ from claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
+from faker import Faker
 from generator_util import GeneratorUtil
 from row_adapter import RowAdapter
 
@@ -51,18 +55,77 @@ class OtherGeneratorUtil:
         else:
             obj[f.META_LST_UPDT_SK] = 0
 
-    def gen_synthetic_clm_ansi_sgntr(self, src_path: str = f"sample-data/{f.CLM_ANSI_SGNTR}.csv"):
-        csv_df = pd.read_csv(  # type: ignore
-            src_path,
-            dtype=str,
-            na_filter=False,
-        )
-        clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
+    def load_addresses(self):
+        base_dir = Path(os.path.realpath(__file__)).parent
+        target_path = base_dir.joinpath("SYNTHETIC_CLM_ANSI_SGNTR.csv")
+        path_str = str(target_path)
+
+        # check if inside a zip archive (stored procedure)
+        if ".zip" in path_str:
+            zip_part, internal_part = path_str.split(".zip", 1)
+            zip_path = zip_part + ".zip"
+            internal_file_path = internal_part.lstrip("/\\")
+
+            with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as f:
+                file_text = f.read().decode("utf-8")
+                file_stream = io.StringIO(file_text)
+                csvreader = csv.reader(file_stream)
+                self._parse_csv_rows(csvreader)
+        else:
+            # fallback if normal directory (local development)
+            with target_path.open(encoding="utf-8") as file:
+                csvreader = csv.reader(file)
+                self._parse_csv_rows(csvreader)
+
+    def _parse_csv_rows(self, csvreader):
+        clm_ansi_sgntr: list[dict[str, Any]] = []
+        header = next(csvreader)
+        for row in csvreader:
+            cur_row: dict[str, Any] = {}
+            for col in range(len(row)):
+                cur_row[header[col]] = row[col]
+            clm_ansi_sgntr.append(cur_row)
 
         # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate
         # it's synthetic
         return [
             RowAdapter(x | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"})
+            for x in clm_ansi_sgntr
+        ]
+
+    def gen_synthetic_clm_ansi_sgntr(self):
+        base_dir = Path(os.path.realpath(__file__)).parent
+        target_path = base_dir.joinpath("SYNTHETIC_CLM_ANSI_SGNTR.csv")
+        path_str = str(target_path)
+
+        # Check if inside a zip archive (stored procedure)
+        if ".zip" in path_str:
+            zip_part, internal_part = path_str.split(".zip", 1)
+            zip_path = zip_part + ".zip"
+            internal_file_path = internal_part.lstrip("/\\")
+
+            with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as file_stream:
+                csv_df = pd.read_csv(
+                    file_stream,
+                    dtype=str,
+                    na_filter=False,
+                )
+        else:
+            # Fallback if normal directory (local development)
+            csv_df = pd.read_csv(  # type: ignore
+                target_path,
+                dtype=str,
+                na_filter=False,
+            )
+
+        clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
+
+        # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate it's synthetic
+        return [
+            RowAdapter(
+                {k: (None if v == "" else v) for k, v in x.items()}
+                | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"}
+            )
             for x in clm_ansi_sgntr
         ]
 

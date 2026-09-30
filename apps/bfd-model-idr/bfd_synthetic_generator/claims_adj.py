@@ -316,10 +316,10 @@ class AdjudicatedGeneratorUtil:
         clm_line[f.CLM_LINE_NCVRD_PD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line[f.CLM_LINE_NCVRD_CHRG_AMT] = round(random.uniform(0, 1500), 2)
         clm_line[f.CLM_LINE_NDC_CD] = random.choice(AVAILABLE_NDC)
-        clm_line[f.CLM_LINE_SRVC_UNIT_QTY] = random.randint(1, 10)
+        clm_line[f.CLM_LINE_SRVC_UNIT_QTY] = float(random.randint(1, 10))
         clm_line[f.CLM_LINE_FROM_DT] = clm[f.CLM_FROM_DT]
         clm_line[f.CLM_LINE_THRU_DT] = clm[f.CLM_THRU_DT]
-        clm_line[f.CLM_LINE_NDC_QTY] = random.randint(1, 10)
+        clm_line[f.CLM_LINE_NDC_QTY] = float(random.randint(1, 10))
         clm_line[f.CLM_LINE_NDC_QTY_QLFYR_CD] = "ML"
         clm_line[f.CLM_LINE_BENE_PD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line[f.CLM_LINE_PRVDR_PMT_AMT] = round(random.uniform(1, 1000000), 2)
@@ -327,9 +327,9 @@ class AdjudicatedGeneratorUtil:
         clm_line[f.CLM_LINE_BENE_PMT_AMT] = round(random.uniform(0, 5), 2)
         clm_line[f.CLM_LINE_BLOOD_DDCTBL_AMT] = round(random.uniform(0, 15), 2)
         clm_line[f.CLM_LINE_MDCR_DDCTBL_AMT] = round(random.uniform(0, 5), 2)
-        clm_line[f.CLM_LINE_NUM] = "1"
+        clm_line[f.CLM_LINE_NUM] = 1
         clm_line[f.CLM_FROM_DT] = clm[f.CLM_FROM_DT]
-        clm_line[f.CLM_LINE_RX_NUM] = round(random.uniform(0, 100000), 2)
+        clm_line[f.CLM_LINE_RX_NUM] = str(random.randint(10000, 999999))
         clm_line[f.CLM_LINE_GRS_CVRD_CST_TOT_AMT] = round(random.uniform(0, 1000), 2)
         clm_line[f.CLM_LINE_OTHR_TP_PD_AMT] = round(random.uniform(0, 1000), 2)
 
@@ -344,7 +344,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_rx[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_line_rx[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
         clm_line_rx[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
-        clm_line_rx[f.CLM_LINE_NUM] = "1"
+        clm_line_rx[f.CLM_LINE_NUM] = 1
         clm_line_rx[f.CLM_FROM_DT] = clm[f.CLM_FROM_DT]
         clm_line_rx[f.CLM_DSPNSNG_STUS_CD] = random.choice(["P", "C"])
         clm_line_rx[f.CLM_LINE_RX_ORGN_CD] = random.choice(
@@ -465,12 +465,12 @@ class AdjudicatedGeneratorUtil:
             init_diagnoses = []
 
         def match_diag(subdict: dict[str, Any]):
-            # Find the row with matching columns so that we can run regeneration on diagnosis rows
+            sub_str = {k: str(v) for k, v in subdict.items()}
             return next(
                 (
                     x
                     for x in init_diagnoses
-                    if subdict.items() <= {k: str(v) for k, v in x.kv.items()}.items()
+                    if sub_str.items() <= {k: str(v) for k, v in x.kv.items()}.items()
                 ),
                 None,
             ) or RowAdapter({})
@@ -484,7 +484,7 @@ class AdjudicatedGeneratorUtil:
             # "*_static" dicts are used to match upon existing diagnosis rows so that their "*_data"
             # columns can be updated during regeneration; otherwise, everytime claims data is
             # regenerated these rows would have different column values
-            principal_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "P"}
+            principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                 f.CLM_DGNS_PRCDR_ICD_IND: "0",
@@ -493,7 +493,7 @@ class AdjudicatedGeneratorUtil:
             principal = match_diag(principal_static)
             principal.extend(principal_data)
 
-            first_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "D"}
+            first_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "D"}
             first_data = {
                 f.CLM_DGNS_CD: principal[f.CLM_DGNS_CD],
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -502,7 +502,7 @@ class AdjudicatedGeneratorUtil:
             first = match_diag(first_static)
             first.extend(first_data)
 
-            admitting_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "A"}
+            admitting_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "A"}
             admitting_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -511,7 +511,7 @@ class AdjudicatedGeneratorUtil:
             admitting = match_diag(admitting_static)
             admitting.extend(admitting_data)
 
-            external_1_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "E"}
+            external_1_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "E"}
             external_1_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -520,7 +520,7 @@ class AdjudicatedGeneratorUtil:
             external_1 = match_diag(external_1_static)
             external_1.extend(external_1_data)
 
-            first_external_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "1"}
+            first_external_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "1"}
             first_external_data = {
                 f.CLM_DGNS_CD: external_1[f.CLM_DGNS_CD],
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -539,7 +539,7 @@ class AdjudicatedGeneratorUtil:
             )
         elif clm_type_cd == 40:
             # outpatient uses principal, other, external cause of injury, patient reason for visit
-            principal_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "P"}
+            principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                 f.CLM_DGNS_PRCDR_ICD_IND: "0",
@@ -548,7 +548,7 @@ class AdjudicatedGeneratorUtil:
             principal = match_diag(principal_static)
             principal.extend(principal_data)
 
-            first_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "D"}
+            first_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "D"}
             first_data = {
                 f.CLM_DGNS_CD: principal[f.CLM_DGNS_CD],
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -557,7 +557,7 @@ class AdjudicatedGeneratorUtil:
             first = match_diag(first_static)
             first.extend(first_data)
 
-            rfv_diag_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "R"}
+            rfv_diag_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "R"}
             rfv_diag_data = {
                 f.CLM_DGNS_CD: principal[f.CLM_DGNS_CD],
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -574,7 +574,7 @@ class AdjudicatedGeneratorUtil:
             )
         elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
             # professional claims use principal diagnosis and other diagnoses
-            principal_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "P"}
+            principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                 f.CLM_DGNS_PRCDR_ICD_IND: "0",
@@ -583,7 +583,7 @@ class AdjudicatedGeneratorUtil:
             principal = match_diag(principal_static)
             principal.extend(principal_data)
 
-            first_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "D"}
+            first_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "D"}
             first_data = {
                 f.CLM_DGNS_CD: principal[f.CLM_DGNS_CD],
                 f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
@@ -599,7 +599,7 @@ class AdjudicatedGeneratorUtil:
             )  # Professional claims typically have fewer diagnoses
 
         for diagnosis_sqnc in range(2, num_add_diags + 2):
-            diagnosis_static = {f.CLM_VAL_SQNC_NUM: str(diagnosis_sqnc), f.CLM_PROD_TYPE_CD: "D"}
+            diagnosis_static = {f.CLM_VAL_SQNC_NUM: diagnosis_sqnc, f.CLM_PROD_TYPE_CD: "D"}
             diagnosis_data: dict[str, Any] = {}
             if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
                 diagnosis_data = {

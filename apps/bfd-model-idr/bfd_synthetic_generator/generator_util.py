@@ -1,11 +1,14 @@
 import csv
 import datetime
+import io
 import itertools
 import json
+import os
 import random
 import string
 import subprocess
 import sys
+import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable, Iterable
@@ -16,10 +19,6 @@ from typing import Any
 
 import pandas as pd
 import tqdm
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
-from faker import Faker
-
 from constants import (
     BENE_DUAL,
     BENE_ENTLMT,
@@ -40,6 +39,9 @@ from constants import (
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
 )
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+from faker import Faker
 from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
 
@@ -554,44 +556,81 @@ class GeneratorUtil:
 
     def load_code_systems(self):
         code_systems = {}
-        sushi_dir = "./sushi"
-        relative_path = f"{sushi_dir}/fsh-generated/resources"
+        base_dir = Path(os.path.realpath(__file__)).parent
+        target_path = base_dir.joinpath("sushi/fsh-generated/resources")
+        path_str = str(target_path)
 
-        # Check if the resources directory exists, if not run sushi build
-        if not Path(relative_path).exists():
-            run_command("npm install")
-            run_command("npm run sushi-build")
+        if ".zip" in path_str:
+            zip_part, internal_part = path_str.split(".zip", 1)
+            zip_path = zip_part + ".zip"
+            internal_dir_path = internal_part.lstrip("/\\")
 
-        try:
-            for path in Path(relative_path).iterdir():
-                file = path.name
-                if ".json" not in file or "CodeSystem" not in file:
-                    continue
-                full_path = relative_path + "/" + file
-                try:
-                    with Path(full_path).open() as file:
-                        data = json.load(file)
-                        concepts = [i["code"] for i in data["concept"]]
-                        code_systems[data["name"]] = concepts
-                except FileNotFoundError:
-                    print(f"Error: File not found at path: {full_path}")
-                except json.JSONDecodeError:
-                    print(f"Error: Invalid JSON format in file: {full_path}")
-        except FileNotFoundError:
-            print(f"Error: Resources directory not found at path: {relative_path}")
-            sys.exit(1)
+            with zipfile.ZipFile(zip_path, "r") as z:
+                for zip_info in z.infolist():
+                    file_path_in_zip = zip_info.filename
 
-        self.code_systems: dict[str, list[str]] = code_systems
+                    if file_path_in_zip.startswith(internal_dir_path) and file_path_in_zip.endswith(
+                        ".json"
+                    ):
+                        file_name = os.path.basename(file_path_in_zip)
+                        if "CodeSystem" not in file_name:
+                            continue
+
+                        with z.open(zip_info) as f:
+                            try:
+                                data = json.loads(f.read().decode("utf-8"))
+                                if "concept" in data and "name" in data:
+                                    concepts = [i["code"] for i in data["concept"]]
+                                    code_systems[data["name"]] = concepts
+                            except (json.JSONDecodeError, KeyError) as e:
+                                print(f"Error parsing {file_name}: {e}")
+        else:
+            # fallback if normal directory (local development)
+            if target_path.exists():
+                for path in target_path.iterdir():
+                    if ".json" not in path.name or "CodeSystem" not in path.name:
+                        continue
+                    try:
+                        with path.open(encoding="utf-8") as file:
+                            data = json.load(file)
+                            concepts = [i["code"] for i in data["concept"]]
+                            code_systems[data["name"]] = concepts
+                    except (json.JSONDecodeError, KeyError, FileNotFoundError):
+                        continue
+            else:
+                print(f"Error: Local resources directory not found at path: {target_path}")
+
+        self.code_systems = code_systems
 
     def load_addresses(self):
-        with Path("beneficiary-components/addresses.csv").open() as file:
-            csvreader = csv.reader(file)
-            header = next(csvreader)
-            for row in csvreader:
-                cur_row: dict[str, Any] = {}
-                for col in range(len(row)):
-                    cur_row[header[col]] = row[col]
-                self.address_options.append(cur_row)
+        base_dir = Path(os.path.realpath(__file__)).parent
+        target_path = base_dir.joinpath("beneficiary-components/addresses.csv")
+        path_str = str(target_path)
+
+        # check if inside a zip archive (stored procedure)
+        if ".zip" in path_str:
+            zip_part, internal_part = path_str.split(".zip", 1)
+            zip_path = zip_part + ".zip"
+            internal_file_path = internal_part.lstrip("/\\")
+
+            with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as f:
+                file_text = f.read().decode("utf-8")
+                file_stream = io.StringIO(file_text)
+                csvreader = csv.reader(file_stream)
+                self._parse_csv_rows(csvreader)
+        else:
+            # fallback if normal directory (local development)
+            with target_path.open(encoding="utf-8") as file:
+                csvreader = csv.reader(file)
+                self._parse_csv_rows(csvreader)
+
+    def _parse_csv_rows(self, csvreader):
+        header = next(csvreader)
+        for row in csvreader:
+            cur_row: dict[str, Any] = {}
+            for col in range(len(row)):
+                cur_row[header[col]] = row[col]
+            self.address_options.append(cur_row)
 
     def gen_mbi(self) -> str:
         return self.id_gen.mbi()
