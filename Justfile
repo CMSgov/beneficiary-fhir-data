@@ -69,7 +69,7 @@ swagger:
 
 [arg("env", long, pattern=env_pattern)]
 migrate-synthetic env:
-    BFD_ENV={{ env }} ./apps/bfd-db-migrator-synthetic/migrate.sh
+    BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-synthetic/migrate.sh
 
 [arg("env", long, pattern=env_pattern)]
 [arg("load-mode", long, pattern="(local|synthetic)")]
@@ -176,3 +176,9 @@ patient-generator patients="" exclude-empty="" force-ztm-static-rows="" *paths:
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
         {{ if force-ztm-static-rows == "1" { "--force-ztm-static-rows" } else { "" } }}
+
+[arg("env", long, pattern=env_pattern)]
+[arg("headless", long, value="1")]
+locust env headless="":
+    BFD_ENV="{{ env }}" apps/utils/locust_tests/locust.sh \
+        {{ if headless != "" { "--headless" } else { "" } }}
