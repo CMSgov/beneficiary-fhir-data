@@ -43,9 +43,8 @@ EOF
   ])
 
   slos_metrics = {
-    all_latency         = "http-requests.latency.all.avg"
-    all_responses_count = "http-requests.count.all.count"
-    all_http500s_count  = "http-requests.count.5xx-responses.count"
+    all_latency        = "http-requests.latency.all.avg"
+    all_http500s_count = "http-requests.count.5xx-responses.count"
   }
 
 
@@ -114,13 +113,13 @@ resource "aws_cloudwatch_metric_alarm" "slo_all_latency_mean_15m_warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
-  alarm_name          = "${local.alarm_name_prefix}-slo-http500-50pct-24h-alert"
+  alarm_name          = "${local.alarm_name_prefix}-slo-http500-10pct-1h-alert"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  threshold           = 50
+  threshold           = 10
 
   alarm_description = join("", [
-    "HTTP 500 error rate over 24 hours exceeded ALERT threshold of 50% for ",
+    "HTTP 500 error rate over 1 hour exceeded ALERT threshold of 10% for ",
     "${local.target_service} in ${local.env}. ",
     "Only fires if total requests > 1000. ",
     "Logs query: ${local.http500_log_insights_query_url}"
@@ -134,26 +133,37 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
   }
 
   metric_query {
-    id = "m1"
 
+    id = "m1"
+    # this is using the load balancer data
+    # the metrics published from the app have dimensions
+    # there are limitations for how many dimensions we can look at per alarm that this works around
     metric {
-      metric_name = local.slos_metrics.all_responses_count
-      namespace   = local.namespace
-      period      = 86400
+      metric_name = "RequestCount"
+      namespace   = "AWS/ApplicationELB"
+      period      = 3600
       stat        = "Sum"
       unit        = "Count"
+      dimensions = {
+        LoadBalancer = data.aws_lb.main.arn_suffix
+      }
     }
   }
 
   metric_query {
     id = "m2"
-
+    # this is using the load balancer data
+    # the metrics published from the app have dimensions
+    # there are limitations for how many dimensions we can look at per alarm that this works around
     metric {
-      metric_name = local.slos_metrics.all_http500s_count
-      namespace   = local.namespace
-      period      = 86400
+      metric_name = "HTTPCode_ELB_5XX_Count"
+      namespace   = "AWS/ApplicationELB"
+      period      = 3600
       stat        = "Sum"
       unit        = "Count"
+      dimensions = {
+        LoadBalancer = data.aws_lb.main.arn_suffix
+      }
     }
   }
 
@@ -167,8 +177,6 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
   alarm_name          = "${local.alarm_name_prefix}-slo-http500-any-count-5m-alert"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  period              = "300"
-  statistic           = "Sum"
   threshold           = "1"
 
   alarm_description = join("", [
@@ -177,12 +185,16 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
     "Logs query: ${local.http500_log_insights_query_url}"
   ])
 
-  metric_name = local.slos_metrics.all_http500s_count
-  namespace   = local.namespace
+  metric_query {
+    id = "m1"
+    # This can be done this way because the window is under 3 hours
+    expression  = "SELECT SUM(\"${local.slos_metrics.all_http500s_count}\") FROM SCHEMA(\"${local.namespace}\", response_status)"
+    period      = 300
+    return_data = true
+  }
 
   alarm_actions = local.slos_alert_arn
 
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
 }
-
