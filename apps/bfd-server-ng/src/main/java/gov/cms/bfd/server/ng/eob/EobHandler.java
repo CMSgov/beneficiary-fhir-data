@@ -9,13 +9,14 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationItem;
+import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -278,8 +279,9 @@ public class EobHandler {
 
   private boolean claimItemIsSamhsa(
       ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
-    return procedureIsSamhsa(claimItem.getProcedure(), claimThroughDate, claimUniqueId)
-        || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
+    return procedureIsSamhsa(claimItem.getProcedureOptional(), claimThroughDate, claimUniqueId)
+        || hcpcsIsSamhsa(
+            claimItem.getClaimLine().getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }
 
   private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
@@ -304,7 +306,7 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-      Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
+      Optional<? extends ProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
     if (proc.isEmpty()) {
       return false;
     }

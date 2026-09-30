@@ -310,16 +310,6 @@ public enum ClaimTypeCode {
         .get(code);
   }
 
-  public Optional<ClaimContext> toContext() {
-    if (isInstitutional()) {
-      return Optional.of(ClaimContext.INSTITUTIONAL);
-    }
-    if (isProfessional()) {
-      return Optional.of(ClaimContext.PROFESSIONAL);
-    }
-    return Optional.empty();
-  }
-
   public CodeableConcept toFhirType() {
     var codeableConcept =
         new CodeableConcept(
