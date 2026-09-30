@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
+import gov.cms.bfd.server.ng.claim.model.common.DateSupportingInfoInstitutionalProfessional;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
@@ -32,6 +33,7 @@ abstract class ClaimProfessionalBase extends ClaimBase {
   @Column(name = "clm_ptnt_cntl_num")
   private Optional<String> patientControlNumber;
 
+  @Embedded private DateSupportingInfoInstitutionalProfessional commonDateSupportingInfo;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
   @Embedded private BillingProviderProfessional billingProviderHistory;
@@ -178,10 +180,12 @@ abstract class ClaimProfessionalBase extends ClaimBase {
 
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
     var sharedHeaderSupportingInfo =
-        Stream.of(
-                claimSubmissionDate.toFhir(supportingInfoFactory),
-                getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
-            .flatMap(Optional::stream)
+        Stream.concat(
+                Stream.of(
+                        claimSubmissionDate.toFhir(supportingInfoFactory),
+                        getClaimContractorNumber().map(c -> c.toFhir(supportingInfoFactory)))
+                    .flatMap(Optional::stream),
+                getCommonDateSupportingInfo().toFhir(supportingInfoFactory).stream())
             .toList();
 
     Stream.of(sharedHeaderSupportingInfo, getSubclassSupportingInfo())
