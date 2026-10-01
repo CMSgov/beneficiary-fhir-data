@@ -305,7 +305,6 @@ def _handle_snowflake_flow(
 
     # Regenerate existing data updates in batches
     if not truncate:
-        idx = 1
         for bene_sks_batch in writer.iter_bene_sk_batches(batch_size):
             existing = writer.get_patient_batch(bene_sks_batch, patient_tables)
             regenerate_static_tables(generator, existing)
@@ -315,8 +314,6 @@ def _handle_snowflake_flow(
                 generator, existing[BENE_HSTRY], patient_mbi_id_rows, force_ztm
             )
             generator.flush_batch(writer)
-            logger.info(f"Patient data generation completed for batch {idx}!")
-            idx += 1
     else:
         # Generate new synthetic patients in batches
         num_new_patients = int(patients)
@@ -326,7 +323,6 @@ def _handle_snowflake_flow(
                 generator, [RowAdapter({}) for _ in range(chunk)], {}, force_ztm
             )
             generator.flush_batch(writer)
-            logger.info(f"Patient data generation completed for batch {i}!")
 
     logger.info("Patient data generation complete!")
 

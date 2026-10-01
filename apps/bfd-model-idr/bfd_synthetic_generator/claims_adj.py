@@ -276,7 +276,7 @@ class AdjudicatedGeneratorUtil:
             clm_dt_sgntr[f.CLM_ACTV_CARE_FROM_DT] = clm[f.CLM_FROM_DT]
             clm_dt_sgntr[f.CLM_DSCHRG_DT] = clm[f.CLM_THRU_DT]
             if clm_type_cd in (20, 30):
-                if random.choice([0, 1]):  # TODO: this is changing the date!
+                if random.choice([0, 1]):
                     clm_dt_sgntr[f.CLM_QLFY_STAY_FROM_DT] = clm[f.CLM_FROM_DT]
                     clm_dt_sgntr[f.CLM_QLFY_STAY_THRU_DT] = clm[f.CLM_THRU_DT]
                 else:
@@ -285,7 +285,7 @@ class AdjudicatedGeneratorUtil:
 
             if clm_type_cd in (50, 60, 61, 62, 63, 64):
                 clm_dt_sgntr[f.CLM_MDCR_EXHSTD_DT] = clm[f.CLM_THRU_DT]
-                if random.choice([0, 1]):  # TODO: this is changing the date!
+                if random.choice([0, 1]):
                     clm_dt_sgntr[f.CLM_NCVRD_FROM_DT] = clm[f.CLM_THRU_DT]
                     clm_dt_sgntr[f.CLM_NCVRD_THRU_DT] = clm[f.CLM_THRU_DT]
                 else:

@@ -306,6 +306,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self, bene_sks: list[int], table_names: list[str]
     ) -> dict[str, list[RowAdapter]]:
         perf_start = time.perf_counter()
+        # Dumping bene_sks into a transient table to take advantage of scaling with a join
         temp_table = f"{self.database}.{self.schema}.TEMP_BATCH_KEYS"
         self.session.sql(f"DROP TABLE IF EXISTS {temp_table}").collect()
         bene_df = self.session.create_dataframe([[b] for b in bene_sks], schema=["BENE_SK"])
@@ -346,7 +347,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 table_name, adapter_list = future.result()
                 result[table_name] = adapter_list
 
-        self.session.sql(f"DROP TABLE IF EXISTS {temp_table}").collect()
+        self.session.table(temp_table).drop_table()
 
         duration = time.perf_counter() - perf_start
         logger.info(f"Took {duration:.6f} seconds to fetch existing claims")
@@ -398,10 +399,9 @@ class SnowflakeWriter(OutputDestinationWriter):
             f"CREATE TRANSIENT TABLE {staging_table_name} LIKE {qualified_table}"
         ).collect()
 
-        self.session.sql(
-            f"CREATE STAGE IF NOT EXISTS {database}.{schema}.generator_files_stage"
-        ).collect()
-
+        # Note: Snowpark has session.create_dataframe() but it serializes data locally and chokes
+        # on wide tables a lot of rows. To scale, this we buffer raw rows to CSV and stream
+        # compressed chunks to staging table and then run an upsert using Snowpark's merge
         file_input_stream = io.BytesIO(csv_payload)
         self.session.file.put_stream(
             input_stream=file_input_stream,
@@ -456,7 +456,8 @@ class SnowflakeWriter(OutputDestinationWriter):
             join_expr,
             merge_clauses,
         )
-        self.session.sql(f"DROP TABLE IF EXISTS {staging_table_name}").collect()
+
+        self.session.table(staging_table_name).drop_table()
         duration = time.perf_counter() - perf_start
 
         message = f"Wrote to {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"

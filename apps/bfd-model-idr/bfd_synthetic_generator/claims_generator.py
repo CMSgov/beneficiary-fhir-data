@@ -866,7 +866,6 @@ def generate(
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
-    idx = 1
     for bene_sks_batch in writer.get_bene_sks(files, bene_sk_mode, batch_size):
         existing_claims = files
         if isinstance(writer, SnowflakeWriter) and not truncate:
@@ -903,8 +902,6 @@ def generate(
             if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
                 continue
             gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
-        logger.info(f"Claims data generation completed for batch {idx}!")
-        idx += 1
 
     message = "Done generating synthetic claims/prior auth data for provided BENE_SKs"
     print(message)
@@ -920,8 +917,8 @@ def _generate_batch(
     min_claims: int,
     max_claims: int,
     pac_gen: GeneratePacDataMode,
-    generated_type_1_npis=list[str],
-    generated_type_2_npis=list[str],
+    generated_type_1_npis: list[str],
+    generated_type_2_npis: list[str],
 ) -> dict[str, list[RowAdapter]]:
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in existing}
     clms_per_bene_sk = partition_rows(llist=existing[f.CLM], part_by=lambda x: int(x[f.BENE_SK]))

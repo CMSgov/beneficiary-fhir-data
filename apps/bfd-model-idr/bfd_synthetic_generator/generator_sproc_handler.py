@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 _BATCH_SIZE = 50_000
 
 
-def regenerate(
+def generate_synthetic_data(
     session: Session,
     force_ztm: bool,
     pac_gen: str,
@@ -40,7 +40,7 @@ def regenerate(
     schema = session.get_current_schema().replace('"', "")
     writer = SnowflakeWriter(session, db, schema)
 
-    # regenerate patient data
+    # generate patient data
     load_inputs(
         patients=patients,
         force_ztm=force_ztm,
@@ -52,7 +52,7 @@ def regenerate(
     pac_gen = pac_gen.split(".")[-1].upper() if pac_gen else "IF_NONE"
     bene_sk_mode = bene_sk_mode.split(".")[-1].upper() if bene_sk_mode else "BOTH"
 
-    # regenerate claim data
+    # generate claim data
     if claims:
         generate(
             min_claims=min_claims,

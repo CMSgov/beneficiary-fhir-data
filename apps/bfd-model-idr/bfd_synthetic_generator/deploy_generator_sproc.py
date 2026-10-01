@@ -168,11 +168,11 @@ def main(
     print(f"Upload Status: {put_result[0].status}")
 
     print("Creating/Updating stored procedure...")
-    snowflake_regenerate = sess.sproc.register_from_file(
+    generator_sproc = sess.sproc.register_from_file(
         file_path="@generator_files_stage/bfd_synthetic_generator.zip",
-        func_name="regenerate_synthetic_data.regenerate",
+        func_name="generator_sproc_handler.generate_synthetic_data",
         return_type=VariantType(),
-        name="regenerate",
+        name="generate_synthetic_data",
         is_permanent=True,
         stage_location="@generator_files_stage",
         replace=True,
@@ -183,7 +183,6 @@ def main(
             "pydantic",
             "faker",
             "pandas",
-            "pyarrow",
         ],
         input_types=[
             BooleanType(),
@@ -199,18 +198,21 @@ def main(
         ],
     )
 
+    # Set LOG_LEVEL so Snowflake can hook our logging into an event table
     sess.sql("""
-        ALTER PROCEDURE regenerate(
+        ALTER PROCEDURE generate_synthetic_data(
             BOOLEAN, VARCHAR, VARCHAR, NUMBER, BOOLEAN, NUMBER, NUMBER, BOOLEAN, BOOLEAN, NUMBER
         ) SET LOG_LEVEL = 'INFO';
     """).collect()
 
     db = sess.get_current_database().replace('"', "")
-    schema = sess.get_current_schema().replace('"', "")
-    sess.sql(f"ALTER DATABASE {db} SET EVENT_TABLE = {db}.{schema}.procedure_event_table").collect()
+    event_table = f"{db}.CMS_VDM_VIEW_MDCR_PRD.procedure_event_table"
 
-    print("Running stored procedure to regenerate synthetic data...")
-    snowflake_regenerate(
+    sess.sql(f"CREATE EVENT TABLE IF NOT EXISTS {event_table}").collect()
+    sess.sql(f"ALTER DATABASE {db} SET EVENT_TABLE = {event_table}").collect()
+
+    print("Running stored procedure to generate synthetic data...")
+    generator_sproc(
         force_ztm,
         pac_gen.name if hasattr(pac_gen, "name") else str(pac_gen),
         bene_sk_mode.name if hasattr(bene_sk_mode, "name") else str(bene_sk_mode),
