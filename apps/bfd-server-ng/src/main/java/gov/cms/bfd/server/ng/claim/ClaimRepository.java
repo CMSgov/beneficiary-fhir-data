@@ -4,13 +4,24 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalBasisNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalBasisSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalRegularNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalBasisNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalBasisSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalRegularNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalRegularSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxBasis;
 import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxCms;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxRegular;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.annotation.Timed;
@@ -169,7 +180,51 @@ public class ClaimRepository {
               SystemType.NCH,
               ClaimProfile.CMS),
           new ClaimTypeDefinition(
-              CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS, ClaimProfile.CMS));
+              CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS, ClaimProfile.CMS),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
+              ClaimProfessionalRegularSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_NCH,
+              ClaimProfessionalRegularNch.class,
+              SystemType.NCH,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
+              ClaimInstitutionalRegularSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_NCH,
+              ClaimInstitutionalRegularNch.class,
+              SystemType.NCH,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_RX_CMS, ClaimRxRegular.class, SystemType.DDPS, ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
+              ClaimProfessionalBasisSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_NCH,
+              ClaimProfessionalBasisNch.class,
+              SystemType.NCH,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
+              ClaimInstitutionalBasisSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_NCH,
+              ClaimInstitutionalBasisNch.class,
+              SystemType.NCH,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_RX_CMS, ClaimRxBasis.class, SystemType.DDPS, ClaimProfile.BASIS));
 
   /**
    * Search for a claim by its ID.

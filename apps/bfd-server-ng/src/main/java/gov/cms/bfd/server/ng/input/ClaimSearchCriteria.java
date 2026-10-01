@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.input;
 
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import java.util.List;

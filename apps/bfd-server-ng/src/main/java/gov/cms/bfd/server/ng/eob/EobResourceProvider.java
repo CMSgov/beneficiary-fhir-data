@@ -12,12 +12,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
@@ -92,6 +92,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
+   * @param profile requested profile
    * @param request HTTP request details
    * @param requestDetails HAPI FHIR request details
    * @return bundle
@@ -110,6 +111,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final StringParam profile,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
@@ -139,7 +141,7 @@ public class EobResourceProvider implements IResourceProvider {
             claimTypeCodes,
             outcomeCriteria,
             FhirInputConverter.parseSourceParameter(source),
-            ClaimProfile.CMS); // TODO - change this to a query param
+            FhirInputConverter.parseProfileParameter(profile));
 
     return eobHandler.searchByBene(criteria, options, Optional.of(requestDetails));
   }

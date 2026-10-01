@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
@@ -180,7 +181,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             Collections.emptyList(),
             List.of(),
             List.of(),
-            Collections.emptyList());
+            Collections.emptyList(),
+            ClaimProfile.CMS);
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
   }

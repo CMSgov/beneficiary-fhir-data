@@ -556,4 +556,17 @@ public class FhirInputConverter {
       return Optional.of(Boolean.parseBoolean(headerValues.getFirst()));
     }
   }
+
+  /**
+   * Takes a string query param and converts it into a ClaimProfile enum.
+   *
+   * @param profile the string query param
+   * @return the associated ClaimProfile, with CMS being the default
+   */
+  public static ClaimProfile parseProfileParameter(StringParam profile) {
+    if (profile == null || profile.getValue() == null) {
+      return ClaimProfile.CMS;
+    }
+    return ClaimProfile.valueOf(profile.getValue());
+  }
 }
