@@ -14,9 +14,14 @@ jobs:
       - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
         with:
           repo: terraform-docs/terraform-docs
+      - name: "Install yq"
+        run: |
+          # Download newer version of yq because the one in the Ubuntu repo is too old
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
       - run: |
           sudo apt-get update
-          sudo apt-get install yq libxml2-utils
+          sudo apt-get install libxml2-utils
           ./hooks/install-java-format.sh
       - uses: taiki-e/install-action@9983c65e42da123ff25d1f78505eb6de315aa172 # v2.87.20
         with:

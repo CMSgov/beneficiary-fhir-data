@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -40,6 +41,7 @@ public class PatientResourceProvider implements IResourceProvider {
    * @param fhirId FHIR ID
    * @return patient
    */
+  @RetryOnFailoverOrConnectionException
   @Read
   public Patient find(@IdParam final IdType fhirId) {
     var patient = patientHandler.find(FhirInputConverter.toLong(fhirId));
@@ -53,6 +55,7 @@ public class PatientResourceProvider implements IResourceProvider {
    * @param lastUpdated last updated datetime
    * @return bundle
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID) final IdType fhirId,
@@ -68,6 +71,7 @@ public class PatientResourceProvider implements IResourceProvider {
    * @param lastUpdated last updated datetime
    * @return bundle
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) final TokenParam identifier,
@@ -83,6 +87,7 @@ public class PatientResourceProvider implements IResourceProvider {
    * @param beneSK the ID of the coverage to search for.
    * @return A Bundle of Coverage resources.
    */
+  @RetryOnFailoverOrConnectionException
   @Operation(name = "generate-insurance-card", typeName = "Coverage", idempotent = true)
   public Bundle searchC4DICByBeneficiary(@IdParam final IdType beneSK) {
     var beneSk = FhirInputConverter.toLong(new IdType(beneSK.getValue()));
@@ -96,6 +101,7 @@ public class PatientResourceProvider implements IResourceProvider {
    * @param patient beneficiary input
    * @return A bundle with the attached patient, if found
    */
+  @RetryOnFailoverOrConnectionException
   @Operation(name = "idi-match", idempotent = true)
   public Bundle patientMatch(@OperationParam(name = "IDIPatient") final Patient patient) {
     var patientMatch = FhirInputConverter.getPatientMatch(patient);
