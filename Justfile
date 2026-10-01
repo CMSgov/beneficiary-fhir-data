@@ -10,7 +10,7 @@ bootstrap:
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs
+    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt
     # Some people may not have installed VS Code from brew,
     # so skip if it already exists
     if !command -v code >/dev/null 2>&1
@@ -25,6 +25,16 @@ bootstrap:
     mv .git/hooks/pre-commit .git/hooks/pre-commit.prek
     cp -p ./hooks/run-pre-commit.sh .git/hooks/pre-commit
     cp -p ./hooks/rerun-changed.sh .git/hooks/pre-commit.rerun
+
+[arg("env", long, pattern=env_pattern)]
+extract-public-key env:
+    BFD_ENV="{{ env }}" ./apps/utils/scripts/extract-public-key.sh
+
+[arg("query")]
+[arg("resource", pattern="(Patient|Coverage|ExplanationOfBenefit)")]
+[arg("env", long, pattern=env_pattern)]
+bfd-request resource query env:
+    BFD_ENV="{{ env }}" ./apps/utils/scripts/bfd-request.sh "{{ resource }}" "{{ query }}"
 
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
@@ -201,6 +211,6 @@ claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_non
 
 [arg("env", long, pattern=env_pattern)]
 [arg("headless", long, value="1")]
-locust env headless="":
-    BFD_ENV="{{ env }}" apps/utils/locust_tests/locust.sh \
+regression-test env headless="":
+    BFD_ENV="{{ env }}" apps/utils/locust_tests/regression.sh \
         {{ if headless != "" { "--headless" } else { "" } }}
