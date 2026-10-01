@@ -620,8 +620,7 @@ class _ClaimsFile(StrEnum):
         ordered_headers: list[str],
     ) -> None:
         self.ordered_headers = ordered_headers
-
-        self.out_path = Path(f"out/{value}.csv")
+        self.out_path = Path(f"../out/{value}.csv")
 
     def __new__(
         cls: type["_ClaimsFile"],
@@ -749,8 +748,7 @@ def generate(
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
         raise click.UsageError(
-            "error: min claims value of {min_claims} is greater than max claims value of "
-            "{max_claims}"
+            f"error: min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
     if writer is None:
@@ -784,7 +782,6 @@ def generate(
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
     else:
         id_gen = RandomIdGenerator()
-        Path("out").mkdir(exist_ok=True)
 
         if sushi:
             print("Running sushi build")
@@ -845,12 +842,16 @@ def generate(
             init_provider_historys=existing_providers,
         )
     )
-    gen_utils.export_table(generated_provider_histories, f.PRVDR_HSTRY, writer, ALL_KEYS)
+    gen_utils.export_table(
+        adapters_to_dicts(generated_provider_histories), f.PRVDR_HSTRY, writer, ALL_KEYS
+    )
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
-    gen_utils.export_table(clm_ansi_sgntr_rows, f.CLM_ANSI_SGNTR, writer, ALL_KEYS)
+    gen_utils.export_table(
+        adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer, ALL_KEYS
+    )
 
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=enable_samhsa)
     pac_util = PacGeneratorUtil()
@@ -867,13 +868,13 @@ def generate(
     # files, else there will be drift in the order of generated rows
     idx = 1
     for bene_sks_batch in writer.get_bene_sks(files, bene_sk_mode, batch_size):
-        exisiting_claims = files
+        existing_claims = files
         if isinstance(writer, SnowflakeWriter) and not truncate:
-            exisiting_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
+            existing_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
 
         out_tables = _generate_batch(
             bene_sks_batch,
-            exisiting_claims,
+            existing_claims,
             gen_utils,
             adj_util,
             pac_util,

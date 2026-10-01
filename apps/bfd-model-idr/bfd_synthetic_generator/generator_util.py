@@ -67,7 +67,7 @@ NOW = date.today()
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
 # scanning via list comprehensions. Outermost dict is keyed by original filename, inner dict is
 # keyed by the patient's bene_sk, and innermost dict is the full row itself
-_tables_by_bene_sk: dict[int, dict[str, dict[str, Any]]] = {}
+_tables_by_bene_sk: dict[str, dict[int, dict[str, Any]]] = {}
 
 
 def as_list[T](obj: T | None) -> list[T]:
@@ -184,8 +184,8 @@ def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
-def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
-    return [x.kv for x in adapters]
+def adapters_to_dicts(adapters: list["RowAdapter"] | list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
 
 
 def output_table_contains_by_bene_sk(

@@ -5,6 +5,7 @@ import time
 
 from snowflake.snowpark import Session
 
+# Needed to find generator files inside Snowflake's environment
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 package_root_dir = os.path.dirname(current_file_dir)
 
@@ -12,10 +13,9 @@ for path in (current_file_dir, package_root_dir):
     if path not in sys.path:
         sys.path.append(path)
 
-from claims_generator import GeneratePacDataMode, generate
-from load_synthetic_output import BeneSkMode, SnowflakeWriter
-from patient_generator import load_inputs
-from snowflake.snowpark import Session
+from claims_generator import GeneratePacDataMode, generate  # noqa: E402
+from load_synthetic_output import BeneSkMode, SnowflakeWriter  # noqa: E402
+from patient_generator import load_inputs  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

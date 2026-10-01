@@ -1,6 +1,6 @@
 import os
-import shutil
 import sys
+import zipfile
 
 import click
 from claims_generator import GeneratePacDataMode
@@ -123,14 +123,20 @@ def main(
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
-    # TODO: clean up
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FOLDER_TO_ZIP = os.path.basename(CURRENT_DIR)
     PARENT_DIR = os.path.dirname(CURRENT_DIR)
-    OUTPUT_ZIP_PATH = os.path.join(PARENT_DIR, FOLDER_TO_ZIP)
-    zip_file = shutil.make_archive(
-        base_name=OUTPUT_ZIP_PATH, format="zip", root_dir=PARENT_DIR, base_dir=FOLDER_TO_ZIP
-    )
+    OUTPUT_ZIP_PATH = os.path.join(PARENT_DIR, f"{FOLDER_TO_ZIP}.zip")
+
+    # Zip package and dereference symlinks
+    with zipfile.ZipFile(OUTPUT_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for root, _dirs, files in os.walk(CURRENT_DIR, followlinks=True):
+            for file in files:
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, PARENT_DIR)
+                zipf.write(full_path, relative_path)
+
+    zip_file = OUTPUT_ZIP_PATH
 
     private_key = serialization.load_pem_private_key(
         _require_env("IDR_PRIVATE_KEY").encode(),

@@ -155,11 +155,6 @@ class SnowflakeIdState:
     claim_num_sk_next: dict[tuple[str, str, str], int] = field(default_factory=dict)
 
 
-def _qualified_table(writer: SnowflakeWriter, table_name: str) -> str:
-    resolved_table_name, database, schema = writer.resolve_target_table(table_name)
-    return f'"{database}"."{schema}"."{resolved_table_name}"'
-
-
 def _query(writer: SnowflakeWriter, sql: str) -> Any:
     result = writer.session.sql(sql).collect()
     return result[0][0] if result else None
@@ -174,21 +169,21 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
 
     # Get or set the min ben_sk
     existing_min_bene_sk = _query(
-        writer, f"SELECT MIN(BENE_SK) FROM {_qualified_table(writer, BENE_HSTRY)}"
+        writer, f"SELECT MIN(BENE_SK) FROM {writer.qualified_table(BENE_HSTRY)}"
     )
     if existing_min_bene_sk is not None:
         state.bene_sk_next = int(existing_min_bene_sk) - 1
 
     # Get or set the max mbi
     existing_max_mbi = _query(
-        writer, f"SELECT MAX(BENE_MBI_ID) FROM {_qualified_table(writer, BENE_MBI_ID)}"
+        writer, f"SELECT MAX(BENE_MBI_ID) FROM {writer.qualified_table(BENE_MBI_ID)}"
     )
     if existing_max_mbi is not None:
         state.mbi_next = _decode_identifier(existing_max_mbi, _MBI_ALPHABETS) + 1
 
     # Get or set the max npi
     existing_max_npi = _query(
-        writer, f"SELECT MAX(PRVDR_NPI_NUM) FROM {_qualified_table(writer, PRVDR_HSTRY)}"
+        writer, f"SELECT MAX(PRVDR_NPI_NUM) FROM {writer.qualified_table(PRVDR_HSTRY)}"
     )
     if existing_max_npi is not None:
         state.npi_next = int(existing_max_npi[:9]) + 1
@@ -213,7 +208,7 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
     # Get or set the min numeric ids
     for field_name, table_name in _NUMERIC_MULTIPART_FIELDS.items():
         existing_min = _query(
-            writer, f"SELECT MIN({field_name}) FROM {_qualified_table(writer, table_name)}"
+            writer, f"SELECT MIN({field_name}) FROM {writer.qualified_table(table_name)}"
         )
         if existing_min is not None:
             state.numeric_id_next[field_name] = int(existing_min) - 1
@@ -221,14 +216,14 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
     # Get or set the max multipart ids
     for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
         existing_max = _query(
-            writer, f"SELECT MAX({field_name}) FROM {_qualified_table(writer, table_name)}"
+            writer, f"SELECT MAX({field_name}) FROM {writer.qualified_table(table_name)}"
         )
         if existing_max is not None:
             value = existing_max.removeprefix("-")
             alphabets = _expand_parts(parts)
             state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
 
-    # Get or set the min clm_num_sk per (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
+    # Get or set the max clm_num_sk per (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
     claims_rows = _query_multiple(
         writer,
         f"""
@@ -236,8 +231,8 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
             CLM_TYPE_CD,
             CLM_DT_SGNTR_SK,
             GEO_BENE_SK,
-            MIN(CLM_NUM_SK) AS MIN_CLM_NUM_SK
-        FROM {_qualified_table(writer, CLM)}
+            MAX(CLM_NUM_SK) AS MAX_CLM_NUM_SK
+        FROM {writer.qualified_table(CLM)}
         GROUP BY
             CLM_TYPE_CD,
             CLM_DT_SGNTR_SK,
@@ -245,9 +240,9 @@ def load_id_state(writer: SnowflakeWriter) -> SnowflakeIdState:
         """,
     )
 
-    for clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk, min_clm_num_sk in claims_rows:
+    for clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk, max_clm_num_sk in claims_rows:
         key_columns = (str(clm_type_cd), str(clm_dt_sgntr_sk), str(geo_bene_sk))
-        state.claim_num_sk_next[key_columns] = int(min_clm_num_sk) - 1
+        state.claim_num_sk_next[key_columns] = int(max_clm_num_sk) + 1
 
     return state
 

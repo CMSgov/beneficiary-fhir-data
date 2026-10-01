@@ -171,7 +171,7 @@ class CsvWriter(OutputDestinationWriter):
         bene_sks: list[int],
         files: dict[str, list[RowAdapter]],
     ) -> list[RowAdapter]:
-        return {
+        return [
             RowAdapter(
                 {
                     "BENE_SK": str(row["BENE_SK"]),
@@ -182,7 +182,7 @@ class CsvWriter(OutputDestinationWriter):
             )
             for row in files[BENE_HSTRY]
             if row.get("BENE_MBI_ID") and int(row["BENE_SK"]) in bene_sks
-        }
+        ]
 
 
 class SnowflakeWriter(OutputDestinationWriter):
@@ -206,12 +206,16 @@ class SnowflakeWriter(OutputDestinationWriter):
             self.schema,
         )
 
-    def qualified_session_table(self, table_name: str) -> Any:
+    def qualified_table(self, table_name: str) -> str:
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
-        return self.session.table(f"{database}.{schema}.{resolved_table_name}")
+        return f"{database}.{schema}.{resolved_table_name}"
+
+    def _qualified_session_table(self, table_name: str) -> Any:
+        table = self.qualified_table(table_name)
+        return self.session.table(table)
 
     def iter_bene_sk_batches(self, batch_size: int) -> Iterator[list[int]]:
-        df = self.qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
+        df = self._qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
         batch = []
         for row in df.to_local_iterator():
             batch.append(int(row["BENE_SK"]))
@@ -222,7 +226,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             yield batch
 
     def get_rows(self, table_name: str) -> list[dict[str, Any]]:
-        rows = self.qualified_session_table(table_name).collect()
+        rows = self._qualified_session_table(table_name).collect()
         return [row.as_dict() for row in rows]
 
     def get_bene_sk_to_mbi(
@@ -231,7 +235,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         files: dict[str, list[RowAdapter]],  # noqa: ARG002
     ) -> list[RowAdapter]:
         rows = (
-            self.qualified_session_table(BENE_HSTRY)
+            self._qualified_session_table(BENE_HSTRY)
             .filter(col("BENE_SK").isin(bene_sks))
             .select("BENE_SK", "BENE_MBI_ID", "IDR_LTST_TRANS_FLG")
             .collect()
@@ -270,7 +274,7 @@ class SnowflakeWriter(OutputDestinationWriter):
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
     ) -> dict[str, list[RowAdapter]]:
-        bene_hstry_df = self.qualified_session_table(BENE_HSTRY).filter(
+        bene_hstry_df = self._qualified_session_table(BENE_HSTRY).filter(
             col("BENE_SK").isin(bene_sks)
         )
         result: dict[str, list[RowAdapter]] = {
@@ -278,18 +282,20 @@ class SnowflakeWriter(OutputDestinationWriter):
                 RowAdapter(r.as_dict(), loaded_from_file=True) for r in bene_hstry_df.collect()
             ]
         }
-        mbi_ids_df = bene_hstry_df.select("BENE_MBI_ID").filter(col("BENE_MBI_ID").is_not_null())
+        mbi_ids_df = (
+            bene_hstry_df.select("BENE_MBI_ID").distinct().filter(col("BENE_MBI_ID").is_not_null())
+        )
 
         for table_name in table_names:
             if _TABLE_RELATIONS[table_name] is KeyRelation.BENE_SK:
                 rows = (
-                    self.qualified_session_table(table_name)
+                    self._qualified_session_table(table_name)
                     .filter(col("BENE_SK").isin(bene_sks))
                     .collect()
                 )
             else:
                 rows = (
-                    self.qualified_session_table(table_name)
+                    self._qualified_session_table(table_name)
                     .join(mbi_ids_df, using_columns=["BENE_MBI_ID"])
                     .collect()
                 )
@@ -305,7 +311,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         bene_df = self.session.create_dataframe([[b] for b in bene_sks], schema=["BENE_SK"])
         bene_df.write.mode("overwrite").save_as_table(temp_table, table_type="transient")
         temp_keys_df = self.session.table(temp_table)
-        clm_df = self.qualified_session_table(CLM).join(temp_keys_df, on="BENE_SK")
+        clm_df = self._qualified_session_table(CLM).join(temp_keys_df, on="BENE_SK")
 
         key_dfs = {
             KeyRelation.FOUR_PART_KEY: clm_df.select(
@@ -326,7 +332,7 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         def fetch_table_data(table_name):
             key_df = key_dfs[_TABLE_RELATIONS[table_name]]
-            joined = self.qualified_session_table(table_name).join(
+            joined = self._qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
             )
             return table_name, [
@@ -362,7 +368,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         known_columns = self._get_known_columns(database, schema, resolved_table_name)
 
         # CSV file structure has to match the table schema order
-        target = self.session.table(qualified_table)
+        target = self._qualified_session_table(table_name)
         target_columns = [
             field.name for field in target.schema.fields if field.name in known_columns
         ]
@@ -486,7 +492,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         for table_name in table_names:
             resolved_table_name, database, schema = self.resolve_target_table(table_name)
             self.session.sql(
-                f"TRUNCATE TABLE IF EXISTS {f'{database}.{schema}.{resolved_table_name}'}"
+                f"TRUNCATE TABLE IF EXISTS {database}.{schema}.{resolved_table_name}"
             ).collect()
 
 
