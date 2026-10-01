@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.ng.input.CoverageSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    * @throws ResourceNotFoundException if the coverage resource is not found.
    * @throws InvalidRequestException if the ID format is invalid.
    */
+  @RetryOnFailoverOrConnectionException
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
@@ -54,6 +56,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    * @param lastUpdated The _lastUpdated search parameter.
    * @return A Bundle of Coverage resources.
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchByLogicalId(
       @RequiredParam(name = IAnyResource.SP_RES_ID) final IdType coverageId,
@@ -73,6 +76,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    * @param classValue The class value search parameter.
    * @return A Bundle of Coverage resources.
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY) final ReferenceParam beneficiaryParam,

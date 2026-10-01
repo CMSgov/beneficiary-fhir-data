@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
+import gov.cms.bfd.server.ng.testUtil.TransientJdbcExceptionDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -12,6 +13,7 @@ import java.nio.file.Paths;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,7 +29,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -181,12 +182,6 @@ public class IntegrationTestConfiguration {
   }
 
   @Bean
-  public AuditEventRepository auditEventRepository(
-      DynamoDbEnhancedClient enhancedClient, Configuration configuration) {
-    return new AuditEventRepository(enhancedClient, configuration.getPatientMatchAuditTableName());
-  }
-
-  @Bean
   @Primary
   public AuditLogger testAuditLogger(
       AuditEventRepository repository,
@@ -203,5 +198,12 @@ public class IntegrationTestConfiguration {
       logStreamLogger.log(auditRecord);
       dynamoLogger.log(auditRecord);
     };
+  }
+
+  @Bean
+  @Primary
+  public DataSource testDataSource(Configuration configuration) {
+    return new TransientJdbcExceptionDataSource(
+        configuration.getDataSourceFactory().createDataSource());
   }
 }
