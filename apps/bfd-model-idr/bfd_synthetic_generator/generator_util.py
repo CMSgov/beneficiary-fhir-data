@@ -3,12 +3,10 @@ import datetime
 import io
 import itertools
 import json
-import os
 import random
 import string
 import subprocess
 import sys
-import zipfile
 from collections import defaultdict
 from collections.abc import Callable, Iterable
 from datetime import date, timedelta
@@ -35,6 +33,7 @@ from constants import (
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
+from file_utils import ROOT
 from id_generators import IdGenerator, RandomIdGenerator
 from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
 from row_adapter import RowAdapter
@@ -230,82 +229,21 @@ class GeneratorUtil:
         self.load_code_systems()
 
     def load_code_systems(self):
-        code_systems = {}
-        base_dir = Path(os.path.realpath(__file__)).parent
-        target_path = base_dir.joinpath("sushi/fsh-generated/resources")
-        path_str = str(target_path)
+        resources_dir = ROOT / "sushi/fsh-generated/resources"
+        if not resources_dir.exists():
+            raise FileNotFoundError(f"{resources_dir} not found; run 'npm run sushi-build'")
 
-        if ".zip" in path_str:
-            zip_part, internal_part = path_str.split(".zip", 1)
-            zip_path = zip_part + ".zip"
-            internal_dir_path = internal_part.lstrip("/\\")
-
-            with zipfile.ZipFile(zip_path, "r") as z:
-                for zip_info in z.infolist():
-                    file_path_in_zip = zip_info.filename
-
-                    if file_path_in_zip.startswith(internal_dir_path) and file_path_in_zip.endswith(
-                        ".json"
-                    ):
-                        file_name = os.path.basename(file_path_in_zip)
-                        if "CodeSystem" not in file_name:
-                            continue
-
-                        with z.open(zip_info) as f:
-                            try:
-                                data = json.loads(f.read().decode("utf-8"))
-                                if "concept" in data and "name" in data:
-                                    concepts = [i["code"] for i in data["concept"]]
-                                    code_systems[data["name"]] = concepts
-                            except (json.JSONDecodeError, KeyError) as e:
-                                print(f"Error parsing {file_name}: {e}")
-        else:
-            # fallback if normal directory (local development)
-            if target_path.exists():
-                for path in target_path.iterdir():
-                    if ".json" not in path.name or "CodeSystem" not in path.name:
-                        continue
-                    try:
-                        with path.open(encoding="utf-8") as file:
-                            data = json.load(file)
-                            concepts = [i["code"] for i in data["concept"]]
-                            code_systems[data["name"]] = concepts
-                    except (json.JSONDecodeError, KeyError, FileNotFoundError):
-                        continue
-            else:
-                print(f"Error: Local resources directory not found at path: {target_path}")
-
-        self.code_systems = code_systems
+        self.code_systems = {}
+        for path in resources_dir.iterdir():
+            if "CodeSystem" not in path.name or not path.name.endswith(".json"):
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if "concept" in data and "name" in data:
+                self.code_systems[data["name"]] = [c["code"] for c in data["concept"]]
 
     def load_addresses(self):
-        base_dir = Path(os.path.realpath(__file__)).parent
-        target_path = base_dir.joinpath("beneficiary-components/addresses.csv")
-        path_str = str(target_path)
-
-        # check if inside a zip archive (stored procedure)
-        if ".zip" in path_str:
-            zip_part, internal_part = path_str.split(".zip", 1)
-            zip_path = zip_part + ".zip"
-            internal_file_path = internal_part.lstrip("/\\")
-
-            with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as f:
-                file_text = f.read().decode("utf-8")
-                file_stream = io.StringIO(file_text)
-                csvreader = csv.reader(file_stream)
-                self._parse_csv_rows(csvreader)
-        else:
-            # fallback if normal directory (local development)
-            with target_path.open(encoding="utf-8") as file:
-                csvreader = csv.reader(file)
-                self._parse_csv_rows(csvreader)
-
-    def _parse_csv_rows(self, csvreader):
-        header = next(csvreader)
-        for row in csvreader:
-            cur_row: dict[str, Any] = {}
-            for col in range(len(row)):
-                cur_row[header[col]] = row[col]
-            self.address_options.append(cur_row)
+        text = (ROOT / "beneficiary-components/addresses.csv").read_text(encoding="utf-8")
+        self.address_options = list(csv.DictReader(io.StringIO(text)))
 
     def gen_mbi(self) -> str:
         return self.id_gen.mbi()

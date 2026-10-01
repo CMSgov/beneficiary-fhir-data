@@ -1,8 +1,5 @@
-import os
 import random
-import zipfile
 from datetime import date, datetime
-from pathlib import Path
 from typing import Any
 
 import constants as f
@@ -17,6 +14,7 @@ from claims_static import (
     NOW,
 )
 from faker import Faker
+from file_utils import ROOT
 from generator_util import GeneratorUtil
 from row_adapter import RowAdapter
 
@@ -53,46 +51,9 @@ class OtherGeneratorUtil:
         else:
             obj[f.META_LST_UPDT_SK] = 0
 
-    def _parse_csv_rows(self, csvreader):
-        clm_ansi_sgntr: list[dict[str, Any]] = []
-        header = next(csvreader)
-        for row in csvreader:
-            cur_row: dict[str, Any] = {}
-            for col in range(len(row)):
-                cur_row[header[col]] = row[col]
-            clm_ansi_sgntr.append(cur_row)
-
-        # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate
-        # it's synthetic
-        return [
-            RowAdapter(x | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"})
-            for x in clm_ansi_sgntr
-        ]
-
     def gen_synthetic_clm_ansi_sgntr(self):
-        base_dir = Path(os.path.realpath(__file__)).parent
-        target_path = base_dir.joinpath("SYNTHETIC_CLM_ANSI_SGNTR.csv")
-        path_str = str(target_path)
-
-        # Check if inside a zip archive (stored procedure)
-        if ".zip" in path_str:
-            zip_part, internal_part = path_str.split(".zip", 1)
-            zip_path = zip_part + ".zip"
-            internal_file_path = internal_part.lstrip("/\\")
-
-            with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as file_stream:
-                csv_df = pd.read_csv(
-                    file_stream,
-                    dtype=str,
-                    na_filter=False,
-                )
-        else:
-            # Fallback if normal directory (local development)
-            csv_df = pd.read_csv(  # type: ignore
-                target_path,
-                dtype=str,
-                na_filter=False,
-            )
+        with (ROOT / "SYNTHETIC_CLM_ANSI_SGNTR.csv").open("rb") as file_stream:
+            csv_df = pd.read_csv(file_stream, dtype=str, na_filter=False)
 
         clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
 

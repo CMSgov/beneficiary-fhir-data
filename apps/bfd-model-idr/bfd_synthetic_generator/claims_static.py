@@ -1,10 +1,8 @@
-import os
 import random
-import zipfile
 from datetime import date, datetime
-from pathlib import Path
 
 import yaml
+from file_utils import ROOT
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
@@ -21,27 +19,7 @@ class SecurityLabelModel(BaseModel):
         return self.code.replace(".", "")
 
 
-SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
-
-
-def _load_yaml(file_path: Path) -> dict | list:
-    path_str = str(file_path)
-    if ".zip" in path_str:
-        zip_part, internal_part = path_str.split(".zip", 1)
-        zip_path = zip_part + ".zip"
-
-        internal_file_path = internal_part.lstrip("/\\")
-
-        with zipfile.ZipFile(zip_path, "r") as z, z.open(internal_file_path) as f:
-            return yaml.safe_load(f.read().decode("utf-8"))
-
-    # fallback if normal directory (local development)
-    return yaml.safe_load(file_path.read_text(encoding="utf-8"))
-
-
-yaml_data = _load_yaml(SECURITY_LABELS_YML)
-
-
+yaml_data = yaml.safe_load((ROOT / "security_labels.yml").read_text(encoding="utf-8"))
 SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(yaml_data, by_alias=True)
 
 
