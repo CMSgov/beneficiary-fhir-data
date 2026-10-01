@@ -380,7 +380,11 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     cur = conn.execute(
         """
-        select claim_line_rx.*
+        select
+            claim_line_rx.clm_line_vccn_admin_fee_amt,
+            claim_line_rx.clm_line_sls_tax_amt,
+            claim_line_rx.clm_line_ingrdnt_cst_amt,
+            claim_line_rx.clm_line_srvc_cst_amt
         from cms_vdm_view_mdcr_prd.v2_mdcr_clm claim
         join cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx claim_line_rx
             on claim.geo_bene_sk = claim_line_rx.geo_bene_sk
