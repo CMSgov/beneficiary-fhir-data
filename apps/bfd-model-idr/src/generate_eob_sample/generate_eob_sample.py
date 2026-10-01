@@ -55,22 +55,26 @@ class SampleGenerator:
         claim_type = int(claim_type_raw)
 
         if claim_type in PHARMACY_CLM_TYPE_CDS:
-            result = self.create_base(clm_uniq_id, claim_row, "EOB-Pharmacy-Sample.json")
+            result = self.create_base(
+                clm_uniq_id, claim_type, claim_row, "EOB-Pharmacy-Sample.json"
+            )
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
         elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
-            result = self.create_base(clm_uniq_id, claim_row, "EOB-Carrier-Sample.json")
+            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Carrier-Sample.json")
         elif claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME:
-            result = self.create_base(clm_uniq_id, claim_row, "EOB-DME-Sample.json")
+            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-DME-Sample.json")
         elif claim_type in MCS_CLM_TYPE_CDS:
-            result = self.create_base(clm_uniq_id, claim_row, "EOB-Carrier-MCS-Sample.json")
+            result = self.create_base(
+                clm_uniq_id, claim_type, claim_row, "EOB-Carrier-MCS-Sample.json"
+            )
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
         # this a default fallback for institutional claim types at the moment
         # as this work continues we may add more specific handling
         # for different institutional claim types
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
-            result = self.create_base(clm_uniq_id, claim_row, "EOB-Base-Sample-new.json")
+            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample-new.json")
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
@@ -89,6 +93,7 @@ class SampleGenerator:
     def create_base(
         self,
         clm_uniq_id: str,
+        clm_type_cd: int,
         claim_row: dict[str, str],
         destination_file_name: str,
     ) -> Result:
@@ -283,7 +288,7 @@ class SampleGenerator:
             "lastUpdated": extract_col_str(claim_row, "IDR_UPDT_TS"),
             "CLM_FINL_ACTN_IND": extract_col_str(claim_row, "CLM_FINL_ACTN_IND"),
             "BENE_SK": extract_col_str(claim_row, "BENE_SK"),
-            "CLM_TYPE_CD": int(extract_col_str(claim_row, "CLM_TYPE_CD")),
+            "CLM_TYPE_CD": clm_type_cd,
             "CLM_UNIQ_ID": extract_col_str(claim_row, "CLM_UNIQ_ID"),
             "CLM_CNTL_NUM": extract_col_str(claim_row, "CLM_CNTL_NUM"),
             "CLM_FROM_DT": extract_col_str(claim_row, "CLM_FROM_DT"),

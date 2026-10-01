@@ -301,9 +301,7 @@ class AdjudicatedGeneratorUtil:
             if str(clm.get(f.CLM_OCRNC_SGNTR_SK, "")).startswith("-")
             else gen_numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
         )
-        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(
-            TARGET_SEQUENCE_NUMBERS
-        )
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_CD] = random.choice(TARGET_OCRNC_SPAN_CODES)
 
         # add from and thru dates
@@ -1071,15 +1069,19 @@ class AdjudicatedGeneratorUtil:
         add_meta_timestamps(clm_line_prfnl, clm)
 
         clm_line_prfnl[f.CLM_FED_TYPE_SRVC_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_FED_TYPE_SRVC_CD])
+            gen_utils.code_systems[f.CLM_FED_TYPE_SRVC_CD]
+        )
 
         clm_line_prfnl[f.CLM_LINE_CARR_HPSA_SCRCTY_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD])
+            gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD]
+        )
 
         clm_line_prfnl[f.CLM_PRCNG_LCLTY_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_PRCNG_LCLTY_CD])
+            gen_utils.code_systems[f.CLM_PRCNG_LCLTY_CD]
+        )
 
         clm_line_prfnl[f.CLM_PRMRY_PYR_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_PRMRY_PYR_CD])        
+            gen_utils.code_systems[f.CLM_PRMRY_PYR_CD]
+        )
 
         return clm_line_prfnl
