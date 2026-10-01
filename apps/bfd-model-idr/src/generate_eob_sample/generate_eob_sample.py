@@ -63,10 +63,10 @@ class SampleGenerator:
         # as this work continues we may add more specific handling
         # for different institutional claim types
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
-            result = self.create_base(clm_uniq_id, claim_row,"EOB-Base-Sample-new.json")
-            self.add_instl(claim_row=claim_row,result=result)
-            self.add_proc_lines(claim_row=claim_row,result=result)
-            self.add_clm_values(claim_row=claim_row,result=result)
+            result = self.create_base(clm_uniq_id, claim_row, "EOB-Base-Sample-new.json")
+            self.add_instl(claim_row=claim_row, result=result)
+            self.add_proc_lines(claim_row=claim_row, result=result)
+            self.add_clm_values(claim_row=claim_row, result=result)
         else:
             print("Unknown Type")
             sys.exit(1)
@@ -78,7 +78,6 @@ class SampleGenerator:
             json.dump(result.result_json, f, indent=2)
 
         print(f"Successfully generated sample JSON: {result.output_file}")
-
 
     def create_pharmacy(self, clm_uniq_id: str, claim_row: dict[str, str]) -> Result:
 
@@ -228,7 +227,6 @@ class SampleGenerator:
             }
             for prod_line in (prod_lines or [])
         ]
-
 
         clm_lines = self.read_line(claim_row)
         instnl_lines = self.read_instnl_lines(claim_row)
@@ -391,6 +389,13 @@ class SampleGenerator:
         lctn_hist = self.read_lctn_hist(clm_row=claim_row)
         dcmtn = self.read_dcmtn(clm_row=claim_row)
         sig_line = self.read_sig_line(str(claim_row.get("CLM_DT_SGNTR_SK", "")).strip())
+        provider_npi = str(claim_row.get("PRVDR_PRSCRBNG_PRVDR_NPI_NUM", "")).strip()
+
+        prov_row = self.read_provider(provider_npi)
+        clm_sbmtr_cntrct_num = str(claim_row.get("CLM_SBMTR_CNTRCT_NUM", "")).strip()
+        clm_sbmtr_cntrct_pbp_num = str(claim_row.get("CLM_SBMTR_CNTRCT_PBP_NUM", "")).strip()
+
+        ctr_pbp_row = self.read_pbp(clm_sbmtr_cntrct_num, clm_sbmtr_cntrct_pbp_num)
 
         output_json = {
             "resourceType": "ExplanationOfBenefitBase",
@@ -407,6 +412,19 @@ class SampleGenerator:
             "CLM_SRC_ID": extract_col_str(claim_row, "CLM_SRC_ID"),
             "META_SRC_SK": extract_col_str(claim_row, "META_SRC_SK"),
             "PRVDR_BLG_PRVDR_NPI_NUM": extract_col_str(claim_row, "PRVDR_BLG_PRVDR_NPI_NUM"),
+            "CLM_ORIG_CNTL_NUM": extract_col_str(claim_row, "CLM_ORIG_CNTL_NUM"),
+            "CLM_SRVC_PRVDR_GNRC_ID_NUM": extract_col_str(claim_row, "CLM_SRVC_PRVDR_GNRC_ID_NUM"),
+            "CLM_PD_DT": extract_col_str(claim_row, "CLM_PD_DT"),
+            "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": provider_npi,
+            "CLM_PRSBNG_PRVDR_GNRC_ID_NUM": extract_col_str(
+                claim_row, "CLM_PRSBNG_PRVDR_GNRC_ID_NUM"
+            ),
+            "PRVDR_PRSBNG_ID_QLFYR_CD": extract_col_str(claim_row, "PRVDR_PRSBNG_ID_QLFYR_CD"),
+            "PRVDR_LAST_NAME": extract_col_str(prov_row, "PRVDR_LAST_NAME"),
+            "CNTRCT_PBP_NAME": extract_col_str(ctr_pbp_row, "CNTRCT_PBP_NAME"),
+            "CLM_BENE_PMT_AMT": extract_col_str(claim_row, "CLM_BENE_PMT_AMT"),
+            "CLM_OTHR_TP_PD_AMT": extract_col_str(claim_row, "CLM_OTHR_TP_PD_AMT"),
+            "PRVDR_SRVC_ID_QLFYR_CD": extract_col_str(claim_row, "PRVDR_SRVC_ID_QLFYR_CD"),
             "diagnoses": diagnoses_lines,
             "supportingInfoComponents": [],
             "lineItemComponents": line_item_components,
@@ -423,7 +441,6 @@ class SampleGenerator:
                     prfnl, "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW"
                 ),
                 "CLM_CLNCL_TRIL_NUM": extract_col_str(prfnl, "CLM_CLNCL_TRIL_NUM"),
-                
             },
             "CLM_NRLN_RIC_CD": extract_col_str(dcmtn, "CLM_NRLN_RIC_CD"),
             "CLM_MDCR_DDCTBL_AMT": extract_col_str(claim_row, "CLM_MDCR_DDCTBL_AMT"),
@@ -435,7 +452,6 @@ class SampleGenerator:
             "CLM_BLOOD_LBLTY_AMT": extract_col_str(claim_row, "CLM_BLOOD_LBLTY_AMT"),
             "CLM_BLG_PRVDR_OSCAR_NUM": extract_col_str(claim_row, "CLM_BLG_PRVDR_OSCAR_NUM"),
             "CLM_RFRG_PRVDR_PIN_NUM": extract_col_str(claim_row, "CLM_RFRG_PRVDR_PIN_NUM"),
-            "CLM_BENE_PMT_AMT": extract_col_str(claim_row, "CLM_BENE_PMT_AMT"),
             "CLM_ALOWD_CHRG_AMT": extract_col_str(claim_row, "CLM_ALOWD_CHRG_AMT"),
             "CLM_BENE_PMT_COINSRNC_AMT": extract_col_str(claim_row, "CLM_BENE_PMT_COINSRNC_AMT"),
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": extract_col_str(claim_row, "PRVDR_RNDRNG_PRVDR_NPI_NUM"),
@@ -462,7 +478,6 @@ class SampleGenerator:
             "CLM_BLOOD_CHRG_AMT": extract_col_str(claim_row, "CLM_BLOOD_CHRG_AMT"),
             "CLM_BLOOD_NCVRD_CHRG_AMT": extract_col_str(claim_row, "CLM_BLOOD_NCVRD_CHRG_AMT"),
             "CLM_COB_PTNT_RESP_AMT": extract_col_str(claim_row, "CLM_COB_PTNT_RESP_AMT"),
-            "CLM_OTHR_TP_PD_AMT": extract_col_str(claim_row, "CLM_OTHR_TP_PD_AMT"),
             "CLM_PRVDR_INTRST_PD_AMT": extract_col_str(claim_row, "CLM_PRVDR_INTRST_PD_AMT"),
             "CLM_PRVDR_OTAF_AMT": extract_col_str(claim_row, "CLM_PRVDR_OTAF_AMT"),
             "CLM_BNFT_ENHNCMT_1_CD": extract_col_str(claim_row, "CLM_BNFT_ENHNCMT_1_CD"),
@@ -484,7 +499,11 @@ class SampleGenerator:
             "CLM_ACTV_CARE_THRU_DT": extract_col_str(sig_line, "CLM_ACTV_CARE_THRU_DT"),
             "CLM_QLFY_STAY_FROM_DT": extract_col_str(sig_line, "CLM_QLFY_STAY_FROM_DT"),
             "CLM_QLFY_STAY_THRU_DT": extract_col_str(sig_line, "CLM_QLFY_STAY_THRU_DT"),
-            
+            "CLM_IDR_LD_DT ": extract_col_str(claim_row, "CLM_IDR_LD_DT"),
+            "CLM_SBMT_FRMT_CD": extract_col_str(claim_row, "CLM_SBMT_FRMT_CD"),
+            "CLM_SBMTR_CNTRCT_NUM": extract_col_str(claim_row, "CLM_SBMTR_CNTRCT_NUM"),
+            "CLM_SBMTR_CNTRCT_PBP_NUM": extract_col_str(claim_row, "CLM_SBMTR_CNTRCT_PBP_NUM"),
+            "CLM_DT_SGNTR_SK": extract_col_str(sig_line, "CLM_DT_SGNTR_SK"),
         }
 
         return Result(
@@ -513,7 +532,7 @@ class SampleGenerator:
         )
 
         if not_found_fail and record_matches.empty:
-            print(f"No record found for params: {params}")
+            print(f"No record found for file name: {file_name}")
             sys.exit(1)
 
         return [] if record_matches.empty else record_matches.to_dict(orient="records")  # type: ignore[reportCallIssue]
@@ -524,7 +543,7 @@ class SampleGenerator:
         records = self.read_multi_line_file(file_name, not_found_fail, params)
         return {} if not records else records[0]
 
-    def add_instl(self,claim_row: dict[str,str],result: Result) -> None:
+    def add_instl(self, claim_row: dict[str, str], result: Result) -> None:
         instnl = self.read_instnl(clm_row=claim_row)
         result.result_json["institutionalComponents"] = {
             # This is in the sample data but I cannot find it anywhere else
@@ -547,21 +566,13 @@ class SampleGenerator:
             ),
             "CLM_INSTNL_NCVRD_DAY_CNT": extract_col_str(instnl, "CLM_INSTNL_NCVRD_DAY_CNT"),
             "CLM_MDCR_IP_PPS_EXCPTN_AMT": extract_col_str(instnl, "CLM_MDCR_IP_PPS_EXCPTN_AMT"),
-            "CLM_MDCR_IP_PPS_CPTL_FSP_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_PPS_CPTL_FSP_AMT"
-            ),
-            "CLM_MDCR_IP_PPS_CPTL_IME_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_PPS_CPTL_IME_AMT"
-            ),
-            "CLM_MDCR_IP_PPS_OUTLIER_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_PPS_OUTLIER_AMT"
-            ),
+            "CLM_MDCR_IP_PPS_CPTL_FSP_AMT": extract_col_str(instnl, "CLM_MDCR_IP_PPS_CPTL_FSP_AMT"),
+            "CLM_MDCR_IP_PPS_CPTL_IME_AMT": extract_col_str(instnl, "CLM_MDCR_IP_PPS_CPTL_IME_AMT"),
+            "CLM_MDCR_IP_PPS_OUTLIER_AMT": extract_col_str(instnl, "CLM_MDCR_IP_PPS_OUTLIER_AMT"),
             "CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT": extract_col_str(
                 instnl, "CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT"
             ),
-            "CLM_MDCR_IP_PPS_CPTL_TOT_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_PPS_CPTL_TOT_AMT"
-            ),
+            "CLM_MDCR_IP_PPS_CPTL_TOT_AMT": extract_col_str(instnl, "CLM_MDCR_IP_PPS_CPTL_TOT_AMT"),
             "CLM_INSTNL_DRG_OUTLIER_AMT": extract_col_str(instnl, "CLM_INSTNL_DRG_OUTLIER_AMT"),
             "CLM_INSTNL_PRFNL_AMT": extract_col_str(instnl, "CLM_INSTNL_PRFNL_AMT"),
             "CLM_FINL_STDZD_PYMT_AMT": extract_col_str(instnl, "CLM_FINL_STDZD_PYMT_AMT"),
@@ -569,28 +580,18 @@ class SampleGenerator:
             "CLM_HIPPS_MODEL_BNDLD_PMT_AMT": extract_col_str(
                 instnl, "CLM_HIPPS_MODEL_BNDLD_PMT_AMT"
             ),
-            "CLM_HIPPS_READMSN_RDCTN_AMT": extract_col_str(
-                instnl, "CLM_HIPPS_READMSN_RDCTN_AMT"
-            ),
+            "CLM_HIPPS_READMSN_RDCTN_AMT": extract_col_str(instnl, "CLM_HIPPS_READMSN_RDCTN_AMT"),
             "CLM_HIPPS_VBP_AMT": extract_col_str(instnl, "CLM_HIPPS_VBP_AMT"),
-            "CLM_MDCR_IP_1ST_YR_RATE_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_1ST_YR_RATE_AMT"
-            ),
-            "CLM_MDCR_IP_SCND_YR_RATE_AMT": extract_col_str(
-                instnl, "CLM_MDCR_IP_SCND_YR_RATE_AMT"
-            ),
-            "CLM_PPS_MD_WVR_STDZD_VAL_AMT": extract_col_str(
-                instnl, "CLM_PPS_MD_WVR_STDZD_VAL_AMT"
-            ),
+            "CLM_MDCR_IP_1ST_YR_RATE_AMT": extract_col_str(instnl, "CLM_MDCR_IP_1ST_YR_RATE_AMT"),
+            "CLM_MDCR_IP_SCND_YR_RATE_AMT": extract_col_str(instnl, "CLM_MDCR_IP_SCND_YR_RATE_AMT"),
+            "CLM_PPS_MD_WVR_STDZD_VAL_AMT": extract_col_str(instnl, "CLM_PPS_MD_WVR_STDZD_VAL_AMT"),
             "CLM_SITE_NTRL_CST_BSD_PYMT_AMT": extract_col_str(
                 instnl, "CLM_SITE_NTRL_CST_BSD_PYMT_AMT"
             ),
             "CLM_SITE_NTRL_IP_PPS_PYMT_AMT": extract_col_str(
                 instnl, "CLM_SITE_NTRL_IP_PPS_PYMT_AMT"
             ),
-            "CLM_SS_OUTLIER_STD_PYMT_AMT": extract_col_str(
-                instnl, "CLM_SS_OUTLIER_STD_PYMT_AMT"
-            ),
+            "CLM_SS_OUTLIER_STD_PYMT_AMT": extract_col_str(instnl, "CLM_SS_OUTLIER_STD_PYMT_AMT"),
             "DGNS_DRG_CD": extract_col_str(instnl, "DGNS_DRG_CD"),
             "CLM_ADMSN_TYPE_CD": extract_col_str(instnl, "CLM_ADMSN_TYPE_CD"),
             "BENE_PTNT_STUS_CD": extract_col_str(instnl, "BENE_PTNT_STUS_CD"),
@@ -604,7 +605,7 @@ class SampleGenerator:
             "CLM_FI_ACTN_CD": extract_col_str(instnl, "CLM_FI_ACTN_CD"),
         }
 
-    def add_clm_values(self,claim_row: dict[str,str],result: Result) -> None:
+    def add_clm_values(self, claim_row: dict[str, str], result: Result) -> None:
         claim_values = [
             {
                 "CLM_VAL_CD": extract_col_str(val_line, "CLM_VAL_CD"),
@@ -614,8 +615,7 @@ class SampleGenerator:
         ]
         result.result_json["claimValues"] = claim_values
 
-    def add_proc_lines(self,claim_row: dict[str,str],result: Result) -> None:
-        prod_lines = self.read_prod_lines(claim_row)
+    def add_proc_lines(self, claim_row: dict[str, str], result: Result) -> None:
         procedure_lines = [
             {
                 "CLM_VAL_SQNC_NUM": extract_col_str(prod_line, "CLM_VAL_SQNC_NUM"),
@@ -623,9 +623,9 @@ class SampleGenerator:
                 "CLM_PRCDR_CD": extract_col_str(prod_line, "CLM_PRCDR_CD"),
                 "CLM_DGNS_PRCDR_ICD_IND": extract_col_str(prod_line, "CLM_DGNS_PRCDR_ICD_IND"),
             }
-            for prod_line in (prod_lines or [])
+            for prod_line in (self.read_prod_lines(claim_row) or [])
         ]
-        result.result_json["claimValues"] = procedure_lines
+        result.result_json["procedures"] = procedure_lines
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
         return self.read_single_line_file(
@@ -645,7 +645,7 @@ class SampleGenerator:
     def read_pbp(self, clm_sbmtr_cntrct_num: str, clm_sbmtr_cntrct_pbp_num: str) -> dict[str, str]:
         return self.read_single_line_file(
             "SYNTHETIC_CNTRCT_PBP_NUM",
-            True,
+            False,
             [
                 Param("CNTRCT_NUM", clm_sbmtr_cntrct_num),
                 Param("CNTRCT_PBP_NUM", clm_sbmtr_cntrct_pbp_num),
