@@ -15,9 +15,9 @@ imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base"
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper"
 
 group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
-    
+
     //Even though we may have "cancelled" claims, status refers to the resource itself.
-    src -> tgt.status = "active" "Set status"; 
+    src -> tgt.status = "active" "Set status";
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.outcome = "complete" "Set outcome";
 
@@ -34,7 +34,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
       src.profileType as profType where profType = "CMS" -> tgt then{
-        //Spec C4BB first to minimize impact to those who hardcode validation against the first element. 
+        //Spec C4BB first to minimize impact to those who hardcode validation against the first element.
         src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata_c4bb_full','code') "set profile";
         src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata_default','code') "set profile";
       } "Add profile type";
@@ -63,12 +63,12 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src -> tgt.billablePeriod = create('Period') as billablePeriod then {
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
     } "Set EOB period";
-    
+
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
     // Insurer for Part D claims
     src.CLM_TYPE_CD as typeCd where (typeCd >= 1 and typeCd <= 4) -> tgt.contained = create('Organization') as tgtOrg then createInsurerOrgPartD(src,tgtOrg) "Create insurer org.";
-    src.CLM_TYPE_CD as typeCd where (typeCd >= 1 and typeCd <= 4) -> tgt.insurer = create('Reference') as tgtOrgRef, 
+    src.CLM_TYPE_CD as typeCd where (typeCd >= 1 and typeCd <= 4) -> tgt.insurer = create('Reference') as tgtOrgRef,
     tgtOrgRef.reference = "#insurer-org" "Set reference to contained insurer org";
 
     // Payment date
@@ -82,7 +82,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = "#BILLING-ID" "Add reference to non-NPI";
     src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
     src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
-    //The above handles instances where the id is type NPI. If there's no NPI, we're going to populate it as an org. 
+    //The above handles instances where the id is type NPI. If there's no NPI, we're going to populate it as an org.
     src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization - Non NPI";
 
 
@@ -107,7 +107,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
             } "Add qualifier code and id num";
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "set name";
         } "Add reference to EOB";
-        
+
       } "Add CareTeam Element";
 
     } "Add CareTeam providers";
@@ -135,7 +135,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       } "Add reference for coverage";
     } "Add insurance coverage";
 
-    //note, this is always the same as CLM_LINE.CLM_LINE_BENE_PMT_AMT. 
+    //note, this is always the same as CLM_LINE.CLM_LINE_BENE_PMT_AMT.
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
@@ -174,37 +174,37 @@ group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt:
 
     // Refills authorized (always zero in IDR data)
     src.CLM_LINE_AUTHRZD_FILL_NUM as refills -> tgt then addRefillsAuthorized(src, tgt) "Add refills authorized";
-    
+
     // Pharmacy service type
     src.CLM_PHRMCY_SRVC_TYPE_CD as pharmType -> tgt then addPharmacyServiceType(src, tgt) "Add pharmacy service type";
-    
+
     // Prescription origin code
     src.CLM_LINE_RX_ORGN_CD as rxOrigin -> tgt then addPrescriptionOrigin(src, tgt) "Add prescription origin";
-    
+
     // Brand generic indicator
     src.CLM_BRND_GNRC_CD as brandGeneric -> tgt then addBrandGenericIndicator(src, tgt) "Add brand generic indicator";
-    
+
     // Patient residence code
     src.CLM_PTNT_RSDNC_CD as ptntRes -> tgt then addPatientResidence(src, tgt) "Add patient residence";
-    
+
     // Submission clarification code
     src.CLM_LTC_DSPNSNG_MTHD_CD as submsnClr -> tgt then addSubmissionClarification(src, tgt) "Add submission clarification";
-    
+
     // Compound code
     src.CLM_CMPND_CD as compound -> tgt then addCompoundCode(src, tgt) "Add compound code";
-    
+
     // Days supply
     src.CLM_LINE_DAYS_SUPLY_QTY as daysSupply -> tgt then addDaysSupply(src, tgt) "Add days supply";
-    
+
     // Fill number
     src.CLM_LINE_RX_FILL_NUM as fillNum -> tgt then addFillNumber(src, tgt) "Add fill number";
-    
+
     // Dispense as written product selection
     src.CLM_DAW_PROD_SLCTN_CD as dawCode -> tgt then addDispenseAsWritten(src, tgt) "Add dispense as written";
-    
+
     // Drug coverage status
     src.CLM_DRUG_CVRG_STUS_CD as drugCovStatus -> tgt then addDrugCoverageStatus(src, tgt) "Add drug coverage status";
-    
+
     // Catastrophic coverage
     src.CLM_CTSTRPHC_CVRG_IND_CD as catCov -> tgt then addCatastrophicCoverage(src, tgt) "Add catastrophic coverage";
 
@@ -388,7 +388,7 @@ group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: Back
 
 group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NUM as lineNum -> tgt.sequence = lineNum "set sequence number";
-    
+
     src.isCompound as compounded where compounded = "true" -> tgt.productOrService = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBCompoundLiteral","compound") "Add compounded item";
     src.isCompound as compounded where compounded = "true" -> tgt.detail = create('BackboneElement') as tgtDetail then {
         src -> tgtDetail.sequence = "1" "Add sequence number. Always 1.";
@@ -443,7 +443,7 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
 
 }
 
-//To get this info, join CLM with V2_MDCR_CNTRCT_PBP_NUM on the claim's CLM.CLM_SBMTR_CNTRCT_NUM + CLM.CLM_SBMTR_CNTRCT_PBP_NUM. 
+//To get this info, join CLM with V2_MDCR_CNTRCT_PBP_NUM on the claim's CLM.CLM_SBMTR_CNTRCT_NUM + CLM.CLM_SBMTR_CNTRCT_PBP_NUM.
 group createInsurerOrgPartD(source src: ExplanationOfBenefitPharmacy, target tgtOrg: Organization){
   src -> tgtOrg.id = "insurer-org" "Set org id";
   src -> tgtOrg.meta = create('Meta') as tgtMeta then {
