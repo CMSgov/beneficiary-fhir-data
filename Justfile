@@ -1,7 +1,7 @@
 env_pattern := "(\\d+-)?(test|sandbox|prod)"
 
 default:
-    just --choose
+    just --list
 
 bootstrap:
     #!/usr/bin/env bash
@@ -47,7 +47,9 @@ migrate-db: create-db
 pipeline csv_folder: migrate-db create-mock-idr
     LOGURU_COLORIZE=YES ./apps/bfd-pipeline-idr/run-pipeline.sh {{ csv_folder }}
 
-# Run server-ng, optionally running the pipeline first if `csv_folder` is provided
+[doc("""
+  Run server-ng, optionally running the pipeline first if `csv_folder` is provided
+""")]
 server-ng csv_folder="":
     #!/usr/bin/env bash
     set -Eeuo pipefail
@@ -171,11 +173,31 @@ patient-generator patients="" exclude-empty="" force-ztm-static-rows="" *paths:
     set -Eeuo pipefail
 
     root="$(git rev-parse --show-toplevel)"
-    paths=$($root/apps/utils/scripts/relative-to-absolute.sh "{{ paths }}")
+    paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
     cd "$root/apps/bfd-model-idr" && uv run patient_generator.py $paths \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
         {{ if force-ztm-static-rows == "1" { "--force-ztm-static-rows" } else { "" } }}
+
+[arg("paths")]
+[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)")]
+[arg("enable-samhsa", long, value="1")]
+[arg("max-claims", long, pattern="\\d+")]
+[arg("min-claims", long, pattern="\\d+")]
+[arg("pac-gen", long, pattern="(no|if_none|always)")]
+[no-cd]
+claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+
+    root="$(git rev-parse --show-toplevel)"
+    paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+    cd "$root/apps/bfd-model-idr" && uv run claims_generator.py $paths \
+        --bene-sk-mode "{{ bene-sk-mode }}" \
+        {{ if enable-samhsa == "1" { "--enable-samhsa" } else { "" } }} \
+        --max-claims "{{ max-claims }}" \
+        --min-claims "{{ min-claims }}" \
+        --pac-gen "{{ pac-gen }}"
 
 [arg("env", long, pattern=env_pattern)]
 [arg("headless", long, value="1")]
