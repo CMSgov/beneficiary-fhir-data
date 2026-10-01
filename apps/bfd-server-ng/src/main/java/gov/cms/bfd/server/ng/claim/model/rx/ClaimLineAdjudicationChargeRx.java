@@ -5,27 +5,20 @@ import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
+@Getter
 public class ClaimLineAdjudicationChargeRx {
-  @Column(name = "clm_line_ingrdnt_cst_amt")
-  private BigDecimal ingredientCostAmount;
-
-  @Column(name = "clm_line_vccn_admin_fee_amt")
-  private BigDecimal vaccineAdminFeeAmount;
-
-  @Column(name = "clm_line_srvc_cst_amt")
-  private BigDecimal dispensingFeeAmount;
-
-  @Column(name = "clm_line_sls_tax_amt")
-  private BigDecimal salesTaxAmount;
+  @Column(name = "tot_rx_cst_amt")
+  @Convert(converter = NonZeroBigDecimalConverter.class)
+  private Optional<BigDecimal> totalRxCostAmount;
 
   @Column(name = "clm_line_plro_amt")
   @Convert(converter = NonZeroBigDecimalConverter.class)
@@ -47,30 +40,21 @@ public class ClaimLineAdjudicationChargeRx {
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> reportedGapDiscountAmount;
 
-  @Transient
-  public BigDecimal getTotalDrugCost() {
-    return Stream.of(
-            ingredientCostAmount, vaccineAdminFeeAmount, dispensingFeeAmount, salesTaxAmount)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-  }
-
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    return Stream.concat(
-            Stream.of(
-                AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
-                    getTotalDrugCost())),
-            Stream.of(
-                    AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT
-                        .toFhirAdjudicationOptional(patientLiabReductPaidAmount),
-                    AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT
-                        .toFhirAdjudicationOptional(lowIncomeCostShareSubAmount),
-                    AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT
-                        .toFhirAdjudicationOptional(grossCostBelowThresholdAmount),
-                    AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT
-                        .toFhirAdjudicationOptional(grossCostAboveThresholdAmount),
-                    AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT
-                        .toFhirAdjudicationOptional(reportedGapDiscountAmount))
-                .flatMap(Optional::stream))
+    return Stream.of(
+            AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudicationOptional(
+                totalRxCostAmount),
+            AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudicationOptional(
+                patientLiabReductPaidAmount),
+            AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudicationOptional(
+                lowIncomeCostShareSubAmount),
+            AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudicationOptional(
+                grossCostBelowThresholdAmount),
+            AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT
+                .toFhirAdjudicationOptional(grossCostAboveThresholdAmount),
+            AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT.toFhirAdjudicationOptional(
+                reportedGapDiscountAmount))
+        .flatMap(Optional::stream)
         .toList();
   }
 }

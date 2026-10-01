@@ -67,7 +67,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -130,8 +129,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -160,7 +158,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -258,8 +256,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -632,7 +629,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -699,7 +696,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -762,8 +758,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -792,7 +787,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -890,8 +885,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1264,7 +1258,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -1331,7 +1325,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -1394,8 +1387,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -1424,7 +1416,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -1522,8 +1514,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1896,7 +1887,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -2629,7 +2620,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -2692,8 +2682,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -2722,7 +2711,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -2820,8 +2809,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3194,7 +3182,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -3927,7 +3915,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -3990,8 +3977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -4020,7 +4006,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -4118,8 +4104,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -4492,7 +4477,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -5225,7 +5210,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -5288,8 +5272,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -5318,7 +5301,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -5416,8 +5399,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -5790,7 +5772,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -6523,7 +6505,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -6586,8 +6567,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -6616,7 +6596,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -6714,8 +6694,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7088,7 +7067,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -7821,7 +7800,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -7884,8 +7862,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -7914,7 +7891,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -8012,8 +7989,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -8386,7 +8362,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -9119,7 +9095,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2018-08-21",
         "start" : "2018-08-12"
       },
       "careTeam" : [ {
@@ -9182,8 +9157,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
         },
         "name" : [ {
-          "family" : "Garcia",
-          "given" : [ "Indiana" ]
+          "family" : "Garcia"
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -9212,7 +9186,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         "adjudication" : [ {
           "amount" : {
             "currency" : "USD",
-            "value" : 2256829.86
+            "value" : 2256829.87
           },
           "category" : {
             "coding" : [ {
@@ -9310,8 +9284,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         "quantity" : {
           "value" : 2.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2018-08-12"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -9684,7 +9657,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 2256829.86
+          "value" : 2256829.87
         },
         "category" : {
           "coding" : [ {
@@ -23434,7 +23407,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -23624,8 +23596,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -30246,7 +30217,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -30436,8 +30406,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -37058,7 +37027,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -37248,8 +37216,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -41592,7 +41559,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -41782,8 +41748,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -42224,7 +42189,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -42414,8 +42378,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -48375,7 +48338,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -48565,8 +48527,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -49007,7 +48968,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_DDPS]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -49197,8 +49157,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_DDPS]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -55158,7 +55117,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -55348,8 +55306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -55790,7 +55747,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_DDPS]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -55980,8 +55936,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_DDPS]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -61925,7 +61880,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -62115,8 +62069,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -66930,7 +66883,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -67120,8 +67072,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -72646,7 +72597,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -72836,8 +72786,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -75868,7 +75817,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_DDPS]=
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -76058,8 +76006,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_DDPS]=
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -82698,7 +82645,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -82888,8 +82834,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -87703,7 +87648,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -87893,8 +87837,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -93419,7 +93362,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -93609,8 +93551,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -96641,7 +96582,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_DDPS]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -96831,8 +96771,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_DDPS]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -103471,7 +103410,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -103661,8 +103599,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -108476,7 +108413,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -108666,8 +108602,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -114192,7 +114127,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -114382,8 +114316,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -117414,7 +117347,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_DDPS]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -117604,8 +117536,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_DDPS]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -135908,7 +135839,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -136098,8 +136028,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -152090,7 +152019,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -152280,8 +152208,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -168272,7 +168199,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }
       } ],
       "billablePeriod" : {
-        "end" : "2025-08-12",
         "start" : "2025-08-10"
       },
       "careTeam" : [ {
@@ -168462,8 +168388,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "unit" : "ML",
           "value" : 10.0
         },
-        "sequence" : 1,
-        "servicedDate" : "2025-08-10"
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

@@ -17,7 +17,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }
   } ],
   "billablePeriod" : {
-    "end" : "2018-08-21",
     "start" : "2018-08-12"
   },
   "careTeam" : [ {
@@ -80,8 +79,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" ]
     },
     "name" : [ {
-      "family" : "Garcia",
-      "given" : [ "Indiana" ]
+      "family" : "Garcia"
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -110,7 +108,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
-        "value" : 2256829.86
+        "value" : 2256829.87
       },
       "category" : {
         "coding" : [ {
@@ -208,8 +206,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "quantity" : {
       "value" : 2.0
     },
-    "sequence" : 1,
-    "servicedDate" : "2018-08-12"
+    "sequence" : 1
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -582,7 +579,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 2256829.86
+      "value" : 2256829.87
     },
     "category" : {
       "coding" : [ {
@@ -634,7 +631,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }
   } ],
   "billablePeriod" : {
-    "end" : "2025-08-12",
     "start" : "2025-08-10"
   },
   "careTeam" : [ {
@@ -824,8 +820,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "unit" : "ML",
       "value" : 10.0
     },
-    "sequence" : 1,
-    "servicedDate" : "2025-08-10"
+    "sequence" : 1
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

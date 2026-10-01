@@ -188,8 +188,7 @@ public class ClaimCmsRx extends ClaimBase {
    * @return optional total drug cost amount
    */
   public Optional<BigDecimal> getTotalDrugCostAmount() {
-    return Optional.ofNullable(
-        getClaimItems().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
+    return getClaimItems().getClaimLine().getAdjudicationCharge().getTotalRxCostAmount();
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {
