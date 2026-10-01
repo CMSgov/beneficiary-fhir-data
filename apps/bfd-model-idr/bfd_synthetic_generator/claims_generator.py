@@ -16,17 +16,14 @@ from claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS, PROF
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     GeneratorUtil,
-    IdGenerator,
-    RandomIdGenerator,
-    SequentialIdGenerator,
     adapters_to_dicts,
     as_list,
     load_file_dict,
-    load_id_state,
     partition_rows,
     probability,
     run_command,
 )
+from id_generators import IdGenerator, RandomIdGenerator, SequentialIdGenerator, load_id_state
 from load_synthetic_output import (
     ALL_KEYS,
     BeneSkMode,
@@ -759,21 +756,44 @@ def generate(
     if writer is None:
         writer = CsvWriter()
 
+    claims_tables = [
+        f.CLM,
+        f.CLM_LINE,
+        f.CLM_LINE_DCMTN,
+        f.CLM_ANSI_SGNTR,
+        f.CLM_VAL,
+        f.CLM_DT_SGNTR,
+        f.CLM_PROD,
+        f.CLM_INSTNL,
+        f.CLM_LINE_INSTNL,
+        f.CLM_DCMTN,
+        f.CLM_LCTN_HSTRY,
+        f.CLM_FISS,
+        f.CLM_PRFNL,
+        f.CLM_LINE_PRFNL,
+        f.CLM_LINE_RX,
+        f.CLM_RLT_COND_SGNTR_MBR,
+        f.PRVDR_HSTRY,
+        f.PRAUC,
+    ]
+
     if isinstance(writer, SnowflakeWriter):
+        if truncate:
+            writer.truncate_tables(claims_tables)
         id_state = load_id_state(writer)
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
     else:
         id_gen = RandomIdGenerator()
         Path("out").mkdir(exist_ok=True)
 
-    gen_utils = GeneratorUtil(id_gen=id_gen)
+        if sushi:
+            print("Running sushi build")
+            _, stderr = run_command("npm run sushi-build", cwd="../")
+            if stderr:
+                print("SUSHI errors:")
+                print(stderr)
 
-    if sushi:
-        print("Running sushi build")
-        _, stderr = run_command("npm run sushi-build", cwd=".")
-        if stderr:
-            print("SUSHI errors:")
-            print(stderr)
+    gen_utils = GeneratorUtil(id_gen=id_gen)
 
     files: dict[str, list[RowAdapter]] = {
         f.BENE_HSTRY: [],
@@ -825,17 +845,19 @@ def generate(
             init_provider_historys=existing_providers,
         )
     )
-    _write_static_tables(gen_utils, writer, f.PRVDR_HSTRY, generated_provider_histories, truncate)
+    gen_utils.export_table(generated_provider_histories, f.PRVDR_HSTRY, writer, ALL_KEYS)
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
-    _write_static_tables(gen_utils, writer, f.CLM_ANSI_SGNTR, clm_ansi_sgntr_rows, truncate)
+    gen_utils.export_table(clm_ansi_sgntr_rows, f.CLM_ANSI_SGNTR, writer, ALL_KEYS)
 
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=enable_samhsa)
     pac_util = PacGeneratorUtil()
     claim_child_tables = [
-        t for t in _ClaimsFile if t not in (f.CLM, f.PRAUC, f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY)
+        table
+        for table in claims_tables
+        if table not in (f.CLM, f.PRAUC, f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY)
     ]
 
     # An operator could provide a BENE_HSTRY with new beneficiaries that have no corresponding CLMs,
@@ -843,14 +865,11 @@ def generate(
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
+    idx = 1
     for bene_sks_batch in writer.get_bene_sks(files, bene_sk_mode, batch_size):
         exisiting_claims = files
-        if isinstance(writer, SnowflakeWriter):
-            if truncate:
-                exisiting_claims = {k: [] for k in [f.CLM, *claim_child_tables]}
-            else:
-                claim_child_tables = [claim_child.value for claim_child in claim_child_tables]
-                exisiting_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
+        if isinstance(writer, SnowflakeWriter) and not truncate:
+            exisiting_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
 
         out_tables = _generate_batch(
             bene_sks_batch,
@@ -880,14 +899,11 @@ def generate(
             out_tables[f.PRAUC].clear()
 
         for table_name, rows in out_tables.items():
-            if table_name == f.PRVDR_HSTRY or table_name not in _ClaimsFile:
+            if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
                 continue
-            if isinstance(writer, CsvWriter):
-                writer.write_table(rows, table_name, ALL_KEYS, truncate)
-            else:
-                gen_utils.export_table(
-                    adapters_to_dicts(rows), table_name, writer=writer, truncate=truncate
-                )
+            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
+        logger.info(f"Claims data generation completed for batch {idx}!")
+        idx += 1
 
     message = "Done generating synthetic claims/prior auth data for provided BENE_SKs"
     print(message)
@@ -1150,7 +1166,7 @@ def _generate_batch(
                 ),
                 f.CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),
-                    *norm_clm_lines_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]), []),
+                    *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
                 ],
                 f.CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
                 f.CLM_PRFNL: clm_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
@@ -1166,7 +1182,9 @@ def _generate_batch(
                     *proc_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
                     *diag_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
                 ],
-                f.CLM_DT_SGNTR: as_list(clm_dt_sgntr_per_sk.get(file_pac_clm[f.CLM_DT_SGNTR_SK])),
+                f.CLM_DT_SGNTR: as_list(
+                    clm_dt_sgntr_per_sk.get(int(file_pac_clm[f.CLM_DT_SGNTR_SK]))
+                ),
             }
             for file_pac_clm in existing_pac_clms
         ]
@@ -1310,21 +1328,6 @@ def _generate_batch(
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
     return out_tables
-
-
-def _write_static_tables(
-    gen_utils: GeneratorUtil,
-    writer: OutputDestinationWriter,
-    table_name: str,
-    rows: list[RowAdapter],
-    truncate: bool,
-) -> None:
-    if isinstance(writer, CsvWriter):
-        writer.write_table(rows, table_name, ALL_KEYS, truncate)
-    else:
-        gen_utils.export_table(
-            adapters_to_dicts(rows), table_name, writer=writer, truncate=truncate
-        )
 
 
 def _generate_prior_auth(

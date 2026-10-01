@@ -4,7 +4,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import StrEnum, auto
@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import snowflake.connector
 from constants import (
     _INT_TO_STRING_COLS,
     BENE_DUAL,
@@ -46,10 +45,7 @@ from constants import (
     PRAUC,
     PRVDR_HSTRY,
 )
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from row_adapter import RowAdapter
-from snowflake.connector import SnowflakeConnection
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, when_matched, when_not_matched
 from snowflake.snowpark.functions import hash as snowpark_hash
@@ -86,7 +82,6 @@ class OutputDestinationWriter(ABC):
         data: list[Any],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
-        truncate: bool = False,
     ) -> None: ...
 
     @abstractmethod
@@ -108,7 +103,7 @@ class OutputDestinationWriter(ABC):
 
 
 class CsvWriter(OutputDestinationWriter):
-    def __init__(self, out_dir: str = "out") -> None:
+    def __init__(self, out_dir: str = "../out") -> None:
         self.out_dir = Path(out_dir)
 
     def _clean_int_columns(self, rows: list[dict[str, Any]]):
@@ -123,7 +118,6 @@ class CsvWriter(OutputDestinationWriter):
         data: list[Any],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
-        truncate: bool = False,  # noqa: ARG002
     ) -> None:
         if not data:
             return
@@ -198,27 +192,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.schema = schema
         self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
 
-    def _connect(
-        self, account: str, user: str, private_key: str, warehouse: str
-    ) -> SnowflakeConnection:
-        pk = serialization.load_pem_private_key(
-            private_key.encode(),
-            password=None,
-            backend=default_backend(),
-        )
-        pk_bytes = pk.private_bytes(
-            encoding=serialization.Encoding.DER,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption(),
-        )
-        return snowflake.connector.connect(  # type: ignore
-            user=user,
-            private_key=pk_bytes,
-            account=account,
-            warehouse=warehouse,
-            role="TEST_SERVICE_USER",
-        )
-
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
         override = _TABLE_OVERRIDES.get(table_name)
         if override is not None:
@@ -238,7 +211,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         return self.session.table(f"{database}.{schema}.{resolved_table_name}")
 
     def iter_bene_sk_batches(self, batch_size: int) -> Iterator[list[int]]:
-        perf_start = time.perf_counter()
         df = self.qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
         batch = []
         for row in df.to_local_iterator():
@@ -247,10 +219,6 @@ class SnowflakeWriter(OutputDestinationWriter):
                 yield batch
                 batch = []
         if batch:
-            duration = time.perf_counter() - perf_start
-            message = f"Took {duration:.6f} seconds to get batch of benes"
-            logger.info(message)
-            print(f"length of buffer {len(batch)}")
             yield batch
 
     def get_rows(self, table_name: str) -> list[dict[str, Any]]:
@@ -298,44 +266,6 @@ class SnowflakeWriter(OutputDestinationWriter):
             self._column_types_cache[cache_key] = {row["COLUMN_NAME"].upper() for row in rows}
 
         return self._column_types_cache[cache_key]
-
-    def write_table(
-        self,
-        data: list[dict[str, Any]],
-        table_name: str,
-        cols: list[str] | str = ALL_KEYS,  # noqa: ARG002
-        truncate: bool = False,
-    ) -> None:
-        if not data:
-            return
-
-        perf_start = time.perf_counter()
-        resolved_table_name, database, schema = self.resolve_target_table(table_name)
-        qualified_table = f"{database}.{schema}.{resolved_table_name}"
-        known_columns = self._get_known_columns(database, schema, resolved_table_name)
-
-        clean_rows = []
-        for x in data:
-            row_dict = x.kv if hasattr(x, "kv") else x
-            if isinstance(row_dict, dict):
-                # Only keep fields that actually match a target table column name
-                filtered_row = {k: v for k, v in row_dict.items() if k.upper() in known_columns}
-                clean_rows.append(filtered_row)
-        duration = time.perf_counter() - perf_start
-        message = f"Clean up before insertion took {duration:.6f} seconds"
-        logger.info(message)
-
-        perf_start = time.perf_counter()
-        df = self.session.create_dataframe(clean_rows)
-        duration = time.perf_counter() - perf_start
-        logger.info(f"created dataframe in {duration:.6f} seconds")
-
-        perf_start = time.perf_counter()
-        write_mode = "truncate" if truncate else "append"
-        df.write.mode(write_mode).save_as_table(qualified_table)
-        duration = time.perf_counter() - perf_start
-        message = f"Inserted into {table_name} in {duration:.6f} seconds"
-        logger.info(message)
 
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
@@ -417,7 +347,12 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         return result
 
-    def merge_batch(self, data: list[dict[str, Any]], table_name: str) -> None:
+    def write_table(
+        self,
+        data: list[dict[str, Any]],
+        table_name: str,
+        cols: list[str] | str = ALL_KEYS,  # noqa: ARG002
+    ) -> None:
         if not data:
             return
 
@@ -457,6 +392,10 @@ class SnowflakeWriter(OutputDestinationWriter):
             f"CREATE TRANSIENT TABLE {staging_table_name} LIKE {qualified_table}"
         ).collect()
 
+        self.session.sql(
+            f"CREATE STAGE IF NOT EXISTS {database}.{schema}.generator_files_stage"
+        ).collect()
+
         file_input_stream = io.BytesIO(csv_payload)
         self.session.file.put_stream(
             input_stream=file_input_stream,
@@ -468,7 +407,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.sql(
             f"""
             COPY INTO {staging_table_name}
-            FROM @{database}.{schema}.generator_files_stage/batch_{resolved_table_name}.csv
+            FROM @{database}.{schema}.generator_files_stage/batch_{resolved_table_name}.csv.gz
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 SKIP_HEADER = 1
@@ -514,7 +453,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.sql(f"DROP TABLE IF EXISTS {staging_table_name}").collect()
         duration = time.perf_counter() - perf_start
 
-        message = f"Merged {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"
+        message = f"Wrote to {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"
         logger.info(message)
 
     def _get_primary_keys(self, table_name: str) -> list[str]:
@@ -538,10 +477,17 @@ class SnowflakeWriter(OutputDestinationWriter):
     def get_bene_sks(
         self,
         files: dict[str, list[RowAdapter]],  # noqa: ARG002
-        bene_sk_mode: BeneSkMode,
+        bene_sk_mode: BeneSkMode,  # noqa: ARG002
         batch_size: int,
     ) -> Iterator[list[int]]:
         yield from self.iter_bene_sk_batches(batch_size)
+
+    def truncate_tables(self, table_names: Iterable[str]) -> None:
+        for table_name in table_names:
+            resolved_table_name, database, schema = self.resolve_target_table(table_name)
+            self.session.sql(
+                f"TRUNCATE TABLE IF EXISTS {f'{database}.{schema}.{resolved_table_name}'}"
+            ).collect()
 
 
 class KeyRelation(StrEnum):

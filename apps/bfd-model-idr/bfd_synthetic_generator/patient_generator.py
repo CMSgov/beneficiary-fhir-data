@@ -24,15 +24,12 @@ from constants import (
 from faker import Faker
 from generator_util import (
     GeneratorUtil,
-    IdGenerator,
-    RandomIdGenerator,
-    SequentialIdGenerator,
     adapters_to_dicts,
     load_file_dict,
-    load_id_state,
     output_table_contains_by_bene_sk,
     probability,
 )
+from id_generators import IdGenerator, RandomIdGenerator, SequentialIdGenerator, load_id_state
 from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
 
@@ -217,22 +214,15 @@ def load_inputs(
     if writer is None:
         writer = CsvWriter()
 
-    is_snowflake = isinstance(writer, SnowflakeWriter)
-    if is_snowflake:
-        id_state = load_id_state(writer)
-        id_gen: IdGenerator = SequentialIdGenerator(id_state)
+    if isinstance(writer, SnowflakeWriter):
+        _handle_snowflake_flow(writer, patients, force_ztm, batch_size, truncate)
     else:
-        id_gen = RandomIdGenerator()
-
-    generator = GeneratorUtil(id_gen=id_gen)
-
-    if is_snowflake:
-        _handle_snowflake_flow(generator, writer, patients, force_ztm, batch_size, truncate)
-    else:
-        _handle_csv_flow(generator, writer)
+        _handle_csv_flow(writer)
 
 
-def _handle_csv_flow(generator: GeneratorUtil, writer: CsvWriter):
+def _handle_csv_flow(writer: CsvWriter):
+    generator: GeneratorUtil = GeneratorUtil(id_gen=RandomIdGenerator())
+
     csv_tables = [
         BENE_HSTRY,
         BENE_MBI_ID,
@@ -280,19 +270,16 @@ def _handle_csv_flow(generator: GeneratorUtil, writer: CsvWriter):
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
     _generate_patients_batch(generator, patients, patient_mbi_id_rows, args.force_ztm)
-    generator.save_output_files(writer, truncate=args.truncate)
+    generator.save_output_files(writer)
 
 
 def _handle_snowflake_flow(
-    generator: GeneratorUtil,
     writer: SnowflakeWriter,
     patients: int,
     force_ztm: bool,
     batch_size: int,
     truncate: bool,
 ):
-    _generate_contracts(generator, writer, truncate=truncate)
-
     patient_tables = [
         BENE_MBI_ID,
         BENE_STUS,
@@ -306,8 +293,19 @@ def _handle_snowflake_flow(
         BENE_LIS_CMBND,
     ]
 
-    # Process existing data updates in batches
+    if truncate:
+        writer.truncate_tables([*patient_tables, BENE_HSTRY, CNTRCT_PBP_NUM, CNTRCT_PBP_CNTCT])
+
+    id_state = load_id_state(writer)
+    id_gen: IdGenerator = SequentialIdGenerator(id_state)
+    generator: GeneratorUtil = GeneratorUtil(id_gen=id_gen)
+
+    # TODO: check if we still want contracts amount to be fixed amount
+    _generate_contracts(generator, writer)
+
+    # Regenerate existing data updates in batches
     if not truncate:
+        idx = 1
         for bene_sks_batch in writer.iter_bene_sk_batches(batch_size):
             existing = writer.get_patient_batch(bene_sks_batch, patient_tables)
             regenerate_static_tables(generator, existing)
@@ -317,6 +315,8 @@ def _handle_snowflake_flow(
                 generator, existing[BENE_HSTRY], patient_mbi_id_rows, force_ztm
             )
             generator.flush_batch(writer)
+            logger.info(f"Patient data generation completed for batch {idx}!")
+            idx += 1
     else:
         # Generate new synthetic patients in batches
         num_new_patients = int(patients)
@@ -325,11 +325,10 @@ def _handle_snowflake_flow(
             _generate_patients_batch(
                 generator, [RowAdapter({}) for _ in range(chunk)], {}, force_ztm
             )
-            generator.flush_batch(writer, truncate=(truncate and i == 0))
+            generator.flush_batch(writer)
+            logger.info(f"Patient data generation completed for batch {i}!")
 
-    message = "Patient data generation complete!"
-    print(message)
-    logger.info(message)
+    logger.info("Patient data generation complete!")
 
 
 def _generate_patients_batch(
@@ -463,9 +462,8 @@ def _generate_patients_batch(
 
 
 def _generate_contracts(
-    generator: GeneratorUtil, writer: OutputDestinationWriter, truncate: bool, amount: int = 10
+    generator: GeneratorUtil, writer: OutputDestinationWriter, amount: int = 10
 ) -> None:
-    # todo: check if we still want contracts amount to be fixed
     existing_contracts = [
         RowAdapter(row, loaded_from_file=True) for row in writer.get_rows(CNTRCT_PBP_NUM)
     ]
@@ -477,15 +475,12 @@ def _generate_contracts(
         init_contract_pbp_nums=existing_contracts,
         init_contract_pbp_contacts=existing_contacts,
     )
-    generator.export_table(
-        adapters_to_dicts(contract_pbp_nums), CNTRCT_PBP_NUM, writer=writer, truncate=truncate
-    )
+    generator.export_table(adapters_to_dicts(contract_pbp_nums), CNTRCT_PBP_NUM, writer=writer)
 
     generator.export_table(
         adapters_to_dicts(contract_pbp_contacts),
         CNTRCT_PBP_CNTCT,
         writer=writer,
-        truncate=truncate,
     )
 
 
@@ -505,8 +500,8 @@ if __name__ == "__main__":
             claims_args = [
                 sys.executable,
                 "claims_generator.py",
-                f"out/{BENE_HSTRY}.csv",
-                f"out/{CNTRCT_PBP_NUM}.csv",
+                f"../out/{BENE_HSTRY}.csv",
+                f"../out/{CNTRCT_PBP_NUM}.csv",
             ]
 
             result = subprocess.run(
