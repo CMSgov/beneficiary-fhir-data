@@ -8,16 +8,15 @@ SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR
 
 source "$SCRIPT_DIR/../scripts/load-bfd-credentials.sh"
+source "$SCRIPT_DIR/../scripts/load-server-certs.sh"
 headless=""
 if [[ -v argc_headless ]]; then
 	headless="--headless"
 fi
 (
 	cd "$SCRIPT_DIR"
-	tmpdir="${TMPDIR:-'/tmp'}"
-	PGUSER="$BFD_DB_USERNAME" PGPASSWORD="$BFD_DB_PASSWORD" PGHOST="$BFD_DB_ENDPOINT" PGDATABASE=fhirdb \
-		uv run locust -f v3/regression_suite.py \
-		--client-cert-path="$tmpdir/${BFD_ENV}_combined.pem" \
-		--host=https://test.fhirv3.bfd.cmscloud.local \
+	uv run locust -f v3/regression_suite.py \
+		--client-cert-path="$BFD_COMBINED_CERT" \
+		--host="https://$BFD_ENV.fhirv3.bfd.cmscloud.local" \
 		$headless
 )

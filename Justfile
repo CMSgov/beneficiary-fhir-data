@@ -214,3 +214,7 @@ claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_non
 regression-test env headless="":
     BFD_ENV="{{ env }}" apps/utils/locust_tests/regression.sh \
         {{ if headless != "" { "--headless" } else { "" } }}
+
+[arg("env", long, pattern=env_pattern)]
+samhsa-regression-test env:
+    BFD_ENV="{{ env }}" apps/utils/samhsa-regression-tests/regression.sh
