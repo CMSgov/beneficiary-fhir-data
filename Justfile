@@ -33,8 +33,10 @@ extract-public-key env:
 [arg("query")]
 [arg("resource", pattern="(Patient|Coverage|ExplanationOfBenefit)")]
 [arg("env", long, pattern=env_pattern)]
-bfd-request resource query env:
-    BFD_ENV="{{ env }}" ./apps/utils/scripts/bfd-request.sh "{{ resource }}" "{{ query }}"
+[arg("samhsa", long, value="1")]
+bfd-request resource query env samhsa="":
+    BFD_ENV="{{ env }}" ./apps/utils/scripts/bfd-request.sh "{{ resource }}" "{{ query }}" \
+        {{ if samhsa == "1" { "--samhsa" } else { "" } }}
 
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
@@ -215,6 +217,12 @@ regression-test env headless="":
     BFD_ENV="{{ env }}" apps/utils/locust_tests/regression.sh \
         {{ if headless != "" { "--headless" } else { "" } }}
 
+[arg("concurrency", long, pattern="\\d+")]
 [arg("env", long, pattern=env_pattern)]
-samhsa-regression-test env:
-    BFD_ENV="{{ env }}" apps/utils/samhsa-regression-tests/regression.sh
+[arg("limit", long, pattern="\\d+")]
+[arg("tablesample", long, pattern="\\d+")]
+samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
+    BFD_ENV="{{ env }}" apps/utils/samhsa-regression-tests/regression.sh \
+        --tablesample "{{ tablesample }}" \
+        --limit "{{ limit }}" \
+        --concurrency "{{ concurrency }}"
