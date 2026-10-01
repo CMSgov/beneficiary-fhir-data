@@ -63,9 +63,7 @@ def get_progress(
     if not should_track_load_progress(load_mode):
         return None
 
-    return PostgresExtractor(
-        load_mode=load_mode, cls=LoadProgress, partition=partition
-    ).extract_single(
+    return PostgresExtractor(cls=LoadProgress, partition=partition).extract_single(
         LoadProgress.fetch_query_by_job(partition, job_id),
         {LoadProgress.query_placeholder(): table_name},
     )
@@ -85,7 +83,7 @@ def extract_and_load(
     if source == Source.SNOWFLAKE:
         data_extractor = SnowflakeExtractor(cls=cls, partition=partition)
     else:
-        data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
+        data_extractor = PostgresExtractor(cls=cls, partition=partition)
 
     logger.info("loading {}", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
@@ -157,7 +155,6 @@ def extract_and_load(
 
 def prune_phase_1_ss_claims(
     cls: type[T],
-    load_mode: LoadMode,
     job_start: datetime,
 ) -> bool:
     claim_table = cls.table()
@@ -170,7 +167,7 @@ def prune_phase_1_ss_claims(
 
     prune_query, params = stale_phase_1_claims_query(claim_table, item_table, prune_cutoff_date)
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn:
+    with psycopg.connect(get_connection_string()) as conn:
         for target_table in [item_table, claim_table]:
             total_row_count = 0
             while True:
@@ -191,7 +188,6 @@ def prune_phase_1_ss_claims(
 
 def prune_stale_non_part_d_claims(
     cls: type[T],
-    load_mode: LoadMode,
 ) -> bool:
     claim_table = cls.table()
     item_table = _NON_PART_D_CLAIM_ITEM_TABLES.get(claim_table)
@@ -207,7 +203,7 @@ def prune_stale_non_part_d_claims(
         claim_table: 0,
     }
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn:
+    with psycopg.connect(get_connection_string()) as conn:
         while True:
             claim_row_count = 0
             with conn.transaction():
@@ -235,20 +231,18 @@ def prune_stale_non_part_d_claims(
     return True
 
 
-def prune_bene_lis_cmbnd(
-    load_mode: LoadMode,
-) -> bool:
+def prune_bene_lis_cmbnd() -> bool:
     bene_table = IdrBeneficiaryLowIncomeSubsidyCmbnd.table()
 
     logger.info("pruning obsolete lis beneficiaries")
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+    with psycopg.connect(get_connection_string()) as conn, conn.transaction():
         while True:
             res = conn.execute(
                 f"""
                 DELETE FROM {bene_table}
                 WHERE (bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts) IN (
-                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts 
+                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
                     LIMIT %s
@@ -263,14 +257,12 @@ def prune_bene_lis_cmbnd(
     return True
 
 
-def prune_bene_ma_part_d(
-    load_mode: LoadMode,
-) -> bool:
+def prune_bene_ma_part_d() -> bool:
     bene_table = IdrBeneficiaryMaPartDEnrollment.table()
 
     logger.info("pruning obsolete part d beneficiaries", DEFAULT_MAX_DATE)
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+    with psycopg.connect(get_connection_string()) as conn, conn.transaction():
         while True:
             res = conn.execute(
                 f"""
@@ -291,28 +283,26 @@ def prune_bene_ma_part_d(
     return True
 
 
-def prune_bene_ma_part_d_rx(
-    load_mode: LoadMode,
-) -> bool:
+def prune_bene_ma_part_d_rx() -> bool:
     bene_table = IdrBeneficiaryMaPartDEnrollmentRx.table()
 
     logger.info("pruning obsolete part d rx beneficiaries", DEFAULT_MAX_DATE)
 
-    with psycopg.connect(get_connection_string(load_mode)) as conn, conn.transaction():
+    with psycopg.connect(get_connection_string()) as conn, conn.transaction():
         while True:
             res = conn.execute(
                 f"""
                 DELETE FROM {bene_table}
-                WHERE (bene_sk, 
-                       bene_cntrct_num, 
-                       bene_pbp_num, 
-                       bene_enrlmt_bgn_dt, 
+                WHERE (bene_sk,
+                       bene_cntrct_num,
+                       bene_pbp_num,
+                       bene_enrlmt_bgn_dt,
                        bene_enrlmt_pdp_rx_info_bgn_dt
                     ) IN (
-                    SELECT bene_sk, 
-                           bene_cntrct_num, 
-                           bene_pbp_num, 
-                           bene_enrlmt_bgn_dt, 
+                    SELECT bene_sk,
+                           bene_cntrct_num,
+                           bene_pbp_num,
+                           bene_enrlmt_bgn_dt,
                            bene_enrlmt_pdp_rx_info_bgn_dt
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s

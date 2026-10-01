@@ -1,8 +1,12 @@
 env_pattern := "(\\d+-)?(test|sandbox|prod)"
+env_local_pattern := f"({{ env_pattern }}|local)"
+env_help := "BFD environment"
 
 default:
     just --list
 
+[doc("""Installs development dependencies in your local machine.
+Should be ran once for new devs or when dependencies change""")]
 bootstrap:
     #!/usr/bin/env bash
     set -Eeuo pipefail
@@ -26,78 +30,92 @@ bootstrap:
     cp -p ./hooks/run-pre-commit.sh .git/hooks/pre-commit
     cp -p ./hooks/rerun-changed.sh .git/hooks/pre-commit.rerun
 
-[arg("env", long, pattern=env_pattern)]
-extract-public-key env:
-    BFD_ENV="{{ env }}" ./apps/utils/scripts/extract-public-key.sh
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[doc("""Extracts the certificate from the server.
+Useful when new clients connect to BFD and need the cert for host verification.""")]
+extract-server-cert env:
+    curl -k -w "%{certs}" "https://{{ env }}.fhirv3.bfd.cmscloud.local"
 
-[arg("query")]
-[arg("resource", pattern="(Patient|Coverage|ExplanationOfBenefit)")]
-[arg("env", long, pattern=env_pattern)]
-[arg("samhsa", long, value="1")]
+[arg("query", help="Querystring to send with the request")]
+[arg("samhsa", long, value="1", help="When set, uses a certificate that is allowed to see samhsa data")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("resource", pattern="(Patient|Coverage|ExplanationOfBenefit)", help="FHIR resource")]
+[doc("Sends a request to BFD")]
 bfd-request resource query env samhsa="":
     BFD_ENV="{{ env }}" ./apps/utils/scripts/bfd-request.sh "{{ resource }}" "{{ query }}" \
         {{ if samhsa == "1" { "--samhsa" } else { "" } }}
 
+[doc("Rebuilds the entire maven project. This needs to be ran after a release.")]
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
 
+[doc("Helper command to remove all containers")]
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
+[doc("Removes the local db container")]
 remove-db:
     ./apps/utils/scripts/remove-local-db.sh
 
+[doc("Creates the local db container")]
 create-db:
     ./apps/utils/scripts/create-bfd-db.sh
 
-create-mock-idr:
+[arg("env", long, pattern=f"(local|{{ env_pattern }})", help=env_help)]
+migrate-db env: create-db
+    BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-ng/migrate.sh
+
+[doc("Creates the mock IDR schema in the local db container")]
+create-mock-idr: (migrate-db "local")
     ./apps/utils/scripts/run-sql-script.sh ./apps/bfd-pipeline-idr/mock-idr.sql
 
-migrate-db: create-db
-    BFD_ENV=local ./apps/bfd-db-migrator-ng/migrate.sh
-
-pipeline csv_folder: migrate-db create-mock-idr
-    LOGURU_COLORIZE=YES ./apps/bfd-pipeline-idr/run-pipeline.sh {{ csv_folder }}
-
-[doc("""
-  Run server-ng, optionally running the pipeline first if `csv_folder` is provided
-""")]
-server-ng csv_folder="":
+[arg("csv-folder", help="Loads data from the folder into the local db before starting the server")]
+[doc("Run server-ng, optionally running the pipeline first if `csv-folder` is provided")]
+server-ng csv-folder="":
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
-    if [ "{{ csv_folder }}" != "" ]; then
-        just pipeline {{ csv_folder }};
+    if [ "{{ csv-folder }}" != "" ]; then
+        just pipeline {{ csv-folder }};
     fi
     cd ./apps/bfd-server-ng && mvn clean spring-boot:run
 
-[arg("update-snapshots", long, value="1")]
+[arg("update-snapshots", long, value="1", help="Update snapshots when running tests")]
+[doc("Run unit and integration tests for server-ng")]
 server-ng-test update-snapshots="":
     cd ./apps/bfd-server-ng && mvn clean verify {{ if update-snapshots == "1" { "-DupdateSnapshot=" } else { "" } }}
 
+[doc("""Open server-ng integration test logs.
+These are useful to troubleshoot integration test failures.""")]
 server-ng-test-logs:
     code ./apps/bfd-server-ng/target/failsafe-reports/logs
 
+[doc("Open server-ng swagger page. Local server must be running first.")]
 swagger:
     open http://localhost:8080/v3/fhir/swagger-ui/
 
-[arg("env", long, pattern=env_pattern)]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[doc("Run the synthetic data migrator")]
 migrate-synthetic env:
     BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-synthetic/migrate.sh
 
-[arg("env", long, pattern=env_pattern)]
-[arg("load-mode", long, pattern="(local|synthetic)")]
+[arg("seed-from", long)]
+[arg("source-env", long, pattern=f"{{ env_pattern }}?")]
 [arg("truncate", long, value="1")]
-load-synthetic load-mode env *truncate:
+[arg("env", long, pattern=env_local_pattern, help=env_help)]
+[no-cd]
+pipeline env="local" source-env="" seed-from="" *truncate:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
-    if [ "{{ load-mode }}" = "local" ]; then
-        just migrate-db
+    if [ "{{ env }}" = "local" ]; then
+        just create-mock-idr
     fi
-    LOGURU_COLORIZE=YES BFD_ENV="{{ env }}" \
-        ./apps/bfd-pipeline-idr/load-synthetic.sh \
-        --load-mode "{{ load-mode }}" \
+    root="$(git rev-parse --show-toplevel)"
+    seed_from={{ if seed-from == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ seed-from }})" } }}
+    BFD_ENV="{{ env }}" "$root/apps/bfd-pipeline-idr/run-pipeline.sh" \
+        {{ if source-env != "" { f"--source-env {{ source-env }}" } else { "" } }} \
+        {{ if seed-from != "" { "--seed-from \"$seed_from\"" } else { "" } }}
         {{ if truncate == "1" { "--truncate" } else { "" } }}
 
 [arg("env", long, pattern=env_pattern)]

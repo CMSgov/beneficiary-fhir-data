@@ -22,7 +22,6 @@ from .db_utils import get_connection_string
 from .load_partition import LoadPartition
 from .model.base_model import (
     DbType,
-    LoadMode,
     Source,
     T,
     format_date_opt,
@@ -227,9 +226,9 @@ class DbExecutor(ABC):
 
 
 class PostgresExtractor(Extractor[T]):
-    def __init__(self, cls: type[T], partition: LoadPartition, load_mode: LoadMode) -> None:
+    def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         super().__init__(cls, partition)
-        self.connection_string = get_connection_string(load_mode)
+        self.connection_string = get_connection_string()
         self.conn = psycopg.connect(self.connection_string)
 
     @override

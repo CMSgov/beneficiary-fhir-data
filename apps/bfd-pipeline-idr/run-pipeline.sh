@@ -1,35 +1,58 @@
 #!/usr/bin/env bash
-
 set -Eeuo pipefail
 
-SCRIPT_DIR=$(path=$(realpath "$0") && dirname "$path")
+# @option	--source-env
+# @option	--seed-from
+# @flag		--truncate
+eval "$(argc --argc-eval "$0" "$@")"
+
+SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR
-INVOKE_DIR="$PWD"
 
-source "$SCRIPT_DIR/../utils/scripts/local-constants.sh"
-
-function do_load() {
-	(cd "$SCRIPT_DIR" && BFD_DB_USERNAME="$BFD_LOCAL_DB_USERNAME" \
-		BFD_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD" \
-		BFD_DB_ENDPOINT="localhost" \
-		IDR_ENABLE_DATE_PARTITIONS=0 \
-		uv run idr-pipeline \
-		--source postgres \
-		--load-mode synthetic \
-		--load-type initial \
-		--seed-from "$INVOKE_DIR/${1}")
-}
-
-if [[ -d "$1/0" ]]; then
-	echo "Loading batches in $1..."
-	for batch_dir in "$1"/*/; do
-		echo "Loading batch $batch_dir..."
-		do_load "$batch_dir"
-		echo "Done loading batch $batch_dir"
-	done
-	echo "Done loading all batches"
+if [ -v argc_source_env ]; then
+	if [ "$BFD_ENV" != "local" ]; then
+		echo "--source-env can only be used when BFD_ENV is 'local'"
+		exit 1
+	fi
+	source_env="$argc_source_env"
 else
-	echo "Loading full tables from $1..."
-	do_load "$1"
-	echo "Done loading full tables from $1"
+	source_env="$BFD_ENV"
 fi
+
+if [ "$BFD_ENV" != "local" ]; then
+	read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? [yn] " -n 1 -r
+	echo # (optional) move to a new line
+	if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+		echo 'exiting'
+		exit 0
+	fi
+fi
+
+if [ "$source_env" != "local" ]; then
+	BFD_ENV="$source_env" source "$SCRIPT_DIR/../utils/scripts/load-idr-credentials.sh" synthetic
+fi
+if [ "$BFD_ENV" = "local" ]; then
+	source "$SCRIPT_DIR/../utils/scripts/local-constants.sh"
+	export BFD_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+	export BFD_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+	export BFD_DB_ENDPOINT="localhost"
+else
+	source "$SCRIPT_DIR/../utils/scripts/load-bfd-credentials.sh"
+fi
+
+args=("--load-type=initial" "--load-mode=synthetic")
+if [ "$source_env" = "local" ]; then
+	args+=("--source=postgres")
+else
+	args+=("--source=snowflake")
+fi
+
+if [ -v argc_truncate ]; then
+	args+=('--truncate')
+fi
+
+if [ -v argc_seed_from ]; then
+	args+=("--seed-from=$argc_seed_from")
+fi
+
+(cd "$SCRIPT_DIR" && IDR_ENABLE_DATE_PARTITIONS=0 LOGURU_COLORIZE=YES uv run idr-pipeline "${args[@]}")

@@ -18,7 +18,6 @@ from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
 
 from .db_utils import get_connection_string
-from .model.base_model import LoadMode
 from .model.idr_beneficiary import IdrBeneficiary
 from .model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
 from .model.idr_beneficiary_entitlement import IdrBeneficiaryEntitlement
@@ -140,9 +139,9 @@ class IdrJobLoadEvent(BaseModel):
     model_config = ConfigDict(validate_by_name=True)
 
 
-def _connect_and_do[T](load_mode: LoadMode, func: Callable[[Cursor[DictRow]], T]) -> T:
+def _connect_and_do[T](func: Callable[[Cursor[DictRow]], T]) -> T:
     with (
-        psycopg.connect(get_connection_string(load_mode)) as conn,
+        psycopg.connect(get_connection_string()) as conn,
         conn.cursor(row_factory=dict_row) as curs,
     ):
         return func(curs)
@@ -152,7 +151,7 @@ def _clean_query_str(query: Template) -> str:
     return re.sub(r"\s+", " ", sql.as_string(query).strip())
 
 
-def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJobLoadEvent]:
+def get_eligible_events(start_time: datetime) -> list[IdrJobLoadEvent]:
     def _do(curs: Cursor[DictRow]) -> list[IdrJobLoadEvent]:
         sql_fields = sql.SQL(", ").join(
             [
@@ -176,12 +175,10 @@ def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJo
 
         return load_events
 
-    return _connect_and_do(load_mode, _do)
+    return _connect_and_do(_do)
 
 
-def get_unreported_jobs(
-    load_mode: LoadMode, start_time: datetime, grace_period: timedelta
-) -> set[IdrJobType]:
+def get_unreported_jobs(start_time: datetime, grace_period: timedelta) -> set[IdrJobType]:
     def _do(curs: Cursor[DictRow]) -> set[IdrJobType]:
         get_jobs_query = t"""
             SELECT {fields(IdrJobLoadEvent, by_alias=True).job_type:i}
@@ -218,12 +215,10 @@ def get_unreported_jobs(
 
         return unreported_jobs
 
-    return _connect_and_do(load_mode, _do)
+    return _connect_and_do(_do)
 
 
-def _update_time_column(
-    time_column: str, load_mode: LoadMode, events: list[IdrJobLoadEvent], time: datetime
-) -> None:
+def _update_time_column(time_column: str, events: list[IdrJobLoadEvent], time: datetime) -> None:
     def _do(curs: Cursor[DictRow]) -> None:
         update_jobs_query = t"""
             UPDATE {"idr":i}.{LOAD_EVENTS_TABLE:i}
@@ -240,37 +235,28 @@ def _update_time_column(
             lambda: TypeAdapter(list[IdrJobLoadEvent]).validate_python(updated_rows),
         )
 
-    _connect_and_do(load_mode, _do)
+    _connect_and_do(_do)
 
 
-def update_start_times(
-    load_mode: LoadMode, events: list[IdrJobLoadEvent], start_time: datetime
-) -> None:
+def update_start_times(events: list[IdrJobLoadEvent], start_time: datetime) -> None:
     _update_time_column(
         time_column=typing.cast(str, fields(IdrJobLoadEvent).start_time),
-        load_mode=load_mode,
         events=events,
         time=start_time,
     )
 
 
-def update_completion_times(
-    load_mode: LoadMode, events: list[IdrJobLoadEvent], completion_time: datetime
-) -> None:
+def update_completion_times(events: list[IdrJobLoadEvent], completion_time: datetime) -> None:
     _update_time_column(
         time_column=typing.cast(str, fields(IdrJobLoadEvent).completion_time),
-        load_mode=load_mode,
         events=events,
         time=completion_time,
     )
 
 
-def update_failure_times(
-    load_mode: LoadMode, events: list[IdrJobLoadEvent], failure_time: datetime
-) -> None:
+def update_failure_times(events: list[IdrJobLoadEvent], failure_time: datetime) -> None:
     _update_time_column(
         time_column=typing.cast(str, fields(IdrJobLoadEvent).failure_time),
-        load_mode=load_mode,
         events=events,
         time=failure_time,
     )
