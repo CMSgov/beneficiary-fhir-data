@@ -27,7 +27,7 @@ def test_generate_eob_sample_base() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Base-Sample-new.json")
+    output_file = Path("../../out-test/EOB-Base-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -113,7 +113,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
     assert result_data["CLM_UNIQ_ID"] == "9298559719445"
     assert result_data["CLM_TYPE_CD"] in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
 
-
+# this test is pointed at test_sample2 because test sample 1 does not have mcs claims
 def test_generate_eob_sample_carrier_mcs() -> None:
     result = CliRunner().invoke(
         main,

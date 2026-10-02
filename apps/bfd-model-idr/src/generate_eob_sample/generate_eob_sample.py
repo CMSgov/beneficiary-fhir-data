@@ -75,7 +75,7 @@ class SampleGenerator:
         # for different institutional claim types
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
             result = self.create_base(
-                clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample-new.json"
+                clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample.json"
             )
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
