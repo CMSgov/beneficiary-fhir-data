@@ -42,8 +42,8 @@ from .pipeline_utils import (
     prune_bene_lis_cmbnd,
     prune_bene_ma_part_d,
     prune_bene_ma_part_d_rx,
+    prune_non_latest_claim_versions,
     prune_phase_1_ss_claims,
-    prune_stale_non_part_d_claims,
 )
 from .settings import SETTINGS
 
@@ -52,12 +52,6 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimRx,
-    IdrClaimProfessionalNch,
-    IdrClaimInstitutionalNch,
-    IdrClaimProfessionalSs,
-    IdrClaimInstitutionalSs,
-]
-CLAIM_NON_PART_D_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
     IdrClaimInstitutionalNch,
     IdrClaimProfessionalSs,
@@ -184,9 +178,9 @@ class StagedIdrPipeline:
                 self.start_time,
             )
 
-        for model in self._filter_tables(CLAIM_NON_PART_D_TABLES):
+        for model in self._filter_tables(CLAIM_TABLES):
             yield functools.partial(
-                prune_stale_non_part_d_claims,
+                prune_non_latest_claim_versions,
                 model,
                 self.load_mode,
             )

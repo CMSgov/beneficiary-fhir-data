@@ -26,7 +26,7 @@ from .loader import LoadType, PostgresLoader, get_connection_string, should_trac
 from .model.base_model import (
     LoadMode,
     T,
-    stale_non_part_d_claims_query,
+    non_latest_claim_ids_query,
     stale_phase_1_claims_query,
 )
 from .model.idr_beneficiary_low_income_subsidy_cmbnd import IdrBeneficiaryLowIncomeSubsidyCmbnd
@@ -41,8 +41,7 @@ _SHARED_SYSTEM_CLAIM_ITEM_TABLES = {
 }
 
 
-# Keep this mapping explicit so stale non-Part-D pruning remains independent of Phase 1 SS pruning.
-_NON_PART_D_CLAIM_ITEM_TABLES = {
+_CLAIM_ITEM_TABLES = {
     CLAIM_INSTITUTIONAL_NCH_TABLE: CLAIM_INSTITUTIONAL_ITEM_NCH_TABLE,
     CLAIM_INSTITUTIONAL_SS_TABLE: CLAIM_INSTITUTIONAL_ITEM_SS_TABLE,
     CLAIM_PROFESSIONAL_NCH_TABLE: CLAIM_PROFESSIONAL_ITEM_NCH_TABLE,
@@ -189,29 +188,26 @@ def prune_phase_1_ss_claims(
     return True
 
 
-def prune_stale_non_part_d_claims(
+def prune_non_latest_claim_versions(
     cls: type[T],
     load_mode: LoadMode,
 ) -> bool:
     claim_table = cls.table()
-    item_table = _NON_PART_D_CLAIM_ITEM_TABLES.get(claim_table)
-    if item_table is None:
-        return True
+    item_table = _CLAIM_ITEM_TABLES.get(claim_table)
 
-    logger.info("pruning stale non-Part-D claims")
+    target_tables = [claim_table] if item_table is None else [item_table, claim_table]
 
-    prune_query = stale_non_part_d_claims_query(claim_table)
+    logger.info("pruning non-latest claim versions")
 
-    total_row_counts: dict[str, int] = {
-        item_table: 0,
-        claim_table: 0,
-    }
+    prune_query = non_latest_claim_ids_query(claim_table)
+
+    total_row_counts: dict[str, int] = {target_table: 0 for target_table in target_tables}
 
     with psycopg.connect(get_connection_string(load_mode)) as conn:
         while True:
             claim_row_count = 0
             with conn.transaction():
-                for target_table in [item_table, claim_table]:
+                for target_table in target_tables:
                     res = conn.execute(
                         f"""DELETE FROM {target_table} WHERE clm_uniq_id IN ({prune_query})""",  # type: ignore
                         (),
@@ -224,7 +220,7 @@ def prune_stale_non_part_d_claims(
                         claim_row_count = res.rowcount
 
             if claim_row_count == 0:
-                for target_table in [item_table, claim_table]:
+                for target_table in target_tables:
                     logger.info(
                         "Total rows pruned from {}: {}",
                         target_table,
@@ -248,7 +244,7 @@ def prune_bene_lis_cmbnd(
                 f"""
                 DELETE FROM {bene_table}
                 WHERE (bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts) IN (
-                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts 
+                    SELECT bene_sk, bene_cmbnd_deemd_efctv_dt, idr_trans_obslt_ts
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
                     LIMIT %s
@@ -303,16 +299,16 @@ def prune_bene_ma_part_d_rx(
             res = conn.execute(
                 f"""
                 DELETE FROM {bene_table}
-                WHERE (bene_sk, 
-                       bene_cntrct_num, 
-                       bene_pbp_num, 
-                       bene_enrlmt_bgn_dt, 
+                WHERE (bene_sk,
+                       bene_cntrct_num,
+                       bene_pbp_num,
+                       bene_enrlmt_bgn_dt,
                        bene_enrlmt_pdp_rx_info_bgn_dt
                     ) IN (
-                    SELECT bene_sk, 
-                           bene_cntrct_num, 
-                           bene_pbp_num, 
-                           bene_enrlmt_bgn_dt, 
+                    SELECT bene_sk,
+                           bene_cntrct_num,
+                           bene_pbp_num,
+                           bene_enrlmt_bgn_dt,
                            bene_enrlmt_pdp_rx_info_bgn_dt
                     FROM {bene_table}
                     WHERE idr_trans_obslt_ts < %s
