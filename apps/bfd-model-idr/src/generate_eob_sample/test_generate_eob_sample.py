@@ -123,6 +123,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
     assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
 
 
+
 # this test is pointed at test_sample2 because test sample 1 does not have mcs claims
 def test_generate_eob_sample_carrier_mcs() -> None:
     result = CliRunner().invoke(
