@@ -19,7 +19,6 @@ dependencies = [
 
 [project.scripts]
 generate-eob-sample = "generate_eob_sample:main"
-idr-extract = "idr_extract:main"
 generate-bene-sample = "generate_bene_sample:main"
 gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"

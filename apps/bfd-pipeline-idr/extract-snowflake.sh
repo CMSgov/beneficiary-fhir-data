@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-echo "Starting IDR Extract"
+echo "Starting Snowflake Extract"
 echo "BFD_ENV: ${BFD_ENV}"
 
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
@@ -13,4 +13,4 @@ EXPORT_FILE_DIR="../bfd-model-idr/out"
 readonly EXPORT_FILE_DIR
 export EXPORT_FILE_DIR
 
-(cd "$SCRIPT_DIR" && uv run idr-extract "$@")
+(cd "$SCRIPT_DIR" && uv run snowflake-extract "$@")

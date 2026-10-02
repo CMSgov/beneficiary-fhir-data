@@ -63,7 +63,7 @@ parser.add_argument(
     "--exclude-empty",
     action=argparse.BooleanOptionalAction,
     help=(
-        "Treat empty column values as non-existant and allow the generator to generate new values"
+        "Treat empty column values as non-existent and allow the generator to generate new values"
     ),
 )
 parser.add_argument(
