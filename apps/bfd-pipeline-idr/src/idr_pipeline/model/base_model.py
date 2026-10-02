@@ -154,10 +154,10 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
 
 def provider_npi_type_expr(alias: str) -> str:
     return f"""
-        CASE 
+        CASE
             WHEN {alias}.prvdr_lgl_name IS NOT NULL THEN 2
             WHEN {alias}.prvdr_lgl_name IS NULL AND {alias}.prvdr_1st_name IS NOT NULL THEN 1
-            ELSE NULL 
+            ELSE NULL
         END
     """
 
@@ -870,7 +870,7 @@ def stale_phase_1_claims_query(
     return (
         f"""
             WITH claims AS (
-                SELECT clm.clm_uniq_id 
+                SELECT clm.clm_uniq_id
                 FROM {header_table} clm
                 WHERE clm.clm_type_cd BETWEEN {PHASE_1_SS_MIN} AND {PHASE_1_SS_MAX}
                 AND clm.clm_uniq_id > 0
@@ -878,7 +878,7 @@ def stale_phase_1_claims_query(
                 AND clm.bfd_updated_ts < %s
                 ORDER BY clm.bfd_updated_ts, clm.clm_uniq_id
             )
-            SELECT clm.clm_uniq_id 
+            SELECT clm.clm_uniq_id
             FROM claims clm
             WHERE NOT EXISTS (
                 SELECT 1 FROM {item_table} item
