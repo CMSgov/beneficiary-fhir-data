@@ -6,17 +6,12 @@ from pydantic import BeforeValidator
 from ..constants import (
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    IDR_CLAIM_DATE_SIGNATURE_TABLE,
-    IDR_CLAIM_DOCUMENTATION_TABLE,
-    IDR_CLAIM_LOCATION_HISTORY_TABLE,
-    IDR_CLAIM_PROFESSIONAL_TABLE,
-    IDR_CLAIM_TABLE,
-    IDR_PROVIDER_HISTORY_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS,
     ALIAS_CLM,
+    ALIAS_DCMTN,
     ALIAS_LCTN_HSTRY,
     ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PRFNL,
@@ -50,10 +45,12 @@ from ..model.base_model import (
     clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
+    provider_npi_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 class IdrClaimProfessionalSs(IdrBaseModel):
@@ -113,12 +110,12 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_prvdr_rmng_due_amt: float | None
     clm_blood_ncvrd_chrg_amt: float | None
     clm_prvdr_intrst_pd_amt: float | None
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm: Annotated[
         datetime,
         {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
@@ -173,6 +170,29 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         },
         BeforeValidator(transform_null_date_to_min),
     ]
+    clm_ptnt_cntl_num: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    idr_insrt_ts_dcmtn: Annotated[
+        datetime,
+        {
+            BATCH_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_DCMTN,
+            COLUMN_MAP: "idr_insrt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_dcmtn: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_DCMTN,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
     # columns from v2_mdcr_clm_lctn_hstry
     clm_audt_trl_stus_cd: Annotated[
         str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_default_string)
@@ -207,6 +227,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_blg_prvdr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_BLG)}]
     prvdr_blg_1st_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
@@ -223,6 +244,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_rfrg_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_RFRG)}]
     bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
@@ -234,6 +256,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OTHR},
         BeforeValidator(transform_default_string),
     ]
+    bfd_prvdr_othr_npi_type: Annotated[int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_OTHR)}]
     bfd_prvdr_othr_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OTHR, "OTHR")},
@@ -305,6 +328,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
+        dcmtn = ALIAS_DCMTN
         lctn_hstry = ALIAS_LCTN_HSTRY
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
@@ -321,11 +345,11 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query(IDR_CLAIM_PROFESSIONAL_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_professional_table)}
                 UNION
-                {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_documentation_table)}
                 UNION
-                {clm_child_query(IDR_CLAIM_LOCATION_HISTORY_TABLE)}
+                {clm_child_query(SETTINGS.idr_claim_location_history_table)}
                 UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
@@ -338,7 +362,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                     claims.clm_dt_sgntr_sk,
                     claims.clm_num_sk,
                     MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                FROM {IDR_CLAIM_LOCATION_HISTORY_TABLE} {lctn_hstry}
+                FROM {SETTINGS.idr_claim_location_history_table} {lctn_hstry}
                 JOIN claims ON
                     {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
                     {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
@@ -356,36 +380,41 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN {IDR_CLAIM_TABLE} {clm} ON
+            JOIN {SETTINGS.idr_claim_table} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
+            JOIN {SETTINGS.idr_claim_date_signature_table} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            LEFT JOIN {IDR_CLAIM_PROFESSIONAL_TABLE} {prfnl} ON
+            LEFT JOIN {SETTINGS.idr_claim_professional_table} {prfnl} ON
                 {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
+            LEFT JOIN {SETTINGS.idr_claim_documentation_table} {dcmtn} ON
+                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
+                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
             LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
                 {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
                 {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
                 {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = latest_lctn.clm_num_sk
-            LEFT JOIN {IDR_CLAIM_LOCATION_HISTORY_TABLE} {lctn_hstry} ON
+            LEFT JOIN {SETTINGS.idr_claim_location_history_table} {lctn_hstry} ON
                 {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
                 {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
                 {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
                 {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_blg}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_blg}
                 ON {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num
                 AND {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rfrg}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_rfrg}
                 ON {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num
                 AND {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_othr}
+            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_othr}
                 ON {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num
                 AND {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd}

@@ -100,6 +100,7 @@ class StagedIdrPipeline:
         load_type: LoadType,
         source: Source,
         worker_client: LoadingBatchWorkerClient,
+        job_id: int,
         tables_to_load: set[str] | None,
     ) -> None:
         self.load_mode = load_mode
@@ -107,6 +108,7 @@ class StagedIdrPipeline:
         self.load_type = load_type
         self.source = source
         self.worker_client = worker_client
+        self.job_id = job_id
         self.tables_to_load = tables_to_load
         self._executor = executor
 
@@ -240,5 +242,6 @@ class StagedIdrPipeline:
                 load_mode=self.load_mode,
                 load_type=self.load_type,
                 source=self.source,
+                job_id=self.job_id,
                 worker_client=self.worker_client,
             )

@@ -34,12 +34,16 @@ from constants import (
     CLM_LCTN_HSTRY,
     CLM_LINE,
     CLM_LINE_DCMTN,
+    CLM_LINE_FISS,
     CLM_LINE_INSTNL,
+    CLM_LINE_MCS,
     CLM_LINE_PRFNL,
     CLM_LINE_RX,
+    CLM_OCRNC_SGNTR_MBR,
     CLM_PRFNL,
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
+    CLM_RLT_OCRNC_SGNTR_MBR,
     CLM_VAL,
     CNTRCT_PBP_NUM,
     PRAUC,
@@ -65,7 +69,8 @@ class TableTarget:
 
 
 _TABLE_OVERRIDES: dict[str, TableTarget] = {
-    PRAUC: TableTarget(name="PRAUC", schema="CMS_EDP_VIEW_CVM_PRAU_PRD")
+    PRAUC: TableTarget(name="PRAUC", schema="CMS_EDP_VIEW_CVM_PRAU_PRD"),
+    CLM_RLT_OCRNC_SGNTR_MBR: TableTarget(name="V2_CLM_RLT_OCRNC_SGNTR_MBR"),
 }
 
 
@@ -324,6 +329,12 @@ class SnowflakeWriter(OutputDestinationWriter):
             .distinct()
             .cache_result(),
             KeyRelation.CLM_DT_SGNTR_SK: clm_df.select("CLM_DT_SGNTR_SK").distinct().cache_result(),
+            KeyRelation.CLM_RLT_OCRNC_SGNTR_SK: clm_df.select("CLM_RLT_OCRNC_SGNTR_SK")
+            .distinct()
+            .cache_result(),
+            KeyRelation.CLM_OCRNC_SGNTR_SK: clm_df.select("CLM_OCRNC_SGNTR_SK")
+            .distinct()
+            .cache_result(),
         }
 
         result: dict[str, list[RowAdapter]] = {}
@@ -503,6 +514,8 @@ class KeyRelation(StrEnum):
     FOUR_PART_KEY = auto()
     CLM_UNIQ_ID = auto()
     CLM_RLT_COND_SGNTR_SK = auto()
+    CLM_OCRNC_SGNTR_SK = auto()
+    CLM_RLT_OCRNC_SGNTR_SK = auto()
     CLM_DT_SGNTR_SK = auto()
 
 
@@ -532,4 +545,8 @@ _TABLE_RELATIONS: dict[str, KeyRelation] = {
     CLM_LCTN_HSTRY: KeyRelation.FOUR_PART_KEY,
     CLM_LINE_RX: KeyRelation.CLM_UNIQ_ID,
     CLM_RLT_COND_SGNTR_MBR: KeyRelation.CLM_RLT_COND_SGNTR_SK,
+    CLM_OCRNC_SGNTR_MBR: KeyRelation.CLM_OCRNC_SGNTR_SK,
+    CLM_RLT_OCRNC_SGNTR_MBR: KeyRelation.CLM_RLT_OCRNC_SGNTR_SK,
+    CLM_LINE_MCS: KeyRelation.FOUR_PART_KEY,
+    CLM_LINE_FISS: KeyRelation.FOUR_PART_KEY,
 }

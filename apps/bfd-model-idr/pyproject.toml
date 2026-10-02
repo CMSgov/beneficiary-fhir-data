@@ -3,7 +3,7 @@ name = "generator"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14.3"
 dependencies = [
     "faker>=37.1.0",
     "pandas>=2.2.3,<3.0.0",
@@ -17,11 +17,45 @@ dependencies = [
     "cryptography>=50.0.0",
 ]
 
+[project.scripts]
+generate-eob-sample = "generate_eob_sample:main"
+idr-extract = "idr_extract:main"
+generate-bene-sample = "generate_bene_sample:main"
+gen-dd = "gen_dd:main"
+generate-prior-auth-sample = "generate_prior_auth_sample:main"
+
 [dependency-groups]
-dev = ["ruff>=0.12.9", "uv>=0.11.15", "pyright>=1.1.403", "debugpy>=1.8.19"]
+dev = [
+    "ruff>=0.12.9",
+    "uv>=0.11.15",
+    "pyright>=1.1.403",
+    "debugpy>=1.8.19",
+    "pytest>=9.0.1",
+]
 
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.sources]
+idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
+
+[build-system]
+requires = ["uv_build<=0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = [
+    "generate_eob_sample",
+    "generate_bene_sample",
+    "gen_dd",
+    "generate_prior_auth_sample",
+]
+packages = [
+    "src/generate_eob_sample",
+    "src/generate_bene_sample",
+    "src/gen_dd",
+    "src/generate_prior_auth_sample",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.

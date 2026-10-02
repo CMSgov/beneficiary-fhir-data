@@ -18,11 +18,22 @@ This Terraservice defines several important IDR Pipeline related resources:
 
 ### Invocation
 
-> [!IMPORTANT]
-> It is **vital** that invocations specify a read timeout _greater_ than the `spawned_runtime` of the Locust test, otherwise the the synchronous invocation will fail and start another Lambda erroneously. This can be done by specifying the `--cli-read-timeout <seconds>` flag in the AWS CLI or `read_timeout` in the [`botocore.config` object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)
-
 > [!NOTE]
 > Specifying no invocation payload will result in a _typical_ `idr-pipeline` Task spawning in `incremental`, `IDR` mode with the `run-idr-pipeline` _not_ rescheduling itself if an `idr-pipeline` Task is already running
+
+> [!IMPORTANT]
+> To run an IDR Pipeline **in-parallel with another instance**, you must set the `IDR_JOB_ID` environment variable to be any integer value other than `1` in the `env` object in the Lambda event payload. You should also specify the load type (`IDR_LOAD_TYPE`) and any other settings through the `env` object.
+>
+> e.g.:
+>
+> ```json
+> {
+>   "env": {
+>     "IDR_JOB_ID": 2,
+>     "IDR_LOAD_TYPE": "initial"
+>   }
+> }
+> ```
 
 The `run-locust` Lambda can be [invoked synchronously](https://docs.amazonaws.cn/en_us/lambda/latest/dg/invocation-sync.html) using the `InvokeFunction` AWS API Action (e.g. `aws lambda invoke...`) or in the AWS Console in the `Test` tab given a JSON payload following the schema below.
 
@@ -81,7 +92,7 @@ Errors will return the error message and exception context.
 _Note: This does not include transitive dependencies (dependencies of dependencies)._
 
 | Terraservice | Required for Established? | Required for Ephemeral? | Details |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `config` | Yes | Yes | N/A |
 | `cluster` | Yes | Yes | N/A |
 | `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
@@ -131,6 +142,9 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ------ | ------- |
 | <a name="module_data_db_writer_instance"></a> [data\_db\_writer\_instance](#module\_data\_db\_writer\_instance) | ../../terraform-modules/general/data-db-writer-instance | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
+| <a name="module_log_group_events"></a> [log\_group\_events](#module\_log\_group\_events) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_idr_messages"></a> [log\_group\_idr\_messages](#module\_log\_group\_idr\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_run_idr"></a> [log\_group\_run\_idr](#module\_log\_group\_run\_idr) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -142,9 +156,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_group.events](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.idr_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.run_idr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecs_task_definition.idr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/ecs_task_definition) | resource |
 | [aws_iam_policy.events_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.events_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |

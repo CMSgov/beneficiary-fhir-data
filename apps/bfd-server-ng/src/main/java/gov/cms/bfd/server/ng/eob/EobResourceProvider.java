@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
+import gov.cms.bfd.server.ng.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
@@ -44,7 +45,6 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String TYPE = "type";
   private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
   private static final String OUTCOME = "outcome";
-  private static final String SOURCE_QUERY_PARAM = "_source";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -59,6 +59,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param requestDetails different HTTP request details
    * @return patient
    */
+  @RetryOnFailoverOrConnectionException
   @Read
   public ExplanationOfBenefit find(
       @IdParam final IdType fhirId,
@@ -96,6 +97,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param requestDetails HAPI FHIR request details
    * @return bundle
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
@@ -155,6 +157,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param source claim source to filter by
    * @return bundle
    */
+  @RetryOnFailoverOrConnectionException
   @Search
   public Bundle searchById(
       @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final TokenAndListParam fhirIds,

@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "s3logs_firehose_logs" {
   statement {
     sid       = "AllowPutLogEventsAndCreateStream"
     actions   = ["logs:PutLogEvents", "logs:CreateLogStream"]
-    resources = ["${aws_cloudwatch_log_group.s3logs.arn}:log-stream:*"]
+    resources = ["${module.log_group_s3logs.arn}:log-stream:*"]
   }
 }
 

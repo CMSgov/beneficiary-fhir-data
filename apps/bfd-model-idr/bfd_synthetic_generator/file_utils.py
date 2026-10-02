@@ -2,7 +2,7 @@ from pathlib import Path
 from zipfile import Path as ZipPath
 
 
-# Detect whether the code is running out of a normal director (local development)
+# Detect whether the code is running out of a normal directory (local development)
 # or inside a zipped environment (Snowflake stored procedure)
 def _find_root() -> Path | ZipPath:
     here = Path(__file__).resolve().parent

@@ -11,11 +11,11 @@ data "aws_ecr_image" "run_idr" {
   image_tag       = local.run_idr_version
 }
 
-resource "aws_cloudwatch_log_group" "run_idr" {
-  name              = "/aws/lambda/${local.run_idr_lambda_full_name}"
-  kms_key_id        = local.env_key_arn
-  retention_in_days = 30
-  skip_destroy      = true
+module "log_group_run_idr" {
+  source       = "../../terraform-modules/general/high-retention-log-group"
+  name         = "/aws/lambda/${local.run_idr_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_scheduler_schedule_group" "run_idr" {
@@ -47,7 +47,7 @@ resource "aws_lambda_function" "run_idr" {
 
   logging_config {
     log_format = "Text"
-    log_group  = aws_cloudwatch_log_group.run_idr.name
+    log_group  = module.log_group_run_idr.name
   }
 
   environment {

@@ -46,6 +46,11 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_log_group_slack_alerter"></a> [log\_group\_slack\_alerter](#module\_log\_group\_slack\_alerter) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_slack_failure"></a> [log\_group\_slack\_failure](#module\_log\_group\_slack\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_slack_success"></a> [log\_group\_slack\_success](#module\_log\_group\_slack\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_splunk_incident_failure"></a> [log\_group\_splunk\_incident\_failure](#module\_log\_group\_splunk\_incident\_failure) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_splunk_incident_success"></a> [log\_group\_splunk\_incident\_success](#module\_log\_group\_splunk\_incident\_success) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-platform-service | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -59,11 +64,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ---- |
 | [aws_cloudwatch_event_rule.guardduty_runtime_health](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.guardduty_runtime_health](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_event_target) | resource |
-| [aws_cloudwatch_log_group.slack_alerter](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.slack_failure](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.slack_success](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.splunk_incident_failure](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.splunk_incident_success](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_policy.slack_alerter_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.slack_alerter_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.slack_alerter_sqs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |

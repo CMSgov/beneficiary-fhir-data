@@ -86,12 +86,14 @@ def main():
     # This also assumes it will eventually work, and also assumes it is being run from inside the
     # container and targeting the local matchbox server.
     logger.info("Waiting for local matchbox server to start...")
-    for _ in range(30):
+    num_tries = 30
+    for i in range(30):
         try:
-            if requests.get("http://matchbox:18080/matchboxv3/actuator/health", timeout=5).ok:
+            if requests.get("http://matchbox:8080/matchboxv3/actuator/health", timeout=5).ok:
                 break
-        except requests.RequestException:
-            pass
+        except requests.RequestException as ex:
+            if i == num_tries - 1:
+                raise ex
         time.sleep(5)
 
     session = requests.Session()

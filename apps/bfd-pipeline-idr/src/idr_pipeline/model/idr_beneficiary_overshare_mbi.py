@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Annotated, override
 
-from ..constants import IDR_BENE_HISTORY_TABLE, IDR_BENE_XREF_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     PRIMARY_KEY_ORDER,
@@ -9,6 +8,7 @@ from ..model.base_model import (
     ModelType,
     Source,
 )
+from ..settings import SETTINGS
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
@@ -47,10 +47,10 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         # shown since it may be incorrectly linked to more than one person.
         return f"""
                SELECT hstry.bene_mbi_id
-               FROM {IDR_BENE_HISTORY_TABLE} hstry {{TABLESAMPLE}}
+               FROM {SETTINGS.idr_bene_history_table} hstry {{TABLESAMPLE}}
                WHERE NOT EXISTS (
                    SELECT 1
-                   FROM {IDR_BENE_XREF_TABLE} xref
+                   FROM {SETTINGS.idr_bene_xref_table} xref
                    WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
                      AND hstry.bene_sk = xref.bene_xref_sk
                      AND xref.bene_kill_cred_cd = '2'

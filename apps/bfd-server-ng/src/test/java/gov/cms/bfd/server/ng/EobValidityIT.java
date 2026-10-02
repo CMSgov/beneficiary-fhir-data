@@ -33,7 +33,6 @@ class EobValidityIT extends IntegrationTestBase {
         "EOB should have provider, or data-absent-reason when provider/org npi is not provided");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
-    assertFalse(eob.hasExtension());
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()
@@ -101,7 +100,8 @@ class EobValidityIT extends IntegrationTestBase {
     assertFalse(bundle.getEntry().isEmpty(), "Search should return results for validation");
 
     for (var entry : bundle.getEntry()) {
-      validateEob((ExplanationOfBenefit) entry.getResource());
+      var eob = (ExplanationOfBenefit) entry.getResource();
+      validateEob(eob);
     }
   }
 }

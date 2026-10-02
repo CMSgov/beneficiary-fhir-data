@@ -4,8 +4,6 @@ import au.com.origin.snapshots.Snapshot;
 import au.com.origin.snapshots.SnapshotSerializerContext;
 import au.com.origin.snapshots.serializers.v1.ToStringSnapshotSerializer;
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.regex.Pattern;
 import lombok.SneakyThrows;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,20 +77,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
 
     json = CLAIM_IDR_LOAD_DATE_REGEX.matcher(json).replaceAll("$19999-12-31$2");
 
-    // Take the HAPI FHIR output and serialize it using a serialization format that will sort keys
-    // in order.
-    // This will prevent re-ordered keys from showing up in the diff, since that isn't important.
-    var keyOrderingObjectMapper =
-        JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
-    var orderedJsonNode =
-        keyOrderingObjectMapper
-            .reader()
-            .with(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-            .readTree(json);
-    var orderedJsonString =
-        keyOrderingObjectMapper
-            .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(orderedJsonNode);
-    return super.apply(orderedJsonString, snapshotSerializerContext);
+    return super.apply(json, snapshotSerializerContext);
   }
 }

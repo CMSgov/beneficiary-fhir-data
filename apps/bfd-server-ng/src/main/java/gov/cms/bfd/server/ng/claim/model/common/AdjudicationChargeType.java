@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.math.BigDecimal;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -49,6 +50,12 @@ public enum AdjudicationChargeType {
       "Paid by patient",
       "CLM_LINE_BENE_PMT_AMT",
       "Line Paid By Beneficiary Amount"),
+  LINE_MSP_COINSRNC_AMT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "paidbypatient",
+      "Secondary Payment Coinsurance Amount",
+      "CLM_LINE_MSP_COINSRNC_AMT",
+      "Secondary Payment Coinsurance Amount"),
   LINE_BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",
@@ -457,23 +464,41 @@ public enum AdjudicationChargeType {
         .setAmount(USD.toFhir(value));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(int value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(Integer.toUnsignedLong(value));
+  /* Adjudication values that are CMS-specific should not be returned when null/zero. */
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationOptional(
+      Optional<BigDecimal> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setAmount(USD.toFhir(adjudicationValue)));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(long value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(value);
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationUnsignedType(
+      Optional<Integer> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(Integer.toUnsignedLong(adjudicationValue)));
   }
 
-  public ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(
-      BigDecimal value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(buildCategory())
-        .setValue(value);
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationLong(
+      Optional<Long> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(adjudicationValue));
+  }
+
+  public Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudicationDecimalType(
+      Optional<BigDecimal> value) {
+    return value.map(
+        adjudicationValue ->
+            new ExplanationOfBenefit.AdjudicationComponent()
+                .setCategory(buildCategory())
+                .setValue(adjudicationValue));
   }
 
   public ExplanationOfBenefit.TotalComponent toFhirTotal(BigDecimal value) {

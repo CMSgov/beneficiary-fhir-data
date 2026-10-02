@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "lambda_cloudwatch" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.this[0].arn}:*"]
+    resources = ["${module.log_group_this[0].arn}:*"]
   }
 }
 
@@ -42,7 +42,6 @@ data "aws_iam_policy_document" "lambda_ssm" {
       for param in [
         "sensitive/idr_account",
         "sensitive/idr_database",
-        "sensitive/idr_schema",
         "sensitive/idr_username",
         "sensitive/idr_private_key",
         "sensitive/idr_warehouse",

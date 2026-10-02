@@ -85,7 +85,6 @@ on:
         description: The BFD snapshot development version that corresponds to the next release version
         value: ${{ jobs.compute-version-strings.outputs.bfd_dev_version }}
 
-
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
@@ -191,7 +190,7 @@ jobs:
       - name: Retrieve base java image
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: '*bfd-platform-base-java*'
+          pattern: "*bfd-platform-base-java*"
           merge-multiple: true
           path: ${{ runner.temp }}
 
@@ -210,7 +209,7 @@ jobs:
           sudo chmod +x /usr/bin/gitleaks
 
       - name: Setup JDK
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: "25"
           distribution: corretto
@@ -292,7 +291,7 @@ jobs:
           node-version: "22"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "0.11.2"
 
@@ -301,7 +300,7 @@ jobs:
         working-directory: apps/bfd-model-idr
 
       - name: Generate v3 Data Dictionary
-        run: uv run gen_dd.py
+        run: uv run gen-dd
         working-directory: apps/bfd-model-idr
 
       - name: Prepare artifacts
@@ -380,7 +379,7 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
@@ -388,7 +387,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
 
       - name: Push jib images
         env:

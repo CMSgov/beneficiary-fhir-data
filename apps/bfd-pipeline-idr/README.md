@@ -15,7 +15,7 @@ uv sync
 > [!IMPORTANT]
 >
 > - Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
-> - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, this synthetic data already exists in `apps/bfd-model-idr/synthetic-data`. Consult the `README.md` in that directory for further detail.
+> - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, some synthetic data already exists in `./test_samples1` and `./test_samples2`. Consult the `README.md` in `../bfd-model-idr` for further detail generating/regenerating.
 
 To load from `apps/bfd-model-idr/out`, run:
 
@@ -33,7 +33,6 @@ Or, you can pass the directory to load from as the first positional argument to 
 
 This is useful for loading our synthetic data stored in our repository, or the test data, e.g.:
 
-- `./run-db.sh ../bfd-model-idr/synthetic-data`
 - `./run-db.sh ./test_samples1`
 - `./run-db.sh ./test_samples2`
 
@@ -50,7 +49,7 @@ in order to load data concurrently, but this does not play nicely with the debug
 and run using threads instead of processes. This incurs a performance hit due to blocking IO, but is necessary for breakpoints
 to work seamlessly.
 
-To run a specific test: 
+To run a specific test:
 
 ```sh
  uv run test/test_pipeline.py::{your_test_name}
@@ -78,19 +77,27 @@ Data is loaded into a live environment from our Snowflake dev instance
 
 This will load the current contents of Snowflake into the environment.
 
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh
+```
+
+To first ingest new data into Snowflake before loading, supply a folder containing the CSV files you wish to load as a positional argument.
+
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out
+```
+
 > [!NOTE]
 >
 > By default, loading synthetic data does not truncate existing tables before loading. This allows additional synthetic data to be appended.
 > To perform a fresh load, pass the '--truncate' flag to the pipeline or in 'load_synthetic.py'
 
-```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh
-```
 
 This will first _replace_ the contents in Snowflake with the given CSV data and then load it into the environment.
+Only the tables matching the files given will be truncated.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
+BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out --truncate
 ```
 
 ## Loading synthetic data into your local database
@@ -119,3 +126,17 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run idr-pipeline
 - Add the data to `generator_util.py`, for synthetic data generation
 - If adding a new table, register it in `main` for the corresponding states (initial load vs incremental load and bene only vs claims only vs all claims load-in) in `pipeline.py`
 - If adding a new table, register it in the list of CSVs to load in `load_synthetic.py`
+
+## Export from Test IDR
+
+We have a test snowflake environment. This process will take all of the tables that we use for Synthetic Data and will pull them to .csv of the approprate name
+that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
+
+```bash
+export BFD_ENV="1234_TEST"
+./extract-idr.sh
+```
+
+## Running the IDR Pipeline in ECS
+
+Refer to the documentation on the `run-idr-pipeline` Lambda in the [`idr-pipeline` Tofuservice README](../../ops/services/04-idr-pipeline/README.md)

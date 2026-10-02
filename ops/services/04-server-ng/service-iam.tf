@@ -47,9 +47,9 @@ data "aws_iam_policy_document" "logs" {
     sid     = "AllowFireLensPutLogEventsAndCreateStream"
     actions = ["logs:PutLogEvents", "logs:CreateLogStream"]
     resources = [
-      "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*",
-      "${aws_cloudwatch_log_group.server_healthchecks.arn}:log-stream:*",
-      "${aws_cloudwatch_log_group.server_nonjson.arn}:log-stream:*"
+      "${module.log_group_server_messages.arn}:log-stream:*",
+      "${module.log_group_server_healthchecks.arn}:log-stream:*",
+      "${module.log_group_server_nonjson.arn}:log-stream:*"
     ]
   }
 }
@@ -175,11 +175,11 @@ data "aws_iam_policy_document" "execution_logs" {
     sid     = "AllowLogStreamControl"
     actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = [
-      "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
-      "${aws_cloudwatch_log_group.service_connect_messages.arn}:*",
-      "${aws_cloudwatch_log_group.server_messages.arn}:*",
-      "${aws_cloudwatch_log_group.server_healthchecks.arn}:*",
-      "${aws_cloudwatch_log_group.server_nonjson.arn}:*"
+      "${module.log_group_log_router_messages.arn}:*",
+      "${module.log_group_service_connect_messages.arn}:*",
+      "${module.log_group_server_messages.arn}:*",
+      "${module.log_group_server_healthchecks.arn}:*",
+      "${module.log_group_server_nonjson.arn}:*"
     ]
   }
 }

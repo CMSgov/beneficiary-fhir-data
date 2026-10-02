@@ -16,7 +16,7 @@ jobs:
         id: code-checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "0.11.2"
       - name: Install node
@@ -25,7 +25,7 @@ jobs:
           node-version: "22"
       # Maven is needed to run the migrator
       - name: "Setup JDK"
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: "25"
           distribution: "corretto"
@@ -33,7 +33,7 @@ jobs:
         run: uv sync
         working-directory: apps/bfd-model-idr
       - name: Generate v3 Data Dictionary
-        run: uv run gen_dd.py
+        run: uv run gen-dd
         working-directory: apps/bfd-model-idr
       - name: Ensure synthetic data pipeline runs
         run: |
@@ -44,7 +44,7 @@ jobs:
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims ./synthetic-data
+          uv run patient_generator.py --claims ../bfd-pipeline-idr/test_samples1
           # Split claims output into 1000 CLMs batches
           uv run load_splitter.py -c 1000
           cd ../bfd-pipeline-idr

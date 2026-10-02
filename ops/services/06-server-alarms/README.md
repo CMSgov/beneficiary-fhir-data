@@ -73,6 +73,7 @@ Along with the summary, the alert includes various links to Log Insights queries
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_log_group_alerter"></a> [log\_group\_alerter](#module\_log\_group\_alerter) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -84,7 +85,6 @@ Along with the summary, the alert includes various links to Log Insights queries
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_group.alerter](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.elb_healthy_hosts](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.samhsa_mismatch_error](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.server_log_availability_1hr](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
@@ -120,6 +120,7 @@ Along with the summary, the alert includes various links to Log Insights queries
 | [aws_cloudwatch_metric_alarm.slo_patient_no_contract_bulk_latency_99p_15m_warning](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.slo_patient_no_contract_nonbulk_latency_99p_15m_alert](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.slo_patient_no_contract_nonbulk_latency_99p_15m_warning](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_iam_policy.alerter_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.alerter_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.alerter_query_log](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.invoke_alerter](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
@@ -133,6 +134,7 @@ Along with the summary, the alert includes various links to Log Insights queries
 | [archive_file.alerter_lambda_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_cloudwatch_log_group.server_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/cloudwatch_log_group) | data source |
 | [aws_cloudwatch_log_group.server_messages](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/cloudwatch_log_group) | data source |
+| [aws_iam_policy_document.alerter_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.alerter_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.alerter_query_log](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.assume_lambda](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |

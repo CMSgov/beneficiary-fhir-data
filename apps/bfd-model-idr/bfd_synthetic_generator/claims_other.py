@@ -82,12 +82,16 @@ class OtherGeneratorUtil:
         generated_type_1_npis = set()
         generated_type_2_npis = set()
         for idx, provider_history in enumerate(all_provider_historys):
-            prvdr_sk = provider_history.get(f.PRVDR_SK) or gen_utils.id_gen.npi_id(field="PRVDR_SK")
+            prvdr_sk = provider_history.get(f.PRVDR_SK) or gen_utils.id_gen.npi_id(
+                field="PRVDR_SK"
+            )
             # make half of providers type 1 npi and half type 2
             # type 1 npis never have a legal name
             # need to return both the subsets of type 1/2 npis that were used so that
             # generated claims can reference provider histories that actually exist
-            prvdr_lgl_name = "" if idx % 2 == 0 else random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES)
+            prvdr_lgl_name = (
+                "" if idx % 2 == 0 else random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES)
+            )
             provider_history.extend(
                 {
                     f.PRVDR_SK: prvdr_sk,
@@ -118,4 +122,8 @@ class OtherGeneratorUtil:
 
             provider_historys.append(provider_history)
 
-        return provider_historys, list(generated_type_1_npis), list(generated_type_2_npis)
+        return (
+            provider_historys,
+            list(generated_type_1_npis),
+            list(generated_type_2_npis),
+        )

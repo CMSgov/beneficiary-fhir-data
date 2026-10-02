@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public enum IdrUnit {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 
-  SimpleQuantity toFhir(double value) {
+  SimpleQuantity toFhir(BigDecimal value) {
     var quantity = new SimpleQuantity();
     quantity
         .setValue(value)

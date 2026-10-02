@@ -57,4 +57,5 @@ def configure_logger() -> None:
         level=SETTINGS.log_level,
         enqueue=True,  # Ensures non-blocking and async+multiprocessing-safe
         diagnose=False,  # Ensures local variables are not logged for exceptions
+        serialize=SETTINGS.structured_logs,
     )

@@ -12,6 +12,7 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_BLOOD_PT_FRNSH_QTY as pintsFurnished -> tgt then addBloodPintsFurnished(src, tgt) "Add blood pints furnished";
     src.CLM_MDCR_INSTNL_MCO_PD_SW as mcoPdSw -> tgt then addMCOPdSw(src, tgt) "Add primary payer switch";
     src.CLM_PPS_IND_CD as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
+    src.CLM_PPS_IND as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
     src.TYPE_OF_BILL_CD as tobCode -> tgt then addTypeOfBill(src, tgt) "Add type of bill code";
     src.CLM_NCH_WKLY_PROC_DT as procDt -> tgt then addProcessingDate(src, tgt) "Add processing date";
     src.CLM_ACTV_CARE_THRU_DT as activeThruDt -> tgt then addNCHThroughDate(src, tgt) "Add processing date";
@@ -53,6 +54,26 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
             src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HCT_HGB_RSLT_NUM") "Add Coding";
         } "Add category";
      } "set category";
+
+    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal.exists() -> tgt.value = create('Reference') as tgtReference then{
+        src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-hgb-",rowNum) "Add observation num";
+    } "Add hemoglobin observation reference";
+    src.CLM_LINE_HGB_LVL_NUM as typeVal where typeVal.exists() -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgt.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HGB_LVL_NUM") "Add Coding";
+        } "Add category";
+    } "Set hemoglobin category";
+
+    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal.exists() -> tgt.value = create('Reference') as tgtReference then{
+        src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-hct-",rowNum) "Add observation num";
+    } "Add hematocrit observation reference";
+    src.CLM_LINE_HCT_LVL_NUM as typeVal where typeVal.exists() -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgt.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HCT_LVL_NUM") "Add Coding";
+        } "Add category";
+    } "Set hematocrit category";
 
     src.CLM_BNFT_ENHNCMT_CD as code -> tgt then addBenefitEnhancementCode(code,tgt) "Add benefit enhancement code 1";
 
@@ -297,6 +318,7 @@ group addPPSInd(source src: SupportingInfoComponent, target tgt: BackboneElement
     } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.CLM_PPS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",val) "Add coding";
+        src.CLM_PPS_IND as val -> tgtCC.coding = translate(val,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PPS_IND','coding') "Add coding";
     } "Add CC";
 }
 //code. Not necessary, duplicative with BENE_PTNT_STUS_CD. 

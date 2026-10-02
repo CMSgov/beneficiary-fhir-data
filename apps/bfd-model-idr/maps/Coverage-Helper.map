@@ -29,4 +29,3 @@ conceptmap "BENE_DSBLD_STUS_ID" {
   s:40 == t:"N"
   s:"~" == t:"null"
 }
-

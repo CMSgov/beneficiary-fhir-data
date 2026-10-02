@@ -32,11 +32,12 @@ resource "aws_scheduler_schedule" "checker" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "checker" {
-  name              = "/aws/lambda/${local.checker_lambda_full_name}"
-  retention_in_days = local.required_retention_in_days
-  kms_key_id        = local.kms_key_arn
-  skip_destroy      = true
+module "log_group_checker" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  name               = "/aws/lambda/${local.checker_lambda_full_name}"
+  log_retention_days = local.required_retention_in_days
+  kms_key_id         = local.kms_key_arn
+  skip_destroy       = true
 }
 
 resource "aws_lambda_function" "checker" {

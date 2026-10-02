@@ -2,7 +2,7 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-* @mjburling @aschey-forpeople @malessi @alex-dzeda @mel1-G
+* @mjburling @aschey-forpeople @malessi @alex-dzeda-cms @mel1-G
 
 # BB2 Insights
 /insights/terraform/projects/bb2/* @jimmyfagan @bwang-icf

@@ -30,28 +30,29 @@ set +e
 task_id="-1"
 task_start_retries=3
 while ((task_start_retries > 0)); do
-  for migrator_task_arn in $(
+  migrator_task_arns="$(
     aws ecs list-tasks \
       --cluster "$CLUSTER_NAME" \
       --family "$TASK_DEFINITION_FAMILY" \
       --query "taskArns" \
       --output text
-  ); do
-    current_task_state="$(
-      aws ecs describe-tasks \
-        --cluster "$CLUSTER_NAME" \
-        --tasks "$migrator_task_arn" \
-        --query "tasks[0].lastStatus" \
-        --output text || echo "n/a"
-    )"
-    if [[ $current_task_state == "PROVISIONING" ||
-      $current_task_state == "PENDING" ||
-      $current_task_state == "ACTIVATING" ||
-      $current_task_state == "RUNNING" ]]; then
-      echo "Task $migrator_task_arn is currently running"
-      exit 1
-    fi
-  done
+  )"
+  if [[ -n $migrator_task_arns ]]; then
+    for migrator_task_json in $(
+      # shellcheck disable=SC2086 # We want to word-split here
+      aws ecs describe-tasks --tasks $migrator_task_arns --cluster "$CLUSTER_NAME" |
+        jq -c --arg group "$TASK_NAME" '.tasks[] | select(.group == $group)'
+    ); do
+      current_task_state="$(jq -rc '.lastStatus' <<<"$migrator_task_json")"
+      if [[ $current_task_state == "PROVISIONING" ||
+        $current_task_state == "PENDING" ||
+        $current_task_state == "ACTIVATING" ||
+        $current_task_state == "RUNNING" ]]; then
+        echo "Task ($(jq -rc '.taskArn' <<<"$migrator_task_json")) is currently running"
+        exit 1
+      fi
+    done
+  fi
 
   task_id="$(
     aws ecs run-task \
@@ -82,7 +83,7 @@ fi
 
 echo "Started $TASK_NAME ($task_id) in $CLUSTER_NAME. Waiting until it has completed or failed..."
 
-until [[ 
+until [[
   $(aws ecs describe-tasks \
     --cluster "$CLUSTER_NAME" \
     --tasks "$task_id" \

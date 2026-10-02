@@ -3,7 +3,6 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from ..constants import IDR_CONTRACT_PBP_NUM_TABLE, IDR_CONTRACT_PBP_SEGMENT_TABLE
 from ..load_partition import LoadPartition
 from ..model.base_model import (
     ALIAS,
@@ -16,6 +15,7 @@ from ..model.base_model import (
     Source,
     transform_default_string,
 )
+from ..settings import SETTINGS
 
 
 class IdrContractPbpNumber(IdrBaseModel):
@@ -57,16 +57,16 @@ class IdrContractPbpNumber(IdrBaseModel):
                 SELECT
                     {pbp_num}.cntrct_pbp_sk,
                     COUNT(*) AS cntrct_count
-                FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
-                LEFT JOIN {IDR_CONTRACT_PBP_SEGMENT_TABLE} sgmt 
+                FROM {SETTINGS.idr_contract_pbp_num_table} {pbp_num}
+                LEFT JOIN {SETTINGS.idr_contract_pbp_segment_table} sgmt 
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
                 GROUP BY {pbp_num}.cntrct_pbp_sk
             )
             SELECT
                 {{COLUMNS}}
-            FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num} {{TABLESAMPLE}}
+            FROM {SETTINGS.idr_contract_pbp_num_table} {pbp_num} {{TABLESAMPLE}}
             JOIN sgmt_count ON {pbp_num}.cntrct_pbp_sk = sgmt_count.cntrct_pbp_sk
-            LEFT JOIN {IDR_CONTRACT_PBP_SEGMENT_TABLE} sgmt
+            LEFT JOIN {SETTINGS.idr_contract_pbp_segment_table} sgmt
                 ON sgmt.cntrct_pbp_sk = {pbp_num}.cntrct_pbp_sk AND sgmt_count.cntrct_count = 1
             WHERE {pbp_num}.cntrct_pbp_sk != 0
             {{LIMIT}}

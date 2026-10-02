@@ -1,0 +1,259 @@
+import json
+import os
+import subprocess
+from pathlib import Path
+
+import pandas as pd
+import yaml
+
+print("Generating Data Dictionary")
+dd_support_folder = "./dictionary-support-files"
+structure_def_folder = "./sushi/fsh-generated/resources"
+
+"""
+This data structure will get more complex as BFD adds more "types" of data. We're effectively trying
+to populate a minimum spanning tree.
+We want to have >=1 potential example to populate for each row in the data dictionary. 
+In practice, Patient will be the least complex (no dependent variables), followed by Coverage 
+(1 dependent variable), and then EOB (2 dependent variables).
+For the initial version, we'll start simple and hard code no dependent variables for each of those.
+"""
+sample_sources = {
+    "AuditEvent": "out/AuditEvent.json",
+    "Patient": "out/Patient.json",
+    "ExplanationOfBenefit": "out/ExplanationOfBenefit.json",
+    "ExplanationOfBenefit-Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
+    "ExplanationOfBenefit-PriorAuth": "out/ExplanationOfBenefit-PriorAuth.json",
+    "Coverage": "out/Coverage-FFS.json",
+}
+sample_sources_by_profile = {
+    "PartA": "out/Coverage-FFS.json",
+    "PartB": "out/Coverage-FFS-PartB.json",
+    "PartC": "out/Coverage-PartC.json",
+    "PartD": "out/Coverage-PartD.json",
+    "DUAL": "out/Coverage-Dual.json",
+    "Inpatient": "out/ExplanationOfBenefit.json",
+    "SNF": "out/ExplanationOfBenefit-SNF.json",
+    "HHA": "out/ExplanationOfBenefit-HHA.json",
+    "Hospice": "out/ExplanationOfBenefit-Hospice.json",
+    "Outpatient": "out/ExplanationOfBenefit-Outpatient.json",
+    "Carrier": "out/ExplanationOfBenefit-Carrier.json",
+    "DME": "out/ExplanationOfBenefit-DME.json",
+    "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
+    "PriorAuth": "out/ExplanationOfBenefit-PriorAuth.json",
+    "Patient": "out/Patient.json",
+    "Audit": "out/AuditEvent.json",
+}
+
+sample_resources_by_profile = {}
+dd_df = []
+structure_def_names_descriptions = {}
+
+
+def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        args,
+        cwd=Path(__file__).parent.parent.parent,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+if not Path(structure_def_folder).exists():
+    print("Generating sushi files")
+    run_subprocess(["npm", "install"])
+    run_subprocess(["npm", "run", "sushi-build"])
+
+for resource_type in sample_sources_by_profile:
+    with Path(sample_sources_by_profile[resource_type]).open() as file:
+        sample_resources_by_profile[resource_type] = json.load(file)
+
+
+for walk_info in os.walk(structure_def_folder):
+    files = list(
+        filter(lambda file: ".json" in file and "StructureDefinition" in file, walk_info[2])
+    )
+    for file_name in files:
+        with Path(structure_def_folder + "/" + file_name).open() as file:
+            test_resource = json.load(file)
+            if test_resource.get("kind") != "logical":
+                continue
+            for element in test_resource["differential"]["element"]:
+                structure_def_names_descriptions[element["id"]] = {}
+                structure_def_names_descriptions[element["id"]]["name"] = element["short"]
+                if "definition" in element:
+                    structure_def_names_descriptions[element["id"]]["definition"] = element[
+                        "definition"
+                    ]
+
+
+coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
+claim_profiles = [
+    "HHA",
+    "Hospice",
+    "SNF",
+    "DME",
+    "Carrier",
+    "Inpatient",
+    "Outpatient",
+    "Pharmacy",
+    "PriorAuth",
+]
+
+
+for walk_info in os.walk(dd_support_folder):
+    files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
+    for file_name in files:
+        with Path(str(dd_support_folder) + "/" + str(file_name)).open() as file:
+            print("Generating", file_name)
+            data = yaml.safe_load(file)
+            current_resource_type = file_name[0 : len(file_name) - 5]
+            for entry in data:
+                if entry.get("suppressInDD"):
+                    continue
+                if "fhirPath" in entry:
+                    if "appliesTo" in entry:
+                        entry["appliesTo"].sort()
+                    if "sources" in entry:
+                        entry["sources"].sort()
+                    if "Patient" in entry["appliesTo"]:
+                        entry["FHIR Resource"] = "Patient"
+                    elif any(x in coverage_parts for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "Coverage"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
+                    elif any(x in claim_profiles for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "ExplanationOfBenefit"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
+                    else:
+                        entry["FHIR Resource"] = "AuditEvent"
+
+                    # This opportunistically populates examples based upon the samples
+                    # created from executing FML
+                    result = run_subprocess(
+                        [
+                            "node",
+                            "eval_fhirpath.js",
+                            json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
+                            entry["fhirPath"],
+                        ]
+                    )
+                    entry["example"] = json.loads(result.stdout)
+                    if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
+                        pass
+                    elif len(entry["example"]) > 0:
+                        entry["example"] = entry["example"][0]
+                    else:
+                        entry["example"] = ""
+
+                    source_view = entry.get("sourceView")
+                    source_column = entry.get("sourceColumn")
+
+                    # Populate the element names + missing descriptions
+                    if entry["inputPath"] in structure_def_names_descriptions:
+                        entry["Field Name"] = structure_def_names_descriptions[entry["inputPath"]][
+                            "name"
+                        ]
+                        if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
+                            entry["Description"] = structure_def_names_descriptions[
+                                entry["inputPath"]
+                            ]["definition"]
+                    # nameOverride and definitionOverride only exist when a field is derived IN fml.
+                    if "nameOverride" in entry:
+                        entry["Field Name"] = entry["nameOverride"]
+                        entry["Description"] = entry["definitionOverride"]
+                    elif "Description" not in entry or not entry["Description"]:
+                        raise ValueError(
+                            f"Entry {entry.get('inputPath', 'Unknown')} has no definition. "
+                        )
+                    entry.pop("inputPath")
+                    dd_df.append(entry)
+
+dd_df = pd.DataFrame(dd_df)
+
+
+def replace_str(input_str):
+    if isinstance(input_str, str) and len(str(input_str)) > 0:
+        return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
+    return ""
+
+
+dd_df["referenceTable"] = list(map(replace_str, dd_df["referenceTable"]))
+
+dd_df.to_csv(
+    "out/bfd_data_dictionary.csv",
+    columns=[
+        "Field Name",
+        "Description",
+        "FHIR Resource",
+        "Coverage / Claim Type",
+        "fhirPath",
+        "example",
+        "notes",
+        "sourceView",
+        "sourceColumn",
+        "bfdDerived",
+        "sources",
+        "referenceTable",
+        "cclfMapping",
+        "ccwMapping",
+        "profiles",
+    ],
+)
+export_columns = [
+    "Field Name",
+    "Description",
+    "FHIR Resource",
+    "Coverage / Claim Type",
+    "fhirPath",
+    "example",
+    "notes",
+    "sourceView",
+    "sourceColumn",
+    "bfdDerived",
+    "sources",
+    "referenceTable",
+    "cclfMapping",
+    "ccwMapping",
+    "profiles",
+]
+export_df = dd_df[export_columns]
+
+export_df.to_json("out/bfd_data_dictionary.json", orient="records", indent=2)
+
+tips_df = pd.read_csv(dd_support_folder + "/tips.csv")
+
+with pd.ExcelWriter("out/bfd_data_dictionary.xlsx", engine="xlsxwriter") as writer:
+    export_df.to_excel(writer, sheet_name="Data Dictionary", index=True)
+
+    workbook = writer.book
+    worksheet = writer.sheets["Data Dictionary"]
+    header_format = workbook.add_format({"bold": True, "bg_color": "#DCE6F2", "border": 1})
+    text_format = workbook.add_format({"border": 1})
+
+    worksheet.write(0, 0, "Row", header_format)
+
+    for col_num, value in enumerate(export_df.columns, start=1):
+        worksheet.write(0, col_num, value, header_format)
+
+    worksheet.set_column("A:A", 4, text_format)
+    worksheet.set_column("B:B", 30, text_format)
+    worksheet.set_column("C:C", 65, text_format)
+    worksheet.set_column("D:D", 20, text_format)
+    worksheet.set_column("E:E", 20, text_format)
+    worksheet.set_column("F:F", 55, text_format)
+    worksheet.set_column("G:G", 25, text_format)
+    worksheet.set_column("H:H", 25, text_format)
+    worksheet.set_column("I:I", 18, text_format)
+    worksheet.set_column("J:J", 20, text_format)
+    worksheet.set_column("K:K", 5, text_format)
+    worksheet.set_column("L:L", 10, text_format)
+    worksheet.set_column("M:M", 20, text_format)
+    worksheet.set_column("N:N", 30, text_format)
+    worksheet.set_column("O:O", 30, text_format)
+
+    tips_df.to_excel(writer, sheet_name="Tips and Tricks", index=True)
+    worksheet = writer.sheets["Tips and Tricks"]
+    worksheet.set_column("A:A", 4, text_format)
+    worksheet.set_column("B:B", 30, text_format)
+    worksheet.set_column("C:C", 100, text_format)
+print("Completed generating data dictionary")

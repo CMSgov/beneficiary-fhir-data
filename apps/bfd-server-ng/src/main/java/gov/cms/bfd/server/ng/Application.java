@@ -8,9 +8,12 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
+import java.util.Map;
 import java.util.concurrent.Executor;
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,6 +21,7 @@ import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -29,6 +33,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 @EnableConfigurationProperties(Configuration.class)
 @EnableTransactionManagement
 @EnableAsync
+@EnableRetry(proxyTargetClass = true)
 public class Application {
   /**
    * Server entrypoint.
@@ -135,16 +140,31 @@ public class Application {
     return ExecutorServiceMetrics.monitor(meterRegistry, executor, "executor");
   }
 
+  private static void copyValuesToMdc(MDCAdapter mdc, @Nullable Map<String, String> values) {
+    if (values == null) {
+      return;
+    }
+    for (var value : values.entrySet()) {
+      mdc.put(value.getKey(), value.getValue());
+    }
+  }
+
   private static Runnable wrapWithMdcContext(Runnable task) {
-    // save the current MDC context
-    var contextMap = MDC.getCopyOfContextMap();
+    // Save the current MDC context to copy to the child.
+    var parentMdc = MDC.getMDCAdapter();
+    var parentThreadId = Thread.currentThread().threadId();
+
     return () -> {
-      MDC.clear();
-      MDC.setContextMap(contextMap);
+      // Copy the values from the parent MDC so the child thread has the same state.
+      copyValuesToMdc(MDC.getMDCAdapter(), parentMdc.getCopyOfContextMap());
+      MDC.put("parentThreadId", String.valueOf(parentThreadId));
       try {
         task.run();
       } finally {
-        // once the task is complete, clear MDC
+        // If new MDC values were created in the child thread, we want to copy those back to the
+        // parent.
+        copyValuesToMdc(parentMdc, MDC.getCopyOfContextMap());
+        // Clear the child _after_ the values are copied.
         MDC.clear();
       }
     };

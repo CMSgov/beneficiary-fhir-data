@@ -9,8 +9,6 @@ from unidecode import unidecode
 
 from ..constants import (
     BENEFICIARY_TABLE,
-    IDR_BENE_HISTORY_TABLE,
-    IDR_BENE_XREF_TABLE,
 )
 from ..load_partition import LoadPartition
 from ..matching import normalize_address
@@ -33,6 +31,7 @@ from ..model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from ..settings import SETTINGS
 
 
 def _normalize_str(s: str) -> str:
@@ -191,7 +190,7 @@ class IdrBeneficiary(IdrBaseModel):
                         PARTITION BY bene_sk, bene_xref_sk
                         ORDER BY src_rec_updt_ts DESC
                     ) AS row_order
-                FROM {IDR_BENE_XREF_TABLE}
+                FROM {SETTINGS.idr_bene_xref_table}
             ),
             current_xref AS (
                 SELECT
@@ -202,7 +201,7 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_insrt_ts,
                     bx.idr_updt_ts
                 FROM ordered_xref ox
-                JOIN {IDR_BENE_XREF_TABLE} bx
+                JOIN {SETTINGS.idr_bene_xref_table} bx
                     ON bx.bene_sk = ox.bene_sk
                     AND bx.bene_xref_sk = ox.bene_xref_sk
                     AND bx.bene_hicn_num = ox.bene_hicn_num
@@ -213,7 +212,7 @@ class IdrBeneficiary(IdrBaseModel):
                 {deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
-            FROM {IDR_BENE_HISTORY_TABLE} {hstry} {{TABLESAMPLE}}
+            FROM {SETTINGS.idr_bene_history_table} {hstry} {{TABLESAMPLE}}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             -- Additionally, there are cases where there exists a bene_sk -> bene_xref_efctv_sk

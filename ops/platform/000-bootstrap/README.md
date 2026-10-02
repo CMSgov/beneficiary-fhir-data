@@ -53,6 +53,7 @@ Following these steps ensures that the boostrapped resources are stored in state
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_bucket_tf_state"></a> [bucket\_tf\_state](#module\_bucket\_tf\_state) | ../../terraform-modules/general/secure-bucket | n/a |
+| <a name="module_log_group_runner"></a> [log\_group\_runner](#module\_log\_group\_runner) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-platform-service | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -64,7 +65,6 @@ Following these steps ensures that the boostrapped resources are stored in state
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_group.runner](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_codebuild_project.runner](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_source_credential.github](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codebuild_source_credential) | resource |
 | [aws_codebuild_webhook.runner](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/codebuild_webhook) | resource |

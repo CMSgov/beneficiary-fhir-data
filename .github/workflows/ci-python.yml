@@ -45,6 +45,46 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-pipeline",
+              projectRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+              testsRoot: "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-generate-bene-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-generate-eob-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_eob_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_eob_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-gen-dd",
+              projectRoot: "apps/bfd-model-idr/src/gen_dd",
+              testsRoot: "apps/bfd-model-idr/src/gen_dd",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
+            {
+              projectName: "run-idr-model-generate-prior-auth-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_prior_auth_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
@@ -55,11 +95,11 @@ jobs:
           ref: ${{ inputs.branch }}
       # Maven is needed to run the migrator
       - name: "Setup JDK"
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: "25"
           distribution: "corretto"
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |

@@ -55,5 +55,3 @@ services:
       POSTGRES_DB: "matchbox"
       POSTGRES_USER: "matchbox"
       POSTGRES_PASSWORD: "matchbox"
-    volumes:
-      - ./data:/var/lib/postgresql/data

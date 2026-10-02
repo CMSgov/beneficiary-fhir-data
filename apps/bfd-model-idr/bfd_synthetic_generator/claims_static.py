@@ -20,12 +20,16 @@ class SecurityLabelModel(BaseModel):
 
 
 yaml_data = yaml.safe_load((ROOT / "security_labels.yml").read_text(encoding="utf-8"))
-SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(yaml_data, by_alias=True)
+SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
+    yaml_data, by_alias=True
+)
 
 
 SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]
 SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS = ["http://hl7.org/fhir/sid/icd-10-cm"]
-SECURITY_LABELS_HCPCS_SYSTEMS = ["https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"]
+SECURITY_LABELS_HCPCS_SYSTEMS = [
+    "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
+]
 SECURITY_LABELS_CPT_SYSTEMS = ["http://www.ama-assn.org/go/cpt"]
 SECURITY_LABELS_DRG_SYSTEMS = [
     "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
@@ -150,7 +154,8 @@ AVAILABLE_NON_SAMHSA_ICD_10_PRCDR_CODES = [
 PROC_CODES_SAMHSA_CPT_HCPCS = [
     x.normalized_code
     for x in SECURITY_LABELS
-    if x.system in SECURITY_LABELS_HCPCS_SYSTEMS or x.system in SECURITY_LABELS_CPT_SYSTEMS
+    if x.system in SECURITY_LABELS_HCPCS_SYSTEMS
+    or x.system in SECURITY_LABELS_CPT_SYSTEMS
 ]
 PROC_CODES_NON_SAMHSA_CPT_HCPCS = ["99213", "99453", "J2270"]
 HCPCS_MODS = ["1P", "22", "23", "28", "32", "U6", "US", "PC", "PD"]
@@ -165,10 +170,14 @@ CLM_POA_IND_CHOICES = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 AVAIL_CLM_RLT_COND_SK = ["193064687", "117814", "193065597", "117853", "193074307"]
 NON_SAMHSA_DGNS_DRG_CDS = list(range(43))
 SAMHSA_DGNS_DRG_CDS = [
-    int(x.normalized_code) for x in SECURITY_LABELS if x.system in SECURITY_LABELS_DRG_SYSTEMS
+    int(x.normalized_code)
+    for x in SECURITY_LABELS
+    if x.system in SECURITY_LABELS_DRG_SYSTEMS
 ]
 TARGET_SEQUENCE_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7]
 TARGET_RLT_COND_CODES = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
+TARGET_RLT_OCRNC_CODES = ["A3", "22"]
+TARGET_OCRNC_SPAN_CODES = ["74", "70"]
 AVAILABLE_GIVEN_NAMES = [
     "Wallace",
     "Gromit",

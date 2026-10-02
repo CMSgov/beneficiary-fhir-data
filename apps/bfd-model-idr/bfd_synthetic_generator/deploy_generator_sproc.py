@@ -149,7 +149,6 @@ def main(
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    # TODO: handle role!!!
     sess = Session.builder.configs(
         {
             "account": _require_env("IDR_ACCOUNT"),
@@ -158,7 +157,6 @@ def main(
             "warehouse": _require_env("IDR_WAREHOUSE"),
             "database": _require_env("IDR_DATABASE"),
             "schema": _require_env("IDR_SCHEMA"),
-            "role": "TEST_SERVICE_USER",
         }
     ).create()
 

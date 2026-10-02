@@ -50,6 +50,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
+| <a name="module_log_group_verifier"></a> [log\_group\_verifier](#module\_log\_group\_verifier) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -61,7 +62,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Type |
 | ---- | ---- |
-| [aws_cloudwatch_log_group.verifier](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.dataset_failed](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.errors](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.slo_data_load_ingestion_time](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/cloudwatch_metric_alarm) | resource |
