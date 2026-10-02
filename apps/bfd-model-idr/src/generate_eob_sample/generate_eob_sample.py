@@ -265,7 +265,8 @@ class SampleGenerator:
                 "CLM_LINE_INSTNL_REV_CTR_DT": extract_col_str(
                     clm_line, "CLM_LINE_INSTNL_REV_CTR_DT"
                 ),
-                "CLM_LINE_OTHR_TP_PD_AMT": extract_col_str(claim_row, "CLM_LINE_OTHR_TP_PD_AMT"),
+                "CLM_LINE_OTHR_TP_PD_AMT": extract_col_str(clm_line, "CLM_LINE_OTHR_TP_PD_AMT"),
+                "CLM_LINE_NCVRD_PD_AMT": extract_col_str(clm_line, "CLM_LINE_NCVRD_PD_AMT"),
             }
             for clm_line in clm_lines
         ]
