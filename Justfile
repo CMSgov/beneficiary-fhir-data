@@ -70,7 +70,13 @@ create-db:
 [arg("env", long, pattern=env_local_pattern, help=env_help)]
 [doc("Migrate the v3 database using the specified env")]
 [group('database')]
-migrate-db env: create-db
+migrate-db env:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+
+    if [ "{{ env }}" = "local" ]; then
+    	just create-db
+    fi
     BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-ng/migrate.sh
 
 [doc("Creates the mock IDR schema in the local db container")]
@@ -78,15 +84,15 @@ migrate-db env: create-db
 create-mock-idr: (migrate-db "local")
     ./apps/utils/scripts/run-sql-script.sh ./apps/bfd-pipeline-idr/mock-idr.sql
 
-[arg("csv-folder", long, help="Loads data from the folder into the local db before starting the server")]
+[arg("seed-from", long, help="Loads data from the folder into the local db before starting the server")]
 [doc("Run server-ng, optionally running the pipeline first if `csv-folder` is provided")]
 [group('server')]
-server-ng csv-folder="":
+server-ng seed-from="":
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
-    if [ "{{ csv-folder }}" != "" ]; then
-        just pipeline {{ csv-folder }};
+    if [ "{{ seed-from }}" != "" ]; then
+        just pipeline --seed-from "{{ seed-from }}";
     fi
     cd ./apps/bfd-server-ng && mvn clean spring-boot:run
 
