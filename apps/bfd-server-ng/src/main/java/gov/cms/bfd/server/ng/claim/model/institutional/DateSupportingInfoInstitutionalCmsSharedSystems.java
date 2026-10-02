@@ -12,9 +12,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The claim date for institutional claims, cms profile, shared system. */
 @Embeddable
-public class DateSupportingInfoCmsSharedSystems implements SupportingInfoComponentBase {
+public class DateSupportingInfoInstitutionalCmsSharedSystems
+    implements SupportingInfoComponentBase {
 
-  @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
+  @Embedded private DateSupportingInfoInstitutional dateSupportingInfoInstitutional;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private ClaimProcessDate claimProcessDate;
 
@@ -26,7 +27,7 @@ public class DateSupportingInfoCmsSharedSystems implements SupportingInfoCompone
                     qualifyStayFromDate.toFhir(supportingInfoFactory),
                     claimProcessDate.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream),
-            supportingInfoDateInstitutional.toFhir(supportingInfoFactory).stream())
+            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }

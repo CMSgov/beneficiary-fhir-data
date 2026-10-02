@@ -13,18 +13,17 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** CMS profile specific information for claim date supporting info. */
 @Embeddable
-public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
+public class DateSupportingInfoInstitutionalCmsNch implements SupportingInfoComponentBase {
 
-  @Embedded private SupportingInfoDateInstitutional supportingInfoDateInstitutional;
-
+  @Embedded private DateSupportingInfoInstitutional dateSupportingInfoInstitutional;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  @Embedded private ClaimProcessDate claimProcessDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
-  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
+  @Embedded private NoncoveredThruDate noncoveredThroughDate;
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
-  @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
@@ -40,7 +39,7 @@ public class DateSupportingInfoCmsNch implements SupportingInfoComponentBase {
                     qualifyStayThruDate.toFhir(supportingInfoFactory),
                     claimProcessDate.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream),
-            supportingInfoDateInstitutional.toFhir(supportingInfoFactory).stream())
+            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }

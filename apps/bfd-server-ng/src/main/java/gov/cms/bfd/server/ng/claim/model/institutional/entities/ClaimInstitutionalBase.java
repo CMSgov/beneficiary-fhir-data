@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
+import gov.cms.bfd.server.ng.claim.model.common.DateSupportingInfoInstitutionalProfessional;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AttendingCareTeam;
@@ -53,6 +54,7 @@ abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private DateSupportingInfoInstitutionalProfessional dateSupportingInfoOcrncRelatedOcrnc;
 
   // region Hook Methods
 
@@ -177,7 +179,9 @@ abstract class ClaimInstitutionalBase extends ClaimBase {
             getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
             buildSubclassSupportingInfo(),
             getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),
-            getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList())
+            getClaimRelatedCondition().toFhir(supportingInfoFactory).stream().toList(),
+            getDateSupportingInfoOcrncRelatedOcrnc().toFhir(supportingInfoFactory).stream()
+                .toList())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
