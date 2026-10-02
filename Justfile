@@ -67,7 +67,8 @@ remove-db:
 create-db:
     ./apps/utils/scripts/create-bfd-db.sh
 
-[arg("env", long, pattern=f"(local|{{ env_pattern }})", help=env_help)]
+[arg("env", long, pattern=env_local_pattern, help=env_help)]
+[doc("Migrate the v3 database using the specified env")]
 [group('database')]
 migrate-db env: create-db
     BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-ng/migrate.sh
@@ -77,7 +78,7 @@ migrate-db env: create-db
 create-mock-idr: (migrate-db "local")
     ./apps/utils/scripts/run-sql-script.sh ./apps/bfd-pipeline-idr/mock-idr.sql
 
-[arg("csv-folder", help="Loads data from the folder into the local db before starting the server")]
+[arg("csv-folder", long, help="Loads data from the folder into the local db before starting the server")]
 [doc("Run server-ng, optionally running the pipeline first if `csv-folder` is provided")]
 [group('server')]
 server-ng csv-folder="":
@@ -255,7 +256,13 @@ generate-bene-sample bene-sk source-directory="" output-directory="":
         {{ if source-directory != "" { f"--source-directory {{ source-directory }}" } else { "" } }} \
         {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
 
-[arg("paths", help="directory or list of files to regenerate from")]
+[arg("paths", help="""
+Paths to CSVs or directories including CSVs that will be regenerated/updated with new
+        columns. Updates are idempotent, meaning that passing in an existing table/CSV without
+        any new columns being added to the synthetic data generation will result in a
+        byte-identical output file. Take care to avoid providing a partial set of tables with
+        foreign key constraints (e.g. BENE_SK) without providing the root table as this could
+        result in broken output data""")]
 [arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
 Does not affect patients regenerated when a bene_htry file is provided""")]
 [arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
@@ -280,12 +287,22 @@ patient-generator patients="" exclude-empty="" force-ztm-static-rows="" *paths:
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
         {{ if force-ztm-static-rows == "1" { "--force-ztm-static-rows" } else { "" } }}
 
-[arg("paths")]
-[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)")]
-[arg("enable-samhsa", long, value="1")]
-[arg("max-claims", long, pattern="\\d+")]
-[arg("min-claims", long, pattern="\\d+")]
-[arg("pac-gen", long, pattern="(no|if_none|always)")]
+[arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
+[arg("enable-samhsa", long, value="1", help="Enables generation of SAMHSA-related data")]
+[arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per person")]
+[arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per person")]
+[arg("pac-gen", long, pattern="(no|if_none|always)", help="""
+"Generate new partially-adjudicated claims data based on choice. `no` will never generate
+pac data, `if_none`` will generate if the input claims data has no pac CLMs, and
+`always` will force the generation always""")]
+[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="""
+Sets the mode for which input files from which distinct BENE_SKs are read. 'bene_hstry'
+indicates that BENE_SKs are only loaded from BENE_HSTRY, 'clm' indicates loading from
+only from CLM. 'both' indicates loading from both
+""")]
+[doc("""Generates claims data using the IDR schema to feed into the BFD pipeline.
+The `paths` argument can be used to add columns to existing files.
+Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
 claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths:
@@ -301,17 +318,21 @@ claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_non
         --min-claims "{{ min-claims }}" \
         --pac-gen "{{ pac-gen }}"
 
-[arg("env", long, pattern=env_pattern)]
-[arg("headless", long, value="1")]
+[arg("tablesample", long, help="Percent of table to sample")]
+[arg("headless", long, value="1", help="Run in headless mode (outputs in the terminal instead of the web UI)")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[doc("Runs locust regression tests against the specified env")]
 [group('regression')]
-regression-test env headless="":
+regression-test env tablesample="0.25" headless="":
     BFD_ENV="{{ env }}" apps/utils/locust_tests/regression.sh \
+        --table-sample-percent "{{ tablesample }}" \
         {{ if headless != "" { "--headless" } else { "" } }}
 
-[arg("concurrency", long, pattern="\\d+")]
-[arg("env", long, pattern=env_pattern)]
-[arg("limit", long, pattern="\\d+")]
-[arg("tablesample", long, pattern="\\d+")]
+[arg("tablesample", long, help="Percent of the table to sample")]
+[arg("limit", long, pattern="\\d+", help="Limit of unique claim IDs (not necessarily beneficiaries) to return from queries")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("concurrency", long, pattern="\\d+", help="Number of concurrent requests to make against the v3 Server")]
+[doc("Runs SAMHSA regression tests against the specified env")]
 [group('regression')]
 samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
     BFD_ENV="{{ env }}" apps/utils/samhsa-regression-tests/regression.sh \
