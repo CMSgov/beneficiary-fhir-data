@@ -1072,9 +1072,10 @@ class AdjudicatedGeneratorUtil:
             gen_utils.code_systems[f.CLM_FED_TYPE_SRVC_CD]
         )
 
-        clm_line_prfnl[f.CLM_LINE_CARR_HPSA_SCRCTY_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD]
-        )
+        if clm_type_cd in (71, 72):
+            clm_line_prfnl[f.CLM_LINE_CARR_HPSA_SCRCTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD]
+            )
 
         clm_line_prfnl[f.CLM_PRCNG_LCLTY_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PRCNG_LCLTY_CD]
