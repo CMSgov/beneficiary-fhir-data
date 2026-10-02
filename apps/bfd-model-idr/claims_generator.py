@@ -405,17 +405,12 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
-            f.CLM_FED_TYPE_SRVC_CD, # TODO: not generated yet
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD, # TODO: not generated yet
-            f.CLM_PRMRY_PYR_CD, # TODO: not generated yet
-            f.CLM_PRCNG_LCLTY_CD, # TODO: not generated yet
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
-            f.CLM_FED_TYPE_SRVC_CD,
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
-            f.CLM_PRCNG_LCLTY_CD,
-            f.CLM_PRMRY_PYR_CD,
         ],
     )
     CLM_LINE_RX = (
