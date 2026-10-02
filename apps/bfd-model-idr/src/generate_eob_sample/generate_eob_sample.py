@@ -11,6 +11,7 @@ from idr_model.claims_static import (
     INSTITUTIONAL_CLAIM_TYPES,
     MCS_CLM_TYPE_CDS,
     PHARMACY_CLM_TYPE_CDS,
+    VMS_CDS,
 )
 
 
@@ -73,7 +74,8 @@ class SampleGenerator:
         # this a default fallback for institutional claim types at the moment
         # as this work continues we may add more specific handling
         # for different institutional claim types
-        elif claim_type in INSTITUTIONAL_CLAIM_TYPES:
+        # also fall back for known claim types that we do not have a special sample for
+        elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_CDS:
             result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample.json")
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)

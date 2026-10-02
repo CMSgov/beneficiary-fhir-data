@@ -10,6 +10,7 @@ from idr_model.claims_static import (
     INSTITUTIONAL_CLAIM_TYPES,
     MCS_CLM_TYPE_CDS,
     PHARMACY_CLM_TYPE_CDS,
+    VMS_CDS,
 )
 
 
@@ -35,7 +36,10 @@ def test_generate_eob_sample_base() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "8520736890144"
-    assert result_data["CLM_TYPE_CD"] in INSTITUTIONAL_CLAIM_TYPES
+    assert (
+        result_data["CLM_TYPE_CD"] in INSTITUTIONAL_CLAIM_TYPES
+        or result_data["CLM_TYPE_CD"] in VMS_CDS
+    )
 
 
 def test_generate_eob_sample_pharmacy() -> None:
