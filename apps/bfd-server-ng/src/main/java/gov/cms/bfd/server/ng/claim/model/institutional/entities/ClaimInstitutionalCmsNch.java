@@ -121,6 +121,6 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalBase {
 
   @Override
   public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
+    return Optional.of(claimRelatedCondition); // test sample scenario
   }
 }
