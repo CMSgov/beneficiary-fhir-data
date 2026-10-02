@@ -16,13 +16,17 @@ public class DateSupportingInfoInstitutionalCmsSharedSystems
     implements SupportingInfoComponentBase {
 
   @Embedded private DateSupportingInfoInstitutional dateSupportingInfoInstitutional;
+  @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private ClaimProcessDate claimProcessDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.concat(
-            Stream.of(claimProcessDate.toFhir(supportingInfoFactory)).flatMap(Optional::stream),
+            Stream.of(
+                    qualifyStayFromDate.toFhir(supportingInfoFactory),
+                    claimProcessDate.toFhir(supportingInfoFactory))
+                .flatMap(Optional::stream),
             dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream())
         .toList();
   }

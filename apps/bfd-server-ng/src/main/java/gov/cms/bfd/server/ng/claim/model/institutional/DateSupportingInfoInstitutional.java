@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionDate;
-import gov.cms.bfd.server.ng.claim.model.common.DateSupportingInfoInstitutionalProfessional;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Embeddable;
@@ -17,17 +16,14 @@ public class DateSupportingInfoInstitutional implements SupportingInfoComponentB
 
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private DateSupportingInfoInstitutionalProfessional commonDateSupportingInfo;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.concat(
-            Stream.of(
-                    admissionPeriod.toFhir(supportingInfoFactory),
-                    claimSubmissionDate.toFhir(supportingInfoFactory))
-                .flatMap(Optional::stream),
-            commonDateSupportingInfo.toFhir(supportingInfoFactory).stream())
+    return Stream.of(
+            admissionPeriod.toFhir(supportingInfoFactory),
+            claimSubmissionDate.toFhir(supportingInfoFactory))
+        .flatMap(Optional::stream)
         .toList();
   }
 }
