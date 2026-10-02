@@ -8,6 +8,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -30,8 +31,8 @@ public class ClaimItemRxCms implements ClaimItemBase {
    *
    * @return total drug cost from contained adjudication charge
    */
-  public BigDecimal getTotalDrugCost() {
-    return claimLine.getAdjudicationCharge().getTotalDrugCost();
+  public Optional<BigDecimal> getTotalDrugCost() {
+    return claimLine.getAdjudicationCharge().getTotalRxCostAmount();
   }
 
   /**
