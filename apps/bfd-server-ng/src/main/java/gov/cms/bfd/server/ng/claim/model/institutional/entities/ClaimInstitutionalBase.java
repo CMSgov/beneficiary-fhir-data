@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;

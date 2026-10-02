@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.claim;
 
 import lombok.Builder;
 import lombok.Value;

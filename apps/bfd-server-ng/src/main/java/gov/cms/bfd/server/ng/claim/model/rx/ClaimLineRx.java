@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;

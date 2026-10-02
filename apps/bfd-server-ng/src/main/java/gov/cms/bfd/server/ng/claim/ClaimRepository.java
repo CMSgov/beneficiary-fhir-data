@@ -4,13 +4,24 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalBasisNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalBasisSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalRegularNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalRegularSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalBasisNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalBasisSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalRegularNch;
+import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalRegularSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxBasis;
 import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxCms;
+import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxRegular;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.annotation.Timed;
@@ -29,7 +40,7 @@ public class ClaimRepository {
   private final ClaimAsyncService asyncService;
   private final MetricRecorder metricRecorder;
 
-  private static final String CLAIM_PROFESSIONAL_SHARED_SYSTEMS =
+  private static final String CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS =
       """
         SELECT c
         FROM ClaimProfessionalCmsSharedSystems c
@@ -37,7 +48,23 @@ public class ClaimRepository {
         LEFT JOIN FETCH c.claimItems cl
       """;
 
-  private static final String CLAIM_PROFESSIONAL_NCH =
+  private static final String CLAIM_PROFESSIONAL_REGULAR_SHARED_SYSTEMS =
+      """
+            SELECT c
+            FROM ClaimProfessionalRegularSharedSystems c
+            JOIN FETCH c.beneficiary b
+            LEFT JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_PROFESSIONAL_BASIS_SHARED_SYSTEMS =
+      """
+            SELECT c
+            FROM ClaimProfessionalBasisSharedSystems c
+            JOIN FETCH c.beneficiary b
+            LEFT JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_PROFESSIONAL_CMS_NCH =
       """
         SELECT c
         FROM ClaimProfessionalCmsNch c
@@ -45,7 +72,23 @@ public class ClaimRepository {
         JOIN FETCH c.claimItems cl
       """;
 
-  private static final String CLAIM_INSTITUTIONAL_SHARED_SYSTEMS =
+  private static final String CLAIM_PROFESSIONAL_REGULAR_NCH =
+      """
+            SELECT c
+            FROM ClaimProfessionalRegularNch c
+            JOIN FETCH c.beneficiary b
+            JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_PROFESSIONAL_BASIS_NCH =
+      """
+            SELECT c
+            FROM ClaimProfessionalBasisNch c
+            JOIN FETCH c.beneficiary b
+            JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS =
       """
         SELECT c
         FROM ClaimInstitutionalCmsSharedSystems c
@@ -53,13 +96,45 @@ public class ClaimRepository {
         LEFT JOIN FETCH c.claimItems cl
       """;
 
-  private static final String CLAIM_INSTITUTIONAL_NCH =
+  private static final String CLAIM_INSTITUTIONAL_REGULAR_SHARED_SYSTEMS =
+      """
+            SELECT c
+            FROM ClaimInstitutionalRegularSharedSystems c
+            JOIN FETCH c.beneficiary b
+            LEFT JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_INSTITUTIONAL_BASIS_SHARED_SYSTEMS =
+      """
+            SELECT c
+            FROM ClaimInstitutionalBasisSharedSystems c
+            JOIN FETCH c.beneficiary b
+            LEFT JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_INSTITUTIONAL_CMS_NCH =
       """
         SELECT c
         FROM ClaimInstitutionalCmsNch c
         JOIN FETCH c.beneficiary b
         JOIN FETCH c.claimItems cl
       """;
+
+  private static final String CLAIM_INSTITUTIONAL_REGULAR_NCH =
+      """
+            SELECT c
+            FROM ClaimInstitutionalCmsNch c
+            JOIN FETCH c.beneficiary b
+            JOIN FETCH c.claimItems cl
+          """;
+
+  private static final String CLAIM_INSTITUTIONAL_BASIS_NCH =
+      """
+            SELECT c
+            FROM ClaimInstitutionalCmsNch c
+            JOIN FETCH c.beneficiary b
+            JOIN FETCH c.claimItems cl
+          """;
 
   private static final String CLAIM_RX_CMS =
       """
@@ -85,18 +160,71 @@ public class ClaimRepository {
   private static final List<ClaimTypeDefinition> ALL_CLAIM_TYPES =
       List.of(
           new ClaimTypeDefinition(
-              CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+              CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
               ClaimProfessionalCmsSharedSystems.class,
-              SystemType.SS),
+              SystemType.SS,
+              ClaimProfile.CMS),
           new ClaimTypeDefinition(
-              CLAIM_PROFESSIONAL_NCH, ClaimProfessionalCmsNch.class, SystemType.NCH),
+              CLAIM_PROFESSIONAL_CMS_NCH,
+              ClaimProfessionalCmsNch.class,
+              SystemType.NCH,
+              ClaimProfile.CMS),
           new ClaimTypeDefinition(
-              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+              CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
               ClaimInstitutionalCmsSharedSystems.class,
-              SystemType.SS),
+              SystemType.SS,
+              ClaimProfile.CMS),
           new ClaimTypeDefinition(
-              CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalCmsNch.class, SystemType.NCH),
-          new ClaimTypeDefinition(CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS));
+              CLAIM_INSTITUTIONAL_CMS_NCH,
+              ClaimInstitutionalCmsNch.class,
+              SystemType.NCH,
+              ClaimProfile.CMS),
+          new ClaimTypeDefinition(
+              CLAIM_RX_CMS, ClaimRxCms.class, SystemType.DDPS, ClaimProfile.CMS),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
+              ClaimProfessionalRegularSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_NCH,
+              ClaimProfessionalRegularNch.class,
+              SystemType.NCH,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
+              ClaimInstitutionalRegularSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_NCH,
+              ClaimInstitutionalRegularNch.class,
+              SystemType.NCH,
+              ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_RX_CMS, ClaimRxRegular.class, SystemType.DDPS, ClaimProfile.REGULAR),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
+              ClaimProfessionalBasisSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_CMS_NCH,
+              ClaimProfessionalBasisNch.class,
+              SystemType.NCH,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
+              ClaimInstitutionalBasisSharedSystems.class,
+              SystemType.SS,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_CMS_NCH,
+              ClaimInstitutionalBasisNch.class,
+              SystemType.NCH,
+              ClaimProfile.BASIS),
+          new ClaimTypeDefinition(
+              CLAIM_RX_CMS, ClaimRxBasis.class, SystemType.DDPS, ClaimProfile.BASIS));
 
   /**
    * Search for a claim by its ID.
@@ -123,7 +251,7 @@ public class ClaimRepository {
 
     var professionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+            CLAIM_PROFESSIONAL_CMS_SHARED_SYSTEMS,
             ClaimProfessionalCmsSharedSystems.class,
             ClaimProfessionalCmsSharedSystems.getSystemType(),
             criteria.claimUniqueIds(),
@@ -131,7 +259,7 @@ public class ClaimRepository {
 
     var professionalNchClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_PROFESSIONAL_NCH,
+            CLAIM_PROFESSIONAL_CMS_NCH,
             ClaimProfessionalCmsNch.class,
             ClaimProfessionalCmsNch.getSystemType(),
             criteria.claimUniqueIds(),
@@ -139,7 +267,7 @@ public class ClaimRepository {
 
     var institutionalSharedSystemsClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+            CLAIM_INSTITUTIONAL_CMS_SHARED_SYSTEMS,
             ClaimInstitutionalCmsSharedSystems.class,
             ClaimInstitutionalCmsSharedSystems.getSystemType(),
             criteria.claimUniqueIds(),
@@ -147,7 +275,7 @@ public class ClaimRepository {
 
     var institutionalNchClaims =
         asyncService.findByIdsInClaimType(
-            CLAIM_INSTITUTIONAL_NCH,
+            CLAIM_INSTITUTIONAL_CMS_NCH,
             ClaimInstitutionalCmsNch.class,
             ClaimInstitutionalCmsNch.getSystemType(),
             criteria.claimUniqueIds(),
@@ -207,7 +335,10 @@ public class ClaimRepository {
 
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
-            .filter(claimTypeDefinition -> claimTypeDefinition.matchesSystemType(filterBuilders))
+            .filter(
+                claimTypeDefinition ->
+                    claimTypeDefinition.matchesSystemType(filterBuilders)
+                        && claimTypeDefinition.matchesProfile(criteria.profile()))
             .map(
                 d ->
                     asyncService.fetchClaims(
