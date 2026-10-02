@@ -92,18 +92,25 @@ tables = [
 ]
 
 
-def load_from_csv(extractor: DbExecutor, src_folder: str, truncate: bool = False) -> None:
+def load_from_csv(
+    extractor: DbExecutor, src_folder: str, truncate: bool = False, is_snowflake: bool = False
+) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
-        if truncate:
-            extractor.execute(f"TRUNCATE TABLE {sql_table}")
         file = table["csv_name"]
-        _load_file(extractor, src_folder, file, sql_table)
+        _load_file(extractor, src_folder, file, sql_table, truncate, is_snowflake)
         extractor.commit()
 
 
-def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: str) -> None:
+def _load_file(
+    extractor: DbExecutor,
+    src_folder: str,
+    file: str,
+    full_table: str,
+    truncate: bool,
+    is_snowflake: bool,
+) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
     # valid path
@@ -118,9 +125,17 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             # skip empty files
             if reader.fieldnames is None:
                 continue
-            sql_table = full_table.split(".")[1]
+            # Only truncate once we know we have a matching table.
+            if truncate:
+                extractor.execute(f"TRUNCATE TABLE {full_table}")
+
+            # snowflake wants us to declare our database first.
+            if is_snowflake:
+                extractor.execute(f"USE {SETTINGS.idr_database}")
+
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
+            sql_table = full_table.split(".").pop()
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
@@ -138,6 +153,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             ]
             # skip empty files since we won't have any valid columns
             # which causes the COPY command below to fail
+
             if cols:
                 extractor.copy(CsvFile(cols, full_table, match))
 
@@ -167,4 +183,5 @@ if __name__ == "__main__":
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         args.base_dir or default_dir,
         args.truncate,
+        args.database_type == "snowflake",
     )

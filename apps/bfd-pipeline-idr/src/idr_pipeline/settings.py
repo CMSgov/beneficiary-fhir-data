@@ -231,6 +231,11 @@ class _Settings:
     _IDR_SCHEMA = "cms_vdm_view_mdcr_prd"
     _IDR_PRIOR_AUTH_SCHEMA = "cms_edp_view_cvm_prau_prd"
 
+    def idr_schema_by_table(self, table: str) -> str:
+        if "PRAUC" in table:
+            return self._IDR_PRIOR_AUTH_SCHEMA
+        return self.idr_schema or self._IDR_SCHEMA
+
     # Beneficiary History Tables
     @property
     def idr_bene_history_table(self) -> str:

@@ -92,6 +92,7 @@ def main(
             else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
             seed_from,
             truncate,
+            source == Source.SNOWFLAKE,
         )
     run(source, load_mode, load_type, MultiprocessingExecutor(SETTINGS.max_tasks), job_id)
 

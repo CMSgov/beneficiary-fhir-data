@@ -37,8 +37,8 @@ readonly IDR_DATABASE
 export IDR_DATABASE
 
 args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
-if [[ -n "$1" ]]; then
-  args+=('--seed-from' "$1")
-fi
+
+args+=("$@")
+
 
 IDR_ENABLE_DATE_PARTITIONS=0 uv run idr-pipeline "${args[@]}"

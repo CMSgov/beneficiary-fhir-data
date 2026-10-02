@@ -1286,7 +1286,7 @@
     - Hospice
     - SNF
     - Outpatient
-  sources: 
+  sources:
     - NCH
     - FISS
   ccwMapping:
@@ -1361,7 +1361,7 @@
   sources:
     - NCH
     - FISS
-    - MCS 
+    - MCS
     - VMS
   ccwMapping:
     - HCPCS_3RD_MDFR_CD
@@ -1387,7 +1387,7 @@
   sources:
     - NCH
     - FISS
-    - MCS 
+    - MCS
     - VMS
   ccwMapping:
     - HCPCS_4TH_MDFR_CD
@@ -1413,7 +1413,7 @@
   sources:
     - NCH
     - FISS
-    - MCS 
+    - MCS
     - VMS
   cclfMapping:
     - CCLF2.HCPCS_5_MDFR_CD
@@ -1447,7 +1447,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1468,7 +1468,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1479,7 +1479,7 @@
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_1_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
-  notes: ANSI reason and group codes are unordered. 
+  notes: ANSI reason and group codes are unordered.
   profiles:
     - Basis
     - Regular
@@ -1489,7 +1489,7 @@
     - Outpatient
     - Inpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1508,7 +1508,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1517,7 +1517,7 @@
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_2_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
-  notes: ANSI reason and group codes are unordered. 
+  notes: ANSI reason and group codes are unordered.
   profiles:
     - Basis
     - Regular
@@ -1527,7 +1527,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1546,7 +1546,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1555,7 +1555,7 @@
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_3_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
-  notes: ANSI reason and group codes are unordered. 
+  notes: ANSI reason and group codes are unordered.
   profiles:
     - Basis
     - Regular
@@ -1565,7 +1565,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1584,7 +1584,7 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA 
+    - HHA
     - Hospice
   sources:
     - NCH
@@ -1593,7 +1593,7 @@
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
-  notes: ANSI reason and group codes are unordered. 
+  notes: ANSI reason and group codes are unordered.
   profiles:
     - Basis
     - Regular
@@ -1851,7 +1851,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_ACTV_CARE_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.start
-  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation.
   profiles:
     - Basis
     - Regular
@@ -1870,7 +1870,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_DSCHRG_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.end
-  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation.
   profiles:
     - Basis
     - Regular
@@ -1935,7 +1935,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: BENE_PTNT_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='discharge-status').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD').code
-  notes: The two CCW variables here represent the same concept, but only one code system is enumerated here. 
+  notes: The two CCW variables here represent the same concept, but only one code system is enumerated here.
   profiles:
     - Basis
     - Regular
@@ -1964,7 +1964,7 @@
     - SNF
     - Outpatient
     - Carrier
-  sources: 
+  sources:
     - NCH
   ccwMapping:
     - NCH_BLOOD_PNTS_FRNSHD_QTY
@@ -1976,11 +1976,11 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_MCO_PD_SW
   appliesTo:
     - Inpatient
-    - Outpatient 
+    - Outpatient
     - HHA
     - Hospice
     - SNF
-  sources: 
+  sources:
     - NCH
     - FISS
   ccwMapping:
@@ -2021,7 +2021,7 @@
     - FISS
     - NCH
   bfdDerived: True
-  notes: This field is derived from 0 + CLM_BILL_FAC_TYPE_CD + CLM_BILL_CLSFCTN_CD + CLM_BILL_FREQ_CD because the codes are dependent upon one another, and require concatenation to be meaningful in a machine-readable format. 
+  notes: This field is derived from 0 + CLM_BILL_FAC_TYPE_CD + CLM_BILL_CLSFCTN_CD + CLM_BILL_FREQ_CD because the codes are dependent upon one another, and require concatenation to be meaningful in a machine-readable format.
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://www.nubc.org/CodeSystem/TypeOfBill').code
   profiles:
     - Basis
@@ -2039,7 +2039,7 @@
     - NCH
   ccwMapping:
     - CLM_FAC_TYPE_CD
-  cclfMapping: 
+  cclfMapping:
     - CCLF1.CLM_BILL_FAC_TYPE_CD
   referenceTable: CLM_BILL_FAC_TYPE_CD
   sourceView: V2_MDCR_CLM
@@ -2061,7 +2061,7 @@
     - NCH
   ccwMapping:
     - CLM_SRVC_CLSFCTN_TYPE_CD
-  cclfMapping: 
+  cclfMapping:
     - CCLF1.CLM_BILL_CLSFCTN_CD
   referenceTable: CLM_BILL_CLSFCTN_CD
   sourceView: V2_MDCR_CLM
@@ -2084,7 +2084,7 @@
     - NCH
   ccwMapping:
     - CLM_FREQ_CD
-  cclfMapping: 
+  cclfMapping:
     - CCLF1.CLM_BILL_FREQ_CD
   referenceTable: CLM_BILL_FREQ_CD
   sourceView: V2_MDCR_CLM
@@ -2132,7 +2132,7 @@
     - SNF
   sources:
     - NCH
-  ccwMapping: 
+  ccwMapping:
     - NCH_VRFD_NCVRD_STAY_THRU_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCVRD_THRU_DT
@@ -2240,7 +2240,7 @@
   cclfMapping:
     - CCLF1.CLM_HIPPS_UNCOMPD_CARE_AMT
   sourceView: V2_MDCR_CLM_INSTNL
-  sourceColumn: CLM_HIPPS_UNCOMPD_CARE_AMT 
+  sourceColumn: CLM_HIPPS_UNCOMPD_CARE_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_HIPPS_UNCOMPD_CARE_AMT').exists()).amount.value
   profiles:
     - CMS
@@ -2611,7 +2611,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: PRVDR_RNDRNG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.careTeam.where(role.coding.where(code = 'rendering').exists()).provider.identifier.value
-  notes: This can be either the same or different as the other rendering provider fields. An alternative way to connect the nodes is to refer to the relevant careTeam sequence and then get the Provider's NPI from there. 
+  notes: This can be either the same or different as the other rendering provider fields. An alternative way to connect the nodes is to refer to the relevant careTeam sequence and then get the Provider's NPI from there.
   profiles:
     - Basis
     - Regular
@@ -2871,7 +2871,7 @@
   sourceColumn: CLM_REV_CNTR_STUS_CD
   referenceTable: CLM_REV_CNTR_STUS_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD').value.code
-  notes: A condensed version of the data available in this field is available for both processed and processing claims in CLM_REV_PMT_MTHD_CD. 
+  notes: A condensed version of the data available in this field is available for both processed and processing claims in CLM_REV_PMT_MTHD_CD.
   profiles:
     - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT
@@ -2881,7 +2881,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HOSPC_PRD_CNT
-  ccwMapping: 
+  ccwMapping:
     - BENE_HOSPC_PRD_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_HOSPC_PRD_CNT').exists()).value
   profiles:
@@ -3248,7 +3248,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TYPE_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
-  notes: Still used to populate the qualification. 
+  notes: Still used to populate the qualification.
   profiles:
     - CMS
     - Basis
@@ -3259,7 +3259,7 @@
     - DME
   sources:
     - NCH
-  cclfMapping: 
+  cclfMapping:
     - CCLF5.CLM_CARR_PMT_DNL_CD
     - CCLF6.CLM_CARR_PMT_DNL_CD
   ccwMapping:
@@ -3490,7 +3490,7 @@
     - NCH
     - MCS
   ccwMapping:
-     - LINE_PMT_80_100_CD
+    - LINE_PMT_80_100_CD
   referenceTable: CLM_PMT_80_100_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PMT_80_100_CD
@@ -3589,6 +3589,8 @@
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_DME_PRICE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
+  profiles:
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Inpatient
@@ -3828,7 +3830,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_1ST_YR_RATE_AMT
-  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_1ST_YR_RATE_AMT')).amount.value 
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_1ST_YR_RATE_AMT')).amount.value
   profiles:
     - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_SCND_YR_RATE_AMT
@@ -3839,7 +3841,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_SCND_YR_RATE_AMT
-  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_SCND_YR_RATE_AMT')).amount.value  
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_SCND_YR_RATE_AMT')).amount.value
   profiles:
     - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_MD_WVR_STDZD_VAL_AMT
@@ -4407,35 +4409,35 @@
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
     - CMS
-- inputPath: ExplanationOfBenefit-Base.GEO_BLG_SSA_STATE_CD                       
-  appliesTo:                                                                    
-    - Inpatient                                                                 
-    - Outpatient                                                                
+- inputPath: ExplanationOfBenefit-Base.GEO_BLG_SSA_STATE_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
     - HHA
     - Hospice
     - SNF
     - DME
   sources:
-    - NCH                                                                       
-  cclfMapping:  
+    - NCH
+  cclfMapping:
     - CCLF1.PRVDR_FAC_FIPS_ST_CD
   sourceView: V2_MDCR_CLM
-  sourceColumn: GEO_BLG_SSA_STATE_CD                                            
-  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
+  sourceColumn: GEO_BLG_SSA_STATE_CD
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).code
   profiles:
     - CMS
-- inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
-  appliesTo:                                                                    
+- inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD
+  appliesTo:
     - Carrier
-    - DME                                                                       
-  sources:      
+    - DME
+  sources:
     - NCH
   cclfMapping:
-    - CCLF5.RNDRG_PRVDR_FIPS_ST_CD                                              
+    - CCLF5.RNDRG_PRVDR_FIPS_ST_CD
   sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
-  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
+  sourceColumn: GEO_RNDRG_SSA_STATE_CD
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code
   profiles:
     - CMS
