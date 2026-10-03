@@ -535,8 +535,10 @@ class PacGeneratorUtil:
     ):
         clm_ocrnc_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_ocrnc_sgntr_mbr,
-            is_pac_predicate=lambda: f.CLM_UNIQ_ID in init_clm_ocrnc_sgntr_mbr
-            and init_clm_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID],
+            is_pac_predicate=lambda: (
+                f.CLM_UNIQ_ID in init_clm_ocrnc_sgntr_mbr
+                and init_clm_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID]
+            ),
             exclude_fields_always=set(),
             exclude_fields_adj={
                 f.CLM_OCRNC_SGNTR_SK,
@@ -585,8 +587,10 @@ class PacGeneratorUtil:
     ):
         clm_rlt_ocrnc_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_rlt_ocrnc_sgntr_mbr,
-            is_pac_predicate=lambda: f.CLM_UNIQ_ID in init_clm_rlt_ocrnc_sgntr_mbr
-            and init_clm_rlt_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID],
+            is_pac_predicate=lambda: (
+                f.CLM_UNIQ_ID in init_clm_rlt_ocrnc_sgntr_mbr
+                and init_clm_rlt_ocrnc_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID]
+            ),
             exclude_fields_always=set(),
             exclude_fields_adj={
                 f.CLM_RLT_OCRNC_SGNTR_SK,

@@ -16,9 +16,9 @@ from claims_static import (
     INSTITUTIONAL_CLAIM_TYPES,
     NOW,
     PHARMACY_CLM_TYPE_CDS,
+    TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
-    TARGET_OCRNC_SPAN_CODES,
     TARGET_SEQUENCE_NUMBERS,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
@@ -106,9 +106,7 @@ class AdjudicatedGeneratorUtil:
         )
         clm[f.BENE_SK] = bene_sk
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
-        clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD]
-        )
+        clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD])
 
         if clm_type_cd not in PHARMACY_CLM_TYPE_CDS:
             clm[f.CLM_QUERY_CD] = random.choice(gen_utils.code_systems[f.CLM_QUERY_CD])
@@ -123,9 +121,7 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = random.choice(type_1_npis)
             clm[f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM] = clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)
-            clm[f.CLM_SBMT_FRMT_CD] = random.choice(
-                gen_utils.code_systems[f.CLM_SBMT_FRMT_CD]
-            )
+            clm[f.CLM_SBMT_FRMT_CD] = random.choice(gen_utils.code_systems[f.CLM_SBMT_FRMT_CD])
             clm[f.CLM_BENE_PMT_AMT] = round(random.uniform(0, 1000), 2)
             clm[f.CLM_OTHR_TP_PD_AMT] = round(random.uniform(0, 1000), 2)
             if gen_utils.cntrct_pbp_num:
@@ -142,12 +138,8 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_BILL_CLSFCTN_CD] = tob_code[1]
             clm[f.CLM_BILL_FREQ_CD] = tob_code[2]
 
-        clm[f.CLM_CNTRCTR_NUM] = random.choice(
-            gen_utils.code_systems[f.CLM_CNTRCTR_NUM]
-        )
-        clm[f.CLM_NCH_PRMRY_PYR_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_NCH_PRMRY_PYR_CD]
-        )
+        clm[f.CLM_CNTRCTR_NUM] = random.choice(gen_utils.code_systems[f.CLM_CNTRCTR_NUM])
+        clm[f.CLM_NCH_PRMRY_PYR_CD] = random.choice(gen_utils.code_systems[f.CLM_NCH_PRMRY_PYR_CD])
 
         clm[f.CLM_FINL_ACTN_IND] = "Y"
         if clm[f.CLM_TYPE_CD] == 3 or clm[f.CLM_ADJSTMT_TYPE_CD] == "1":
@@ -202,9 +194,7 @@ class AdjudicatedGeneratorUtil:
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
             )
             clm[f.CLM_ATNDG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
-            clm[f.CLM_BLG_PRVDR_OSCAR_NUM] = random.choice(
-                AVAIL_OSCAR_CODES_INSTITUTIONAL
-            )
+            clm[f.CLM_BLG_PRVDR_OSCAR_NUM] = random.choice(AVAIL_OSCAR_CODES_INSTITUTIONAL)
             clm[f.CLM_MDCR_COINSRNC_AMT] = round(random.uniform(0, 25), 2)
             clm[f.CLM_BLG_PRVDR_ZIP5_CD] = random.choice(["75205", "77550", "77005"])
             clm[f.CLM_RLT_COND_SGNTR_SK] = random.choice(AVAIL_CLM_RLT_COND_SK)
@@ -218,15 +208,11 @@ class AdjudicatedGeneratorUtil:
                     clm[field_key] = val
                     used_enhancements.add(val)
                 clm[f.CLM_NGACO_PBPMT_SW] = "Y" if "1" in used_enhancements else "N"
-                clm[f.CLM_NGACO_PDSCHRG_HCBS_SW] = (
-                    "Y" if "3" in used_enhancements else "N"
-                )
+                clm[f.CLM_NGACO_PDSCHRG_HCBS_SW] = "Y" if "3" in used_enhancements else "N"
                 clm[f.CLM_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
                 clm[f.CLM_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
                 clm[f.CLM_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
-                clm[f.CLM_ACO_CARE_MGMT_HCBS_SW] = (
-                    "Y" if "7" in used_enhancements else "N"
-                )
+                clm[f.CLM_ACO_CARE_MGMT_HCBS_SW] = "Y" if "7" in used_enhancements else "N"
 
         if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
             clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
@@ -252,9 +238,7 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_BENE_PD_AMT] = round(random.uniform(1, 1000000), 2)
             clm[f.CLM_BENE_PMT_AMT] = round(random.uniform(1, 1000000), 2)
             clm[f.CLM_PRVDR_PMT_AMT] = round(random.uniform(1, 1000000), 2)
-        clm[f.CLM_PMT_AMT] = round(
-            random.uniform(1, float(clm[f.CLM_SBMT_CHRG_AMT])), 2
-        )
+        clm[f.CLM_PMT_AMT] = round(random.uniform(1, float(clm[f.CLM_SBMT_CHRG_AMT])), 2)
         clm[f.CLM_MDCR_DDCTBL_AMT] = round(random.uniform(1, 1676), 2)
         clm[f.CLM_NCVRD_CHRG_AMT] = round(
             float(clm[f.CLM_SBMT_CHRG_AMT]) - float(clm[f.CLM_PMT_AMT]), 2
@@ -324,12 +308,8 @@ class AdjudicatedGeneratorUtil:
             if str(clm.get(f.CLM_OCRNC_SGNTR_SK, "")).startswith("-")
             else gen_utils.id_gen.numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
         )
-        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(
-            TARGET_SEQUENCE_NUMBERS
-        )
-        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_CD] = random.choice(
-            TARGET_OCRNC_SPAN_CODES
-        )
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
+        clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_CD] = random.choice(TARGET_OCRNC_SPAN_CODES)
 
         # add from and thru dates
         if random.choice([0, 1]):
@@ -361,9 +341,7 @@ class AdjudicatedGeneratorUtil:
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM] = random.choice(
             TARGET_SEQUENCE_NUMBERS
         )
-        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_CD] = random.choice(
-            TARGET_RLT_OCRNC_CODES
-        )
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_CD] = random.choice(TARGET_RLT_OCRNC_CODES)
 
         # add field for date
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = clm[f.CLM_THRU_DT]
@@ -372,9 +350,7 @@ class AdjudicatedGeneratorUtil:
 
         return clm_rlt_ocrnc_sgntr_mbr
 
-    def gen_clm_dt_sgntr(
-        self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None
-    ):
+    def gen_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
         clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})
         clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_type_cd = int(clm[f.CLM_TYPE_CD])
@@ -411,9 +387,7 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dt_sgntr
 
-    def gen_pharm_clm_line(
-        self, clm: RowAdapter, init_clm_line: RowAdapter | None = None
-    ):
+    def gen_pharm_clm_line(self, clm: RowAdapter, init_clm_line: RowAdapter | None = None):
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
         clm_line[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -461,9 +435,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_rx[f.CLM_LINE_RX_ORGN_CD] = random.choice(
             gen_utils.code_systems[f.CLM_LINE_RX_ORGN_CD]
         )
-        clm_line_rx[f.CLM_BRND_GNRC_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_BRND_GNRC_CD]
-        )
+        clm_line_rx[f.CLM_BRND_GNRC_CD] = random.choice(gen_utils.code_systems[f.CLM_BRND_GNRC_CD])
         clm_line_rx[f.CLM_PTNT_RSDNC_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PTNT_RSDNC_CD]
         )
@@ -476,47 +448,31 @@ class AdjudicatedGeneratorUtil:
         clm_line_rx[f.CLM_LTC_DSPNSNG_MTHD_CD] = random.choice(
             gen_utils.code_systems[f.CLM_LTC_DSPNSNG_MTHD_CD]
         )
-        clm_line_rx[f.CLM_CMPND_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_CMPND_CD]
-        )
+        clm_line_rx[f.CLM_CMPND_CD] = random.choice(gen_utils.code_systems[f.CLM_CMPND_CD])
         clm_line_rx[f.CLM_LINE_DAYS_SUPLY_QTY] = random.randint(1, 10)
         clm_line_rx[f.CLM_LINE_RX_FILL_NUM] = random.randint(1, 10)
-        clm_line_rx[f.CLM_DAW_PROD_SLCTN_CD] = random.choice(
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        )
+        clm_line_rx[f.CLM_DAW_PROD_SLCTN_CD] = random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
         clm_line_rx[f.CLM_DRUG_CVRG_STUS_CD] = random.choice(
             gen_utils.code_systems[f.CLM_DRUG_CVRG_STUS_CD]
         )
         clm_line_rx[f.CLM_CTSTRPHC_CVRG_IND_CD] = random.choice(
             gen_utils.code_systems[f.CLM_CTSTRPHC_CVRG_IND_CD]
         )
-        clm_line_rx[f.CLM_LINE_GRS_ABOVE_THRSHLD_AMT] = round(
-            random.uniform(1, 1000000), 2
-        )
-        clm_line_rx[f.CLM_LINE_GRS_BLW_THRSHLD_AMT] = round(
-            random.uniform(1, 1000000), 2
-        )
+        clm_line_rx[f.CLM_LINE_GRS_ABOVE_THRSHLD_AMT] = round(random.uniform(1, 1000000), 2)
+        clm_line_rx[f.CLM_LINE_GRS_BLW_THRSHLD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_LIS_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_TROOP_TOT_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_PLRO_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_RPTD_MFTR_DSCNT_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_INGRDNT_CST_AMT] = round(random.uniform(1, 1000000), 2)
-        clm_line_rx[f.CLM_LINE_VCCN_ADMIN_FEE_AMT] = round(
-            random.uniform(1, 1000000), 2
-        )
+        clm_line_rx[f.CLM_LINE_VCCN_ADMIN_FEE_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_SRVC_CST_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_SLS_TAX_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_PRCNG_EXCPTN_CD] = random.choice(["", "O", "M"])
         clm_line_rx[f.CLM_CMS_CALCD_MFTR_DSCNT_AMT] = round(random.uniform(0, 1000), 2)
-        clm_line_rx[f.CLM_LINE_REBT_PASSTHRU_POS_AMT] = round(
-            random.uniform(0, 1000), 2
-        )
-        clm_line_rx[f.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT] = round(
-            random.uniform(0, 1000), 2
-        )
-        clm_line_rx[f.CLM_LINE_RPTD_GAP_DSCNT_AMT] = round(
-            random.uniform(1, 1000000), 2
-        )
+        clm_line_rx[f.CLM_LINE_REBT_PASSTHRU_POS_AMT] = round(random.uniform(0, 1000), 2)
+        clm_line_rx[f.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT] = round(random.uniform(0, 1000), 2)
+        clm_line_rx[f.CLM_LINE_RPTD_GAP_DSCNT_AMT] = round(random.uniform(1, 1000000), 2)
 
         add_meta_timestamps(clm_line_rx, clm)
 
@@ -548,9 +504,7 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_dsprtnt_clm_val(
-        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
-    ):
+    def gen_dsprtnt_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
         # CLM_OPRTNL_DSPRTNT_AMT
         # Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique
         # identifier with CLM_UNIQ_ID.
@@ -589,13 +543,9 @@ class AdjudicatedGeneratorUtil:
     ):
         clm_prod = init_clm_prod or RowAdapter({})
         clm_prod[f.CLM_PROD_TYPE_CD] = "S"
-        clm_prod[f.CLM_PRCDR_CD] = random.choice(
-            get_icd_10_prcdr_codes(self.enable_samhsa)
-        )
+        clm_prod[f.CLM_PRCDR_CD] = random.choice(get_icd_10_prcdr_codes(self.enable_samhsa))
         clm_prod[f.CLM_DGNS_PRCDR_ICD_IND] = "0"
-        clm_prod[f.CLM_PRCDR_PRFRM_DT] = random_date(
-            clm[f.CLM_FROM_DT], clm[f.CLM_THRU_DT]
-        )
+        clm_prod[f.CLM_PRCDR_PRFRM_DT] = random_date(clm[f.CLM_FROM_DT], clm[f.CLM_THRU_DT])
         clm_prod[f.CLM_VAL_SQNC_NUM] = clm_val_sqnc_num
         clm_prod[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_prod[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -683,9 +633,7 @@ class AdjudicatedGeneratorUtil:
             diagnoses.append(external_1)
             diagnoses.append(first_external)
             num_add_diags = (
-                len(init_diagnoses) - 5
-                if len(init_diagnoses) > 5
-                else random.randint(2, 15)
+                len(init_diagnoses) - 5 if len(init_diagnoses) > 5 else random.randint(2, 15)
             )
         elif clm_type_cd == 40:
             # outpatient uses principal, other, external cause of injury, patient reason for visit
@@ -720,9 +668,7 @@ class AdjudicatedGeneratorUtil:
             diagnoses.append(first)
             diagnoses.append(rfv_diag)
             num_add_diags = (
-                len(init_diagnoses) - 3
-                if len(init_diagnoses) > 3
-                else random.randint(2, 15)
+                len(init_diagnoses) - 3 if len(init_diagnoses) > 3 else random.randint(2, 15)
             )
         elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
             # professional claims use principal diagnosis and other diagnoses
@@ -747,9 +693,7 @@ class AdjudicatedGeneratorUtil:
             diagnoses.append(principal)
             diagnoses.append(first)
             num_add_diags = (
-                len(init_diagnoses) - 2
-                if len(init_diagnoses) > 2
-                else random.randint(2, 8)
+                len(init_diagnoses) - 2 if len(init_diagnoses) > 2 else random.randint(2, 8)
             )  # Professional claims typically have fewer diagnoses
 
         for diagnosis_sqnc in range(2, num_add_diags + 2):
@@ -760,24 +704,18 @@ class AdjudicatedGeneratorUtil:
             diagnosis_data: dict[str, Any] = {}
             if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
                 diagnosis_data = {
-                    f.CLM_DGNS_CD: random.choice(
-                        get_icd_10_dgns_codes(self.enable_samhsa)
-                    ),
+                    f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                     f.CLM_POA_IND: random.choice(CLM_POA_IND_CHOICES),
                 }
             elif clm_type_cd == 40:
                 diagnosis_data = {
-                    f.CLM_DGNS_CD: random.choice(
-                        get_icd_10_dgns_codes(self.enable_samhsa)
-                    ),
+                    f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                 }
             elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
                 diagnosis_data = {
-                    f.CLM_DGNS_CD: random.choice(
-                        get_icd_10_dgns_codes(self.enable_samhsa)
-                    ),
+                    f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                     f.CLM_POA_IND: "~",
                 }
@@ -812,24 +750,14 @@ class AdjudicatedGeneratorUtil:
             clm_instnl[f.CLM_OP_SRVC_TYPE_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_OP_SRVC_TYPE_CD]
             )
-        clm_instnl[f.CLM_FI_ACTN_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_FI_ACTN_CD]
-        )
-        clm_instnl[f.CLM_ADMSN_TYPE_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_ADMSN_TYPE_CD]
-        )
-        clm_instnl[f.BENE_PTNT_STUS_CD] = random.choice(
-            gen_utils.code_systems[f.BENE_PTNT_STUS_CD]
-        )
+        clm_instnl[f.CLM_FI_ACTN_CD] = random.choice(gen_utils.code_systems[f.CLM_FI_ACTN_CD])
+        clm_instnl[f.CLM_ADMSN_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADMSN_TYPE_CD])
+        clm_instnl[f.BENE_PTNT_STUS_CD] = random.choice(gen_utils.code_systems[f.BENE_PTNT_STUS_CD])
         clm_instnl[f.CLM_MDCR_INSTNL_MCO_PD_SW] = random.choice(
             gen_utils.code_systems[f.CLM_MDCR_INSTNL_MCO_PD_SW]
         )
-        clm_instnl[f.CLM_ADMSN_SRC_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_ADMSN_SRC_CD]
-        )
-        clm_instnl[f.DGNS_DRG_CD] = random.choice(
-            get_drg_dgns_codes(self.enable_samhsa)
-        )
+        clm_instnl[f.CLM_ADMSN_SRC_CD] = random.choice(gen_utils.code_systems[f.CLM_ADMSN_SRC_CD])
+        clm_instnl[f.DGNS_DRG_CD] = random.choice(get_drg_dgns_codes(self.enable_samhsa))
         clm_instnl[f.DGNS_DRG_OUTLIER_CD] = random.choice(
             gen_utils.code_systems[f.DGNS_DRG_OUTLIER_CD]
         )
@@ -856,35 +784,17 @@ class AdjudicatedGeneratorUtil:
             clm_instnl[f.CLM_FINL_STDZD_PYMT_AMT] = round(random.uniform(0, 10000), 2)
         if clm_type_cd == 20:
             clm_instnl[f.CLM_HAC_RDCTN_PYMT_AMT] = round(random.uniform(0, 5000), 2)
-            clm_instnl[f.CLM_HIPPS_MODEL_BNDLD_PMT_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_SITE_NTRL_CST_BSD_PYMT_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_SITE_NTRL_IP_PPS_PYMT_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_SS_OUTLIER_STD_PYMT_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
+            clm_instnl[f.CLM_HIPPS_MODEL_BNDLD_PMT_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_SITE_NTRL_CST_BSD_PYMT_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_SITE_NTRL_IP_PPS_PYMT_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_SS_OUTLIER_STD_PYMT_AMT] = round(random.uniform(0, 10000), 2)
         if clm_type_cd in (20, 30, 60, 61, 62, 63, 64):
-            clm_instnl[f.CLM_HIPPS_READMSN_RDCTN_AMT] = round(
-                random.uniform(0, 5000), 2
-            )
+            clm_instnl[f.CLM_HIPPS_READMSN_RDCTN_AMT] = round(random.uniform(0, 5000), 2)
             clm_instnl[f.CLM_HIPPS_VBP_AMT] = round(random.uniform(0, 5000), 2)
-            clm_instnl[f.CLM_INSTNL_LOW_VOL_PMT_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_MDCR_IP_1ST_YR_RATE_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_MDCR_IP_SCND_YR_RATE_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
-            clm_instnl[f.CLM_PPS_MD_WVR_STDZD_VAL_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
+            clm_instnl[f.CLM_INSTNL_LOW_VOL_PMT_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_MDCR_IP_1ST_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_MDCR_IP_SCND_YR_RATE_AMT] = round(random.uniform(0, 10000), 2)
+            clm_instnl[f.CLM_PPS_MD_WVR_STDZD_VAL_AMT] = round(random.uniform(0, 10000), 2)
         if clm_type_cd in (40, 61, 64, 62, 20, 63, 30, 60):
             clm_instnl[f.CLM_INSTNL_PRFNL_AMT] = round(random.uniform(0, 10000), 2)
 
@@ -893,9 +803,7 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd == 10:
             if random.choice([0, 1]):
                 clm_instnl[f.CLM_HHA_LUP_IND_CD] = "L"
-            clm_instnl[f.CLM_HHA_RFRL_CD] = random.choice(
-                gen_utils.code_systems[f.CLM_HHA_RFRL_CD]
-            )
+            clm_instnl[f.CLM_HHA_RFRL_CD] = random.choice(gen_utils.code_systems[f.CLM_HHA_RFRL_CD])
             clm_instnl[f.CLM_MDCR_HHA_TOT_VISIT_CNT] = round(random.uniform(0, 25), 2)
 
         if clm_type_cd == 40:
@@ -932,9 +840,7 @@ class AdjudicatedGeneratorUtil:
         )
         clm_prfnl[f.CLM_CLNCL_TRIL_NUM] = str(random.randint(0, 10000))
         if int(clm[f.CLM_TYPE_CD]) in (71, 72, 81, 82):
-            clm_prfnl[f.CLM_PRVDR_ACNT_RCVBL_OFST_AMT] = round(
-                random.uniform(0, 1000), 2
-            )
+            clm_prfnl[f.CLM_PRVDR_ACNT_RCVBL_OFST_AMT] = round(random.uniform(0, 1000), 2)
 
         add_meta_timestamps(clm_prfnl, clm)
 
@@ -982,12 +888,8 @@ class AdjudicatedGeneratorUtil:
             )
 
         if clm_type_cd >= 71 and clm_type_cd <= 72:
-            clm_line[f.CLM_RNDRG_PRVDR_TAX_NUM] = random.choice(
-                ["1928347912", "912834729"]
-            )
-            clm_line[f.CLM_RNDRG_PRVDR_PIN_NUM] = random.choice(
-                ["29364819", "19238747"]
-            )
+            clm_line[f.CLM_RNDRG_PRVDR_TAX_NUM] = random.choice(["1928347912", "912834729"])
+            clm_line[f.CLM_RNDRG_PRVDR_PIN_NUM] = random.choice(["29364819", "19238747"])
             clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
             clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
             clm_line[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
@@ -1006,21 +908,13 @@ class AdjudicatedGeneratorUtil:
                     val = random.choice(enhancement_options)
                     clm_line[field_key] = val
                     used_enhancements.add(val)
-                clm_line[f.CLM_LINE_NGACO_PBPMT_SW] = (
-                    "Y" if "1" in used_enhancements else "N"
-                )
+                clm_line[f.CLM_LINE_NGACO_PBPMT_SW] = "Y" if "1" in used_enhancements else "N"
                 clm_line[f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW] = (
                     "Y" if "3" in used_enhancements else "N"
                 )
-                clm_line[f.CLM_LINE_NGACO_SNF_WVR_SW] = (
-                    "Y" if "4" in used_enhancements else "N"
-                )
-                clm_line[f.CLM_LINE_NGACO_TLHLTH_SW] = (
-                    "Y" if "2" in used_enhancements else "N"
-                )
-                clm_line[f.CLM_LINE_NGACO_CPTATN_SW] = (
-                    "Y" if "5" in used_enhancements else "N"
-                )
+                clm_line[f.CLM_LINE_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
                 clm_line[f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW] = (
                     "Y" if "7" in used_enhancements else "N"
                 )
@@ -1029,9 +923,7 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
             clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
 
-        clm_line[f.CLM_LINE_HCPCS_CD] = random.choice(
-            get_hcpcs_proc_codes(self.enable_samhsa)
-        )
+        clm_line[f.CLM_LINE_HCPCS_CD] = random.choice(get_hcpcs_proc_codes(self.enable_samhsa))
         num_mods = random.randint(0, 5)
         if num_mods:
             clm_line[f.HCPCS_1_MDFR_CD] = random.choice(HCPCS_MODS)
@@ -1091,9 +983,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_instnl[f.CLM_TYPE_CD] = clm_type_cd
         clm_line_instnl[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
 
-        clm_line_instnl[f.CLM_LINE_INSTNL_ADJSTD_AMT] = round(
-            random.uniform(0, 1500), 2
-        )
+        clm_line_instnl[f.CLM_LINE_INSTNL_ADJSTD_AMT] = round(random.uniform(0, 1500), 2)
         clm_line_instnl[f.CLM_LINE_INSTNL_RDCD_AMT] = round(random.uniform(0, 1500), 2)
         clm_line_instnl[f.CLM_DDCTBL_COINSRNC_CD] = random.choice(
             gen_utils.code_systems[f.CLM_DDCTBL_COINSRNC_CD]
@@ -1176,9 +1066,7 @@ class AdjudicatedGeneratorUtil:
             gen_utils.code_systems[f.CLM_PMT_80_100_CD]
         )
 
-        clm_line_prfnl[f.CLM_MTUS_IND_CD] = random.choice(
-            gen_utils.code_systems[f.CLM_MTUS_IND_CD]
-        )
+        clm_line_prfnl[f.CLM_MTUS_IND_CD] = random.choice(gen_utils.code_systems[f.CLM_MTUS_IND_CD])
         clm_line_prfnl[f.CLM_LINE_PRFNL_MTUS_CNT] = random.randint(0, 10)
         # claim_line_prfnl[fc.CLM_PRCNG_LCLTY_CD] =
         # random.choice(generator.code_systems[fc.CLM_PRCNG_LCLTY_CD])
@@ -1190,16 +1078,10 @@ class AdjudicatedGeneratorUtil:
             gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
         )
 
-        clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_CHRG_AMT] = round(
-            random.uniform(0, 10000), 2
-        )
-        clm_line_prfnl[f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT] = round(
-            random.uniform(0, 10000), 2
-        )
+        clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_CHRG_AMT] = round(random.uniform(0, 10000), 2)
+        clm_line_prfnl[f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT] = round(random.uniform(0, 10000), 2)
         clm_line_prfnl[f.CLM_LINE_PRFNL_INTRST_AMT] = round(random.uniform(0, 10000), 2)
-        clm_line_prfnl[f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT] = round(
-            random.uniform(0, 10000), 2
-        )
+        clm_line_prfnl[f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT] = round(random.uniform(0, 10000), 2)
 
         if random.randint(0, 10) == 6:
             clm_line_prfnl[f.CLM_LINE_HCT_HGB_TYPE_CD] = random.choice(["R1", "R2"])
@@ -1211,15 +1093,11 @@ class AdjudicatedGeneratorUtil:
             )
 
         if clm_type_cd == 81 or clm_type_cd == 82:
-            clm_line_prfnl[f.CLM_LINE_DMERC_SCRN_SVGS_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
+            clm_line_prfnl[f.CLM_LINE_DMERC_SCRN_SVGS_AMT] = round(random.uniform(0, 10000), 2)
             clm_line_prfnl[f.CLM_SUPLR_TYPE_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_SUPLR_TYPE_CD]
             )
-            clm_line_prfnl[f.CLM_LINE_PRFNL_DME_PRICE_AMT] = round(
-                random.uniform(0, 10000), 2
-            )
+            clm_line_prfnl[f.CLM_LINE_PRFNL_DME_PRICE_AMT] = round(random.uniform(0, 10000), 2)
 
         clm_line_prfnl[f.CLM_LINE_NUM] = clm_line_num
 

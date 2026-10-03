@@ -149,9 +149,7 @@ def load_file_dict(
 
     print(
         f"Loading all provided files, {
-            'ignoring empty columns'
-            if exclude_empty
-            else 'treating empty columns as meaningful'
+            'ignoring empty columns' if exclude_empty else 'treating empty columns as meaningful'
         }..."
     )
     file_tupls = [
@@ -174,10 +172,7 @@ def load_file_dict(
                 continue
 
             files[file_name] = load_file(
-                [
-                    {str(k): v for k, v in x.items() if pd.notna(v)}
-                    for x in file_as_dictlist
-                ]
+                [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
             )
     print("All files loaded")
 
@@ -240,9 +235,7 @@ class GeneratorUtil:
     def load_code_systems(self):
         resources_dir = ROOT / "sushi/fsh-generated/resources"
         if not resources_dir.exists():
-            raise FileNotFoundError(
-                f"{resources_dir} not found; run 'npm run sushi-build'"
-            )
+            raise FileNotFoundError(f"{resources_dir} not found; run 'npm run sushi-build'")
 
         self.code_systems = {}
         for path in resources_dir.iterdir():
@@ -253,9 +246,7 @@ class GeneratorUtil:
                 self.code_systems[data["name"]] = [c["code"] for c in data["concept"]]
 
     def load_addresses(self):
-        text = (ROOT / "beneficiary-components/addresses.csv").read_text(
-            encoding="utf-8"
-        )
+        text = (ROOT / "beneficiary-components/addresses.csv").read_text(encoding="utf-8")
         self.address_options = list(csv.DictReader(io.StringIO(text)))
 
     def gen_mbi(self) -> str:
@@ -264,12 +255,8 @@ class GeneratorUtil:
     def gen_bene_sk(self) -> int:
         return self.id_gen.bene_sk()
 
-    def generate_bene_xref(
-        self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int
-    ):
-        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(
-            string.ascii_letters
-        )
+    def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int):
+        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
         kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
@@ -339,11 +326,7 @@ class GeneratorUtil:
             # regeneration will only ever call this function with "num_mbis" set to 1, so we can set
             # the mbi_obj here immediately knowing that the mbi_idx = 0 and num_mbis = 1 case does
             # not mutate the output BENE_HSTRY table
-            mbi_obj = (
-                RowAdapter({})
-                if num_mbis > 1 or not initial_mbi_obj
-                else initial_mbi_obj
-            )
+            mbi_obj = RowAdapter({}) if num_mbis > 1 or not initial_mbi_obj else initial_mbi_obj
             # Exclude rows from the original patient that will be modified so that RowAdapter does
             # not ignore those changes when creating the historical patient if this is not the last
             # iteration. If this is the last iteration, just use the current patient
@@ -403,9 +386,7 @@ class GeneratorUtil:
                 historical_patient["IDR_LTST_TRANS_FLG"] = "N"
 
                 self.set_timestamps(historical_patient, obslt_dt)
-                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = (
-                    str(obslt_dt) + "T00:00:00.000000"
-                )
+                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000"
                 self.bene_hstry_table.append(historical_patient.kv)
 
                 previous_obslt_dt = obslt_dt  # Store for next iteration
@@ -417,9 +398,7 @@ class GeneratorUtil:
             self.mbi_table[current_mbi] = mbi_obj.kv
 
     def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
-        parts = random.choices(
-            [["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1]
-        )[0]
+        parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = random.random() < 0.2
         future = random.random() < 0.2
@@ -448,9 +427,7 @@ class GeneratorUtil:
             medicare_start_date = NOW + datetime.timedelta(days=365)
             medicare_end_date = NOW + datetime.timedelta(days=730)
         else:
-            medicare_start_date_val = self.mbi_table[patient["BENE_MBI_ID"]][
-                "BENE_MBI_EFCTV_DT"
-            ]
+            medicare_start_date_val = self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
             medicare_start_date = (
                 parse(medicare_start_date_val).date()
                 if isinstance(medicare_start_date_val, str)
@@ -467,9 +444,7 @@ class GeneratorUtil:
         # being mutated across different tables
         initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
 
-        if (
-            not patient.loaded_from_file or force_ztm
-        ) and not output_table_contains_by_bene_sk(
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
             table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_stus(
@@ -481,9 +456,7 @@ class GeneratorUtil:
 
         buy_in_cd = random.choice(self.code_systems["BENE_BUYIN_CD"])
 
-        if (
-            not patient.loaded_from_file or force_ztm
-        ) and not output_table_contains_by_bene_sk(
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
             table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_entlmnt_rsn(
@@ -498,9 +471,7 @@ class GeneratorUtil:
             # subsequent generations can introduce more data for patients that previously had none.
             # "force_ztm" overrides this check so that those patients may have new rows generated if
             # "coverage_parts" is not empty when it was in a previous run
-            if (
-                not patient.loaded_from_file or force_ztm
-            ) and not output_table_contains_by_bene_sk(
+            if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
                 table=self.mdcr_entlmt, for_file=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
             ):
                 self.generate_bene_entlmt(
@@ -721,9 +692,7 @@ class GeneratorUtil:
 
         self.bene_mapd_enrlmt_rx.append(rx_row.kv)
 
-    def generate_bene_mapd_enrlmt(
-        self, enrollment_row: RowAdapter, pdp_only: bool = False
-    ):
+    def generate_bene_mapd_enrlmt(self, enrollment_row: RowAdapter, pdp_only: bool = False):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -748,9 +717,7 @@ class GeneratorUtil:
         enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"] = bene_enrlmt_emplr_sbsdy_sw
         enrollment_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         enrollment_row["BENE_ENRLMT_END_DT"] = enrollment_end_date
-        enrollment_row["IDR_TRANS_EFCTV_TS"] = (
-            str(enrollment_start_date) + "T00:00:00.000000"
-        )
+        enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
         enrollment_row["IDR_INSRT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
         enrollment_row["IDR_UPDT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
         enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
@@ -766,9 +733,7 @@ class GeneratorUtil:
     ):
         init_contract_pbp_nums = init_contract_pbp_nums or []
         init_contract_pbp_contacts = init_contract_pbp_contacts or []
-        additional_pbp_nums = [
-            RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))
-        ]
+        additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]
         additional_pbp_contacts = [
             RowAdapter({}) for _ in range(amount - len(init_contract_pbp_contacts))
         ]
@@ -808,12 +773,8 @@ class GeneratorUtil:
             sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.numeric_id(
                 field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
             )
-            effective_date = self.fake.date_between_dates(
-                date.fromisoformat("2020-01-01"), NOW
-            )
-            end_date = self.fake.date_between_dates(
-                effective_date, NOW + relativedelta(years=3)
-            )
+            effective_date = self.fake.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+            end_date = self.fake.date_between_dates(effective_date, NOW + relativedelta(years=3))
             obsolete_date = random.choice(
                 [
                     self.fake.date_between_dates(effective_date, NOW),
@@ -835,18 +796,12 @@ class GeneratorUtil:
             pbp_contact["CNTRCT_PBP_SK"] = sk
             pbp_contact["CNTRCT_PLAN_CNTCT_OBSLT_DT"] = "9999-12-31"
             pbp_contact["CNTRCT_PLAN_CNTCT_TYPE_CD"] = random.choice(["~", "30", "62"])
-            pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(
-                random.choices(string.digits, k=7)
-            )
-            pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(
-                random.choices(string.digits, k=10)
-            )
+            pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(random.choices(string.digits, k=7))
+            pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(random.choices(string.digits, k=10))
             pbp_contact["CNTRCT_PLAN_CNTCT_EXTNSN_NUM"] = "".join(
                 random.choices(string.digits, k=7)
             )
-            pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(
-                random.choices(string.digits, k=10)
-            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(random.choices(string.digits, k=10))
             pbp_contact["CNTRCT_PBP_END_DT"] = last_day.isoformat()
             pbp_contact["CNTRCT_PBP_BGN_DT"] = NOW.isoformat()
             pbp_contact["CNTRCT_PLAN_CNTCT_ST_1_ADR"] = random.choice(
@@ -865,9 +820,7 @@ class GeneratorUtil:
                 ]
             )
             pbp_contact["CNTRCT_PLAN_CNTCT_STATE_CD"] = "CA"
-            pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(
-                random.choices(string.digits, k=9)
-            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(random.choices(string.digits, k=9))
 
             contract_pbp_nums.append(pbp_num)
             contract_pbp_contacts.append(pbp_contact)
@@ -880,9 +833,7 @@ class GeneratorUtil:
         self,
         writer: OutputDestinationWriter,
     ) -> None:
-        mbi_arr = [
-            {"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table
-        ]
+        mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
             (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
@@ -907,9 +858,7 @@ class GeneratorUtil:
         ]
 
         if isinstance(writer, CsvWriter):
-            beneficiary_and_contract_exports.append(
-                (self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS)
-            )
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
             beneficiary_and_contract_exports.append(
                 (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
             )
