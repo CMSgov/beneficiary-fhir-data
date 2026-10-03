@@ -9,7 +9,7 @@ Flyway-based migrations sub-project.
 Run migrations against a `localhost` database:
 
 ```sh
-./migrate.sh
+just migrate-db --env local
 ```
 
 ### Against a Live Environment
@@ -17,16 +17,10 @@ Run migrations against a `localhost` database:
 > [!IMPORTANT]
 > Make sure you are authenticated via Kion to the appropriate AWS Account in your shell prior to running any of the commands below
 
-Run migrations in a live environment (e.g. `prod`, `9999-test`, etc.) with `./migrate.sh` by specifying the target environment via the `BFD_ENV` environment variable or as the first command-line argument:
+Run migrations in a live environment (e.g. `prod`, `9999-test`, etc.) by specifying the target environment via the `--env` argument:
 
 ```sh
-BFD_ENV=1234-test ./migrate.sh
-```
-
-or:
-
-```sh
-./migrate.sh 1234-test
+just migrate-db --env 1234-test
 ```
 
 ## Adding Migrations

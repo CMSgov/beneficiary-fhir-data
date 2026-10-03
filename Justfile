@@ -75,7 +75,7 @@ migrate-db env:
     set -Eeuo pipefail
 
     if [ "{{ env }}" = "local" ]; then
-    	just create-db
+        just create-db
     fi
     BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-ng/migrate.sh
 
@@ -84,17 +84,19 @@ migrate-db env:
 create-mock-idr: (migrate-db "local")
     ./apps/utils/scripts/run-sql-script.sh ./apps/bfd-pipeline-idr/mock-idr.sql
 
+[arg("profiles", long, help="Spring boot profiles to use (comma-separated)")]
 [arg("seed-from", long, help="Loads data from the folder into the local db before starting the server")]
-[doc("Run server-ng, optionally running the pipeline first if `csv-folder` is provided")]
+[arg("env", long, pattern=env_local_pattern, help=env_help)]
+[doc("Run server-ng, optionally running the pipeline first if `seed-from` is provided")]
 [group('server')]
-server-ng seed-from="":
+server-ng env="local" profiles="" seed-from="":
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
     if [ "{{ seed-from }}" != "" ]; then
         just pipeline --seed-from "{{ seed-from }}";
     fi
-    cd ./apps/bfd-server-ng && mvn clean spring-boot:run
+    BFD_ENV="{{ env }}" ./apps/bfd-server-ng/server.sh --profiles "{{ profiles }}"
 
 [arg("update-snapshots", long, value="1", help="Update snapshots when running tests")]
 [doc("Run unit and integration tests for server-ng")]
@@ -143,6 +145,13 @@ pipeline env="local" source-env="" seed-from="" *truncate:
         {{ if source-env != "" { f"--source-env {{ source-env }}" } else { "" } }} \
         {{ if seed-from != "" { "--seed-from \"$seed_from\"" } else { "" } }}
         {{ if truncate == "1" { "--truncate" } else { "" } }}
+
+[arg('test-name', long)]
+[doc("Runs tests for the IDR pipeline")]
+[group("pipeline")]
+pipeline-tests test-name="":
+    cd ./apps/bfd-pipeline-idr && uv run pytest \
+    {{ if test-name != "" { f"test/test_pipeline.py::{{ test-name }}" } else { "" } }}
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("Dump all data from the Snowflake database into local CSVs")]
@@ -198,7 +207,7 @@ matchbox-logs:
 If `--all` is supplied, all resources will be generated.
 If no arguments are supplied, you can pick the resource interactively.""")]
 [group('model')]
-gen-structure-map type="" *all: upload-sushi
+generate-structure-map type="" *all: upload-sushi
     cd ./apps/bfd-model-idr && ./gen-structure-map.sh --type="{{ type }}" \
         {{ if all == "1" { "--all" } else { "" } }}
 

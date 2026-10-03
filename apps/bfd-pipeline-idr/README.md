@@ -20,26 +20,20 @@ uv sync
 To load from `apps/bfd-model-idr/out`, run:
 
 ```sh
-./run-db.sh
+just pipeline --seed-from ../bfd-model-idr/out
 ```
 
-(see the contents of the script for examples on how to run each phase separately)
-
-Or, you can pass the directory to load from as the first positional argument to `run-db.sh`:
-
-```sh
-./run-db.sh <directory_path>
-```
+(see the dependencies in the Justfile for examples on how to run each phase separately)
 
 This is useful for loading our synthetic data stored in our repository, or the test data, e.g.:
 
-- `./run-db.sh ./test_samples1`
-- `./run-db.sh ./test_samples2`
+- `just pipeline --seed-from ./test_samples1`
+- `just pipeline --seed-from ./test_samples2`
 
 ### Run tests
 
 ```sh
-uv run pytest
+just pipeline-tests
 ```
 
 ### Debugging tests
@@ -52,7 +46,7 @@ to work seamlessly.
 To run a specific test:
 
 ```sh
- uv run test/test_pipeline.py::{your_test_name}
+just pipeline-tests --test-name {your_test_name}
 ```
 
 ### Debugging generated queries
@@ -73,18 +67,18 @@ See `settings.py` for the current list of settings.
 ## Loading synthetic data into a live environment
 
 Data is loaded into a live environment from our Snowflake dev instance
-(replace the value of `BFD_ENV` with the environment name you want to target).
+(replace the value of `--env` with the environment name you want to target).
 
 This will load the current contents of Snowflake into the environment.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh
+just pipeline --env 1234-test
 ```
 
 To first ingest new data into Snowflake before loading, supply a folder containing the CSV files you wish to load as a positional argument.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out
+just pipeline --env 1234-test --seed-from ../bfd-model-idr/out
 ```
 
 > [!NOTE]
@@ -97,25 +91,13 @@ This will first _replace_ the contents in Snowflake with the given CSV data and 
 Only the tables matching the files given will be truncated.
 
 ```sh
-BFD_ENV=1234-test ./load-synthetic-env.sh --seed-from ../bfd-model-idr/out --truncate
+just pipeline --env 1234-test --seed-from ../bfd-model-idr/out --truncate
 ```
 
 ## Loading synthetic data into your local database
 
-The steps above also apply, but run `./load-synthetic-local.sh` instead.
-
-## Running against production data
-
-Set up credentials
-
 ```sh
-source ./load-credentials.sh
-```
-
-Run the app (optionally specify a minimum transaction date)
-
-```sh
-PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run idr-pipeline
+just pipeline --env local --source-env 1234-test
 ```
 
 ## Adding data to the model
@@ -127,14 +109,13 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run idr-pipeline
 - If adding a new table, register it in `main` for the corresponding states (initial load vs incremental load and bene only vs claims only vs all claims load-in) in `pipeline.py`
 - If adding a new table, register it in the list of CSVs to load in `load_synthetic.py`
 
-## Export from Test IDR
+## Export from Test Snowflake
 
 We have a test snowflake environment. This process will take all of the tables that we use for Synthetic Data and will pull them to .csv of the approprate name
 that can be uploaded via the idr_pipeline in bfd-pipeline-idr.
 
 ```bash
-export BFD_ENV="1234_TEST"
-./extract-idr.sh
+just extract-snowflake --env 1234-test
 ```
 
 ## Running the IDR Pipeline in ECS
