@@ -6,13 +6,14 @@ readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
     "faker>=37.1.0",
-    "pandas>=3.0.2",
+    "pandas>=2.2.3,<3.0.0",
     "xlsxwriter>=3.2.5",
     "pyyaml>=6.0.2",
     "pydantic>=2.12.3",
     "tqdm>=4.67.1",
     "click>=8.3.1",
     "requests>=2.32.5",
+    "snowflake-snowpark-python>=1.54.0",
     "cryptography>=50.0.0",
 ]
 
@@ -43,8 +44,18 @@ requires = ["uv_build<=0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "idr_model"
-packages = ["src/idr_model", "src/generate_eob_sample", "src/generate_bene_sample", "src/gen_dd", "src/generate_prior_auth_sample"]
+module-name = [
+    "generate_eob_sample",
+    "generate_bene_sample",
+    "gen_dd",
+    "generate_prior_auth_sample",
+]
+packages = [
+    "src/generate_eob_sample",
+    "src/generate_bene_sample",
+    "src/gen_dd",
+    "src/generate_prior_auth_sample",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.

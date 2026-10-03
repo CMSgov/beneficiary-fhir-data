@@ -5,7 +5,10 @@ from typing import Any
 
 import pandas as pd
 
-from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS
+from bfd_synthetic_generator.claims_static import (
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+)
 
 
 class Result:
@@ -303,11 +306,11 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json, output_file=f"{self.output_directory}/EOB-Base-Sample-new.json"
+            result_json=output_json,
+            output_file=f"{self.output_directory}/EOB-Base-Sample-new.json",
         )
 
     def create_pharmacy(self, clm_uniq_id: str, claim_row: dict[str, str]) -> Result:
-
         provider_npi = str(claim_row.get("PRVDR_PRSCRBNG_PRVDR_NPI_NUM", "")).strip()
 
         prov_row = self.read_provider(provider_npi)
@@ -431,7 +434,8 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json, output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
+            result_json=output_json,
+            output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json",
         )
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:

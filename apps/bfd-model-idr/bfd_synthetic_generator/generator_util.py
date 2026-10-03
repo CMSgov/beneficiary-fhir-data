@@ -1,5 +1,6 @@
 import csv
 import datetime
+import io
 import itertools
 import json
 import random
@@ -10,49 +11,33 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 
 import pandas as pd
 import tqdm
+from constants import (
+    BENE_DUAL,
+    BENE_ENTLMT,
+    BENE_ENTLMT_RSN,
+    BENE_HSTRY,
+    BENE_LIS_CMBND,
+    BENE_MAPD_ENRLMT,
+    BENE_MAPD_ENRLMT_RX,
+    BENE_MBI_ID,
+    BENE_STUS,
+    BENE_TP,
+    BENE_XREF,
+    CNTRCT_PBP_CNTCT,
+    CNTRCT_PBP_NUM,
+)
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
+from file_utils import ROOT
+from id_generators import IdGenerator, RandomIdGenerator
+from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
+from row_adapter import RowAdapter
 
-BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
-BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
-BENE_STUS = "SYNTHETIC_BENE_MDCR_STUS"
-BENE_ENTLMT_RSN = "SYNTHETIC_BENE_MDCR_ENTLMT_RSN"
-BENE_ENTLMT = "SYNTHETIC_BENE_MDCR_ENTLMT"
-BENE_TP = "SYNTHETIC_BENE_TP"
-BENE_XREF = "SYNTHETIC_BENE_XREF"
-BENE_DUAL = "SYNTHETIC_BENE_CMBND_DUAL_MDCR"
-BENE_MAPD_ENRLMT = "SYNTHETIC_BENE_MAPD_ENRLMT"
-BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
-BENE_LIS_CMBND = "SYNTHETIC_BENE_LIS_CMBND"
-CLM = "SYNTHETIC_CLM"
-CLM_LINE = "SYNTHETIC_CLM_LINE"
-CLM_LINE_DCMTN = "SYNTHETIC_CLM_LINE_DCMTN"
-CLM_VAL = "SYNTHETIC_CLM_VAL"
-CLM_DT_SGNTR = "SYNTHETIC_CLM_DT_SGNTR"
-CLM_PROD = "SYNTHETIC_CLM_PROD"
-CLM_INSTNL = "SYNTHETIC_CLM_INSTNL"
-CLM_LINE_INSTNL = "SYNTHETIC_CLM_LINE_INSTNL"
-CLM_DCMTN = "SYNTHETIC_CLM_DCMTN"
-CLM_LCTN_HSTRY = "SYNTHETIC_CLM_LCTN_HSTRY"
-CLM_FISS = "SYNTHETIC_CLM_FISS"
-CLM_PRFNL = "SYNTHETIC_CLM_PRFNL"
-CLM_LINE_PRFNL = "SYNTHETIC_CLM_LINE_PRFNL"
-CLM_LINE_RX = "SYNTHETIC_CLM_LINE_RX"
-CLM_LINE_MCS = "SYNTHETIC_CLM_LINE_MCS"
-CLM_LINE_FISS = "SYNTHETIC_CLM_LINE_FISS"
-CLM_RLT_COND_SGNTR_MBR = "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR"
-CLM_OCRNC_SGNTR_MBR = "SYNTHETIC_CLM_OCRNC_SGNTR_MBR"
-CLM_RLT_OCRNC_SGNTR_MBR = "SYNTHETIC_CLM_RLT_OCRNC_SGNTR_MBR"
-CLM_ANSI_SGNTR = "SYNTHETIC_CLM_ANSI_SGNTR"
-PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
-CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
-CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
-PRAUC = "SYNTHETIC_PRAUC"
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 AVAIL_CONTRACT_NUMS = [
     "Z0001",
@@ -81,39 +66,7 @@ NOW = date.today()
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
 # scanning via list comprehensions. Outermost dict is keyed by original filename, inner dict is
 # keyed by the patient's bene_sk, and innermost dict is the full row itself
-_tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
-
-# Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
-# Used with the gen_*_id functions below.
-__used_ids_by_field: dict[str, set[str]] = {}
-
-_faker = Faker()
-
-
-class RowAdapter:
-    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
-        self.kv = kv
-        self.loaded_from_file = loaded_from_file
-
-    def __getitem__(self, key: str):
-        return self.kv[key]
-
-    def __setitem__(self, key: str, new_value: Any):
-        if key not in self.kv:
-            self.kv[key] = new_value
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.kv
-
-    def get(self, key: str, default: Any | None = None) -> Any:
-        return self.kv.get(key, default)
-
-    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
-        cur = self if not overwrite else self.kv
-        other_dict = other if isinstance(other, dict) else other.kv
-
-        for k, v in other_dict.items():
-            cur[k] = v
+_tables_by_bene_sk: dict[str, dict[int, dict[str, Any]]] = {}
 
 
 def as_list[T](obj: T | None) -> list[T]:
@@ -156,86 +109,31 @@ def add_days(input_dt: str, days_to_add: int = 0):
     return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
 
 
-def random_date(start_date: str, end_date: str):
-    start_formatted = date.fromisoformat(start_date).toordinal()
-    end_formatted = date.fromisoformat(end_date).toordinal()
+def random_date(start_date: str | date, end_date: str | date):
+    start_formatted = (
+        date.fromisoformat(start_date).toordinal()
+        if isinstance(start_date, str)
+        else start_date.toordinal()
+    )
+    end_formatted = (
+        date.fromisoformat(end_date).toordinal()
+        if isinstance(end_date, str)
+        else end_date.toordinal()
+    )
     rand_date = random.randint(start_formatted, end_formatted)
     return date.fromordinal(rand_date).isoformat()
 
 
-def gen_thru_dt(frm_dt: str, max_days: int = 30):
-    from_date = date.fromisoformat(frm_dt)
+def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
+    from_date = date.fromisoformat(frm_dt) if isinstance(frm_dt, str) else frm_dt
     days_to_add = random.randint(0, max_days)
     return (from_date + timedelta(days=days_to_add)).isoformat()
 
 
-def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
-    while True:
-        id = gen_func()
-        id_set = __used_ids_by_field.get(field, set())
-        if id not in id_set:
-            if id_set:
-                __used_ids_by_field[field].add(id)
-            else:
-                __used_ids_by_field[field] = {id}
-
-            return id
-
-
-def gen_multipart_id(field: str, parts: list[tuple[str, int]]) -> str:
-    return __gen_id(
-        field=field,
-        gen_func=lambda: (
-            f"-{
-                ''.join(
-                    [
-                        ''.join(random.choices(population=allowed_chars, k=length))
-                        for (allowed_chars, length) in parts
-                    ]
-                )
-            }"
-        ),
-    )
-
-
-def gen_basic_id(field: str, length: int, allowed_chars: str = string.digits) -> str:
-    return gen_multipart_id(field=field, parts=[(allowed_chars, length)])
-
-
-def calculate_npi_checksum(npi_9: str) -> str:
-    full_str = "80840" + npi_9
-    digits = [int(char) for char in full_str]
-    for i in range(len(digits)):
-        if (len(digits) - 1 - i) % 2 == 0:
-            val = digits[i] * 2
-            if val > 9:
-                val = val - 9
-            digits[i] = val
-    total = sum(digits)
-    check_digit = (10 - (total % 10)) % 10
-    return str(check_digit)
-
-
-def gen_npi_id(field: str) -> str:
-    def make_npi():
-        first_digit = random.choice(["1", "2"])
-        rest = "".join(random.choices(population=string.digits, k=8))
-        npi_9 = first_digit + rest
-        check_digit = calculate_npi_checksum(npi_9)
-        return npi_9 + check_digit
-
-    return __gen_id(field=field, gen_func=make_npi)
-
-
-def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
-    if start > 0 or end > 0 or end > start:
-        raise ValueError("'end' and 'start' must be negative and 'end' must be less than 'start'")
-
-    return __gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
-
-
 def load_file_dict(
-    files: dict[str, list["RowAdapter"]], paths: list[str] | list[Path], exclude_empty: bool = False
+    files: dict[str, list["RowAdapter"]],
+    paths: list[str] | list[Path],
+    exclude_empty: bool = False,
 ):
     file_paths = set(
         itertools.chain.from_iterable(
@@ -287,15 +185,17 @@ def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
-def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
-    return [x.kv for x in adapters]
+def adapters_to_dicts(
+    adapters: list["RowAdapter"] | list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
 
 
 def output_table_contains_by_bene_sk(
     table: list[dict[str, Any]], for_file: str, bene_sk: str
 ) -> bool:
     if for_file not in _tables_by_bene_sk:
-        _tables_by_bene_sk[for_file] = {str(row["BENE_SK"]): row for row in table}
+        _tables_by_bene_sk[for_file] = {row["BENE_SK"]: row for row in table}
 
     return bene_sk in _tables_by_bene_sk[for_file]
 
@@ -308,12 +208,10 @@ def convert_tilde_str(val: str) -> str:
 
 class GeneratorUtil:
     USE_COLS = "use_cols"
-    ALL_KEYS = "all_keys"
 
-    def __init__(self):
+    def __init__(self, id_gen: IdGenerator | None = None):
+        self.id_gen = id_gen or RandomIdGenerator()
         self.fake = Faker()
-        self.used_bene_sk: list[int] = []
-        self.used_mbi: list[str] = []
         self.bene_hstry_table: list[dict[str, Any]] = []
         self.bene_xref_table: list[dict[str, Any]] = []
         self.mbi_table: dict[str, dict[str, Any]] = {}
@@ -335,72 +233,27 @@ class GeneratorUtil:
         self.load_code_systems()
 
     def load_code_systems(self):
-        code_systems = {}
-        sushi_dir = "./sushi"
-        relative_path = f"{sushi_dir}/fsh-generated/resources"
+        resources_dir = ROOT / "sushi/fsh-generated/resources"
+        if not resources_dir.exists():
+            raise FileNotFoundError(f"{resources_dir} not found; run 'npm run sushi-build'")
 
-        # Check if the resources directory exists, if not run sushi build
-        if not Path(relative_path).exists():
-            run_command("npm install")
-            run_command("npm run sushi-build")
-
-        try:
-            for path in Path(relative_path).iterdir():
-                file = path.name
-                if ".json" not in file or "CodeSystem" not in file:
-                    continue
-                full_path = relative_path + "/" + file
-                try:
-                    with Path(full_path).open() as file:
-                        data = json.load(file)
-                        concepts = [i["code"] for i in data["concept"]]
-                        code_systems[data["name"]] = concepts
-                except FileNotFoundError:
-                    print(f"Error: File not found at path: {full_path}")
-                except json.JSONDecodeError:
-                    print(f"Error: Invalid JSON format in file: {full_path}")
-        except FileNotFoundError:
-            print(f"Error: Resources directory not found at path: {relative_path}")
-            sys.exit(1)
-
-        self.code_systems: dict[str, list[str]] = code_systems
+        self.code_systems = {}
+        for path in resources_dir.iterdir():
+            if "CodeSystem" not in path.name or not path.name.endswith(".json"):
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if "concept" in data and "name" in data:
+                self.code_systems[data["name"]] = [c["code"] for c in data["concept"]]
 
     def load_addresses(self):
-        with Path("beneficiary-components/addresses.csv").open() as file:
-            csvreader = csv.reader(file)
-            header = next(csvreader)
-            for row in csvreader:
-                cur_row: dict[str, Any] = {}
-                for col in range(len(row)):
-                    cur_row[header[col]] = row[col]
-                self.address_options.append(cur_row)
+        text = (ROOT / "beneficiary-components/addresses.csv").read_text(encoding="utf-8")
+        self.address_options = list(csv.DictReader(io.StringIO(text)))
 
     def gen_mbi(self) -> str:
-        mbi: list[str] = []
-        set_1 = set(string.ascii_uppercase) - set(["S", "L", "O", "I", "B", "Z"])
-        set_2 = set(list(set_1) + list(string.digits))
-        mbi.append(random.choice(["1", "2", "3", "4", "5", "6", "7", "8", "9"]))
-        mbi.append(random.choice(["L", "O", "I", "B", "Z"]))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_2)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(list(set_1)))
-        mbi.append(random.choice(string.digits))
-        mbi.append(random.choice(string.digits))
-
-        full_mbi = "".join(mbi)
-        if full_mbi in self.mbi_table:
-            return self.gen_mbi()
-        return full_mbi
+        return self.id_gen.mbi()
 
     def gen_bene_sk(self) -> int:
-        bene_sk = random.randint(-1000000000, -1000)
-        if bene_sk in self.used_bene_sk:
-            return self.gen_bene_sk()
-        return bene_sk
+        return self.id_gen.bene_sk()
 
     def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int):
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
@@ -460,7 +313,10 @@ class GeneratorUtil:
             patient[component] = address[component]
 
     def gen_mbis_for_patient(
-        self, patient: RowAdapter, num_mbis: int, initial_mbi_obj: RowAdapter | None = None
+        self,
+        patient: RowAdapter,
+        num_mbis: int,
+        initial_mbi_obj: RowAdapter | None = None,
     ):
         previous_obslt_dt = None
 
@@ -571,9 +427,12 @@ class GeneratorUtil:
             medicare_start_date = NOW + datetime.timedelta(days=365)
             medicare_end_date = NOW + datetime.timedelta(days=730)
         else:
-            medicare_start_date = parse(
-                self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
-            ).date()
+            medicare_start_date_val = self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
+            medicare_start_date = (
+                parse(medicare_start_date_val).date()
+                if isinstance(medicare_start_date_val, str)
+                else medicare_start_date_val
+            )
             medicare_end_date = datetime.date(9999, 12, 31)
         mdcr_stus_cd = "~"
         while mdcr_stus_cd in ("0", "~", "00"):
@@ -641,7 +500,9 @@ class GeneratorUtil:
         if (
             (not patient.loaded_from_file or force_ztm)
             and not output_table_contains_by_bene_sk(
-                table=self.bene_cmbnd_dual_mdcr, for_file=BENE_DUAL, bene_sk=patient["BENE_SK"]
+                table=self.bene_cmbnd_dual_mdcr,
+                for_file=BENE_DUAL,
+                bene_sk=patient["BENE_SK"],
             )
             and probability(0.5)
         ):
@@ -776,7 +637,6 @@ class GeneratorUtil:
         stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.mdcr_stus.append(stus_row.kv)
 
-
     def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
         lis_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
@@ -810,7 +670,7 @@ class GeneratorUtil:
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
         )
-        member_id_num = gen_numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        member_id_num = self.id_gen.numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
         group_num = str(random.randint(-999, -100))
         prcsr_num = str(random.randint(-999999, -100000))
         bank_id_num = str(random.randint(-99999, -10000))
@@ -842,8 +702,8 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
         contract = random.choice(self.cntrct_pbp_num)
-        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or gen_basic_id(
-            field="CNTRCT_PBP_SK", length=12
+        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.numeric_id(
+            field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
         )
         contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
         pbp_num = contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS)
@@ -910,11 +770,16 @@ class GeneratorUtil:
             if not contract_num or not pbp_val:
                 contract_num, pbp_val = available_contract_num_pairs[pair_index]
                 pair_index += 1
-            sk = pbp_num.get("CNTRCT_PBP_SK") or gen_basic_id(field="CNTRCT_PBP_SK", length=12)
-            effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
-            end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
+            sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.numeric_id(
+                field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
+            )
+            effective_date = self.fake.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+            end_date = self.fake.date_between_dates(effective_date, NOW + relativedelta(years=3))
             obsolete_date = random.choice(
-                [_faker.date_between_dates(effective_date, NOW), date.fromisoformat("9999-12-31")]
+                [
+                    self.fake.date_between_dates(effective_date, NOW),
+                    date.fromisoformat("9999-12-31"),
+                ]
             )
             last_day = NOW.replace(month=12, day=31)
 
@@ -964,43 +829,65 @@ class GeneratorUtil:
 
         return contract_pbp_nums, contract_pbp_contacts
 
-    def save_output_files(self):
-        Path("out").mkdir(exist_ok=True)
-
+    def save_output_files(
+        self,
+        writer: OutputDestinationWriter,
+    ) -> None:
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
-            (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", GeneratorUtil.ALL_KEYS),
-            (mbi_arr, f"out/{BENE_MBI_ID}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.ALL_KEYS),
-            (self.mdcr_rsn, f"out/{BENE_ENTLMT_RSN}.csv", GeneratorUtil.ALL_KEYS),
-            (self.bene_xref_table, f"out/{BENE_XREF}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
+            (mbi_arr, BENE_MBI_ID, ALL_KEYS),
+            (self.mdcr_stus, BENE_STUS, ALL_KEYS),
+            (self.mdcr_entlmt, BENE_ENTLMT, ALL_KEYS),
+            (self.mdcr_tp, BENE_TP, ALL_KEYS),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN, ALL_KEYS),
+            (self.bene_xref_table, BENE_XREF, ALL_KEYS),
             (
                 self.bene_cmbnd_dual_mdcr,
-                f"out/{BENE_DUAL}.csv",
-                GeneratorUtil.ALL_KEYS,
+                BENE_DUAL,
+                ALL_KEYS,
             ),
-            (self.bene_lis_cmbnd, f"out/{BENE_LIS_CMBND}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND, ALL_KEYS),
             (
                 self.bene_mapd_enrlmt_rx,
-                f"out/{BENE_MAPD_ENRLMT_RX}.csv",
-                GeneratorUtil.ALL_KEYS,
+                BENE_MAPD_ENRLMT_RX,
+                ALL_KEYS,
             ),
-            (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_num, f"out/{CNTRCT_PBP_NUM}.csv", GeneratorUtil.ALL_KEYS),
-            (self.cntrct_pbp_cntct, f"out/{CNTRCT_PBP_CNTCT}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, ALL_KEYS),
         ]
 
-        with tqdm.tqdm(beneficiary_and_contract_exports) as t:
-            for data, path, cols in t:
-                t.set_postfix(file=path)  # type: ignore
-                self.export_df(data, path, cols)
+        if isinstance(writer, CsvWriter):
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
+            beneficiary_and_contract_exports.append(
+                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
+            )
 
-    @staticmethod
-    def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = ALL_KEYS):
-        df = pd.json_normalize(data)  # type: ignore
-        if cols != GeneratorUtil.ALL_KEYS:
-            df = df[cols]
-        df.to_csv(out_path, index=False)
+        with tqdm.tqdm(beneficiary_and_contract_exports) as t:
+            for data, table_name, cols in t:
+                t.set_postfix(file=table_name)  # type: ignore
+                self.export_table(data, table_name, writer, cols)
+
+    def export_table(
+        self,
+        data: list[dict[str, Any]],
+        table_name: str,
+        writer: OutputDestinationWriter,
+        cols: list[str] | str = ALL_KEYS,
+    ) -> None:
+        writer.write_table(data, table_name, cols)
+
+    def flush_batch(self, writer: OutputDestinationWriter) -> None:
+        self.save_output_files(writer)
+        self.bene_hstry_table.clear()
+        self.bene_xref_table.clear()
+        self.mbi_table = {}
+        self.mdcr_stus.clear()
+        self.mdcr_entlmt.clear()
+        self.mdcr_tp.clear()
+        self.mdcr_rsn.clear()
+        self.bene_cmbnd_dual_mdcr.clear()
+        self.bene_lis_cmbnd.clear()
+        self.bene_mapd_enrlmt_rx.clear()
+        self.bene_mapd_enrlmt.clear()
+        _tables_by_bene_sk.clear()
