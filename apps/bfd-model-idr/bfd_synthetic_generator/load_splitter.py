@@ -68,11 +68,24 @@ def main(clm_batches_size: int, out: Path):
         f.CLM_LINE_PRFNL: [],
         f.CLM_LINE_RX: [],
         f.CLM_RLT_COND_SGNTR_MBR: [],
+        f.CLM_OCRNC_SGNTR_MBR: [],
+        f.CLM_RLT_OCRNC_SGNTR_MBR: [],
     }
     load_file_dict(files=files_to_split, paths=[Path("../out")])
 
-    sgntr_mbrs_per_clm_uniq_id = partition_rows(
-        llist=files_to_split[f.CLM_RLT_COND_SGNTR_MBR], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
+    cond_sgntr_mbr_per_clm_uniq_id = partition_rows(
+        llist=files_to_split[f.CLM_RLT_COND_SGNTR_MBR],
+        part_by=lambda x: str(x[f.CLM_RLT_COND_SGNTR_SK]),
+    )
+
+    ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
+        llist=files_to_split[f.CLM_OCRNC_SGNTR_MBR],
+        part_by=lambda x: str(x[f.CLM_OCRNC_SGNTR_SK]),
+    )
+
+    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
+        llist=files_to_split[f.CLM_RLT_OCRNC_SGNTR_MBR],
+        part_by=lambda x: str(x[f.CLM_RLT_OCRNC_SGNTR_SK]),
     )
     clm_lines_per_clm_uniq_id = partition_rows(
         llist=files_to_split[f.CLM_LINE], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
@@ -124,7 +137,7 @@ def main(clm_batches_size: int, out: Path):
     batched_tables[0].update(files_to_copy)
     print(f"Batching: {', '.join(files_to_split.keys())}...")
     for batch_num, batch in tqdm.tqdm(
-        list(enumerate(itertools.batched(files_to_split[CLM], n=clm_batches_size, strict=False)))
+        list(enumerate(itertools.batched(files_to_split[f.CLM], n=clm_batches_size, strict=False)))
     ):
         batched_tables_per_clm = [
             {
@@ -142,7 +155,13 @@ def main(clm_batches_size: int, out: Path):
                 f.CLM_PRFNL: clm_prfnls_per_fpk[four_part_key(clm)],
                 f.CLM_LINE_PRFNL: clm_line_prfnls_per_fpk[four_part_key(clm)],
                 f.CLM_LINE_RX: clm_line_rxs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
-                f.CLM_RLT_COND_SGNTR_MBR: sgntr_mbrs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
+                f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_clm_uniq_id[
+                    clm[f.CLM_RLT_COND_SGNTR_SK]
+                ],
+                f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk[clm[f.CLM_OCRNC_SGNTR_SK]],
+                f.CLM_RLT_OCRNC_SGNTR_MBR: rlt_ocrnc_sgntr_mbr_per_ocrnc_sk[
+                    clm[f.CLM_RLT_OCRNC_SGNTR_SK]
+                ],
             }
             for clm in batch
         ]

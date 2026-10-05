@@ -873,7 +873,7 @@ def generate(
     if isinstance(writer, SnowflakeWriter):
         if truncate:
             writer.truncate_tables(claims_tables)
-        id_state = load_id_state(writer)
+        id_state = load_id_state(writer, truncate)
         id_gen: IdGenerator = SequentialIdGenerator(id_state)
     else:
         id_gen = RandomIdGenerator()

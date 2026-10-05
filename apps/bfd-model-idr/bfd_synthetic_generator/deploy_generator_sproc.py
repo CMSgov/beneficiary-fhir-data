@@ -160,19 +160,24 @@ def main(
         }
     ).create()
 
-    sess.sql("create or replace stage generator_files_stage").collect()
+    db_name = _require_env("IDR_DATABASE")
+    schema_name = _require_env("IDR_SCHEMA")
+
+    sess.sql(f"create or replace stage {db_name}.{schema_name}.generator_files_stage").collect()
     print("Uploading synthetic generator code...")
-    put_result = sess.file.put(zip_file, "@generator_files_stage", auto_compress=False)
+    put_result = sess.file.put(
+        zip_file, f"@{db_name}.{schema_name}.generator_files_stage", auto_compress=False
+    )
     print(f"Upload Status: {put_result[0].status}")
 
     print("Creating/Updating stored procedure...")
     generator_sproc = sess.sproc.register_from_file(
-        file_path="@generator_files_stage/bfd_synthetic_generator.zip",
+        file_path=f"@{db_name}.{schema_name}.generator_files_stage/bfd_synthetic_generator.zip",
         func_name="generator_sproc_handler.generate_synthetic_data",
         return_type=VariantType(),
         name="generate_synthetic_data",
         is_permanent=True,
-        stage_location="@generator_files_stage",
+        stage_location=f"@{db_name}.{schema_name}.generator_files_stage",
         replace=True,
         packages=[
             "snowflake-snowpark-python",

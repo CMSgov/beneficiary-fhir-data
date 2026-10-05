@@ -296,7 +296,7 @@ def _handle_snowflake_flow(
     if truncate:
         writer.truncate_tables([*patient_tables, BENE_HSTRY, CNTRCT_PBP_NUM, CNTRCT_PBP_CNTCT])
 
-    id_state = load_id_state(writer)
+    id_state = load_id_state(writer, truncate)
     id_gen: IdGenerator = SequentialIdGenerator(id_state)
     generator: GeneratorUtil = GeneratorUtil(id_gen=id_gen)
 

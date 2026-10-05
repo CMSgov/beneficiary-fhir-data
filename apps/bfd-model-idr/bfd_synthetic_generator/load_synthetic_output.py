@@ -403,7 +403,8 @@ class SnowflakeWriter(OutputDestinationWriter):
         duration = time.perf_counter() - perf_start
         logger.info(f"Packaging data into CSV completed in {duration:.6f} seconds")
 
-        staging_table_name = f"{database}.{schema}.MERGE_STAGE_{resolved_table_name}"
+        session_schema = self.session.get_current_schema().replace('"', "")
+        staging_table_name = f"{database}.{session_schema}.MERGE_STAGE_{resolved_table_name}"
         target_filename = f"batch_{resolved_table_name}.csv"
 
         perf_start = time.perf_counter()
@@ -419,7 +420,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         file_input_stream = io.BytesIO(csv_payload)
         self.session.file.put_stream(
             input_stream=file_input_stream,
-            stage_location=f"@{database}.{schema}.generator_files_stage/{target_filename}",
+            stage_location=f"@{database}.{session_schema}.generator_files_stage/{target_filename}",
             auto_compress=True,
             overwrite=True,
         )
@@ -427,7 +428,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.sql(
             f"""
             COPY INTO {staging_table_name}
-            FROM @{database}.{schema}.generator_files_stage/batch_{resolved_table_name}.csv.gz
+            FROM @{database}.{session_schema}.generator_files_stage/batch_{resolved_table_name}.csv.gz
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 SKIP_HEADER = 1
