@@ -41,6 +41,8 @@ jobs:
           uv run patient_generator.py --claims --patients 100
           cd ../../bfd-pipeline-idr
           ./run-db.sh
+        env:
+          PYTHONPATH: ${{ github.workspace }}/apps/bfd-model-idr
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr/bfd_synthetic_generator
@@ -53,3 +55,5 @@ jobs:
           # of data is OK and the data was regenerated properly without taking a significant amount
           # of time to load the full dataset
           ./run-db.sh ../bfd-model-idr/batched_out/0
+        env:
+          PYTHONPATH: ${{ github.workspace }}/apps/bfd-model-idr
