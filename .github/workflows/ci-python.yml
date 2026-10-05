@@ -55,7 +55,7 @@ jobs:
             },
             {
               projectName: "run-idr-model-generate-bene-sample",
-              projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
+              projectRoot: "apps/bfd-model-idr/src/generate-bene-sample",
               testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
               uvCommand: "uv sync",
               pytestCommand: "uv run pytest",
@@ -63,7 +63,7 @@ jobs:
             },
             {
               projectName: "run-idr-model-generate-eob-sample",
-              projectRoot: "apps/bfd-model-idr",
+              projectRoot: "apps/bfd-model-idr/src/generate_eob_sample",
               testsRoot: "apps/bfd-model-idr/src/generate_eob_sample",
               uvCommand: "uv sync",
               pytestCommand: "uv run pytest",

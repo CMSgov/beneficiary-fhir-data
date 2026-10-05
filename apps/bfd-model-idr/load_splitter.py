@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 import tqdm
 
-import bfd_synthetic_generator.field_constants as f
+import bfd_synthetic_generator.constants as f
 from bfd_synthetic_generator.claims_util import four_part_key
 from bfd_synthetic_generator.generator_util import (
     BENE_DUAL,

@@ -2,9 +2,8 @@ import random
 from datetime import date, datetime
 
 import yaml
+from file_utils import ROOT
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
-
-from bfd_synthetic_generator.file_utils import ROOT
 
 
 class SecurityLabelModel(BaseModel):

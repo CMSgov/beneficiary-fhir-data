@@ -131,7 +131,7 @@ def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
 
 
 def load_file_dict(
-    files: dict[str, list["RowAdapter"]],
+    files: dict[str, list[RowAdapter]],
     paths: list[str] | list[Path],
     exclude_empty: bool = False,
 ):
@@ -186,7 +186,7 @@ def probability(frac: float) -> bool:
 
 
 def adapters_to_dicts(
-    adapters: list["RowAdapter"] | list[dict[str, Any]],
+    adapters: list[RowAdapter] | list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
 
