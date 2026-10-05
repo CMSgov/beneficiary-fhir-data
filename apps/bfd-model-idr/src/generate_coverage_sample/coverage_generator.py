@@ -1,7 +1,7 @@
 import json
 import sys
 from datetime import date, datetime
-from enum import Enum, auto
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -99,6 +99,12 @@ class SampleGenerator:
         self, bene_hist: dict[str, str], part: MedicarePart, output_file_name: str
     ) -> None:
 
+        bene_entlmt = None
+        bene_entlmt_rsn = None
+        bene_map_d = None
+        cntrct_pbp_num = None
+        cntrct_pbp_cntct = None
+        cntrct_pmp_sk = None
         if part == MedicarePart.A or part == MedicarePart.B:
             bene_entlmt = self.read_bene_entlmt(part)
 
@@ -106,10 +112,19 @@ class SampleGenerator:
                 print(f"Coverage not found for Medicare Part {part.name}.")
                 return
 
+            bene_entlmt_rsn = self.read_bene_entlmt_rsn()
 
-        bene_entlmt_rsn = self.read_bene_entlmt_rsn()
+        if part == MedicarePart.C:
+            bene_map_d = self.read_bene_map_d(part)
+            cntrct_pmp_sk = extract_col_str(bene_map_d, "CNTRCT_PBP_SK")
 
         bene_tp = self.read_bene_tp()
+
+        bene_status = self.read_bene_status()
+
+        if not cntrct_pmp_sk:
+            cntrct_pbp_num = self.read_cntrct_pbp_num(cntrct_pmp_sk=cntrct_pmp_sk)
+            cntrct_pbp_cntct = self.read_cntrct_pbp_cntct(cntrct_pmp_sk=cntrct_pmp_sk)
 
         json_output = {
             "resourceType": "CoverageBase",
@@ -120,11 +135,21 @@ class SampleGenerator:
             # This is literally right now. Progam has an override for allowing dynamic date settings
             "currentDate": str(self.current_date),
             "BENE_BUYIN_CD": extract_col_str(bene_tp, "BENE_BUYIN_CD"),
+            "BENE_MDCR_STUS_CD": extract_col_str(bene_status, "BENE_MDCR_STUS_CD"),
             "BENE_RNG_BGN_DT": extract_col_str(bene_entlmt, "BENE_RNG_BGN_DT"),
             "BENE_RNG_END_DT": extract_col_str(bene_entlmt, "BENE_RNG_END_DT"),
             "BENE_MDCR_ENTLMT_STUS_CD": extract_col_str(bene_entlmt, "BENE_MDCR_ENTLMT_STUS_CD"),
             "BENE_MDCR_ENRLMT_RSN_CD": extract_col_str(bene_entlmt, "BENE_MDCR_ENRLMT_RSN_CD"),
             "BENE_MDCR_ENTLMT_RSN_CD": extract_col_str(bene_entlmt_rsn, "BENE_MDCR_ENTLMT_RSN_CD"),
+            "BENE_ENRLMT_BGN_DT": extract_col_str(bene_map_d, "BENE_ENRLMT_BGN_DT"),
+            "BENE_ENRLMT_END_DT": extract_col_str(bene_map_d, "BENE_ENRLMT_END_DT"),
+            "BENE_CNTRCT_NUM": extract_col_str(bene_map_d, "BENE_CNTRCT_NUM"),
+            "BENE_PBP_NUM": extract_col_str(bene_map_d, "BENE_PBP_NUM"),
+            "BENE_CVRG_TYPE_CD": extract_col_str(bene_map_d, "BENE_CVRG_TYPE_CD"),
+            "CNTRCT_PBP_NAME": extract_col_str(cntrct_pbp_num, "CNTRCT_PBP_NAME"),
+            "CNTRCT_PLAN_CNTCT_TEL_NUM": extract_col_str(
+                cntrct_pbp_cntct, "CNTRCT_PLAN_CNTCT_TEL_NUM"
+            ),
             "GEO_USPS_STATE_CD": extract_col_str(bene_hist, "GEO_USPS_STATE_CD"),
         }
 
@@ -206,10 +231,69 @@ class SampleGenerator:
         )
 
     def read_bene_entlmt_rsn(self) -> dict[str, str]:
-        return self.read_latest("SYNTHETIC_BENE_MDCR_ENTLMT_RSN",[])
+        return self.read_latest("SYNTHETIC_BENE_MDCR_ENTLMT_RSN", [])
 
     def read_bene_tp(self) -> dict[str, str]:
-        return self.read_latest("SYNTHETIC_BENE_TP",[])
+        return self.read_latest("SYNTHETIC_BENE_TP", [])
+
+    def read_bene_status(self) -> dict[str, str]:
+        return self.read_single_line_file(
+            "SYNTHETIC_BENE_MDCR_STUS",
+            False,
+            [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
+        )
+
+    def read_bene_map_d(self, part: MedicarePart) -> dict[str, str] | None:
+        params = [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")]
+        match part:
+            case MedicarePart.C:
+                records = self.read_multi_line_file(
+                    "SYNTHETIC_BENE_MAPD_ENRLMT",
+                    False,
+                    params,
+                )
+                records = [
+                    record
+                    for record in records
+                    if record["BENE_ENRLMT_PGM_TYPE_CD"] == "1"
+                    or record["BENE_ENRLMT_PGM_TYPE_CD"] == "3"
+                ]
+                return {} if not records else records[0]
+            case MedicarePart.D:
+                records = self.read_multi_line_file(
+                    "SYNTHETIC_BENE_MAPD_ENRLMT",
+                    False,
+                    params,
+                )
+                records = [
+                    record
+                    for record in records
+                    if record["BENE_ENRLMT_PGM_TYPE_CD"] == "2"
+                    or record["BENE_ENRLMT_PGM_TYPE_CD"] == "3"
+                ]
+                return {} if not records else records[0]
+            case _:
+                return None
+
+        return self.read_multi_line_file(
+            "SYNTHETIC_BENE_MAPD_ENRLMT",
+            False,
+            params,
+        )
+
+    def read_cntrct_pbp_num(self, cntrct_pmp_sk: str) -> dict[str, str]:
+        return self.read_single_line_file(
+            "SYNTHETIC_CNTRCT_PBP_NUM",
+            False,
+            [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
+        )
+
+    def read_cntrct_pbp_cntct(self, cntrct_pmp_sk: str) -> dict[str, str]:
+        return self.read_single_line_file(
+            "SYNTHETIC_CNTRCT_PBP_CNTCT",
+            False,
+            [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
+        )
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
