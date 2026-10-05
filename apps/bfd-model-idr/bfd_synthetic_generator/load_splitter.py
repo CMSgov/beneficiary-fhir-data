@@ -5,11 +5,10 @@ from collections import defaultdict
 from pathlib import Path
 
 import click
+import constants as f
 import tqdm
-
-import bfd_synthetic_generator.constants as f
-from bfd_synthetic_generator.claims_util import four_part_key
-from bfd_synthetic_generator.generator_util import (
+from claims_util import four_part_key
+from generator_util import (
     BENE_DUAL,
     BENE_ENTLMT,
     BENE_ENTLMT_RSN,
@@ -44,7 +43,7 @@ from bfd_synthetic_generator.generator_util import (
     load_file_dict,
     partition_rows,
 )
-from bfd_synthetic_generator.row_adapter import RowAdapter
+from row_adapter import RowAdapter
 
 
 @click.command
@@ -81,7 +80,7 @@ def main(clm_batches_size: int, out: Path):
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
     }
-    load_file_dict(files=files_to_copy, paths=[Path("./out")])
+    load_file_dict(files=files_to_copy, paths=[Path("../out")])
 
     files_to_split: dict[str, list[RowAdapter]] = {
         CLM: [],
@@ -100,7 +99,7 @@ def main(clm_batches_size: int, out: Path):
         CLM_LINE_RX: [],
         CLM_RLT_COND_SGNTR_MBR: [],
     }
-    load_file_dict(files=files_to_split, paths=[Path("./out")])
+    load_file_dict(files=files_to_split, paths=[Path("../out")])
 
     sgntr_mbrs_per_clm_uniq_id = partition_rows(
         llist=files_to_split[CLM_RLT_COND_SGNTR_MBR], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
