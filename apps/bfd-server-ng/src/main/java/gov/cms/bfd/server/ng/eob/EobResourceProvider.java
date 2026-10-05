@@ -159,6 +159,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param request HTTP request details
    * @param outcome outcome to filter by
    * @param source claim source to filter by
+   * @param profile requested profile
    * @return bundle
    */
   @RetryOnFailoverOrConnectionException
@@ -171,7 +172,8 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request,
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
-      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source) {
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final StringParam profile) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
