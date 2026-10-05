@@ -109,6 +109,7 @@ class OutputDestinationWriter(ABC):
 class CsvWriter(OutputDestinationWriter):
     def __init__(self, out_dir: str = "../out") -> None:
         self.out_dir = Path(out_dir)
+        self._tables: set[str] = set()
 
     def write_table(
         self,
@@ -135,8 +136,10 @@ class CsvWriter(OutputDestinationWriter):
                 )
 
         out_path = self.out_dir / f"{table_name}.csv"
-        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(out_path, index=False)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        first_write = table_name not in self._tables
+        df.to_csv(out_path, index=False, mode="w" if first_write else "a", header=first_write)
+        self._tables.add(table_name)
 
     def get_provider_histories(
         self,
@@ -154,7 +157,7 @@ class CsvWriter(OutputDestinationWriter):
         self,
         files: dict[str, list[RowAdapter]],
         bene_sk_mode: BeneSkMode,
-        batch_size: int,  # noqa: ARG002
+        batch_size: int,
     ) -> Iterator[list[int]]:
         clm_bene_sks = (
             [int(row[BENE_SK]) for row in files[CLM]]
@@ -167,7 +170,9 @@ class CsvWriter(OutputDestinationWriter):
             else []
         )
         all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
-        yield list(OrderedDict.fromkeys(x for x in all_bene_sks))
+        ordered = list(OrderedDict.fromkeys(x for x in all_bene_sks))
+        for i in range(0, len(ordered), batch_size):
+            yield ordered[i : i + batch_size]
 
     def get_bene_sk_to_mbi(
         self,

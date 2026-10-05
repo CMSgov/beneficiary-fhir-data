@@ -1134,28 +1134,28 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_cond_sgntr_mbr=row
                 )
                 for row in cond_sgntr_mbr_per_clm_uniq_id.get(
-                    str(clm[f.CLM_RLT_COND_SGNTR_SK]), [RowAdapter({})]
+                    str(clm[f.CLM_RLT_COND_SGNTR_SK]), [None]
                 )
             ]
             adj_clms_tbls[f.CLM_RLT_COND_SGNTR_MBR].extend(clm_rlt_cond_sgntr_mbrs)
 
-            clm_ocrnc_sgntr_mbr = adj_util.gen_clm_ocrnc_sgntr_mbr(
-                clm=clm,
-                gen_utils=gen_utils,
-                init_clm_ocrnc_sgntr_mbr=ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    clm[f.CLM_OCRNC_SGNTR_SK]
-                ),
-            )
-            adj_clms_tbls[f.CLM_OCRNC_SGNTR_MBR].append(clm_ocrnc_sgntr_mbr)
+            clm_ocrnc_sgntr_mbr = [
+                adj_util.gen_clm_ocrnc_sgntr_mbr(
+                    clm=clm, gen_utils=gen_utils, init_clm_ocrnc_sgntr_mbr=row
+                )
+                for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(str(clm[f.CLM_OCRNC_SGNTR_SK]), [None])
+            ]
+            adj_clms_tbls[f.CLM_OCRNC_SGNTR_MBR].extend(clm_ocrnc_sgntr_mbr)
 
-            clm_rlt_ocrnc_sgntr_mbr = adj_util.gen_clm_rlt_ocrnc_sgntr_mbr(
-                clm=clm,
-                gen_utils=gen_utils,
-                init_clm_rlt_ocrnc_sgntr_mbr=rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    clm[f.CLM_RLT_OCRNC_SGNTR_SK]
-                ),
-            )
-            adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].append(clm_rlt_ocrnc_sgntr_mbr)
+            clm_rlt_ocrnc_sgntr_mbr = [
+                adj_util.gen_clm_rlt_ocrnc_sgntr_mbr(
+                    clm=clm, gen_utils=gen_utils, init_clm_rlt_ocrnc_sgntr_mbr=row
+                )
+                for row in rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
+                    str(clm[f.CLM_RLT_OCRNC_SGNTR_SK]), [None]
+                )
+            ]
+            adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].extend(clm_rlt_ocrnc_sgntr_mbr)
 
             clm_type_cd = int(clm[f.CLM_TYPE_CD])
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
@@ -1293,13 +1293,11 @@ def _generate_batch(
                 f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_clm_uniq_id.get(
                     str(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK]), []
                 ),
-                f.CLM_OCRNC_SGNTR_MBR: as_list(
-                    ocrnc_sgntr_mbr_per_ocrnc_sk.get(str(file_pac_clm[f.CLM_OCRNC_SGNTR_SK]), [])
+                f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk.get(
+                    str(file_pac_clm[f.CLM_OCRNC_SGNTR_SK]), []
                 ),
-                f.CLM_RLT_OCRNC_SGNTR_MBR: as_list(
-                    rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                        str(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK]), []
-                    )
+                f.CLM_RLT_OCRNC_SGNTR_MBR: rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
+                    str(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK]), []
                 ),
                 f.CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),

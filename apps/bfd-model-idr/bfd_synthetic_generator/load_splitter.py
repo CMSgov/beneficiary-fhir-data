@@ -29,7 +29,7 @@ from row_adapter import RowAdapter
 @click.argument(
     "out",
     nargs=1,
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=False, path_type=Path),
     default="./batched_out",
 )
 def main(clm_batches_size: int, out: Path):
