@@ -55,7 +55,7 @@ jobs:
             },
             {
               projectName: "run-idr-model-generate-bene-sample",
-              projectRoot: "apps/bfd-model-idr/src/generate-bene-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_bene_sample",
               testsRoot: "apps/bfd-model-idr/src/generate_bene_sample",
               uvCommand: "uv sync",
               pytestCommand: "uv run pytest",
