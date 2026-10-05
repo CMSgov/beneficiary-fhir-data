@@ -349,8 +349,8 @@ regression-test env tablesample="0.25" headless="":
 
 [arg("tablesample", long, help="Percent of the table to sample")]
 [arg("limit", long, pattern="\\d+", help="Limit of unique claim IDs (not necessarily beneficiaries) to return from queries")]
-[arg("env", long, pattern=env_pattern, help=env_help)]
 [arg("concurrency", long, pattern="\\d+", help="Number of concurrent requests to make against the v3 Server")]
+[arg("env", long, pattern=env_local_pattern, help=env_help)]
 [doc("Runs SAMHSA regression tests against the specified env")]
 [group('regression')]
 samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
