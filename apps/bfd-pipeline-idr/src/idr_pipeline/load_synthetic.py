@@ -9,7 +9,6 @@ from loguru import logger
 from .db_utils import get_connection_string
 from .extractor import CsvFile, DbExecutor, PostgresExecutor, SnowflakeExecutor
 from .logger_config import configure_logger
-from .model.base_model import LoadMode
 from .settings import SETTINGS
 
 tables = [
@@ -180,7 +179,7 @@ if __name__ == "__main__":
     load_from_csv(
         SnowflakeExecutor()
         if args.database_type == "snowflake"
-        else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
+        else PostgresExecutor(psycopg.connect(get_connection_string())),
         args.base_dir or default_dir,
         args.truncate,
         args.database_type == "snowflake",
