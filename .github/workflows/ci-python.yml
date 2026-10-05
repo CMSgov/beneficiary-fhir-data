@@ -63,7 +63,7 @@ jobs:
             },
             {
               projectName: "run-idr-model-generate-eob-sample",
-              projectRoot: "apps/bfd-model-idr/src/generate_eob_sample",
+              projectRoot: "apps/bfd-model-idr",
               testsRoot: "apps/bfd-model-idr/src/generate_eob_sample",
               uvCommand: "uv sync",
               pytestCommand: "uv run pytest",

@@ -10,12 +10,11 @@ def test_generate_eob_sample_base() -> None:
             "--clm-uniq-id",
             "8520736890144",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            "../bfd-pipeline-idr/test_samples1",
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
-
     assert result.exit_code == 0
 
 
@@ -26,9 +25,9 @@ def test_generate_eob_sample_pharmacy() -> None:
             "--clm-uniq-id",
             "6595861148142",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            "../bfd-pipeline-idr/test_samples1",
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
