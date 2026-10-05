@@ -15,7 +15,7 @@ BEGIN
     -- In a live environment, we'll clean out whatever's there and replace it.
     -- The tables in this schema are only meant for staging so there's nothing in here
     -- that needs to persist between loads.
-    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd') 
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd')
     LOOP
         EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.' || quote_ident(r.tablename) || ' CASCADE';
     END LOOP;
@@ -37,9 +37,9 @@ BEGIN
 END $$;
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
-    bene_sk BIGINT NOT NULL, 
+    bene_sk BIGINT NOT NULL,
     bene_xref_sk BIGINT NOT NULL,
-    bene_xref_efctv_sk BIGINT NOT NULL, 
+    bene_xref_efctv_sk BIGINT NOT NULL,
     bene_mbi_id VARCHAR(11),
     bene_ssn_num VARCHAR(9),
     bene_1st_name VARCHAR(30),

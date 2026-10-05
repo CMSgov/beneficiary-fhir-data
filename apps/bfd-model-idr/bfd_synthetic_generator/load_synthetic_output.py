@@ -430,7 +430,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 SKIP_HEADER = 1
                 FIELD_OPTIONALLY_ENCLOSED_BY = '"'
                 ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
-            )   
+            )
             PURGE = TRUE
             """
         ).collect()

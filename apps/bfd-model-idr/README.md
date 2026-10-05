@@ -57,7 +57,7 @@ This will generate the StructureDefinition and CodeSystem resources necessary fo
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact. 
+Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact.
 
 To start matchbox, run
 
@@ -73,7 +73,7 @@ curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 
 ### Referencing New/Updated Dependencies for Matchbox
 
-As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies. 
+As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies.
 
 ### Generating Sample JSON from Synthetic CSVs
 
@@ -87,7 +87,7 @@ To generate a prior authorization JSON sample from the synthetic CSVs based on t
 python generate_prior_auth_sample.py --utn=<utn-here>
 ```
 
-This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
+This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML.
 
 #### EOB Sample Generator
 
@@ -362,4 +362,3 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 ```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
-

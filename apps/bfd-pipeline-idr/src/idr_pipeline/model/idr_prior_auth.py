@@ -104,7 +104,7 @@ class IdrPriorAuth(IdrBaseModel):
                     OVER (PARTITION BY mbi_num, utn ORDER BY current_segment) as row_order
                 FROM {SETTINGS.idr_prior_auth_table}
                 WHERE pa_req_rec_dt >= {{MIN_TS}}
-            ) 
+            )
             SELECT {{COLUMNS}} FROM distinct_prior_auths {prior_auth}
             LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_att_phy}
                 ON {prvdr_att_phy}.prvdr_npi_num = {prior_auth}.att_phy_npi
