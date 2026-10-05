@@ -9,36 +9,6 @@ import constants as f
 import tqdm
 from claims_util import four_part_key
 from generator_util import (
-    BENE_DUAL,
-    BENE_ENTLMT,
-    BENE_ENTLMT_RSN,
-    BENE_HSTRY,
-    BENE_LIS_CMBND,
-    BENE_MAPD_ENRLMT,
-    BENE_MAPD_ENRLMT_RX,
-    BENE_MBI_ID,
-    BENE_STUS,
-    BENE_TP,
-    BENE_XREF,
-    CLM,
-    CLM_ANSI_SGNTR,
-    CLM_DCMTN,
-    CLM_DT_SGNTR,
-    CLM_FISS,
-    CLM_INSTNL,
-    CLM_LCTN_HSTRY,
-    CLM_LINE,
-    CLM_LINE_DCMTN,
-    CLM_LINE_INSTNL,
-    CLM_LINE_PRFNL,
-    CLM_LINE_RX,
-    CLM_PRFNL,
-    CLM_PROD,
-    CLM_RLT_COND_SGNTR_MBR,
-    CLM_VAL,
-    CNTRCT_PBP_CNTCT,
-    CNTRCT_PBP_NUM,
-    PRVDR_HSTRY,
     adapters_to_dicts,
     load_file_dict,
     partition_rows,
@@ -64,90 +34,90 @@ from row_adapter import RowAdapter
 )
 def main(clm_batches_size: int, out: Path):
     files_to_copy: dict[str, list[RowAdapter]] = {
-        BENE_HSTRY: [],
-        BENE_MBI_ID: [],
-        BENE_STUS: [],
-        BENE_ENTLMT_RSN: [],
-        BENE_ENTLMT: [],
-        BENE_TP: [],
-        BENE_XREF: [],
-        BENE_DUAL: [],
-        BENE_MAPD_ENRLMT: [],
-        BENE_MAPD_ENRLMT_RX: [],
-        BENE_LIS_CMBND: [],
-        CLM_ANSI_SGNTR: [],
-        PRVDR_HSTRY: [],
-        CNTRCT_PBP_NUM: [],
-        CNTRCT_PBP_CNTCT: [],
+        f.BENE_HSTRY: [],
+        f.BENE_MBI_ID: [],
+        f.BENE_STUS: [],
+        f.BENE_ENTLMT_RSN: [],
+        f.BENE_ENTLMT: [],
+        f.BENE_TP: [],
+        f.BENE_XREF: [],
+        f.BENE_DUAL: [],
+        f.BENE_MAPD_ENRLMT: [],
+        f.BENE_MAPD_ENRLMT_RX: [],
+        f.BENE_LIS_CMBND: [],
+        f.CLM_ANSI_SGNTR: [],
+        f.PRVDR_HSTRY: [],
+        f.CNTRCT_PBP_NUM: [],
+        f.CNTRCT_PBP_CNTCT: [],
     }
     load_file_dict(files=files_to_copy, paths=[Path("../out")])
 
     files_to_split: dict[str, list[RowAdapter]] = {
-        CLM: [],
-        CLM_LINE: [],
-        CLM_LINE_DCMTN: [],
-        CLM_VAL: [],
-        CLM_DT_SGNTR: [],
-        CLM_PROD: [],
-        CLM_INSTNL: [],
-        CLM_LINE_INSTNL: [],
-        CLM_DCMTN: [],
-        CLM_LCTN_HSTRY: [],
-        CLM_FISS: [],
-        CLM_PRFNL: [],
-        CLM_LINE_PRFNL: [],
-        CLM_LINE_RX: [],
-        CLM_RLT_COND_SGNTR_MBR: [],
+        f.CLM: [],
+        f.CLM_LINE: [],
+        f.CLM_LINE_DCMTN: [],
+        f.CLM_VAL: [],
+        f.CLM_DT_SGNTR: [],
+        f.CLM_PROD: [],
+        f.CLM_INSTNL: [],
+        f.CLM_LINE_INSTNL: [],
+        f.CLM_DCMTN: [],
+        f.CLM_LCTN_HSTRY: [],
+        f.CLM_FISS: [],
+        f.CLM_PRFNL: [],
+        f.CLM_LINE_PRFNL: [],
+        f.CLM_LINE_RX: [],
+        f.CLM_RLT_COND_SGNTR_MBR: [],
     }
     load_file_dict(files=files_to_split, paths=[Path("../out")])
 
     sgntr_mbrs_per_clm_uniq_id = partition_rows(
-        llist=files_to_split[CLM_RLT_COND_SGNTR_MBR], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
+        llist=files_to_split[f.CLM_RLT_COND_SGNTR_MBR], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
     )
     clm_lines_per_clm_uniq_id = partition_rows(
-        llist=files_to_split[CLM_LINE], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
+        llist=files_to_split[f.CLM_LINE], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
     )
     clm_line_rxs_per_clm_uniq_id = partition_rows(
-        llist=files_to_split[CLM_LINE_RX], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
+        llist=files_to_split[f.CLM_LINE_RX], part_by=lambda x: str(x[f.CLM_UNIQ_ID])
     )
     clm_dcmtns_per_fpk = partition_rows(
-        llist=files_to_split[CLM_DCMTN],
+        llist=files_to_split[f.CLM_DCMTN],
         part_by=lambda x: four_part_key(x),
     )
     clm_vals_per_fpk = partition_rows(
-        llist=files_to_split[CLM_VAL],
+        llist=files_to_split[f.CLM_VAL],
         part_by=lambda x: four_part_key(x),
     )
     clm_prods_per_fpk = partition_rows(
-        llist=files_to_split[CLM_PROD],
+        llist=files_to_split[f.CLM_PROD],
         part_by=lambda x: four_part_key(x),
     )
     clm_dt_sgntrs_per_sk = partition_rows(
-        llist=files_to_split[CLM_DT_SGNTR],
+        llist=files_to_split[f.CLM_DT_SGNTR],
         part_by=lambda x: str(x[f.CLM_DT_SGNTR_SK]),
     )
     clm_instnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_INSTNL],
+        llist=files_to_split[f.CLM_INSTNL],
         part_by=lambda x: four_part_key(x),
     )
     clm_prfnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_PRFNL],
+        llist=files_to_split[f.CLM_PRFNL],
         part_by=lambda x: four_part_key(x),
     )
     clm_line_instnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[f.CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
     )
     clm_line_prfnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[f.CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
     )
     clm_fiss_per_fpk = partition_rows(
-        llist=files_to_split[CLM_FISS], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[f.CLM_FISS], part_by=lambda x: four_part_key(x)
     )
     clm_lctn_hstrys_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LCTN_HSTRY], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[f.CLM_LCTN_HSTRY], part_by=lambda x: four_part_key(x)
     )
     clm_line_dcmtns_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[f.CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
     )
 
     batched_tables: dict[int, dict[str, list[RowAdapter]]] = defaultdict(lambda: defaultdict(list))
@@ -158,21 +128,21 @@ def main(clm_batches_size: int, out: Path):
     ):
         batched_tables_per_clm = [
             {
-                CLM: [clm],
-                CLM_LINE: clm_lines_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
-                CLM_LINE_DCMTN: clm_line_dcmtns_per_fpk[four_part_key(clm)],
-                CLM_VAL: clm_vals_per_fpk[four_part_key(clm)],
-                CLM_DT_SGNTR: clm_dt_sgntrs_per_sk[clm[f.CLM_DT_SGNTR_SK]],
-                CLM_PROD: clm_prods_per_fpk[four_part_key(clm)],
-                CLM_INSTNL: clm_instnls_per_fpk[four_part_key(clm)],
-                CLM_LINE_INSTNL: clm_line_instnls_per_fpk[four_part_key(clm)],
-                CLM_DCMTN: clm_dcmtns_per_fpk[four_part_key(clm)],
-                CLM_LCTN_HSTRY: clm_lctn_hstrys_per_fpk[four_part_key(clm)],
-                CLM_FISS: clm_fiss_per_fpk[four_part_key(clm)],
-                CLM_PRFNL: clm_prfnls_per_fpk[four_part_key(clm)],
-                CLM_LINE_PRFNL: clm_line_prfnls_per_fpk[four_part_key(clm)],
-                CLM_LINE_RX: clm_line_rxs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
-                CLM_RLT_COND_SGNTR_MBR: sgntr_mbrs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
+                f.CLM: [clm],
+                f.CLM_LINE: clm_lines_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
+                f.CLM_LINE_DCMTN: clm_line_dcmtns_per_fpk[four_part_key(clm)],
+                f.CLM_VAL: clm_vals_per_fpk[four_part_key(clm)],
+                f.CLM_DT_SGNTR: clm_dt_sgntrs_per_sk[clm[f.CLM_DT_SGNTR_SK]],
+                f.CLM_PROD: clm_prods_per_fpk[four_part_key(clm)],
+                f.CLM_INSTNL: clm_instnls_per_fpk[four_part_key(clm)],
+                f.CLM_LINE_INSTNL: clm_line_instnls_per_fpk[four_part_key(clm)],
+                f.CLM_DCMTN: clm_dcmtns_per_fpk[four_part_key(clm)],
+                f.CLM_LCTN_HSTRY: clm_lctn_hstrys_per_fpk[four_part_key(clm)],
+                f.CLM_FISS: clm_fiss_per_fpk[four_part_key(clm)],
+                f.CLM_PRFNL: clm_prfnls_per_fpk[four_part_key(clm)],
+                f.CLM_LINE_PRFNL: clm_line_prfnls_per_fpk[four_part_key(clm)],
+                f.CLM_LINE_RX: clm_line_rxs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
+                f.CLM_RLT_COND_SGNTR_MBR: sgntr_mbrs_per_clm_uniq_id[clm[f.CLM_UNIQ_ID]],
             }
             for clm in batch
         ]
