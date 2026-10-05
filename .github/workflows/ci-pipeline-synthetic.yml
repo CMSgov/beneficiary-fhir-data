@@ -37,13 +37,13 @@ jobs:
         working-directory: apps/bfd-model-idr
       - name: Ensure synthetic data pipeline runs
         run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
+          cd ${{ github.workspace }}/apps/bfd-model-idr/bfd_synthetic_generator
           uv run patient_generator.py --claims --patients 100
           cd ../bfd-pipeline-idr
           ./run-db.sh
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
+          cd ${{ github.workspace }}/apps/bfd-model-idr/bfd_synthetic_generator
           uv run patient_generator.py --claims ../bfd-pipeline-idr/test_samples1
           # Split claims output into 1000 CLMs batches
           uv run load_splitter.py -c 1000
