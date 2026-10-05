@@ -53,7 +53,7 @@ just pipeline-tests --test-name {your_test_name}
 
 The queries used here are heavily dynamic and sometimes it's useful to inspect the generated result.
 
-To inspect a single query, run `IDR_SQL_LOG=1 IDR_LOG_LEVEL=warning IDR_TABLES="idr.<your_table_name>" ./run-db.sh ./test_samples1`
+To inspect a single query, run `just pipeline --sql-log --log-level warning --tables "idr.<your_table_name>"`
 
 This will enable debug logging and only run against a single table to prevent dozens of queries from spamming the logs.
 Setting `IDR_LOG_LEVEL=warning` will prevent additional logs from making it hard to find the query.

@@ -121,18 +121,21 @@ swagger:
 migrate-synthetic env:
     BFD_ENV="{{ env }}" ./apps/bfd-db-migrator-synthetic/migrate.sh
 
-[arg("seed-from", long, help="directory to load synthetic CSV files from")]
+[arg("tables", long, help="Comma-separated list of tables to load. Must match BFD table name with schema. ex: idr.claim_rx")]
+[arg("seed-from", long, help="Directory to load synthetic CSV files from")]
+[arg("sql-log", long, value="1", help="Enable SQL query logging")]
 [arg("truncate", long, value="1", help="When enabled, truncates the source env before loading new data")]
 [arg("env", long, pattern=env_local_pattern, help=env_help)]
 [arg("source-env", long, pattern=f"{{ env_pattern }}?", help="""Override the source environment to load data from.
 Data from the `seed-from` param will be loaded here.""")]
+[arg("log-level", long, pattern="(debug|info|warning|error)", help="Change log level")]
 [doc("""Runs the IDR pipeline. Optionally seeding new synthetic data into the environment
 when the `seed-from` param is supplied. When `--env` is "local", `--source-env` can be used
 to load data from a different env into your local db.
 """)]
 [group('pipeline')]
 [no-cd]
-pipeline env="local" source-env="" seed-from="" *truncate:
+pipeline env="local" source-env="" seed-from="" sql-log="0" log-level="info" tables="" *truncate:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -141,7 +144,8 @@ pipeline env="local" source-env="" seed-from="" *truncate:
     fi
     root="$(git rev-parse --show-toplevel)"
     seed_from={{ if seed-from == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ seed-from }})" } }}
-    BFD_ENV="{{ env }}" "$root/apps/bfd-pipeline-idr/run-pipeline.sh" \
+    BFD_ENV="{{ env }}" IDR_SQL_LOG="{{ sql-log }}" IDR_LOG_LEVEL="{{ log-level }}" IDR_TABLES="{{ tables }}" \
+        "$root/apps/bfd-pipeline-idr/run-pipeline.sh" \
         {{ if source-env != "" { f"--source-env {{ source-env }}" } else { "" } }} \
         {{ if seed-from != "" { "--seed-from \"$seed_from\"" } else { "" } }}
         {{ if truncate == "1" { "--truncate" } else { "" } }}
