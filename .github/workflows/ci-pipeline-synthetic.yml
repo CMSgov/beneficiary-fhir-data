@@ -40,7 +40,7 @@ jobs:
           cd ${{ github.workspace }}/apps/bfd-model-idr
           uv run patient_generator.py --claims --patients 100
           cd ../bfd-pipeline-idr
-          ./run-db.sh
+          BFD_ENV=local ./run-pipeline.sh --seed-from ../bfd-model-idr/out
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
@@ -51,4 +51,4 @@ jobs:
           # Load from batched_out/0 to load _just_ the first batch to validate that the structure
           # of data is OK and the data was regenerated properly without taking a significant amount
           # of time to load the full dataset
-          ./run-db.sh ../bfd-model-idr/batched_out/0
+          BFD_ENV=local ./run-pipeline.sh --seed-from ../bfd-model-idr/batched_out/0
