@@ -1,6 +1,6 @@
 import json
 import sys
-from datetime import date
+from datetime import date, datetime
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any
@@ -27,11 +27,16 @@ class Param:
 
 
 class MedicarePart(Enum):
-    A = auto()
-    B = auto()
-    C = auto()
-    D = auto()
-    ALL = auto()
+    def __init__(self, value: int, code: str):
+        self._value_ = value
+        self.code = code
+
+    A = (1, "A")
+    B = (2, "B")
+    C = (3, "C")
+    D = (4, "D")
+    DUAL = (5, "DUAL")
+    ALL = (6, "")
 
 
 class SampleGenerator:
@@ -94,6 +99,18 @@ class SampleGenerator:
         self, bene_hist: dict[str, str], part: MedicarePart, output_file_name: str
     ) -> None:
 
+        if part == MedicarePart.A or part == MedicarePart.B:
+            bene_entlmt = self.read_bene_entlmt(part)
+
+            if not bene_entlmt:
+                print(f"Coverage not found for Medicare Part {part.name}.")
+                return
+
+
+        bene_entlmt_rsn = self.read_bene_entlmt_rsn()
+
+        bene_tp = self.read_bene_tp()
+
         json_output = {
             "resourceType": "CoverageBase",
             "coveragePart": part.name,
@@ -102,34 +119,13 @@ class SampleGenerator:
             "lastUpdated": extract_col_str(bene_hist, "IDR_UPDT_TS"),
             # This is literally right now. Progam has an override for allowing dynamic date settings
             "currentDate": str(self.current_date),
-            "BENE_ENRLMT_BGN_DT": "2018-04-11",
-            "BENE_ENRLMT_END_DT": "9999-12-31",
-            "BENE_CNTRCT_NUM": "H1234",
-            "BENE_PBP_NUM": "001",
-            "BENE_CVRG_TYPE_CD": "3",
-            "CNTRCT_PBP_NAME": "Sample Medicare Advantage Plan",
-            "CNTRCT_PLAN_CNTCT_TEL_NUM": "1-800-555-1234",
-            "CNTRCT_PBP_SGMT_NUM": "000",
-            "BENE_PDP_ENRLMT_MMBR_ID_NUM": "M123456789",
-            "BENE_PDP_ENRLMT_GRP_NUM": "G987654321",
-            "BENE_PDP_ENRLMT_PRCSR_NUM": "P123456",
-            "BENE_PDP_ENRLMT_BANK_ID_NUM": "BIN123456",
-            "BENE_CMBND_DEEMD_IND": "Y",
-            "BENE_CMBND_DEEMD_COPMT_LVL_ID": "1",
-            "BENE_CMBND_DEEMD_PRM_PCT": "100.0",
-            "BENE_ENRLMT_EMPLR_SBSDY_SW": "Y",
-            "BENE_MDCR_STUS_CD": "31",
-            "BENE_BUYIN_CD": "A",
-            "BENE_RNG_BGN_DT": "2018-04-11",
-            "BENE_RNG_END_DT": "9999-12-31",
-            "BENE_MDCR_ENTLMT_STUS_CD": "E",
-            "BENE_MDCR_ENRLMT_RSN_CD": "I",
-            "BENE_MDCR_ENTLMT_RSN_CD": "2",
-            "BENE_MDCD_ELGBLTY_BGN_DT": "2018-04-11",
-            "BENE_MDCD_ELGBLTY_END_DT": "9999-12-31",
-            "BENE_DUAL_STUS_CD": "01",
-            "BENE_DUAL_TYPE_CD": "P",
-            "GEO_USPS_STATE_CD": "TX",
+            "BENE_BUYIN_CD": extract_col_str(bene_tp, "BENE_BUYIN_CD"),
+            "BENE_RNG_BGN_DT": extract_col_str(bene_entlmt, "BENE_RNG_BGN_DT"),
+            "BENE_RNG_END_DT": extract_col_str(bene_entlmt, "BENE_RNG_END_DT"),
+            "BENE_MDCR_ENTLMT_STUS_CD": extract_col_str(bene_entlmt, "BENE_MDCR_ENTLMT_STUS_CD"),
+            "BENE_MDCR_ENRLMT_RSN_CD": extract_col_str(bene_entlmt, "BENE_MDCR_ENRLMT_RSN_CD"),
+            "BENE_MDCR_ENTLMT_RSN_CD": extract_col_str(bene_entlmt_rsn, "BENE_MDCR_ENTLMT_RSN_CD"),
+            "GEO_USPS_STATE_CD": extract_col_str(bene_hist, "GEO_USPS_STATE_CD"),
         }
 
         self.write_file(Result(result_json=json_output, output_file=output_file_name))
@@ -183,8 +179,42 @@ class SampleGenerator:
             [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
         )
 
+    def read_latest(self, file_name: str, additional_params: list[Param]) -> dict[str, str]:
+        params = [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")]
+        if additional_params:
+            params += additional_params
+        records = self.read_multi_line_file(
+            file_name,
+            False,
+            params,
+        )
+        return_record = None
+        return_record_date = None
+        for record in records:
+            record_date = parse_date(record["BENE_RNG_BGN_DT"])
+            if record_date <= self.current_date and (
+                not return_record or return_record_date < record_date
+            ):
+                return_record = record
+                return_record_date = record_date
+
+        return return_record
+
+    def read_bene_entlmt(self, part: MedicarePart) -> dict[str, str]:
+        return self.read_latest(
+            "SYNTHETIC_BENE_MDCR_ENTLMT", [Param("BENE_MDCR_ENTLMT_TYPE_CD", part.code)]
+        )
+
+    def read_bene_entlmt_rsn(self) -> dict[str, str]:
+        return self.read_latest("SYNTHETIC_BENE_MDCR_ENTLMT_RSN",[])
+
+    def read_bene_tp(self) -> dict[str, str]:
+        return self.read_latest("SYNTHETIC_BENE_TP",[])
+
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
+    if not row:
+        return None
     return str(row.get(name, "")).strip() or None
 
 
@@ -195,3 +225,7 @@ def extract_col_bool(row: dict[str, str], name: str) -> str:
         return "true"
 
     return "false"
+
+
+def parse_date(date_str: str) -> date:
+    return datetime.strptime(date_str, "%Y-%m-%d").date()
