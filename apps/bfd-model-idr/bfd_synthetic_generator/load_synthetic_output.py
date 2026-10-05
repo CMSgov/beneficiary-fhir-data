@@ -13,7 +13,6 @@ from typing import Any
 
 import pandas as pd
 from constants import (
-    _INT_TO_STRING_COLS,
     BENE_DUAL,
     BENE_ENTLMT,
     BENE_ENTLMT_RSN,
@@ -84,7 +83,7 @@ class OutputDestinationWriter(ABC):
     @abstractmethod
     def write_table(
         self,
-        data: list[Any],
+        data: list[dict[str, Any]],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
     ) -> None: ...
@@ -111,30 +110,29 @@ class CsvWriter(OutputDestinationWriter):
     def __init__(self, out_dir: str = "../out") -> None:
         self.out_dir = Path(out_dir)
 
-    def _clean_int_columns(self, rows: list[dict[str, Any]]):
-        for column in _INT_TO_STRING_COLS:
-            for row in rows:
-                if column in row:
-                    row[column] = str(row[column])
-        return rows
-
     def write_table(
         self,
-        data: list[Any],
+        data: list[dict[str, Any]],
         table_name: str,
         cols: list[str] | str = ALL_KEYS,
     ) -> None:
         if not data:
             return
 
-        if hasattr(data[0], "kv"):
-            data = [x.kv for x in data]
-            data = self._clean_int_columns(data)
-
         df = pd.json_normalize(data)
 
         if cols is not None and not isinstance(cols, str):
             df = df.reindex(columns=cols).fillna("")
+
+        for column in df.columns:
+            if df[column].dtype == "float64":
+                df[column] = df[column].apply(
+                    lambda x: (
+                        str(int(x))
+                        if isinstance(x, (int, float)) and not pd.isna(x) and x != ""
+                        else ""
+                    )
+                )
 
         out_path = self.out_dir / f"{table_name}.csv"
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
