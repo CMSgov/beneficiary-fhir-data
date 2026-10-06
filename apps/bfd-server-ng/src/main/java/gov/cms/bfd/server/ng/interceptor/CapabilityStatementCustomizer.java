@@ -17,14 +17,18 @@ import org.springframework.stereotype.Component;
 public class CapabilityStatementCustomizer {
 
   private final String implementationUrl;
+  private final String version;
 
   /**
    * constructor injecting the configuration value for url.
    *
    * @param implementationUrl extracted from config
    */
-  public CapabilityStatementCustomizer(@Value("${bfd.project.url}") String implementationUrl) {
+  public CapabilityStatementCustomizer(
+      @Value("${bfd.project.url}") String implementationUrl,
+      @Value("${bfd.project.version}") String version) {
     this.implementationUrl = implementationUrl;
+    this.version = version;
   }
 
   /**
@@ -35,5 +39,6 @@ public class CapabilityStatementCustomizer {
   @Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
   public void customize(IBaseConformance theCapabilityStatement) {
     ((CapabilityStatement) theCapabilityStatement).getImplementation().setUrl(implementationUrl);
+    ((CapabilityStatement) theCapabilityStatement).setVersion(version);
   }
 }
