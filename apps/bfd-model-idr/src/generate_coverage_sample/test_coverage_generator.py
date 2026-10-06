@@ -74,6 +74,7 @@ def test_generate_coverage_part_d() -> None:
 
     assert result.exit_code == 0
 
+
 def test_generate_coverage_part_dual() -> None:
     result = CliRunner().invoke(
         main,
