@@ -132,7 +132,6 @@ class SampleGenerator:
                     print(f"Coverage not found for Medicare Part {part.name}.")
                     return
 
-
         bene_tp = self.read_bene_tp()
 
         bene_status = self.read_bene_status()
@@ -381,6 +380,7 @@ def extract_col_str(row: dict[str, str] | None, name: str) -> str | None:
     if not row:
         return None
     return str(row.get(name, "")).strip() or None
+
 
 def parse_date(date_str: str) -> date:
     return datetime.strptime(date_str, "%Y-%m-%d").date()
