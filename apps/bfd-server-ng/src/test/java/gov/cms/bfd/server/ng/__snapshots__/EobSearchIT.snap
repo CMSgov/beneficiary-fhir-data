@@ -17106,6 +17106,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -20355,6 +20375,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -22982,26 +23022,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -27287,6 +27307,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -29914,26 +29954,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -34219,6 +34239,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -36846,26 +36886,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -41167,6 +41187,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -45060,26 +45100,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -48068,6 +48088,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -51963,26 +52003,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -54971,6 +54991,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -58866,26 +58906,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -61858,6 +61878,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -65723,6 +65763,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -67218,26 +67278,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -71539,6 +71579,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -73034,26 +73094,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -75603,26 +75643,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -79324,26 +79344,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -83011,6 +83011,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -86876,6 +86896,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -88371,26 +88411,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -92692,6 +92712,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -94187,26 +94227,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -96756,26 +96776,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -100477,26 +100477,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -104164,6 +104144,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -108029,6 +108029,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -109524,26 +109544,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -113845,6 +113845,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -115340,26 +115360,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -117909,26 +117909,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -121630,26 +121610,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
-          } ]
-        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -123661,6 +123621,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "09",
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -126290,26 +126270,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -129286,6 +129246,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -131913,26 +131893,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -134909,6 +134869,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -137536,26 +137516,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -140185,6 +140145,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -142812,26 +142792,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -145808,6 +145768,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -148435,26 +148415,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -151431,6 +151391,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -154058,26 +154038,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -156707,6 +156667,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -159334,26 +159314,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -162330,6 +162290,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -164957,26 +164937,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -167953,6 +167913,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
+      }, {
+        "sequence": 28,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -170580,26 +170560,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
             "code": "64",
             "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
-          } ]
-        }
-      }, {
-        "sequence": 22,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_RLT_COND_CD",
-            "display": "Claim Related Condition Code"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "code": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-            "code": "GH",
-            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
