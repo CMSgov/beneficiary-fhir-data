@@ -148,6 +148,10 @@ uv run compile_resources.py \
     --test
 ```
 
+## Generating Synthetic Data
+
+### Local Generation
+
 #### Patient Data - `patient_generator.py`
 
 ##### `patient_generator.py` usage
@@ -309,6 +313,42 @@ If _any_ claims-related tables have had columns added to their respective genera
 #### `--sushi`
 
 `--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
+
+
+### Generating Synthetic Data Directly in Snowflake
+
+We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd_synthetic_generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
+
+# Granting Permissions
+
+Snowflake requires these permissions to allow the snowflake stored procedure to work.
+Here are the list of commands in case they need to be re-ran in the future for both schemas
+(CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
+
+```text
+GRANT MODIFY ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
+GRANT CREATE STAGE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT CREATE PROCEDURE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT CREATE EVENT TABLE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
+```
+
+Example flow of running the stored procedure:
+
+```text
+1. kn or kp
+2. export BFD_ENV={your_environment}
+3. source `./load-synthetic-credentials.sh`
+Generating data:
+- To generate data from scratch: `uv run deploy_generator_sproc.py --patients 100 --truncate True`
+- To regenerate data: `uv run deploy_generator_sproc.py`
+
+To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
+```
 
 ## Testing Mapping Changes
 

@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 import sys
@@ -11,6 +12,7 @@ from constants import (
     BENE_MAPD_ENRLMT_RX,
     BENE_MBI_ID,
     CLM,
+    CLM_DCMTN,
     CLM_DT_SGNTR,
     CLM_LINE,
     CLM_RLT_COND_SGNTR_MBR,
@@ -18,6 +20,8 @@ from constants import (
     PRVDR_HSTRY,
 )
 from load_synthetic_output import SnowflakeWriter
+
+logger = logging.getLogger(__name__)
 
 
 class IdGenerator(ABC):
@@ -204,6 +208,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         "CLM_ORIG_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_uppercase, 3)]),
         "PRVDR_EMPLR_ID_NUM": (PRVDR_HSTRY, [(string.digits, 9)]),
         "PRVDR_OSCAR_NUM": (PRVDR_HSTRY, [(string.digits, 6)]),
+        "CLM_PTNT_CNTL_NUM": (CLM_DCMTN, [(string.digits, 14), (string.ascii_uppercase, 3)]),
     }
 
     # Get or set the min numeric ids
@@ -229,7 +234,13 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         if existing_max is not None:
             value = existing_max.removeprefix("-")
             alphabets = _expand_parts(parts)
-            state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
+            try:
+                state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
+            except ValueError:
+                logger.info(
+                    f"Value Error when decoding multipart id field_name: {value} Setting max id to 0"
+                )
+                state.multipart_id_next[field_name] = 0
         else:
             state.multipart_id_next[field_name] = 0
 
