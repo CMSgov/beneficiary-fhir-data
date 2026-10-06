@@ -32,6 +32,9 @@ jobs:
       - uses: taiki-e/install-action@9983c65e42da123ff25d1f78505eb6de315aa172 # v2.87.20
         with:
           tool: just
+      - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
+        with:
+          repo: sigoden/argc
       - name: Generate v3 Data Dictionary
         run: just generate-data-dictionary
       - name: Ensure synthetic data pipeline runs
