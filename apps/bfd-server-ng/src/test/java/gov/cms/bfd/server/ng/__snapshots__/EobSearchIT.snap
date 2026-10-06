@@ -10498,6 +10498,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -12152,6 +12172,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -13804,6 +13844,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -15463,6 +15523,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -17004,6 +17084,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -18696,6 +18796,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -20215,6 +20335,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -21602,6 +21742,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -22782,6 +22942,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -25508,6 +25728,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -27027,6 +27267,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -28414,6 +28674,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -29594,6 +29874,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -32320,6 +32660,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -33839,6 +34199,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -35226,6 +35606,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -36406,6 +36806,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -39148,6 +39608,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -40665,6 +41145,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -43318,6 +43818,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -44498,6 +45018,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -45929,6 +46509,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -47448,6 +48048,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -50101,6 +50721,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -51281,6 +51921,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_FISS]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -52712,6 +53412,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -54231,6 +54951,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -56884,6 +57624,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -58064,6 +58824,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_FISS]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -59479,6 +60299,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -60998,6 +61838,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -63304,6 +64164,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -64823,6 +65703,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -66278,6 +67178,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -69020,6 +69980,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -70539,6 +71519,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -71994,6 +72994,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -74505,6 +75565,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "code": "3"
           } ]
         }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -76962,6 +78082,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -78142,6 +79282,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -80254,6 +81454,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -81771,6 +82991,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -84077,6 +85317,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -85596,6 +86856,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -87051,6 +88331,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -89793,6 +91133,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -91312,6 +92672,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -92767,6 +94147,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -95278,6 +96718,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "code": "3"
           } ]
         }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -97735,6 +99235,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -98915,6 +100435,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -101027,6 +102607,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -102544,6 +104144,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
           } ]
         }
       } ],
@@ -104850,6 +106470,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -106369,6 +108009,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -107824,6 +109484,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -110566,6 +112286,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -112085,6 +113825,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -113540,6 +115300,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -116051,6 +117871,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "code": "3"
           } ]
         }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -118508,6 +120388,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -119688,6 +121588,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -121683,6 +123643,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -123070,6 +125050,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -124250,6 +126250,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -125667,6 +127727,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -127186,6 +129266,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -128573,6 +130673,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -129753,6 +131873,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -131170,6 +133350,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -132689,6 +134889,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -134076,6 +136296,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -135256,6 +137496,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -137865,6 +140165,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -139252,6 +141572,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -140432,6 +142772,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -141849,6 +144249,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -143368,6 +145788,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -144755,6 +147195,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -145935,6 +148395,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -147352,6 +149872,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -148871,6 +151411,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -150258,6 +152818,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -151438,6 +154018,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -154047,6 +156687,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -155434,6 +158094,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -156614,6 +159294,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -158031,6 +160771,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -159550,6 +162310,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -160937,6 +163717,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -162117,6 +164917,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
@@ -163534,6 +166394,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 33,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -165053,6 +167933,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -166440,6 +169340,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 17,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -167620,6 +170540,66 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 20,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 21,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+          } ]
+        }
+      }, {
+        "sequence": 22,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "GH",
+            "display": "RESERVED FOR NATIONAL ASSIGNMENT"
           } ]
         }
       } ],
