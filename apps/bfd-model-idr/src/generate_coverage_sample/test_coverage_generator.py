@@ -73,3 +73,20 @@ def test_generate_coverage_part_d() -> None:
     )
 
     assert result.exit_code == 0
+
+def test_generate_coverage_part_dual() -> None:
+    result = CliRunner().invoke(
+        main,
+        [
+            "--bene-sk",
+            "800678894",
+            "--source-directory",
+            "../../../bfd-pipeline-idr/test_samples1",
+            "--output-directory",
+            "../../out-test",
+            "--parts",
+            "DUAL",
+        ],
+    )
+
+    assert result.exit_code == 0

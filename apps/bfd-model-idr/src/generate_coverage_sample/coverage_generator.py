@@ -103,27 +103,35 @@ class SampleGenerator:
         bene_entlmt_rsn = None
         bene_map_d = None
         bene_map_d_rx = None
+        bene_dual = None
         cntrct_pbp_num = None
         cntrct_pbp_cntct = None
         cntrct_pmp_sk = None
         cntrct_pbp_sgmt = None
-        if part == MedicarePart.A or part == MedicarePart.B:
-            bene_entlmt = self.read_bene_entlmt(part)
 
-            if not bene_entlmt:
-                print(f"Coverage not found for Medicare Part {part.name}.")
-                return
+        match part:
+            case MedicarePart.A | MedicarePart.B:
+                bene_entlmt = self.read_bene_entlmt(part)
 
-            bene_entlmt_rsn = self.read_bene_entlmt_rsn()
+                if not bene_entlmt:
+                    print(f"Coverage not found for Medicare Part {part.name}.")
+                    return
 
-        if part == MedicarePart.C or part == MedicarePart.D:
-            bene_map_d = self.read_bene_map_d(part)
-            if not bene_map_d:
-                print(f"Coverage not found for Medicare Part {part.name}.")
-                return
-            cntrct_pmp_sk = extract_col_str(bene_map_d, "CNTRCT_PBP_SK")
-            if part == MedicarePart.D:
-                bene_map_d_rx = self.read_bene_map_d_rx(bene_map_d=bene_map_d)
+                bene_entlmt_rsn = self.read_bene_entlmt_rsn()
+            case MedicarePart.C | MedicarePart.D:
+                bene_map_d = self.read_bene_map_d(part)
+                if not bene_map_d:
+                    print(f"Coverage not found for Medicare Part {part.name}.")
+                    return
+                cntrct_pmp_sk = extract_col_str(bene_map_d, "CNTRCT_PBP_SK")
+                if part == MedicarePart.D:
+                    bene_map_d_rx = self.read_bene_map_d_rx(bene_map_d=bene_map_d)
+            case MedicarePart.DUAL:
+                bene_dual = self.read_bene_cmbnd_dual()
+                if not bene_dual:
+                    print(f"Coverage not found for Medicare Part {part.name}.")
+                    return
+
 
         bene_tp = self.read_bene_tp()
 
@@ -174,6 +182,10 @@ class SampleGenerator:
                 bene_lis, "BENE_CMBND_DEEMD_COPMT_LVL_ID"
             ),
             "BENE_CMBND_DEEMD_PRM_PCT": extract_col_str(bene_lis, "BENE_CMBND_DEEMD_PRM_PCT"),
+            "BENE_MDCD_ELGBLTY_BGN_DT": extract_col_str(bene_dual, "BENE_MDCD_ELGBLTY_BGN_DT"),
+            "BENE_MDCD_ELGBLTY_END_DT": extract_col_str(bene_dual, "BENE_MDCD_ELGBLTY_END_DT"),
+            "BENE_DUAL_STUS_CD": extract_col_str(bene_dual, "BENE_DUAL_STUS_CD"),
+            "BENE_DUAL_TYPE_CD": extract_col_str(bene_dual, "BENE_DUAL_TYPE_CD"),
             "CNTRCT_PBP_SGMT_NUM": extract_col_str(cntrct_pbp_sgmt, "CNTRCT_PBP_SGMT_NUM"),
             "GEO_USPS_STATE_CD": extract_col_str(bene_hist, "GEO_USPS_STATE_CD"),
         }
@@ -297,7 +309,6 @@ class SampleGenerator:
                     False,
                     params,
                 )
-                print(len(records))
                 records = [
                     record
                     for record in records
@@ -347,21 +358,29 @@ class SampleGenerator:
             [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
         )
 
+    def read_bene_cmbnd_dual(self) -> dict[str, str]:
+        records = self.read_multi_line_file(
+            "SYNTHETIC_BENE_CMBND_DUAL_MDCR",
+            False,
+            [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
+        )
+        return_record = None
+        return_record_date = None
+        for record in records:
+            record_date = parse_date(record["BENE_MDCD_ELGBLTY_BGN_DT"])
+            if record_date <= self.current_date and (
+                not return_record or return_record_date < record_date
+            ):
+                return_record = record
+                return_record_date = record_date
 
-def extract_col_str(row: dict[str, str], name: str) -> str | None:
+        return return_record
+
+
+def extract_col_str(row: dict[str, str] | None, name: str) -> str | None:
     if not row:
         return None
     return str(row.get(name, "")).strip() or None
-
-
-def extract_col_bool(row: dict[str, str], name: str) -> str:
-    val = row.get(name, "").strip().upper()
-
-    if val in ("TRUE", "1", "YES", "Y"):
-        return "true"
-
-    return "false"
-
 
 def parse_date(date_str: str) -> date:
     return datetime.strptime(date_str, "%Y-%m-%d").date()
