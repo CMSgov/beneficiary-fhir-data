@@ -239,7 +239,7 @@ conformance-test resource="" *all: upload-sushi
 
 [doc("Generates the v3 data dictionary")]
 [group('model')]
-generate-data-dictionary:
+generate-data-dictionary: sushi
     cd ./apps/bfd-model-idr && uv run gen-dd
 
 [arg("utn", long, help="UTN to generate sample with")]
