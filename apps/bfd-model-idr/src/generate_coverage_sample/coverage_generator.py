@@ -137,7 +137,7 @@ class SampleGenerator:
         bene_status = self.read_bene_status()
         bene_lis = self.read_bene_cmbnd()
 
-        if not cntrct_pmp_sk:
+        if cntrct_pmp_sk:
             cntrct_pbp_num = self.read_cntrct_pbp_num(cntrct_pmp_sk=cntrct_pmp_sk)
             cntrct_pbp_cntct = self.read_cntrct_pbp_cntct(cntrct_pmp_sk=cntrct_pmp_sk)
 
