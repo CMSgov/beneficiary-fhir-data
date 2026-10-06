@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The claim date for institutional or professional claims. */
 @Embeddable
-public class DateSupportingInfoInstitutionalProfessional implements SupportingInfoComponentBase {
+public class DateClaimOcrncSupportingInfo implements SupportingInfoComponentBase {
 
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;

@@ -64,16 +64,16 @@ public class Configuration implements Serializable {
   @Autowired(required = false)
   private JdbcConnectionDetails jdbcConnectionDetails;
 
-  private String dynamoLocalUrl = "http://localhost:8000";
+  private transient String dynamoLocalUrl = "http://localhost:8000";
 
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.
-  private String env = LOCAL_ENV;
-  private String dbIdentifier = "";
-  private Local local = new Local();
-  private Sensitive sensitive = new Sensitive();
-  private Nonsensitive nonsensitive = new Nonsensitive();
-  private Project project = new Project();
+  private transient String env = LOCAL_ENV;
+  private transient String dbIdentifier = "";
+  private transient Local local = new Local();
+  private transient Sensitive sensitive = new Sensitive();
+  private transient Nonsensitive nonsensitive = new Nonsensitive();
+  private transient Project project = new Project();
 
   @Getter(lazy = true)
   private final Map<String, String> clientCertsToAliases = getClientCertsToAliasesInternal();

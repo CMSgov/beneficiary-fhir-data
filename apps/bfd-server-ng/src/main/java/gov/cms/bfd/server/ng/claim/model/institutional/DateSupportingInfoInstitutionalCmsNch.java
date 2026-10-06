@@ -16,30 +16,28 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class DateSupportingInfoInstitutionalCmsNch implements SupportingInfoComponentBase {
 
   @Embedded private DateSupportingInfoInstitutional dateSupportingInfoInstitutional;
+
+  @Embedded
+  private DateClaimOcrncSupportingInfoInstitutionalNch dateClaimOcrncSupportingInfoInstitutionalNch;
+
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ClaimProcessDate claimProcessDate;
-  @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
   @Embedded private NoncoveredThruDate noncoveredThroughDate;
-  @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
-  @Embedded private QualifyStayFromDate qualifyStayFromDate;
-  @Embedded private QualifyStayThruDate qualifyStayThruDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.concat(
-            Stream.of(
-                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-                    activeCareThroughDate.toFhir(supportingInfoFactory),
-                    noncoveredFromDate.toFhir(supportingInfoFactory),
-                    noncoveredThroughDate.toFhir(supportingInfoFactory),
-                    benefitsExhaustedDate.toFhir(supportingInfoFactory),
-                    qualifyStayFromDate.toFhir(supportingInfoFactory),
-                    qualifyStayThruDate.toFhir(supportingInfoFactory),
-                    claimProcessDate.toFhir(supportingInfoFactory))
-                .flatMap(Optional::stream),
-            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream())
+            Stream.concat(
+                Stream.of(
+                        nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                        noncoveredFromDate.toFhir(supportingInfoFactory),
+                        noncoveredThroughDate.toFhir(supportingInfoFactory),
+                        claimProcessDate.toFhir(supportingInfoFactory))
+                    .flatMap(Optional::stream),
+                dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream()),
+            dateClaimOcrncSupportingInfoInstitutionalNch.toFhir(supportingInfoFactory).stream())
         .toList();
   }
 }
