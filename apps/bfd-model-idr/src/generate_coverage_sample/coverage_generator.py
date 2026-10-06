@@ -254,7 +254,7 @@ class SampleGenerator:
         for record in records:
             record_date = parse_date(record["BENE_RNG_BGN_DT"])
             if record_date <= self.current_date and (
-                not return_record or return_record_date < record_date
+                not return_record or (return_record_date and return_record_date < record_date)
             ):
                 return_record = record
                 return_record_date = record_date
@@ -368,7 +368,7 @@ class SampleGenerator:
         for record in records:
             record_date = parse_date(record["BENE_MDCD_ELGBLTY_BGN_DT"])
             if record_date <= self.current_date and (
-                not return_record or return_record_date < record_date
+                not return_record or (return_record_date and return_record_date < record_date)
             ):
                 return_record = record
                 return_record_date = record_date
