@@ -567,6 +567,10 @@ public class FhirInputConverter {
     if (profile == null || profile.getValue() == null) {
       return ClaimProfile.CMS;
     }
-    return ClaimProfile.valueOf(profile.getValue());
+    try {
+      return ClaimProfile.valueOf(profile.getValue());
+    } catch (IllegalArgumentException _) {
+      throw new InvalidRequestException("Invalid profile parameter: " + profile.getValue());
+    }
   }
 }

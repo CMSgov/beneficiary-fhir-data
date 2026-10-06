@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @SuppressWarnings("java:S2201")
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pa_uniq_trkng_num"))
-public class ClaimLineInstitutionalCmsSharedSystems extends ClaimLineInstitutionalBase {
+public class ClaimLineInstitutionalCmsSharedSystems extends ClaimLineInstitutionalCms {
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;

@@ -2,13 +2,11 @@ package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
-import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsModifierCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
-import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -23,7 +21,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.StringType;
 
 /** clm_line info base. */
 @MappedSuperclass
@@ -37,8 +34,6 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   @Column(name = "clm_line_dgns_cd")
   private Optional<String> claimLineDiagnosisCode;
-
-  private Optional<String> trackingNumber;
 
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
@@ -91,21 +86,6 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Override
   public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
     return Optional.of(claimLineRenderingProvider);
-  }
-
-  @Override
-  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
-      SupportingInfoFactory supportingInfoFactory) {
-    var trackingSupportingInfo =
-        trackingNumber.map(
-            number ->
-                supportingInfoFactory
-                    .createSupportingInfo()
-                    .setCategory(
-                        BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                    .setValue(new StringType(number)));
-
-    return trackingSupportingInfo.stream().toList();
   }
 
   @Override
