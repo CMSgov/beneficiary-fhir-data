@@ -20,6 +20,7 @@ def test_generate_coverage_part_a() -> None:
 
     assert result.exit_code == 0
 
+
 def test_generate_coverage_part_b() -> None:
     result = CliRunner().invoke(
         main,
@@ -37,6 +38,7 @@ def test_generate_coverage_part_b() -> None:
 
     assert result.exit_code == 0
 
+
 def test_generate_coverage_part_c() -> None:
     result = CliRunner().invoke(
         main,
@@ -49,6 +51,24 @@ def test_generate_coverage_part_c() -> None:
             "../../out-test",
             "--parts",
             "C",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+
+def test_generate_coverage_part_d() -> None:
+    result = CliRunner().invoke(
+        main,
+        [
+            "--bene-sk",
+            "547437476",
+            "--source-directory",
+            "../../../bfd-pipeline-idr/test_samples1",
+            "--output-directory",
+            "../../out-test",
+            "--parts",
+            "D",
         ],
     )
 
