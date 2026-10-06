@@ -41,4 +41,4 @@ jobs:
         run: |
           just patient-generator --patients 100
           just claims-generator ./apps/bfd-model-idr/out
-          just pipeline --env local --seed-from apps//bfd-model-idr/out
+          just pipeline --env local --seed-from ./apps/bfd-model-idr/out
