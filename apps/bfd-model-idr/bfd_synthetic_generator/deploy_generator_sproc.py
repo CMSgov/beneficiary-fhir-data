@@ -149,29 +149,29 @@ def main(
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    sess = Session.builder.configs(
+    session = Session.builder.configs(
         {
             "account": _require_env("IDR_ACCOUNT"),
             "user": _require_env("IDR_USERNAME"),
             "private_key": private_key_bytes,  # type: ignore
             "warehouse": _require_env("IDR_WAREHOUSE"),
             "database": _require_env("IDR_DATABASE"),
-            "schema": _require_env("IDR_SCHEMA"),
+            "schema": "CMS_VDM_VIEW_MDCR_PRD",
         }
     ).create()
 
-    db_name = _require_env("IDR_DATABASE")
-    schema_name = _require_env("IDR_SCHEMA")
+    db_name = session.get_current_database().replace('"', "")
+    schema_name = session.get_current_schema().replace('"', "")
 
-    sess.sql(f"create or replace stage {db_name}.{schema_name}.generator_files_stage").collect()
+    session.sql(f"create or replace stage {db_name}.{schema_name}.generator_files_stage").collect()
     print("Uploading synthetic generator code...")
-    put_result = sess.file.put(
+    put_result = session.file.put(
         zip_file, f"@{db_name}.{schema_name}.generator_files_stage", auto_compress=False
     )
     print(f"Upload Status: {put_result[0].status}")
 
     print("Creating/Updating stored procedure...")
-    generator_sproc = sess.sproc.register_from_file(
+    generator_sproc = session.sproc.register_from_file(
         file_path=f"@{db_name}.{schema_name}.generator_files_stage/bfd_synthetic_generator.zip",
         func_name="generator_sproc_handler.generate_synthetic_data",
         return_type=VariantType(),
@@ -202,17 +202,16 @@ def main(
     )
 
     # Set LOG_LEVEL so Snowflake can hook our logging into an event table
-    sess.sql("""
+    session.sql("""
         ALTER PROCEDURE generate_synthetic_data(
             BOOLEAN, VARCHAR, VARCHAR, NUMBER, BOOLEAN, NUMBER, NUMBER, BOOLEAN, BOOLEAN, NUMBER
         ) SET LOG_LEVEL = 'INFO';
     """).collect()
 
-    db = sess.get_current_database().replace('"', "")
-    event_table = f"{db}.CMS_VDM_VIEW_MDCR_PRD.procedure_event_table"
+    event_table = f"{db_name}.CMS_VDM_VIEW_MDCR_PRD.procedure_event_table"
 
-    sess.sql(f"CREATE EVENT TABLE IF NOT EXISTS {event_table}").collect()
-    sess.sql(f"ALTER DATABASE {db} SET EVENT_TABLE = {event_table}").collect()
+    session.sql(f"CREATE EVENT TABLE IF NOT EXISTS {event_table}").collect()
+    session.sql(f"ALTER DATABASE {db_name} SET EVENT_TABLE = {event_table}").collect()
 
     print("Running stored procedure to generate synthetic data...")
     generator_sproc(
