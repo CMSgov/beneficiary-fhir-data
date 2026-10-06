@@ -23,6 +23,7 @@ public class CapabilityStatementCustomizer {
    * constructor injecting the configuration value for url.
    *
    * @param implementationUrl extracted from config
+   * @param version project version extracted from config
    */
   public CapabilityStatementCustomizer(
       @Value("${bfd.project.url}") String implementationUrl,
