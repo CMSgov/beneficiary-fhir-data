@@ -29,26 +29,13 @@ jobs:
         with:
           java-version: "25"
           distribution: "corretto"
-      - name: Sync UV in bfd-model-idr
-        run: uv sync
-        working-directory: apps/bfd-model-idr
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
       - name: Generate v3 Data Dictionary
-        run: uv run gen-dd
-        working-directory: apps/bfd-model-idr
+        run: just generate-data-dictionary
       - name: Ensure synthetic data pipeline runs
         run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims --patients 100
-          cd ../bfd-pipeline-idr
-          BFD_ENV=local ./run-pipeline.sh --seed-from ../bfd-model-idr/out
-      - name: Ensure synthetic data pipeline runs with existing synthetic data
-        run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims ../bfd-pipeline-idr/test_samples1
-          # Split claims output into 1000 CLMs batches
-          uv run load_splitter.py -c 1000
-          cd ../bfd-pipeline-idr
-          # Load from batched_out/0 to load _just_ the first batch to validate that the structure
-          # of data is OK and the data was regenerated properly without taking a significant amount
-          # of time to load the full dataset
-          BFD_ENV=local ./run-pipeline.sh --seed-from ../bfd-model-idr/batched_out/0
+          just patient-generator --patients 100
+          just claims-generator ./apps/bfd-model-idr/out
+          just pipeline --env local --seed-from ../bfd-model-idr/out
