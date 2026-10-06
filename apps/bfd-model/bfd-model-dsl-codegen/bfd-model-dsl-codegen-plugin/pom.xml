@@ -48,9 +48,9 @@
         </dependency>
         <dependency>
             <!-- required by hibernate-validator -->
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.el</artifactId>
-            <version>${jakarta.el.version}</version>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>${expressly.version}</version>
         </dependency>
 
         <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->

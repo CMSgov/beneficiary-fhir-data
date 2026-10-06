@@ -8,8 +8,8 @@ import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class AbstractSamhsaBackfillTest {
     Mockito.when(mockQuery.setParameter(anyString(), anyInt())).thenReturn(mockQuery);
     Object[] objects =
         new Object[] {
-          "12345", Date.valueOf("1970-1-1"), Date.valueOf("1970-1-1"), "code1", "code2", "code3"
+          "12345", LocalDate.of(1970, 1, 1), LocalDate.of(1970, 1, 1), "code1", "code2", "code3"
         };
     List<Object[]> objectList = new ArrayList<>();
     objectList.add(objects);

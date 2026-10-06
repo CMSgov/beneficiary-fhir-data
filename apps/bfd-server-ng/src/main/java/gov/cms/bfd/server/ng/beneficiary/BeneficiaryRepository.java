@@ -18,7 +18,7 @@ import jakarta.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 @SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
 

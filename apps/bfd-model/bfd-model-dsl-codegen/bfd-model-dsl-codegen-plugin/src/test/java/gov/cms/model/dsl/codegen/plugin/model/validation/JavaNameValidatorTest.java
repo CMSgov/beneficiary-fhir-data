@@ -2,9 +2,9 @@ package gov.cms.model.dsl.codegen.plugin.model.validation;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.hibernate.annotations.common.annotationfactory.AnnotationDescriptor;
-import org.hibernate.annotations.common.annotationfactory.AnnotationFactory;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link JavaNameValidator}. */
@@ -62,9 +62,8 @@ public class JavaNameValidatorTest {
    * @return the validator
    */
   private JavaNameValidator createValidator(JavaNameType type) {
-    AnnotationDescriptor annotationDescriptor = new AnnotationDescriptor(JavaName.class);
-    annotationDescriptor.setValue("type", type);
-    JavaName annotation = AnnotationFactory.create(annotationDescriptor);
+    JavaName annotation = mock(JavaName.class);
+    when(annotation.type()).thenReturn(type);
     JavaNameValidator validator = new JavaNameValidator();
     validator.initialize(annotation);
     return validator;

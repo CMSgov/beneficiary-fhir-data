@@ -72,6 +72,12 @@
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
+        <dependency>
+            <!-- Scans for entities in the persistence.xml units used by PipelineApplicationState. -->
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-scan-jandex</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <!-- Functional-reactive programming api for concurrent claim ingestion. -->

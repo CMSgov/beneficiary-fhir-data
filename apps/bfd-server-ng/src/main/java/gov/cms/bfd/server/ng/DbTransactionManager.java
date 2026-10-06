@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
@@ -10,7 +10,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 /** Custom transaction manager to set session variables. */
 @Component
-@AllArgsConstructor
+@NoArgsConstructor
 public class DbTransactionManager extends JpaTransactionManager {
   @PersistenceContext private transient EntityManager entityManager;
 

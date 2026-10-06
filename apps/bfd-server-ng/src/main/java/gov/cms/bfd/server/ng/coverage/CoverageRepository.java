@@ -13,14 +13,14 @@ import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Repository for querying coverage information. */
 @Transactional(readOnly = true)
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CoverageRepository {
   @PersistenceContext private EntityManager entityManager;
   private final DateUtil dateUtil;
