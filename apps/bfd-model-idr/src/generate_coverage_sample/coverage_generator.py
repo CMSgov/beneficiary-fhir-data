@@ -240,7 +240,7 @@ class SampleGenerator:
             [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
         )
 
-    def read_latest(self, file_name: str, additional_params: list[Param]) -> dict[str, str]:
+    def read_latest(self, file_name: str, additional_params: list[Param]) -> dict[str, str] | None:
         params = [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")]
         if additional_params:
             params += additional_params
@@ -261,15 +261,15 @@ class SampleGenerator:
 
         return return_record
 
-    def read_bene_entlmt(self, part: MedicarePart) -> dict[str, str]:
+    def read_bene_entlmt(self, part: MedicarePart) -> dict[str, str] | None:
         return self.read_latest(
             "SYNTHETIC_BENE_MDCR_ENTLMT", [Param("BENE_MDCR_ENTLMT_TYPE_CD", part.code)]
         )
 
-    def read_bene_entlmt_rsn(self) -> dict[str, str]:
+    def read_bene_entlmt_rsn(self) -> dict[str, str] | None:
         return self.read_latest("SYNTHETIC_BENE_MDCR_ENTLMT_RSN", [])
 
-    def read_bene_tp(self) -> dict[str, str]:
+    def read_bene_tp(self) -> dict[str, str] | None:
         return self.read_latest("SYNTHETIC_BENE_TP", [])
 
     def read_bene_status(self) -> dict[str, str]:
@@ -357,7 +357,7 @@ class SampleGenerator:
             [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
         )
 
-    def read_bene_cmbnd_dual(self) -> dict[str, str]:
+    def read_bene_cmbnd_dual(self) -> dict[str, str] | None:
         records = self.read_multi_line_file(
             "SYNTHETIC_BENE_CMBND_DUAL_MDCR",
             False,
