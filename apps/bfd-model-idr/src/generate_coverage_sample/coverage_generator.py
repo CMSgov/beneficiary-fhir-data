@@ -102,9 +102,11 @@ class SampleGenerator:
         bene_entlmt = None
         bene_entlmt_rsn = None
         bene_map_d = None
+        bene_map_d_rx = None
         cntrct_pbp_num = None
         cntrct_pbp_cntct = None
         cntrct_pmp_sk = None
+        cntrct_pbp_sgmt = None
         if part == MedicarePart.A or part == MedicarePart.B:
             bene_entlmt = self.read_bene_entlmt(part)
 
@@ -114,13 +116,19 @@ class SampleGenerator:
 
             bene_entlmt_rsn = self.read_bene_entlmt_rsn()
 
-        if part == MedicarePart.C:
+        if part == MedicarePart.C or part == MedicarePart.D:
             bene_map_d = self.read_bene_map_d(part)
+            if not bene_map_d:
+                print(f"Coverage not found for Medicare Part {part.name}.")
+                return
             cntrct_pmp_sk = extract_col_str(bene_map_d, "CNTRCT_PBP_SK")
+            if part == MedicarePart.D:
+                bene_map_d_rx = self.read_bene_map_d_rx(bene_map_d=bene_map_d)
 
         bene_tp = self.read_bene_tp()
 
         bene_status = self.read_bene_status()
+        bene_lis = self.read_bene_cmbnd()
 
         if not cntrct_pmp_sk:
             cntrct_pbp_num = self.read_cntrct_pbp_num(cntrct_pmp_sk=cntrct_pmp_sk)
@@ -146,10 +154,27 @@ class SampleGenerator:
             "BENE_CNTRCT_NUM": extract_col_str(bene_map_d, "BENE_CNTRCT_NUM"),
             "BENE_PBP_NUM": extract_col_str(bene_map_d, "BENE_PBP_NUM"),
             "BENE_CVRG_TYPE_CD": extract_col_str(bene_map_d, "BENE_CVRG_TYPE_CD"),
+            "BENE_ENRLMT_EMPLR_SBSDY_SW": extract_col_str(bene_map_d, "BENE_ENRLMT_EMPLR_SBSDY_SW"),
             "CNTRCT_PBP_NAME": extract_col_str(cntrct_pbp_num, "CNTRCT_PBP_NAME"),
             "CNTRCT_PLAN_CNTCT_TEL_NUM": extract_col_str(
                 cntrct_pbp_cntct, "CNTRCT_PLAN_CNTCT_TEL_NUM"
             ),
+            "BENE_PDP_ENRLMT_MMBR_ID_NUM": extract_col_str(
+                bene_map_d_rx, "BENE_PDP_ENRLMT_MMBR_ID_NUM"
+            ),
+            "BENE_PDP_ENRLMT_GRP_NUM": extract_col_str(bene_map_d_rx, "BENE_PDP_ENRLMT_GRP_NUM"),
+            "BENE_PDP_ENRLMT_PRCSR_NUM": extract_col_str(
+                bene_map_d_rx, "BENE_PDP_ENRLMT_PRCSR_NUM"
+            ),
+            "BENE_PDP_ENRLMT_BANK_ID_NUM": extract_col_str(
+                bene_map_d_rx, "BENE_PDP_ENRLMT_BANK_ID_NUM"
+            ),
+            "BENE_CMBND_DEEMD_IND": extract_col_str(bene_lis, "BENE_CMBND_DEEMD_IND"),
+            "BENE_CMBND_DEEMD_COPMT_LVL_ID": extract_col_str(
+                bene_lis, "BENE_CMBND_DEEMD_COPMT_LVL_ID"
+            ),
+            "BENE_CMBND_DEEMD_PRM_PCT": extract_col_str(bene_lis, "BENE_CMBND_DEEMD_PRM_PCT"),
+            "CNTRCT_PBP_SGMT_NUM": extract_col_str(cntrct_pbp_sgmt, "CNTRCT_PBP_SGMT_NUM"),
             "GEO_USPS_STATE_CD": extract_col_str(bene_hist, "GEO_USPS_STATE_CD"),
         }
 
@@ -243,6 +268,13 @@ class SampleGenerator:
             [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
         )
 
+    def read_bene_cmbnd(self) -> dict[str, str]:
+        return self.read_single_line_file(
+            "SYNTHETIC_BENE_LIS_CMBND",
+            False,
+            [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")],
+        )
+
     def read_bene_map_d(self, part: MedicarePart) -> dict[str, str] | None:
         params = [Param("BENE_SK", self.bene_sk), Param("IDR_LTST_TRANS_FLG", "Y")]
         match part:
@@ -265,6 +297,7 @@ class SampleGenerator:
                     False,
                     params,
                 )
+                print(len(records))
                 records = [
                     record
                     for record in records
@@ -275,11 +308,23 @@ class SampleGenerator:
             case _:
                 return None
 
-        return self.read_multi_line_file(
-            "SYNTHETIC_BENE_MAPD_ENRLMT",
+    def read_bene_map_d_rx(self, bene_map_d: dict[str, str]) -> dict[str, str] | None:
+        records = self.read_multi_line_file(
+            "SYNTHETIC_BENE_MAPD_ENRLMT_RX",
             False,
-            params,
+            [
+                Param("BENE_SK", bene_map_d["BENE_SK"]),
+                Param("BENE_ENRLMT_BGN_DT", bene_map_d["BENE_ENRLMT_BGN_DT"]),
+                Param("CNTRCT_PBP_SK", bene_map_d["CNTRCT_PBP_SK"]),
+            ],
         )
+        records = [
+            record
+            for record in records
+            if parse_date(record["BENE_ENRLMT_BGN_DT"])
+            == parse_date(bene_map_d["BENE_ENRLMT_BGN_DT"])
+        ]
+        return {} if not records else records[0]
 
     def read_cntrct_pbp_num(self, cntrct_pmp_sk: str) -> dict[str, str]:
         return self.read_single_line_file(
@@ -291,6 +336,13 @@ class SampleGenerator:
     def read_cntrct_pbp_cntct(self, cntrct_pmp_sk: str) -> dict[str, str]:
         return self.read_single_line_file(
             "SYNTHETIC_CNTRCT_PBP_CNTCT",
+            False,
+            [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
+        )
+
+    def read_cntrct_pbp_sgmt(self, cntrct_pmp_sk: str) -> dict[str, str]:
+        return self.read_single_line_file(
+            "SYNTHETIC_CNTRCT_PBP_SGMT",
             False,
             [Param("CNTRCT_PBP_SK", cntrct_pmp_sk)],
         )
