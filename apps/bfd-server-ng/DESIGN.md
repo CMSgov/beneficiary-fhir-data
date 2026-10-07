@@ -17,8 +17,8 @@ At the moment, we're operating off of a ClaimDomain-Profile-Source convention fo
 
 ### Living naming convention expanded for data-to-fhir classes
 
-**Template**: `data-type(s) | ? IDR-concept | fhir-concept | ? claim-domain | ? fhir-profile | ? claim-source`
-**Key**: `?` means optional given implementation specificity.
+**Template**: `data-type(s) | ? IDR-concept | fhir-concept | ? claim-domain | ? fhir-profile | ? claim-source`<br>
+**Key**: `?` means optional given implementation specificity.<br>
 **V3 Concepts**:
 * claim-domains: `Institutional`, `Professional`
 * fhir-profiles: `CMS` > `Regular` > `Basis`
