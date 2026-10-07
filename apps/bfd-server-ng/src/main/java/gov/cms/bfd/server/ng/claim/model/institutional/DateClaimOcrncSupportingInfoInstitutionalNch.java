@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 import gov.cms.bfd.server.ng.claim.model.common.ActiveCareThroughDate;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitsExhaustedDate;
 import gov.cms.bfd.server.ng.claim.model.common.QualifyStayFromDate;
-import gov.cms.bfd.server.ng.claim.model.common.QualifyStayThruDate;
+import gov.cms.bfd.server.ng.claim.model.common.QualifyStayThroughDate;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Embeddable;
@@ -20,7 +20,7 @@ public class DateClaimOcrncSupportingInfoInstitutionalNch implements SupportingI
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
-  @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  @Embedded private QualifyStayThroughDate qualifyStayThroughDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
@@ -29,7 +29,7 @@ public class DateClaimOcrncSupportingInfoInstitutionalNch implements SupportingI
             benefitsExhaustedDate.toFhir(supportingInfoFactory),
             activeCareThroughDate.toFhir(supportingInfoFactory),
             qualifyStayFromDate.toFhir(supportingInfoFactory),
-            qualifyStayThruDate.toFhir(supportingInfoFactory))
+            qualifyStayThroughDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
         .toList();
   }

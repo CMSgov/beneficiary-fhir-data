@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * period.
  */
 @Embeddable
-public class QualifyStayThruDate {
+public class QualifyStayThroughDate {
 
   @Column(name = "bfd_clm_qlfy_stay_thru_dt")
   private Optional<LocalDate> bfdQualifyStayThruDate;

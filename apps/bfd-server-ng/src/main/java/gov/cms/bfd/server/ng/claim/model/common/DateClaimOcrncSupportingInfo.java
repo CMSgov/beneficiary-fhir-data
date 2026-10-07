@@ -16,7 +16,7 @@ public class DateClaimOcrncSupportingInfo implements SupportingInfoComponentBase
   @Embedded private NoncoveredFromDate noncoveredFromDate;
   @Embedded private NoncoveredThroughDate noncoveredThroughDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
-  @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  @Embedded private QualifyStayThroughDate qualifyStayThroughDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
@@ -27,7 +27,7 @@ public class DateClaimOcrncSupportingInfo implements SupportingInfoComponentBase
             noncoveredFromDate.toFhir(supportingInfoFactory),
             noncoveredThroughDate.toFhir(supportingInfoFactory),
             qualifyStayFromDate.toFhir(supportingInfoFactory),
-            qualifyStayThruDate.toFhir(supportingInfoFactory))
+            qualifyStayThroughDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
         .toList();
   }

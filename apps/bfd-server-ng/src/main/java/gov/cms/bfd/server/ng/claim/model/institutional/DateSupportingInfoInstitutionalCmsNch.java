@@ -23,7 +23,7 @@ public class DateSupportingInfoInstitutionalCmsNch implements SupportingInfoComp
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ClaimProcessDate claimProcessDate;
   @Embedded private NoncoveredFromDate noncoveredFromDate;
-  @Embedded private NoncoveredThruDate noncoveredThroughDate;
+  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
