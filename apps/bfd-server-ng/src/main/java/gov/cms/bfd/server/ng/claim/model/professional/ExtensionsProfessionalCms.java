@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFederalTypeOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderSpecialtyCode;

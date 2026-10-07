@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.claim.ClaimSecurityStatus;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;

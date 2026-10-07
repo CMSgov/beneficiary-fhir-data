@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
@@ -863,5 +864,69 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(1, getEobFromBundle(eobBundle).size());
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideProfileScenarios")
+  void eobSearchByPatientAndProfile(String profile, SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new StringClientParam(Constants.PARAM_PROFILE).matches().value(profile))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        6, eobBundle.getEntry().size(), "Profile " + profile + " should still return 6 EOBs");
+    expectFhir().scenario(searchStyle.name() + "_profile_" + profile).toMatchSnapshot(eobBundle);
+  }
+
+  static Stream<Arguments> provideProfileScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of("CMS", "REGULAR", "BASIS").map(profile -> Arguments.of(profile, style)));
+  }
+
+  @Test
+  void eobSearchByPatientNoProfileDefaultsToCms() {
+    // No profile param should match explicit CMS exactly
+    var defaultBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .execute();
+
+    var cmsBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new StringClientParam(Constants.PARAM_PROFILE).matches().value("CMS"))
+            .execute();
+
+    assertEquals(cmsBundle.getEntry().size(), defaultBundle.getEntry().size());
+    // optionally diff resource IDs/content to confirm byte-for-byte parity, not just count
+  }
+
+  @Test
+  void eobSearchByPatientInvalidProfileBadRequest() {
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new StringClientParam(Constants.PARAM_PROFILE).matches().value("BOGUS"));
+    assertThrows(
+        InvalidRequestException.class,
+        searchWithIdentifier::execute,
+        "Should throw InvalidRequestException for unsupported profile value");
   }
 }

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;

@@ -1,8 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
+import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.NchBenefitEnhancementSwitches;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
@@ -28,7 +27,7 @@ import org.hl7.fhir.r4.model.Quantity;
 @Embeddable
 @Getter
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
-public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms implements ClaimLineBase {
+public class ClaimLineProfessionalCmsNch extends ClaimLineProfessionalCms {
 
   @Embedded private ClaimLineProfessionalNchCore nchCore;
   @Embedded private ClaimLineAdjudicationProfessionalCmsNch adjudicationCharge;
