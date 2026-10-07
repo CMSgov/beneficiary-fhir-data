@@ -468,6 +468,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "code": "8"
       } ]
     }
+  }, {
+    "sequence": 17,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "W2",
+        "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+      } ]
+    }
   } ],
   "insurance": [ {
     "focal": true,
@@ -1651,6 +1671,46 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding": [ {
         "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
         "code": "3"
+      } ]
+    }
+  }, {
+    "sequence": 20,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "05",
+        "display": "LIEN HAS BEEN FILED"
+      } ]
+    }
+  }, {
+    "sequence": 21,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "64",
+        "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
       } ]
     }
   } ],
@@ -4576,6 +4636,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "code": "8"
       } ]
     }
+  }, {
+    "sequence": 33,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "21",
+        "display": "BILLING FOR DENIAL NOTICE"
+      } ]
+    }
   } ],
   "diagnosis": [ {
     "sequence": 1,
@@ -6213,6 +6293,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding": [ {
         "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
         "code": "8"
+      } ]
+    }
+  }, {
+    "sequence": 33,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "21",
+        "display": "BILLING FOR DENIAL NOTICE"
       } ]
     }
   } ],
