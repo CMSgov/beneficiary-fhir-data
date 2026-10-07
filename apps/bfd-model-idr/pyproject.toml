@@ -26,7 +26,7 @@ generate-prior-auth-sample = "generate_prior_auth_sample:main"
 [dependency-groups]
 dev = [
     "ruff>=0.12.9",
-    "uv>=0.11.15",
+    "uv>=0.12.18",
     "pyright>=1.1.403",
     "debugpy>=1.8.19",
     "pytest>=9.0.1",
