@@ -37,8 +37,8 @@ def test_generate_eob_sample_base() -> None:
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "8520736890144"
     assert (
-        result_data["CLM_TYPE_CD"] in INSTITUTIONAL_CLAIM_TYPES
-        or result_data["CLM_TYPE_CD"] in VMS_CDS
+        int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_CLAIM_TYPES
+        or int(result_data["CLM_TYPE_CD"]) in VMS_CDS
     )
 
 
@@ -64,7 +64,7 @@ def test_generate_eob_sample_pharmacy() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "6595861148142"
-    assert result_data["CLM_TYPE_CD"] in PHARMACY_CLM_TYPE_CDS
+    assert int(result_data["CLM_TYPE_CD"]) in PHARMACY_CLM_TYPE_CDS
 
 
 def test_generate_eob_sample_carrier() -> None:
@@ -89,7 +89,7 @@ def test_generate_eob_sample_carrier() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "4045037817088"
-    assert result_data["CLM_TYPE_CD"] in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
 
 
 def test_generate_eob_sample_carrier_dme() -> None:
@@ -115,7 +115,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "9298559719445"
-    assert result_data["CLM_TYPE_CD"] in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
 
 
 # this test is pointed at test_sample2 because test sample 1 does not have mcs claims
@@ -142,4 +142,4 @@ def test_generate_eob_sample_carrier_mcs() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "3351266481403"
-    assert result_data["CLM_TYPE_CD"] in MCS_CLM_TYPE_CDS
+    assert int(result_data["CLM_TYPE_CD"]) in MCS_CLM_TYPE_CDS
