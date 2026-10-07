@@ -306,7 +306,7 @@ class SampleGenerator:
     def read_bene_tp(self) -> dict[str, str] | None:
         return self.read_latest("SYNTHETIC_BENE_TP", "BENE_RNG_BGN_DT", [])
 
-    def read_bene_status(self) -> dict[str, str]:
+    def read_bene_status(self) -> dict[str, str] | None:
         return self.read_latest(
             "SYNTHETIC_BENE_MDCR_STUS",
             "MDCR_STUS_BGN_DT",
