@@ -924,7 +924,7 @@ def legacy_rx_prescribing_npi_type_expr(provider_qualifier_code: str) -> str:
     """
 
 
-def non_latest_claim_ids_query(claim_table: str) -> str:
+def stale_non_part_d_claims_query(claim_table: str) -> str:
     return f"""
         SELECT clm.clm_uniq_id
         FROM {claim_table} clm
