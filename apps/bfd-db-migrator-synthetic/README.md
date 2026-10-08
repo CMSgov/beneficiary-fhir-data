@@ -9,17 +9,12 @@ Flyway-based migrations sub-project.
 > [!IMPORTANT]
 > Make sure you are authenticated via Kion to the appropriate AWS Account in your shell prior to running any of the commands below
 
-Run migrations in a live environment (e.g. `prod`, `9999-test`, etc.) with `./migrate.sh` by specifying the target environment via the `BFD_ENV` environment variable or as the first command-line argument:
+Run migrations in a live environment (e.g. `prod`, `9999-test`, etc.) by specifying the target environment via the `--env` argument:
 
 ```sh
-BFD_ENV=1234-test ./migrate.sh
+just migrate-synthetic --env 1234-test
 ```
 
-or:
-
-```sh
-./migrate.sh 1234-test
-```
 
 ## Adding Migrations
 
@@ -42,7 +37,7 @@ podman run \
 ## Granting Permissions
 
 Snowflake requires a lot of permissions to allow the migrator/pipeline to work.
-Here are the list of commands in case they need to be re-ran in the future for both schemas 
+Here are the list of commands in case they need to be re-ran in the future for both schemas
 (CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
 
 ```sql

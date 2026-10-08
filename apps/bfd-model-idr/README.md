@@ -8,72 +8,23 @@ The `../bfd-pipeline-idr/test_samples1` directory contains some synthetic-data, 
 
 ## Generating data
 
-Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
-
-To download the FHIR Validator:
-<https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar>
-
-```sh
-curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar > validator_cli.jar
-```
-
-### Install sushi + fhirpath.js
-
-```sh
-# Check if npm is installed
-npm --version
-
-# If not then install
-brew install npm
-```
-
-
-### Install packages  (via uv)
-
-```sh
-# Check if uv is installed
-uv --version
-
-# If not then install
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-```sh
-# Install dependencies
-uv sync
-```
-
 ### Compile FSH Resources
 
 To compile the .fsh files from this folder
 
 ```sh
-npm run sushi-build
+just sushi
 ```
 
 This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data.
 
-### Get Matchbox up and running
+### Matchbox
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact. 
-
-To start matchbox, run
-
-```sh
-docker compose up -d
-```
-
-Note, it takes several minutes and requires a good bit of RAM. Once the uploads from matchbox-setup are completed, matchbox should be ready to use. Additionally, matchbox has a health check available at:
-
-```sh
-curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
-```
-
 ### Referencing New/Updated Dependencies for Matchbox
 
-As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies. 
+As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies.
 
 ### Generating Sample JSON from Synthetic CSVs
 
@@ -84,17 +35,17 @@ To generate or update sample data files from the generated synthetic CSVs (locat
 To generate a prior authorization JSON sample from the synthetic CSVs based on tracking number.
 
 ```sh
-python generate_prior_auth_sample.py --utn=<utn-here>
+just generate-prior-auth-sample --utn=<utn-here>
 ```
 
-This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
+This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML.
 
 #### EOB Sample Generator
 
 To generate a EOB sample that is not prior authorization.
 
 ```sh
-uv run generate-eob-sample --clm-uniq-id <clm_uniq_id_here>
+just generate-eob-sample --clm-uniq-id <clm_uniq_id_here>
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
@@ -107,7 +58,7 @@ There are two optional parameters .
 ### Bene Sample Generator
 
 ```sh
-uv run generate-bene-sample --bene-sk <bene_sk>
+just generate-bene-sample --bene-sk <bene_sk>
 ```
 This will search for the bene_sk in out/SYNTHETIC_BENE_HIST.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
@@ -119,88 +70,38 @@ There are two optional parameters .
 
 ### Create FHIR files with synthetic data
 
-Requires Matchbox to be active.
-
 To easily compile all resources:
 
 ```sh
-./compile-all-resources.sh
+just generate-structure-map --all
+just fhir-transform --all
 ```
 
-To compile a specific resource:
+These commands also allow you to provide a specific resource or choose one interactively when no arguments are supplied.
 
-Pass along map with -m
-pass along the sample file with -i
-pass along the output file with -o
-pass along the resource url with -r
-pass along --test to run conformance tests
-pass along --skip-structure-map-generation to skip generating the structure map. Only use this in the context of sequential transformations that re-use a structure map.
-pass along --profileType or -p to specify the profile type (Basis, Regular, or CMS) to filter for. Defaults to CMS.
+Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact.
 
-Example (Patient):
+Note, it takes several minutes and requires a good bit of RAM. Once the uploads from matchbox-setup are completed, matchbox should be ready to use. Additionally, matchbox has a health check available at:
 
 ```sh
-uv run compile_resources.py \
-    -m maps/patient.map \
-    -i sample-data/Beneficiary-Sample.json \
-    -o outputs/Patient.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
-    --test
+curl -X GET "http://localhost:18080/matchboxv3/actuator/health"
 ```
 
 #### Patient Data - `patient_generator.py`
 
-##### `patient_generator.py` usage
-
-```text
-usage: patient_generator.py [-h] [--patients PATIENTS] [--claims]
-                            [--exclude-empty | --no-exclude-empty]
-                            [--force-ztm-static-rows | --no-force-ztm-static-rows]
-                            [files ...]
-
-Generate synthetic patient data
-
-positional arguments:
-  files                 CSVs that will be regenerated/updated with new
-                        columns. Updates are idempotent, meaning that passing
-                        in an existing table/CSV without any new columns being
-                        added to the synthetic data generation will result in
-                        a byte-identical output file. Take care to avoid
-                        providing a partial set of tables with foreign key
-                        constraints (e.g. BENE_SK) without providing the root
-                        table as this could result in broken output data
-
-options:
-  -h, --help            show this help message and exit
-  --patients PATIENTS   Number of patients to generate. Ignored if
-                        SYNTHETIC_BENE_HSTRY is provided via 'files'
-  --claims              Automatically generate claims after patient generation
-                        using the generated SYNTHETIC_BENE_HSTRY.csv file
-  --exclude-empty, --no-exclude-empty
-                        Treat empty column values as non-existant and allow
-                        the generator to generate new values
-  --force-ztm-static-rows, --no-force-ztm-static-rows
-                        Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data,
-                        etc.) for a patient loaded from a file to be
-                        generated. This will introduce new rows for patients
-                        that previously had none. Useful if not all tables for
-                        a patient have been generated yet.
-
-```
-
 ##### Generating patient data
 
-To generate synthetic patient data, the patient_generator.py script is used.
+To generate synthetic patient data, the `patient_generator` script is used.
 To utilize it to generate an entirely _new_ set of data from nothing:
 
 ```sh
-uv run patient_generator.py
+just patient-generator --patients <num_patients>
 ```
 
 Or, to load the v3 synthetic data (to add new fields):
 
 ```sh
-uv run patient_generator.py ../bfd-pipeline-idr/test_samples1/*.csv
+just patient-generator ../bfd-pipeline-idr/test_samples1/*.csv
 ```
 
 _**NOTE**: the `bene_id` column in `SYNTHETIC_BENE_HSTRY.csv` is to reference the `bene_id` field used in V1/V2. It's not used for sample data generation here._
@@ -224,39 +125,10 @@ The patient generator creates synthetic beneficiary data with realistic but _syn
 
 #### Claims data - `claims_generator.py`
 
-<!-- TODO: Provide an official location for downloading synthetic claims data -->
-> [!IMPORTANT]
-> Synthetic claims data is _much_ larger in size relative to patient data, and so only a subset is stored in the repository under `../bfd-pipeline-idr/test-samples` and `../bfd-pipeline-idr/test-samples2`. If you are looking to regnerate this data, please reach out in #bfd so that the existing dataset can be provided to you. Or ask about the `../bfd-pipeline-idr/extract-idr.sh` workflow to extract the snowflake data yourself.
-
-#### `claims_generator.py` usage
-
-```text
-Usage: claims_generator.py [OPTIONS] [PATHS]...
-
-  Generate synthetic claims data. Provided file PATHS will be updated with new
-  fields.
-
-Options:
-  --sushi / --no-sushi            Generate new StructureDefinitions. Use when
-                                  testing locally if new .fsh files have been
-                                  added.
-  --min-claims INTEGER            Minimum number of claims to generate per
-                                  person
-  --max-claims INTEGER            Maximum number of claims to generate per
-                                  person
-  --force-pac-claims / --no-force-pac-claims
-                                  Generate _new_ partially-adjudicated claims
-                                  when existing pac claims tables exist in the
-                                  synthetic data provided
-  --help                          Show this message and exit.
-```
-
-#### Generating claims data
-
 > [!WARNING]
 > Either `SYNTHETIC_CLM.csv` or `SYNTHETIC_BENE_HSTRY.csv` **must** be provided as claims data generation requires an existing `BENE_SK` or `CLM` to generate/regenerate data. It is recommended that `SYNTHETIC_CNTRCT_PBP_NUM.csv` also be provided so new claims use the same generated contracts. If not provided, newly generated claims will instead use randomly selected contract nums and pbp nums. This may result in claims referencing contracts that do not exist in the generated contract tables.
 
-To generate synthetic claims data, the `claims_generator.py` script is used.
+To generate synthetic claims data, the `claims-generator` script is used.
 
 The synthetic claims data generated will be written to the `./out` folder in the form of CSVs, one per-table:
 
@@ -286,9 +158,7 @@ These files represent the schema of the tables the information is sourced from, 
 The below will generate _entirely new claims_ for the given `BENE_SK`s in the provided file:
 
 ```sh
-uv run claims_generator.py \
-    --sushi \
-    out/SYNTHETIC_BENE_HSTRY.csv out/SYNTHETIC_CNTRCT_PBP_NUM.csv
+just claims-generator out/SYNTHETIC_BENE_HSTRY.csv out/SYNTHETIC_CNTRCT_PBP_NUM.csv
 ```
 
 ##### Regenerating existing claims data
@@ -296,9 +166,7 @@ uv run claims_generator.py \
 The below will _re-generate_ **existing claims data** (assume `<PATH_TO_CLAIMS_DATA>` is a local directory containing synthetic claims data):
 
 ```sh
-uv run claims_generator.py \
-    --sushi \
-    ./out <PATH_TO_CLAIMS_DATA>
+just claims-generator ./out
 ```
 
 If _any_ claims-related tables have had columns added to their respective generation functions, those new columns will be populated with values without impacting existing values in other columns.
@@ -306,23 +174,14 @@ If _any_ claims-related tables have had columns added to their respective genera
 > [!CAUTION]
 > If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
 
-#### `--sushi`
-
-`--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
-
 ## Testing Mapping Changes
 
 ### Verifying FML Map Changes
 
-To test updates to your FML map files, run `compile_resources.py` to generate a resource in the `out/` directory and verify the output:
+To test updates to your FML map files, run `conformance-test` to generate a resource and verify the output:
 
 ```sh
-uv run compile_resources.py \
-    -m maps/ExplanationOfBenefit-Base.map \
-    -i sample-data/EOB-Carrier-MCS-Sample.json \
-    -o out/ExplanationOfBenefit-MCS.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
-    --test
+just conformance-test
 ```
 
 ### Updating Structure Definitions
@@ -336,11 +195,11 @@ For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status c
 To test augmentation logic independently:
 
 ```sh
-python augment_sample_resources.py {your_sample_file}.json [Basis|Regular|CMS]
+uv run augment_sample_resources.py {your_sample_file}.json [Basis|Regular|CMS]
 ```
 
 > [!NOTE]
-> The `uv run compile_resources.py` command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.
+> The `just fhir-transform` command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.
 
 ## Data Dictionary
 
@@ -350,11 +209,10 @@ Sometimes a field may be condensed at the IDR level, and fanned into multiple di
 To generate the data dictionary:
 
 ```sh
-./compile-all-resources.sh
-uv run gen-dd
+just generate-data-dictionary
 ```
 
-If the gen-dd script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+If the data dictionary script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
 Run:
 
 ```sql
@@ -362,4 +220,3 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 ```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
-

@@ -693,7 +693,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
         ):
             item["diagnosisSequence"] = [int(match.ROW_NUM)]
 
-filename = "out/temporary-sample.json"
+filename = f"out/{Path(cur_sample).stem}_temp.json"
 
 cur_sample_data["lastUpdated"] = "2026-01-01T03:02:28.000000Z"
 

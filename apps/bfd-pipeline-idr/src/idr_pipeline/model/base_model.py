@@ -407,7 +407,6 @@ UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_u
 
 
 class LoadMode(StrEnum):
-    LOCAL = "local"
     SYNTHETIC = "synthetic"
     PROD = "prod"
 

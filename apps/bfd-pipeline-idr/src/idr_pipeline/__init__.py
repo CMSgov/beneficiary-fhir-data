@@ -44,7 +44,7 @@ from .settings import SETTINGS
     "--load-mode",
     envvar="IDR_LOAD_MODE",
     type=click.Choice(LoadMode, case_sensitive=False),
-    default=LoadMode.LOCAL,
+    default=LoadMode.SYNTHETIC,
     show_default=True,
     help="Mode - affects db connection string and load progress tracking",
 )
@@ -85,11 +85,14 @@ def main(
     multiprocessing.set_start_method("spawn")
     # Setup the root logger _once_
     configure_logger()
+    if truncate and not seed_from:
+        logger.error("Cannot enable --truncate without --seed-from")
+        sys.exit(1)
     if seed_from:
         load_from_csv(
             SnowflakeExecutor()
             if source == Source.SNOWFLAKE
-            else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
+            else PostgresExecutor(psycopg.connect(get_connection_string())),
             seed_from,
             truncate,
             source == Source.SNOWFLAKE,
@@ -111,20 +114,19 @@ def run(
     tables_to_load = SETTINGS.tables_to_load
     idr_job_events: list[IdrJobLoadEvent] = []
     if load_type == LoadType.INCREMENTAL and not tables_to_load:
-        idr_job_events = get_eligible_events(load_mode=load_mode, start_time=start_time)
+        idr_job_events = get_eligible_events(start_time=start_time)
         unreported_jobs = get_unreported_jobs(
-            load_mode=load_mode,
             start_time=start_time,
             grace_period=SETTINGS.incremental_job_grace_period_hrs,
         )
 
-        update_start_times(load_mode=load_mode, events=idr_job_events, start_time=start_time)
+        update_start_times(events=idr_job_events, start_time=start_time)
 
         tables_to_load = get_tables_to_load(
             unreported_jobs | {event.job_type for event in idr_job_events}
         )
 
-    worker_manager = LoadingBatchWorkerManager(get_connection_string(load_mode))
+    worker_manager = LoadingBatchWorkerManager(get_connection_string())
     atexit.register(worker_manager.cleanup)
 
     staged_pipeline = StagedIdrPipeline(
@@ -158,7 +160,6 @@ def run(
                 ", ".join(str(event.id) for event in idr_job_events),
             )
             update_failure_times(
-                load_mode=load_mode,
                 events=idr_job_events,
                 failure_time=resolve_test_date(load_mode),
             )
@@ -167,7 +168,6 @@ def run(
     finally:
         if idr_job_events:
             update_completion_times(
-                load_mode=load_mode,
                 events=idr_job_events,
                 completion_time=resolve_test_date(load_mode),
             )

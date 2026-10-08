@@ -23,6 +23,10 @@ export BFD_SENSITIVE_DB_USERNAME=someUser
 
 ### Local SSM configuration
 
+> [!NOTE]
+> It's not necessary to use SSM locally since all configuration is set through other means,
+> but this can be useful to test configuration changes.
+
 You can verify SSM configuration is working correctly using `ministack`.
 
 ```sh
@@ -49,33 +53,15 @@ but the community edition can still run it without all the bells and whistles.
 ### From the CLI
 
 ```sh
-mvn spring-boot:run
-```
-
-Run the application with a specific profile
-
-```sh
-export BFD_ENV=1000-test
-mvn spring-boot:run -Dspring-boot.run.profiles=aws
-```
-
-or using environment variables only
-
-```sh
-export BFD_ENV=1000-test
-export SPRING_PROFILES_ACTIVE=aws
-mvn spring-boot:run
+just server-ng
 ```
 
 ### Connecting to a specific database
 
-Override the database connection parameters to change the database from the default local configuration
+Use the `--env` flag to run against a specific environment
 
 ```sh
-export BFD_SENSITIVE_DB_USERNAME=user 
-export BFD_SENSITIVE_DB_PASSWORD=password 
-export BFD_LOCAL_DB_HOST=host 
-mvn spring-boot:run
+just server-ng --env 1234-test
 ```
 
 ### Profiling SQL queries
@@ -83,7 +69,7 @@ mvn spring-boot:run
 The `sql-profile` profile can be used to log SQL queries and output metrics.
 
 ```sh
-mvn spring-boot run -Dspring-boot.run.profiles=local,sql-profile
+just server-ng --profiles local,sql-profile
 ```
 
 ### Structured Logging
@@ -91,12 +77,14 @@ mvn spring-boot run -Dspring-boot.run.profiles=local,sql-profile
 The `structured-log` profile can be used to test structured logs.
 
 ```sh
-mvn spring-boot run -Dspring-boot.run.profiles=local,structured-log
+just server-ng --profiles local,structured-log
 ```
 
 ## Swagger
 
 The Swagger UI is available at `/v3/fhir/swagger-ui`
+
+To launch in your browser: `just swagger`
 
 ## Sample Requests
 
@@ -109,6 +97,10 @@ namely `PGSSLMODE`.
 
 You'll probably want to unset these when running the tests from the terminal.
 
+```sh
+just server-ng-test
+```
+
 ### Regenerating snapshots
 
 Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
@@ -117,13 +109,29 @@ If snapshot tests fail, they will generate a `.patch` file with the difference t
 of choice.
 
 ```sh
-mvn clean verify -DupdateSnapshot=
+just server-ng-tests --update-snapshots
 ```
 
 ### Debugging Tests
 
 Log messages from the server process will not be shown in the console output.
 To see detailed log info, look at the files created under `target/failsafe-reports/logs`.
+Sometimes Intellij doesn't refresh the UI when these files are updated so you have to do `right click (on file explorer) -> reload from disk`.
+
+To open these files in VS Code:
+
+```sh
+just server-ng-test-logs
+```
+
+## Making a request to the deployed API
+
+`just bfd-request` handles pulling down the correct certificates and routing the base URL for you.
+
+`just bfd-request <resource> <querystring>`
+
+```sh
+just bfd-request ExplanationOfBenefit --env test
 
 ## mTLS, SAMHSA Authorization, and Security Configuration
 
@@ -215,4 +223,3 @@ AWS_SECRET_ACCESS_KEY=dummy \
 AWS_REGION=us-east-1 \
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 ```
-
