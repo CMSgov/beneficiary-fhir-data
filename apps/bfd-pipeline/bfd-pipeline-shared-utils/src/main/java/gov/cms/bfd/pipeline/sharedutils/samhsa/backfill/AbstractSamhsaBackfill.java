@@ -11,7 +11,6 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
-import java.sql.Date;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -220,14 +219,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // original query.
     if (!tableEntry.getLineItem()) {
       try {
-        LocalDate fromDate =
-            claim[columnIndexMap.get(tableEntry.getFromDateField())] != null
-                ? ((Date) claim[columnIndexMap.get(tableEntry.getFromDateField())]).toLocalDate()
-                : null;
-        LocalDate toDate =
-            claim[columnIndexMap.get(tableEntry.getToDateField())] != null
-                ? ((Date) claim[columnIndexMap.get(tableEntry.getToDateField())]).toLocalDate()
-                : null;
+        LocalDate fromDate = (LocalDate) claim[columnIndexMap.get(tableEntry.getFromDateField())];
+        LocalDate toDate = (LocalDate) claim[columnIndexMap.get(tableEntry.getToDateField())];
         dates = Optional.of(new LocalDate[] {fromDate, toDate});
       } catch (Exception e) {
         throw new BadCodeMonkeyException(

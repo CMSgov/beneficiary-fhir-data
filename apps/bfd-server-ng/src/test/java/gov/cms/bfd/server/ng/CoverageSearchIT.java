@@ -19,6 +19,7 @@ import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Tuple;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
@@ -427,8 +428,7 @@ class CoverageSearchIT extends IntegrationTestBase {
                         t -> String.valueOf(t.get("typeCode")),
                         t ->
                             Date.from(
-                                ((java.sql.Date) t.get("originalBeginDate"))
-                                    .toLocalDate()
+                                ((LocalDate) t.get("originalBeginDate"))
                                     .atStartOfDay(ZoneId.systemDefault())
                                     .toInstant())));
 

@@ -4,14 +4,12 @@ import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Repository methods for prior authorization. */
 @Transactional(readOnly = true)
 @Repository
-@AllArgsConstructor
 public class PriorAuthorizationRepository {
   @PersistenceContext private EntityManager entityManager;
 

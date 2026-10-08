@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -46,7 +45,7 @@ public class V2Server extends RestfulServer {
   /** Constructs a new {@link V2Server} instance. */
   public V2Server() {
     super(FhirContext.forR4());
-    setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+    setServerAddressStrategy(new ProxyAddressStrategy());
     // HAPI FHIR, by default, does not trust the parameters (from both the query string and content
     // body, for POSTs) that are automatically extracted by the web framework in the request to be
     // properly encoded. Due to this, it attempts to extract parameters on its own, but fails to do

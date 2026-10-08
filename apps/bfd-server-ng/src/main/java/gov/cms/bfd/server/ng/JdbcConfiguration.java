@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import com.google.common.base.Strings;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
+import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
 
