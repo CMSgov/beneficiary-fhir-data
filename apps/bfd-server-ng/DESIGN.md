@@ -11,10 +11,24 @@ This process lends itself to a somewhat unique set of challenges due to the natu
 
 The default profile for any call will be CMS, so any CMS leaf entity is the maximum amount of mapped information, and at parity with what was before profile work.
 
-At the moment, we're operating off of a Domain-Profile-Source convention for organizing the concrete leaf entities that represent profiles.
-For example:
-- ClaimLineProfessionalCmsNch (Professional-Cms-Nch)
-- AdjudicationInstitutionalBasisSharedSystems (Institutional-Basis-SharedSystems)
+At the moment, we're operating off of a ClaimDomain-Profile-Source convention for organizing the concrete leaf entities that represent profiles.
+* e.g. `ClaimLineProfessionalCmsNch` (Professional-Cms-Nch)
+* e.g. `AdjudicationInstitutionalBasisSharedSystems` (Institutional-Basis-SharedSystems)
+
+### Living naming convention expanded for data-to-fhir classes
+
+**Template**: `data-type(s) | ? IDR-concept | fhir-concept | ? claim-domain | ? fhir-profile | ? claim-source`<br>
+**Key**: `?` means optional given implementation specificity.<br>
+**V3 Concepts**:
+* claim-domains: `Institutional`, `Professional`
+* fhir-profiles: `CMS` > `Regular` > `Basis`
+* claim-sources: `NCH`, `SS` (super-group containing multiple sources agged into SharedSystems)
+
+### Naming Examples
+**base-form** e.g.) `DateSupportingInfo` or `DateSupportingInfoInstitutional`
+* e.g. in `claim.model.common`: `DateClaimOcrncSupportingInfo` using IDR Concept, omitting fhir-profile, claim-domain, and claim-source because intended to be common to all fhir-profiles, claim-types, and sources.
+* e.g. in `claim.model.institutional`: `DateClaimOcrncSupportingInfoInstitutionalNch` omits only the fhir-profile piece; intended for all Institutional NCH fhir-profiles.
+
 
 ## Handling Wide Data
 

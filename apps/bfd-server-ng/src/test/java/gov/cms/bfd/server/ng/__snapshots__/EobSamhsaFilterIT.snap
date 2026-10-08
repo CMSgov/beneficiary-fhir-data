@@ -4596,34 +4596,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_QLFY_STAY_FROM_DT",
-            "display": "Qualified Stay From Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2019-11-17"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_QLFY_STAY_THRU_DT",
-            "display": "Qualified Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2019-12-03"
-      }, {
-        "sequence": 11,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_CMS_PROC_DT",
             "display": "FI Claim Process Date"
           }, {
@@ -4634,7 +4606,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 12,
+        "sequence": 10,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4646,7 +4618,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "end": "2019-12-03"
         }
       }, {
-        "sequence": 13,
+        "sequence": 11,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4655,7 +4627,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4673,7 +4645,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4691,7 +4663,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 16,
+        "sequence": 14,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4709,7 +4681,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 17,
+        "sequence": 15,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4729,7 +4701,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 18,
+        "sequence": 16,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4749,7 +4721,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 19,
+        "sequence": 17,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4769,7 +4741,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 20,
+        "sequence": 18,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4788,7 +4760,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 21,
+        "sequence": 19,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4807,7 +4779,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 22,
+        "sequence": 20,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4827,7 +4799,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         }
       }, {
-        "sequence": 23,
+        "sequence": 21,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4846,7 +4818,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "code": "[pt_us]"
         }
       }, {
-        "sequence": 24,
+        "sequence": 22,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14079,34 +14051,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_QLFY_STAY_FROM_DT",
-            "display": "Qualified Stay From Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2019-11-17"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_QLFY_STAY_THRU_DT",
-            "display": "Qualified Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2019-12-03"
-      }, {
-        "sequence": 11,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_CMS_PROC_DT",
             "display": "FI Claim Process Date"
           }, {
@@ -14117,7 +14061,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 12,
+        "sequence": 10,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14129,7 +14073,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "end": "2019-12-03"
         }
       }, {
-        "sequence": 13,
+        "sequence": 11,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14138,7 +14082,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14156,7 +14100,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14174,7 +14118,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 16,
+        "sequence": 14,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14192,7 +14136,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 17,
+        "sequence": 15,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14212,7 +14156,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 18,
+        "sequence": 16,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14232,7 +14176,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 19,
+        "sequence": 17,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14252,7 +14196,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 20,
+        "sequence": 18,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14271,7 +14215,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 21,
+        "sequence": 19,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14290,7 +14234,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 22,
+        "sequence": 20,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14310,7 +14254,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         }
       }, {
-        "sequence": 23,
+        "sequence": 21,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14329,7 +14273,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "code": "[pt_us]"
         }
       }, {
-        "sequence": 24,
+        "sequence": 22,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
