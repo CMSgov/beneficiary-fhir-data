@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The claim date for institutional or professional claims. */
+/** The claim ocrnc dates for institutional NCH claims. */
 @Embeddable
 public class DateClaimOcrncSupportingInfoInstitutionalNch implements SupportingInfoComponentBase {
 
