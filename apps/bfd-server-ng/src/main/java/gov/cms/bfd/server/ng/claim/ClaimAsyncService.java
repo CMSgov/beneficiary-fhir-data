@@ -46,7 +46,7 @@ public class ClaimAsyncService {
           List<B> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
-    var whereClause = buildWhereClause(filters, systemType);
+    var whereClause = buildWhereClause(filters);
     var jpql =
         String.format(
             """
@@ -81,7 +81,7 @@ public class ClaimAsyncService {
       List<DbFilterBuilder> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
-    var whereClause = buildWhereClause(filters, systemType);
+    var whereClause = buildWhereClause(filters);
     var jpql =
         String.format(
             """
@@ -108,16 +108,14 @@ public class ClaimAsyncService {
     }
   }
 
-  private String buildWhereClause(DbFilter filter, SystemType systemType) {
-    var latestClaimFilter =
-        systemType.filterLatestClaims() ? "AND c.latestClaimIndicator = 'Y'" : "";
+  private String buildWhereClause(DbFilter filter) {
     return String.format(
         """
-        AND b.latestTransactionFlag = 'Y'
-        %s
-        %s
-        """,
-        filter.filterClause(), latestClaimFilter);
+      AND b.latestTransactionFlag = 'Y'
+      AND c.latestClaimIndicator = 'Y'
+      %s
+      """,
+        filter.filterClause());
   }
 
   <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {

@@ -63,6 +63,7 @@ CLAIM_NON_PART_D_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
 ]
+
 CLAIM_SS_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalSs,
     IdrClaimInstitutionalSs,
