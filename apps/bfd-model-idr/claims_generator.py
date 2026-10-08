@@ -405,10 +405,10 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
-            f.CLM_FED_TYPE_SRVC_CD, # TODO: not generated yet
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD, # TODO: not generated yet
-            f.CLM_PRMRY_PYR_CD, # TODO: not generated yet
-            f.CLM_PRCNG_LCLTY_CD, # TODO: not generated yet
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_PRCNG_LCLTY_CD,
+            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
@@ -972,7 +972,7 @@ def generate(
         for row in files[CLM_RLT_OCRNC_SGNTR_MBR]
         if row.get(f.CLM_RLT_OCRNC_SGNTR_SK)
     }
-    
+
 
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x for x in files[CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
@@ -1085,7 +1085,7 @@ def generate(
             )
             adj_clms_tbls[CLM_RLT_OCRNC_SGNTR_MBR].append(clm_rlt_ocrnc_sgntr_mbr)
 
-            
+
 
             clm_type_cd = int(clm[f.CLM_TYPE_CD])
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
@@ -1228,7 +1228,7 @@ def generate(
                 CLM_RLT_OCRNC_SGNTR_MBR: as_list(
                     rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK])
                 ),
-            
+
                 CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
@@ -1406,7 +1406,7 @@ def generate(
                 ]
                 out_tables[CLM_LINE_FISS].extend(clm_line_fiss)
 
-            
+
 
     print("Done generating synthetic claims data for provided BENE_SKs")
 
@@ -1428,4 +1428,3 @@ def generate(
 
 if __name__ == "__main__":
     generate()
-    
