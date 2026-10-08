@@ -155,7 +155,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_count_percent" {
     # the metrics published from the app have dimensions
     # there are limitations for how many dimensions we can look at per alarm that this works around
     metric {
-      metric_name = "HTTPCode_ELB_5XX_Count"
+      metric_name = "HTTPCode_Target_5XX_Count"
       namespace   = "AWS/ApplicationELB"
       period      = 3600
       stat        = "Sum"
@@ -190,7 +190,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_http500_any_count_5m_alert" {
     # the metrics published from the app have dimensions
     # there are limitations for how many dimensions we can look at per alarm that this works around
     metric {
-      metric_name = "HTTPCode_ELB_5XX_Count"
+      metric_name = "HTTPCode_Target_5XX_Count"
       namespace   = "AWS/ApplicationELB"
       period      = 300
       stat        = "Sum"
