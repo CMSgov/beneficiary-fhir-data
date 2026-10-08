@@ -10,6 +10,25 @@
   <artifactId>report-aggregate</artifactId>
   <name>report-aggregate</name>
   <description>Generate jacoco's report-aggregate across all BFD modules</description>
+  <!-- Align the mixed Jetty 12.0/12.1 lines pulled in from bfd-server-ng and bfd-server-launcher (coverage-only module). -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-bom</artifactId>
+        <version>${jetty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-bom</artifactId>
+        <version>${jetty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>gov.cms.bfd</groupId>
