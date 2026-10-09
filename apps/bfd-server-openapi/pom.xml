@@ -15,7 +15,7 @@
     </properties>
 
     <!-- Fix for CVE-2026-10050, CVE-2026-19203 and related Jetty CVEs: pin the test-scope Jetty
-         pulled in transitively by hapi-fhir-test-utilities (12.0.34) to ${jetty.version}.
+         pulled in transitively by hapi-fhir-test-utilities.
          Scoped to this module only so it doesn't disturb the jetty version that
          spring-boot-starter-jetty manages consistently for bfd-server-ng. -->
     <dependencyManagement>
