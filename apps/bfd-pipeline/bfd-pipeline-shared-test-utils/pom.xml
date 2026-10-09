@@ -1,84 +1,79 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-pipeline-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-pipeline-shared-test-utils</artifactId>
-    <packaging>jar</packaging>
-
-    <description>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-pipeline-parent</artifactId>
+    <version>2.274.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>bfd-pipeline-shared-test-utils</artifactId>
+  <packaging>jar</packaging>
+  <description>
         Framework and utility test code shared across the BFD Pipeline application.
     </description>
-
-    <dependencies>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rif</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-pipeline-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- Compile time only -->
-        <dependency>
-            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-test-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Used to run our unit and integration tests. -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+  <dependencies>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rif</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rda</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-pipeline-shared-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- Compile time only -->
+    <dependency>
+      <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-shared-test-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used to run our unit and integration tests. -->
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides a sane facade for the giant mess of incompatible logging
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides a sane facade for the giant mess of incompatible logging
                 frameworks in Java. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <!--
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!--
                 Ensure that jacoco plugin is disabled in this module.
                 This overrides use of a property from parent pom.
                 -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${maven.jacoco.plugin.version}</version>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${maven.jacoco.plugin.version}</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

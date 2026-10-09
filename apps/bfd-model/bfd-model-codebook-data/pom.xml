@@ -1,73 +1,68 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-model-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-model-codebook-data</artifactId>
-    <packaging>jar</packaging>
-
-    <description>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-model-parent</artifactId>
+    <version>2.274.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>bfd-model-codebook-data</artifactId>
+  <packaging>jar</packaging>
+  <description>
         Provides CcwCodebookVariable enum class extracted from codebook pdfs.
     </description>
-
-    <dependencies>
-        <dependency>
-            <!-- Provides basic model classes required by generated enum class. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-codebook-library</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <!-- Generates XML files and enum class for codebook variables using codebook pdfs. -->
-                <groupId>gov.cms.bfd</groupId>
-                <artifactId>bfd-model-codebook-plugin</artifactId>
-                <version>${project.version}</version>
-                <configuration>
-                    <xmlFilesDirectory>${project.build.directory}/generated-resources</xmlFilesDirectory>
-                    <javaFilesDirectory>${project.build.directory}/generated-sources</javaFilesDirectory>
-                    <enumPackage>gov.cms.bfd.model.codebook.data</enumPackage>
-                    <enumClass>CcwCodebookVariable</enumClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>codebooks</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
+  <dependencies>
+    <dependency>
+      <!-- Provides basic model classes required by generated enum class. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-codebook-library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <!-- Generates XML files and enum class for codebook variables using codebook pdfs. -->
+        <groupId>gov.cms.bfd</groupId>
+        <artifactId>bfd-model-codebook-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <xmlFilesDirectory>${project.build.directory}/generated-resources</xmlFilesDirectory>
+          <javaFilesDirectory>${project.build.directory}/generated-sources</javaFilesDirectory>
+          <enumPackage>gov.cms.bfd.model.codebook.data</enumPackage>
+          <enumClass>CcwCodebookVariable</enumClass>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>codebooks</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/target/generated-sources</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
