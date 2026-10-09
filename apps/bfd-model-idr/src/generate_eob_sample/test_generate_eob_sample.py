@@ -1,6 +1,11 @@
+from pathlib import Path
+
 from click.testing import CliRunner
 
 from generate_eob_sample import main
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SOURCE_DIR = str(PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples1")
 
 
 def test_generate_eob_sample_base() -> None:
@@ -10,12 +15,11 @@ def test_generate_eob_sample_base() -> None:
             "--clm-uniq-id",
             "8520736890144",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
-
     assert result.exit_code == 0
 
 
@@ -26,9 +30,9 @@ def test_generate_eob_sample_pharmacy() -> None:
             "--clm-uniq-id",
             "6595861148142",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 

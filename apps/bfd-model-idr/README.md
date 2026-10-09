@@ -57,7 +57,7 @@ This will generate the StructureDefinition and CodeSystem resources necessary fo
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact. 
+Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact.
 
 To start matchbox, run
 
@@ -73,7 +73,7 @@ curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 
 ### Referencing New/Updated Dependencies for Matchbox
 
-As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies. 
+As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies.
 
 ### Generating Sample JSON from Synthetic CSVs
 
@@ -87,7 +87,7 @@ To generate a prior authorization JSON sample from the synthetic CSVs based on t
 python generate_prior_auth_sample.py --utn=<utn-here>
 ```
 
-This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML. 
+This will search for the specified UTN in `out/SYNTHETIC_PRAUC.csv`, collect the segments, and get it into the format that we map using FML.
 
 #### EOB Sample Generator
 
@@ -147,6 +147,10 @@ uv run compile_resources.py \
     -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
     --test
 ```
+
+## Generating Synthetic Data
+
+### Local Generation
 
 #### Patient Data - `patient_generator.py`
 
@@ -216,7 +220,7 @@ The files output will be in the `out` folder:
 - `SYNTHETIC_BENE_XREF.csv`
 - `SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv`
 - `SYNTHETIC_BENE_LIS.csv`
-- `SYNTHETIC_BENE_LIS_CMBND.csv`
+- `SYNTHETIC_BENE_CMBND_LIS.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT.csv`
 
@@ -310,6 +314,42 @@ If _any_ claims-related tables have had columns added to their respective genera
 
 `--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
 
+
+### Generating Synthetic Data Directly in Snowflake
+
+We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd_synthetic_generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
+
+# Granting Permissions
+
+Snowflake requires these permissions to allow the snowflake stored procedure to work.
+Here are the list of commands in case they need to be re-ran in the future for both schemas
+(CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
+
+```text
+GRANT MODIFY ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
+GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
+GRANT CREATE STAGE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT CREATE PROCEDURE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT CREATE EVENT TABLE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
+```
+
+Example flow of running the stored procedure:
+
+```text
+1. kn or kp
+2. export BFD_ENV={your_environment}
+3. source `./load-synthetic-credentials.sh`
+Generating data:
+- To generate data from scratch: `uv run deploy_generator_sproc.py --patients 100 --truncate True`
+- To regenerate data: `uv run deploy_generator_sproc.py`
+
+To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
+```
+
 ## Testing Mapping Changes
 
 ### Verifying FML Map Changes
@@ -362,4 +402,3 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 ```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
-

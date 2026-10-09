@@ -1,9 +1,8 @@
-import os
 import random
 from datetime import date, datetime
-from pathlib import Path
 
 import yaml
+from file_utils import ROOT
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
@@ -20,10 +19,8 @@ class SecurityLabelModel(BaseModel):
         return self.code.replace(".", "")
 
 
-SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("../../security_labels.yml")
-SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
-    yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
-)
+yaml_data = yaml.safe_load((ROOT / "security_labels.yml").read_text(encoding="utf-8"))
+SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(yaml_data, by_alias=True)
 
 
 SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]

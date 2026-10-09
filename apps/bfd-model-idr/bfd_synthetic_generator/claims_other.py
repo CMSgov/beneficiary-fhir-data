@@ -2,11 +2,9 @@ import random
 from datetime import date, datetime
 from typing import Any
 
+import constants as f
 import pandas as pd
-from faker import Faker
-
-import field_constants as f
-from idr_model.claims_static import (
+from claims_static import (
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
     AVAILABLE_PROVIDER_LEGAL_NAMES,
@@ -15,12 +13,10 @@ from idr_model.claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
-from generator_util import (
-    CLM_ANSI_SGNTR,
-    RowAdapter,
-    gen_basic_id,
-    gen_npi_id,
-)
+from faker import Faker
+from file_utils import ROOT
+from generator_util import GeneratorUtil
+from row_adapter import RowAdapter
 
 _faker = Faker()
 
@@ -55,23 +51,26 @@ class OtherGeneratorUtil:
         else:
             obj[f.META_LST_UPDT_SK] = 0
 
-    def gen_synthetic_clm_ansi_sgntr(self, src_path: str = f"sample-data/{CLM_ANSI_SGNTR}.csv"):
-        csv_df = pd.read_csv(  # type: ignore
-            src_path,
-            dtype=str,
-            na_filter=False,
-        )
+    def gen_synthetic_clm_ansi_sgntr(self):
+        with (ROOT / "SYNTHETIC_CLM_ANSI_SGNTR.csv").open("rb") as file_stream:
+            csv_df = pd.read_csv(file_stream, dtype=str, na_filter=False)
+
         clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
 
-        # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate
-        # it's synthetic
+        # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate it's synthetic
         return [
-            RowAdapter(x | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"})
+            RowAdapter(
+                {k: (None if v == "" else v) for k, v in x.items()}
+                | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"}
+            )
             for x in clm_ansi_sgntr
         ]
 
     def gen_provider_history(
-        self, amount: int, init_provider_historys: list[RowAdapter] | None = None
+        self,
+        amount: int,
+        gen_utils: GeneratorUtil,
+        init_provider_historys: list[RowAdapter] | None = None,
     ):
         init_provider_historys = init_provider_historys or []
         additional_provider_historys = [
@@ -83,17 +82,12 @@ class OtherGeneratorUtil:
         generated_type_1_npis = set()
         generated_type_2_npis = set()
         for idx, provider_history in enumerate(all_provider_historys):
-            prvdr_sk = gen_npi_id(field="PRVDR_SK")
+            prvdr_sk = provider_history.get(f.PRVDR_SK) or gen_utils.id_gen.npi_id(field="PRVDR_SK")
             # make half of providers type 1 npi and half type 2
             # type 1 npis never have a legal name
             # need to return both the subsets of type 1/2 npis that were used so that
             # generated claims can reference provider histories that actually exist
-            if idx % 2 == 0:
-                prvdr_lgl_name = ""
-                generated_type_1_npis.add(prvdr_sk)
-            else:
-                prvdr_lgl_name = random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES)
-                generated_type_2_npis.add(prvdr_sk)
+            prvdr_lgl_name = "" if idx % 2 == 0 else random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES)
             provider_history.extend(
                 {
                     f.PRVDR_SK: prvdr_sk,
@@ -105,14 +99,27 @@ class OtherGeneratorUtil:
                     f.PRVDR_NAME: random.choice(AVAILABLE_PROVIDER_NAMES),
                     f.PRVDR_LGL_NAME: prvdr_lgl_name,
                     f.PRVDR_NPI_NUM: prvdr_sk,
-                    f.PRVDR_EMPLR_ID_NUM: gen_basic_id(field=f.PRVDR_EMPLR_ID_NUM, length=9),
-                    f.PRVDR_OSCAR_NUM: gen_basic_id(field=f.PRVDR_OSCAR_NUM, length=6),
+                    f.PRVDR_EMPLR_ID_NUM: gen_utils.id_gen.gen_basic_id(
+                        field=f.PRVDR_EMPLR_ID_NUM, length=9
+                    ),
+                    f.PRVDR_OSCAR_NUM: gen_utils.id_gen.gen_basic_id(
+                        field=f.PRVDR_OSCAR_NUM, length=6
+                    ),
                     f.PRVDR_TXNMY_CMPST_CD: random.choice(AVAILABLE_PROVIDER_TX_CODES),
                     f.PRVDR_TYPE_CD: random.choice(AVAILABLE_PROVIDER_TYPE_CODES),
                 }
             )
             self._generate_meta_sk_pair(provider_history)
 
+            if provider_history.get(f.PRVDR_LGL_NAME):
+                generated_type_2_npis.add(prvdr_sk)
+            else:
+                generated_type_1_npis.add(prvdr_sk)
+
             provider_historys.append(provider_history)
 
-        return provider_historys, list(generated_type_1_npis), list(generated_type_2_npis)
+        return (
+            provider_historys,
+            list(generated_type_1_npis),
+            list(generated_type_2_npis),
+        )

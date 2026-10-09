@@ -5,7 +5,60 @@ from typing import Any
 
 import pandas as pd
 
-from idr_model.claims_static import INSTITUTIONAL_CLAIM_TYPES, PHARMACY_CLM_TYPE_CDS
+FISS_CLM_TYPE_CDS = [
+    1011,
+    1041,
+    1012,
+    1013,
+    1014,
+    1022,
+    1023,
+    1034,
+    1071,
+    1072,
+    1073,
+    1074,
+    1075,
+    1076,
+    1077,
+    1083,
+    1085,
+    1087,
+    1089,
+    1032,
+    1033,
+    1081,
+    1082,
+    1021,
+    1018,
+    2011,
+    2041,
+    2012,
+    2013,
+    2014,
+    2022,
+    2023,
+    2034,
+    2071,
+    2072,
+    2073,
+    2074,
+    2075,
+    2076,
+    2077,
+    2083,
+    2085,
+    2087,
+    2089,
+    2032,
+    2033,
+    2081,
+    2082,
+    2021,
+    2018,
+]
+INSTITUTIONAL_CLAIM_TYPES = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *FISS_CLM_TYPE_CDS]
+PHARMACY_CLM_TYPE_CDS = [1, 2, 3, 4]
 
 
 class Result:
@@ -303,11 +356,11 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json, output_file=f"{self.output_directory}/EOB-Base-Sample-new.json"
+            result_json=output_json,
+            output_file=f"{self.output_directory}/EOB-Base-Sample-new.json",
         )
 
     def create_pharmacy(self, clm_uniq_id: str, claim_row: dict[str, str]) -> Result:
-
         provider_npi = str(claim_row.get("PRVDR_PRSCRBNG_PRVDR_NPI_NUM", "")).strip()
 
         prov_row = self.read_provider(provider_npi)
@@ -431,7 +484,8 @@ class SampleGenerator:
         }
 
         return Result(
-            result_json=output_json, output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json"
+            result_json=output_json,
+            output_file=f"{self.output_directory}/EOB-Pharmacy-Sample.json",
         )
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
