@@ -96,7 +96,6 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_PROFESSIONAL_ORG = "3351266481402";
   protected static final String CLAIM_ID_PROFESSIONAL_MCS = "3351266481403";
   protected static final String CLAIM_ID_RX_ORGANIZATION = "1409088853940";
-  protected static final String CLAIM_ID_RX_NON_LATEST = "1409088853949";
   protected static final String CLAIM_ID_PROFESSIONAL_NON_LATEST = "3351266481404";
   protected static final String CLAIM_ID_INSTITUTIONAL = "1071939711296";
 
