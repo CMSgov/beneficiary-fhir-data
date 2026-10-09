@@ -14,12 +14,10 @@ from ..model.base_model import (
     ALIAS_LINE,
     ALIAS_PBP_NUM,
     ALIAS_PRVDR_PRSCRBNG,
-    ALIAS_PRVDR_SRVC,
     ALIAS_PRVDR_SRVC_GNRC_ID,
     ALIAS_RX_LINE,
     ALIAS_SGNTR,
     BATCH_ID,
-    COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
@@ -57,18 +55,6 @@ class IdrClaimRx(IdrBaseModel):
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: Annotated[int, ALIAS:ALIAS_CLM]
     clm_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_prnt_cntl_num: Annotated[
-        str,
-        {
-            ALIAS: ALIAS_CLM,
-            EXPR: f"""CASE
-                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_prnt_cntl_num
-                THEN ''
-                ELSE {ALIAS_CLM}.clm_prnt_cntl_num
-                END""",
-        },
-        BeforeValidator(transform_default_string),
-    ]
     clm_orig_cntl_num: Annotated[
         str,
         {
@@ -78,11 +64,7 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
-    clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_efctv_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
-    clm_obslt_dt: Annotated[
-        date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
-    ]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_pd_dt: Annotated[
@@ -129,17 +111,11 @@ class IdrClaimRx(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
 
     # Columns from v2_mdcr_clm_line
-    clm_line_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_from_dt: Annotated[date, {ALIAS: ALIAS_LINE}]
-    clm_line_thru_dt: Annotated[date, {ALIAS: ALIAS_LINE}]
     clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_ndc_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
-    clm_line_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_ncvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     idr_insrt_ts_line: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE, **INSERT_FIELD},
@@ -168,25 +144,16 @@ class IdrClaimRx(IdrBaseModel):
     clm_line_days_suply_qty: Annotated[int | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_grs_above_thrshld_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_grs_blw_thrshld_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_ingrdnt_cst_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_lis_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_plro_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_rx_fill_num: Annotated[int | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_rx_orgn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_sls_tax_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_srvc_cst_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_troop_tot_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_vccn_admin_fee_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_rptd_gap_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_rptd_mftr_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_rebt_passthru_pos_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_cms_calcd_mftr_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_line_grs_cvrd_cst_tot_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
-    clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     idr_insrt_ts_line_rx: Annotated[
         datetime,
         {ALIAS: ALIAS_RX_LINE, **INSERT_FIELD},
@@ -196,6 +163,22 @@ class IdrClaimRx(IdrBaseModel):
         datetime,
         {ALIAS: ALIAS_RX_LINE, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
+    ]
+    tot_rx_cst_amt: Annotated[
+        float | None,
+        {
+            EXPR: f"""CASE
+                WHEN {ALIAS_RX_LINE}.clm_line_vccn_admin_fee_amt IS NULL
+                    AND {ALIAS_RX_LINE}.clm_line_sls_tax_amt IS NULL
+                    AND {ALIAS_RX_LINE}.clm_line_ingrdnt_cst_amt IS NULL
+                    AND {ALIAS_RX_LINE}.clm_line_srvc_cst_amt IS NULL
+                THEN NULL
+                ELSE COALESCE({ALIAS_RX_LINE}.clm_line_vccn_admin_fee_amt, 0)
+                    + COALESCE({ALIAS_RX_LINE}.clm_line_sls_tax_amt, 0)
+                    + COALESCE({ALIAS_RX_LINE}.clm_line_ingrdnt_cst_amt, 0)
+                    + COALESCE({ALIAS_RX_LINE}.clm_line_srvc_cst_amt, 0)
+                END""",
+        },
     ]
 
     # Columns from v2_mdcr_cntrct_pbp_num
@@ -218,27 +201,12 @@ class IdrClaimRx(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_prvdr_hstry
-    prvdr_srvc_prvdr_npi_num: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_srvc_1st_name: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_default_string),
-    ]
     prvdr_srvc_last_or_lgl_name: Annotated[
         str,
-        {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_SRVC)},
+        {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_SRVC_GNRC_ID)},
         BeforeValidator(transform_default_string),
     ]
 
-    prvdr_prscrbng_prvdr_npi_num: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_default_string),
-    ]
     bfd_prvdr_prscrbng_npi_type: Annotated[
         int | None, {EXPR: provider_npi_type_expr(ALIAS_PRVDR_PRSCRBNG)}
     ]
@@ -276,7 +244,6 @@ class IdrClaimRx(IdrBaseModel):
         line = ALIAS_LINE
         rx_line = ALIAS_RX_LINE
         sgntr = ALIAS_SGNTR
-        prvdr_srvc = ALIAS_PRVDR_SRVC
         prvdr_srvc_gnrc_id = ALIAS_PRVDR_SRVC_GNRC_ID
         prvdr_prscrbng = ALIAS_PRVDR_PRSCRBNG
         pbp_num = ALIAS_PBP_NUM
@@ -320,14 +287,11 @@ class IdrClaimRx(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND
                 {clm}.clm_num_sk = {rx_line}.clm_num_sk
-            LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc}
-                ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
-                AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_srvc_gnrc_id}
                 ON {prvdr_srvc_gnrc_id}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
                 AND {prvdr_srvc_gnrc_id}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN {SETTINGS.idr_provider_history_table} {prvdr_prscrbng}
-                ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
+                ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.clm_prsbng_prvdr_gnrc_id_num
                 AND {prvdr_prscrbng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN contracts {pbp_num}
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num

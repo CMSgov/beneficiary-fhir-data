@@ -25,9 +25,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 @AttributeOverride(name = "npiType", column = @Column(name = "bfd_srvc_prvdr_gnrc_id_npi_type"))
 public class ServiceProviderPharmacy extends ProviderHistoryBase {
 
-  @Column(name = "prvdr_srvc_1st_name")
-  private Optional<String> providerFirstName;
-
   @Column(name = "prvdr_srvc_id_qlfyr_cd")
   private Optional<ProviderIdQualifierCode> providerQualifierCode;
 
@@ -89,7 +86,6 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
 
   private HumanName toFhirName() {
     var name = new HumanName();
-    providerFirstName.ifPresent(name::addGiven);
     getProviderName().ifPresent(name::setFamily);
     return name;
   }

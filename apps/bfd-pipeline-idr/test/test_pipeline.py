@@ -373,6 +373,42 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == -8797257401798
 
+    cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -8797257401798")
+    assert cur.rowcount == 1
+    claim_rx_row = cur.fetchone()
+    assert claim_rx_row is not None
+
+    cur = conn.execute(
+        """
+        select
+            claim_line_rx.clm_line_vccn_admin_fee_amt,
+            claim_line_rx.clm_line_sls_tax_amt,
+            claim_line_rx.clm_line_ingrdnt_cst_amt,
+            claim_line_rx.clm_line_srvc_cst_amt
+        from cms_vdm_view_mdcr_prd.v2_mdcr_clm claim
+        join cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx claim_line_rx
+            on claim.geo_bene_sk = claim_line_rx.geo_bene_sk
+            and claim.clm_dt_sgntr_sk = claim_line_rx.clm_dt_sgntr_sk
+            and claim.clm_type_cd = claim_line_rx.clm_type_cd
+            and claim.clm_num_sk = claim_line_rx.clm_num_sk
+        where claim.clm_uniq_id = -8797257401798
+        """
+    )
+    assert cur.rowcount == 1
+    claim_line_rx_row = cur.fetchone()
+    assert claim_line_rx_row is not None
+
+    expected_tot_rx_cst_amt = sum(
+        claim_line_rx_row[field]
+        for field in (
+            "clm_line_vccn_admin_fee_amt",
+            "clm_line_sls_tax_amt",
+            "clm_line_ingrdnt_cst_amt",
+            "clm_line_srvc_cst_amt",
+        )
+    )
+    assert claim_rx_row["tot_rx_cst_amt"] == expected_tot_rx_cst_amt
+
     cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
     if load_type == LoadType.INITIAL:
         assert cur.rowcount == 996
@@ -824,7 +860,6 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -1784862973911")
     row = cur.fetchone()
     assert row is not None
-    assert row["prvdr_prscrbng_prvdr_npi_num"] == "1789655200"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
     assert row["bfd_prvdr_prscrbng_npi_type"] == 1
     assert row["bfd_updated_ts"] == old_update_ts
@@ -838,7 +873,6 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = -6260496095505")
     row = cur.fetchone()
     assert row is not None
-    assert row["prvdr_prscrbng_prvdr_npi_num"] == "1820038259"
     assert row["prvdr_prsbng_id_qlfyr_cd"] == "01"
     assert row["bfd_prvdr_prscrbng_npi_type"] is None
     assert row["bfd_updated_ts"] == latest_time
