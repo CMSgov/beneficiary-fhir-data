@@ -1,469 +1,450 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-server-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-server-war</artifactId>
-    <packaging>war</packaging>
-
-    <description>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-server-parent</artifactId>
+    <version>2.274.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>bfd-server-war</artifactId>
+  <packaging>war</packaging>
+  <description>
         The primary WAR for the BFD Server project. Provides a FHIR API.
     </description>
-
-    <dependencies>
-        <dependency>
-            <!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-server-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+  <dependencies>
+    <dependency>
+      <!-- BFD Shared Utilities include a wrapper around MDC for logging. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-server-shared-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                 for details. -->
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides the JPA entities used to represent the BFD data in the database. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rif</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda</artifactId>
-        </dependency>
-
-        <dependency>
-            <!-- At least one "structures" JAR must also be included -->
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-structures-dstu3</artifactId>
-            <version>${hapi-fhir.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- At least one "structures" JAR must also be included -->
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-            <version>${hapi-fhir.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <!-- This dependency includes the server HAPI-FHIR classes -->
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-server</artifactId>
-            <version>${hapi-fhir.version}</version>
-        </dependency>
-        <dependency>
-            <!-- This dependency includes the client HAPI-FHIR classes -->
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
-            <version>${hapi-fhir.version}</version>
-        </dependency>
-        <dependency>
-            <!-- This dependency includes the base HAPI-FHIR classes -->
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-base</artifactId>
-            <version>${hapi-fhir.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Needed for comparing JSON files to obtain the diff. See
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides the JPA entities used to represent the BFD data in the database. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rif</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rda</artifactId>
+    </dependency>
+    <dependency>
+      <!-- At least one "structures" JAR must also be included -->
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-dstu3</artifactId>
+      <version>${hapi-fhir.version}</version>
+    </dependency>
+    <dependency>
+      <!-- At least one "structures" JAR must also be included -->
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-r4</artifactId>
+      <version>${hapi-fhir.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <!-- This dependency includes the server HAPI-FHIR classes -->
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-server</artifactId>
+      <version>${hapi-fhir.version}</version>
+    </dependency>
+    <dependency>
+      <!-- This dependency includes the client HAPI-FHIR classes -->
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-client</artifactId>
+      <version>${hapi-fhir.version}</version>
+    </dependency>
+    <dependency>
+      <!-- This dependency includes the base HAPI-FHIR classes -->
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-base</artifactId>
+      <version>${hapi-fhir.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Needed for comparing JSON files to obtain the diff. See
                  https://github.com/flipkart-incubator/zjsonpatch for details. -->
-            <groupId>com.flipkart.zjsonpatch</groupId>
-            <artifactId>zjsonpatch</artifactId>
-            <version>${zjsonpatch.version}</version>
-            <scope>test</scope>
-            <!-- Don't let the jackson transitive dependency versions be determined by
+      <groupId>com.flipkart.zjsonpatch</groupId>
+      <artifactId>zjsonpatch</artifactId>
+      <version>${zjsonpatch.version}</version>
+      <scope>test</scope>
+      <!-- Don't let the jackson transitive dependency versions be determined by
                  this test dependency -->
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <!-- Needed for JEE/Servlet support -->
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <!-- Used for CORS support -->
-            <groupId>org.ebaysf.web</groupId>
-            <artifactId>cors-filter</artifactId>
-            <version>${cors.filter.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.common</groupId>
-            <artifactId>hibernate-commons-annotations</artifactId>
-            <version>${hibernate-commons-annotations.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Provides the @Inject annotation. Does NOT provide dependency injection;
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <!-- Needed for JEE/Servlet support -->
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- Used for CORS support -->
+      <groupId>org.ebaysf.web</groupId>
+      <artifactId>cors-filter</artifactId>
+      <version>${cors.filter.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.common</groupId>
+      <artifactId>hibernate-commons-annotations</artifactId>
+      <version>${hibernate-commons-annotations.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Provides the @Inject annotation. Does NOT provide dependency injection;
                 just the standardized annotation for it. -->
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
-        </dependency>
-        <dependency>
-            <!-- We mostly use Spring to ensure that our JPA EntityManagers are properly
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+    <dependency>
+      <!-- We mostly use Spring to ensure that our JPA EntityManagers are properly
                 managed. -->
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring-framework.version}</version>
-        </dependency>
-        <dependency>
-            <!-- We're really not using much of the Spring Data JPA framework; we
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <!-- We're really not using much of the Spring Data JPA framework; we
                 mostly just need its Hibernate JPA glue. -->
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Dependency for spring-retry-->
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
-        </dependency>
-        <dependency>
-            <!-- We need to be able to retry our Provider entrypoint methods upon
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Dependency for spring-retry-->
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aspects</artifactId>
+    </dependency>
+    <dependency>
+      <!-- We need to be able to retry our Provider entrypoint methods upon
             failover of a node in our Aurora Clusters-->
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
-            <version>${spring-retry.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+      <version>${spring-retry.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
                 at runtime. -->
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jvm</artifactId>
-            <version>${metrics.version}</version>
-        </dependency>
-        <!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
-        <!--                for the number of active requests, and a timer for request duration. Enabled-->
-        <!--                via `web.xml`. &ndash;&gt;-->
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jakarta-servlets</artifactId>
-            <version>${metrics.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jakarta-servlet</artifactId>
-            <version>${metrics.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Used to parse and read various CSV data resources. -->
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-        </dependency>
-
-        <dependency>
-            <!-- BFD runs against PostgreSQL in production. -->
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
-            <!-- providd because it's only needed at compile time -->
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <!-- Used to proxy JDBC usage, for monitoring. -->
-            <groupId>net.ttddyy</groupId>
-            <artifactId>datasource-proxy</artifactId>
-            <version>${datasource-proxy.version}</version>
-        </dependency>
-
-        <dependency>
-            <!-- Used for endpoint testing automation -->
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <!-- The test framework used for unit and integration tests. -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-            <!-- exclude Junit from including its version of hamcrest -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- We need to be able to retry our Provider entrypoint methods upon
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jvm</artifactId>
+      <version>${metrics.version}</version>
+    </dependency>
+    <!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
+    <!--                for the number of active requests, and a timer for request duration. Enabled-->
+    <!--                via `web.xml`. &ndash;&gt;-->
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jakarta-servlets</artifactId>
+      <version>${metrics.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jakarta-servlet</artifactId>
+      <version>${metrics.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used to parse and read various CSV data resources. -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+    </dependency>
+    <dependency>
+      <!-- BFD runs against PostgreSQL in production. -->
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+      <!-- providd because it's only needed at compile time -->
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to proxy JDBC usage, for monitoring. -->
+      <groupId>net.ttddyy</groupId>
+      <artifactId>datasource-proxy</artifactId>
+      <version>${datasource-proxy.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used for endpoint testing automation -->
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- The test framework used for unit and integration tests. -->
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+      <!-- exclude Junit from including its version of hamcrest -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- We need to be able to retry our Provider entrypoint methods upon
             failover of a node in our Aurora Clusters-->
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Mockito utilities for JUnit / Jupiter. -->
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- This will get hamcrest-core automatically -->
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>${hamcrest-library.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-server-openapi</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Logging backend for tests.  -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Provides sample data used in tests. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rif-samples</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to load sample data in tests. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-pipeline-ccw-rif</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons.io.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Used for Bloom filters -->
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sketch_2.12</artifactId>
-            <version>${org.apache.spark.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- We need to be able to run the server in-process during tests. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-server-launcher</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
-            <groupId>org.eclipse.jetty.ee10</groupId>
-            <artifactId>jetty-ee10-webapp</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Jetty is the embedded web server that this project uses to run WARs. -->
-            <groupId>org.eclipse.jetty.ee10</groupId>
-            <artifactId>jetty-ee10-annotations</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-pipeline-shared-test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven.antrun.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <target>
-                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
-                                    <patternset>
-                                        <exclude name="**/lib/*" />
-                                        <exclude name="**/classes/**" />
-                                    </patternset>
-                                </unzip>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Copy the key/trust stores over to target for easier access in the tests. -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-server-resources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/server-work</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/../dev/ssl-stores</directory>
-                                    <includes>
-                                        <include>server-keystore.pfx</include>
-                                        <include>server-truststore.pfx</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec.maven.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <classpathScope>test</classpathScope>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath />
-                                <argument>gov.cms.bfd.server.war.OpenApiDocs</argument>
-                                <argument>${project.version}</argument>
-                                <argument>${project.basedir}</argument>
-                                <argument>${project.basedir}/../../../dist</argument>
-                            </arguments>
-                            <skip>${apidocgen.skip}</skip>
-                        </configuration>
-                        <id>create-openapi-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-dd-openapi-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.csv</file>
-                                    <type>csv</type>
-                                    <classifier>v1-data-dictionary</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.json</file>
-                                    <type>json</type>
-                                    <classifier>v1-data-dictionary</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.csv</file>
-                                    <type>csv</type>
-                                    <classifier>v2-data-dictionary</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.json</file>
-                                    <type>json</type>
-                                    <classifier>v2-data-dictionary</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/data-dictionary-${project.version}.xlsx</file>
-                                    <type>xlsx</type>
-                                    <classifier>data-dictionary</classifier>
-                                </artifact>
-                                <artifact>
-                                    <file>${project.basedir}/../../../dist/OpenAPI-${project.version}.yaml</file>
-                                    <type>yaml</type>
-                                    <classifier>openapi</classifier>
-                                </artifact>
-                            </artifacts>
-                            <skipAttach>${apidocgen.skip}</skipAttach>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Mockito utilities for JUnit / Jupiter. -->
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- This will get hamcrest-core automatically -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-library</artifactId>
+      <version>${hamcrest-library.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-server-openapi</artifactId>
+      <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Logging backend for tests.  -->
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Provides sample data used in tests. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rif-samples</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to load sample data in tests. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-pipeline-ccw-rif</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons.io.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used for Bloom filters -->
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sketch_2.12</artifactId>
+      <version>${org.apache.spark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-shared-test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- We need to be able to run the server in-process during tests. -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-server-launcher</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-webapp</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Jetty is the embedded web server that this project uses to run WARs. -->
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-annotations</artifactId>
+      <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-pipeline-shared-test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven.antrun.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
+                  <patternset>
+                    <exclude name="**/lib/*"/>
+                    <exclude name="**/classes/**"/>
+                  </patternset>
+                </unzip>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- Copy the key/trust stores over to target for easier access in the tests. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-server-resources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/server-work</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/../dev/ssl-stores</directory>
+                  <includes>
+                    <include>server-keystore.pfx</include>
+                    <include>server-truststore.pfx</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <configuration>
+              <classpathScope>test</classpathScope>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <classpath/>
+                <argument>gov.cms.bfd.server.war.OpenApiDocs</argument>
+                <argument>${project.version}</argument>
+                <argument>${project.basedir}</argument>
+                <argument>${project.basedir}/../../../dist</argument>
+              </arguments>
+              <skip>${apidocgen.skip}</skip>
+            </configuration>
+            <id>create-openapi-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-dd-openapi-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.csv</file>
+                  <type>csv</type>
+                  <classifier>v1-data-dictionary</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/V1-data-dictionary-${project.version}.json</file>
+                  <type>json</type>
+                  <classifier>v1-data-dictionary</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.csv</file>
+                  <type>csv</type>
+                  <classifier>v2-data-dictionary</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/V2-data-dictionary-${project.version}.json</file>
+                  <type>json</type>
+                  <classifier>v2-data-dictionary</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/data-dictionary-${project.version}.xlsx</file>
+                  <type>xlsx</type>
+                  <classifier>data-dictionary</classifier>
+                </artifact>
+                <artifact>
+                  <file>${project.basedir}/../../../dist/OpenAPI-${project.version}.yaml</file>
+                  <type>yaml</type>
+                  <classifier>openapi</classifier>
+                </artifact>
+              </artifacts>
+              <skipAttach>${apidocgen.skip}</skipAttach>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

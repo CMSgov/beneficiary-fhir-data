@@ -1,115 +1,111 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-shared-test-utils</artifactId>
-    <packaging>jar</packaging>
-
-    <description>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-parent</artifactId>
+    <version>2.274.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>bfd-shared-test-utils</artifactId>
+  <packaging>jar</packaging>
+  <description>
         Provides test utility code and dependencies that are shared by more than one of the other BFD modules.
     </description>
-
-    <dependencies>
-        <dependency>
-            <!-- Provides a database schema mechanism. See the DatabaseSchemaManager
+  <dependencies>
+    <dependency>
+      <!-- Provides a database schema mechanism. See the DatabaseSchemaManager
                 class. -->
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
                  Java. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <!-- An implementation of the Log4J API that routes everything through to SLF4J,
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <!-- An implementation of the Log4J API that routes everything through to SLF4J,
                  instead. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
                  events will be sent to it. -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Used to run our unit and integration tests. -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to interact with AWS' SSM service -->
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>sqs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ministack</groupId>
-            <artifactId>testcontainers-ministack</artifactId>
-            <version>${testcontainers-ministack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <!--
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Used to run our unit and integration tests. -->
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to interact with AWS' SSM service -->
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>sqs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainers.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ministack</groupId>
+      <artifactId>testcontainers-ministack</artifactId>
+      <version>${testcontainers-ministack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!--
                 Ensure that jacoco plugin is disabled in this module.
                 This overrides use of a property from parent pom.
                 -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${maven.jacoco.plugin.version}</version>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${maven.jacoco.plugin.version}</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

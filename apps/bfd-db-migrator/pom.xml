@@ -1,249 +1,244 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-db-migrator</artifactId>
-    <packaging>jar</packaging>
-
-    <description>An application integrated with Flyway and Hibernate responsible for executing database migrations and
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-parent</artifactId>
+    <version>2.274.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>bfd-db-migrator</artifactId>
+  <packaging>jar</packaging>
+  <description>An application integrated with Flyway and Hibernate responsible for executing database migrations and
         validations against BFD datastores.
     </description>
-
-    <dependencies>
-        <dependency>
-            <!-- contains the JPA entities for writing to the database -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Provides the JPA entities used to represent the Blue Button API
+  <dependencies>
+    <dependency>
+      <!-- contains the JPA entities for writing to the database -->
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rda</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Provides the JPA entities used to represent the Blue Button API
                 backend's data in the database. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rif</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>${reflections.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- An implementation of the Log4J API that routes everything through to SLF4J,
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-rif</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>${reflections.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- An implementation of the Log4J API that routes everything through to SLF4J,
                  instead. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-to-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-to-slf4j -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Logback is used as the logging target/backend for SLF4J during runtime: all logging
                  events will be sent to it. -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides a JSON layout (i.e. output format) for Logback. Provides
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides a JSON layout (i.e. output format) for Logback. Provides
                  ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
-            <groupId>ch.qos.logback.contrib</groupId>
-            <artifactId>logback-json-classic</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Required by logback-json-classic. -->
-            <groupId>ch.qos.logback.contrib</groupId>
-            <artifactId>logback-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Provides utility code and dependencies that are shared by (more or
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-json-classic</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Required by logback-json-classic. -->
+      <groupId>ch.qos.logback.contrib</groupId>
+      <artifactId>logback-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Provides utility code and dependencies that are shared by (more or
                 less) all of the other BFD modules. -->
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-shared-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
                 at runtime. -->
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jvm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <!-- Used in tests to help with managing asynchronous behavior. Reference:
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jvm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+    <dependency>
+      <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <!-- Used in tests to help with managing asynchronous behavior. Reference:
                 https://github.com/awaitility/awaitility -->
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to run our unit and integration tests. -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Adds convenience features for working with mocks in tests -->
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to write fluent assertions in unit tests. -->
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ministack</groupId>
-            <artifactId>testcontainers-ministack</artifactId>
-            <version>${testcontainers-ministack.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven.assembly.plugin.version}</version>
-                    <configuration>
-                        <appendAssemblyId>false</appendAssemblyId>
-                        <descriptors>
-                            <descriptor>src/main/assembly/zip.xml</descriptor>
-                        </descriptors>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven.dependency.plugin.version}</version>
-                    <!-- Unpack the assembly for use in ITs. -->
-                    <configuration>
-                        <overWriteReleases>false</overWriteReleases>
-                        <overWriteSnapshots>true</overWriteSnapshots>
-                        <artifactItems>
-                            <artifactItem>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <version>${project.version}</version>
-                                <type>zip</type>
-                                <outputDirectory>${project.build.directory}/db-migrator</outputDirectory>
-                            </artifactItem>
-                        </artifactItems>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-scm-plugin</artifactId>
-                    <configuration>
-                        <!-- This default config is used in the Jenkinsfile CI build. -->
-                        <tag>${project.artifactId}-${project.version}</tag>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>server-unpack-assembly</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Will run the `*IT.java` integration tests in this project, as part
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to run our unit and integration tests. -->
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Adds convenience features for working with mocks in tests -->
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-shared-test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Used to write fluent assertions in unit tests. -->
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ministack</groupId>
+      <artifactId>testcontainers-ministack</artifactId>
+      <version>${testcontainers-ministack.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven.assembly.plugin.version}</version>
+          <configuration>
+            <appendAssemblyId>false</appendAssemblyId>
+            <descriptors>
+              <descriptor>src/main/assembly/zip.xml</descriptor>
+            </descriptors>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven.dependency.plugin.version}</version>
+          <!-- Unpack the assembly for use in ITs. -->
+          <configuration>
+            <overWriteReleases>false</overWriteReleases>
+            <overWriteSnapshots>true</overWriteSnapshots>
+            <artifactItems>
+              <artifactItem>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>${project.artifactId}</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <outputDirectory>${project.build.directory}/db-migrator</outputDirectory>
+              </artifactItem>
+            </artifactItems>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-scm-plugin</artifactId>
+          <configuration>
+            <!-- This default config is used in the Jenkinsfile CI build. -->
+            <tag>${project.artifactId}-${project.version}</tag>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>server-unpack-assembly</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- Will run the `*IT.java` integration tests in this project, as part
                     of the build. -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Used to build docker image for the project. -->
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>${asm.version}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>build-image</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>${jib.goal}</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- Used to build docker image for the project. -->
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>${asm.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>build-image</id>
+            <phase>package</phase>
+            <goals>
+              <goal>${jib.goal}</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
