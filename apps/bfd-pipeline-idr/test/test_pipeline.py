@@ -384,7 +384,6 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     cur = conn.execute("select * from idr.claim_professional_ss where clm_uniq_id = 999999434803")
     assert cur.rowcount == 0
 
-
     cur = conn.execute("select * from idr.claim_rx where clm_uniq_id = 999999488700")
     assert cur.rowcount == 0
 
