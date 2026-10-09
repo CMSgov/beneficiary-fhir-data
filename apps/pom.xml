@@ -53,8 +53,8 @@
     <module>report-aggregate</module>
   </modules>
   <properties>
-    <surefire.jvm.args />
-    <failsafe.jvm.args />
+    <surefire.jvm.args/>
+    <failsafe.jvm.args/>
     <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -215,8 +215,8 @@
     <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
     <its.db.url>jdbc:bfd-test:tc</its.db.url>
-    <its.db.username />
-    <its.db.password />
+    <its.db.username/>
+    <its.db.password/>
     <!-- Docker image used with testcontainers to provide a working database for testing. -->
     <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -253,7 +253,7 @@
     <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
     <jib.tag>${project.version}</jib.tag>
     <!-- Optional image namespace. -->
-    <jib.namespace />
+    <jib.namespace/>
     <!-- Skip by default.  Override to allow images to be built. -->
     <jib.skip>true</jib.skip>
     <!-- Skip by default.  Override to let open api documents be generated. -->
@@ -316,7 +316,7 @@
         <artifactId>netty-handler</artifactId>
         <version>${netty.version}</version>
       </dependency>
-      <!-- Pin remaining transitive netty artifacts to ${netty.version} for consistency -->
+      <!-- Pin remaining transitive netty artifacts to ${netty.version} for consistency-->
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-transport</artifactId>
