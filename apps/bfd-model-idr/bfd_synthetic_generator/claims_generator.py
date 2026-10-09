@@ -779,8 +779,8 @@ class _ClaimsFile(StrEnum):
     show_default=True,
     help=(
         "Sets the mode for which input files from which distinct BENE_SKs are read. 'bene_hstry' "
-        f"indicates that BENE_SKs are only loaded from {f.BENE_HSTRY}, 'clm' indicates loading from "
-        f"only from {f.CLM}. 'both' indicates loading from both"
+        f"indicates that BENE_SKs are only loaded from {f.BENE_HSTRY}, 'clm' indicates loading "
+        f"from only from {f.CLM}. 'both' indicates loading from both"
     ),
 )
 @click.option(
@@ -839,7 +839,7 @@ def generate(
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
         raise click.UsageError(
-            f"error: min claims value of {min_claims} is greater than max claims value of {max_claims}"
+            f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
     if writer is None:
@@ -963,7 +963,7 @@ def generate(
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
-    for bene_sks_batch in writer.get_bene_sks(files, bene_sk_mode, batch_size):
+    for bene_sks_batch in writer.get_bene_sks(batch_size, bene_sk_mode, files):
         existing_claims = files
         if isinstance(writer, SnowflakeWriter) and not truncate:
             existing_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
@@ -1020,7 +1020,7 @@ def _generate_batch(
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in existing}
     clms_per_bene_sk = partition_rows(llist=existing[f.CLM], part_by=lambda x: int(x[f.BENE_SK]))
 
-    cond_sgntr_mbr_per_clm_uniq_id = partition_rows(
+    cond_sgntr_mbr_per_cond_sgntr_sk = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
         part_by=lambda x: str(x[f.CLM_RLT_COND_SGNTR_SK]),
     )
@@ -1133,7 +1133,7 @@ def _generate_batch(
                 adj_util.gen_clm_rlt_cond_sgntr_mbr(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_cond_sgntr_mbr=row
                 )
-                for row in cond_sgntr_mbr_per_clm_uniq_id.get(
+                for row in cond_sgntr_mbr_per_cond_sgntr_sk.get(
                     str(clm[f.CLM_RLT_COND_SGNTR_SK]), [None]
                 )
             ]
@@ -1290,7 +1290,7 @@ def _generate_batch(
                 f.CLM: as_list(file_pac_clm),  # as_list ensures None values return empty list
                 f.CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
-                f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_clm_uniq_id.get(
+                f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_cond_sgntr_sk.get(
                     str(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK]), []
                 ),
                 f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk.get(

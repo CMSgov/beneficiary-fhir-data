@@ -15,7 +15,9 @@ from constants import (
     CLM_DCMTN,
     CLM_DT_SGNTR,
     CLM_LINE,
+    CLM_OCRNC_SGNTR_MBR,
     CLM_RLT_COND_SGNTR_MBR,
+    CLM_RLT_OCRNC_SGNTR_MBR,
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
 )
@@ -80,6 +82,9 @@ _MBI_ALPHABETS = [
 
 
 class RandomIdGenerator(IdGenerator):
+    # Generator picks random values and retries on collision. Everything it has handed out is
+    # remembered in memory per field. Used only by the CSV flow.
+
     def __init__(self) -> None:
         self._used_by_field: dict[str, set[str]] = {}
         self._used_bene_sk: set[int] = set()
@@ -151,11 +156,21 @@ DEFAULT_INITIAL_NPI = 100_000_000
 
 @dataclass
 class SnowflakeIdState:
+    # Represents the next values the generator will hand out based off the current IDs in
+    # Snowflake. This is built once per run by load_id_state
+
+    # Next BENE_SK to use. Counts down.
     bene_sk_next: int = DEFAULT_INITIAL_BENE_SK
+    # Plain numeric fields. Counts down.
     numeric_id_next: dict[str, int] = field(default_factory=dict)
+    # Multipart fields (field -> next position of the mixed radix counter, not the string ID
+    # itself, see _decode_identifier). Counts up.
     multipart_id_next: dict[str, int] = field(default_factory=dict)
+    # MBIs and NPIs similar as above. Counts up.
     mbi_next: int = 0
     npi_next: int = DEFAULT_INITIAL_NPI
+    # CLM_NUM_SK is unique within (CLM_TYPE_CD, CLM_DT_SGNTR_SK, GEO_BENE_SK) so each combo has its
+    # own counter. Counts up.
     claim_num_sk_next: dict[tuple[str, str, str], int] = field(default_factory=dict)
 
 
@@ -171,6 +186,7 @@ def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[tuple[Any, ...]]:
 def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeIdState:
     state = SnowflakeIdState()
 
+    # if truncate is set then the tables are emptied so every field starts from scratch
     if not truncate:
         # Get or set the min ben_sk
         existing_min_bene_sk = _query(
@@ -193,12 +209,14 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         if existing_max_npi is not None:
             state.npi_next = int(existing_max_npi[:9]) + 1
 
-    _NUMERIC_MULTIPART_FIELDS: dict[str, str] = {
+    _NUMERIC_FIELDS: dict[str, str] = {
         "CNTRCT_PBP_SK": CNTRCT_PBP_NUM,
         "CLM_UNIQ_ID": CLM,
         "CLM_DT_SGNTR_SK": CLM_DT_SGNTR,
         "GEO_BENE_SK": CLM,
         "CLM_RLT_COND_SGNTR_SK": CLM_RLT_COND_SGNTR_MBR,
+        "CLM_OCRNC_SGNTR_SK": CLM_OCRNC_SGNTR_MBR,
+        "CLM_RLT_OCRNC_SGNTR_SK": CLM_RLT_OCRNC_SGNTR_MBR,
         "BENE_PDP_ENRLMT_MMBR_ID_NUM": BENE_MAPD_ENRLMT_RX,
     }
 
@@ -212,7 +230,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     }
 
     # Get or set the min numeric ids
-    for field_name, table_name in _NUMERIC_MULTIPART_FIELDS.items():
+    for field_name, table_name in _NUMERIC_FIELDS.items():
         existing_min = None
         if not truncate:
             existing_min = _query(
@@ -223,7 +241,10 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         else:
             state.numeric_id_next[field_name] = 0
 
-    # Get or set the max multipart ids
+    # Get or set the max multipart ids. These are strings but we still run a SELECT MAX on them.
+    # That is intentional since the counter below relies on alphabetical sorting so "00...12ABC"
+    # will always come right before "00...12ABD" This holds since every position is fixed width
+    # and possible values (alphabet) are sorted with _sorted_chars
     for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
         existing_max = None
         if not truncate:
@@ -234,13 +255,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         if existing_max is not None:
             value = existing_max.removeprefix("-")
             alphabets = _expand_parts(parts)
-            try:
-                state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
-            except ValueError:
-                logger.info(
-                    f"Value Error when decoding multipart id field_name: {value} Setting max id to 0"
-                )
-                state.multipart_id_next[field_name] = 0
+            state.multipart_id_next[field_name] = _decode_identifier(value, alphabets) + 1
         else:
             state.multipart_id_next[field_name] = 0
 
@@ -270,17 +285,22 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
 
 
 def _expand_parts(parts: list[tuple[str, int]]) -> list[str]:
+    # Turn (allowed characters, length) parts into one alphabet per character position.
+    # One example is CLM_CNTL_NUM which has a structure of [(digits, 14), (uppercase letters, 3)],
+    # becomes 14 copies of "0123456789" followed by 3 copies of "ABC...Z"
     position_alphabets: list[str] = []
     for chars, length in parts:
         position_alphabets.extend([_sorted_chars(chars)] * length)
     return position_alphabets
 
 
-# _decode_identifier converts a string identifier into its numeric position so we can treat
-# these identifiers as sequential counters. This uses a mixed radix counter approach here. Each
-# position can have a different number of possible values so its radix. position_alphabets contains
-# the ordered alphabet for each position. We increment its numeric position and encode that back
-# into the next valid identifier _encode_identifier
+# Multipart IDs like MBI, CLM_CNTL_NUM and etc are fixed width strings where every character
+# position only allows certain characters so they can't be incremented like a numeric field.
+# Instead each one is treated as one big counter using a sorta funky number system so every digit
+# position has its own number of possible values (alphabet) instead of everything being base 10
+# like a normal number. That's what "mixed radix" means here. _decode_identifier converts an ID into
+# its counter position so an integer which then let's us increment it and _encode_identifier
+# converts the counter position back into the ID string
 def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
     position = 0
     multiplier = 1
@@ -303,6 +323,9 @@ def _encode_identifier(position: int, position_alphabets: list[str]) -> str:
 
 
 class SequentialIdGenerator(IdGenerator):
+    # Generator determines sequential IDs by their current state in Snowflake. Multipart IDs are
+    # handled specially as described as above. Used only by the Snowflake flow.
+
     def __init__(self, state: SnowflakeIdState) -> None:
         self.state = state
 

@@ -305,7 +305,7 @@ def _handle_snowflake_flow(
 
     # Regenerate existing data updates in batches
     if not truncate:
-        for bene_sks_batch in writer.iter_bene_sk_batches(batch_size):
+        for bene_sks_batch in writer.get_bene_sks(batch_size=batch_size):
             existing = writer.get_patient_batch(bene_sks_batch, patient_tables)
             regenerate_static_tables(generator, existing)
             patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in existing[BENE_MBI_ID]}

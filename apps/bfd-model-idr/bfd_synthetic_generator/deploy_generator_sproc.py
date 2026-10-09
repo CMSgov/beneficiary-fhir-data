@@ -30,8 +30,8 @@ _BATCH_SIZE = 50_000
     "--force_ztm",
     type=bool,
     help=(
-        'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from '
-        "a file to be generated. This will introduce new rows for patients that previously had "
+        'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for an existing patient to '
+        "be generated. This will introduce new rows for patients that previously had "
         "none. Useful if not all tables for a patient have been generated yet."
     ),
 )
@@ -40,7 +40,8 @@ _BATCH_SIZE = 50_000
     type=int,
     default=0,
     show_default=True,
-    help="Number of NEW patients to generate. Does not affect patients regenerated when BENE_HSTRY is provided",
+    help="Number of NEW patients to generate. Does not affect patients regenerated when truncate "
+    "flag is set to True",
 )
 @click.option(
     "--claims",
@@ -92,9 +93,9 @@ _BATCH_SIZE = 50_000
     default=BeneSkMode.BOTH,
     show_default=True,
     help=(
-        "Sets the mode for which input files from which distinct BENE_SKs are read. 'bene_hstry' "
-        "indicates that BENE_SKs are only loaded from BENE_HSTRY, 'clm' indicates loading from "
-        "only from CLM. 'both' indicates loading from both"
+        "Sets the mode for which tables from which distinct BENE_SKs are read when generating "
+        "claims. 'bene_hstry' indicates that BENE_SKs are only loaded from BENE_HSTRY, 'clm' "
+        "indicates loading from only from CLM. 'both' indicates loading from both"
     ),
 )
 @click.option(
@@ -109,7 +110,7 @@ _BATCH_SIZE = 50_000
     type=int,
     default=_BATCH_SIZE,
     show_default=True,
-    help="Batch size of claims to process",
+    help="Batch size of benes and claims to process",
 )
 def main(
     force_ztm: bool,
@@ -123,6 +124,12 @@ def main(
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
+
+    if min_claims > max_claims:
+        raise click.UsageError(
+            f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
+        )
+
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FOLDER_TO_ZIP = os.path.basename(CURRENT_DIR)
     PARENT_DIR = os.path.dirname(CURRENT_DIR)
@@ -212,6 +219,21 @@ def main(
 
     session.sql(f"CREATE EVENT TABLE IF NOT EXISTS {event_table}").collect()
     session.sql(f"ALTER DATABASE {db_name} SET EVENT_TABLE = {event_table}").collect()
+
+    active_sproc = session.sql("""
+        SELECT COUNT(*) as ACTIVE_COUNT
+        FROM table(information_schema.query_history())
+        WHERE execution_status = 'RUNNING'
+            AND query_text ILIKE 'CALL generate_synthetic_data%'
+    """).collect()
+
+    if active_sproc[0]["ACTIVE_COUNT"] > 0:
+        print(
+            "ABORTED: The synthetic data generator stored procedure is already running. "
+            "Please wait for the current run to complete before launching another. "
+            "Verify completion by reviewing the logs in the event table."
+        )
+        sys.exit(1)
 
     print("Running stored procedure to generate synthetic data...")
     generator_sproc(

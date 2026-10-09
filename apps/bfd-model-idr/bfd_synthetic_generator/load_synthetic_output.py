@@ -100,9 +100,9 @@ class OutputDestinationWriter(ABC):
     @abstractmethod
     def get_bene_sks(
         self,
-        files: dict[str, list[RowAdapter]],
-        bene_sk_mode: BeneSkMode,
         batch_size: int,
+        bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
+        files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]: ...
 
 
@@ -155,9 +155,9 @@ class CsvWriter(OutputDestinationWriter):
 
     def get_bene_sks(
         self,
-        files: dict[str, list[RowAdapter]],
-        bene_sk_mode: BeneSkMode,
         batch_size: int,
+        bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
+        files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]:
         clm_bene_sks = (
             [int(row[BENE_SK]) for row in files[CLM]]
@@ -222,16 +222,26 @@ class SnowflakeWriter(OutputDestinationWriter):
         table = self.qualified_table(table_name)
         return self.session.table(table)
 
-    def iter_bene_sk_batches(self, batch_size: int) -> Iterator[list[int]]:
-        df = self._qualified_session_table(BENE_HSTRY).select("BENE_SK").distinct().sort("BENE_SK")
-        batch = []
-        for row in df.to_local_iterator():
-            batch.append(int(row["BENE_SK"]))
-            if len(batch) == batch_size:
-                yield batch
-                batch = []
-        if batch:
-            yield batch
+    def get_bene_sks(
+        self,
+        batch_size: int,
+        bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
+        files: dict[str, list[RowAdapter]] | None = None,  # noqa: ARG002
+    ) -> Iterator[list[int]]:
+        tables_by_mode = {
+            BeneSkMode.BENE_HSTRY: [BENE_HSTRY],
+            BeneSkMode.CLM: [CLM],
+            BeneSkMode.BOTH: [BENE_HSTRY, CLM],
+        }
+        tables = tables_by_mode[bene_sk_mode]
+        bene_sks_df = self._qualified_session_table(tables[0]).select("BENE_SK")
+        for table in tables[1:]:
+            bene_sks_df = bene_sks_df.union(self._qualified_session_table(table).select("BENE_SK"))
+        bene_sks_df = bene_sks_df.distinct().sort("BENE_SK")
+
+        bene_sks = [int(row["BENE_SK"]) for row in bene_sks_df.collect()]
+        for start in range(0, len(bene_sks), batch_size):
+            yield bene_sks[start : start + batch_size]
 
     def get_rows(self, table_name: str) -> list[dict[str, Any]]:
         rows = self._qualified_session_table(table_name).collect()
@@ -495,14 +505,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         files: dict[str, list[RowAdapter]],  # noqa: ARG002
     ) -> list[dict[str, Any]]:
         return self.get_rows(CNTRCT_PBP_NUM)
-
-    def get_bene_sks(
-        self,
-        files: dict[str, list[RowAdapter]],  # noqa: ARG002
-        bene_sk_mode: BeneSkMode,  # noqa: ARG002
-        batch_size: int,
-    ) -> Iterator[list[int]]:
-        yield from self.iter_bene_sk_batches(batch_size)
 
     def truncate_tables(self, table_names: Iterable[str]) -> None:
         for table_name in table_names:
