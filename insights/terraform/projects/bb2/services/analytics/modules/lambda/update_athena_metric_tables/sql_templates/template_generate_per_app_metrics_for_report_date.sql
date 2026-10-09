@@ -1675,7 +1675,6 @@ FROM
 
         AND path LIKE '/v3/fhir/Patient/%'
         AND path LIKE '%insurance-card%'
-        AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
         AND response_code = 200
@@ -1705,7 +1704,6 @@ FROM
 
         AND path LIKE '/v3/fhir/Patient/%'
         AND path LIKE '%insurance-card%'
-        AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
         AND response_code = 200
