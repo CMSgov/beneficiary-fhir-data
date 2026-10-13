@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -16,6 +17,8 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
   // Basis does not contain an amount field
   @Embedded private PaymentComponent paymentComponent;
+
+  // region Overrides
 
   @Override
   public PaymentComponentBase getPaymentComponent() {
@@ -32,4 +35,12 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
   @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.BASIS;
+  }
+
+  // endregion
+
 }

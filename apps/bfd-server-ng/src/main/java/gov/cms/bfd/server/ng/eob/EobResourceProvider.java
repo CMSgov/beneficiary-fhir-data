@@ -12,17 +12,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.RetryOnFailoverOrConnectionException;
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,7 +84,7 @@ public class EobResourceProvider implements IResourceProvider {
    * Search for claims data by bene.
    *
    * @param patient patient
-   * @param count record count
+   * @param count record count`
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
@@ -94,7 +94,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param outcome outcome to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
-   * @param profile requested profile
+   * @param profile requested profiles (comma-separated canonical URLs)
    * @param request HTTP request details
    * @param requestDetails HAPI FHIR request details
    * @return bundle
@@ -114,7 +114,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final StringParam profile,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final UriAndListParam profile,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
@@ -159,7 +159,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param request HTTP request details
    * @param outcome outcome to filter by
    * @param source claim source to filter by
-   * @param profile requested profile
+   * @param profile requested profiles (comma-separated canonical URLs)
    * @return bundle
    */
   @RetryOnFailoverOrConnectionException
@@ -173,7 +173,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request,
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final StringParam profile) {
+      @OptionalParam(name = Constants.PARAM_PROFILE) final UriAndListParam profile) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
@@ -190,7 +190,8 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toDateTimeRange(serviceDate),
             FhirInputConverter.toDateTimeRange(lastUpdated),
             FhirInputConverter.parseOutcomeParameter(outcome),
-            FhirInputConverter.parseSourceParameter(source));
+            FhirInputConverter.parseSourceParameter(source),
+            FhirInputConverter.parseProfileParameter(profile));
 
     return eobHandler.searchById(searchCriteria, options);
   }

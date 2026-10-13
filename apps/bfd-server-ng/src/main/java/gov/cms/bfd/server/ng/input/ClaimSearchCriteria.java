@@ -32,7 +32,7 @@ public record ClaimSearchCriteria(
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
     List<List<MetaSourceSk>> sources,
-    ClaimProfile profile) {
+    ProfileSelection profile) {
 
   /**
    * Alternate constructor defaults the MBI to an empty string so that other areas of the
@@ -48,7 +48,7 @@ public record ClaimSearchCriteria(
       List<ClaimTypeCode> claimTypeCodes,
       List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
       List<List<MetaSourceSk>> sources,
-      ClaimProfile profile) {
+      ProfileSelection profile) {
     this(
         beneSk,
         "",

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
+import gov.cms.bfd.server.ng.input.EobProfileCategory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Collections;
@@ -398,10 +399,6 @@ public enum ClaimTypeCode {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }
 
-  public Optional<String> toFhirStructureDefinition() {
-    return getClaimSubtype().map(ClaimSubtype::getSystemUrl);
-  }
-
   public Optional<ClaimType> getClaimType() {
     return getClaimSubtype().map(ClaimSubtype::getClaimType);
   }
@@ -448,6 +445,37 @@ public enum ClaimTypeCode {
     return codesForThisType;
   }
 
+  /**
+   * Checks if isInstitutional (Inpatient, Outpatient, SNF, HHA, Hospice).
+   *
+   * @return Returns true if this code maps to an Institutional claim type
+   */
+  public boolean isInstitutional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.INSTITUTIONAL)
+        .orElse(false);
+  }
+
+  /**
+   * Checks if Professional claim type (Carrier, DME).
+   *
+   * @return true if this code maps to a Professional
+   */
+  public boolean isProfessional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
+        .orElse(false);
+  }
+
+  /**
+   * Profile category for this claim type code.
+   *
+   * @return category, or empty if the code has no subtype
+   */
+  public Optional<EobProfileCategory> getProfileCategory() {
+    return getClaimSubtype().map(ClaimSubtype::getProfileCategory);
+  }
+
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
     return List.of(_71, _72, _1700, _2700);
   }
@@ -485,28 +513,6 @@ public enum ClaimTypeCode {
 
   private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
     return List.of(_20, _30, _1018, _1021, _2018, _2021);
-  }
-
-  /**
-   * Checks if isInstitutional (Inpatient, Outpatient, SNF, HHA, Hospice).
-   *
-   * @return Returns true if this code maps to an Institutional claim type
-   */
-  public boolean isInstitutional() {
-    return getClaimSubtype()
-        .map(subtype -> subtype.getClaimType() == ClaimType.INSTITUTIONAL)
-        .orElse(false);
-  }
-
-  /**
-   * Checks if Professional claim type (Carrier, DME).
-   *
-   * @return true if this code maps to a Professional
-   */
-  public boolean isProfessional() {
-    return getClaimSubtype()
-        .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
-        .orElse(false);
   }
 
   private static final Map<ClaimTypeCode, ClaimSubtype> CODE_TO_SUBTYPE = createInvertedMap();

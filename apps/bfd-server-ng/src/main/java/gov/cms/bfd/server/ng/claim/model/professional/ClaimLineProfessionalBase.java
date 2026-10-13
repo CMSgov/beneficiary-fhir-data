@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
@@ -8,6 +7,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsModifierCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

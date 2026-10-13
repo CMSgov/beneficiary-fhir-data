@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.claim.filter.*;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.entities.ClaimInstitutionalBasisNch;
@@ -69,26 +70,31 @@ public class ClaimRepository {
               claimQueryString(ClaimProfessionalCmsSharedSystems.class, "LEFT"),
               ClaimProfessionalCmsSharedSystems.class,
               SystemType.SS,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalCmsNch.class, ""),
               ClaimProfessionalCmsNch.class,
               SystemType.NCH,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalCmsSharedSystems.class, "LEFT"),
               ClaimInstitutionalCmsSharedSystems.class,
               SystemType.SS,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalCmsNch.class, ""),
               ClaimInstitutionalCmsNch.class,
               SystemType.NCH,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.CMS),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxCms.class),
               ClaimRxCms.class,
               SystemType.DDPS,
+              ClaimType.PHARMACY,
               ClaimProfile.CMS),
 
           // REGULAR
@@ -96,26 +102,31 @@ public class ClaimRepository {
               claimQueryString(ClaimProfessionalRegularSharedSystems.class, "LEFT"),
               ClaimProfessionalRegularSharedSystems.class,
               SystemType.SS,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalRegularNch.class, ""),
               ClaimProfessionalRegularNch.class,
               SystemType.NCH,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalRegularSharedSystems.class, "LEFT"),
               ClaimInstitutionalRegularSharedSystems.class,
               SystemType.SS,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalRegularNch.class, ""),
               ClaimInstitutionalRegularNch.class,
               SystemType.NCH,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.REGULAR),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxRegular.class),
               ClaimRxRegular.class,
               SystemType.DDPS,
+              ClaimType.PHARMACY,
               ClaimProfile.REGULAR),
 
           // BASIS
@@ -123,26 +134,31 @@ public class ClaimRepository {
               claimQueryString(ClaimProfessionalBasisSharedSystems.class, "LEFT"),
               ClaimProfessionalBasisSharedSystems.class,
               SystemType.SS,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalBasisNch.class, ""),
               ClaimProfessionalBasisNch.class,
               SystemType.NCH,
+              ClaimType.PROFESSIONAL,
               ClaimProfile.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalBasisSharedSystems.class, "LEFT"),
               ClaimInstitutionalBasisSharedSystems.class,
               SystemType.SS,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalBasisNch.class, ""),
               ClaimInstitutionalBasisNch.class,
               SystemType.NCH,
+              ClaimType.INSTITUTIONAL,
               ClaimProfile.BASIS),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxBasis.class),
               ClaimRxBasis.class,
               SystemType.DDPS,
+              ClaimType.PHARMACY,
               ClaimProfile.BASIS));
 
   /**
@@ -161,7 +177,7 @@ public class ClaimRepository {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
       return Collections.emptyList();
     }
-    var paramBuilders =
+    List<DbFilterBuilder> paramBuilders =
         List.of(
             new BillablePeriodFilterParam(criteria.serviceDate()),
             new LastUpdatedFilterParam(criteria.lastUpdated()),
@@ -170,15 +186,11 @@ public class ClaimRepository {
 
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
-            .filter(d -> d.matchesProfile(ClaimProfile.CMS))
-            .map(
+            .flatMap(
                 d ->
-                    asyncService.findByIdsInClaimType(
-                        d.baseQuery(),
-                        d.claimClass(),
-                        d.systemType(),
-                        criteria.claimUniqueIds(),
-                        paramBuilders))
+                    d.getProfileFilters(criteria.profile(), paramBuilders).stream()
+                        .map(
+                            filters -> findByIdsInClaimType(d, criteria.claimUniqueIds(), filters)))
             .toList();
 
     CompletableFuture.allOf(claimFutures.toArray(new CompletableFuture[0])).join();
@@ -216,17 +228,17 @@ public class ClaimRepository {
 
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
-            .filter(
-                claimTypeDefinition ->
-                    claimTypeDefinition.matchesSystemType(filterBuilders)
-                        && claimTypeDefinition.matchesProfile(criteria.profile()))
-            .map(
+            .filter(d -> d.matchesSystemType(filterBuilders))
+            .flatMap(
                 d ->
-                    asyncService.fetchClaims(
-                        d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
+                    d.getProfileFilters(criteria.profile(), filterBuilders).stream()
+                        .map(filters -> fetchClaims(d, criteria, filters)))
             .toList();
 
-    var includePriorAuth = filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
+    // Prior authorizations are not available in any of the _profile profiles
+    var includePriorAuth =
+        criteria.profile().isDefault()
+            && filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
     CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
         includePriorAuth
             ? asyncService.fetchPriorAuth(criteria.mbi())
@@ -243,6 +255,21 @@ public class ClaimRepository {
     var claims = claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
     var priorAuths = priorAuthFuture.join();
     return new ClaimAndAuthResult(claims, priorAuths);
+  }
+
+  private CompletableFuture<List<ClaimBase>> fetchClaims(
+      ClaimTypeDefinition d, ClaimSearchCriteria criteria, List<DbFilterBuilder> filters) {
+    return asyncService
+        .fetchClaims(d.baseQuery(), d.claimClass(), d.systemType(), criteria, filters)
+        .thenApply(Collections::unmodifiableList);
+  }
+
+  private CompletableFuture<List<ClaimBase>> findByIdsInClaimType(
+      ClaimTypeDefinition d, List<Long> claimUniqueIds, List<DbFilterBuilder> filters) {
+    return asyncService
+        .findByIdsInClaimType(
+            d.baseQuery(), d.claimClass(), d.systemType(), claimUniqueIds, filters)
+        .thenApply(Collections::unmodifiableList);
   }
 
   /**

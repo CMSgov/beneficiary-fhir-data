@@ -11,10 +11,21 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Filters claims on claim type codes.
  *
+ * @param paramName query parameter name, must be unique within the query
  * @param claimTypeCodes claim type codes
  */
-public record ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes)
+public record ClaimTypeCodeFilterParam(String paramName, List<ClaimTypeCode> claimTypeCodes)
     implements DbFilterBuilder {
+
+  /**
+   * Filters claims on claim type codes.
+   *
+   * @param claimTypeCodes claim type codes
+   */
+  public ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes) {
+    this("claimTypeCodes", claimTypeCodes);
+  }
+
   @NotNull
   @Override
   public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
@@ -23,7 +34,7 @@ public record ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes)
     }
 
     return new DbFilter(
-        String.format(" AND %s.claimTypeCode IN :claimTypeCodes", tableAlias),
-        List.of(new DbFilterParam("claimTypeCodes", claimTypeCodes)));
+        String.format(" AND %s.claimTypeCode IN :%s", tableAlias, paramName),
+        List.of(new DbFilterParam(paramName, claimTypeCodes)));
   }
 }

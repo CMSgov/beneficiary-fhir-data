@@ -3,11 +3,12 @@ package gov.cms.bfd.server.ng;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.ProfileSelection;
+import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,8 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             new DateTimeRange(),
             new DateTimeRange(),
             Collections.emptyList(),
-            Collections.emptyList()),
+            Collections.emptyList(),
+            ProfileSelection.DEFAULT),
         excludeOptions);
 
     var samhsaLogs =
@@ -71,7 +73,8 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             new DateTimeRange(),
             new DateTimeRange(),
             Collections.emptyList(),
-            Collections.emptyList()),
+            Collections.emptyList(),
+            ProfileSelection.DEFAULT),
         excludeOptions);
 
     var samhsaLogs =

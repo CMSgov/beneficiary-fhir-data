@@ -1,10 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPlaceOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -40,6 +41,11 @@ abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
   @Override
   public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.REGULAR;
   }
 
   // endregion

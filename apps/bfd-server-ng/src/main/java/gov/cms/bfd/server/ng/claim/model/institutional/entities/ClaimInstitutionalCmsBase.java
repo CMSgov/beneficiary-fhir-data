@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationPpsCms;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -83,6 +84,11 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
     getAdjudicationPpsCms().toFhirAdjudication().forEach(eob::addAdjudication);
     AdjudicationClaimValue.toFhir(getClaimValues()).forEach(eob::addAdjudication);
     eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.CMS;
   }
 
   // endregion

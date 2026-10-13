@@ -110,6 +110,10 @@ public class IntegrationTestBase {
 
   private static final String FHIR_JSON = "fhir+json";
 
+  protected static final String PROFILE_CMS = "CMS";
+  protected static final String PROFILE_REGULAR = "REGULAR";
+  protected static final String PROFILE_BASIS = "BASIS";
+
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
   }

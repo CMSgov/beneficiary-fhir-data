@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoDateInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoInstitutional;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -43,6 +44,11 @@ abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return List.of();
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.REGULAR;
   }
 
   // endregion

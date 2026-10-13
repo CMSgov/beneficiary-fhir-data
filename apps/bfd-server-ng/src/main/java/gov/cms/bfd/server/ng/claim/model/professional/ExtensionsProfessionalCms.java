@@ -1,9 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFederalTypeOfServiceCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPaymentCode;
 import gov.cms.bfd.server.ng.claim.model.common.ProviderSpecialtyCode;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;

@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
 import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -46,6 +47,11 @@ public class ClaimRxRegular extends ClaimRxBase {
   @Override
   protected ClaimItemBase getClaimItem() {
     return claimItem;
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.REGULAR;
   }
 
   // endregion

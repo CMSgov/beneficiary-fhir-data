@@ -14,12 +14,12 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.claim.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.eob.EobHandler;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.ProfileSelection;
+import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -182,7 +182,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             List.of(),
             Collections.emptyList(),
-            ClaimProfile.CMS);
+            ProfileSelection.DEFAULT);
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
   }

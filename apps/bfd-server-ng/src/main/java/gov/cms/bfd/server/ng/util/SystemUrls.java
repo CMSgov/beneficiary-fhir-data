@@ -8,7 +8,7 @@ public class SystemUrls {
     // Intentionally empty
   }
 
-  // Profiles
+  // region Profiles
 
   /**
    * <a href="https://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Patient.html">C4BB
@@ -81,6 +81,19 @@ public class SystemUrls {
    */
   public static final String PROFILE_PRIOR_AUTH =
       "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization";
+
+  /** URL for BlueButton's CMS Structure Definition for EoBs. */
+  public static final String CMS_STRUCTURE_DEFINITION_EOB =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-";
+
+  /** URL for CARIN EoB StructureDefinition. */
+  public static final String CARIN_STRUCTURE_DEFINITION_EOB =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-";
+
+  /** The CARIN version used in _profile search queries. */
+  public static final String CARIN_VERSION = "2.2.0";
+
+  // endregion
 
   /**
    * System URL for the HL7 Subscriber Relationship code system. Used for {@code

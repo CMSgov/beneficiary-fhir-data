@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
@@ -15,6 +14,7 @@ import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractPBPNumber;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;

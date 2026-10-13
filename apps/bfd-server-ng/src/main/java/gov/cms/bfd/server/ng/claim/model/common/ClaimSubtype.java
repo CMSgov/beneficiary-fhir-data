@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
+import gov.cms.bfd.server.ng.input.EobProfileCategory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
@@ -15,58 +16,58 @@ public enum ClaimSubtype {
   /** Represents CARRIER type. */
   CARRIER(
       "carrier",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
       ClaimType.PROFESSIONAL,
+      EobProfileCategory.PROFESSIONAL_NONCLINICIAN,
       "Professional Physician/Supplier Claim"),
 
   /** Represents DME type. */
   DME(
       "dme",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL,
       ClaimType.PROFESSIONAL,
+      EobProfileCategory.PROFESSIONAL_NONCLINICIAN,
       "Durable Medical Equipment Claim"),
 
   /** Represents HHA type. */
   HHA(
       "hha",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
+      EobProfileCategory.INPATIENT_INSTITUTIONAL,
       "Home Health Services"),
 
   /** Represents HOSPICE type. */
   HOSPICE(
       "hospice",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
+      EobProfileCategory.INPATIENT_INSTITUTIONAL,
       "Hospice Care"),
 
   /** Represents INPATIENT type. */
   INPATIENT(
       "inpatient",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
+      EobProfileCategory.INPATIENT_INSTITUTIONAL,
       "Inpatient Hospital Care"),
 
   /** Represents OUTPATIENT type. */
   OUTPATIENT(
       "outpatient",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
+      EobProfileCategory.OUTPATIENT_INSTITUTIONAL,
       "Outpatient Hospital Care"),
 
   /** Represents PDE type. */
-  PDE("pde", SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY, ClaimType.PHARMACY, "Drug Plan Event"),
+  PDE("pde", ClaimType.PHARMACY, EobProfileCategory.PHARMACY, "Drug Plan Event"),
 
   /** Represents SNF type. */
   SNF(
       "snf",
-      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL,
       ClaimType.INSTITUTIONAL,
+      EobProfileCategory.INPATIENT_INSTITUTIONAL,
       "Skilled Nursing Facility Care");
 
   private final String code;
-  private final String systemUrl;
   private final ClaimType claimType;
+  private final EobProfileCategory profileCategory;
   private final String eobTypeDisplay;
 
   CodeableConcept toFhir() {
@@ -82,17 +83,18 @@ public enum ClaimSubtype {
   }
 
   /**
-   * Returns the normalized grouping of this {@link ClaimSubtype}. INPATIENT, HHA, HOSPICE, and SNF
-   * are grouped under {@code INPATIENT}, and OUTPATIENT maps to itself. CARRIER, DME, and PDE do
-   * not belong to a grouped category and therefore return an empty result.
+   * Returns the normalized grouping of this {@link ClaimSubtype}, based on its profile category.
+   * Inpatient institutional subtypes (INPATIENT, HHA, HOSPICE, SNF) are grouped under {@code
+   * INPATIENT}, and OUTPATIENT maps to itself. Other subtypes do not belong to a grouped category
+   * and return an empty result.
    *
    * @return ClaimSubtype
    */
   public Optional<ClaimSubtype> grouped() {
-    return switch (this) {
-      case INPATIENT, HHA, HOSPICE, SNF -> Optional.of(INPATIENT);
-      case OUTPATIENT -> Optional.of(OUTPATIENT);
-      case CARRIER, DME, PDE -> Optional.empty();
+    return switch (profileCategory) {
+      case INPATIENT_INSTITUTIONAL -> Optional.of(INPATIENT);
+      case OUTPATIENT_INSTITUTIONAL -> Optional.of(OUTPATIENT);
+      case PHARMACY, PROFESSIONAL_NONCLINICIAN -> Optional.empty();
     };
   }
 

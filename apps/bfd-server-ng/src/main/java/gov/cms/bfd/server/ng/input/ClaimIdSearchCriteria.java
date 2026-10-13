@@ -13,16 +13,18 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param lastUpdated last updated
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param profile requested profiles; {@link ProfileSelection#DEFAULT} when _profile is absent
  */
 public record ClaimIdSearchCriteria(
     List<Long> claimUniqueIds,
     @NotNull DateTimeRange serviceDate,
     @NotNull DateTimeRange lastUpdated,
     @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    @NotNull List<List<MetaSourceSk>> sources) {
+    @NotNull List<List<MetaSourceSk>> sources,
+    @NotNull ProfileSelection profile) {
 
   /**
-   * Returns whether a last updated date filter has been provided.
+   * Returns whether a service date filter has been provided.
    *
    * @return boolean
    */
@@ -55,5 +57,14 @@ public record ClaimIdSearchCriteria(
    */
   public boolean hasSources() {
     return !sources.isEmpty();
+  }
+
+  /**
+   * Returns whether a _profile has been provided.
+   *
+   * @return boolean
+   */
+  public boolean hasProfile() {
+    return !profile.isDefault();
   }
 }

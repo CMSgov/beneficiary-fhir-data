@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
 
-import gov.cms.bfd.server.ng.claim.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimQueryCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimRelatedCondition;
@@ -17,6 +16,7 @@ import gov.cms.bfd.server.ng.claim.model.institutional.OtherInstitutionalCareTea
 import gov.cms.bfd.server.ng.claim.model.institutional.ReferringInstitutionalCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.RenderingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.institutional.TypeOfBillCode;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;

@@ -10,6 +10,7 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.AdjudicationRx;
 import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRxCms;
+import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -76,6 +77,11 @@ public class ClaimRxCms extends ClaimRxBase {
   @Override
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.of(claimItem.getTotalDrugCost());
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.CMS;
   }
 
   // endregion
