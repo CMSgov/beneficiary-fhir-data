@@ -1,6 +1,7 @@
 import os
 import sys
 import zipfile
+from typing import Any
 
 import click
 from claims_generator import GeneratePacDataMode
@@ -8,7 +9,16 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from load_synthetic_output import BeneSkMode
 from snowflake.snowpark import Session
-from snowflake.snowpark.types import BooleanType, IntegerType, StringType, VariantType
+from snowflake.snowpark.types import BooleanType, DataType, IntegerType, StringType, VariantType
+
+_BATCH_SIZE = 50_000
+
+_INPUT_TYPE_MAP: dict[Any, tuple[DataType, str]] = {
+    click.BOOL: (BooleanType(), "BOOLEAN"),
+    click.INT: (IntegerType(), "NUMBER"),
+    click.STRING: (StringType(), "VARCHAR"),
+    click.Choice: (StringType(), "VARCHAR"),
+}
 
 
 def _require_env(name: str) -> str:
@@ -22,7 +32,50 @@ def _require_env(name: str) -> str:
     return val
 
 
-_BATCH_SIZE = 50_000
+def _get_snowpark_and_sql_types(param: click.Parameter) -> tuple[DataType, str]:
+    param_type = param.type
+    if param.type in _INPUT_TYPE_MAP:
+        return _INPUT_TYPE_MAP[param_type]
+
+    return StringType(), "VARCHAR"
+
+
+def _zip_current_directory() -> str:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    folder_to_zip = os.path.basename(current_dir)
+    parent_dir = os.path.dirname(current_dir)
+    output_zip_path = os.path.join(parent_dir, f"{folder_to_zip}.zip")
+
+    with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(current_dir, followlinks=True):
+            for file in files:
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, parent_dir)
+                zipf.write(full_path, relative_path)
+    return output_zip_path
+
+
+def _create_snowflake_session() -> Session:
+    private_key = serialization.load_pem_private_key(
+        _require_env("IDR_PRIVATE_KEY").encode(),
+        password=None,
+        backend=default_backend(),
+    )
+    private_key_bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    return Session.builder.configs(
+        {
+            "account": _require_env("IDR_ACCOUNT"),
+            "user": _require_env("IDR_USERNAME"),
+            "private_key": private_key_bytes,
+            "warehouse": _require_env("IDR_WAREHOUSE"),
+            "database": _require_env("IDR_DATABASE"),
+            "schema": "CMS_VDM_VIEW_MDCR_PRD",
+        }
+    ).create()
 
 
 @click.command
@@ -112,70 +165,43 @@ _BATCH_SIZE = 50_000
     show_default=True,
     help="Batch size of benes and claims to process",
 )
+@click.pass_context
 def main(
+    ctx: click.Context,
     force_ztm: bool,
     patients: int,
     claims: bool,
     min_claims: int,
     max_claims: int,
     enable_samhsa: bool,
-    pac_gen: str,
-    bene_sk_mode: str,
+    pac_gen: GeneratePacDataMode,
+    bene_sk_mode: BeneSkMode,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
-
     if min_claims > max_claims:
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
-    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    FOLDER_TO_ZIP = os.path.basename(CURRENT_DIR)
-    PARENT_DIR = os.path.dirname(CURRENT_DIR)
-    OUTPUT_ZIP_PATH = os.path.join(PARENT_DIR, f"{FOLDER_TO_ZIP}.zip")
-
-    # Zip package and dereference symlinks
-    with zipfile.ZipFile(OUTPUT_ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, _dirs, files in os.walk(CURRENT_DIR, followlinks=True):
-            for file in files:
-                full_path = os.path.join(root, file)
-                relative_path = os.path.relpath(full_path, PARENT_DIR)
-                zipf.write(full_path, relative_path)
-
-    zip_file = OUTPUT_ZIP_PATH
-
-    private_key = serialization.load_pem_private_key(
-        _require_env("IDR_PRIVATE_KEY").encode(),
-        password=None,
-        backend=default_backend(),
-    )
-
-    private_key_bytes = private_key.private_bytes(
-        encoding=serialization.Encoding.DER,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-    session = Session.builder.configs(
-        {
-            "account": _require_env("IDR_ACCOUNT"),
-            "user": _require_env("IDR_USERNAME"),
-            "private_key": private_key_bytes,  # type: ignore
-            "warehouse": _require_env("IDR_WAREHOUSE"),
-            "database": _require_env("IDR_DATABASE"),
-            "schema": "CMS_VDM_VIEW_MDCR_PRD",
-        }
-    ).create()
-
+    session = _create_snowflake_session()
     db_name = session.get_current_database().replace('"', "")
     schema_name = session.get_current_schema().replace('"', "")
 
+    zip_file = _zip_current_directory()
     session.sql(f"create or replace stage {db_name}.{schema_name}.generator_files_stage").collect()
     print("Uploading synthetic generator code...")
     put_result = session.file.put(
         zip_file, f"@{db_name}.{schema_name}.generator_files_stage", auto_compress=False
     )
     print(f"Upload Status: {put_result[0].status}")
+
+    input_types = []
+    sql_input_types = []
+    for param in main.params:
+        snowpark_type, sql_string = _get_snowpark_and_sql_types(param)
+        input_types.append(snowpark_type)
+        sql_input_types.append(sql_string)
 
     print("Creating/Updating stored procedure...")
     generator_sproc = session.sproc.register_from_file(
@@ -194,32 +220,21 @@ def main(
             "faker",
             "pandas",
         ],
-        input_types=[
-            BooleanType(),
-            StringType(),
-            StringType(),
-            IntegerType(),
-            BooleanType(),
-            IntegerType(),
-            IntegerType(),
-            BooleanType(),
-            BooleanType(),
-            IntegerType(),
-        ],
+        input_types=input_types,
     )
 
     # Set LOG_LEVEL so Snowflake can hook our logging into an event table
-    session.sql("""
-        ALTER PROCEDURE generate_synthetic_data(
-            BOOLEAN, VARCHAR, VARCHAR, NUMBER, BOOLEAN, NUMBER, NUMBER, BOOLEAN, BOOLEAN, NUMBER
-        ) SET LOG_LEVEL = 'INFO';
+    session.sql(f"""
+    ALTER PROCEDURE generate_synthetic_data({", ".join(sql_input_types)}) SET LOG_LEVEL = 'INFO';
     """).collect()
-
     event_table = f"{db_name}.CMS_VDM_VIEW_MDCR_PRD.procedure_event_table"
-
     session.sql(f"CREATE EVENT TABLE IF NOT EXISTS {event_table}").collect()
     session.sql(f"ALTER DATABASE {db_name} SET EVENT_TABLE = {event_table}").collect()
+    # Delete old logs from event table or else they'll grow and will be permanently retained
+    session.sql(f"DELETE FROM {event_table}").collect()
 
+    # Check if an instance of the synthetic data generator stored procedure is already running
+    # before executing
     active_sproc = session.sql("""
         SELECT COUNT(*) as ACTIVE_COUNT
         FROM table(information_schema.query_history())
@@ -238,8 +253,8 @@ def main(
     print("Running stored procedure to generate synthetic data...")
     generator_sproc(
         force_ztm,
-        pac_gen.name if hasattr(pac_gen, "name") else str(pac_gen),
-        bene_sk_mode.name if hasattr(bene_sk_mode, "name") else str(bene_sk_mode),
+        pac_gen.value,
+        bene_sk_mode.value,
         patients,
         claims,
         min_claims,

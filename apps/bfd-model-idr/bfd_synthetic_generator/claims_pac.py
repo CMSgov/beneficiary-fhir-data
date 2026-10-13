@@ -76,6 +76,8 @@ class PacGeneratorUtil:
             exclude_fields_adj=exclude_fields_adj,
         )
 
+        # We use 10**13 - 1 as the 'end' here to so that the generated id will never exceed
+        # 13 digits in length which is a constraint for CLM_UNIQ_ID
         clm[f.CLM_UNIQ_ID] = gen_utils.id_gen.numeric_id(
             field=f.CLM_UNIQ_ID, start=-1, end=-(10**13 - 1)
         )
@@ -118,6 +120,8 @@ class PacGeneratorUtil:
         else:
             clm[f.CLM_FINL_ACTN_IND] = "Y"
 
+        # We use 10**12 - 1 as the 'end' here to so that the generated id will never exceed
+        # 12 digits in length which is a constraint for CLM_DT_SGNTR_SK
         clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**12 - 1)
         )
