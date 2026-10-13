@@ -1,11 +1,11 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClinicalTrialNumber;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;

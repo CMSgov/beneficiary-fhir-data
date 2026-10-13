@@ -182,7 +182,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             List.of(),
             Collections.emptyList(),
-            ProfileSelection.DEFAULT);
+            new ProfileSelection());
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
   }

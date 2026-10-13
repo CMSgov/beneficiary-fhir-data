@@ -23,7 +23,6 @@ import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxBasis;
 import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxCms;
 import gov.cms.bfd.server.ng.claim.model.rx.entities.ClaimRxRegular;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.annotation.Timed;
@@ -173,6 +172,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
+          @MeterTag(key = "hasProfiles", expression = "hasProfiles()")
           ClaimIdSearchCriteria criteria) {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
       return Collections.emptyList();
@@ -186,11 +186,15 @@ public class ClaimRepository {
 
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
-            .flatMap(
+            .filter(d -> d.matchesProfile(criteria.profile()))
+            .map(
                 d ->
-                    d.getProfileFilters(criteria.profile(), paramBuilders).stream()
-                        .map(
-                            filters -> findByIdsInClaimType(d, criteria.claimUniqueIds(), filters)))
+                    asyncService.findByIdsInClaimType(
+                        d.baseQuery(),
+                        d.claimClass(),
+                        d.systemType(),
+                        criteria.claimUniqueIds(),
+                        d.getProfileFilters(criteria.profile(), paramBuilders)))
             .toList();
 
     CompletableFuture.allOf(claimFutures.toArray(new CompletableFuture[0])).join();
@@ -228,17 +232,23 @@ public class ClaimRepository {
 
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
-            .filter(d -> d.matchesSystemType(filterBuilders))
-            .flatMap(
+            .filter(
+                d -> d.matchesSystemType(filterBuilders) && d.matchesProfile(criteria.profile()))
+            .map(
                 d ->
-                    d.getProfileFilters(criteria.profile(), filterBuilders).stream()
-                        .map(filters -> fetchClaims(d, criteria, filters)))
+                    asyncService.fetchClaims(
+                        d.baseQuery(),
+                        d.claimClass(),
+                        d.systemType(),
+                        criteria,
+                        d.getProfileFilters(criteria.profile(), filterBuilders)))
             .toList();
 
-    // Prior authorizations are not available in any of the _profile profiles
+    // Prior authorizations are only returned when no _profile is requested
     var includePriorAuth =
-        criteria.profile().isDefault()
+        !criteria.profile().hasProfiles()
             && filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
+
     CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
         includePriorAuth
             ? asyncService.fetchPriorAuth(criteria.mbi())
@@ -255,21 +265,6 @@ public class ClaimRepository {
     var claims = claimStream.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
     var priorAuths = priorAuthFuture.join();
     return new ClaimAndAuthResult(claims, priorAuths);
-  }
-
-  private CompletableFuture<List<ClaimBase>> fetchClaims(
-      ClaimTypeDefinition d, ClaimSearchCriteria criteria, List<DbFilterBuilder> filters) {
-    return asyncService
-        .fetchClaims(d.baseQuery(), d.claimClass(), d.systemType(), criteria, filters)
-        .thenApply(Collections::unmodifiableList);
-  }
-
-  private CompletableFuture<List<ClaimBase>> findByIdsInClaimType(
-      ClaimTypeDefinition d, List<Long> claimUniqueIds, List<DbFilterBuilder> filters) {
-    return asyncService
-        .findByIdsInClaimType(
-            d.baseQuery(), d.claimClass(), d.systemType(), claimUniqueIds, filters)
-        .thenApply(Collections::unmodifiableList);
   }
 
   /**

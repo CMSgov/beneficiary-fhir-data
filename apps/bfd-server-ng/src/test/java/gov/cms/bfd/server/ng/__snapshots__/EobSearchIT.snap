@@ -15448,7 +15448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_WITH_SEARCH_profile_BASIS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_profile_BASIS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -17618,7 +17618,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_WITH_SEARCH_profile_CMS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_profile_CMS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -24430,7 +24430,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_WITH_SEARCH_profile_REGULAR]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_profile_REGULAR]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -27255,7 +27255,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_profile_BASIS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -29425,7 +29425,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_profile_CMS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -36237,7 +36237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_profile_REGULAR]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGULAR]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -39062,7 +39062,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[GET_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[POST_profile_BASIS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASIS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -41232,7 +41232,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[POST
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[POST_profile_CMS]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",
@@ -48044,7 +48044,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[POST
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfileAllCategories[POST_profile_REGULAR]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGULAR]=[
 {
   "resourceType": "Bundle",
   "id" : "00000000-0000-0000-0000-000000000000",

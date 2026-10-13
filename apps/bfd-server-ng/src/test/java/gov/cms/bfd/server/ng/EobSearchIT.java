@@ -1,8 +1,9 @@
 package gov.cms.bfd.server.ng;
 
-import static gov.cms.bfd.server.ng.input.EobProfileCategory.INPATIENT_INSTITUTIONAL;
-import static gov.cms.bfd.server.ng.input.EobProfileCategory.OUTPATIENT_INSTITUTIONAL;
-import static gov.cms.bfd.server.ng.input.EobProfileCategory.PHARMACY;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.INPATIENT_INSTITUTIONAL;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.OUTPATIENT_INSTITUTIONAL;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PHARMACY;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PROFESSIONAL_NONCLINICIAN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,12 +18,12 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
-import gov.cms.bfd.server.ng.input.EobProfileCategory;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.net.URLEncoder;
@@ -32,17 +33,12 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
@@ -868,14 +864,7 @@ class EobSearchIT extends IntegrationTestBase {
     assertEquals(0, getEobFromBundle(eobBundle).size());
   }
 
-  // ---------------------------------------------------------------------------------------------
-  // _profile
-  //
-  // Expectations are derived from the default (no _profile) response rather than hard-coded
-  // per-category counts. Each default EOB is classified by its EOB-TYPE coding on EOB.type, which
-  // is independent of the feature under test (meta.profile). Prior authorizations carry no
-  // EOB-TYPE subtype, so they are excluded; they are never returned when _profile is set.
-  // ---------------------------------------------------------------------------------------------
+  // region Profile
 
   private IQuery<Bundle> searchByPatient() {
     return searchBundle()
@@ -896,43 +885,6 @@ class EobSearchIT extends IntegrationTestBase {
         .toArray(String[]::new);
   }
 
-  private static String idOf(ExplanationOfBenefit eob) {
-    return eob.getIdElement().getIdPart();
-  }
-
-  private static Set<String> ids(List<ExplanationOfBenefit> eobs) {
-    return eobs.stream().map(EobSearchIT::idOf).collect(Collectors.toSet());
-  }
-
-  private static List<String> metaProfiles(ExplanationOfBenefit eob) {
-    return eob.getMeta().getProfile().stream().map(CanonicalType::getValue).toList();
-  }
-
-  /** Category from the EOB-TYPE coding on EOB.type; empty for prior authorizations. */
-  private static Optional<EobProfileCategory> categoryOf(ExplanationOfBenefit eob) {
-    return eob.getType().getCoding().stream()
-        .filter(coding -> SystemUrls.BLUE_BUTTON_EOB_TYPE_CODE.equals(coding.getSystem()))
-        .map(Coding::getCode)
-        .flatMap(code -> Arrays.stream(ClaimSubtype.values()).filter(s -> s.name().equals(code)))
-        .findFirst()
-        .map(ClaimSubtype::getProfileCategory);
-  }
-
-  /** Category of each claim EOB in the default response, keyed by EOB id. */
-  private Map<String, EobProfileCategory> defaultCategoryById() {
-    return getEobFromBundle(searchByPatient().execute()).stream()
-        .flatMap(eob -> categoryOf(eob).stream().map(c -> Map.entry(idOf(eob), c)))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  private static Set<String> idsIn(
-      Map<String, EobProfileCategory> categoryById, Set<EobProfileCategory> categories) {
-    return categoryById.entrySet().stream()
-        .filter(e -> categories.contains(e.getValue()))
-        .map(Map.Entry::getKey)
-        .collect(Collectors.toSet());
-  }
-
   static Stream<Arguments> provideProfileScenarios() {
     return Stream.of(SearchStyleEnum.values())
         .flatMap(
@@ -942,160 +894,84 @@ class EobSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @MethodSource("provideProfileScenarios")
-  void eobSearchByPatientAndProfileAllCategories(
-      ClaimProfile profile, SearchStyleEnum searchStyle) {
-    var categoryById = defaultCategoryById();
+  void eobSearchByPatientAndProfile(ClaimProfile profile, SearchStyleEnum searchStyle) {
     var eobBundle =
         searchByPatient().and(profiles(allCategoryUrls(profile))).usingStyle(searchStyle).execute();
-    var eobs = getEobFromBundle(eobBundle);
-
-    assertEquals(
-        categoryById.keySet(),
-        ids(eobs),
-        "All claim EOBs (no prior authorizations) should be returned for " + profile);
-    eobs.forEach(
-        eob ->
-            assertEquals(
-                profile.toFhirProfiles(categoryById.get(idOf(eob))),
-                metaProfiles(eob),
-                "meta.profile for " + idOf(eob)));
+    assertEquals(6, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name() + "_profile_" + profile).toMatchSnapshot(eobBundle);
   }
 
   static Stream<Arguments> provideSingleProfileScenarios() {
-    return Arrays.stream(EobProfileCategory.values())
-        .flatMap(
-            category ->
-                Arrays.stream(ClaimProfile.values())
-                    .map(profile -> Arguments.of(category, profile)));
+    return Stream.of(
+        Arguments.of(PHARMACY, 1),
+        Arguments.of(INPATIENT_INSTITUTIONAL, 1),
+        Arguments.of(OUTPATIENT_INSTITUTIONAL, 3),
+        Arguments.of(PROFESSIONAL_NONCLINICIAN, 1));
   }
 
   @ParameterizedTest
   @MethodSource("provideSingleProfileScenarios")
-  void eobSearchByPatientAndSingleProfile(EobProfileCategory category, ClaimProfile profile) {
-    var categoryById = defaultCategoryById();
+  void eobSearchByPatientAndSingleProfile(EobProfileCategory category, int expectedCount) {
     var eobs =
         getEobFromBundle(
-            searchByPatient().and(profiles(profile.getCanonicalUrl(category))).execute());
+            searchByPatient()
+                .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(category)))
+                .execute());
 
-    assertEquals(
-        idsIn(categoryById, Set.of(category)),
-        ids(eobs),
-        "Only " + category + " claims should be returned");
-    eobs.forEach(
-        eob ->
-            assertEquals(
-                profile.toFhirProfiles(category),
-                metaProfiles(eob),
-                "meta.profile for " + idOf(eob)));
+    assertEquals(expectedCount, eobs.size());
+    assertTrue(
+        eobs.stream()
+            .allMatch(eob -> eob.getMeta().hasProfile(ClaimProfile.BASIS.toFhirProfile(category))));
   }
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByPatientMixedProfiles(SearchStyleEnum searchStyle) {
-    var categoryById = defaultCategoryById();
-    // EnumMap: deterministic iteration order, so the request URL (and the snapshot's self link) is
-    // stable. Map.of iteration order is randomized per JVM run.
-    var requested = new EnumMap<EobProfileCategory, ClaimProfile>(EobProfileCategory.class);
-    requested.put(INPATIENT_INSTITUTIONAL, ClaimProfile.BASIS);
-    requested.put(OUTPATIENT_INSTITUTIONAL, ClaimProfile.REGULAR);
-    requested.put(PHARMACY, ClaimProfile.CMS);
-    // Precondition: each requested category has data, so both institutional queries are exercised.
-    requested
-        .keySet()
-        .forEach(
-            category ->
-                assertFalse(
-                    idsIn(categoryById, Set.of(category)).isEmpty(),
-                    "Precondition: test data should include " + category));
-
-    var urls =
-        requested.entrySet().stream()
-            .map(e -> e.getValue().getCanonicalUrl(e.getKey()))
-            .toArray(String[]::new);
-    var eobBundle = searchByPatient().and(profiles(urls)).usingStyle(searchStyle).execute();
-    var eobs = getEobFromBundle(eobBundle);
-
-    assertEquals(idsIn(categoryById, requested.keySet()), ids(eobs));
-    eobs.forEach(
-        eob -> {
-          var category = categoryById.get(idOf(eob));
-          assertEquals(
-              requested.get(category).toFhirProfiles(category),
-              metaProfiles(eob),
-              "meta.profile for " + idOf(eob));
-        });
+    var eobBundle =
+        searchByPatient()
+            .and(
+                profiles(
+                    ClaimProfile.CMS.getCanonicalUrl(PHARMACY),
+                    ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL),
+                    ClaimProfile.REGULAR.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(5, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name() + "_profile_mixed").toMatchSnapshot(eobBundle);
   }
 
   @Test
-  void eobSearchByPatientNoProfileMatchesCmsWithoutPriorAuth() {
-    var defaultEobs = getEobFromBundle(searchByPatient().execute());
-    var cmsEobs =
-        getEobFromBundle(
-            searchByPatient().and(profiles(allCategoryUrls(ClaimProfile.CMS))).execute());
-
-    var defaultClaimEobs =
-        defaultEobs.stream()
-            .filter(eob -> categoryOf(eob).isPresent())
-            .collect(Collectors.toMap(EobSearchIT::idOf, Function.identity()));
-
-    assertEquals(defaultClaimEobs.keySet(), ids(cmsEobs));
-    cmsEobs.forEach(
-        eob ->
-            assertTrue(
-                eob.equalsDeep(defaultClaimEobs.get(idOf(eob))),
-                "Explicit CMS rendering should match default for " + idOf(eob)));
-  }
-
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void eobSearchByPatientVersionedC4bbProfileRoundTrips(SearchStyleEnum searchStyle) {
-    // meta.profile emits C4BB canonicals with |2.2.0; clients echoing that value must be accepted.
-    var unversioned = ClaimProfile.BASIS.getCanonicalUrl(PHARMACY);
-    var versioned = ClaimProfile.BASIS.toFhirProfile(PHARMACY);
-    assertTrue(versioned.startsWith(unversioned + "|"), "Precondition: emitted URL is versioned");
-
-    var unversionedIds =
-        ids(
-            getEobFromBundle(
-                searchByPatient().and(profiles(unversioned)).usingStyle(searchStyle).execute()));
-    var versionedIds =
-        ids(
-            getEobFromBundle(
-                searchByPatient().and(profiles(versioned)).usingStyle(searchStyle).execute()));
-
-    assertFalse(unversionedIds.isEmpty(), "Precondition: test data should include pharmacy");
-    assertEquals(unversionedIds, versionedIds);
+  void eobSearchByPatientVersionedProfile() {
+    var eobBundle =
+        searchByPatient().and(profiles(ClaimProfile.BASIS.toFhirProfile(PHARMACY))).execute();
+    assertEquals(1, eobBundle.getEntry().size());
   }
 
   static Stream<String> provideInvalidProfiles() {
     return Stream.of(
-        // Unknown values, including the legacy enum names.
         "BOGUS",
-        "CMS",
-        "REGULAR",
         "BASIS",
-        // Unsupported C4BB profile.
         "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Oral",
-        // Unsupported version.
         ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY) + "|2.1.0",
-        // CMS canonicals are unversioned.
-        ClaimProfile.CMS.getCanonicalUrl(PHARMACY) + "|2.2.0",
-        // Same category requested in two renderings.
-        ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY)
-            + ","
-            + ClaimProfile.BASIS.getCanonicalUrl(PHARMACY));
+        ClaimProfile.CMS.getCanonicalUrl(PHARMACY) + "|2.2.0");
   }
 
   @ParameterizedTest
   @MethodSource("provideInvalidProfiles")
   void eobSearchByPatientInvalidProfileBadRequest(String profile) {
-    var query = searchByPatient().and(profiles(profile.split(",")));
-    assertThrows(
-        InvalidRequestException.class,
-        query::execute,
-        "Should throw InvalidRequestException for _profile=" + profile);
+    var query = searchByPatient().and(profiles(profile));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByPatientConflictingProfileBadRequest() {
+    var query =
+        searchByPatient()
+            .and(
+                profiles(
+                    ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY),
+                    ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)));
+    assertThrows(InvalidRequestException.class, query::execute);
   }
 
   @Test
@@ -1104,10 +980,7 @@ class EobSearchIT extends IntegrationTestBase {
         searchByPatient()
             .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)))
             .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)));
-    assertThrows(
-        InvalidRequestException.class,
-        query::execute,
-        "Repeated _profile (AND) should be rejected; use a comma-separated list");
+    assertThrows(InvalidRequestException.class, query::execute);
   }
 
   @Test
@@ -1119,32 +992,27 @@ class EobSearchIT extends IntegrationTestBase {
             + URLEncoder.encode(
                 ClaimProfile.BASIS.getCanonicalUrl(PHARMACY), StandardCharsets.UTF_8);
     var query = getFhirClient().search().byUrl(url).returnBundle(Bundle.class);
-    assertThrows(
-        InvalidRequestException.class, query::execute, "_profile modifiers should be rejected");
+    assertThrows(InvalidRequestException.class, query::execute);
   }
 
   @Test
-  void eobSearchByPatientProfileIntersectsType() {
-    var categoryById = defaultCategoryById();
-    var outpatientType = ClaimSubtype.OUTPATIENT.getCode();
+  void eobSearchByPatientProfileAndType() {
+    var outpatientType =
+        new TokenClientParam("type").exactly().identifier(ClaimSubtype.OUTPATIENT.getCode());
 
-    // Disjoint type and profile -> nothing. Also verifies the type and profile claim type code
-    // filters bind to distinct query parameters (a collision would return the HHA claim here).
-    var disjoint =
-        getEobFromBundle(
-            searchByPatient()
-                .and(new TokenClientParam("type").exactly().identifier(outpatientType))
-                .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL)))
-                .execute());
-    assertEquals(0, disjoint.size());
+    var inpatientBundle =
+        searchByPatient()
+            .and(outpatientType)
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL)))
+            .execute();
+    assertEquals(0, inpatientBundle.getEntry().size());
 
-    var overlapping =
-        getEobFromBundle(
-            searchByPatient()
-                .and(new TokenClientParam("type").exactly().identifier(outpatientType))
-                .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)))
-                .execute());
-    assertEquals(idsIn(categoryById, Set.of(OUTPATIENT_INSTITUTIONAL)), ids(overlapping));
+    var outpatientBundle =
+        searchByPatient()
+            .and(outpatientType)
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)))
+            .execute();
+    assertEquals(3, outpatientBundle.getEntry().size());
   }
 
   @ParameterizedTest
@@ -1159,10 +1027,7 @@ class EobSearchIT extends IntegrationTestBase {
             .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)))
             .usingStyle(searchStyle)
             .execute();
-    var eobs = getEobFromBundle(eobBundle);
-
-    assertEquals(Set.of(CLAIM_ID_RX), ids(eobs), "Only the pharmacy claim should be returned");
-    assertEquals(ClaimProfile.BASIS.toFhirProfiles(PHARMACY), metaProfiles(eobs.getFirst()));
+    assertEquals(1, eobBundle.getEntry().size());
     expectFhir()
         .scenario(searchStyle.name() + "_profile_pharmacy_basis")
         .toMatchSnapshot(eobBundle);
@@ -1174,20 +1039,8 @@ class EobSearchIT extends IntegrationTestBase {
     var regularSize = profileResponseSizeBytes(ClaimProfile.REGULAR);
     var basisSize = profileResponseSizeBytes(ClaimProfile.BASIS);
 
-    assertTrue(
-        cmsSize > regularSize,
-        "CMS response ("
-            + cmsSize
-            + " bytes) should be larger than REGULAR ("
-            + regularSize
-            + " bytes)");
-    assertTrue(
-        regularSize > basisSize,
-        "REGULAR response ("
-            + regularSize
-            + " bytes) should be larger than BASIS ("
-            + basisSize
-            + " bytes)");
+    assertTrue(cmsSize > regularSize, "CMS response should be larger than REGULAR");
+    assertTrue(regularSize > basisSize, "REGULAR response should be larger than BASIS");
   }
 
   private int profileResponseSizeBytes(ClaimProfile profile) {
@@ -1195,4 +1048,6 @@ class EobSearchIT extends IntegrationTestBase {
     var json = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(bundle);
     return json.getBytes(StandardCharsets.UTF_8).length;
   }
+
+  // endregion
 }

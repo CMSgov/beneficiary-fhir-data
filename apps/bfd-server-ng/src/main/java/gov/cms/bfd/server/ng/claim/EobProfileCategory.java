@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.input;
+package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimType;

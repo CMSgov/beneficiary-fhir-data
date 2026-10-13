@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.input.EobProfileCategory;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;

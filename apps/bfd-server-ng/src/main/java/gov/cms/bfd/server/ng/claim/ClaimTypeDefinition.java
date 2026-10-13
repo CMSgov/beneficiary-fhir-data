@@ -5,12 +5,9 @@ import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
-import gov.cms.bfd.server.ng.input.EobProfileCategory;
 import gov.cms.bfd.server.ng.input.ProfileSelection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Definition of a claim type used for executing claim searches.
@@ -42,33 +39,40 @@ public record ClaimTypeDefinition(
   }
 
   /**
-   * Gets the filters to query this claim type with for the requested profiles.
+   * Determine whether this claim type definition belongs to the requested profiles.
+   *
+   * @param profileSelection requested profiles
+   * @return boolean
+   */
+  public boolean matchesProfile(ProfileSelection profileSelection) {
+    if (!profileSelection.hasProfiles()) {
+      return profile == ClaimProfile.CMS;
+    }
+    return EobProfileCategory.fromClaimType(claimType).stream()
+        .anyMatch(category -> profileSelection.isRequested(category, profile));
+  }
+
+  /**
+   * Adds a claim type code filter when only some of this claim type's categories were requested.
    *
    * @param profileSelection requested profiles
    * @param filters filters from the search criteria
-   * @return the filters, or empty if this claim type should not be queried
+   * @return filters
    */
-  public Optional<List<DbFilterBuilder>> getProfileFilters(
+  public List<DbFilterBuilder> getProfileFilters(
       ProfileSelection profileSelection, List<DbFilterBuilder> filters) {
-    if (profileSelection.isDefault()) {
-      return profile == ClaimProfile.CMS ? Optional.of(filters) : Optional.empty();
-    }
     var categories = EobProfileCategory.fromClaimType(claimType);
     var requested =
         categories.stream()
             .filter(category -> profileSelection.isRequested(category, profile))
             .toList();
-    if (requested.isEmpty()) {
-      return Optional.empty();
+    if (!profileSelection.hasProfiles() || requested.size() == categories.size()) {
+      return filters;
     }
-    if (requested.size() == categories.size()) {
-      return Optional.of(filters);
-    }
-    // Only some of this claim type's categories were requested, so narrow it by claim type code
     var claimTypeCodes =
         requested.stream().flatMap(category -> category.getClaimTypeCodes().stream()).toList();
     var profileFilters = new ArrayList<>(filters);
     profileFilters.add(new ClaimTypeCodeFilterParam(PROFILE_CLAIM_TYPE_CODES, claimTypeCodes));
-    return Optional.of(profileFilters);
+    return profileFilters;
   }
 }

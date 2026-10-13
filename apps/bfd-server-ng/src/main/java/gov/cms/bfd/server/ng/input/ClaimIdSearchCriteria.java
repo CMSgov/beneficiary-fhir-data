@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param lastUpdated last updated
  * @param outcomes claim outcomes
  * @param sources claim sources
- * @param profile requested profiles; {@link ProfileSelection#DEFAULT} when _profile is absent
+ * @param profile requested profiles
  */
 public record ClaimIdSearchCriteria(
     List<Long> claimUniqueIds,
@@ -64,7 +64,7 @@ public record ClaimIdSearchCriteria(
    *
    * @return boolean
    */
-  public boolean hasProfile() {
-    return !profile.isDefault();
+  public boolean hasProfiles() {
+    return profile().hasProfiles();
   }
 }

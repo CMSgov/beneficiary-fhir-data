@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.input.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.input.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;

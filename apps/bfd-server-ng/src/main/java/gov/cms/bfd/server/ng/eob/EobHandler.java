@@ -73,7 +73,7 @@ public class EobHandler {
                 new DateTimeRange(),
                 Collections.emptyList(),
                 Collections.emptyList(),
-                ProfileSelection.DEFAULT),
+                new ProfileSelection()),
             options);
     return eobs.stream().findFirst();
   }

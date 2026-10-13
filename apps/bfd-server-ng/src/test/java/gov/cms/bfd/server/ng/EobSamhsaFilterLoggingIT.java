@@ -43,7 +43,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             new DateTimeRange(),
             Collections.emptyList(),
             Collections.emptyList(),
-            ProfileSelection.DEFAULT),
+            new ProfileSelection()),
         excludeOptions);
 
     var samhsaLogs =
@@ -74,7 +74,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
             new DateTimeRange(),
             Collections.emptyList(),
             Collections.emptyList(),
-            ProfileSelection.DEFAULT),
+            new ProfileSelection()),
         excludeOptions);
 
     var samhsaLogs =

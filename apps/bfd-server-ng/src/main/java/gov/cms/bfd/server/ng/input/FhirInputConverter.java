@@ -6,6 +6,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchParameter;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -578,7 +580,7 @@ public class FhirInputConverter {
    */
   public static ProfileSelection parseProfileParameter(@Nullable UriAndListParam profileParam) {
     if (profileParam == null || profileParam.getValuesAsQueryTokens().isEmpty()) {
-      return ProfileSelection.DEFAULT;
+      return new ProfileSelection();
     }
     if (profileParam.getValuesAsQueryTokens().size() > 1) {
       throw new InvalidRequestException(

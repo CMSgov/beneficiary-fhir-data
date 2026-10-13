@@ -159,7 +159,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param request HTTP request details
    * @param outcome outcome to filter by
    * @param source claim source to filter by
-   * @param profile requested profiles (comma-separated canonical URLs)
+   * @param profile requested profiles to filter by
    * @return bundle
    */
   @RetryOnFailoverOrConnectionException

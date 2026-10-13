@@ -144,4 +144,13 @@ public record ClaimSearchCriteria(
   public boolean hasSources() {
     return !sources.isEmpty();
   }
+
+  /**
+   * Returns whether a _profile has been provided.
+   *
+   * @return boolean
+   */
+  public boolean hasProfiles() {
+    return profile().hasProfiles();
+  }
 }

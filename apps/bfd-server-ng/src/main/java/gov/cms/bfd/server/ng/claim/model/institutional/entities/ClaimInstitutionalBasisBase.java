@@ -1,10 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoDateInstitutional;
 import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoInstitutional;
-import gov.cms.bfd.server.ng.input.ClaimProfile;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import javax.annotation.processing.Generated;

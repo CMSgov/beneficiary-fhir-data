@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.input.EobProfileCategory;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Collections;
@@ -399,6 +399,10 @@ public enum ClaimTypeCode {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }
 
+  public Optional<EobProfileCategory> getProfileCategory() {
+    return getClaimSubtype().map(ClaimSubtype::getProfileCategory);
+  }
+
   public Optional<ClaimType> getClaimType() {
     return getClaimSubtype().map(ClaimSubtype::getClaimType);
   }
@@ -465,15 +469,6 @@ public enum ClaimTypeCode {
     return getClaimSubtype()
         .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
         .orElse(false);
-  }
-
-  /**
-   * Profile category for this claim type code.
-   *
-   * @return category, or empty if the code has no subtype
-   */
-  public Optional<EobProfileCategory> getProfileCategory() {
-    return getClaimSubtype().map(ClaimSubtype::getProfileCategory);
   }
 
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {

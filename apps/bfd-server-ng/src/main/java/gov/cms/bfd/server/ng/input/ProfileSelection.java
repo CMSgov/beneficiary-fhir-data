@@ -1,33 +1,19 @@
 package gov.cms.bfd.server.ng.input;
 
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import java.util.Map;
 
 /**
- * The profiles requested with _profile, by category. Empty when _profile is not provided.
+ * Represents the profiles requested for each category.
  *
- * @param profiles requested profile for each category
+ * @param profiles requested profile by category
  */
 public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
 
-  /** Used when _profile is not provided. */
-  public static final ProfileSelection DEFAULT = new ProfileSelection(Map.of());
-
-  /**
-   * Creates a profile selection.
-   *
-   * @param profiles requested profile for each category
-   */
-  public ProfileSelection {
-    profiles = Map.copyOf(profiles);
-  }
-
-  /**
-   * Returns whether _profile was not provided.
-   *
-   * @return boolean
-   */
-  public boolean isDefault() {
-    return profiles.isEmpty();
+  /** Creates an empty {@link ProfileSelection}. */
+  public ProfileSelection() {
+    this(Map.of());
   }
 
   /**
@@ -39,5 +25,14 @@ public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
    */
   public boolean isRequested(EobProfileCategory category, ClaimProfile profile) {
     return profiles.get(category) == profile;
+  }
+
+  /**
+   * Returns whether any profiles were provided.
+   *
+   * @return boolean
+   */
+  public boolean hasProfiles() {
+    return !profiles.isEmpty();
   }
 }

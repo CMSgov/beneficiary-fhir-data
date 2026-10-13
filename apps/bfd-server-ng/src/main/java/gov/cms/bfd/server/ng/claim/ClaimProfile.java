@@ -1,19 +1,19 @@
-package gov.cms.bfd.server.ng.input;
+package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/** Profiles an ExplanationOfBenefit can be rendered in. */
+/** enum that represents the exposed profile definitions for an ExplanationOfBenefit. */
 @Getter
 @AllArgsConstructor
 public enum ClaimProfile {
-  /** CMS Blue Button profile. Contains all available elements. This is the default. */
+  /** Fullest profile, default. */
   CMS(SystemUrls.CMS_STRUCTURE_DEFINITION_EOB, "", ""),
-  /** C4BB profile. Contains CARIN elements, including financial information. */
+  /** Some information redacted, retains CARIN fields. */
   REGULAR(SystemUrls.CARIN_STRUCTURE_DEFINITION_EOB, "", SystemUrls.CARIN_VERSION),
-  /** C4BB Basis profile. Contains no financial information. */
+  /** Least information, all adjudication removed. */
   BASIS(SystemUrls.CARIN_STRUCTURE_DEFINITION_EOB, "-Basis", SystemUrls.CARIN_VERSION);
 
   private final String baseUrl;
@@ -21,7 +21,7 @@ public enum ClaimProfile {
   private final String version;
 
   /**
-   * Gets the unversioned canonical URL of this profile for a category.
+   * Gets the canonical URL for the given category.
    *
    * @param category profile category
    * @return canonical URL
@@ -31,7 +31,7 @@ public enum ClaimProfile {
   }
 
   /**
-   * Gets the URL of this profile for a category, including the version if there is one.
+   * Gets the versioned URL for the given category.
    *
    * @param category profile category
    * @return profile URL
@@ -42,13 +42,13 @@ public enum ClaimProfile {
   }
 
   /**
-   * Gets the meta.profile values for a resource rendered in this profile. CMS resources also
-   * conform to C4BB, which is listed first.
+   * Gets the meta.profile values for the given category.
    *
    * @param category profile category
    * @return profile URLs
    */
   public List<String> toFhirProfiles(EobProfileCategory category) {
+    // CMS also conforms to C4BB, list C4BB first
     return switch (this) {
       case CMS -> List.of(REGULAR.toFhirProfile(category), toFhirProfile(category));
       case REGULAR, BASIS -> List.of(toFhirProfile(category));
