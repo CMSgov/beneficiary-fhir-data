@@ -28,7 +28,7 @@ abstract class ClaimLineInstitutionalCms extends ClaimLineInstitutionalBase {
   }
 
   /**
-   * Helper method with logic for professional tracking number mapping.
+   * Helper method with logic for institutional tracking number mapping.
    *
    * @param supportingInfoFactory the factory of supporting info
    * @return a list of 0..1 supporting info components
