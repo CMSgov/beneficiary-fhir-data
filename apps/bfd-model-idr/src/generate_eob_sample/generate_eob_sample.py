@@ -255,17 +255,33 @@ class SampleGenerator:
 
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             result = self.create_base(
-                clm_uniq_id, claim_type, claim_row, "EOB-Pharmacy-Sample.json"
+                clm_uniq_id=clm_uniq_id,
+                clm_type_cd=claim_type,
+                claim_row=claim_row,
+                destination_file_name="EOB-Pharmacy-Sample.json",
             )
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
         elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
-            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Carrier-Sample.json")
+            result = self.create_base(
+                clm_uniq_id=clm_uniq_id,
+                clm_type_cd=claim_type,
+                claim_row=claim_row,
+                destination_file_name="EOB-Carrier-Sample.json",
+            )
         elif claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME:
-            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-DME-Sample.json")
+            result = self.create_base(
+                clm_uniq_id=clm_uniq_id,
+                clm_type_cd=claim_type,
+                claim_row=claim_row,
+                destination_file_name="EOB-DME-Sample.json",
+            )
         elif claim_type in MCS_CLM_TYPE_CDS:
             result = self.create_base(
-                clm_uniq_id, claim_type, claim_row, "EOB-Carrier-MCS-Sample.json"
+                clm_uniq_id=clm_uniq_id,
+                clm_type_cd=claim_type,
+                claim_row=claim_row,
+                destination_file_name="EOB-Carrier-MCS-Sample.json",
             )
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
