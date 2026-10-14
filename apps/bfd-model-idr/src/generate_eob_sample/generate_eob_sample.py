@@ -382,31 +382,34 @@ class SampleGenerator:
 
     def read_clm(self, clm_uniq_id: str) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory, "SYNTHETIC_CLM", True, [Param("CLM_UNIQ_ID", clm_uniq_id)]
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM",
+            not_found_fail=True,
+            params=[Param("CLM_UNIQ_ID", clm_uniq_id)],
         )
 
     def read_provider(self, provider_npi: str) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_PRVDR_HSTRY",
-            False,
-            [Param("PRVDR_NPI_NUM", provider_npi)],
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_PRVDR_HSTRY",
+            not_found_fail=False,
+            params=[Param("PRVDR_NPI_NUM", provider_npi)],
         )
 
     def read_sig_line(self, clm_dt_sgntr_sk: str) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_DT_SGNTR",
-            False,
-            [Param("CLM_DT_SGNTR_SK", clm_dt_sgntr_sk)],
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_DT_SGNTR",
+            not_found_fail=False,
+            params=[Param("CLM_DT_SGNTR_SK", clm_dt_sgntr_sk)],
         )
 
     def read_pbp(self, clm_sbmtr_cntrct_num: str, clm_sbmtr_cntrct_pbp_num: str) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CNTRCT_PBP_NUM",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CNTRCT_PBP_NUM",
+            not_found_fail=False,
+            params=[
                 Param("CNTRCT_NUM", clm_sbmtr_cntrct_num),
                 Param("CNTRCT_PBP_NUM", clm_sbmtr_cntrct_pbp_num),
             ],
@@ -414,10 +417,10 @@ class SampleGenerator:
 
     def read_instnl(self, clm_row: dict[str, str]) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_INSTNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_INSTNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_row["CLM_TYPE_CD"]),
@@ -427,10 +430,10 @@ class SampleGenerator:
 
     def read_prfnl(self, clm_row: dict[str, str]) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_PRFNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_PRFNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_row["CLM_TYPE_CD"]),
@@ -440,10 +443,10 @@ class SampleGenerator:
 
     def read_lctn_hist(self, clm_row: dict[str, str]) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LCTN_HSTRY",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LCTN_HSTRY",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_row["CLM_TYPE_CD"]),
@@ -453,10 +456,10 @@ class SampleGenerator:
 
     def read_dcmtn(self, clm_row: dict[str, str]) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_DCMTN",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_DCMTN",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_row["CLM_TYPE_CD"]),
@@ -466,10 +469,10 @@ class SampleGenerator:
 
     def read_rx_line(self, clm_line: dict[str, str]) -> dict[str, str]:
         return read_single_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_RX",
-            True,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_RX",
+            not_found_fail=True,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -479,10 +482,10 @@ class SampleGenerator:
 
     def read_prod_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_PROD",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_PROD",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -492,10 +495,10 @@ class SampleGenerator:
 
     def read_instnl_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_INSTNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_INSTNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -505,10 +508,10 @@ class SampleGenerator:
 
     def read_prfnl_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_PRFNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_PRFNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -518,10 +521,10 @@ class SampleGenerator:
 
     def read_mcs_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_MCS",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_MCS",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -553,10 +556,10 @@ class SampleGenerator:
 
     def read_fiss_lines(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_FISS",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_FISS",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),
@@ -579,10 +582,10 @@ class SampleGenerator:
 
     def read_clm_val(self, clm_line: dict[str, str]) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_VAL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_VAL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", clm_line["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", clm_line["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", clm_line["CLM_TYPE_CD"]),

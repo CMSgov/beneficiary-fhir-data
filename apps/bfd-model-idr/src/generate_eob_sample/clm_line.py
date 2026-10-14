@@ -117,10 +117,10 @@ class ClmLineBuilder:
 
     def read_line(self) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE",
-            True,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE",
+            not_found_fail=True,
+            params=[
                 Param("GEO_BENE_SK", self.clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", self.clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", self.clm_row["CLM_TYPE_CD"]),
@@ -130,10 +130,10 @@ class ClmLineBuilder:
 
     def read_instnl_lines(self) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_INSTNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_INSTNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", self.clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", self.clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", self.clm_row["CLM_TYPE_CD"]),
@@ -143,10 +143,10 @@ class ClmLineBuilder:
 
     def read_prfnl_lines(self) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_PRFNL",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_PRFNL",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", self.clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", self.clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", self.clm_row["CLM_TYPE_CD"]),
@@ -156,10 +156,10 @@ class ClmLineBuilder:
 
     def read_dcmtn_lines(self) -> list[dict[str, str]]:
         return read_multi_line_file(
-            self.source_directory,
-            "SYNTHETIC_CLM_LINE_DCMTN",
-            False,
-            [
+            source_directory=self.source_directory,
+            file_name="SYNTHETIC_CLM_LINE_DCMTN",
+            not_found_fail=False,
+            params=[
                 Param("GEO_BENE_SK", self.clm_row["GEO_BENE_SK"]),
                 Param("CLM_DT_SGNTR_SK", self.clm_row["CLM_DT_SGNTR_SK"]),
                 Param("CLM_TYPE_CD", self.clm_row["CLM_TYPE_CD"]),
