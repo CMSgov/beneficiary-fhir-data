@@ -63,7 +63,7 @@ class PostgresLoader:
         job_id: int,
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
-            conninfo=get_connection_string(load_mode),
+            conninfo=get_connection_string(),
             min_size=SETTINGS.per_batch_min_connections,
             max_size=SETTINGS.per_batch_max_connections,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
@@ -162,9 +162,9 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             )
             npi_type_changed_clause = f"""
                 EXISTS (
-                        SELECT 1 
+                        SELECT 1
                         FROM "{{temp_tablename}}" tmp
-                        WHERE {pkey_join} 
+                        WHERE {pkey_join}
                         AND ({legacy_versus_real_npi_types_check})
                     )
             """
@@ -178,8 +178,8 @@ class BatchLoader(Generic[T]):  # noqa: UP046
 
             on_conflict_where_clause = f"""
                 WHERE (
-                    ({", ".join(f"t.{v}" for v in update_set)}) 
-                    IS DISTINCT FROM 
+                    ({", ".join(f"t.{v}" for v in update_set)})
+                    IS DISTINCT FROM
                     ({", ".join(f"EXCLUDED.{v}" for v in update_set)})
                 )
                 OR {npi_type_changed_clause}
@@ -395,7 +395,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
 
         if self.job_id != DEFAULT_JOB_ID:
             sql += """
-            ,max_run_ts = (SELECT MAX(last_ts) 
+            ,max_run_ts = (SELECT MAX(last_ts)
                          FROM idr.load_progress
                          WHERE job_id = %(job_id)s
                            AND table_name = %(table)s
@@ -421,7 +421,7 @@ class BatchLoader(Generic[T]):  # noqa: UP046
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
-            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s 
+            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s
                     AND job_id = %(job_id)s
             """,
             {"table": self.table, "batch_partition": self.partition.name, "job_id": self.job_id},
