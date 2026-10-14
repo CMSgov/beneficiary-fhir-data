@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
@@ -19,7 +20,28 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_entitlement_latest", schema = "idr")
+@Subselect(
+    """
+    SELECT DISTINCT ON (bene_sk, bene_mdcr_entlmt_type_cd) bene_sk,
+        bene_rng_bgn_dt,
+        bene_rng_end_dt,
+        bene_mdcr_entlmt_type_cd,
+        bene_mdcr_entlmt_stus_cd,
+        bene_mdcr_enrlmt_rsn_cd,
+        idr_ltst_trans_flg,
+        idr_trans_efctv_ts,
+        idr_trans_obslt_ts,
+        idr_insrt_ts,
+        idr_updt_ts,
+        bfd_created_ts,
+        bfd_updated_ts,
+        min(bene_rng_bgn_dt) OVER (PARTITION BY bene_sk, bene_mdcr_entlmt_type_cd) AS original_bgn_dt
+    FROM idr.beneficiary_entitlement
+    WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
+      AND idr_ltst_trans_flg = 'Y'
+      AND bene_rng_bgn_dt <= (now() - interval '12 hours')
+    ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
+    """)
 public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement> {
 
   @EmbeddedId private BeneficiaryEntitlementId id;
