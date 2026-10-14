@@ -12,9 +12,7 @@ import jakarta.persistence.Query;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Date;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,8 +42,7 @@ public class LoadNpiDataFilesTest {
     EntityTransaction entityTransaction = Mockito.mock(EntityTransaction.class);
     Mockito.when(entityManager.createNativeQuery(anyString())).thenReturn(query);
     Mockito.when(entityManager.getTransaction()).thenReturn(entityTransaction);
-    Mockito.when(query.getSingleResult())
-        .thenReturn(new Date(Instant.now().minus(31, ChronoUnit.DAYS).toEpochMilli()));
+    Mockito.when(query.getSingleResult()).thenReturn(LocalDate.now().minusDays(31));
   }
 
   @Test

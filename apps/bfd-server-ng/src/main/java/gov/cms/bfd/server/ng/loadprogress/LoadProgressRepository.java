@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.ZonedDateTime;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * fallback value is handled.
  */
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LoadProgressRepository {
   @PersistenceContext private EntityManager entityManager;
   private final DateUtil dateUtil;

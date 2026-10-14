@@ -17,6 +17,7 @@ import org.hibernate.boot.cfgxml.spi.CfgXmlAccessService;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.classloading.internal.ClassLoaderServiceImpl;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.SessionFactoryOptions;
@@ -94,7 +95,9 @@ public class HibernateValidatorTest {
             PhysicalNamingStrategy.class, null, PhysicalNamingStrategyStandardImpl.INSTANCE))
         .thenReturn(namingStrategy);
     when(mockRegistry.getService(StrategySelector.class)).thenReturn(strategySelector);
-    ClassLoaderService classLoaderService = mock(ClassLoaderService.class);
+    // Hibernate 7's models bootstrap loads real classes through this service, so it can't be a
+    // mock.
+    ClassLoaderService classLoaderService = new ClassLoaderServiceImpl();
     when(mockRegistry.getService(ClassLoaderService.class)).thenReturn(classLoaderService);
     CfgXmlAccessService cfxService = mock(CfgXmlAccessService.class);
     when(mockRegistry.getService(CfgXmlAccessService.class)).thenReturn(cfxService);

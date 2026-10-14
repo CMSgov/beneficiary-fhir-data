@@ -32,7 +32,7 @@ public class CarrierTag {
   /** the details field. */
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
-  private List details;
+  private List<?> details;
 
   /** The associated claim. */
   @Id

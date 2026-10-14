@@ -70,7 +70,7 @@
                 for JPA entities. This happens automagically via javac's annotation
                 processor. -->
             <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
+            <artifactId>hibernate-processor</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.logging</groupId>
@@ -191,7 +191,7 @@
                         </path>
                         <path>
                             <groupId>org.hibernate.orm</groupId>
-                            <artifactId>hibernate-jpamodelgen</artifactId>
+                            <artifactId>hibernate-processor</artifactId>
                             <version>${hibernate.version}</version>
                         </path>
                     </annotationProcessorPaths>

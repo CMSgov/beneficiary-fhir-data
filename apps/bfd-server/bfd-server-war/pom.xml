@@ -37,6 +37,12 @@
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-rda</artifactId>
         </dependency>
+        <dependency>
+            <!-- Used by RDATestUtils' persistence.xml-based EntityManagerFactory. -->
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-scan-jandex</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <!-- At least one "structures" JAR must also be included -->

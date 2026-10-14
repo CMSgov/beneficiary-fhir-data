@@ -34,7 +34,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -214,9 +213,7 @@ public class SamhsaUtil {
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("claimId", claimId);
     Object[] result = (Object[]) query.getSingleResult();
-    LocalDate fromDate = result[0] != null ? ((Date) result[0]).toLocalDate() : null;
-    LocalDate toDate = result[1] != null ? ((Date) result[1]).toLocalDate() : null;
-    return new LocalDate[] {fromDate, toDate};
+    return new LocalDate[] {(LocalDate) result[0], (LocalDate) result[1]};
   }
 
   /**

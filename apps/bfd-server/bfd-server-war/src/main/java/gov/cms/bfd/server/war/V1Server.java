@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -46,7 +45,7 @@ public class V1Server extends RestfulServer {
   /** Constructs a new {@link V1Server} instance. */
   public V1Server() {
     super(FhirContext.forDstu3());
-    setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+    setServerAddressStrategy(new ProxyAddressStrategy());
     // See comments in V2Server's constructor for rational for setting this flag
     setIgnoreServerParsedRequestParameters(false);
     configureServerInfoMetadata();

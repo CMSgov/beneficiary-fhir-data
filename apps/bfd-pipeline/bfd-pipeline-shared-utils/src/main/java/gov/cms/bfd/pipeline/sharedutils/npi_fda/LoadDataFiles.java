@@ -150,15 +150,15 @@ public abstract class LoadDataFiles<TData> implements Callable<Integer> {
    * @return true if the data should be loaded.
    */
   boolean shouldLoadData() {
-    Date lastUpdated;
+    LocalDate lastUpdated;
     Query query = entityManager.createNativeQuery(GET_LAST_UPDATED_QUERY);
     query.setParameter("tableName", tableName);
     try {
-      lastUpdated = (Date) query.getSingleResult();
+      lastUpdated = (LocalDate) query.getSingleResult();
     } catch (NoResultException e) {
       return true;
     }
-    return LocalDate.now().isAfter(lastUpdated.toLocalDate().plusDays(runInterval));
+    return LocalDate.now().isAfter(lastUpdated.plusDays(runInterval));
   }
 
   /** Updates the lastUpdated Date. */
