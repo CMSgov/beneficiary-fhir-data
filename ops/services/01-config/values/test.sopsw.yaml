@@ -149,8 +149,8 @@
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
-/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 1
-/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 1
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/enabled: "false"
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: bfd-${env}/rda-pipeline
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/interval: PT1M
@@ -235,7 +235,8 @@
 /bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi: '{"name":"Blue Button API","certificateAliases":["bluebutton_backend_test_data_server_client_test", "bluebutton_root_ca","bb2_local_cert"]}'
 /bfd/${env}/server-ng/nonsensitive/cert_partners/bcda: '{"name":"BCDA","certificateAliases":["bcda_dev_client", "bcda_test_client", "bcda_local_client"]}'
 /bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d: '{"name":"AB2D","certificateAliases":["ab2d_cms_gov"]}'
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test: |-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test:
+  |-
   -----BEGIN CERTIFICATE-----
   MIIFazCCA1OgAwIBAgIUURk0WIK7R+B9eXMNrSBDEuumRtIwDQYJKoZIhvcNAQEL
   BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -517,7 +518,8 @@
 /bfd/${env}/server-ng/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
 /bfd/${env}/server-ng/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
 /bfd/${env}/server-ng/nonsensitive/lb_is_public: "false"
-/bfd/${env}/server-ng/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test: |-
+/bfd/${env}/server-ng/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test:
+  |-
   -----BEGIN CERTIFICATE-----
   MIIFazCCA1OgAwIBAgIUURk0WIK7R+B9eXMNrSBDEuumRtIwDQYJKoZIhvcNAQEL
   BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -549,7 +551,8 @@
   ocsHNvKPrIcO4lOHskMGqXnIP5VVmVL1PZL4LSwGpHtV5yJGqJAjUcD16Qfre+Az
   gIVpBkoMZxoL20PjA8NEQB0u3fw6xLpTkGNqQzcMdqRI7PDweqCJt1fv4QL2Al0=
   -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_samhsa_cert: |-
+/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_samhsa_cert:
+  |-
   -----BEGIN CERTIFICATE-----
   MIIFMzCCAxugAwIBAgIUB9nuQ0w1J5PDrZnpdgNxtC685s4wDQYJKoZIhvcNAQEL
   BQAwKTEnMCUGA1UEAwweYmx1ZWJ1dHRvbi1iYWNrZW5kLXRlc3Qtc2FtaHNhMB4X
