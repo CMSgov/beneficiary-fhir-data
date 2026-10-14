@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -13,8 +14,8 @@ structure_def_folder = "./sushi/fsh-generated/resources"
 """
 This data structure will get more complex as BFD adds more "types" of data. We're effectively trying
 to populate a minimum spanning tree.
-We want to have >=1 potential example to populate for each row in the data dictionary. 
-In practice, Patient will be the least complex (no dependent variables), followed by Coverage 
+We want to have >=1 potential example to populate for each row in the data dictionary.
+In practice, Patient will be the least complex (no dependent variables), followed by Coverage
 (1 dependent variable), and then EOB (2 dependent variables).
 For the initial version, we'll start simple and hard code no dependent variables for each of those.
 """
@@ -60,9 +61,8 @@ def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
 
 
 if not Path(structure_def_folder).exists():
-    print("Generating sushi files")
-    run_subprocess(["npm", "install"])
-    run_subprocess(["npm", "run", "sushi-build"])
+    print("Sushi files must be generated first")
+    sys.exit(1)
 
 for resource_type in sample_sources_by_profile:
     with Path(sample_sources_by_profile[resource_type]).open() as file:
@@ -86,6 +86,9 @@ for walk_info in os.walk(structure_def_folder):
                         "definition"
                     ]
 
+if len(structure_def_names_descriptions) == 0:
+    print("No valid structure definitions found")
+    sys.exit(1)
 
 coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
 claim_profiles = [
