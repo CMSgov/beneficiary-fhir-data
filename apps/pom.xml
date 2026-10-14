@@ -53,8 +53,8 @@
     <module>report-aggregate</module>
   </modules>
   <properties>
-    <surefire.jvm.args />
-    <failsafe.jvm.args />
+    <surefire.jvm.args/>
+    <failsafe.jvm.args/>
     <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -111,7 +111,7 @@
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
     <sonar.version>5.7.0.6970</sonar.version>
     <jacoco.version>0.8.15</jacoco.version>
-    <micrometer.version>1.15.12</micrometer.version>
+    <micrometer.version>1.16.7</micrometer.version>
     <metrics.version>4.2.39</metrics.version>
     <git-build-hook-maven-plugin.version>3.6.0</git-build-hook-maven-plugin.version>
     <aws-java-sdk-bom.version>2.52.0</aws-java-sdk-bom.version>
@@ -136,6 +136,8 @@
     <jackson-dataformat-yaml.version>2.22.3</jackson-dataformat-yaml.version>
     <jackson-datatype-jsr310.version>2.22.3</jackson-datatype-jsr310.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
+    <!-- Jackson 3.x, pulled in transitively by Flyway. -->
+    <tools-jackson.version>3.1.7</tools-jackson.version>
     <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
     <snakeyaml.version>2.6</snakeyaml.version>
     <jakarta.xml.bind.api.version>4.0.5</jakarta.xml.bind.api.version>
@@ -148,8 +150,8 @@
     <rest-assured.version>5.5.1</rest-assured.version>
     <assertj.version>3.27.7</assertj.version>
     <system-lambda-version>1.2.1</system-lambda-version>
-    <snowflake.version>4.3.2</snowflake.version>
-    <postgresql.version>42.7.13</postgresql.version>
+    <snowflake.version>4.3.4</snowflake.version>
+    <postgresql.version>42.7.14</postgresql.version>
     <slf4j.version>2.0.18</slf4j.version>
     <log4j.version>2.26.1</log4j.version>
     <hikari.version>7.1.0</hikari.version>
@@ -160,7 +162,7 @@
             The version used here should be compatible with SLF4J.
             See the compatible versions here: https://www.slf4j.org/manual.html
         -->
-    <logback.core.version>1.5.34</logback.core.version>
+    <logback.core.version>1.6.3</logback.core.version>
     <zjsonpatch.version>0.4.16</zjsonpatch.version>
     <freemarker.version>2.3.35</freemarker.version>
     <reflections.version>0.10.2</reflections.version>
@@ -170,8 +172,10 @@
     <jakarta.el.version>4.0.2</jakarta.el.version>
     <poi.version>5.4.0</poi.version>
     <javapoet.version>1.13.0</javapoet.version>
-    <netty.version>4.1.137.Final</netty.version>
-    <jetty.version>12.1.10</jetty.version>
+    <netty.version>4.1.138.Final</netty.version>
+    <jetty.version>12.1.12</jetty.version>
+    <!-- Jetty 12.0.x line used by spring-boot-starter-jetty in bfd-server-ng. -->
+    <jetty-spring-boot.version>12.0.38</jetty-spring-boot.version>
     <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
     <datasource-proxy.version>1.10</datasource-proxy.version>
     <cors.filter.version>1.0.1</cors.filter.version>
@@ -211,8 +215,8 @@
     <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
     <its.db.url>jdbc:bfd-test:tc</its.db.url>
-    <its.db.username />
-    <its.db.password />
+    <its.db.username/>
+    <its.db.password/>
     <!-- Docker image used with testcontainers to provide a working database for testing. -->
     <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -226,7 +230,7 @@
     <!-- The source types to enable for PAC resources -->
     <local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
     <!-- Functional-reactive programming api for concurrent claim ingestion. -->
-    <reactor.version>3.8.6</reactor.version>
+    <reactor.version>3.8.7</reactor.version>
     <!-- Default number of threads that we can override as needed in module poms. -->
     <compile.thread.count>4</compile.thread.count>
     <tests.thread.count>4</tests.thread.count>
@@ -249,7 +253,7 @@
     <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
     <jib.tag>${project.version}</jib.tag>
     <!-- Optional image namespace. -->
-    <jib.namespace />
+    <jib.namespace/>
     <!-- Skip by default.  Override to allow images to be built. -->
     <jib.skip>true</jib.skip>
     <!-- Skip by default.  Override to let open api documents be generated. -->
@@ -312,7 +316,7 @@
         <artifactId>netty-handler</artifactId>
         <version>${netty.version}</version>
       </dependency>
-      <!-- Pin remaining transitive netty artifacts to ${netty.version} for consistency -->
+      <!-- Pin remaining transitive netty artifacts to ${netty.version} for consistency-->
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-transport</artifactId>
@@ -372,6 +376,53 @@
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
         <version>5.6.4</version>
+      </dependency>
+      <!-- Fix for CVE-2026-89425 and CVE-2026-89407 (jackson-core 2.x), transitive via jackson-databind -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson-databind.version}</version>
+      </dependency>
+      <!-- Fix for CVE-2026-89425, CVE-2026-89407, CVE-2026-19032, CVE-2026-83557, CVE-2026-68497,
+           CVE-2026-91777 and CVE-2026-91776 (Jackson 3.x), transitive via flyway -->
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${tools-jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${tools-jackson.version}</version>
+      </dependency>
+      <!-- Fix for CVE-2026-45292 (opentelemetry-api resource exhaustion), transitive via hapi-fhir-base -->
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-api</artifactId>
+        <version>1.62.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-context</artifactId>
+        <version>1.62.0</version>
+      </dependency>
+      <!-- Fix for CVE-2025-7962 (angus-mail improper neutralization), transitive via hapi-fhir-server -->
+      <dependency>
+        <groupId>org.eclipse.angus</groupId>
+        <artifactId>angus-mail</artifactId>
+        <version>2.0.5</version>
+      </dependency>
+      <!-- Fix for CVE-2020-29582 (kotlin-stdlib information exposure), transitive via okhttp; matches okhttp's declared version -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>2.2.21</version>
+      </dependency>
+      <!-- Fix for CVE-2026-49844 (log4j-api improper output encoding), transitive via poi and spring-boot-starter-logging -->
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${log4j.version}</version>
       </dependency>
       <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
       <dependency>
@@ -641,6 +692,22 @@
         <!-- Used to transmit metrics to CloudWatch for alerts and dashboards. -->
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-registry-cloudwatch2</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <!-- Keep micrometer-core's companion modules aligned; explicit entries override the Spring Boot BOM. -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-commons</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-observation</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-jakarta9</artifactId>
         <version>${micrometer.version}</version>
       </dependency>
       <dependency>

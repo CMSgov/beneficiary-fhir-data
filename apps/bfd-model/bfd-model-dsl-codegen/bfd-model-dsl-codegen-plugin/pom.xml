@@ -1,146 +1,136 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-model-dsl-codegen-parent</artifactId>
-        <version>2.274.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>gov.cms.bfd</groupId>
+    <artifactId>bfd-model-dsl-codegen-parent</artifactId>
     <version>2.274.0-SNAPSHOT</version>
-    <packaging>maven-plugin</packaging>
-
-    <description>
+  </parent>
+  <artifactId>bfd-model-dsl-codegen-plugin</artifactId>
+  <version>2.274.0-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+  <description>
         Provides maven plugin code generator to create JPA entity classes and data transformation classes for RDA API
         data based on a YAML config file.
     </description>
-
-    <dependencies>
-        <dependency>
-            <!-- plugin interfaces and base classes -->
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>${maven-plugin-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- needed when injecting the Maven Project into a plugin  -->
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>${maven-core.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- annotations used to describe the plugin meta-data -->
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${maven-plugin-annotations.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <!-- used to validate data model before using it for code generation -->
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate.validator.version}</version>
-        </dependency>
-        <dependency>
-            <!-- required by hibernate-validator -->
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.el</artifactId>
-            <version>${jakarta.el.version}</version>
-        </dependency>
-
-        <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-dsl-codegen-library</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Hibernate / JPA -->
-            <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
+  <dependencies>
+    <dependency>
+      <!-- plugin interfaces and base classes -->
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>${maven-plugin-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- needed when injecting the Maven Project into a plugin  -->
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven-core.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- annotations used to describe the plugin meta-data -->
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>${maven-plugin-annotations.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <!-- used to validate data model before using it for code generation -->
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate.validator.version}</version>
+    </dependency>
+    <dependency>
+      <!-- required by hibernate-validator -->
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.el</artifactId>
+      <version>${jakarta.el.version}</version>
+    </dependency>
+    <!-- Pulls in library of classes that are used for actual data copying so that plugin can reference them when generating code that calls them. -->
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <artifactId>bfd-model-dsl-codegen-library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Hibernate / JPA -->
+      <!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself;
                 Hibernate is used for that in the BFD projects.) -->
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <groupId>org.hibernate.javax.persistence</groupId>
-        </dependency>
-        <dependency>
-            <!-- Makes programmatically generating Java sources much simpler. -->
-            <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
-        </dependency>
-
-        <dependency>
-            <!-- Add YAML support to jackson -->
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-
-        <dependency>
-            <!-- Unlike other modules the plugin needs lombok at runtime but they won't be included in other modules. -->
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- Testing -->
-        <dependency>
-            <!-- The test framework used for unit and integration tests. -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Logback is used as the logging target/backend for SLF4J during tests:
+      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <groupId>org.hibernate.javax.persistence</groupId>
+    </dependency>
+    <dependency>
+      <!-- Makes programmatically generating Java sources much simpler. -->
+      <groupId>com.squareup</groupId>
+      <artifactId>javapoet</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Add YAML support to jackson -->
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Unlike other modules the plugin needs lombok at runtime but they won't be included in other modules. -->
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <!-- Testing -->
+    <dependency>
+      <!-- The test framework used for unit and integration tests. -->
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Logback is used as the logging target/backend for SLF4J during tests:
                     all logging events will be sent to it. -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>${jakarta.annotation.api.version}</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-plugin-plugin</artifactId>
-                    <version>${maven.plugin.version}</version>
-                    <configuration>
-                        <!-- Explicit goalPrefix avoids descriptor generation errors. -->
-                        <goalPrefix>bfd-model-dsl-codegen</goalPrefix>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>${asm.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                        <goals><goal>descriptor</goal></goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>${jakarta.annotation.api.version}</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>${maven.plugin.version}</version>
+          <configuration>
+            <!-- Explicit goalPrefix avoids descriptor generation errors. -->
+            <goalPrefix>bfd-model-dsl-codegen</goalPrefix>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.ow2.asm</groupId>
+              <artifactId>asm</artifactId>
+              <version>${asm.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <goals>
+                <goal>descriptor</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
