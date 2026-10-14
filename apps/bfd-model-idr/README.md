@@ -22,8 +22,6 @@ This will generate the StructureDefinition and CodeSystem resources necessary fo
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact.
-
 To start matchbox, run
 
 ```sh
