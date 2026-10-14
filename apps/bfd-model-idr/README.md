@@ -22,18 +22,6 @@ This will generate the StructureDefinition and CodeSystem resources necessary fo
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-To start matchbox, run
-
-```sh
-docker compose up -d
-```
-
-Note, it takes several minutes and requires a good bit of RAM. Once the uploads from matchbox-setup are completed, matchbox should be ready to use. Additionally, matchbox has a health check available at:
-
-```sh
-curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
-```
-
 ### Referencing New/Updated Dependencies for Matchbox
 
 As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies.
