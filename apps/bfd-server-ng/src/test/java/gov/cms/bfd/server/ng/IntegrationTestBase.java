@@ -9,7 +9,6 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -122,9 +121,7 @@ public class IntegrationTestBase {
   }
 
   protected IGenericClient getFhirClient(FhirContext ctx) {
-    var client = ctx.newRestfulGenericClient(getServerUrl());
-    client.registerInterceptor(new LoggingInterceptor(true));
-    return client;
+    return ctx.newRestfulGenericClient(getServerUrl());
   }
 
   protected Expect expectFhir() {

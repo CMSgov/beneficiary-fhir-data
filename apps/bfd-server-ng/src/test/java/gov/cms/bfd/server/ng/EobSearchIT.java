@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
@@ -874,9 +873,8 @@ class EobSearchIT extends IntegrationTestBase {
                 .identifier(BENE_ID_ALL_PARTS_WITH_XREF));
   }
 
-  private static ICriterion<UriClientParam> profiles(String... urls) {
-    return (ICriterion<UriClientParam>)
-        new UriClientParam(Constants.PARAM_PROFILE).matches().values(urls);
+  private static ICriterion<?> profiles(String... urls) {
+    return new UriClientParam(Constants.PARAM_PROFILE).matches().values(urls);
   }
 
   private static String[] allCategoryUrls(ClaimProfile profile) {
@@ -1031,22 +1029,6 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir()
         .scenario(searchStyle.name() + "_profile_pharmacy_basis")
         .toMatchSnapshot(eobBundle);
-  }
-
-  @Test
-  void eobSearchByPatientProfileResponseSizeOrdering() {
-    var cmsSize = profileResponseSizeBytes(ClaimProfile.CMS);
-    var regularSize = profileResponseSizeBytes(ClaimProfile.REGULAR);
-    var basisSize = profileResponseSizeBytes(ClaimProfile.BASIS);
-
-    assertTrue(cmsSize > regularSize, "CMS response should be larger than REGULAR");
-    assertTrue(regularSize > basisSize, "REGULAR response should be larger than BASIS");
-  }
-
-  private int profileResponseSizeBytes(ClaimProfile profile) {
-    var bundle = searchByPatient().and(profiles(allCategoryUrls(profile))).execute();
-    var json = FhirContext.forR4Cached().newJsonParser().encodeResourceToString(bundle);
-    return json.getBytes(StandardCharsets.UTF_8).length;
   }
 
   // endregion

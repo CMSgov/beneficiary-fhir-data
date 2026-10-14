@@ -86,13 +86,14 @@ public abstract class ClaimBase {
    */
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
     var eob = new ExplanationOfBenefit();
+
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
-    claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
-    claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
+    eob.setBillablePeriod(billablePeriod.toFhir());
+    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
 
     eob.setMeta(
         meta.toFhir(
@@ -101,10 +102,13 @@ public abstract class ClaimBase {
             claimState.getSecurityStatus(),
             finalAction,
             getMetaSourceSk()));
+
     identifiers.toFhir(claimTypeCode).forEach(eob::addIdentifier);
     identifiers.toFhirRelatedClaim(claimTypeCode).ifPresent(eob::addRelated);
-    eob.setBillablePeriod(billablePeriod.toFhir());
-    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
+
+    claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
+    claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
+
     claimTypeCode
         .toFhirInsurerPartAB()
         .ifPresent(
