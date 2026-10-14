@@ -735,7 +735,7 @@ wheels = [
 
 [[package]]
 name = "snowflake-connector-python"
-version = "4.7.2"
+version = "4.7.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asn1crypto" },
@@ -756,13 +756,18 @@ dependencies = [
     { name = "tomlkit" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/73/e6e45343dd133207a6f710a88e0675ae69f8c12c23efe7f192448bbdace9/snowflake_connector_python-4.7.2.tar.gz", hash = "sha256:c261b73b8dbe3f3d5b9bfdc19196f38e3eade42cb2f24322b7a2bb60fef76534", size = 954059, upload-time = "2026-08-07T13:59:54.061Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/2c/bb5ecbd0af9f24b743de2d4a44497be2bdab0e4afcdcd23d96998a2f8d18/snowflake_connector_python-4.7.3.tar.gz", hash = "sha256:0f93139c3502c3d23139561b123492c09c33ab12a30956649a01e2cb04f06583", size = 968493, upload-time = "2026-09-03T14:13:37.975Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/9e/d768063750fd8e155311414580b79f35552e95b72f1bcbb702f9e577a5bc/snowflake_connector_python-4.7.2-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:9b5a3860bf4350786c35ffaac0ba60f7b13ef72d6296d23b28e356be1fe938c9", size = 1180582, upload-time = "2026-08-07T14:00:08.808Z" },
-    { url = "https://files.pythonhosted.org/packages/01/40/fcff393b5b6de392931e43c5ca17298e59aaf8fd89b34189748af8166bc9/snowflake_connector_python-4.7.2-cp314-cp314-macosx_15_0_x86_64.whl", hash = "sha256:89e19d070ce884a370a2fa6273fcba8c8e1d7fe7c57861ba15ef92be603dfe19", size = 1192907, upload-time = "2026-08-07T14:00:10.44Z" },
-    { url = "https://files.pythonhosted.org/packages/2c/c2/b2e0676e2637d612e45e711eb3cbd17be3ffa60ea64ff5d7fea8f9ef6261/snowflake_connector_python-4.7.2-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:1ebae2ff7311e9f383ce805d790b6b85cb9a30fe81b1b5dc56d96fe92cd6b5df", size = 2885786, upload-time = "2026-08-07T13:59:51.11Z" },
-    { url = "https://files.pythonhosted.org/packages/ec/cb/a8918acef070f833800c1d3c8221610efffe2c8f0d087e69c81d01c33d39/snowflake_connector_python-4.7.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:3751daec1a0f05470d6419ddf068f11e3b4d464d683ee4d0b8749a9a0c0605b8", size = 2914542, upload-time = "2026-08-07T13:59:52.624Z" },
-    { url = "https://files.pythonhosted.org/packages/2f/0f/e1556f2501b538875c7d3f656f91b5c1ea66d6b88c33ec611b835c4933c5/snowflake_connector_python-4.7.2-cp314-cp314-win_amd64.whl", hash = "sha256:b06b910ff3965bad9c389e1b423837503c5e29f0bc51a9cec7ba8a3df92e6ca8", size = 5478102, upload-time = "2026-08-07T14:00:19.752Z" },
+    { url = "https://files.pythonhosted.org/packages/19/20/7842dba9ce00b6830d19223369891006bafbccbb0cc27e4f785337b1f62e/snowflake_connector_python-4.7.3-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:17bbac7513bc730ca07e78193af6a3c1a231639211a3b7e662411383282e174b", size = 1194878, upload-time = "2026-09-03T14:13:51.038Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/4f/23fbab0125c012fd7357616c37241fe3c2a0c20eb71e25570d1c6d036662/snowflake_connector_python-4.7.3-cp314-cp314-macosx_14_0_x86_64.whl", hash = "sha256:64cf70c154f54e3b78a1faedee4a281c2eec20aec16e86d26a75ac59122d077a", size = 1206534, upload-time = "2026-09-03T14:13:52.59Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/22/991627cbb0bcf1b4472843b532fdb24ccfaee75c35319d51acc113a7c3bd/snowflake_connector_python-4.7.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:7cbeee29b89a9350d0c6e18d28e76de7dc81e9ca5c72dc34a113a503f405d6bc", size = 2918192, upload-time = "2026-09-03T14:13:31.118Z" },
+    { url = "https://files.pythonhosted.org/packages/84/4a/a95bafedf27f11efdf5d785278186cb510c325b457ba1e8f4958e08144ee/snowflake_connector_python-4.7.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:a8b77a0add772037ef720e524f5ebc6913b6de282764d455990b8905eb7c6dfb", size = 2947257, upload-time = "2026-09-03T14:13:33.016Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/03/02e65809305a19ec6714c7f48e95089cf5fbe4473edc8641c4830aaffa7a/snowflake_connector_python-4.7.3-cp314-cp314-win_amd64.whl", hash = "sha256:44142aaf13d9a2674447a2ea1c0b310235cdc7964dcf92b7b64b9093b1edebfb", size = 5490657, upload-time = "2026-09-03T14:14:06.672Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/64/6376ae49f3a7cfeb8a2113e55143929762c5fb83571ce72b6da202098838/snowflake_connector_python-4.7.3-cp314-cp314t-macosx_14_0_arm64.whl", hash = "sha256:0348c697d2daaa9a5a6f5f505b11f3fb7d041fc828e64d8c7e4cdf3895fc0908", size = 1201255, upload-time = "2026-09-03T14:13:53.939Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/eb/805be55b52c37fa6e02a5014c7c1162bf54c5ec014189a772483fcc24a04/snowflake_connector_python-4.7.3-cp314-cp314t-macosx_14_0_x86_64.whl", hash = "sha256:b6e9947ebb779aa775029fbb88e0691975171e4d93d2de33233b651794abd27e", size = 1211565, upload-time = "2026-09-03T14:13:55.281Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/c5/28d088a181fa9e912830eda1368a0cfb9946d92bb4ed0acc49fd079a1616/snowflake_connector_python-4.7.3-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:2ab3fc5198914e9d0208ad168210b60a2fa1d25120f45fce6732811e94298752", size = 2960773, upload-time = "2026-09-03T14:13:34.762Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/35/36a0b7d85fc12ab4b357cbcdbc7772d926878544a1c4f62b3b7d30805970/snowflake_connector_python-4.7.3-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:cbe8bd5f281616fd1394d36e3e633ba21e9d7b3ee02bbb2e32415e3214a89628", size = 2974895, upload-time = "2026-09-03T14:13:36.547Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/d6/0462d6ec1459ab0badc703c798d80132a2cbc79b234b6d25d2995da71e38/snowflake_connector_python-4.7.3-cp314-cp314t-win_amd64.whl", hash = "sha256:16bd99a500c603f7db01d454cf9882929dfbab2c7a2213706e5718229be2e379", size = 5494773, upload-time = "2026-09-03T14:14:04.783Z" },
 ]
 
 [[package]]
