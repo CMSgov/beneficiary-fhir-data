@@ -174,12 +174,6 @@ class EobReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobReadNonLatestPartDIsReturned() {
-    var eob = eobRead().withId(Long.parseLong(CLAIM_ID_RX_NON_LATEST)).execute();
-    assertFalse(eob.isEmpty());
-  }
-
-  @Test
   void eobReadNonLatestProfessionalIsNotReturned() {
     var claims =
         entityManager

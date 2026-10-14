@@ -21,6 +21,14 @@ The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writin
 | Load Testing Suite         | `high_volume_suite.py`        | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress. Invoked by the `bfd-run-server-load` Jenkins pipeline job |
 | Load Testing Suite (POST)  | `high_volume_suite_post.py`   | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress using POST requests                                        |
 
+## v3 Tests
+
+To automatically run tests with the correct environment configuration
+
+```sh
+just regression-test --env test
+```
+
 ## Dependencies
 
 ### Installing Dependencies
