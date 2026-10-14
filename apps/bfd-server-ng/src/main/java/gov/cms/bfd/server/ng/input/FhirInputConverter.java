@@ -66,8 +66,8 @@ public class FhirInputConverter {
       createProfileUrlMap();
 
   private static final String SUPPORTED_PROFILES =
-      Stream.of(EobProfileCategory.values())
-          .flatMap(c -> Stream.of(ClaimProfile.values()).map(p -> p.getCanonicalUrl(c)))
+      Stream.of(ClaimProfile.values())
+          .flatMap(profile -> profile.getCanonicalUrls().stream())
           .sorted()
           .collect(Collectors.joining(", "));
 

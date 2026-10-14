@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
+import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
@@ -341,6 +344,10 @@ public class IntegrationTestBase {
 
   protected static Coding finalAction(ClaimFinalAction finalAction) {
     return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
+  }
+
+  protected static ICriterion<?> profiles(List<String> urls) {
+    return new UriClientParam(Constants.PARAM_PROFILE).matches().values(urls);
   }
 
   public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {

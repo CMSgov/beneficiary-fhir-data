@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,15 @@ public enum ClaimProfile {
    */
   public String getCanonicalUrl(EobProfileCategory category) {
     return baseUrl + category.getProfileName() + suffix;
+  }
+
+  /**
+   * Gets the canonical URLs for all categories.
+   *
+   * @return canonical URLs
+   */
+  public List<String> getCanonicalUrls() {
+    return Arrays.stream(EobProfileCategory.values()).map(this::getCanonicalUrl).toList();
   }
 
   /**
