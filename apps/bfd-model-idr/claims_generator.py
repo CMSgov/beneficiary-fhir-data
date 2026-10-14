@@ -799,16 +799,6 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
 
 @click.command
 @click.option(
-    "--sushi/--no-sushi",
-    envvar="SUSHI",
-    default=False,
-    show_default=True,
-    help=(
-        "Generate new StructureDefinitions. Use when testing locally if new .fsh files have been "
-        "added."
-    ),
-)
-@click.option(
     "--min-claims",
     envvar="MIN_CLAIMS",
     type=int,
@@ -858,7 +848,6 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
 )
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def generate(
-    sushi: bool,
     min_claims: int,
     max_claims: int,
     enable_samhsa: bool,
@@ -875,13 +864,6 @@ def generate(
         sys.exit(1)
 
     gen_utils = GeneratorUtil()
-
-    if sushi:
-        print("Running sushi build")
-        _, stderr = run_command("npm run sushi-build", cwd=".")
-        if stderr:
-            print("SUSHI errors:")
-            print(stderr)
 
     files: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
