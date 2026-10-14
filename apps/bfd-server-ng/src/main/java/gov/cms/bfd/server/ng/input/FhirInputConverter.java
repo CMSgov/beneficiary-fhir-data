@@ -573,20 +573,15 @@ public class FhirInputConverter {
    * @param profileParam _profile param from request
    * @return profile selection representing every OR value from _profile if valid
    */
-  public static ProfileSelection parseProfileParameter(@Nullable UriAndListParam profileParam) {
+  public static ProfileSelection parseProfileParameter(@Nullable UriOrListParam profileParam) {
 
     if (profileParam == null || profileParam.getValuesAsQueryTokens().isEmpty()) {
       return new ProfileSelection();
     }
 
-    if (profileParam.getValuesAsQueryTokens().size() > 1) {
-      throw new InvalidRequestException(
-          "_profile may only be specified once. Use a comma-separated list for multiple profiles.");
-    }
-
     var profiles = new EnumMap<EobProfileCategory, ClaimProfile>(EobProfileCategory.class);
 
-    for (var uri : profileParam.getValuesAsQueryTokens().getFirst().getValuesAsQueryTokens()) {
+    for (var uri : profileParam.getValuesAsQueryTokens()) {
       var entry = parseProfileUri(uri);
       var category = entry.getKey();
       var profile = entry.getValue();

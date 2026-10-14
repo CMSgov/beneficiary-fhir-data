@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
@@ -114,7 +114,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final UriAndListParam profile,
+      @OptionalParam(name = Constants.PARAM_PROFILE) final UriOrListParam profile,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
@@ -173,7 +173,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request,
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final UriAndListParam profile) {
+      @OptionalParam(name = Constants.PARAM_PROFILE) final UriOrListParam profile) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);

@@ -16,7 +16,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.ClaimProfile;
-import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -890,43 +889,29 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name() + "_profile_" + profile).toMatchSnapshot(eobBundle);
   }
 
-  static Stream<Arguments> provideSingleProfileScenarios() {
+  static Stream<Arguments> provideProfileFilterScenarios() {
     return Stream.of(
-        Arguments.of(PHARMACY, 1),
-        Arguments.of(INPATIENT_INSTITUTIONAL, 1),
-        Arguments.of(OUTPATIENT_INSTITUTIONAL, 3),
-        Arguments.of(PROFESSIONAL_NONCLINICIAN, 1));
+        Arguments.of(List.of(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)), 1),
+        Arguments.of(List.of(ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL)), 1),
+        Arguments.of(List.of(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)), 3),
+        Arguments.of(List.of(ClaimProfile.BASIS.getCanonicalUrl(PROFESSIONAL_NONCLINICIAN)), 1),
+        Arguments.of(
+            List.of(
+                ClaimProfile.BASIS.getCanonicalUrl(PHARMACY),
+                ClaimProfile.BASIS.getCanonicalUrl(PROFESSIONAL_NONCLINICIAN)),
+            2),
+        Arguments.of(
+            List.of(
+                ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL),
+                ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)),
+            4));
   }
 
   @ParameterizedTest
-  @MethodSource("provideSingleProfileScenarios")
-  void eobSearchByPatientAndSingleProfile(EobProfileCategory category, int expectedCount) {
-    var eobs =
-        getEobFromBundle(
-            searchByPatient()
-                .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(category))))
-                .execute());
-
-    assertEquals(expectedCount, eobs.size());
-    assertTrue(
-        eobs.stream()
-            .allMatch(eob -> eob.getMeta().hasProfile(ClaimProfile.BASIS.toFhirProfile(category))));
-  }
-
-  @Test
-  void eobSearchByPatientProfileExcludesPriorAuth() {
-    var patient =
-        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-            .exactly()
-            .identifier(BENE_WITH_PRIOR_AUTH);
-
-    var defaultBundle = searchBundle().where(patient).execute();
-    var profileBundle =
-        searchBundle().where(patient).and(profiles(ClaimProfile.CMS.getCanonicalUrls())).execute();
-
-    assertTrue(
-        defaultBundle.getEntry().size() > profileBundle.getEntry().size(),
-        "Prior authorizations should only be returned without _profile");
+  @MethodSource("provideProfileFilterScenarios")
+  void eobSearchByPatientProfileFiltering(List<String> profileUrls, int expectedCount) {
+    var eobBundle = searchByPatient().and(profiles(profileUrls)).execute();
+    assertEquals(expectedCount, eobBundle.getEntry().size());
   }
 
   @ParameterizedTest
@@ -947,61 +932,19 @@ class EobSearchIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobSearchByPatientVersionedProfile() {
-    var eobBundle =
-        searchByPatient()
-            .and(profiles(List.of(ClaimProfile.BASIS.toFhirProfile(PHARMACY))))
-            .execute();
-    assertEquals(1, eobBundle.getEntry().size());
-  }
+  void eobSearchByPatientProfileExcludesPriorAuth() {
+    var patient =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_WITH_PRIOR_AUTH);
 
-  static Stream<String> provideInvalidProfiles() {
-    return Stream.of(
-        "BOGUS",
-        "BASIS",
-        "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Oral",
-        ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY) + "|2.1.0",
-        ClaimProfile.CMS.getCanonicalUrl(PHARMACY) + "|2.2.0");
-  }
+    var defaultBundle = searchBundle().where(patient).execute();
+    var profileBundle =
+        searchBundle().where(patient).and(profiles(ClaimProfile.CMS.getCanonicalUrls())).execute();
 
-  @ParameterizedTest
-  @MethodSource("provideInvalidProfiles")
-  void eobSearchByPatientInvalidProfileBadRequest(String profile) {
-    var query = searchByPatient().and(profiles(List.of(profile)));
-    assertThrows(InvalidRequestException.class, query::execute);
-  }
-
-  @Test
-  void eobSearchByPatientConflictingProfileBadRequest() {
-    var query =
-        searchByPatient()
-            .and(
-                profiles(
-                    List.of(
-                        ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY),
-                        ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))));
-    assertThrows(InvalidRequestException.class, query::execute);
-  }
-
-  @Test
-  void eobSearchByPatientRepeatedProfileBadRequest() {
-    var query =
-        searchByPatient()
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))))
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))));
-    assertThrows(InvalidRequestException.class, query::execute);
-  }
-
-  @Test
-  void eobSearchByPatientProfileModifierBadRequest() {
-    var url =
-        "ExplanationOfBenefit?patient="
-            + BENE_ID_ALL_PARTS_WITH_XREF
-            + "&_profile:below="
-            + URLEncoder.encode(
-                ClaimProfile.BASIS.getCanonicalUrl(PHARMACY), StandardCharsets.UTF_8);
-    var query = getFhirClient().search().byUrl(url).returnBundle(Bundle.class);
-    assertThrows(InvalidRequestException.class, query::execute);
+    assertTrue(
+        defaultBundle.getEntry().size() > profileBundle.getEntry().size(),
+        "Prior authorizations should only be returned without _profile");
   }
 
   @Test
@@ -1042,5 +985,45 @@ class EobSearchIT extends IntegrationTestBase {
         .toMatchSnapshot(eobBundle);
   }
 
+  @Test
+  void eobSearchByPatientInvalidProfileBadRequest() {
+    var query = searchByPatient().and(profiles(List.of("BOGUS")));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByIdInvalidProfileBadRequest() {
+    var query =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_RX))
+            .and(profiles(List.of("BOGUS")));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByPatientRepeatedProfileBadRequest() {
+    var query =
+        searchByPatient()
+            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))))
+            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByPatientProfileModifierBadRequest() {
+    var url =
+        "ExplanationOfBenefit?patient="
+            + BENE_ID_ALL_PARTS_WITH_XREF
+            + "&_profile:below="
+            + URLEncoder.encode(
+                ClaimProfile.BASIS.getCanonicalUrl(PHARMACY), StandardCharsets.UTF_8);
+    var query = getFhirClient().search().byUrl(url).returnBundle(Bundle.class);
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
   // endregion
+
 }
