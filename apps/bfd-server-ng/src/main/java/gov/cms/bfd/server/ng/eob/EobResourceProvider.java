@@ -84,7 +84,7 @@ public class EobResourceProvider implements IResourceProvider {
    * Search for claims data by bene.
    *
    * @param patient patient
-   * @param count record count`
+   * @param count record count
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
