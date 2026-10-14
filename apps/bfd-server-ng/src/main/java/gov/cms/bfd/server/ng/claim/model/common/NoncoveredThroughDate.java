@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** Latest Claim Occurrence event for "Not Covered Thru Date", the end of the period. */
 @Embeddable
 public class NoncoveredThroughDate {
 
@@ -18,15 +18,11 @@ public class NoncoveredThroughDate {
   @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (bfdNoncoveredThroughDate.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(bfdNoncoveredThroughDate.get())));
-    return Optional.of(component);
+    return bfdNoncoveredThroughDate.map(
+        localDate ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
+                .setTiming(new DateType().setValue(DateUtil.toDate(localDate))));
   }
 }

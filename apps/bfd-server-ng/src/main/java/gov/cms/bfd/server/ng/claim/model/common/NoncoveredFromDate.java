@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** Latest Claim Occurrence event for "Not Covered From Date", the beginning of the period. */
 @Embeddable
 public class NoncoveredFromDate {
 
@@ -18,15 +18,11 @@ public class NoncoveredFromDate {
   @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (bfdNoncoveredFromDate.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(bfdNoncoveredFromDate.get())));
-    return Optional.of(component);
+    return bfdNoncoveredFromDate.map(
+        localDate ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
+                .setTiming(new DateType().setValue(DateUtil.toDate(localDate))));
   }
 }

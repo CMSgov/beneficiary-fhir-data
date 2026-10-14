@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** Latest Claim Occurrence event for "Qualify Stay From Date", the beginning of the period */
 @Embeddable
 public class QualifyStayFromDate {
 
@@ -18,15 +18,11 @@ public class QualifyStayFromDate {
   @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (bfdQualifyStayFromDate.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(bfdQualifyStayFromDate.get())));
-    return Optional.of(component);
+    return bfdQualifyStayFromDate.map(
+        localDate ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
+                .setTiming(new DateType().setValue(DateUtil.toDate(localDate))));
   }
 }

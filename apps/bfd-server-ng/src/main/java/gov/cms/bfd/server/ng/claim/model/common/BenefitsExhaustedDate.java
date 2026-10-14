@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** Latest Claim Related Occurrence event for "Benefits Exhausted Date" */
 @Embeddable
 public class BenefitsExhaustedDate {
 
@@ -18,15 +18,11 @@ public class BenefitsExhaustedDate {
   @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
   public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (bfdBenefitsExhaustedDate.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(bfdBenefitsExhaustedDate.get())));
-    return Optional.of(component);
+    return bfdBenefitsExhaustedDate.map(
+        localDate ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
+                .setTiming(new DateType().setValue(DateUtil.toDate(localDate))));
   }
 }
