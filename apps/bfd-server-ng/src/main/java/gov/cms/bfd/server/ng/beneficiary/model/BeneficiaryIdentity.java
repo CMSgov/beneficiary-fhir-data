@@ -4,10 +4,10 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -17,7 +17,16 @@ import org.hl7.fhir.r4.model.Reference;
 
 /** The beneficiary_identity view, for getting current and historical bene_sks and MBIs. */
 @Getter
-@Table(name = "beneficiary_identity", schema = "idr")
+@Subselect(
+"""
+SELECT DISTINCT bene.bene_sk,
+  bene.bene_xref_efctv_sk,
+  bene.bene_mbi_id,
+  bene_mbi.bene_mbi_efctv_dt,
+  bene_mbi.bene_mbi_obslt_dt
+FROM idr.valid_beneficiary bene
+ LEFT JOIN idr.beneficiary_mbi_id bene_mbi ON bene.bene_mbi_id::text = bene_mbi.bene_mbi_id::text AND bene_mbi.idr_ltst_trans_flg::text = 'Y'::text
+""")
 @Entity
 public class BeneficiaryIdentity {
 
