@@ -164,7 +164,7 @@ class IdrClaimRx(IdrBaseModel):
         {ALIAS: ALIAS_RX_LINE, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    tot_rx_cst_amt: Annotated[
+    bfd_tot_rx_cst_amt: Annotated[
         float | None,
         {
             EXPR: f"""CASE

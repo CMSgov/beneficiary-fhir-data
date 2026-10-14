@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @Getter
 public class ClaimLineAdjudicationRx implements AdjudicationEmbedded {
-  @Column(name = "tot_rx_cst_amt")
+  @Column(name = "bfd_tot_rx_cst_amt")
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> totalRxCostAmount;
 

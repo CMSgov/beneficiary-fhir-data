@@ -407,7 +407,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
             "clm_line_srvc_cst_amt",
         )
     )
-    assert claim_rx_row["tot_rx_cst_amt"] == expected_tot_rx_cst_amt
+    assert claim_rx_row["bfd_tot_rx_cst_amt"] == expected_tot_rx_cst_amt
 
     cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
     if load_type == LoadType.INITIAL:
