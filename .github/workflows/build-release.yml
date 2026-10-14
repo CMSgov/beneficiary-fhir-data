@@ -295,13 +295,19 @@ jobs:
         with:
           version: "0.11.2"
 
+      - uses: taiki-e/install-action@ab6895351a88b908e96a4697860d4ffea5e57dbe # v2.87.27
+        with:
+          tool: just
+      - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
+        with:
+          repo: sigoden/argc
+
       - name: Install UV dependencies
         run: uv sync
         working-directory: apps/bfd-model-idr
 
       - name: Generate v3 Data Dictionary
-        run: uv run gen-dd
-        working-directory: apps/bfd-model-idr
+        run: just generate-data-dictionary
 
       - name: Prepare artifacts
         env:
