@@ -149,7 +149,7 @@ class MultiprocessingExecutor(Executor):
         all_results: list[list[T | None]] = []
 
         with ProcessPoolExecutor(
-            max_workers=self.max_workers, initializer=logger.reinstall
+            max_workers=self.max_workers, initializer=logger.reinstall, max_tasks_per_child=1
         ) as pool:
             for stage in stages:
                 results: dict[int, T | None] = {}
