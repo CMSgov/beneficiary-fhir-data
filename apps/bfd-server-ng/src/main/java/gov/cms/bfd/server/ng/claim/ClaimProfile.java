@@ -11,11 +11,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClaimProfile {
   /** Fullest profile, default. */
-  CMS(SystemUrls.CMS_STRUCTURE_DEFINITION_EOB, "", ""),
+  CMS(SystemUrls.PROFILE_CMS_EOB_PREFIX, "", ""),
   /** Some information redacted, retains CARIN fields. */
-  REGULAR(SystemUrls.CARIN_STRUCTURE_DEFINITION_EOB, "", SystemUrls.CARIN_VERSION),
+  REGULAR(SystemUrls.PROFILE_C4BB_EOB_PREFIX, "", SystemUrls.PROFILE_C4BB_VERSION),
   /** Least information, all adjudication removed. */
-  BASIS(SystemUrls.CARIN_STRUCTURE_DEFINITION_EOB, "-Basis", SystemUrls.CARIN_VERSION);
+  BASIS(SystemUrls.PROFILE_C4BB_EOB_PREFIX, "-Basis", SystemUrls.PROFILE_C4BB_VERSION);
 
   private final String baseUrl;
   private final String suffix;

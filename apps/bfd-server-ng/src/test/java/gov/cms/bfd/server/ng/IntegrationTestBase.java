@@ -379,11 +379,16 @@ public class IntegrationTestBase {
     return auditEventRepository;
   }
 
-  public boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
+  protected boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
     return eob.getItem().stream()
         .flatMap(item -> item.getDetail().stream())
         .flatMap(detail -> detail.getProductOrService().getCoding().stream())
         .anyMatch(this::isClaimLineNdcCoding);
+  }
+
+  protected boolean hasPriorAuth(Bundle bundle) {
+    return getEobFromBundle(bundle).stream()
+        .anyMatch(eob -> eob.getMeta().hasProfile(SystemUrls.PROFILE_PRIOR_AUTH));
   }
 
   private boolean isClaimLineNdcCoding(Coding coding) {

@@ -946,6 +946,8 @@ class EobSearchIT extends IntegrationTestBase {
             .and(profiles(ClaimProfile.REGULAR.getCanonicalUrls()))
             .execute();
 
+    assertTrue(hasPriorAuth(defaultBundle));
+    assertTrue(hasPriorAuth(profileBundle));
     assertEquals(defaultBundle.getEntry().size(), profileBundle.getEntry().size());
   }
 
