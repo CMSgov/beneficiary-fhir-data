@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.*;
+import static gov.cms.bfd.server.ng.claim.model.common.ClaimDiagnosisType.FIRST;
 
 import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;

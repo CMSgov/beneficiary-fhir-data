@@ -13,8 +13,8 @@ import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
-import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoInstitutionalCmsSharedSystems;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoInstitutionalCmsSharedSystems;
 import gov.cms.bfd.server.ng.converter.ClaimPaidStatusCodeConverter;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
@@ -48,9 +48,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalCmsSharedSystems extends ClaimInstitutionalCmsBase
     implements SharedSystemsClaim {
 
-  @Embedded private DateSupportingInfoCmsSharedSystems dateSupportingInfo;
+  @Embedded private DateSupportingInfoInstitutionalCmsSharedSystems dateSupportingInfo;
   @Embedded private AdjudicationInstitutionalCmsSharedSystems adjudicationCharge;
-  @Embedded private InstitutionalSupportingInfoCmsSharedSystems supportingInfo;
+  @Embedded private SupportingInfoInstitutionalCmsSharedSystems supportingInfo;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded

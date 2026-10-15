@@ -66,6 +66,14 @@ tables = [
         "table": SETTINGS.idr_claim_location_history_table,
     },
     {
+        "csv_name": "SYNTHETIC_CLM_RLT_OCRNC_SGNTR_MBR.csv",
+        "table": SETTINGS.idr_claim_related_occurrence_signature_table,
+    },
+    {
+        "csv_name": "SYNTHETIC_CLM_OCRNC_SGNTR_MBR.csv",
+        "table": SETTINGS.idr_claim_occurrence_signature_table,
+    },
+    {
         "csv_name": "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv",
         "table": SETTINGS.idr_claim_related_condition_signature_table,
     },
