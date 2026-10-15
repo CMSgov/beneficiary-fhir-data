@@ -103,8 +103,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -140,8 +139,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -507,7 +505,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -524,7 +521,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -665,7 +662,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -735,8 +732,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -772,8 +768,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -1139,7 +1134,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -1156,7 +1150,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -1297,7 +1291,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[GET_WITH_SEARCH
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -1367,8 +1361,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -1404,8 +1397,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -1771,7 +1763,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -1788,7 +1779,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -1929,7 +1920,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleAndSource[POST]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -2665,8 +2656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -2702,8 +2692,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -3069,7 +3058,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -3086,7 +3074,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -3227,7 +3215,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -3963,8 +3951,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -4000,8 +3987,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -4367,7 +4353,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -4384,7 +4369,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -4525,7 +4510,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -5261,8 +5246,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -5298,8 +5282,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -5665,7 +5648,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -5682,7 +5664,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -5823,7 +5805,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -6559,8 +6541,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -6596,8 +6577,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -6963,7 +6943,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -6980,7 +6959,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -7121,7 +7100,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -7857,8 +7836,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -7894,8 +7872,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -8261,7 +8238,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -8278,7 +8254,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -8419,7 +8395,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -9155,8 +9131,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
           "value": "1548226988"
         } ],
         "name": [ {
-          "family": "Garcia",
-          "given": [ "Indiana" ]
+          "family": "Garcia"
         } ]
       } ],
       "identifier": [ {
@@ -9192,8 +9167,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
         "reference": "Patient/280720433"
       },
       "billablePeriod": {
-        "start": "2018-08-12",
-        "end": "2018-08-21"
+        "start": "2018-08-12"
       },
       "created": "2025-10-31T00:00:00+00:00",
       "provider": {
@@ -9559,7 +9533,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
             "code": "compound"
           } ]
         },
-        "servicedDate": "2018-08-12",
         "quantity": {
           "value": 2.0
         },
@@ -9576,7 +9549,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
             } ]
           },
           "amount": {
-            "value": 2256829.86,
+            "value": 2256829.87,
             "currency": "USD"
           }
         }, {
@@ -9717,7 +9690,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
           } ]
         },
         "amount": {
-          "value": 2256829.86,
+          "value": 2256829.87,
           "currency": "USD"
         }
       } ],
@@ -23505,8 +23478,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -23873,7 +23845,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -30317,8 +30288,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -30685,7 +30655,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -37129,8 +37098,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -37497,7 +37465,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -41663,8 +41630,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -42031,7 +41997,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -42295,8 +42260,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -42663,7 +42627,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithSource_
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -48446,8 +48409,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -48814,7 +48776,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -49078,8 +49039,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_DDPS]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -49446,7 +49406,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithSource_DDPS]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -55229,8 +55188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -55597,7 +55555,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -55861,8 +55818,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_DDPS]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -56229,7 +56185,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithSource_DDPS]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -61996,8 +61951,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -62364,7 +62318,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -67001,8 +66954,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -67369,7 +67321,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -72717,8 +72668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -73085,7 +73035,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -75939,8 +75888,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_DDPS]=
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -76307,7 +76255,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_DDPS]=
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -82769,8 +82716,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -83137,7 +83083,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -87774,8 +87719,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -88142,7 +88086,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -93490,8 +93433,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -93858,7 +93800,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -96712,8 +96653,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_DDPS]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -97080,7 +97020,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_DDPS]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -103542,8 +103481,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -103910,7 +103848,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -108547,8 +108484,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -108915,7 +108851,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -114263,8 +114198,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -114631,7 +114565,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -117485,8 +117418,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_DDPS]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -117853,7 +117785,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_DDPS]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -135979,8 +135910,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -136347,7 +136277,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -152161,8 +152090,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -152529,7 +152457,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
@@ -168343,8 +168270,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "reference": "Patient/405764107"
       },
       "billablePeriod": {
-        "start": "2025-08-10",
-        "end": "2025-08-12"
+        "start": "2025-08-10"
       },
       "created": "2025-11-12T00:00:00+00:00",
       "provider": {
@@ -168711,7 +168637,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "code": "00338004904"
           } ]
         },
-        "servicedDate": "2025-08-10",
         "quantity": {
           "value": 10.0,
           "unit": "ML"
