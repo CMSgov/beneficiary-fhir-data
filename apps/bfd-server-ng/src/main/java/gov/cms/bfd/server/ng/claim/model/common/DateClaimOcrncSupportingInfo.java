@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The claim date for institutional or professional claims. */
+/** The Latest Claim Occurence dates for institutional or professional claims. */
 @Embeddable
 public class DateClaimOcrncSupportingInfo implements SupportingInfoComponentBase {
 
