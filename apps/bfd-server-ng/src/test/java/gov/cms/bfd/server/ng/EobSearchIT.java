@@ -932,19 +932,21 @@ class EobSearchIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobSearchByPatientProfileExcludesPriorAuth() {
+  void eobSearchByPatientProfileIncludesPriorAuth() {
     var patient =
         new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
             .exactly()
             .identifier(BENE_WITH_PRIOR_AUTH);
 
+    // PriorAuth is not filtered when a profile is passed in
     var defaultBundle = searchBundle().where(patient).execute();
     var profileBundle =
-        searchBundle().where(patient).and(profiles(ClaimProfile.CMS.getCanonicalUrls())).execute();
+        searchBundle()
+            .where(patient)
+            .and(profiles(ClaimProfile.REGULAR.getCanonicalUrls()))
+            .execute();
 
-    assertTrue(
-        defaultBundle.getEntry().size() > profileBundle.getEntry().size(),
-        "Prior authorizations should only be returned without _profile");
+    assertEquals(defaultBundle.getEntry().size(), profileBundle.getEntry().size());
   }
 
   @Test

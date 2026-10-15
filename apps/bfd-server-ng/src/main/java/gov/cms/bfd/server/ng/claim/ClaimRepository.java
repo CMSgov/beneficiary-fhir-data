@@ -244,10 +244,7 @@ public class ClaimRepository {
                         d.getProfileFilters(criteria.profile(), filterBuilders)))
             .toList();
 
-    // Prior authorizations are only returned when no _profile is requested
-    var includePriorAuth =
-        !criteria.profile().hasProfiles()
-            && filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
+    var includePriorAuth = filterBuilders.stream().allMatch(DbFilterBuilder::shouldQueryPriorAuth);
 
     CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
         includePriorAuth
