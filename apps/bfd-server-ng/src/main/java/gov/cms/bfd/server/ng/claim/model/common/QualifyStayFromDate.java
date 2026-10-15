@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Latest Claim Occurrence event for "Qualify Stay From Date", the beginning of the period */
+/** Latest Claim Occurrence event for "Qualify Stay From Date", the beginning of the period. */
 @Embeddable
 public class QualifyStayFromDate {
 

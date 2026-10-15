@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Latest Claim Related Occurrence event for "Benefits Exhausted Date" */
+/** Latest Claim Related Occurrence event for "Benefits Exhausted Date". */
 @Embeddable
 public class BenefitsExhaustedDate {
 
