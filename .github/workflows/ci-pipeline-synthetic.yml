@@ -16,11 +16,11 @@ jobs:
         id: code-checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           version: "0.11.2"
       - name: Install node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
       # Maven is needed to run the migrator
@@ -29,26 +29,16 @@ jobs:
         with:
           java-version: "25"
           distribution: "corretto"
-      - name: Sync UV in bfd-model-idr
-        run: uv sync
-        working-directory: apps/bfd-model-idr
+      - uses: taiki-e/install-action@ab6895351a88b908e96a4697860d4ffea5e57dbe # v2.87.27
+        with:
+          tool: just
+      - uses: sigoden/install-binary@7eb4b088aedf19fe9b2bc6c6bbdc12379ffb355c #v1.2.0
+        with:
+          repo: sigoden/argc
       - name: Generate v3 Data Dictionary
-        run: uv run gen-dd
-        working-directory: apps/bfd-model-idr
+        run: just generate-data-dictionary
       - name: Ensure synthetic data pipeline runs
         run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims --patients 100
-          cd ../bfd-pipeline-idr
-          ./run-db.sh
-      - name: Ensure synthetic data pipeline runs with existing synthetic data
-        run: |
-          cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --claims ../bfd-pipeline-idr/test_samples1
-          # Split claims output into 1000 CLMs batches
-          uv run load_splitter.py -c 1000
-          cd ../bfd-pipeline-idr
-          # Load from batched_out/0 to load _just_ the first batch to validate that the structure
-          # of data is OK and the data was regenerated properly without taking a significant amount
-          # of time to load the full dataset
-          ./run-db.sh ../bfd-model-idr/batched_out/0
+          just patient-generator --patients 100
+          just claims-generator ./apps/bfd-model-idr/out
+          just pipeline --env local --seed-from ./apps/bfd-model-idr/out
