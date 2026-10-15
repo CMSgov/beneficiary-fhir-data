@@ -107,7 +107,7 @@ class OutputDestinationWriter(ABC):
 
 
 class CsvWriter(OutputDestinationWriter):
-    def __init__(self, out_dir: str = "../out") -> None:
+    def __init__(self, out_dir: str = "./out") -> None:
         self.out_dir = Path(out_dir)
         self._tables: set[str] = set()
 

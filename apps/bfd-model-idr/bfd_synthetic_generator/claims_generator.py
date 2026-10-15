@@ -714,10 +714,10 @@ class _ClaimsFile(StrEnum):
         self.out_path = Path(f"../out/{value}.csv")
 
     def __new__(
-        cls: type[_ClaimsFile],
+        cls: type["_ClaimsFile"],
         value: str,
         ordered_headers: list[str],
-    ) -> _ClaimsFile:
+    ) -> "_ClaimsFile":
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.ordered_headers = ordered_headers
@@ -725,16 +725,6 @@ class _ClaimsFile(StrEnum):
 
 
 @click.command
-@click.option(
-    "--sushi/--no-sushi",
-    envvar="SUSHI",
-    default=False,
-    show_default=True,
-    help=(
-        "Generate new StructureDefinitions. Use when testing locally if new .fsh files have been "
-        "added."
-    ),
-)
 @click.option(
     "--min-claims",
     envvar="MIN_CLAIMS",
@@ -966,7 +956,9 @@ def generate(
     for bene_sks_batch in writer.get_bene_sks(batch_size, bene_sk_mode, files):
         existing_claims = files
         if isinstance(writer, SnowflakeWriter) and not truncate:
-            existing_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
+            existing_claims = writer.get_claims_batch(
+                bene_sks_batch, claim_child_tables
+            )
 
         out_tables = _generate_batch(
             bene_sks_batch,
@@ -996,9 +988,14 @@ def generate(
             out_tables[f.PRAUC].clear()
 
         for table_name, rows in out_tables.items():
-            if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
+            if (
+                table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY)
+                or table_name not in _ClaimsFile
+            ):
                 continue
-            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
+            gen_utils.export_table(
+                adapters_to_dicts(rows), table_name, writer, ALL_KEYS
+            )
 
     message = "Done generating synthetic claims/prior auth data for provided BENE_SKs"
     print(message)
@@ -1018,7 +1015,9 @@ def _generate_batch(
     generated_type_2_npis: list[str],
 ) -> dict[str, list[RowAdapter]]:
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in existing}
-    clms_per_bene_sk = partition_rows(llist=existing[f.CLM], part_by=lambda x: int(x[f.BENE_SK]))
+    clms_per_bene_sk = partition_rows(
+        llist=existing[f.CLM], part_by=lambda x: int(x[f.BENE_SK])
+    )
 
     cond_sgntr_mbr_per_cond_sgntr_sk = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
@@ -1036,14 +1035,18 @@ def _generate_batch(
     )
 
     rx_clm_line_per_clm_uniq_id = {
-        str(x[f.CLM_UNIQ_ID]): x for x in existing[f.CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
+        str(x[f.CLM_UNIQ_ID]): x
+        for x in existing[f.CLM_LINE]
+        if x.get(f.CLM_LINE_RX_NUM)
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
         part_by=lambda x: x[f.CLM_UNIQ_ID],
         filter_by=lambda x: not x.get(f.CLM_LINE_RX_NUM),
     )
-    clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
+    clm_line_rx_per_clm_uniq_id = {
+        str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]
+    }
     clm_dcmtns_per_fpk = partition_rows(
         llist=existing[f.CLM_DCMTN],
         part_by=lambda x: four_part_key(x),
@@ -1064,7 +1067,9 @@ def _generate_batch(
         part_by=lambda x: four_part_key(x),
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] != "S",
     )
-    clm_dt_sgntr_per_sk = {int(row[f.CLM_DT_SGNTR_SK]): row for row in existing[f.CLM_DT_SGNTR]}
+    clm_dt_sgntr_per_sk = {
+        int(row[f.CLM_DT_SGNTR_SK]): row for row in existing[f.CLM_DT_SGNTR]
+    }
     clm_instnl_per_fpk = {four_part_key(row): row for row in existing[f.CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=existing[f.CLM_PRFNL],
@@ -1081,7 +1086,9 @@ def _generate_batch(
         llist=existing[f.CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
     )
     clm_fiss_per_fpk = {four_part_key(row): row for row in existing[f.CLM_FISS]}
-    clm_lctn_hstry_per_fpk = {four_part_key(row): row for row in existing[f.CLM_LCTN_HSTRY]}
+    clm_lctn_hstry_per_fpk = {
+        four_part_key(row): row for row in existing[f.CLM_LCTN_HSTRY]
+    }
     clm_line_dcmtns_per_clk = partition_rows(
         llist=existing[f.CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
     )
@@ -1143,7 +1150,9 @@ def _generate_batch(
                 adj_util.gen_clm_ocrnc_sgntr_mbr(
                     clm=clm, gen_utils=gen_utils, init_clm_ocrnc_sgntr_mbr=row
                 )
-                for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(str(clm[f.CLM_OCRNC_SGNTR_SK]), [None])
+                for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(
+                    str(clm[f.CLM_OCRNC_SGNTR_SK]), [None]
+                )
             ]
             adj_clms_tbls[f.CLM_OCRNC_SGNTR_MBR].extend(clm_ocrnc_sgntr_mbr)
 
@@ -1161,12 +1170,16 @@ def _generate_batch(
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
                 pharm_clm_line = adj_util.gen_pharm_clm_line(
                     clm=clm,
-                    init_clm_line=rx_clm_line_per_clm_uniq_id.get(str(clm[f.CLM_UNIQ_ID])),
+                    init_clm_line=rx_clm_line_per_clm_uniq_id.get(
+                        str(clm[f.CLM_UNIQ_ID])
+                    ),
                 )
                 pharm_clm_line_rx = adj_util.gen_pharm_clm_line_rx(
                     gen_utils=gen_utils,
                     clm=clm,
-                    init_clm_line_rx=clm_line_rx_per_clm_uniq_id.get(str(clm[f.CLM_UNIQ_ID])),
+                    init_clm_line_rx=clm_line_rx_per_clm_uniq_id.get(
+                        str(clm[f.CLM_UNIQ_ID])
+                    ),
                 )
                 adj_clms_tbls[f.CLM_LINE].append(pharm_clm_line)
                 adj_clms_tbls[f.CLM_LINE_RX].append(pharm_clm_line_rx)
@@ -1227,7 +1240,9 @@ def _generate_batch(
                         clm=clm,
                         init_clm_prfnl=x,
                     )
-                    for x in clm_prfnls_per_fpk.get(four_part_key(clm), [RowAdapter({})])
+                    for x in clm_prfnls_per_fpk.get(
+                        four_part_key(clm), [RowAdapter({})]
+                    )
                 ]
                 adj_clms_tbls[f.CLM_PRFNL].extend(clm_prfnls)
 
@@ -1287,9 +1302,13 @@ def _generate_batch(
         # ("all_adj_clms_tbls")
         pac_clms_tbls_from_file = [
             {
-                f.CLM: as_list(file_pac_clm),  # as_list ensures None values return empty list
+                f.CLM: as_list(
+                    file_pac_clm
+                ),  # as_list ensures None values return empty list
                 f.CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
-                f.CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
+                f.CLM_LCTN_HSTRY: as_list(
+                    clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))
+                ),
                 f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_cond_sgntr_sk.get(
                     str(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK]), []
                 ),
@@ -1300,8 +1319,14 @@ def _generate_batch(
                     str(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK]), []
                 ),
                 f.CLM_LINE: [
-                    *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),
-                    *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
+                    *as_list(
+                        rx_clm_line_per_clm_uniq_id.get(
+                            str(file_pac_clm[f.CLM_UNIQ_ID])
+                        )
+                    ),
+                    *norm_clm_lines_per_clm_uniq_id.get(
+                        file_pac_clm[f.CLM_UNIQ_ID], []
+                    ),
                 ],
                 f.CLM_LINE_MCS: clm_mcs_per_fpk.get(four_part_key(file_pac_clm), []),
                 f.CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
@@ -1310,10 +1335,18 @@ def _generate_batch(
                     *as_list(dsprtnt_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
                     *as_list(ime_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
                 ],
-                f.CLM_LINE_DCMTN: clm_line_dcmtns_per_clk.get(four_part_key(file_pac_clm), []),
-                f.CLM_LINE_INSTNL: clm_line_instnls_per_fpk.get(four_part_key(file_pac_clm), []),
-                f.CLM_LINE_PRFNL: clm_line_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
-                f.CLM_INSTNL: as_list(clm_instnl_per_fpk.get(four_part_key(file_pac_clm))),
+                f.CLM_LINE_DCMTN: clm_line_dcmtns_per_clk.get(
+                    four_part_key(file_pac_clm), []
+                ),
+                f.CLM_LINE_INSTNL: clm_line_instnls_per_fpk.get(
+                    four_part_key(file_pac_clm), []
+                ),
+                f.CLM_LINE_PRFNL: clm_line_prfnls_per_fpk.get(
+                    four_part_key(file_pac_clm), []
+                ),
+                f.CLM_INSTNL: as_list(
+                    clm_instnl_per_fpk.get(four_part_key(file_pac_clm))
+                ),
                 f.CLM_PROD: [
                     *proc_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
                     *diag_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
@@ -1338,7 +1371,9 @@ def _generate_batch(
             else []
         )
         for claims_tbls in init_pac_clms_tbls:
-            pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[f.CLM][0], gen_utils=gen_utils)
+            pac_clm = pac_util.gen_pac_clm(
+                init_clm=claims_tbls[f.CLM][0], gen_utils=gen_utils
+            )
             out_tables[f.CLM].append(pac_clm)
 
             pac_clm_fiss = pac_util.gen_clm_fiss(
@@ -1401,14 +1436,18 @@ def _generate_batch(
 
             out_tables[f.CLM_LINE_INSTNL].extend(
                 [
-                    pac_util.gen_pac_clm_instnl(clm=pac_clm, init_clm_instnl=clm_line_instnl)
+                    pac_util.gen_pac_clm_instnl(
+                        clm=pac_clm, init_clm_instnl=clm_line_instnl
+                    )
                     for clm_line_instnl in claims_tbls[f.CLM_LINE_INSTNL]
                 ]
             )
 
             out_tables[f.CLM_LINE_PRFNL].extend(
                 [
-                    pac_util.gen_pac_clm_line_prfnl(clm=pac_clm, init_clm_line_prfnl=clm_line_prfnl)
+                    pac_util.gen_pac_clm_line_prfnl(
+                        clm=pac_clm, init_clm_line_prfnl=clm_line_prfnl
+                    )
                     for clm_line_prfnl in claims_tbls[f.CLM_LINE_PRFNL]
                 ]
             )
@@ -1430,7 +1469,9 @@ def _generate_batch(
             out_tables[f.CLM_DT_SGNTR].append(
                 pac_util.gen_pac_clm_dt_sgntr(
                     clm=pac_clm,
-                    init_clm_dt_sgntr=next(iter(claims_tbls[f.CLM_DT_SGNTR]), RowAdapter({})),
+                    init_clm_dt_sgntr=next(
+                        iter(claims_tbls[f.CLM_DT_SGNTR]), RowAdapter({})
+                    ),
                 )
             )
 
@@ -1447,7 +1488,9 @@ def _generate_batch(
 
             out_tables[f.CLM_DCMTN].extend(
                 [
-                    pac_util.gen_pac_clm_dcmtn(clm=pac_clm, gen_utils=gen_utils, init_clm_dcmtn=x)
+                    pac_util.gen_pac_clm_dcmtn(
+                        clm=pac_clm, gen_utils=gen_utils, init_clm_dcmtn=x
+                    )
                     for x in claims_tbls[f.CLM_DCMTN]
                 ]
             )

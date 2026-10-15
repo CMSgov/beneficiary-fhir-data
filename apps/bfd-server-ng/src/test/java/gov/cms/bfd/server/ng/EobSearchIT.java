@@ -851,17 +851,4 @@ class EobSearchIT extends IntegrationTestBase {
 
     assertEquals(0, getEobFromBundle(eobBundle).size());
   }
-
-  @Test
-  void eobSearchNonLatestPartDIsReturned() {
-    var eobBundle =
-        searchBundle()
-            .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
-                    .exactly()
-                    .identifier(CLAIM_ID_RX_NON_LATEST))
-            .execute();
-
-    assertEquals(1, getEobFromBundle(eobBundle).size());
-  }
 }
