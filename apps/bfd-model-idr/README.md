@@ -200,15 +200,11 @@ GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_
 GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
 ```
 
-Example flow of running the stored procedure:
+Running the stored procedure:
 
 ```text
-1. kn or kp
-2. export BFD_ENV={your_environment}
-3. source `./load-synthetic-credentials.sh`
-Generating data:
-- To generate data from scratch: `uv run deploy_generator_sproc.py --patients 100 --truncate True`
-- To regenerate data: `uv run deploy_generator_sproc.py`
+To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --truncate`
+To regenerate data: `just deploy_generator_sproc --env test`
 
 To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
 ```

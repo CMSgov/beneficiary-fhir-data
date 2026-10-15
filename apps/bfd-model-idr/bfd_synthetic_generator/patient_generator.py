@@ -300,7 +300,6 @@ def _handle_snowflake_flow(
     id_gen: IdGenerator = SequentialIdGenerator(id_state)
     generator: GeneratorUtil = GeneratorUtil(id_gen=id_gen)
 
-    # TODO: check if we still want contracts amount to be fixed amount
     _generate_contracts(generator, writer)
 
     # Regenerate existing data updates in batches

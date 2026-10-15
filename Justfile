@@ -337,6 +337,43 @@ claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_non
         --min-claims "{{ min-claims }}" \
         --pac-gen "{{ pac-gen }}"
 
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
+[arg("claims", long, pattern="(true|false)", help="Generate claims after patient generation")]
+[arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per patient")]
+[arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per patient")]
+[arg("samhsa", long, pattern="(enable|disable)", help="Enable or disable generation of SAMHSA-related data")]
+[arg("pac-gen", long, pattern="(no|if_none|always)", help="Partially-adjudicated claims generation mode")]
+[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
+[arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
+[arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
+[arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
+[doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
+[group('model')]
+[no-cd]
+deploy-generator-sproc env patients="0" claims="true" min-claims="5" max-claims="5" samhsa="enable" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000":
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+
+    root="$(git rev-parse --show-toplevel)"
+    export BFD_ENV="{{ env }}"
+
+    source "$root/apps/bfd-model-idr/load-synthetic-credentials.sh"
+
+    cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/deploy_generator_sproc.py \
+        --patients "{{ patients }}" \
+        --claims "{{ claims }}" \
+        --min-claims "{{ min-claims }}" \
+        --max-claims "{{ max-claims }}" \
+        --{{ samhsa }}-samhsa \
+        --pac-gen "{{ pac-gen }}" \
+        --bene-sk-mode "{{ bene-sk-mode }}" \
+        --truncate {{ if truncate == "1" { "true" } else { "false" } }} \
+        --batch_size "{{ batch-size }}" \
+        {{ if force-ztm == "1" { "--force_ztm true" } else { "" } }}
+
+
+
 [arg("tablesample", long, help="Percent of table to sample")]
 [arg("headless", long, value="1", help="Run in headless mode (outputs in the terminal instead of the web UI)")]
 [arg("env", long, pattern=env_pattern, help=env_help)]
