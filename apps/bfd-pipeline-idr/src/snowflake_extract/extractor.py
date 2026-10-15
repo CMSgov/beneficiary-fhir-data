@@ -63,16 +63,16 @@ class SnowflakeExecutor:
                 {QUERY}
             )
             FILE_FORMAT = (
-                TYPE = 'CSV' 
-                FIELD_DELIMITER = ',' 
-                COMPRESSION = NONE 
+                TYPE = 'CSV'
+                FIELD_DELIMITER = ','
+                COMPRESSION = NONE
                 TIMESTAMP_FORMAT = 'YYYY-MM-DD"T"HH24:MI:SS.FF6'
                 NULL_IF = ('')
                 FIELD_OPTIONALLY_ENCLOSED_BY = '"'
-            ) 
-            HEADER = TRUE 
-            SINGLE = TRUE 
-            OVERWRITE = TRUE 
+            )
+            HEADER = TRUE
+            SINGLE = TRUE
+            OVERWRITE = TRUE
             MAX_FILE_SIZE = 1073741824;
         """.replace("{FILE_NAME}", file_name).replace("{QUERY}", sql)
         )

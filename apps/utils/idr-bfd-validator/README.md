@@ -10,7 +10,7 @@ This utility loads data from IDR using the internal extraction logic of the IDR 
 
 ```sh
 # BFD_ENV can be any BFD environment, e.g. test, 1234-prod, etc.
-BFD_ENV=prod ./run-validator.sh
+just idr-bfd-validator --env prod
 ```
 
 ### Environment Variables
@@ -26,27 +26,6 @@ BFD_ENV=prod ./run-validator.sh
 | `BFD_ENV` | Environment to run against; used by `./run-validator.sh` to pull credentials and get DB host | N/A |
 | `ALERT_SNS_TOPIC_ARN` | SNS Topic ARN to send alerts to; if unset, no alerts will be sent | N/A |
 
-## Environment Setup
-
-It is assumed you are using `pyright`/`pylance` for type-checking, `uv` for virtual environment and dependency management, and `ruff` for linting, formatting, and import sorting.
-
-1. Install `uv`:
-
-   ```bash
-   brew install uv
-   ```
-
-2. Setup Python 3.13 virtual environment:
-
-   ```bash
-   uv sync
-   ```
-
-3. Your virtual environment is now setup! By default, it is available under `.venv`; using VS Code, this Virtual Environment can be chosen using the `Python: Select Interpreter` command
-
-## Updating/managing dependencies
-
-See [`Managing dependencies`](https://docs.astral.sh/uv/concepts/projects/dependencies/) and [`Locking and syncing`](https://docs.astral.sh/uv/concepts/projects/sync/) in the `uv` docs for more information.
 
 ## Building the Docker Image
 
