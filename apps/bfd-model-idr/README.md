@@ -67,6 +67,18 @@ There are two optional parameters .
 - --source-directory  Directory where the source csv files are located.  Default: ./out
 - --output-directory  Directory where to output the files.  Default: ./sample-data
 
+### Coverage Sample Generator
+
+```sh
+uv run generate-coverage-sample --bene-sk <bene_sk> -parts <comma_delimited_list>
+```
+This will search for the bene_sk in out/SYNTHETIC_BENE_HIST.csv and associated files, collect the appropriate data fields and format it to be able to be mapped to fml.
+
+
+There are two optional parameters .
+- --source-directory  Directory where the source csv files are located.  Default: ./out
+- --output-directory  Directory where to output the files.  Default: ./sample-data
+
 
 ### Create FHIR files with synthetic data
 

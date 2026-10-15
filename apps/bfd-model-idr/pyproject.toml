@@ -22,6 +22,7 @@ generate-eob-sample = "generate_eob_sample:main"
 generate-bene-sample = "generate_bene_sample:main"
 gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"
+generate-coverage-sample = "generate_coverage_sample:main"
 
 [dependency-groups]
 dev = [
@@ -50,6 +51,7 @@ packages = [
   "src/generate_bene_sample",
   "src/gen_dd",
   "src/generate_prior_auth_sample",
+  "src/generate_coverage_sample",
 ]
 
 [tool.ruff]

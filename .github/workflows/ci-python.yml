@@ -85,6 +85,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-generate-coverage-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_coverage_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_coverage_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
