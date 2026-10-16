@@ -6,13 +6,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,27 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_part_c_and_d_enrollment", schema = "idr")
+@Immutable
+@Subselect(
+"""
+ SELECT e.bene_sk,
+   e.bene_enrlmt_pgm_type_cd,
+   e.bene_enrlmt_bgn_dt,
+   e.bene_enrlmt_end_dt,
+   e.bene_cntrct_num,
+   e.bene_pbp_num,
+   e.cntrct_pbp_sk,
+   e.bene_cvrg_type_cd,
+   e.bene_enrlmt_emplr_sbsdy_sw,
+   COALESCE(rx.bene_enrlmt_pdp_rx_info_bgn_dt, '9999-12-31'::date) AS bene_enrlmt_pdp_rx_info_bgn_dt,
+   rx.bene_pdp_enrlmt_mmbr_id_num,
+   rx.bene_pdp_enrlmt_grp_num,
+   rx.bene_pdp_enrlmt_prcsr_num,
+   rx.bene_pdp_enrlmt_bank_id_num
+  FROM idr.beneficiary_ma_part_d_enrollment e
+    LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx ON e.bene_sk = rx.bene_sk AND e.bene_enrlmt_bgn_dt = rx.bene_enrlmt_bgn_dt AND e.cntrct_pbp_sk = rx.cntrct_pbp_sk AND (e.bene_enrlmt_pgm_type_cd::text = ANY (ARRAY['2'::character varying, '3'::character varying]::text[])) AND rx.idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'::timestamp with time zone
+ WHERE e.idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'::timestamp with time zone
+""")
 public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCDEnrollment> {
 
   @EmbeddedId private BeneficiaryPartCDEnrollmentId id;
