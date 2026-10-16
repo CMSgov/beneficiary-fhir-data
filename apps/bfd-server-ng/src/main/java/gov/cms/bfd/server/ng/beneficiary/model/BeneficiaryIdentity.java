@@ -25,7 +25,12 @@ SELECT DISTINCT bene.bene_sk,
   bene.bene_mbi_id,
   bene_mbi.bene_mbi_efctv_dt,
   bene_mbi.bene_mbi_obslt_dt
-FROM idr.valid_beneficiary bene
+FROM (
+"""
+        + ValidBeneficiary.VIEW
+        +
+"""
+) bene
  LEFT JOIN idr.beneficiary_mbi_id bene_mbi ON bene.bene_mbi_id::text = bene_mbi.bene_mbi_id::text AND bene_mbi.idr_ltst_trans_flg::text = 'Y'::text
 """)
 @Entity

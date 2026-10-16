@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.coverage.model;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
+import gov.cms.bfd.server.ng.beneficiary.model.ValidBeneficiary;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.model.ProfileType;
@@ -19,6 +20,8 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.SQLRestriction;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -32,7 +35,9 @@ import org.hl7.fhir.r4.model.Reference;
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
 @Getter
-@Table(name = "valid_beneficiary", schema = "idr")
+@Table(name = "beneficiary", schema = "idr")
+@SQLRestriction(ValidBeneficiary.SQL_RESTRICTION)
+@Immutable
 public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
