@@ -8,17 +8,17 @@ from pathlib import Path
 import click
 import constants as f
 import tqdm
-from claims_adj import AdjudicatedGeneratorUtil
-from claims_other import OtherGeneratorUtil
-from claims_pac import PacGeneratorUtil
-from claims_priorauth import PriorAuthGeneratorUtil
-from claims_static import (
+from claim_type_codes import (
     FISS_CLM_TYPE_CDS,
     INSTITUTIONAL_CLAIM_TYPES,
     MCS_CLM_TYPE_CDS,
     PHARMACY_CLM_TYPE_CDS,
     PROFESSIONAL_CLAIM_TYPES,
 )
+from claims_adj import AdjudicatedGeneratorUtil
+from claims_other import OtherGeneratorUtil
+from claims_pac import PacGeneratorUtil
+from claims_priorauth import PriorAuthGeneratorUtil
 from claims_util import four_part_key, match_line_num
 from generator_util import (
     GeneratorUtil,
@@ -27,7 +27,6 @@ from generator_util import (
     load_file_dict,
     partition_rows,
     probability,
-    run_command,
 )
 from id_generators import (
     IdGenerator,
@@ -369,10 +368,10 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
-            f.CLM_FED_TYPE_SRVC_CD,  # TODO: not generated yet
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,  # TODO: not generated yet
-            f.CLM_PRMRY_PYR_CD,  # TODO: not generated yet
-            f.CLM_PRCNG_LCLTY_CD,  # TODO: not generated yet
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_PRMRY_PYR_CD,
+            f.CLM_PRCNG_LCLTY_CD,
             f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,

@@ -44,12 +44,14 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = [
+  "idr_model",
   "generate_eob_sample",
   "generate_bene_sample",
   "gen_dd",
   "generate_prior_auth_sample",
 ]
 packages = [
+  "src/idr_model",
   "src/generate_eob_sample",
   "src/generate_bene_sample",
   "src/gen_dd",

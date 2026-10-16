@@ -232,7 +232,7 @@ def main(
     session.sql(f"ALTER DATABASE {db_name} SET EVENT_TABLE = {event_table}").collect()
     # Delete old logs from event table or else they'll grow and will be permanently retained
     session.sql(
-        f"DELETE FROM {event_table} WHERE TIMESTAMP < DATEADD('week', -2, CURRENT_TIMESTAMP())"
+        f"DELETE FROM {event_table} WHERE TIMESTAMP < DATEADD('day', -90, CURRENT_TIMESTAMP())"
     ).collect()
 
     # Check if an instance of the synthetic data generator stored procedure is already running

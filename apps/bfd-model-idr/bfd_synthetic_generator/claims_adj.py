@@ -4,18 +4,20 @@ from datetime import date
 from typing import Any
 
 import constants as f
-from claims_static import (
+from claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
+    FISS_CLM_TYPE_CDS,
+    INSTITUTIONAL_CLAIM_TYPES,
+    PHARMACY_CLM_TYPE_CDS,
+)
+from claims_static import (
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
     AVAILABLE_NDC,
     AVAILABLE_SSA_STATE_CDS,
     CLM_POA_IND_CHOICES,
-    FISS_CLM_TYPE_CDS,
     HCPCS_MODS,
-    INSTITUTIONAL_CLAIM_TYPES,
     NOW,
-    PHARMACY_CLM_TYPE_CDS,
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
@@ -1102,5 +1104,22 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_LINE_NUM] = clm_line_num
 
         add_meta_timestamps(clm_line_prfnl, clm)
+
+        clm_line_prfnl[f.CLM_FED_TYPE_SRVC_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_FED_TYPE_SRVC_CD]
+        )
+
+        if clm_type_cd in (71, 72):
+            clm_line_prfnl[f.CLM_LINE_CARR_HPSA_SCRCTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_LINE_CARR_HPSA_SCRCTY_CD]
+            )
+
+        clm_line_prfnl[f.CLM_PRCNG_LCLTY_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRCNG_LCLTY_CD]
+        )
+
+        clm_line_prfnl[f.CLM_PRMRY_PYR_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_PRMRY_PYR_CD]
+        )
 
         return clm_line_prfnl

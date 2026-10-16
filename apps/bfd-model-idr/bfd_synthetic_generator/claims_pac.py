@@ -3,14 +3,12 @@ import string
 from collections.abc import Callable
 
 import constants as f
+from claim_type_codes import FISS_CLM_TYPE_CDS, MCS_CLM_TYPE_CDS, VMS_CDS
 from claims_static import (
-    FISS_CLM_TYPE_CDS,
-    MCS_CLM_TYPE_CDS,
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
-    VMS_CDS,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
 from generator_util import GeneratorUtil

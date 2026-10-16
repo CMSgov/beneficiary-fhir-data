@@ -49,7 +49,7 @@ just generate-eob-sample --clm-uniq-id <clm_uniq_id_here>
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
-This will currently only work for Pharmacy and Basic types but will be continued to work on other types.
+This will currently only work for Pharmacy, Professional, and Basic types but will be continued to work on other types.
 
 There are two optional parameters .
 - --source-directory  Directory where the source csv files are located.  Default: ./out
@@ -203,6 +203,7 @@ GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_P
 Running the stored procedure:
 
 ```text
+First, specify kn or kp depending on the environment that you're targeting
 To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --truncate`
 To regenerate data: `just deploy_generator_sproc --env test`
 
