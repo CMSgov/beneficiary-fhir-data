@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -39,6 +40,7 @@ import org.hl7.fhir.r4.model.Period;
       AND bene_mdcd_elgblty_bgn_dt <= (now() - interval '12 hours')
     ORDER BY bene_sk, bene_mdcd_elgblty_bgn_dt DESC, idr_trans_efctv_ts DESC
     """)
+@Immutable
 public class BeneficiaryDualEligibility {
   @Id
   @Column(name = "bene_sk")

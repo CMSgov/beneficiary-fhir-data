@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,6 +29,7 @@ FROM idr.valid_beneficiary bene
  LEFT JOIN idr.beneficiary_mbi_id bene_mbi ON bene.bene_mbi_id::text = bene_mbi.bene_mbi_id::text AND bene_mbi.idr_ltst_trans_flg::text = 'Y'::text
 """)
 @Entity
+@Immutable
 public class BeneficiaryIdentity {
 
   @EmbeddedId private BeneficiaryIdentityId id;

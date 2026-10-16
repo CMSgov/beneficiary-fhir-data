@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -42,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
       AND bene_rng_bgn_dt <= (now() - interval '12 hours')
     ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
     """)
+@Immutable
 public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement> {
 
   @EmbeddedId private BeneficiaryEntitlementId id;
