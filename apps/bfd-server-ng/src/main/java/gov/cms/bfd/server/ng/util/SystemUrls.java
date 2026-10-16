@@ -82,6 +82,7 @@ public class SystemUrls {
   public static final String PROFILE_PRIOR_AUTH =
       "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization";
 
+  // TODO - Consider making these canonical URLs for all possible profile and type combination.
   /** Prefix for CMS BBAPI EoB profiles. */
   public static final String PROFILE_CMS_EOB_PREFIX =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-";

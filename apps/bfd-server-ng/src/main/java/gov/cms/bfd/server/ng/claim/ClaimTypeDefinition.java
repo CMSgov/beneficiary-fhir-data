@@ -61,18 +61,22 @@ public record ClaimTypeDefinition(
    */
   public List<DbFilterBuilder> getProfileFilters(
       ProfileSelection profileSelection, List<DbFilterBuilder> filters) {
+
     var categories = EobProfileCategory.fromClaimType(claimType);
     var requested =
         categories.stream()
             .filter(category -> profileSelection.isRequested(category, profile))
             .toList();
+
     if (!profileSelection.hasProfiles() || requested.size() == categories.size()) {
       return filters;
     }
+
     var claimTypeCodes =
         requested.stream().flatMap(category -> category.getClaimTypeCodes().stream()).toList();
     var profileFilters = new ArrayList<>(filters);
     profileFilters.add(new ClaimTypeCodeFilterParam(PROFILE_CLAIM_TYPE_CODES, claimTypeCodes));
+
     return profileFilters;
   }
 }
