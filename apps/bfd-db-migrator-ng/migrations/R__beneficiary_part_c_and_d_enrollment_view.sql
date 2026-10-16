@@ -16,10 +16,10 @@ SELECT
     rx.bene_pdp_enrlmt_prcsr_num,
     rx.bene_pdp_enrlmt_bank_id_num
 FROM idr.beneficiary_ma_part_d_enrollment e
-         LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx
-                   ON e.bene_sk = rx.bene_sk
-                       AND e.bene_enrlmt_bgn_dt = rx.bene_enrlmt_bgn_dt
-                       AND e.cntrct_pbp_sk = rx.cntrct_pbp_sk
-                       AND e.bene_enrlmt_pgm_type_cd in ('2', '3')
-                       AND rx.idr_trans_obslt_ts >= '9999-12-31'
+     LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx
+       ON e.bene_sk = rx.bene_sk
+       AND e.bene_enrlmt_bgn_dt = rx.bene_enrlmt_bgn_dt
+       AND e.cntrct_pbp_sk = rx.cntrct_pbp_sk
+       AND e.bene_enrlmt_pgm_type_cd in ('2', '3')
+       AND rx.idr_trans_obslt_ts >= '9999-12-31'
 WHERE e.idr_trans_obslt_ts >= '9999-12-31';
