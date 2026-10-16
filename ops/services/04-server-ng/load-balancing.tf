@@ -41,6 +41,7 @@ resource "aws_lb" "this" {
   enable_http2                     = true
   desync_mitigation_mode           = "strictest"
   enable_cross_zone_load_balancing = true
+  preserve_host_header             = true
 }
 
 resource "aws_acm_certificate" "this" {
