@@ -13,7 +13,7 @@ dependencies = [
   "tqdm>=4.67.1",
   "click>=8.3.1",
   "requests>=2.32.5",
-  "cryptography>=50.0.0",
+  "snowflake-snowpark-python>=1.54.0",
   "prompt-toolkit>=3.0.53",
 ]
 
@@ -43,7 +43,13 @@ requires = ["uv_build<=0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "idr_model"
+module-name = [
+  "idr_model",
+  "generate_eob_sample",
+  "generate_bene_sample",
+  "gen_dd",
+  "generate_prior_auth_sample",
+]
 packages = [
   "src/idr_model",
   "src/generate_eob_sample",

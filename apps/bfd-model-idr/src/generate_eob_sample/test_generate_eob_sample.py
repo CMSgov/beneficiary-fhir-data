@@ -4,7 +4,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from generate_eob_sample import main
-from idr_model.claims_static import (
+from idr_model.claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
     INSTITUTIONAL_CLAIM_TYPES,
@@ -12,6 +12,10 @@ from idr_model.claims_static import (
     PHARMACY_CLM_TYPE_CDS,
     VMS_CDS,
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SOURCE_DIR_SAMPLES1 = str(PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples1")
+SOURCE_DIR_SAMPLES2 = PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples2"
 
 
 def test_generate_eob_sample_base() -> None:
@@ -21,14 +25,13 @@ def test_generate_eob_sample_base() -> None:
             "--clm-uniq-id",
             "8520736890144",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
-
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Base-Sample.json")
+    output_file = Path("out-test/EOB-Base-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -49,14 +52,14 @@ def test_generate_eob_sample_pharmacy() -> None:
             "--clm-uniq-id",
             "6595861148142",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Pharmacy-Sample.json")
+    output_file = Path("out-test/EOB-Pharmacy-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -74,14 +77,14 @@ def test_generate_eob_sample_carrier() -> None:
             "--clm-uniq-id",
             "4045037817088",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Carrier-Sample.json")
+    output_file = Path("out-test/EOB-Carrier-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -99,15 +102,15 @@ def test_generate_eob_sample_carrier_dme() -> None:
             "--clm-uniq-id",
             "9298559719445",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
 
-    output_file = Path("../../out-test/EOB-DME-Sample.json")
+    output_file = Path("out-test/EOB-DME-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -126,15 +129,15 @@ def test_generate_eob_sample_carrier_mcs() -> None:
             "--clm-uniq-id",
             "3351266481403",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples2/professional",
+            str(SOURCE_DIR_SAMPLES2 / "professional"),
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
 
-    output_file = Path("../../out-test/EOB-Carrier-MCS-Sample.json")
+    output_file = Path("out-test/EOB-Carrier-MCS-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
