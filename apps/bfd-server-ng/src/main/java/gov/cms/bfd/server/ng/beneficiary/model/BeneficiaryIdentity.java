@@ -29,7 +29,7 @@ SELECT DISTINCT ON (bene.bene_sk, bene.bene_xref_efctv_sk, bene.bene_mbi_id)
  bene_mbi.idr_trans_efctv_ts
 FROM (
 """
-        + ValidBeneficiary.VIEW
+        + BeneficiaryBase.VALID_BENE_VIEW
         +
 """
 ) bene

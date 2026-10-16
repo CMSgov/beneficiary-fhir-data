@@ -10,6 +10,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Getter
 @Table(name = "beneficiary", schema = "idr")
-@SQLRestriction(ValidBeneficiary.SQL_RESTRICTION)
+@SQLRestriction(BeneficiaryBase.VALID_BENE_SQL_RESTRICTION)
 @Immutable
 public class Beneficiary extends BeneficiaryBase {}
