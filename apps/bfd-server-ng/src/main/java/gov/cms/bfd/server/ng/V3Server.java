@@ -58,8 +58,6 @@ public class V3Server extends RestfulServer {
   private void configureServerInfoMetadata() {
     setServerName(CAPABILITIES_SERVER_NAME);
     setImplementationDescription(configuration.getProject().getId());
-    setServerVersion(configuration.getProject().getVersion());
-
     // Lightly customize the capability provider to set publisher name.
     ServerCapabilityStatementProvider capabilityStatementProvider =
         new ServerCapabilityStatementProvider(this);
