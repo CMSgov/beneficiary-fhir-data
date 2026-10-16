@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.input;
 
 /** Whether to include SAMHSA data. */
 public enum SamhsaFilterMode {

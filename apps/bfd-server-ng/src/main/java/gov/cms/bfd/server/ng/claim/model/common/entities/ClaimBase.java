@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
@@ -20,6 +20,7 @@ import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SharedSystemsClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -85,20 +86,29 @@ public abstract class ClaimBase {
    */
   public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
     var eob = new ExplanationOfBenefit();
+
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
+    eob.setBillablePeriod(billablePeriod.toFhir());
+    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
+
+    eob.setMeta(
+        meta.toFhir(
+            claimTypeCode,
+            getClaimProfile(),
+            claimState.getSecurityStatus(),
+            finalAction,
+            getMetaSourceSk()));
+
+    identifiers.toFhir(claimTypeCode).forEach(eob::addIdentifier);
+    identifiers.toFhirRelatedClaim(claimTypeCode).ifPresent(eob::addRelated);
+
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
-    eob.setMeta(
-        meta.toFhir(claimTypeCode, claimState.getSecurityStatus(), finalAction, getMetaSourceSk()));
-    identifiers.toFhir(claimTypeCode).forEach(eob::addIdentifier);
-    identifiers.toFhirRelatedClaim(claimTypeCode).ifPresent(eob::addRelated);
-    eob.setBillablePeriod(billablePeriod.toFhir());
-    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
     claimTypeCode
         .toFhirInsurerPartAB()
         .ifPresent(
@@ -136,6 +146,13 @@ public abstract class ClaimBase {
   }
 
   // region Hook Methods
+
+  /**
+   * Return the profile this claim is rendered in.
+   *
+   * @return the claim profile
+   */
+  public abstract ClaimProfile getClaimProfile();
 
   /**
    * retrieve total components and adjudication components, default to empty (basis).

@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param claimTypeCodes claim type codes
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param profile claim profile
  */
 public record ClaimSearchCriteria(
     long beneSk,
@@ -30,7 +31,8 @@ public record ClaimSearchCriteria(
     List<List<TagCriterion>> tagCriteria,
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    List<List<MetaSourceSk>> sources) {
+    List<List<MetaSourceSk>> sources,
+    ProfileSelection profile) {
 
   /**
    * Alternate constructor defaults the MBI to an empty string so that other areas of the
@@ -45,7 +47,8 @@ public record ClaimSearchCriteria(
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes,
       List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-      List<List<MetaSourceSk>> sources) {
+      List<List<MetaSourceSk>> sources,
+      ProfileSelection profile) {
     this(
         beneSk,
         "",
@@ -56,7 +59,8 @@ public record ClaimSearchCriteria(
         tagCriteria,
         claimTypeCodes,
         outcomes,
-        sources);
+        sources,
+        profile);
   }
 
   /**
@@ -139,5 +143,14 @@ public record ClaimSearchCriteria(
    */
   public boolean hasSources() {
     return !sources.isEmpty();
+  }
+
+  /**
+   * Returns whether a _profile has been provided.
+   *
+   * @return boolean
+   */
+  public boolean hasProfiles() {
+    return profile().hasProfiles();
   }
 }

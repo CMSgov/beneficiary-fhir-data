@@ -6,6 +6,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchParameter;
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -15,6 +17,7 @@ import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @Slf4j
 public class FhirInputConverter {
+
   private static final Set<String> SUPPORTED_SYSTEM_TYPES =
       Set.of(
           IdrConstants.SYSTEM_TYPE_NCH.toUpperCase(),
@@ -57,6 +61,12 @@ public class FhirInputConverter {
   private static final Map<String, ClaimFinalAction> FINAL_ACTION_MAP =
       Stream.of(ClaimFinalAction.values())
           .collect(Collectors.toMap(a -> a.getFinalAction().toUpperCase(), a -> a));
+
+  private static final String SUPPORTED_PROFILES =
+      Stream.of(ClaimProfile.values())
+          .flatMap(profile -> profile.getCanonicalUrls().stream())
+          .sorted()
+          .collect(Collectors.joining(", "));
 
   private FhirInputConverter() {}
 
@@ -555,5 +565,56 @@ public class FhirInputConverter {
     } else {
       return Optional.of(Boolean.parseBoolean(headerValues.getFirst()));
     }
+  }
+
+  /**
+   * Parses the _profile query parameter into the requested profile for each category.
+   *
+   * @param profileParam _profile param from request
+   * @return profile selection representing every OR value from _profile if valid
+   */
+  public static ProfileSelection parseProfileParameter(@Nullable UriOrListParam profileParam) {
+
+    if (profileParam == null || profileParam.getValuesAsQueryTokens().isEmpty()) {
+      return new ProfileSelection();
+    }
+
+    var profiles = new EnumMap<EobProfileCategory, ClaimProfile>(EobProfileCategory.class);
+
+    for (var uri : profileParam.getValuesAsQueryTokens()) {
+      var entry = parseProfileUri(uri);
+      var category = entry.getKey();
+      var profile = entry.getValue();
+      var existing = profiles.putIfAbsent(category, profile);
+
+      if (existing != null && existing != profile) {
+        throw new InvalidRequestException(
+            "Conflicting _profile values for " + category.getProfileName() + ".");
+      }
+    }
+
+    return new ProfileSelection(profiles);
+  }
+
+  private static Map.Entry<EobProfileCategory, ClaimProfile> parseProfileUri(UriParam uri) {
+
+    if (uri.getQualifier() != null) {
+      throw new InvalidRequestException("_profile modifiers are not supported.");
+    }
+
+    var value = Strings.nullToEmpty(uri.getValue()).trim();
+    for (var category : EobProfileCategory.values()) {
+      for (var profile : ClaimProfile.values()) {
+        if (value.equals(profile.getCanonicalUrl(category))
+            || value.equals(profile.toFhirProfile(category))) {
+          return Map.entry(category, profile);
+        }
+      }
+    }
+
+    throw new InvalidRequestException(
+        String.format(
+            "Unsupported _profile value '%s'. Supported values are: %s.",
+            value, SUPPORTED_PROFILES));
   }
 }

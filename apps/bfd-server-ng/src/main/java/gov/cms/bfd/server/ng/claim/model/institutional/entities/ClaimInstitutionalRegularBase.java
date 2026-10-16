@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.claim.ClaimProfile;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
@@ -43,6 +44,11 @@ abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return List.of();
+  }
+
+  @Override
+  public ClaimProfile getClaimProfile() {
+    return ClaimProfile.REGULAR;
   }
 
   // endregion

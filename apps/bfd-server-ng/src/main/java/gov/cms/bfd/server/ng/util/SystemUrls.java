@@ -8,7 +8,7 @@ public class SystemUrls {
     // Intentionally empty
   }
 
-  // Profiles
+  // region Profiles
 
   /**
    * <a href="https://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Patient.html">C4BB
@@ -81,6 +81,19 @@ public class SystemUrls {
    */
   public static final String PROFILE_PRIOR_AUTH =
       "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization";
+
+  /** Prefix for CMS BBAPI EoB profiles. */
+  public static final String PROFILE_CMS_EOB_PREFIX =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-";
+
+  /** Prefix for C4BB EoB profiles. */
+  public static final String PROFILE_C4BB_EOB_PREFIX =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-";
+
+  /** Version for C4BB EoB profiles . */
+  public static final String PROFILE_C4BB_VERSION = "2.2.0";
+
+  // endregion
 
   /**
    * System URL for the HL7 Subscriber Relationship code system. Used for {@code
@@ -747,22 +760,6 @@ public class SystemUrls {
   /** CARIN Blue Button - Institutional Claim SubType Code System. */
   public static final String CARIN_CLAIM_SUBTYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
-
-  /** CARIN Blue Button - ExplanationOfBenefit Pharmacy. */
-  public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.2.0";
-
-  /** CARIN Blue Button - ExplanationOfBenefit Inpatient Institutional. */
-  public static final String CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0";
-
-  /** CARIN Blue Button - ExplanationOfBenefit Outpatient Institutional. */
-  public static final String CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.2.0";
-
-  /** CARIN Blue Button - ExplanationOfBenefit Professional NonClinician. */
-  public static final String CARIN_STRUCTURE_DEFINITION_PROFESSIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.2.0";
 
   /** CARIN Blue Button - Identifier Type Code System. */
   public static final String CARIN_CODE_SYSTEM_IDENTIFIER_TYPE =
