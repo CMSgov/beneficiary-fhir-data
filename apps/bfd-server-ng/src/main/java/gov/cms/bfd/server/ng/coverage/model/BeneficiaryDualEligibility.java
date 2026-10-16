@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.Period;
         bfd_updated_ts
     FROM idr.beneficiary_dual_eligibility
     WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
-      AND idr_ltst_trans_flg = 'Y'
       AND bene_mdcd_elgblty_bgn_dt <= (now() - interval '12 hours')
     ORDER BY bene_sk, bene_mdcd_elgblty_bgn_dt DESC, idr_trans_efctv_ts DESC
     """)

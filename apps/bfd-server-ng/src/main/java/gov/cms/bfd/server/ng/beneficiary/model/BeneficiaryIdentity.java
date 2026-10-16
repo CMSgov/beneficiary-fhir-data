@@ -20,18 +20,24 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @Subselect(
 """
-SELECT DISTINCT bene.bene_sk,
-  bene.bene_xref_efctv_sk,
-  bene.bene_mbi_id,
-  bene_mbi.bene_mbi_efctv_dt,
-  bene_mbi.bene_mbi_obslt_dt
+SELECT DISTINCT ON (bene.bene_sk, bene.bene_xref_efctv_sk, bene.bene_mbi_id)
+ bene.bene_sk,
+ bene.bene_xref_efctv_sk,
+ bene.bene_mbi_id,
+ bene_mbi.bene_mbi_efctv_dt,
+ bene_mbi.bene_mbi_obslt_dt,
+ bene_mbi.idr_trans_efctv_ts
 FROM (
 """
         + ValidBeneficiary.VIEW
         +
 """
 ) bene
- LEFT JOIN idr.beneficiary_mbi_id bene_mbi ON bene.bene_mbi_id::text = bene_mbi.bene_mbi_id::text AND bene_mbi.idr_ltst_trans_flg::text = 'Y'::text
+ LEFT JOIN idr.beneficiary_mbi_id bene_mbi ON bene.bene_mbi_id::text = bene_mbi.bene_mbi_id::text
+ ORDER BY bene.bene_sk,
+  bene.bene_xref_efctv_sk,
+  bene.bene_mbi_id,
+  bene_mbi.idr_trans_efctv_ts DESC
 """)
 @Entity
 @Immutable

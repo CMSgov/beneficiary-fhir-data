@@ -39,7 +39,6 @@ import org.jetbrains.annotations.NotNull;
         min(bene_rng_bgn_dt) OVER (PARTITION BY bene_sk, bene_mdcr_entlmt_type_cd) AS original_bgn_dt
     FROM idr.beneficiary_entitlement
     WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
-      AND idr_ltst_trans_flg = 'Y'
       AND bene_rng_bgn_dt <= (now() - interval '12 hours')
     ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
     """)
