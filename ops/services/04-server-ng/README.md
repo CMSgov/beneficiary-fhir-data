@@ -102,6 +102,9 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy.s3logs_firehose_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3logs_firehose_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.s3logs_firehose_s3](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.samhsa_regression_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.samhsa_regression_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.samhsa_regression_ssm](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.server_metrics](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.service_connect_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.service_connect_pca](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_policy) | resource |
@@ -113,6 +116,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_role.run_locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.s3logs_cw](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.s3logs_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
+| [aws_iam_role.samhsa_regression](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.service_connect](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.deploy](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
@@ -121,6 +125,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_role_policy_attachment.run_locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3logs_cw](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.s3logs_firehose](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.samhsa_regression](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.service_connect](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.s3logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/kinesis_firehose_delivery_stream) | resource |
@@ -148,6 +153,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_ecr_repository.log_router](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_repository) | data source |
 | [aws_ecr_repository.server](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_repository) | data source |
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecs_cluster) | data source |
+| [aws_iam_policy.lambda_vpc_access_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy_document.deploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.deploy_elbv2](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.deploy_iam](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
@@ -166,6 +172,9 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_policy_document.s3logs_firehose_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3logs_firehose_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.s3logs_firehose_s3](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.samhsa_regression_kms](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.samhsa_regression_logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.samhsa_regression_ssm](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.server_metrics](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.service_assume_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.service_connect_pca](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/iam_policy_document) | data source |
