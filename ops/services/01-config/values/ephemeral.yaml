@@ -53,10 +53,6 @@ copy:
   - /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds
   - /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id
   - /bfd/${env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json
-  - /bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi
-  - /bfd/${env}/server-ng/nonsensitive/cert_partners/bcda
-  - /bfd/${env}/server-ng/nonsensitive/cert_partners/dpc
-  - /bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d
   - /bfd/${env}/server/sensitive/server_keystore_base64
   - /bfd/${env}/server/nonsensitive/client_certificates # copy all client_certificates recursively
   - /bfd/${env}/server/sensitive/service_port
@@ -77,6 +73,8 @@ copy:
   - /bfd/${env}/server-ng/sensitive/db/username
   - /bfd/${env}/server-ng/sensitive/db/password
   - /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json
+  - /bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json
+  - /bfd/${env}/server-ng/nonsensitive/cert_partners # copy all cert_partners recu
 # "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
 # configuration format. Takes precedence over any copied SSM parameters
 values:
