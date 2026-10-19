@@ -10,12 +10,10 @@ import jakarta.persistence.MappedSuperclass;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
-import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
 @MappedSuperclass
-@Generated("TODO - Remove after query optimization implementation")
 abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
 
   @Embedded private PaymentComponentAmount paymentComponent;

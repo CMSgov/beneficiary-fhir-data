@@ -11,14 +11,12 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.util.List;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The institutional claim, regular profile base class. */
 @Getter
 @MappedSuperclass
-@Generated("TODO - Remove after query optimization implementation")
 abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
 
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
