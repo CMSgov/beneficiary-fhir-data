@@ -53,8 +53,8 @@
     <module>report-aggregate</module>
   </modules>
   <properties>
-    <surefire.jvm.args />
-    <failsafe.jvm.args />
+    <surefire.jvm.args/>
+    <failsafe.jvm.args/>
     <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -157,12 +157,14 @@
     <hikari.version>7.1.0</hikari.version>
     <flyway.version>13.2.0</flyway.version>
     <checkstyle.version>13.10.0</checkstyle.version>
-    <guava.version>32.1.2-jre</guava.version>
+    <guava.version>33.7.2-jre</guava.version>
+    <!-- Guava 33 no longer exports jsr305; needed for javax.annotation.concurrent / Nullable. -->
+    <jsr305.version>3.0.2</jsr305.version>
     <!--
             The version used here should be compatible with SLF4J.
             See the compatible versions here: https://www.slf4j.org/manual.html
         -->
-    <logback.core.version>1.6.3</logback.core.version>
+    <logback.core.version>1.6.5</logback.core.version>
     <zjsonpatch.version>0.4.16</zjsonpatch.version>
     <freemarker.version>2.3.35</freemarker.version>
     <reflections.version>0.10.2</reflections.version>
@@ -215,8 +217,8 @@
     <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
     <its.db.url>jdbc:bfd-test:tc</its.db.url>
-    <its.db.username />
-    <its.db.password />
+    <its.db.username/>
+    <its.db.password/>
     <!-- Docker image used with testcontainers to provide a working database for testing. -->
     <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -253,7 +255,7 @@
     <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
     <jib.tag>${project.version}</jib.tag>
     <!-- Optional image namespace. -->
-    <jib.namespace />
+    <jib.namespace/>
     <!-- Skip by default.  Override to allow images to be built. -->
     <jib.skip>true</jib.skip>
     <!-- Skip by default.  Override to let open api documents be generated. -->
@@ -865,6 +867,11 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${jsr305.version}</version>
       </dependency>
       <dependency>
         <!-- Compile Time only dependency to simplify creation of simple POJOs -->
