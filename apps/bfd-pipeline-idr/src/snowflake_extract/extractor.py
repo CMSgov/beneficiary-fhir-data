@@ -53,12 +53,16 @@ class SnowflakeExecutor:
         dir_path.mkdir(parents=True, exist_ok=True)
         # Run export from snowflake
         cursor = self.conn.cursor()
+
+        db_schema = ".".join(
+            (SETTINGS.idr_database, SETTINGS.idr_schema_by_table(str(file_name)))
+        )
         # Create Stage
-        cursor.execute("CREATE OR REPLACE TEMPORARY STAGE tmp_export_stage")
+        cursor.execute(f"CREATE OR REPLACE TEMPORARY STAGE {db_schema}.tmp_export_stage")
         # GetData
         cursor.execute(
             """
-            COPY INTO @tmp_export_stage/{FILE_NAME}
+            COPY INTO @{DB_SCHEMA}.tmp_export_stage/{FILE_NAME}
             FROM (
                 {QUERY}
             )
@@ -74,11 +78,11 @@ class SnowflakeExecutor:
             SINGLE = TRUE
             OVERWRITE = TRUE
             MAX_FILE_SIZE = 1073741824;
-        """.replace("{FILE_NAME}", file_name).replace("{QUERY}", sql)
+        """.replace("{DB_SCHEMA}", db_schema).replace("{FILE_NAME}", file_name).replace("{QUERY}", sql)
         )
 
         try:
-            get_command = f"GET @tmp_export_stage/{file_name} file://{output_dir()}"
+            get_command = f"GET @{db_schema}.tmp_export_stage/{file_name} file://{output_dir()}"
             cursor.execute(get_command)
         except snowflake.connector.errors.OperationalError:
             print(f"No records found for file {file_name} in Snowflake.")

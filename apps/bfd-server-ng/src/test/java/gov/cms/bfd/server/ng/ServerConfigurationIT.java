@@ -100,6 +100,6 @@ class ServerConfigurationIT extends IntegrationTestBase {
     assertEquals(PUBLISHER, metaData.getPublisher());
     assertEquals(
         this.configuration.getProject().getId(), metaData.getImplementation().getDescription());
-    assertEquals(this.configuration.getProject().getVersion(), metaData.getVersion());
+    assertEquals(this.configuration.getProject().getVersion(), metaData.getSoftware().getVersion());
   }
 }
