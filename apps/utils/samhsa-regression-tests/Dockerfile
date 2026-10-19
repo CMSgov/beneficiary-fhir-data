@@ -26,4 +26,6 @@ FROM lambda
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
 COPY ./app ${LAMBDA_TASK_ROOT}/app
-CMD [ "app.main.handler" ]
+# Bundle the security labels used by the server-ng SAMHSA filter alongside the application code.
+COPY --from=server-ng-resources security_labels.yml ${LAMBDA_TASK_ROOT}/app/security_labels.yml
+CMD [ "app.handler.handler" ]
