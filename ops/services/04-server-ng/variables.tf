@@ -32,3 +32,11 @@ variable "server_version_override" {
   sensitive   = false
   type        = string
 }
+
+variable "ephemeral_locust_hook_override" {
+  default     = false
+  description = "Enables the execution and creation of the locust-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments"
+  sensitive   = false
+  nullable    = false
+  type        = bool
+}
