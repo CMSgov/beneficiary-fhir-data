@@ -3546,7 +3546,7 @@
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRVDR_SPCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD').value.code
-  notes: "Represents the provider specialty for professional claim. To get provider specialty for individuals involved on professional and institutional claims use the following FHIR path: ExplanationOfBenfit.careTeam.qualification."
+  notes: "Represents the provider specialty for professional claim. To get the provider specialty for individuals involved on professional and institutional claims, use the following FHIR path: ExplanationOfBenfit.careTeam.qualification."
   profiles:
     - CMS
 - inputPath: LineItemComponent.CLM_LINE_DMERC_SCRN_SVGS_AMT
