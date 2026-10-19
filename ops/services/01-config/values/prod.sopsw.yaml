@@ -589,8 +589,7 @@
 /bfd/${env}/server-ng/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
 /bfd/${env}/server-ng/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
 /bfd/${env}/server-ng/nonsensitive/lb_is_public: "true"
-/bfd/${env}/server-ng/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test:
-  |-
+/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_cert: |-
   -----BEGIN CERTIFICATE-----
   MIIFEzCCAvugAwIBAgIEV4nRljANBgkqhkiG9w0BAQsFADA6MTgwNgYDVQQDEy9i
   bHVlYnV0dG9uLWJhY2tlbmQtcHJvZC1kYXRhLXNlcnZlci1jbGllbnQtdGVzdDAe
@@ -621,7 +620,7 @@
   hRN/BZNg/yzHfGXzKuQg+/MDrKLx3k1QGDgz3dqIZ9bG2B3oSmPNH49ebMbjwRUs
   T1n0VQm7cg==
   -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/client_certificates/bluebutton_backend_test_samhsa:
+/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_samhsa_cert:
   |-
   -----BEGIN CERTIFICATE-----
   MIIFMzCCAxugAwIBAgIUBRwBc0dxxJQZEbANjbCKmjOXctQwDQYJKoZIhvcNAQEL
@@ -751,9 +750,10 @@
   5RX+lPcn9R5zJ90dkLZ+jPL90tg2uvT2TWYmbwl8XcuYXyYux5gpERQMHLxH6QSR
   TTsBlDu/w61r8pmhA8kyoml5xx/gAuqr87676Wq7EHQIc3LntyMGcoybJIqHow==
   -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
-/bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json: '["bluebutton_backend_prod_data_server_client_test", "bluebutton_backend_test_samhsa"]'
-/bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi: '{"name":"Blue Button API","certificateAliases":["bluebutton_backend_prod_data_server_client_test","bluebutton_backend_test_samhsa","bluebutton_root_ca"]}'
+/bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["test_client_samhsa_cert", "bluebutton_root_ca", "regression_tests"]'
+/bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json: '["test_client_cert", "test_client_samhsa_cert"]'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bfd: '{"name":"BFD","certificateAliases":["test_client_cert", "test_client_samhsa_cert"]}'
+/bfd/${env}/server-ng/nonsensitive/cert_partners/bbapi: '{"name":"Blue Button API","certificateAliases":["bluebutton_root_ca"]}'
 /bfd/${env}/server-ng/nonsensitive/cert_partners/bcda: '{"name":"BCDA","certificateAliases":["bcda_prod_client"]}'
 /bfd/${env}/server-ng/nonsensitive/cert_partners/ab2d: '{"name":"AB2D","certificateAliases":["ab2d_cms_gov"]}'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
