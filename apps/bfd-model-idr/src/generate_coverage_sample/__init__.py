@@ -5,7 +5,7 @@ import click
 
 from .coverage_generator import MedicarePart, SampleGenerator
 
-parts_values_str = f"{','.join(str(part.value) for part in MedicarePart)}"
+parts_values_str = f"{','.join(str(part.name) for part in MedicarePart)}"
 
 
 @click.command
@@ -18,7 +18,8 @@ parts_values_str = f"{','.join(str(part.value) for part in MedicarePart)}"
 @click.option(
     "--parts",
     type=str,
-    required=True,
+    required=False,
+    default="ALL",
     help=f"Parts request comma delimited without spaces. Exceptable values: {parts_values_str}",
 )
 @click.option(
