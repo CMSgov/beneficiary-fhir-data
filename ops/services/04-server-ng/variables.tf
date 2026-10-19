@@ -40,3 +40,16 @@ variable "ephemeral_locust_hook_override" {
   nullable    = false
   type        = bool
 }
+variable "samhsa_regression_repository_override" {
+  default     = null
+  description = "Overrides the ECR repository for the 'samhsa-regression' container image. If not provided, the default will be used"
+  sensitive   = false
+  type        = string
+}
+
+variable "samhsa_regression_version_override" {
+  default     = null
+  description = "Overrides the version for 'samhsa-regression' container image resolution. If not provided, the latest BFD version will be used"
+  sensitive   = false
+  type        = string
+}
