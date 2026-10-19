@@ -316,7 +316,8 @@ resource "aws_ecs_service" "server" {
     aws_iam_role_policy_attachment.execution,
     aws_iam_role_policy_attachment.deploy,
     aws_iam_role_policy_attachment.service_connect,
-    aws_iam_role_policy_attachment.run_locust_hook
+    aws_iam_role_policy_attachment.run_locust_hook,
+    aws_iam_role_policy_attachment.run_samhsa_hook
   ]
 
   cluster                            = data.aws_ecs_cluster.main.arn
@@ -360,6 +361,16 @@ resource "aws_ecs_service" "server" {
         hook_target_arn  = one(aws_lambda_function.locust_hook[*].arn)
         lifecycle_stages = ["POST_TEST_TRAFFIC_SHIFT"]
         role_arn         = one(aws_iam_role.run_locust_hook[*].arn)
+      }
+    }
+
+    dynamic "lifecycle_hook" {
+      for_each = local.samhsa_hook_enabled ? set([1]) : set()
+
+      content {
+        hook_target_arn  = one(aws_lambda_function.samhsa_hook[*].arn)
+        lifecycle_stages = ["POST_TEST_TRAFFIC_SHIFT"]
+        role_arn         = one(aws_iam_role.run_samhsa_hook[*].arn)
       }
     }
   }
