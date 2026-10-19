@@ -78,7 +78,9 @@ class SnowflakeExecutor:
             SINGLE = TRUE
             OVERWRITE = TRUE
             MAX_FILE_SIZE = 1073741824;
-        """.replace("{DB_SCHEMA}", db_schema).replace("{FILE_NAME}", file_name).replace("{QUERY}", sql)
+        """.replace("{DB_SCHEMA}", db_schema)
+        .replace("{FILE_NAME}", file_name)
+        .replace("{QUERY}", sql)
         )
 
         try:
