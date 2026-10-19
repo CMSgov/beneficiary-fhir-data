@@ -14,6 +14,32 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
 | `migrator` | Yes | No | This Terraservice may be skipped in **ephemeral environments**, if is known that there are no new migrations to run |
 
+## `samhsa-regression` Lambda
+
+This service defines the resources for a Lambda, `bfd-${env}-server-ng-samhsa-regression`, which runs the SAMHSA filtering regression suite (from `apps/utils/samhsa-regression-tests`) against the V3 BFD Server. The Lambda is invoked synchronously by the `samhsa-hook` wrapper Lambda during an ECS service deployment, but can also be invoked directly by an operator or automation. Like the hook itself, the Lambda is only created in established environments, or in ephemeral environments where `ephemeral_samhsa_hook_override` is set.
+
+The `samhsa-regression` Lambda can be [invoked synchronously](https://docs.aws.amazon.com/lambda/latest/dg/invocation-sync.html) using the `InvokeFunction` AWS API Action (e.g. `aws lambda invoke...`) with the following `payload` schema:
+
+```json
+{
+  "host": "<v3 server host to test, e.g. https://<load-balancer-ip>:<port>",
+  "tablesample": <percentage of database rows to sample; optional, defaults to 10.0>,
+  "limit": <maximum number of requests per test case; optional, defaults to 300>,
+  "concurrency": <number of concurrent requests; optional, defaults to 10>
+}
+```
+
+The Lambda will return the following `payload` response schema:
+
+```json
+{
+  "result": "<success|failed; overall result of the regression suite>",
+  "message": "SAMHSA regression tests finished. See 'log_stream_name' and 'log_group_name' properties for CloudWatch Log output location",
+  "log_stream_name": "<log stream name>",
+  "log_group_name": "<log group name>"
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
