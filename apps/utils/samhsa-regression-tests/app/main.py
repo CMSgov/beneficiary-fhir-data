@@ -19,8 +19,6 @@ import asyncclick as click
 import psycopg
 import yaml
 from aiohttp import ClientSession, TCPConnector
-from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -696,6 +694,133 @@ async def gather_with_concurrency[T](n: int, *coros: Awaitable[T]) -> list[T]:
     return await asyncio.gather(*(sem_coro(c) for c in coros))
 
 
+async def run_samhsa_regression(
+    hostname: str,
+    security_labels: list[SecurityLabelModel],
+    db_details: DatabaseDetailsModel,
+    samhsa_cert: Path | None,
+    samhsa_cert_key: Path | None,
+    no_samhsa_cert: Path | None,
+    no_samhsa_cert_key: Path | None,
+    host_cert: Path | None,
+    tablesample: float,
+    limit: int,
+    concurrency: int,
+) -> bool:
+    """Run the SAMHSA filtering regression test; returns True when all checks pass."""
+    samhsa_benes = await query_samhsa_benes(
+        security_labels=security_labels, db_details=db_details, tablesample=tablesample, limit=limit
+    )
+
+    if LOGGING_LEVEL == "DEBUG":
+        for samhsa_bene in samhsa_benes:
+            logger.debug(
+                "Bene SK: %s, clms: %s, prior auth UTNs: %s",
+                samhsa_bene.bene_sk,
+                ",".join(samhsa_bene.samhsa_claim_ids),
+                ",".join(samhsa_bene.samhsa_prior_auth_utns),
+            )
+
+    # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
+    # a local test. If it is, we don't supply real certificate values or worry about loading
+    # certificates at all. We just provide the dummy certificates directly via the header. We use
+    # any() instead of a single "in" expression to allow for hostnames like "localhost:8080" and
+    # so-on
+    is_local = any(x in hostname for x in ["localhost", "127.0.0.1"])
+
+    # The hostname may already include a scheme (e.g. when supplied by an ECS deployment hook);
+    # otherwise default to https for remote hosts and http for local ones
+    if hostname.startswith(("http://", "https://")):
+        base_url = hostname
+    else:
+        base_url = f"{'http' if is_local else 'https'}://{hostname}"
+    full_eob_url = f"{base_url.rstrip('/')}/v3/fhir/ExplanationOfBenefit"
+
+    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    if not is_local:
+        if not samhsa_cert or not samhsa_cert_key or not no_samhsa_cert or not no_samhsa_cert_key:
+            raise RuntimeError("SAMHSA/non-SAMHSA certificates and keys MUST be provided")
+
+        samhsa_ssl_ctx.load_cert_chain(
+            certfile=samhsa_cert.absolute(),
+            keyfile=samhsa_cert_key.absolute(),
+        )
+        no_samhsa_ssl_ctx.load_cert_chain(
+            certfile=no_samhsa_cert.absolute(),
+            keyfile=no_samhsa_cert_key.absolute(),
+        )
+
+        if host_cert:
+            samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+            no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+        else:
+            samhsa_ssl_ctx.check_hostname = False
+            samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+            no_samhsa_ssl_ctx.check_hostname = False
+            no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+
+    async with (
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_allowed"} if is_local else None,
+        ) as samhsa_session,
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=no_samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
+        ) as no_samhsa_session,
+    ):
+        results = await gather_with_concurrency(
+            concurrency,
+            *(
+                verify_samhsa_filtering(
+                    url=full_eob_url,
+                    samhsa_session=samhsa_session,
+                    no_samhsa_session=no_samhsa_session,
+                    samhsa_bene=samhsa_bene,
+                )
+                for samhsa_bene in samhsa_benes
+            ),
+        )
+
+        all_samhsa_filtered = all(
+            res == VerifyFilteringResult.PASS
+            for res in results
+            if res != VerifyFilteringResult.EMPTY_RESPONSE
+        )
+
+        logger.info(
+            "Passing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.PASS]),
+        )
+        logger.info(
+            "Failing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.FAIL]),
+        )
+        logger.info(
+            "Empty responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
+        )
+        logger.log(
+            logging.INFO if all_samhsa_filtered else logging.ERROR,
+            "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
+            len(
+                [
+                    res
+                    for res in results
+                    if res
+                    in [
+                        VerifyFilteringResult.PASS,
+                        VerifyFilteringResult.FAIL,
+                    ]
+                ]
+            ),
+            "PASSED" if all_samhsa_filtered else "FAILED",
+        )
+
+        return all_samhsa_filtered
+
+
 @click.command()
 @click.option(
     "-h",
@@ -833,147 +958,19 @@ async def main(
         else DatabaseDetailsModel.from_env()
     )
 
-    samhsa_benes = await query_samhsa_benes(
-        security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
+    return await run_samhsa_regression(
+        hostname=hostname,
+        security_labels=samhsa_labels,
+        db_details=db_details,
+        samhsa_cert=samhsa_cert,
+        samhsa_cert_key=samhsa_cert_key,
+        no_samhsa_cert=no_samhsa_cert,
+        no_samhsa_cert_key=no_samhsa_cert_key,
+        host_cert=host_cert,
+        tablesample=tablesample,
+        limit=limit,
+        concurrency=concurrency,
     )
-
-    if LOGGING_LEVEL == "DEBUG":
-        for samhsa_bene in samhsa_benes:
-            logger.debug(
-                "Bene SK: %s, clms: %s, prior auth UTNs: %s",
-                samhsa_bene.bene_sk,
-                ",".join(samhsa_bene.samhsa_claim_ids),
-                ",".join(samhsa_bene.samhsa_prior_auth_utns),
-            )
-
-    # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
-    # a local test. If it is, we don't supply real certificate values or worry about loading
-    # certificates at all. We just provide the dummy certificates directly via the header. We use
-    # any() instead of a single "in" expression to allow for hostnames like "localhost:8080" and
-    # so-on
-    is_local = any(x in hostname for x in ["localhost", "127.0.0.1"])
-
-    base_url = f"https://{hostname}" if not is_local else f"http://{hostname}"
-    full_eob_url = f"{base_url.lstrip('/')}/v3/fhir/ExplanationOfBenefit"
-
-    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    if not is_local:
-        if not samhsa_cert or not samhsa_cert_key or not no_samhsa_cert or not no_samhsa_cert_key:
-            logger.error("SAMHSA/non-SAMHSA certificates and keys MUST be provided")
-            sys.exit(1)
-
-        samhsa_ssl_ctx.load_cert_chain(
-            certfile=samhsa_cert.absolute(),
-            keyfile=samhsa_cert_key.absolute(),
-        )
-        no_samhsa_ssl_ctx.load_cert_chain(
-            certfile=no_samhsa_cert.absolute(),
-            keyfile=no_samhsa_cert_key.absolute(),
-        )
-
-        if host_cert:
-            samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-            no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-        else:
-            samhsa_ssl_ctx.check_hostname = False
-            samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
-            no_samhsa_ssl_ctx.check_hostname = False
-            no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
-
-    async with (
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=samhsa_ssl_ctx) if not is_local else None,
-            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_allowed"} if is_local else None,
-        ) as samhsa_session,
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=no_samhsa_ssl_ctx) if not is_local else None,
-            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
-        ) as no_samhsa_session,
-    ):
-        results = await gather_with_concurrency(
-            concurrency,
-            *(
-                verify_samhsa_filtering(
-                    url=full_eob_url,
-                    samhsa_session=samhsa_session,
-                    no_samhsa_session=no_samhsa_session,
-                    samhsa_bene=samhsa_bene,
-                )
-                for samhsa_bene in samhsa_benes
-            ),
-        )
-
-        all_samhsa_filtered = all(
-            res == VerifyFilteringResult.PASS
-            for res in results
-            if res != VerifyFilteringResult.EMPTY_RESPONSE
-        )
-
-        logger.info(
-            "Passing responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.PASS]),
-        )
-        logger.info(
-            "Failing responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.FAIL]),
-        )
-        logger.info(
-            "Empty responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
-        )
-        logger.log(
-            logging.INFO if all_samhsa_filtered else logging.ERROR,
-            "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
-            len(
-                [
-                    res
-                    for res in results
-                    if res
-                    in [
-                        VerifyFilteringResult.PASS,
-                        VerifyFilteringResult.FAIL,
-                    ]
-                ]
-            ),
-            "PASSED" if all_samhsa_filtered else "FAILED",
-        )
-
-        return all_samhsa_filtered
-
-
-# TODO: Do this right, split the Lambda bits out
-def handler(event: dict[str, object], _: LambdaContext) -> dict[str, str]:
-    bfd_env = os.environ.get("BFD_ENVIRONMENT")
-    tmpdir = os.environ.get("TMPDIR", "/tmp")
-    non_samhsa_cert = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
-        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_cert", decrypt=True
-    )
-    non_samhsa_key = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
-        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_key", decrypt=True
-    )
-    samhsa_cert = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
-        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_samhsa_cert", decrypt=True
-    )
-    samhsa_key = parameters.get_parameter(  # pyright: ignore[reportUnknownMemberType]
-        f"/bfd/{bfd_env}/server-ng/sensitive/test_client_samhsa_key", decrypt=True
-    )
-    non_samhsa_path = Path(tmpdir).joinpath("non_samhsa.pem")
-    non_samhsa_path.write_text(f"{non_samhsa_cert}\n{non_samhsa_key}")
-    samhsa_path = Path(tmpdir).joinpath("samhsa.pem")
-    samhsa_path.write_text(f"{samhsa_cert}\n{samhsa_key}")
-
-    # TODO: Dirty hack around click, remove this:
-    os.environ.setdefault("NO_SAMHSA_CERT", str(non_samhsa_path.absolute()))
-    os.environ.setdefault("NO_SAMHSA_CERT_KEY", str(non_samhsa_path.absolute()))
-    os.environ.setdefault("SAMHSA_CERT", str(samhsa_path.absolute()))
-    os.environ.setdefault("SAMHSA_CERT_KEY", str(samhsa_path.absolute()))
-
-    # TODO: Handle security labels
-
-    result = anyio.run(main)
-
-    return {"hookStatus": "SUCCEEDED" if result else "FAILED"}
 
 
 if __name__ == "__main__":
