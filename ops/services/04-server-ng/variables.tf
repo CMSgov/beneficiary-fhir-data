@@ -40,6 +40,15 @@ variable "ephemeral_locust_hook_override" {
   nullable    = false
   type        = bool
 }
+
+variable "ephemeral_samhsa_hook_override" {
+  default     = false
+  description = "Enables the execution and creation of the samhsa-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments"
+  sensitive   = false
+  nullable    = false
+  type        = bool
+}
+
 variable "samhsa_regression_repository_override" {
   default     = null
   description = "Overrides the ECR repository for the 'samhsa-regression' container image. If not provided, the default will be used"

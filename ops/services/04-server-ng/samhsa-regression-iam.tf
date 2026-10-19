@@ -1,12 +1,16 @@
 data "aws_iam_policy_document" "samhsa_regression_logs" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${module.log_group_samhsa_regression.arn}:*"]
+    resources = [for arn in module.log_group_samhsa_regression[*].arn : "${arn}:*"]
   }
 }
 
 resource "aws_iam_policy" "samhsa_regression_logs" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   name = "${local.samhsa_regression_lambda_full_name}-logs-policy"
   path = local.iam_path
   description = join("", [
@@ -14,10 +18,12 @@ resource "aws_iam_policy" "samhsa_regression_logs" {
     "corresponding CloudWatch Log Group and Log Streams"
   ])
 
-  policy = data.aws_iam_policy_document.samhsa_regression_logs.json
+  policy = one(data.aws_iam_policy_document.samhsa_regression_logs[*].json)
 }
 
 data "aws_iam_policy_document" "samhsa_regression_ssm" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   statement {
     sid     = "AllowAccessToUsedParams"
     actions = ["ssm:GetParameter"]
@@ -36,6 +42,8 @@ data "aws_iam_policy_document" "samhsa_regression_ssm" {
 }
 
 resource "aws_iam_policy" "samhsa_regression_ssm" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   name = "${local.samhsa_regression_lambda_full_name}-ssm-policy"
   path = local.iam_path
   description = join("", [
@@ -43,10 +51,12 @@ resource "aws_iam_policy" "samhsa_regression_ssm" {
     "parameters it needs to run the SAMHSA regression suite"
   ])
 
-  policy = data.aws_iam_policy_document.samhsa_regression_ssm.json
+  policy = one(data.aws_iam_policy_document.samhsa_regression_ssm[*].json)
 }
 
 data "aws_iam_policy_document" "samhsa_regression_kms" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   statement {
     sid       = "AllowEncryptAndDecryptWithEnvCmk"
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
@@ -55,6 +65,8 @@ data "aws_iam_policy_document" "samhsa_regression_kms" {
 }
 
 resource "aws_iam_policy" "samhsa_regression_kms" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   name = "${local.samhsa_regression_lambda_full_name}-kms-policy"
   path = local.iam_path
   description = join("", [
@@ -62,7 +74,7 @@ resource "aws_iam_policy" "samhsa_regression_kms" {
     "${local.env_key_alias} key"
   ])
 
-  policy = data.aws_iam_policy_document.samhsa_regression_kms.json
+  policy = one(data.aws_iam_policy_document.samhsa_regression_kms[*].json)
 }
 
 data "aws_iam_policy" "lambda_vpc_access_role" {
@@ -70,6 +82,8 @@ data "aws_iam_policy" "lambda_vpc_access_role" {
 }
 
 resource "aws_iam_role" "samhsa_regression" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   name                  = "${local.samhsa_regression_lambda_full_name}-role"
   path                  = local.iam_path
   description           = "Role for the ${local.samhsa_regression_lambda_full_name} Lambda"
@@ -79,13 +93,13 @@ resource "aws_iam_role" "samhsa_regression" {
 }
 
 resource "aws_iam_role_policy_attachment" "samhsa_regression" {
-  for_each = {
-    logs       = aws_iam_policy.samhsa_regression_logs.arn
-    ssm        = aws_iam_policy.samhsa_regression_ssm.arn
-    kms        = aws_iam_policy.samhsa_regression_kms.arn
+  for_each = local.samhsa_hook_enabled ? {
+    logs       = one(aws_iam_policy.samhsa_regression_logs[*].arn)
+    ssm        = one(aws_iam_policy.samhsa_regression_ssm[*].arn)
+    kms        = one(aws_iam_policy.samhsa_regression_kms[*].arn)
     vpc_access = data.aws_iam_policy.lambda_vpc_access_role.arn
-  }
+  } : {}
 
-  role       = aws_iam_role.samhsa_regression.name
+  role       = one(aws_iam_role.samhsa_regression[*].name)
   policy_arn = each.value
 }

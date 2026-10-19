@@ -7,11 +7,15 @@ locals {
 }
 
 data "aws_ecr_image" "samhsa_regression" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   repository_name = local.samhsa_regression_repository_name
   image_tag       = local.samhsa_regression_version
 }
 
 resource "aws_security_group" "samhsa_regression" {
+  count = local.samhsa_hook_enabled ? 1 : 0
+
   description = "${local.samhsa_regression_lambda_full_name} Lambda security group in ${local.env}"
   name        = "${local.samhsa_regression_lambda_full_name}-sg"
   tags        = { Name = local.samhsa_regression_lambda_full_name }
@@ -26,10 +30,10 @@ resource "aws_security_group" "samhsa_regression" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "samhsa_regression_allow_db_access" {
-  for_each = toset(data.aws_security_groups.aurora_cluster.ids)
+  for_each = local.samhsa_hook_enabled ? toset(data.aws_security_groups.aurora_cluster.ids) : toset([])
 
   security_group_id            = each.value
-  referenced_security_group_id = aws_security_group.samhsa_regression.id
+  referenced_security_group_id = one(aws_security_group.samhsa_regression[*].id)
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "TCP"
@@ -37,7 +41,9 @@ resource "aws_vpc_security_group_ingress_rule" "samhsa_regression_allow_db_acces
 }
 
 module "log_group_samhsa_regression" {
-  source       = "../../terraform-modules/general/high-retention-log-group"
+  source = "../../terraform-modules/general/high-retention-log-group"
+  count  = local.samhsa_hook_enabled ? 1 : 0
+
   name         = "/aws/lambda/${local.samhsa_regression_lambda_full_name}"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
@@ -45,6 +51,7 @@ module "log_group_samhsa_regression" {
 
 resource "aws_lambda_function" "samhsa_regression" {
   depends_on = [aws_iam_role_policy_attachment.samhsa_regression]
+  count      = local.samhsa_hook_enabled ? 1 : 0
 
   function_name = local.samhsa_regression_lambda_full_name
   description   = "Lambda to run the SAMHSA filtering regression suite against the ${local.env} BFD server-ng service"
@@ -52,8 +59,8 @@ resource "aws_lambda_function" "samhsa_regression" {
 
   kms_key_arn = local.env_key_arn
 
-  image_uri        = data.aws_ecr_image.samhsa_regression.image_uri
-  source_code_hash = trimprefix(data.aws_ecr_image.samhsa_regression.id, "sha256:")
+  image_uri        = one(data.aws_ecr_image.samhsa_regression[*].image_uri)
+  source_code_hash = trimprefix(one(data.aws_ecr_image.samhsa_regression[*].id), "sha256:")
   architectures    = ["arm64"]
   package_type     = "Image"
 
@@ -68,10 +75,10 @@ resource "aws_lambda_function" "samhsa_regression" {
   }
 
   vpc_config {
-    security_group_ids = [aws_security_group.samhsa_regression.id]
+    security_group_ids = [one(aws_security_group.samhsa_regression[*].id)]
     subnet_ids         = local.app_subnets[*].id
   }
   replace_security_groups_on_destroy = true
 
-  role = aws_iam_role.samhsa_regression.arn
+  role = one(aws_iam_role.samhsa_regression[*].arn)
 }

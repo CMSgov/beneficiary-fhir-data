@@ -38,6 +38,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
 | <a name="input_ephemeral_locust_hook_override"></a> [ephemeral\_locust\_hook\_override](#input\_ephemeral\_locust\_hook\_override) | Enables the execution and creation of the locust-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments | `bool` | `false` | no |
+| <a name="input_ephemeral_samhsa_hook_override"></a> [ephemeral\_samhsa\_hook\_override](#input\_ephemeral\_samhsa\_hook\_override) | Enables the execution and creation of the samhsa-hook Lambda during ECS deployment. Applies _only_ to ephemeral environments, ignored in established environments | `bool` | `false` | no |
 | <a name="input_log_router_repository_override"></a> [log\_router\_repository\_override](#input\_log\_router\_repository\_override) | Overrides the ECR repository for the log\_router container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_log_router_version_override"></a> [log\_router\_version\_override](#input\_log\_router\_version\_override) | Overrides the version for log\_router container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
@@ -62,6 +63,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | <a name="module_log_group_locust_hook"></a> [log\_group\_locust\_hook](#module\_log\_group\_locust\_hook) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_log_router_messages"></a> [log\_group\_log\_router\_messages](#module\_log\_group\_log\_router\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_s3logs"></a> [log\_group\_s3logs](#module\_log\_group\_s3logs) | ../../terraform-modules/general/high-retention-log-group | n/a |
+| <a name="module_log_group_samhsa_hook"></a> [log\_group\_samhsa\_hook](#module\_log\_group\_samhsa\_hook) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_samhsa_regression"></a> [log\_group\_samhsa\_regression](#module\_log\_group\_samhsa\_regression) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_server_healthchecks"></a> [log\_group\_server\_healthchecks](#module\_log\_group\_server\_healthchecks) | ../../terraform-modules/general/high-retention-log-group | n/a |
 | <a name="module_log_group_server_messages"></a> [log\_group\_server\_messages](#module\_log\_group\_server\_messages) | ../../terraform-modules/general/high-retention-log-group | n/a |
@@ -130,8 +132,10 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_iam_role_policy_attachment.service_role](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_kinesis_firehose_delivery_stream.s3logs](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/kinesis_firehose_delivery_stream) | resource |
 | [aws_lambda_function.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
+| [aws_lambda_function.samhsa_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.samhsa_regression](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function) | resource |
 | [aws_lambda_function_event_invoke_config.locust_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function_event_invoke_config) | resource |
+| [aws_lambda_function_event_invoke_config.samhsa_hook](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lambda_function_event_invoke_config) | resource |
 | [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb) | resource |
 | [aws_lb_listener.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_listener) | resource |
 | [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/lb_target_group) | resource |
@@ -145,6 +149,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_vpc_security_group_ingress_rule.server_allow_db_access](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.server_allow_tls_nlb](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [archive_file.locust_hook_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
+| [archive_file.samhsa_hook_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_acmpca_certificate_authority.pace](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/acmpca_certificate_authority) | data source |
 | [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_ecr_image.log_router](https://registry.terraform.io/providers/hashicorp/aws/6.52.0/docs/data-sources/ecr_image) | data source |
