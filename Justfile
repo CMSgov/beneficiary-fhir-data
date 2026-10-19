@@ -275,6 +275,19 @@ generate-bene-sample bene-sk source-directory="" output-directory="":
         {{ if source-directory != "" { f"--source-directory {{ source-directory }}" } else { "" } }} \
         {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
 
+[arg("bene-sk", long, help="Bene key to generate sample with")]
+[arg("parts", long, help="Parts request comma delimited without spaces.")]
+[arg("source-directory", long, help="Directory to find bene CSV inputs")]
+[arg("output-directory", long, help="Directory to save the output")]
+[doc("Generates sample coverage data to feed into the FHIR transform scripts")]
+[group('model')]
+generate-coverage-sample bene-sk parts source-directory="" output-directory="":
+    cd apps/bfd-model-idr && uv run generate-coverage-sample \
+        --bene-sk "{{ bene-sk }}" \
+        --parts "{{parts}}" \
+        {{ if source-directory != "" { f"--source-directory {{ source-directory }}" } else { "" } }} \
+        {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
+
 [arg("paths", help="""
 Paths to CSVs or directories including CSVs that will be regenerated/updated with new
         columns. Updates are idempotent, meaning that passing in an existing table/CSV without

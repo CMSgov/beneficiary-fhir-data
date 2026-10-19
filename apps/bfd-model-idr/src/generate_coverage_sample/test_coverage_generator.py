@@ -5,6 +5,9 @@ from click.testing import CliRunner
 
 from generate_coverage_sample import main
 
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SOURCE_DIR_SAMPLES1 = str(PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples1")
+
 
 def test_generate_coverage_part_a() -> None:
     result = CliRunner().invoke(
@@ -13,7 +16,7 @@ def test_generate_coverage_part_a() -> None:
             "--bene-sk",
             "632187879",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
             "../../out-test",
             "--parts",
@@ -40,7 +43,7 @@ def test_generate_coverage_part_b() -> None:
             "--bene-sk",
             "800678894",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
             "../../out-test",
             "--parts",
@@ -67,7 +70,7 @@ def test_generate_coverage_part_c() -> None:
             "--bene-sk",
             "441149422",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
             "../../out-test",
             "--parts",
@@ -94,7 +97,7 @@ def test_generate_coverage_part_d() -> None:
             "--bene-sk",
             "547437476",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
             "../../out-test",
             "--parts",
@@ -121,7 +124,7 @@ def test_generate_coverage_part_dual() -> None:
             "--bene-sk",
             "800678894",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
             "../../out-test",
             "--parts",
