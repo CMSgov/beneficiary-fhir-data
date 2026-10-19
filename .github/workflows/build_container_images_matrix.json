@@ -102,6 +102,9 @@
     "name": "bfd-platform-samhsa-regression",
     "dockerfile": "apps/utils/samhsa-regression-tests/Dockerfile",
     "contextDir": "apps/utils/samhsa-regression-tests",
+    "namedContexts": {
+      "server-ng-resources": "apps/bfd-server-ng/src/main/resources"
+    },
     "platform": "linux/arm64"
   }
 ]
