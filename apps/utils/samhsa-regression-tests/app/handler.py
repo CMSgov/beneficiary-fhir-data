@@ -51,10 +51,10 @@ class ResultModel(BaseModel):
 
 def _get_db_details() -> DatabaseDetailsModel:
     username = get_parameter(
-        f"/bfd/{BFD_ENVIRONMENT}/samhsa-regression/sensitive/db/username", decrypt=True
+        f"/bfd/{BFD_ENVIRONMENT}/server-ng/sensitive/db/username", decrypt=True
     )
     password = get_parameter(
-        f"/bfd/{BFD_ENVIRONMENT}/samhsa-regression/sensitive/db/password", decrypt=True
+        f"/bfd/{BFD_ENVIRONMENT}/server-ng/sensitive/db/password", decrypt=True
     )
 
     return DatabaseDetailsModel(host=READER_ENDPOINT, user=username, password=password)

@@ -61,8 +61,8 @@ The image's entry point is `app.handler.handler`, which is invoked synchronously
 - Environment variables `BFD_ENVIRONMENT` and `READER_ENDPOINT`
 - An invoke payload with a `host` (the V3 server under test), plus optional `tablesample`,
   `limit`, and `concurrency` overrides
-- SSM parameters `/bfd/{env}/samhsa-regression/sensitive/db/username|password` for database
-  access and `/bfd/{env}/server-ng/sensitive/test_client*` for the test certificates
+- SSM parameters `/bfd/{env}/server-ng/sensitive/db/username|password` for database access and
+  `/bfd/{env}/server-ng/sensitive/test_client*` for the test certificates
 
 It returns a result model (`result`, `message`, `log_stream_name`, `log_group_name`) that the
 wrapper converts into an ECS `hookStatus`.

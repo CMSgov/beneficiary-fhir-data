@@ -23,8 +23,8 @@ data "aws_iam_policy_document" "samhsa_regression_ssm" {
     actions = ["ssm:GetParameter"]
     resources = [
       for param in [
-        "samhsa-regression/sensitive/db/username",
-        "samhsa-regression/sensitive/db/password",
+        "server-ng/sensitive/db/username",
+        "server-ng/sensitive/db/password",
         "server-ng/sensitive/test_client_cert",
         "server-ng/sensitive/test_client_key",
         "server-ng/sensitive/test_client_samhsa_cert",
