@@ -54,9 +54,7 @@ class SnowflakeExecutor:
         # Run export from snowflake
         cursor = self.conn.cursor()
 
-        db_schema = ".".join(
-            (SETTINGS.idr_database, SETTINGS.idr_schema_by_table(str(file_name)))
-        )
+        db_schema = ".".join((SETTINGS.idr_database, SETTINGS.idr_schema_by_table(str(file_name))))
         # Create Stage
         cursor.execute(f"CREATE OR REPLACE TEMPORARY STAGE {db_schema}.tmp_export_stage")
         # GetData
@@ -79,8 +77,8 @@ class SnowflakeExecutor:
             OVERWRITE = TRUE
             MAX_FILE_SIZE = 1073741824;
         """.replace("{DB_SCHEMA}", db_schema)
-        .replace("{FILE_NAME}", file_name)
-        .replace("{QUERY}", sql)
+            .replace("{FILE_NAME}", file_name)
+            .replace("{QUERY}", sql)
         )
 
         try:
