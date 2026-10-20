@@ -54,7 +54,7 @@ def register_custom_args(parser: LocustArgumentParser) -> None:
     parser.add_argument(
         "--table-sample-percent",
         type=float,
-        help="<% of table to sample> (Optional, Default: 0.25)",
+        help="<percent of table to sample> (Optional, Default: 0.25)",
         dest="table_sample_percent",
         env_var="LOCUST_DATA_TABLE_SAMPLE_PERCENT",
         default=0.25,
