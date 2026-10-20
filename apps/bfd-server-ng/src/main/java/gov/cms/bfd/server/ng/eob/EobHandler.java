@@ -18,8 +18,6 @@ import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSecurityStatus;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.ProfileSelection;
 import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
@@ -65,16 +63,7 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
-    var eobs =
-        searchByIdsInner(
-            new ClaimIdSearchCriteria(
-                List.of(fhirId),
-                new DateTimeRange(),
-                new DateTimeRange(),
-                Collections.emptyList(),
-                Collections.emptyList(),
-                new ProfileSelection()),
-            options);
+    var eobs = searchByIdsInner(new ClaimIdSearchCriteria(List.of(fhirId)), options);
     return eobs.stream().findFirst();
   }
 

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
 
-  /** Creates an empty {@link ProfileSelection}. */
+  /** Creates an empty ProfileSelection, until populated later. */
   public ProfileSelection() {
     this(Map.of());
   }
@@ -24,15 +24,23 @@ public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
    * @return boolean
    */
   public boolean isRequested(EobProfileCategory category, ClaimProfile profile) {
+    if (profiles.isEmpty()) {
+      return profile == ClaimProfile.CMS;
+    }
     return profiles.get(category) == profile;
   }
 
   /**
-   * Returns whether any profiles were provided.
+   * Gets the profile to use as a metric tag.
    *
-   * @return boolean
+   * @return CMS by default, MIXED if more than one, otherwise the profile name
    */
-  public boolean hasProfiles() {
-    return !profiles.isEmpty();
+  public String getProfileCategory() {
+    var requested = profiles.values().stream().distinct().toList();
+    return switch (requested.size()) {
+      case 0 -> ClaimProfile.CMS.name();
+      case 1 -> requested.getFirst().name();
+      default -> "MIXED";
+    };
   }
 }

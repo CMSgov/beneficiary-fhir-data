@@ -115,11 +115,11 @@ public record ClaimSearchCriteria(
   }
 
   /**
-   * Returns whether a _profile has been provided.
+   * Returns the _profile category from the query.
    *
    * @return boolean
    */
-  public boolean hasProfiles() {
-    return profile().hasProfiles();
+  public String getProfileCategory() {
+    return profile().getProfileCategory();
   }
 }

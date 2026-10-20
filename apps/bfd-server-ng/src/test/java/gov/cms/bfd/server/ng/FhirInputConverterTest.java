@@ -232,7 +232,7 @@ class FhirInputConverterTest extends IntegrationTestBase {
             Map.of(PHARMACY, ClaimProfile.BASIS)),
         Arguments.of(
             "versioned",
-            profileParam(ClaimProfile.BASIS.toFhirProfile(PHARMACY)),
+            profileParam(ClaimProfile.BASIS.getVersionedCanonicalUrl(PHARMACY)),
             Map.of(PHARMACY, ClaimProfile.BASIS)),
         Arguments.of(
             "multiple",
@@ -244,7 +244,7 @@ class FhirInputConverterTest extends IntegrationTestBase {
             "duplicate",
             profileParam(
                 ClaimProfile.BASIS.getCanonicalUrl(PHARMACY),
-                ClaimProfile.BASIS.toFhirProfile(PHARMACY)),
+                ClaimProfile.BASIS.getVersionedCanonicalUrl(PHARMACY)),
             Map.of(PHARMACY, ClaimProfile.BASIS)),
         Arguments.of(
             "whitespace",

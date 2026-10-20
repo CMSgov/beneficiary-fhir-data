@@ -346,8 +346,12 @@ public class IntegrationTestBase {
     return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
   }
 
-  protected static ICriterion<?> profiles(List<String> urls) {
+  protected static ICriterion<?> profiles(String... urls) {
     return new UriClientParam(Constants.PARAM_PROFILE).matches().values(urls);
+  }
+
+  protected static ICriterion<?> profiles(List<String> urls) {
+    return profiles(urls.toArray(String[]::new));
   }
 
   public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {

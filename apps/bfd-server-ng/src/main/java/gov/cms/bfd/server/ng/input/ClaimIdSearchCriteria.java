@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import jakarta.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -22,6 +23,21 @@ public record ClaimIdSearchCriteria(
     @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
     @NotNull List<List<MetaSourceSk>> sources,
     @NotNull ProfileSelection profile) {
+
+  /**
+   * Default constructor for tests.
+   *
+   * @param claimUniqueIds the list of ids to for testing
+   */
+  public ClaimIdSearchCriteria(List<Long> claimUniqueIds) {
+    this(
+        claimUniqueIds,
+        new DateTimeRange(),
+        new DateTimeRange(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        new ProfileSelection());
+  }
 
   /**
    * Returns whether a service date filter has been provided.
@@ -60,11 +76,11 @@ public record ClaimIdSearchCriteria(
   }
 
   /**
-   * Returns whether a _profile has been provided.
+   * Returns the _profile category from the query.
    *
    * @return boolean
    */
-  public boolean hasProfiles() {
-    return profile().hasProfiles();
+  public String getProfileCategory() {
+    return profile().getProfileCategory();
   }
 }

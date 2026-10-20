@@ -172,7 +172,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
-          @MeterTag(key = "hasProfiles", expression = "hasProfiles()")
+          @MeterTag(key = "profileCategory", expression = "getProfileCategory()")
           ClaimIdSearchCriteria criteria) {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
       return Collections.emptyList();
@@ -199,10 +199,8 @@ public class ClaimRepository {
 
     CompletableFuture.allOf(claimFutures.toArray(new CompletableFuture[0])).join();
 
-    var allClaims = new ArrayList<ClaimBase>();
-    claimFutures.forEach(f -> allClaims.addAll(f.join()));
-
-    return allClaims;
+    Stream<ClaimBase> allClaims = claimFutures.stream().flatMap(f -> f.join().stream());
+    return allClaims.toList();
   }
 
   /**
@@ -220,6 +218,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
+          @MeterTag(key = "profileCategory", expression = "getProfileCategory()")
           ClaimSearchCriteria criteria,
       String mbi) {
 

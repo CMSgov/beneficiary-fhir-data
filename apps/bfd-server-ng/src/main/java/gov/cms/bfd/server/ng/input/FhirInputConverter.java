@@ -603,10 +603,12 @@ public class FhirInputConverter {
     }
 
     var value = Strings.nullToEmpty(uri.getValue()).trim();
+
+    // Look for the category (unversioned) or profile (versioned) that matches the uri from the
+    // query param.
     for (var category : EobProfileCategory.values()) {
       for (var profile : ClaimProfile.values()) {
-        if (value.equals(profile.getCanonicalUrl(category))
-            || value.equals(profile.toFhirProfile(category))) {
+        if (profile.getAllowedUris(category).contains(value)) {
           return Map.entry(category, profile);
         }
       }

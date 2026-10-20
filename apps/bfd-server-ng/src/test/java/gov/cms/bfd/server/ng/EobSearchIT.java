@@ -263,19 +263,19 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                                  select max(bfd_claim_updated_ts)
-                                  from (
-                                      select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
-                                      union all
-                                      select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
-                                      union all
-                                      select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
-                                      union all
-                                      select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
-                                      union all
-                                      select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
-                                  ) all_claims
-                                  """)
+                select max(bfd_claim_updated_ts)
+                from (
+                    select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                ) all_claims
+                """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
                 .getSingleResult();
     ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
@@ -315,10 +315,10 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createQuery(
                     """
-                                SELECT billablePeriod.claimThroughDate
-                                FROM ClaimInstitutionalCmsNch c
-                                WHERE c.claimUniqueId = :id
-                                """,
+                        SELECT billablePeriod.claimThroughDate
+                        FROM ClaimInstitutionalCmsNch c
+                        WHERE c.claimUniqueId = :id
+                        """,
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
@@ -921,10 +921,9 @@ class EobSearchIT extends IntegrationTestBase {
         searchByPatient()
             .and(
                 profiles(
-                    List.of(
-                        ClaimProfile.CMS.getCanonicalUrl(PHARMACY),
-                        ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL),
-                        ClaimProfile.REGULAR.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))))
+                    ClaimProfile.CMS.getCanonicalUrl(PHARMACY),
+                    ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL),
+                    ClaimProfile.REGULAR.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(5, eobBundle.getEntry().size());
@@ -959,14 +958,14 @@ class EobSearchIT extends IntegrationTestBase {
     var inpatientBundle =
         searchByPatient()
             .and(outpatientType)
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL))))
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(INPATIENT_INSTITUTIONAL)))
             .execute();
     assertEquals(0, inpatientBundle.getEntry().size());
 
     var outpatientBundle =
         searchByPatient()
             .and(outpatientType)
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))))
+            .and(profiles((ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))))
             .execute();
     assertEquals(3, outpatientBundle.getEntry().size());
   }
@@ -980,7 +979,7 @@ class EobSearchIT extends IntegrationTestBase {
                 new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
                     .exactly()
                     .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX))
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))))
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
@@ -991,7 +990,7 @@ class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByPatientInvalidProfileBadRequest() {
-    var query = searchByPatient().and(profiles(List.of("BOGUS")));
+    var query = searchByPatient().and(profiles("BOGUS"));
     assertThrows(InvalidRequestException.class, query::execute);
   }
 
@@ -1003,7 +1002,7 @@ class EobSearchIT extends IntegrationTestBase {
                 new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
                     .exactly()
                     .identifier(CLAIM_ID_RX))
-            .and(profiles(List.of("BOGUS")));
+            .and(profiles("NOT REAL HOORAH"));
     assertThrows(InvalidRequestException.class, query::execute);
   }
 
@@ -1011,8 +1010,8 @@ class EobSearchIT extends IntegrationTestBase {
   void eobSearchByPatientRepeatedProfileBadRequest() {
     var query =
         searchByPatient()
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))))
-            .and(profiles(List.of(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL))));
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)))
+            .and(profiles(ClaimProfile.BASIS.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)));
     assertThrows(InvalidRequestException.class, query::execute);
   }
 

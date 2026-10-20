@@ -24,7 +24,7 @@ public class Meta {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode
         .getProfileCategory()
-        .map(claimProfile::toFhirProfiles)
+        .map(claimProfile::getMetaProfiles)
         .ifPresent(profiles -> profiles.forEach(meta::addProfile));
     meta.addTag(metaSourceSk.toFhirSystemType());
     finalAction.toFhirFinalAction().ifPresent(meta::addTag);
