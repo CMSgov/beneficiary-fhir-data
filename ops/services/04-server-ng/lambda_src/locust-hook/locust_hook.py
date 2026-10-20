@@ -102,7 +102,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> dict[str, str]:  #
         compare_tag = (
             f"{BFD_ENVIRONMENT}_release"
             if BFD_ENVIRONMENT in ["test", "prod", "sandbox"]
-            else BFD_ENVIRONMENT
+            else BFD_ENVIRONMENT.lower().replace("-", "_")
         )
         deployment_id = deployment_event.resource_arn.split("/")[-1].lower().replace("-", "_")
         response = lambda_client.invoke(
