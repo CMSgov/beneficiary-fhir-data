@@ -74,7 +74,7 @@ class PostgresLoader:
             # increase the pool timeout or some partitions will fail to load. It does not seem to
             # matter whether we use a pool or not, either
             # TODO: Investigate pool timeout further so that this can be removed
-            timeout=600,
+            timeout=SETTINGS.postgres_connection_timeout,
         ) as pool:
             await pool.wait()
             loader_cls = FullSyncBatchLoader if model.should_delete_missing() else BatchLoader
