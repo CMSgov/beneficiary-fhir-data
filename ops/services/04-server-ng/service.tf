@@ -355,7 +355,7 @@ resource "aws_ecs_service" "server" {
     bake_time_in_minutes = 0
 
     dynamic "lifecycle_hook" {
-      for_each = local.locust_hook_enabled ? set([1]) : set()
+      for_each = local.locust_hook_enabled ? toset([1]) : toset([])
 
       content {
         hook_target_arn  = one(aws_lambda_function.locust_hook[*].arn)
@@ -365,7 +365,7 @@ resource "aws_ecs_service" "server" {
     }
 
     dynamic "lifecycle_hook" {
-      for_each = local.samhsa_hook_enabled ? set([1]) : set()
+      for_each = local.samhsa_hook_enabled ? toset([1]) : toset([])
 
       content {
         hook_target_arn  = one(aws_lambda_function.samhsa_hook[*].arn)
