@@ -2,7 +2,7 @@ import logging
 import random
 import sys
 from collections import defaultdict
-from enum import StrEnum, auto
+from enum import StrEnum
 from pathlib import Path
 
 import click
@@ -20,6 +20,7 @@ from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
 from claims_util import four_part_key, match_line_num
+from constants import GeneratePacDataMode
 from generator_util import (
     GeneratorUtil,
     adapters_to_dicts,
@@ -42,16 +43,11 @@ from load_synthetic_output import (
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
+from shared_options import common_options
 
 logger = logging.getLogger(__name__)
 
 _BATCH_SIZE = 50_000
-
-
-class GeneratePacDataMode(StrEnum):
-    NO = auto()
-    IF_NONE = auto()
-    ALWAYS = auto()
 
 
 class _ClaimsFile(StrEnum):
@@ -724,84 +720,24 @@ class _ClaimsFile(StrEnum):
 
 
 @click.command
-@click.option(
-    "--min-claims",
-    envvar="MIN_CLAIMS",
-    type=int,
-    default=5,
-    show_default=True,
-    help="Minimum number of claims to generate per person",
-)
-@click.option(
-    "--max-claims",
-    envvar="MAX_CLAIMS",
-    type=int,
-    default=5,
-    show_default=True,
-    help="Maximum number of claims to generate per person",
-)
-@click.option(
-    "--enable-samhsa/--disable-samhsa",
-    envvar="ENABLE_SAMHSA",
-    type=bool,
-    default=True,
-    show_default=True,
-    help="Enables generation of SAMHSA-related data",
-)
-@click.option(
-    "--pac-gen",
-    envvar="PAC_GEN",
-    type=click.Choice(GeneratePacDataMode, case_sensitive=False),
-    default=GeneratePacDataMode.IF_NONE,
-    show_default=True,
-    help=(
-        "Generate new partially-adjudicated claims data based on choice. 'no' will never generate "
-        "pac data, 'if_none' will generate if the input claims data has no pac CLMs, and "
-        "'always' will force the generation always"
-    ),
-)
-@click.option(
-    "--bene-sk-mode",
-    envvar="BENE_SK_MODE",
-    type=click.Choice(BeneSkMode, case_sensitive=False),
-    default=BeneSkMode.BOTH,
-    show_default=True,
-    help=(
-        "Sets the mode for which input files from which distinct BENE_SKs are read. 'bene_hstry' "
-        f"indicates that BENE_SKs are only loaded from {f.BENE_HSTRY}, 'clm' indicates loading "
-        f"only from {f.CLM}. 'both' indicates loading from both"
-    ),
-)
-@click.option(
-    "--truncate",
-    type=bool,
-    default=False,
-    show_default=True,
-    help="Truncate tables before reloading. Default is false",
-)
-@click.option(
-    "--batch_size",
-    type=int,
-    default=_BATCH_SIZE,
-    show_default=True,
-    help="Batch size of claims to process",
-)
+@common_options
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def generate_locally(
     min_claims: int,
     max_claims: int,
-    enable_samhsa: bool,
+    samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    **kwargs,
 ):
     generate(
         min_claims,
         max_claims,
-        enable_samhsa,
+        samhsa,
         pac_gen,
         bene_sk_mode,
         paths,
@@ -814,7 +750,7 @@ def generate_locally(
 def generate(
     min_claims: int,
     max_claims: int,
-    enable_samhsa: bool,
+    samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...] | None = None,
@@ -929,7 +865,7 @@ def generate(
         adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer, ALL_KEYS
     )
 
-    adj_util = AdjudicatedGeneratorUtil(enable_samhsa=enable_samhsa)
+    adj_util = AdjudicatedGeneratorUtil(enable_samhsa=samhsa)
     pac_util = PacGeneratorUtil()
     claim_child_tables = [
         table
@@ -979,9 +915,7 @@ def generate(
                 continue
             gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
 
-    message = "Done generating synthetic claims/prior auth data for provided BENE_SKs"
-    print(message)
-    logger.info(message)
+    logger.info("Done generating synthetic claims/prior auth data for provided BENE_SKs")
 
 
 def _generate_batch(

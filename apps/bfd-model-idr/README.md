@@ -189,15 +189,15 @@ Here are the list of commands in case they need to be re-ran in the future for b
 (CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
 
 ```text
-GRANT MODIFY ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
-GRANT USAGE ON DATABASE BFD_<your_environment> TO ROLE TEST_SERVICE_USER;
-GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
-GRANT USAGE ON SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
-GRANT CREATE STAGE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
-GRANT CREATE PROCEDURE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
-GRANT CREATE EVENT TABLE ON SCHEMA BFD_<your_environment>.cms_vdm_view_mdcr_prd TO ROLE TEST_SERVICE_USER;
-GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_VDM_VIEW_MDCR_PRD TO ROLE TEST_SERVICE_USER;
-GRANT TRUNCATE ON ALL TABLES IN SCHEMA BFD_<your_environment>.CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE TEST_SERVICE_USER;
+GRANT MODIFY ON DATABASE BFD_{ENV} TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON DATABASE BFD_{ENV} TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON SCHEMA CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE STAGE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE PROCEDURE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE EVENT TABLE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE {ENV}_SERVICE_USER;
 ```
 
 Running the stored procedure:
@@ -207,7 +207,7 @@ First, specify kn or kp depending on the environment that you're targeting
 To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --truncate`
 To regenerate data: `just deploy_generator_sproc --env test`
 
-To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
+To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
 ```
 
 ## Testing Mapping Changes

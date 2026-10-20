@@ -31,7 +31,7 @@ def generate_synthetic_data(
     claims: bool = True,
     min_claims: int = 5,
     max_claims: int = 5,
-    enable_samhsa: bool = True,
+    samhsa: bool = True,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
@@ -57,7 +57,7 @@ def generate_synthetic_data(
         generate(
             min_claims=min_claims,
             max_claims=max_claims,
-            enable_samhsa=enable_samhsa,
+            samhsa=samhsa,
             pac_gen=GeneratePacDataMode[pac_gen],
             bene_sk_mode=BeneSkMode[bene_sk_mode],
             writer=writer,

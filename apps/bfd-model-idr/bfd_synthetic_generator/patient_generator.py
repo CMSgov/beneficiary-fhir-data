@@ -4,7 +4,9 @@ import logging
 import random
 import subprocess
 import sys
+from pathlib import Path
 
+import click
 import tqdm
 from constants import (
     BENE_DUAL,
@@ -32,73 +34,13 @@ from generator_util import (
 from id_generators import IdGenerator, RandomIdGenerator, SequentialIdGenerator, load_id_state
 from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
 from row_adapter import RowAdapter
+from shared_options import common_options
 
 logger = logging.getLogger(__name__)
 
 fake = Faker()
 
 _BATCH_SIZE = 50_000
-
-# Command line argument parsing
-parser = argparse.ArgumentParser(description="Generate synthetic patient data")
-parser.add_argument(
-    "paths",
-    nargs="*",
-    help=(
-        "Paths to CSVs or directories including CSVs that will be regenerated/updated with new "
-        "columns. Updates are idempotent, meaning that passing in an existing table/CSV without "
-        "any new columns being added to the synthetic data generation will result in a "
-        "byte-identical output file. Take care to avoid providing a partial set of tables with "
-        "foreign key constraints (e.g. BENE_SK) without providing the root table as this could "
-        "result in broken output data"
-    ),
-)
-parser.add_argument(
-    "--patients",
-    default=0,
-    type=int,
-    help=(
-        "Number of NEW patients to generate. Does not affect patients regenerated when "
-        f"{BENE_HSTRY} is provided"
-    ),
-)
-parser.add_argument(
-    "--claims",
-    action="store_true",
-    help="Automatically generate claims after patient generation using the generated "
-    "SYNTHETIC_BENE_HSTRY",
-)
-parser.add_argument(
-    "--exclude-empty",
-    action=argparse.BooleanOptionalAction,
-    help=(
-        "Treat empty column values as non-existent and allow the generator to generate new values"
-    ),
-)
-parser.add_argument(
-    "--force-ztm-static-rows",
-    action=argparse.BooleanOptionalAction,
-    help=(
-        'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from '
-        "a file to be generated. This will introduce new rows for patients that previously had "
-        "none. Useful if not all tables for a patient have been generated yet."
-    ),
-    dest="force_ztm",
-)
-parser.add_argument(
-    "--truncate",
-    action="store_true",
-    default=False,
-    help="Truncate tables before reloading. Default is false",
-)
-parser.add_argument(
-    "--batch-size",
-    type=int,
-    default=_BATCH_SIZE,
-    dest="batch_size",
-    help="Batch size of BENE_SKs to process",
-)
-args = parser.parse_args()
 
 
 available_given_names = [
@@ -209,6 +151,8 @@ def load_inputs(
     force_ztm: bool,
     batch_size: int,
     truncate: bool,
+    paths: tuple[Path, ...] = (),
+    exclude_empty: bool = False,
     writer: OutputDestinationWriter | None = None,
 ):
     if writer is None:
@@ -217,10 +161,12 @@ def load_inputs(
     if isinstance(writer, SnowflakeWriter):
         _handle_snowflake_flow(writer, patients, force_ztm, batch_size, truncate)
     else:
-        _handle_csv_flow(writer)
+        _handle_csv_flow(writer, paths, patients, force_ztm, exclude_empty)
 
 
-def _handle_csv_flow(writer: CsvWriter):
+def _handle_csv_flow(
+    writer: CsvWriter, paths: tuple[Path, ...], patients: int, force_ztm: bool, exclude_empty: bool
+):
     generator: GeneratorUtil = GeneratorUtil(id_gen=RandomIdGenerator())
 
     csv_tables = [
@@ -240,7 +186,7 @@ def _handle_csv_flow(writer: CsvWriter):
     ]
 
     files: dict[str, list[RowAdapter]] = {table: [] for table in csv_tables}
-    load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
+    load_file_dict(files=files, paths=paths, exclude_empty=exclude_empty)
 
     generator.gen_contract_plan(
         amount=10,
@@ -252,7 +198,7 @@ def _handle_csv_flow(writer: CsvWriter):
         regenerate_static_tables(generator, files)
 
     num_existing = len(files[BENE_HSTRY])
-    num_new = int(args.patients)
+    num_new = int(patients)
     if num_existing == 0 and num_new == 0:
         print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
         sys.exit(1)
@@ -269,7 +215,7 @@ def _handle_csv_flow(writer: CsvWriter):
     patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
-    _generate_patients_batch(generator, patients, patient_mbi_id_rows, args.force_ztm)
+    _generate_patients_batch(generator, patients, patient_mbi_id_rows, force_ztm)
     generator.save_output_files(writer)
 
 
@@ -479,27 +425,50 @@ def _generate_contracts(
     )
 
 
-if __name__ == "__main__":
+@click.command(help="Generate synthetic patient data")
+@common_options
+@click.option(
+    "--exclude-empty/--no-exclude-empty",
+    default=True,
+    show_default=True,
+    help="Treat empty column values as non-existent and allow the generator to generate new values",
+)
+@click.argument("paths", nargs=-1, type=click.Path(exists=True))
+def main(
+    patients: int,
+    claims: bool,
+    exclude_empty: bool,
+    force_ztm: bool,
+    truncate: bool,
+    batch_size: int,
+    paths: tuple[Path, ...],
+    **kwargs,
+) -> None:
     load_inputs(
-        patients=args.patients,
-        force_ztm=args.force_ztm,
-        batch_size=args.batch_size,
-        truncate=args.truncate,
+        patients=patients,
+        force_ztm=force_ztm,
+        batch_size=batch_size,
+        truncate=truncate,
+        paths=paths,
+        exclude_empty=exclude_empty,
+        writer=None,
     )
 
-    # If --claims flag is provided, automatically call claims_generator.py
-    if args.claims:
+    if claims:
         print("Generating claims for generated benes")
         try:
+            current_script_dir = Path(__file__).resolve().parent
+            claims_generator_path = current_script_dir / "claims_generator.py"
+
             # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY and SYNTHETIC_CNTRCT_PBP_NUM
             claims_args = [
                 sys.executable,
-                "claims_generator.py",
-                f"../out/{BENE_HSTRY}.csv",
-                f"../out/{CNTRCT_PBP_NUM}.csv",
+                str(claims_generator_path),  # Pass the absolute path string
+                f"out/{BENE_HSTRY}.csv",
+                f"out/{CNTRCT_PBP_NUM}.csv",
             ]
 
-            result = subprocess.run(
+            subprocess.run(
                 args=claims_args,
                 check=True,
                 stdout=sys.stdout,
@@ -513,3 +482,7 @@ if __name__ == "__main__":
                 print("Error output:")
                 print(e.stderr)
             sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
