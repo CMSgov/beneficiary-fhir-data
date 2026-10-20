@@ -64,9 +64,7 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
-    message = f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}..."
-    print(message)
-    logger.info(message)
+    logger.info(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
 
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
@@ -141,9 +139,7 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
         )
 
-    message = "Finished regenerating/updating all files"
-    print(message)
-    logger.info(message)
+    logger.info("Finished regenerating/updating all files")
 
 
 def load_inputs(
@@ -208,9 +204,7 @@ def _handle_csv_flow(
         log_messages.append(f"regenerating {num_existing} existing patients")
     if num_new > 0:
         log_messages.append(f"generating {num_new} new patients")
-    message = f"{', and '.join(log_messages)}...".capitalize()
-    print(message)
-    logger.info(message)
+    logger.info(f"{', and '.join(log_messages)}...".capitalize())
 
     patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
@@ -397,9 +391,7 @@ def _generate_patients_batch(
 
         generator.bene_hstry_table.append(patient.kv)
 
-    message = f"Done generating {len(patients)} patients"
-    print(message)
-    logger.info(message)
+    logger.info(f"Done generating {len(patients)} patients")
 
 
 def _generate_contracts(

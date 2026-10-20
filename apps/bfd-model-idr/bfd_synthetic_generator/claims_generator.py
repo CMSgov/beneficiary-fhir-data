@@ -1009,9 +1009,7 @@ def _generate_batch(
         not any_pac_clms and pac_gen == GeneratePacDataMode.IF_NONE
     )
 
-    message = "Generating synthetic claims data for provided BENE_SKs..."
-    print(message)
-    logger.info(message)
+    logger.info("Generating synthetic claims data for provided BENE_SKs...")
 
     for pt_bene_sk in tqdm.tqdm(bene_sks):
         existing_clms = clms_per_bene_sk.get(pt_bene_sk, [])
@@ -1047,7 +1045,8 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_cond_sgntr_mbr=row
                 )
                 for row in cond_sgntr_mbr_per_cond_sgntr_sk.get(
-                    str(clm[f.CLM_RLT_COND_SGNTR_SK]), [None]
+                    str(clm[f.CLM_RLT_COND_SGNTR_SK]),
+                    [] if cond_sgntr_mbr_per_cond_sgntr_sk else [None],
                 )
             ]
             adj_clms_tbls[f.CLM_RLT_COND_SGNTR_MBR].extend(clm_rlt_cond_sgntr_mbrs)
@@ -1056,7 +1055,10 @@ def _generate_batch(
                 adj_util.gen_clm_ocrnc_sgntr_mbr(
                     clm=clm, gen_utils=gen_utils, init_clm_ocrnc_sgntr_mbr=row
                 )
-                for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(str(clm[f.CLM_OCRNC_SGNTR_SK]), [None])
+                for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(
+                    str(clm[f.CLM_OCRNC_SGNTR_SK]),
+                    [] if ocrnc_sgntr_mbr_per_ocrnc_sk else [None],
+                )
             ]
             adj_clms_tbls[f.CLM_OCRNC_SGNTR_MBR].extend(clm_ocrnc_sgntr_mbr)
 
@@ -1065,7 +1067,8 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_ocrnc_sgntr_mbr=row
                 )
                 for row in rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(clm[f.CLM_RLT_OCRNC_SGNTR_SK]), [None]
+                    str(clm[f.CLM_RLT_OCRNC_SGNTR_SK]),
+                    [] if rlt_ocrnc_sgntr_mbr_per_ocrnc_sk else [None],
                 )
             ]
             adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].extend(clm_rlt_ocrnc_sgntr_mbr)
