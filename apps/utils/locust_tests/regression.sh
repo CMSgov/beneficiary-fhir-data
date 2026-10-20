@@ -8,6 +8,7 @@ eval "$(argc --argc-eval "$0" "$@")"
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
 readonly SCRIPT_DIR
 
+source "$SCRIPT_DIR/../scripts/load-dns-names.sh" # source this first so that env is set
 source "$SCRIPT_DIR/../scripts/load-bfd-credentials.sh"
 source "$SCRIPT_DIR/../scripts/load-server-certs.sh"
 headless=""
@@ -20,7 +21,7 @@ fi
 	uv run locust -f v3/regression_suite.py \
 		--client-cert-path="$BFD_COMBINED_CERT" \
 		--server-public-key="$BFD_PUBLIC_CERT" \
-		--host="https://$BFD_ENV.fhirv3.bfd.cmscloud.local" \
+		--host="https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}" \
 		--table-sample-percent "$argc_table_sample_percent" \
 		$headless
 )
