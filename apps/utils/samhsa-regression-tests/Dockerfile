@@ -1,6 +1,6 @@
-FROM ghcr.io/astral-sh/uv:0.12.13@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.13@sha256:bee0a2a458fd956c5df7b8b4c5fed2257b0af34866e3da7b51db0be3acb375d1 AS uv
 
-FROM public.ecr.aws/lambda/python:3.14.2026.09.10.05-arm64@sha256:fe234c72295127850b47b2d57ed276c6953c273582b5fd6a3f585450d584a35e AS lambda
+FROM public.ecr.aws/lambda/python:3.14.2026.10.20.00-arm64@sha256:25860f9a052c84ab3354e7616bf6461d6f6cb45d92f754fadfbc9b87c68dcce9 AS lambda
 
 # First, bundle the dependencies into the task root.
 FROM lambda AS builder
