@@ -59,23 +59,31 @@ public class JsonSnapshotReporter implements SnapshotReporter {
     // Adds a helpful bit of text at the end that spits out the specific JSON paths that have diffs
     final var errorsView = OnlyErrorDiffViewer.from(jsondiff).toString();
     final var diff = PatchDiffViewer.from(jsondiff);
-    final var diffStr = diff.toString();
-
-    // Save the diff to a patch file, so it can be viewed using a diff tool if desired
-    FileUtils.writeStringToFile(
-        SnapshotHelper.getPatchfile(getClass(), current.getName()),
-        diffStr,
-        StandardCharsets.UTF_8);
+    var diffStr = diff.toString();
 
     // Generates a GitHub style diff with a few extra lines below and above the diff marker to add
     // context
     final var extraLines = 5;
+    // Length of the header in the patch file
+    final var headerLength = 2;
     final var newline = "\n";
     final var diffMarkerAdd = "+";
     final var diffMarkerSubtract = "-";
     final var diffLines = diffStr.split(newline);
-    StringBuilder result = new StringBuilder(newline);
+
+    var linesInOldFile = 0;
+    var linesInNewFile = 0;
+    var result = new StringBuilder(newline);
     for (var i = 0; i < diffLines.length; i++) {
+      if (i >= headerLength) {
+        if (!diffLines[i].startsWith(diffMarkerAdd)) {
+          linesInOldFile++;
+        }
+        if (!diffLines[i].startsWith(diffMarkerSubtract)) {
+          linesInNewFile++;
+        }
+      }
+
       for (var j = Math.max(0, i - extraLines);
           j < Math.min(diffLines.length, i + extraLines);
           j++) {
@@ -85,6 +93,17 @@ public class JsonSnapshotReporter implements SnapshotReporter {
         }
       }
     }
+    // Replace the default header of "@@ @@" because it doesn't render in Intellij without the line
+    // numbers included.
+    // The patch always starts at line 0 so we can hardcode this part in the header.
+    diffStr =
+        diffStr.replace(
+            "@@ @@", String.format("@@ -0,%d +0,%d @@", linesInOldFile, linesInNewFile));
+    // Save the diff to a patch file, so it can be viewed using a diff tool if desired
+    FileUtils.writeStringToFile(
+        SnapshotHelper.getPatchfile(getClass(), current.getName()),
+        diffStr,
+        StandardCharsets.UTF_8);
     throw new AssertionFailedError(result + newline + errorsView);
   }
 }
