@@ -832,7 +832,7 @@
   v9dQ0wwjowyE98Us6fstIIDfsXA39blPJcic7QH0RFosoU06R5CP074SAJn1MwyH
   nMqCpKWZg6+s8Arxgt3T
   -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_root_ca", "bluebutton_backend_test_samhsa", "regression_tests"]'
+/bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_root_ca", "test_client_samhsa_cert", "regression_tests"]'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 1
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 3
 /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096
