@@ -27,13 +27,13 @@ def generate_synthetic_data(
     force_ztm: bool,
     pac_gen: str,
     bene_sk_mode: str,
-    patients: int = 0,
-    claims: bool = True,
-    min_claims: int = 5,
-    max_claims: int = 5,
-    samhsa: bool = True,
-    truncate: bool = False,
-    batch_size: int = _BATCH_SIZE,
+    patients: int,
+    claims: bool,
+    min_claims: int,
+    max_claims: int,
+    samhsa: bool,
+    truncate: bool,
+    batch_size: int,
 ) -> None:
     perf_start = time.perf_counter()
     db = session.get_current_database().replace('"', "")

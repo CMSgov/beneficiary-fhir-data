@@ -20,7 +20,9 @@ IDR_ACCOUNT="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensiti
 export IDR_ACCOUNT
 IDR_WAREHOUSE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/${creds_prefix}_warehouse --with-decryption --query "Parameter.Value" --output text)"
 export IDR_WAREHOUSE
-IDR_DATABASE="BFD_TEMP"
+if [ -z "$IDR_DATABASE" ]; then
+	IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/${creds_prefix}_database --with-decryption --query "Parameter.Value" --output text)"
+fi
 export IDR_DATABASE
 
 if [ "$is_synthetic" = false ]; then

@@ -204,8 +204,8 @@ Running the stored procedure:
 
 ```text
 First, specify kn or kp depending on the environment that you're targeting
-To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --truncate`
-To regenerate data: `just deploy_generator_sproc --env test`
+To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --claims --truncate`
+To regenerate data: `just deploy_generator_sproc --env test --claims`
 
 To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
 ```

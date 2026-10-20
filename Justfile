@@ -284,10 +284,11 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         result in broken output data""")]
 [arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
 Does not affect patients regenerated when a BENE_HSTRY file is provided""")]
-[arg("claims", long, pattern="(true|false)", help="""Automatically generate claims after patient generation using the generated BENE_HSTRY""")]
+[arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
+the generated BENE_HSTRY""")]
 [arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
                         and allow the generator to generate new values""")]
-[arg("force-ztm-static-rows", long, value="1", help="""
+[arg("force-ztm", long, value="1", help="""
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
 none. Useful if not all tables for a patient have been generated yet.""")]
@@ -296,7 +297,7 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="true" exclude-empty="" force-ztm-static-rows="" *paths:
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -304,12 +305,12 @@ patient-generator patients="" claims="true" exclude-empty="" force-ztm-static-ro
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
     cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/patient_generator.py $paths \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
-        --claims "{{ claims }}" \
+        {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
-        {{ if force-ztm-static-rows == "1" { "--force-ztm-static-rows" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
-[arg("samhsa", long, pattern="(true|false)", help="Enable or disable generation of SAMHSA-related data")]
+[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per person")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per person")]
 [arg("pac-gen", long, pattern="(no|if_none|always)", help="""
@@ -326,7 +327,7 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="true" pac-gen="if_none" bene-sk-mode="both" *paths: sushi
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths: sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -334,17 +335,18 @@ claims-generator min-claims="5" max-claims="10" samhsa="true" pac-gen="if_none" 
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
     cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/claims_generator.py $paths \
         --bene-sk-mode "{{ bene-sk-mode }}" \
-        --samhsa "{{ samhsa }}" \
+        {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
         --min-claims "{{ min-claims }}" \
         --pac-gen "{{ pac-gen }}"
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
 [arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
-[arg("claims", long, pattern="(true|false)", help="Generate claims after patient generation")]
+[arg("claims", long, value="1", help="Generate claims after patient generation")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per patient")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per patient")]
-[arg("samhsa", long, pattern="(true|false)", help="Enable or disable generation of SAMHSA-related data")]
+[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("pac-gen", long, pattern="(no|if_none|always)", help="Partially-adjudicated claims generation mode")]
 [arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
 [arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
@@ -352,26 +354,26 @@ claims-generator min-claims="5" max-claims="10" samhsa="true" pac-gen="if_none" 
 [arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
-deploy-generator-sproc env patients="0" claims="true" min-claims="5" max-claims="5" samhsa="true" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
+deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
     root="$(git rev-parse --show-toplevel)"
     export BFD_ENV="{{ env }}"
-
+    {{ if database != "" { "export IDR_DATABASE=\"" + database + "\"" } else { "" } }}
     source "$root/apps/utils/scripts/load-idr-credentials.sh" synthetic
 
     cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/deploy_generator_sproc.py \
         --patients "{{ patients }}" \
-        --claims "{{ claims }}" \
+        {{ if claims == "1" { "--claims" } else { "" } }} \
         --min-claims "{{ min-claims }}" \
         --max-claims "{{ max-claims }}" \
-        --samhsa "{{ samhsa }}" \
+        {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --pac-gen "{{ pac-gen }}" \
         --bene-sk-mode "{{ bene-sk-mode }}" \
-        --truncate "{{ truncate }}" \
+        {{ if truncate == "1" { "--truncate" } else { "" } }} \
         --batch-size "{{ batch-size }}" \
-        --force-ztm "{{ force-ztm }}"
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
 
 
 [arg("tablesample", long, help="Percent of table to sample")]

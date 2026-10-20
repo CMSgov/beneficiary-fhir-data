@@ -8,7 +8,7 @@ _BATCH_SIZE = 50_000
 def common_options(function):
     function = click.option(
         "--force-ztm",
-        type=bool,
+        is_flag=True,
         help=(
             'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for an existing patient to '
             "be generated. This will introduce new rows for patients that previously had "
@@ -27,8 +27,8 @@ def common_options(function):
 
     function = click.option(
         "--claims",
-        type=bool,
-        default=True,
+        is_flag=True,
+        default=False,
         show_default=True,
         help="Automatically generate claims after patient generation using the generated BENE_HSTRY",
     )(function)
@@ -54,7 +54,7 @@ def common_options(function):
     function = click.option(
         "--samhsa",
         envvar="ENABLE_SAMHSA",
-        type=bool,
+        is_flag=True,
         default=True,
         show_default=True,
         help="Enables generation of SAMHSA-related data",
@@ -88,7 +88,7 @@ def common_options(function):
 
     function = click.option(
         "--truncate",
-        type=bool,
+        is_flag=True,
         default=False,
         show_default=True,
         help="Truncate tables before reloading. Default is false",
