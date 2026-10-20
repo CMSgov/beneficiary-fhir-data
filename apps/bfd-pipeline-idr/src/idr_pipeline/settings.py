@@ -162,6 +162,23 @@ class _Settings:
         return int(getenv("IDR_PER_BATCH_MIN_CONNECTIONS", "20"))
 
     @cached_property
+    def postgres_connection_timeout(self) -> int:
+        """
+        Timeout to acquire a postgres connection.
+
+        Defaults to 1200
+        """
+        return int(getenv("IDR_POSTGRES_CONNECTION_TIMEOUT", "1200"))
+
+    @cached_property
+    def max_tasks_per_child(self) -> int | None:
+        """Max tasks to run per child process before creating a new one."""
+        max_tasks = getenv("IDR_MAX_TASKS_PER_CHILD")
+        if max_tasks is None:
+            return None
+        return int(max_tasks)
+
+    @cached_property
     def per_batch_max_connections(self) -> int:
         """
         Number of minimum connections to hold in the pool per-batch for non-local loads.

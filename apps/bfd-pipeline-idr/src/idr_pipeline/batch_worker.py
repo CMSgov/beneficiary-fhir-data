@@ -248,7 +248,8 @@ class _LoadingBatchWorker(Process):
                 conninfo=self._conn_str,
                 min_size=SETTINGS.per_batch_min_connections,
                 max_size=SETTINGS.per_batch_max_connections,
-                timeout=600,  # See loader.py for explanation on timeout length
+                # See loader.py for explanation on timeout length
+                timeout=SETTINGS.postgres_connection_timeout,
             ) as pool,
         ):
             await pool.wait()

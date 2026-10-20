@@ -195,6 +195,10 @@ resource "aws_ecs_task_definition" "idr" {
             value = "1"
           },
           {
+            name  = "IDR_MAX_TASKS_PER_CHILD",
+            value = "1"
+          },
+          {
             name = "CONFIG_SETTINGS_JSON"
             value = jsonencode(
               {
