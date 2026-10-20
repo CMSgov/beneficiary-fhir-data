@@ -14,7 +14,7 @@ readonly SCRIPT_DIR
 	if [ "$BFD_ENV" = "local" ]; then
 		source "$SCRIPT_DIR/../scripts/local-constants.sh"
 		# shellcheck disable=SC2154 # argc variables are generated externally
-		uv run main.py \
+		uv run app/main.py \
 			--hostname localhost:8080 \
 			--security-labels "$SCRIPT_DIR/../../bfd-server-ng/src/main/resources/security_labels.yml" \
 			--tablesample "$argc_tablesample" \
@@ -24,7 +24,7 @@ readonly SCRIPT_DIR
 		source "$SCRIPT_DIR/../scripts/load-bfd-credentials.sh"
 		source "$SCRIPT_DIR/../scripts/load-server-certs.sh"
 		# shellcheck disable=SC2154
-		uv run main.py \
+		uv run app/main.py \
 			--hostname "$BFD_ENV.fhirv3.bfd.cmscloud.local" \
 			--security-labels "$SCRIPT_DIR/../../bfd-server-ng/src/main/resources/security_labels.yml" \
 			--samhsa-cert "$BFD_SAMHSA_CLIENT_CERT" \
