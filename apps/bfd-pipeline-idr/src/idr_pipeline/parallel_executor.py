@@ -21,6 +21,7 @@ from .exception_utils import (
     rebuild_exception_chain,
     serialize_exception_chain,
 )
+from .settings import SETTINGS
 
 type StageTask[T] = Callable[[], T]
 type Stage[T] = Generator[StageTask[T]]
@@ -149,7 +150,9 @@ class MultiprocessingExecutor(Executor):
         all_results: list[list[T | None]] = []
 
         with ProcessPoolExecutor(
-            max_workers=self.max_workers, initializer=logger.reinstall, max_tasks_per_child=1
+            max_workers=self.max_workers,
+            initializer=logger.reinstall,
+            max_tasks_per_child=SETTINGS.max_tasks_per_child,
         ) as pool:
             for stage in stages:
                 results: dict[int, T | None] = {}
