@@ -74,6 +74,7 @@ copy:
   - /bfd/${env}/server-ng/sensitive/db/password
   - /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json
   - /bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json
+  - /bfd/${env}/server-ng/nonsensitive/samhsa-regression/tablesample
   - /bfd/${env}/server-ng/nonsensitive/cert_partners # copy all cert_partners recu
 # "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
 # configuration format. Takes precedence over any copied SSM parameters

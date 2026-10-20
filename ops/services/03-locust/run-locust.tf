@@ -7,7 +7,7 @@ locals {
 }
 
 data "aws_rds_cluster" "main" {
-  cluster_identifier = "bfd-${local.env}-aurora-cluster"
+  cluster_identifier = "bfd-test-aurora-cluster"
 }
 
 data "aws_ecr_image" "run_locust" {
