@@ -209,6 +209,7 @@ public class ClaimRepository {
    * Returns claims for the given beneficiary.
    *
    * @param criteria filter criteria
+   * @param mbi the beneficiary mbi
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
@@ -219,7 +220,8 @@ public class ClaimRepository {
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
-          ClaimSearchCriteria criteria) {
+          ClaimSearchCriteria criteria,
+      String mbi) {
 
     List<DbFilterBuilder> filterBuilders =
         List.of(
@@ -248,7 +250,7 @@ public class ClaimRepository {
 
     CompletableFuture<List<PriorAuthorization>> priorAuthFuture =
         includePriorAuth
-            ? asyncService.fetchPriorAuth(criteria.mbi())
+            ? asyncService.fetchPriorAuth(mbi)
             : CompletableFuture.completedFuture(Collections.emptyList());
 
     List<CompletableFuture<?>> allFutures = new ArrayList<>(claimFutures);

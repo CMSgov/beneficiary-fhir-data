@@ -97,23 +97,8 @@ public class EobHandler {
     if (beneSimple.isEmpty() || (beneSimple.get().getXrefSk() != beneSk)) {
       return new Bundle();
     }
-    var beneficiary = beneSimple.get();
 
-    var repositoryCriteria =
-        new ClaimSearchCriteria(
-            beneficiary.getXrefSk(),
-            beneficiary.getMbi(),
-            criteria.claimThroughDate(),
-            criteria.lastUpdated(),
-            criteria.limit(),
-            criteria.offset(),
-            criteria.tagCriteria(),
-            criteria.claimTypeCodes(),
-            criteria.outcomes(),
-            criteria.sources(),
-            criteria.profile());
-
-    var claimAndAuthResult = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claimAndAuthResult = claimRepository.findByBeneXrefSk(criteria, beneSimple.get().getMbi());
     var claims = claimAndAuthResult.claims();
     var priorAuths = claimAndAuthResult.priorAuths();
     var samhsaFilterMode = options.getSamhsaFilterMode();
@@ -130,15 +115,15 @@ public class EobHandler {
                       .map(priorAuth -> transformPriorAuthorizationToFhir(priorAuth, options));
               var combinedResources =
                   Stream.concat(filteredClaims, filteredPriorAuths)
-                      .skip(repositoryCriteria.resolveOffset())
-                      .limit(repositoryCriteria.resolveLimitWithExtra(1));
+                      .skip(criteria.resolveOffset())
+                      .limit(criteria.resolveLimitWithExtra(1));
               return FhirUtil.bundleOrDefault(
                   combinedResources,
                   loadProgressRepository::lastUpdated,
                   requestDetails,
                   // we want the raw limit
-                  Optional.of(repositoryCriteria.resolveLimit()),
-                  Optional.of(repositoryCriteria.resolveOffset()));
+                  Optional.of(criteria.resolveLimit()),
+                  Optional.of(criteria.resolveOffset()));
             },
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
     metricRecorder.recordDistribution(
