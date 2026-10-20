@@ -4,7 +4,6 @@
 !config/
 !v1/*.py
 !v2/*.py
-!v3/*.py
 !lambda/server-regression/app.py
 !pyproject.toml
 !uv.lock
