@@ -117,9 +117,9 @@ public record ClaimSearchCriteria(
   /**
    * Returns the _profile category from the query.
    *
-   * @return boolean
+   * @return string of CMS, REGULAR, BASIS, or MIXED
    */
   public String getProfileCategory() {
-    return profile().getProfileCategory();
+    return profile().getProfileTag();
   }
 }

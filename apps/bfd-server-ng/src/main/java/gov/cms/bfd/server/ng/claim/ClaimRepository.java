@@ -172,7 +172,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasLastUpdated", expression = "hasLastUpdated()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
-          @MeterTag(key = "profileCategory", expression = "getProfileCategory()")
+          @MeterTag(key = "profileTag", expression = "getProfileTag()")
           ClaimIdSearchCriteria criteria) {
     if (criteria.claimUniqueIds() == null || criteria.claimUniqueIds().isEmpty()) {
       return Collections.emptyList();
@@ -218,7 +218,7 @@ public class ClaimRepository {
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasOutcomes", expression = "hasOutcomes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
-          @MeterTag(key = "profileCategory", expression = "getProfileCategory()")
+          @MeterTag(key = "profileTag", expression = "getProfileTag()")
           ClaimSearchCriteria criteria,
       String mbi) {
 

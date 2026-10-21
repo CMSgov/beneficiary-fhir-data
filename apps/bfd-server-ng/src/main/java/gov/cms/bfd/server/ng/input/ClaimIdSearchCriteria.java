@@ -80,7 +80,7 @@ public record ClaimIdSearchCriteria(
    *
    * @return boolean
    */
-  public String getProfileCategory() {
-    return profile().getProfileCategory();
+  public String getProfileTag() {
+    return profile().getProfileTag();
   }
 }

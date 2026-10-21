@@ -11,9 +11,14 @@ import java.util.Map;
  */
 public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
 
-  /** Creates an empty ProfileSelection, until populated later. */
+  /** Creates a CMS default ProfileSelection. */
   public ProfileSelection() {
-    this(Map.of());
+    this(
+        Map.of(
+            EobProfileCategory.PHARMACY, ClaimProfile.CMS,
+            EobProfileCategory.INPATIENT_INSTITUTIONAL, ClaimProfile.CMS,
+            EobProfileCategory.OUTPATIENT_INSTITUTIONAL, ClaimProfile.CMS,
+            EobProfileCategory.PROFESSIONAL_NONCLINICIAN, ClaimProfile.CMS));
   }
 
   /**
@@ -24,9 +29,6 @@ public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
    * @return boolean
    */
   public boolean isRequested(EobProfileCategory category, ClaimProfile profile) {
-    if (profiles.isEmpty()) {
-      return profile == ClaimProfile.CMS;
-    }
     return profiles.get(category) == profile;
   }
 
@@ -35,12 +37,8 @@ public record ProfileSelection(Map<EobProfileCategory, ClaimProfile> profiles) {
    *
    * @return CMS by default, MIXED if more than one, otherwise the profile name
    */
-  public String getProfileCategory() {
+  public String getProfileTag() {
     var requested = profiles.values().stream().distinct().toList();
-    return switch (requested.size()) {
-      case 0 -> ClaimProfile.CMS.name();
-      case 1 -> requested.getFirst().name();
-      default -> "MIXED";
-    };
+    return requested.size() > 1 ? "MIXED" : requested.getFirst().name();
   }
 }

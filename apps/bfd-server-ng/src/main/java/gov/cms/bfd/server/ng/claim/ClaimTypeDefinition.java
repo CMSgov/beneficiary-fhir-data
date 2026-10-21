@@ -45,9 +45,6 @@ public record ClaimTypeDefinition(
    * @return boolean
    */
   public boolean matchesProfile(ProfileSelection profileSelection) {
-    if (profileSelection.profiles().isEmpty()) {
-      return profile == ClaimProfile.CMS;
-    }
     return EobProfileCategory.fromClaimType(claimType).stream()
         .anyMatch(category -> profileSelection.isRequested(category, profile));
   }
@@ -68,7 +65,7 @@ public record ClaimTypeDefinition(
             .filter(category -> profileSelection.isRequested(category, profile))
             .toList();
 
-    if (profileSelection.profiles().isEmpty() || requested.size() == categories.size()) {
+    if (requested.size() == categories.size()) {
       return filters;
     }
 
