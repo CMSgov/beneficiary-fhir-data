@@ -276,19 +276,33 @@ async def query_samhsa_claim_any_ids(
             """
         logger.debug("Running query:\n%s", sql.as_string(full_query))
         result = await (await curs.execute(full_query)).fetchall()
-        valid_samhsa_claim_ids = [
-            int(row["clm_uniq_id"])
-            for row in result
-            if (
-                matching_label := next(
-                    x
-                    for x in security_labels
-                    if normalize_code(x.code) == normalize_code(str(row[column]))
-                )
+        valid_samhsa_claim_ids: list[int] = []
+        for row in result:
+            matching_label = next(
+                x
+                for x in security_labels
+                if normalize_code(x.code) == normalize_code(str(row[column]))
             )
-            and row["clm_thru_dt"] >= matching_label.start_date
-            and row["clm_thru_dt"] <= matching_label.end_date
-        ]
+            if (
+                row["clm_thru_dt"] >= matching_label.start_date
+                and row["clm_thru_dt"] <= matching_label.end_date
+            ):
+                logger.debug(
+                    (
+                        "SAMHSA claim %s (table %s, column %s, code %r): matched security label "
+                        "system %s, code %s, valid from %s to %s; claim date %s"
+                    ),
+                    row["clm_uniq_id"],
+                    table,
+                    column,
+                    row[column],
+                    matching_label.system,
+                    matching_label.code,
+                    matching_label.start_date,
+                    matching_label.end_date,
+                    row["clm_thru_dt"],
+                )
+                valid_samhsa_claim_ids.append(int(row["clm_uniq_id"]))
         logger.info(
             (
                 "%d/%d valid (claim date in bounds) SAMHSA clm_uniq_ids under column %s in table "
@@ -458,6 +472,19 @@ async def query_samhsa_benes_with_prior_auths(
                 and row["utn_valid_st_dt"] >= matching_label.start_date
                 and row["utn_valid_st_dt"] <= matching_label.end_date
             ):
+                logger.debug(
+                    (
+                        "SAMHSA prior auth UTN %s (code %r): matched security label system %s, "
+                        "code %s, valid from %s to %s; UTN valid from %s"
+                    ),
+                    row["utn"],
+                    prior_auth_code,
+                    matching_label.system,
+                    matching_label.code,
+                    matching_label.start_date,
+                    matching_label.end_date,
+                    row["utn_valid_st_dt"],
+                )
                 bene_sk = str(row["bene_sk"])
 
                 if bene_sk not in bene_sks_and_prior_auths:
