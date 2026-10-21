@@ -18,7 +18,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.claim.EobProfile;
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -357,7 +357,7 @@ public class IntegrationTestBase {
     return profiles(urls.toArray(String[]::new));
   }
 
-  protected static List<String> canonicalUrls(ProfileType tier) {
+  protected static List<String> canonicalUrls(EobProfileType tier) {
     return Arrays.stream(EobProfile.values())
         .filter(profile -> profile.getProfileType() == tier)
         .map(EobProfile::getCanonicalUrl)

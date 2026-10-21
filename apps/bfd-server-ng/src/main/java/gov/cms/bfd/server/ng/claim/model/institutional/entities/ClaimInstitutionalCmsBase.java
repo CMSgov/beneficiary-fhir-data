@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
@@ -87,8 +87,8 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
   }
 
   @Override
-  public ProfileType getClaimProfile() {
-    return ProfileType.CMS;
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.CMS;
   }
 
   // endregion

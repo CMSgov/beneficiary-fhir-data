@@ -20,7 +20,7 @@ import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -879,12 +879,13 @@ class EobSearchIT extends IntegrationTestBase {
     return Stream.of(SearchStyleEnum.values())
         .flatMap(
             style ->
-                Arrays.stream(ProfileType.values()).map(profile -> Arguments.of(profile, style)));
+                Arrays.stream(EobProfileType.values())
+                    .map(profile -> Arguments.of(profile, style)));
   }
 
   @ParameterizedTest
   @MethodSource("provideProfileScenarios")
-  void eobSearchByPatientAndProfile(ProfileType profile, SearchStyleEnum searchStyle) {
+  void eobSearchByPatientAndProfile(EobProfileType profile, SearchStyleEnum searchStyle) {
     var eobBundle =
         searchByPatient().and(profiles(canonicalUrls(profile))).usingStyle(searchStyle).execute();
     assertEquals(6, eobBundle.getEntry().size());
@@ -942,7 +943,10 @@ class EobSearchIT extends IntegrationTestBase {
     // PriorAuth is not filtered when a profile is passed in
     var defaultBundle = searchBundle().where(patient).execute();
     var profileBundle =
-        searchBundle().where(patient).and(profiles(canonicalUrls(ProfileType.REGULAR))).execute();
+        searchBundle()
+            .where(patient)
+            .and(profiles(canonicalUrls(EobProfileType.REGULAR)))
+            .execute();
 
     assertTrue(hasPriorAuth(defaultBundle));
     assertTrue(hasPriorAuth(profileBundle));

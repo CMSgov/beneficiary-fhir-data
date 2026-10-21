@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
@@ -35,8 +35,8 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
 
   @Override
-  public ProfileType getClaimProfile() {
-    return ProfileType.BASIS;
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.BASIS;
   }
 
   // endregion

@@ -70,31 +70,31 @@ public class ClaimRepository {
               ClaimProfessionalCmsSharedSystems.class,
               SystemType.SS,
               ClaimType.PROFESSIONAL,
-              ProfileType.CMS),
+              EobProfileType.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalCmsNch.class, ""),
               ClaimProfessionalCmsNch.class,
               SystemType.NCH,
               ClaimType.PROFESSIONAL,
-              ProfileType.CMS),
+              EobProfileType.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalCmsSharedSystems.class, "LEFT"),
               ClaimInstitutionalCmsSharedSystems.class,
               SystemType.SS,
               ClaimType.INSTITUTIONAL,
-              ProfileType.CMS),
+              EobProfileType.CMS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalCmsNch.class, ""),
               ClaimInstitutionalCmsNch.class,
               SystemType.NCH,
               ClaimType.INSTITUTIONAL,
-              ProfileType.CMS),
+              EobProfileType.CMS),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxCms.class),
               ClaimRxCms.class,
               SystemType.DDPS,
               ClaimType.PHARMACY,
-              ProfileType.CMS),
+              EobProfileType.CMS),
 
           // REGULAR
           new ClaimTypeDefinition(
@@ -102,31 +102,31 @@ public class ClaimRepository {
               ClaimProfessionalRegularSharedSystems.class,
               SystemType.SS,
               ClaimType.PROFESSIONAL,
-              ProfileType.REGULAR),
+              EobProfileType.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalRegularNch.class, ""),
               ClaimProfessionalRegularNch.class,
               SystemType.NCH,
               ClaimType.PROFESSIONAL,
-              ProfileType.REGULAR),
+              EobProfileType.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalRegularSharedSystems.class, "LEFT"),
               ClaimInstitutionalRegularSharedSystems.class,
               SystemType.SS,
               ClaimType.INSTITUTIONAL,
-              ProfileType.REGULAR),
+              EobProfileType.REGULAR),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalRegularNch.class, ""),
               ClaimInstitutionalRegularNch.class,
               SystemType.NCH,
               ClaimType.INSTITUTIONAL,
-              ProfileType.REGULAR),
+              EobProfileType.REGULAR),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxRegular.class),
               ClaimRxRegular.class,
               SystemType.DDPS,
               ClaimType.PHARMACY,
-              ProfileType.REGULAR),
+              EobProfileType.REGULAR),
 
           // BASIS
           new ClaimTypeDefinition(
@@ -134,31 +134,31 @@ public class ClaimRepository {
               ClaimProfessionalBasisSharedSystems.class,
               SystemType.SS,
               ClaimType.PROFESSIONAL,
-              ProfileType.BASIS),
+              EobProfileType.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimProfessionalBasisNch.class, ""),
               ClaimProfessionalBasisNch.class,
               SystemType.NCH,
               ClaimType.PROFESSIONAL,
-              ProfileType.BASIS),
+              EobProfileType.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalBasisSharedSystems.class, "LEFT"),
               ClaimInstitutionalBasisSharedSystems.class,
               SystemType.SS,
               ClaimType.INSTITUTIONAL,
-              ProfileType.BASIS),
+              EobProfileType.BASIS),
           new ClaimTypeDefinition(
               claimQueryString(ClaimInstitutionalBasisNch.class, ""),
               ClaimInstitutionalBasisNch.class,
               SystemType.NCH,
               ClaimType.INSTITUTIONAL,
-              ProfileType.BASIS),
+              EobProfileType.BASIS),
           new ClaimTypeDefinition(
               rxClaimQueryString(ClaimRxBasis.class),
               ClaimRxBasis.class,
               SystemType.DDPS,
               ClaimType.PHARMACY,
-              ProfileType.BASIS));
+              EobProfileType.BASIS));
 
   /**
    * Search for a claim by its ID.

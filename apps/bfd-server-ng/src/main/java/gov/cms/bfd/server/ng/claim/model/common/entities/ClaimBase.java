@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common.entities;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimAdjustmentTypeCode;
@@ -152,7 +152,7 @@ public abstract class ClaimBase {
    *
    * @return the claim profile
    */
-  public abstract ProfileType getClaimProfile();
+  public abstract EobProfileType getClaimProfile();
 
   /**
    * retrieve total components and adjudication components, default to empty (basis).

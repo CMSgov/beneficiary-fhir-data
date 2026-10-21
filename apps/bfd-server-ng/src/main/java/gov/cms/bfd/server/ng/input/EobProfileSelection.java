@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.claim.EobProfileCategory;
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import java.util.Set;
 
 /**
@@ -29,7 +29,7 @@ public record EobProfileSelection(Set<EobProfile> profiles) {
    * @param profileType claim profile
    * @return boolean
    */
-  public boolean isRequested(EobProfileCategory category, ProfileType profileType) {
+  public boolean isRequested(EobProfileCategory category, EobProfileType profileType) {
     return profiles.contains(EobProfile.of(category, profileType));
   }
 

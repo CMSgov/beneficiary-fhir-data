@@ -23,7 +23,7 @@ public record ClaimTypeDefinition(
     Class<? extends ClaimBase> claimClass,
     SystemType systemType,
     ClaimType claimType,
-    ProfileType profileType) {
+    EobProfileType profileType) {
 
   private static final String PROFILE_CLAIM_TYPE_CODES = "profileClaimTypeCodes";
 

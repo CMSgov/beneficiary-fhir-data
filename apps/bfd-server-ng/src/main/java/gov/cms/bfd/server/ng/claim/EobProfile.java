@@ -4,9 +4,9 @@ import static gov.cms.bfd.server.ng.claim.EobProfileCategory.INPATIENT_INSTITUTI
 import static gov.cms.bfd.server.ng.claim.EobProfileCategory.OUTPATIENT_INSTITUTIONAL;
 import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PHARMACY;
 import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PROFESSIONAL_NONCLINICIAN;
-import static gov.cms.bfd.server.ng.claim.ProfileType.BASIS;
-import static gov.cms.bfd.server.ng.claim.ProfileType.CMS;
-import static gov.cms.bfd.server.ng.claim.ProfileType.REGULAR;
+import static gov.cms.bfd.server.ng.claim.EobProfileType.BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfileType.CMS;
+import static gov.cms.bfd.server.ng.claim.EobProfileType.REGULAR;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -79,7 +79,7 @@ public enum EobProfile {
       SystemUrls.PROFILE_C4BB_VERSION);
 
   private final EobProfileCategory category;
-  private final ProfileType profileType;
+  private final EobProfileType profileType;
   private final String canonicalUrl;
   private final String version;
 
@@ -90,7 +90,7 @@ public enum EobProfile {
    * @param profileType claim profile
    * @return profile
    */
-  public static EobProfile of(EobProfileCategory category, ProfileType profileType) {
+  public static EobProfile of(EobProfileCategory category, EobProfileType profileType) {
     return Arrays.stream(values())
         .filter(p -> p.category == category && p.profileType == profileType)
         .findFirst()

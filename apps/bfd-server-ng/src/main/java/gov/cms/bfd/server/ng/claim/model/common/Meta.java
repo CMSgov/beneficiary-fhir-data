@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
 import gov.cms.bfd.server.ng.claim.EobProfile;
-import gov.cms.bfd.server.ng.claim.ProfileType;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.input.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -18,7 +18,7 @@ public class Meta {
 
   public org.hl7.fhir.r4.model.Meta toFhir(
       ClaimTypeCode claimTypeCode,
-      ProfileType profileType,
+      EobProfileType profileType,
       ClaimSecurityStatus securityStatus,
       ClaimFinalAction finalAction,
       MetaSourceSk metaSourceSk) {

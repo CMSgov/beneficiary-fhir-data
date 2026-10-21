@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
 /** Profiles an ExplanationOfBenefit (only) can be rendered in. */
-public enum ProfileType {
+public enum EobProfileType {
   /** CMS BBAPI, fullest profile, default. */
   CMS,
   /** C4BB, some information redacted, retains CARIN fields. */
