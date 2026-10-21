@@ -37,6 +37,8 @@ build-backend = "uv_build"
 
 [tool.uv]
 exclude-newer = "7 days"
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { certifi = false }
 
 [tool.uv.build-backend]
 module-name = "idr_pipeline"
