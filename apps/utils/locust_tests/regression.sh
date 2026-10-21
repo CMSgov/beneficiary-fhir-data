@@ -19,7 +19,7 @@ fi
 	cd "$SCRIPT_DIR"
 	# shellcheck disable=SC2154 # argc variables are generated externally
 	uv run locust -f v3/regression_suite.py \
-		--client-cert-path="$BFD_COMBINED_CERT" \
+		--client-cert-path="$BFD_SAMHSA_COMBINED_CERT" \
 		--server-public-key="$BFD_PUBLIC_CERT" \
 		--host="https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}" \
 		--table-sample-percent "$argc_table_sample_percent" \
