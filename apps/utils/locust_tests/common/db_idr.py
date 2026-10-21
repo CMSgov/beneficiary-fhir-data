@@ -98,7 +98,7 @@ def get_regression_bene_mbis(uri: str, table_sample_pct: float | None = None) ->
 
 
 def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
-    """Retrieve a random list list of clam Ids.
+    """Retrieve a random list list of claim Ids.
 
     Args:
         uri (str): Database URI
@@ -110,53 +110,53 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
     claim_query = """
     SELECT clm_uniq_id FROM (
         SELECT clm_uniq_id FROM idr.claim_rx
-        JOIN idr.valid_beneficiary
-            ON claim_rx.bene_sk = valid_beneficiary.bene_sk
-        WHERE idr_ltst_trans_flg = 'Y'
+        JOIN idr.valid_beneficiary as b
+            ON claim_rx.bene_sk = b.bene_sk
+        WHERE b.idr_ltst_trans_flg = 'Y' AND idr_ltst_trans_flg = 'Y' AND clm_ltst_clm_ind = 'Y'
         LIMIT 200
         ) t1
     UNION ALL
     SELECT clm_uniq_id FROM (
             SELECT DISTINCT claim_institutional_nch.clm_uniq_id FROM idr.claim_institutional_nch
-            JOIN idr.valid_beneficiary
-                ON claim_institutional_nch.bene_sk = valid_beneficiary.bene_sk
+            JOIN idr.valid_beneficiary as b
+                ON claim_institutional_nch.bene_sk = b.bene_sk
             WHERE EXISTS (
                 SELECT 1 FROM idr.claim_item_institutional_nch
                 WHERE claim_item_institutional_nch.clm_uniq_id = claim_institutional_nch.clm_uniq_id
-            ) AND idr_ltst_trans_flg = 'Y'
+            ) AND b.idr_ltst_trans_flg = 'Y' AND idr_ltst_trans_flg = 'Y' AND clm_ltst_clm_ind = 'Y'
             LIMIT 200
         ) t2
     UNION ALL
     SELECT clm_uniq_id FROM (
             SELECT DISTINCT claim_institutional_ss.clm_uniq_id FROM idr.claim_institutional_ss
-            JOIN idr.valid_beneficiary
-                ON claim_institutional_ss.bene_sk = valid_beneficiary.bene_sk
+            JOIN idr.valid_beneficiary as b
+                ON claim_institutional_ss.bene_sk = b.bene_sk
             WHERE EXISTS (
                 SELECT 1 FROM idr.claim_item_institutional_ss
                 WHERE claim_item_institutional_ss.clm_uniq_id = claim_institutional_ss.clm_uniq_id
-            ) AND idr_ltst_trans_flg = 'Y'
+            ) AND b.idr_ltst_trans_flg = 'Y' AND idr_ltst_trans_flg = 'Y' AND clm_ltst_clm_ind = 'Y'
             LIMIT 200
         ) t3
     UNION ALL
     SELECT clm_uniq_id FROM (
             SELECT DISTINCT claim_professional_nch.clm_uniq_id FROM idr.claim_professional_nch
-            JOIN idr.valid_beneficiary
-                ON claim_professional_nch.bene_sk = valid_beneficiary.bene_sk
+            JOIN idr.valid_beneficiary as b
+                ON claim_professional_nch.bene_sk = b.bene_sk
             WHERE EXISTS (
                 SELECT 1 FROM idr.claim_item_professional_nch
                 WHERE claim_item_professional_nch.clm_uniq_id = claim_professional_nch.clm_uniq_id
-            ) AND idr_ltst_trans_flg = 'Y'
+            ) AND b.idr_ltst_trans_flg = 'Y' AND idr_ltst_trans_flg = 'Y' AND clm_ltst_clm_ind = 'Y'
             LIMIT 200
         ) t4
     UNION ALL
     SELECT clm_uniq_id FROM (
             SELECT DISTINCT claim_professional_ss.clm_uniq_id FROM idr.claim_professional_ss
-            JOIN idr.valid_beneficiary
-                ON claim_professional_ss.bene_sk = valid_beneficiary.bene_sk
+            JOIN idr.valid_beneficiary as b
+                ON claim_professional_ss.bene_sk = b.bene_sk
             WHERE EXISTS (
                 SELECT 1 FROM idr.claim_item_professional_ss
                 WHERE claim_item_professional_ss.clm_uniq_id = claim_professional_ss.clm_uniq_id
-            ) AND idr_ltst_trans_flg = 'Y'
+            ) AND b.idr_ltst_trans_flg = 'Y' AND idr_ltst_trans_flg = 'Y' AND clm_ltst_clm_ind = 'Y'
             LIMIT 200
         ) t5;
     """
