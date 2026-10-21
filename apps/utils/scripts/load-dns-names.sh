@@ -44,6 +44,9 @@ find_internal_elb_dns() {
 	echo "${dns}"
 }
 
+# The next few lines run the lookups from the AWS CLI in parallel as they can individually be quite
+# slow.
+
 _bfd_tmp_v1v2=$(mktemp)
 _bfd_tmp_v3=$(mktemp)
 
