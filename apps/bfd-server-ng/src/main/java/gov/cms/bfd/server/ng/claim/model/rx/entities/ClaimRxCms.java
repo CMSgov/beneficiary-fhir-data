@@ -75,7 +75,7 @@ public class ClaimRxCms extends ClaimRxBase {
 
   @Override
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
-    return Optional.of(claimItem.getTotalDrugCost());
+    return claimItem.getTotalDrugCost();
   }
 
   // endregion

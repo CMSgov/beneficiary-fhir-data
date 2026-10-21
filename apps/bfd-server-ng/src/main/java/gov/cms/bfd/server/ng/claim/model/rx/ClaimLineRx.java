@@ -6,7 +6,6 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
-import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim line info base. */
@@ -25,8 +23,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("java:S2201")
 public class ClaimLineRx implements ClaimLineBase {
 
-  @Column(name = "clm_line_from_dt")
-  private Optional<LocalDate> fromDate;
+  @Column(name = "clm_from_dt", insertable = false, updatable = false)
+  private Optional<LocalDate> claimFromDate;
 
   @Embedded private ClaimLineNdcQuantity ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
@@ -49,7 +47,6 @@ public class ClaimLineRx implements ClaimLineBase {
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     ndc.toFhirDetail().ifPresent(line::addDetail);
     line.setQuantity(quantity);
-    fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     return Optional.of(line);
   }
 
