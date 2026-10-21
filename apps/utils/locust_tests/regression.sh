@@ -25,5 +25,6 @@ fi
 		--host="https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}" \
 		--table-sample-percent "$argc_table_sample_percent" \
 		--users "$argc_users" \
+		--spawn-rate "$argc_users" \
 		$headless
 )
