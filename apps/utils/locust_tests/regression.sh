@@ -3,6 +3,7 @@ set -Eeou pipefail
 
 # @flag 	--headless
 # @option --table-sample-percent=0.25
+# @option --users=1
 eval "$(argc --argc-eval "$0" "$@")"
 
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
@@ -23,5 +24,6 @@ fi
 		--server-public-key="$BFD_PUBLIC_CERT" \
 		--host="https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}" \
 		--table-sample-percent "$argc_table_sample_percent" \
+		--users "$argc_users" \
 		$headless
 )
