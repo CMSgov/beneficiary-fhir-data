@@ -162,26 +162,16 @@ class StagedIdrPipeline:
         if self.load_type == LoadType.INITIAL:
             return
 
-        yield functools.partial(
-            prune_bene_lis_cmbnd,
-            self.load_mode,
-        )
+        yield prune_bene_lis_cmbnd
 
-        yield functools.partial(
-            prune_bene_ma_part_d,
-            self.load_mode,
-        )
+        yield prune_bene_ma_part_d
 
-        yield functools.partial(
-            prune_bene_ma_part_d_rx,
-            self.load_mode,
-        )
+        yield prune_bene_ma_part_d_rx
 
         for model in self._filter_tables(CLAIM_SS_TABLES):
             yield functools.partial(
                 prune_phase_1_ss_claims,
                 model,
-                self.load_mode,
                 self.start_time,
             )
 
@@ -189,7 +179,6 @@ class StagedIdrPipeline:
             yield functools.partial(
                 prune_stale_non_part_d_claims,
                 model,
-                self.load_mode,
             )
 
     def _filter_tables(self, tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:

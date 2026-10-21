@@ -7,8 +7,10 @@ import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
@@ -20,6 +22,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @SuppressWarnings("java:S2201")
 public class ClaimLineRx implements ClaimLineBase {
+
+  @Column(name = "clm_from_dt", insertable = false, updatable = false)
+  private Optional<LocalDate> claimFromDate;
 
   @Embedded private ClaimLineNdcQuantity ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;

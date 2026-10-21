@@ -1,29 +1,26 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.converter.FissPpsIndicatorCodeConverter;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFiscalIntermediaryActionCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimNonpaymentReasonCode;
-import gov.cms.bfd.server.ng.claim.model.common.ClaimOutpatientServiceTypeCode;
-import gov.cms.bfd.server.ng.claim.model.common.HhaReferralCode;
 import gov.cms.bfd.server.ng.claim.model.common.McoPaidSwitch;
 import gov.cms.bfd.server.ng.claim.model.common.PpsIndicatorCode;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoComponentBase;
 import gov.cms.bfd.server.ng.claim.model.common.SupportingInfoFactory;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** The supporting info for an institutional claim from nch. */
+/** Supporting info for CMS profile shared systems source. */
 @Embeddable
-@Getter
-public class InstitutionalSupportingInfoCmsNch implements SupportingInfoComponentBase {
+public class SupportingInfoInstitutionalCmsSharedSystems implements SupportingInfoComponentBase {
 
   @Embedded private SupportingInfoInstitutional claimSupportingInfoInstitutional;
-  @Embedded private BillingProviderSsaStateCode billingProviderSsaStateCode;
 
   @Column(name = "clm_mdcr_instnl_mco_pd_sw")
   private Optional<McoPaidSwitch> mcoPaidSwitch;
@@ -35,33 +32,20 @@ public class InstitutionalSupportingInfoCmsNch implements SupportingInfoComponen
   @Column(name = "clm_fi_actn_cd")
   private Optional<ClaimFiscalIntermediaryActionCode> claimFiscalIntermediaryActionCode;
 
-  @Column(name = "clm_hha_lup_ind_cd")
-  private Optional<HhaLupaIndicatorCode> hhaLupaIndicatorCode;
-
-  @Column(name = "clm_hha_rfrl_cd")
-  private Optional<HhaReferralCode> hhaReferralCode;
-
-  @Column(name = "clm_pps_ind_cd")
+  @Column(name = "clm_pps_ind")
+  @Convert(converter = FissPpsIndicatorCodeConverter.class)
   private Optional<PpsIndicatorCode> ppsIndicatorCode;
-
-  @Column(name = "clm_op_srvc_type_cd")
-  private Optional<ClaimOutpatientServiceTypeCode> claimOutpatientServiceTypeCode;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-
     return Stream.concat(
             claimSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
             Stream.of(
                     mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
                     nonpaymentReasonCode.map(c -> c.toFhir(supportingInfoFactory)),
                     claimFiscalIntermediaryActionCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
-                    hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
-                    ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    billingProviderSsaStateCode.toFhir(supportingInfoFactory))
+                    ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)))
                 .flatMap(Optional::stream))
         .toList();
   }
