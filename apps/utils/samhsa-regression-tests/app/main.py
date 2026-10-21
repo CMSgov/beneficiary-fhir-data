@@ -272,6 +272,7 @@ async def query_samhsa_claim_any_ids(
             TABLESAMPLE SYSTEM({tablesample:l})
             {claim_join:q}
             WHERE {table:i}.{column:i} = ANY({(list(query_params))})
+                AND {(claims_table):i}.clm_ltst_clm_ind = 'Y'
             LIMIT {limit:l}
             """
         logger.debug("Running query:\n%s", sql.as_string(full_query))
@@ -366,7 +367,8 @@ async def query_samhsa_benes_with_claims(
                             SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr.{table:i}
                             INNER JOIN idr.beneficiary
                                 ON {table:i}.bene_sk = beneficiary.bene_sk
-                            WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))});
+                            WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))})
+                                AND beneficiary.idr_ltst_trans_flg = 'Y';
                             """
                         )
                         for table in CLAIMS_TABLES
