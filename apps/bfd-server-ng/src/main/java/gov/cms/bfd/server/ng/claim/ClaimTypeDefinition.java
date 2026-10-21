@@ -5,7 +5,7 @@ import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
-import gov.cms.bfd.server.ng.input.ProfileSelection;
+import gov.cms.bfd.server.ng.input.EobProfileSelection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +16,14 @@ import java.util.List;
  * @param claimClass entity class
  * @param systemType system type which indicates a claim's source
  * @param claimType claim type of the entity class
- * @param profile the profile the entity class is rendered in
+ * @param profileType the profile the entity class is rendered in
  */
 public record ClaimTypeDefinition(
     String baseQuery,
     Class<? extends ClaimBase> claimClass,
     SystemType systemType,
     ClaimType claimType,
-    ClaimProfile profile) {
+    ProfileType profileType) {
 
   private static final String PROFILE_CLAIM_TYPE_CODES = "profileClaimTypeCodes";
 
@@ -44,9 +44,9 @@ public record ClaimTypeDefinition(
    * @param profileSelection requested profiles
    * @return boolean
    */
-  public boolean matchesProfile(ProfileSelection profileSelection) {
+  public boolean matchesProfile(EobProfileSelection profileSelection) {
     return EobProfileCategory.fromClaimType(claimType).stream()
-        .anyMatch(category -> profileSelection.isRequested(category, profile));
+        .anyMatch(category -> profileSelection.isRequested(category, profileType));
   }
 
   /**
@@ -57,12 +57,12 @@ public record ClaimTypeDefinition(
    * @return filters
    */
   public List<DbFilterBuilder> getProfileFilters(
-      ProfileSelection profileSelection, List<DbFilterBuilder> filters) {
+      EobProfileSelection profileSelection, List<DbFilterBuilder> filters) {
 
     var categories = EobProfileCategory.fromClaimType(claimType);
     var requested =
         categories.stream()
-            .filter(category -> profileSelection.isRequested(category, profile))
+            .filter(category -> profileSelection.isRequested(category, profileType))
             .toList();
 
     if (requested.size() == categories.size()) {

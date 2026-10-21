@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.common;
 
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfile;
+import gov.cms.bfd.server.ng.claim.ProfileType;
 import gov.cms.bfd.server.ng.input.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -17,15 +18,15 @@ public class Meta {
 
   public org.hl7.fhir.r4.model.Meta toFhir(
       ClaimTypeCode claimTypeCode,
-      ClaimProfile claimProfile,
+      ProfileType profileType,
       ClaimSecurityStatus securityStatus,
       ClaimFinalAction finalAction,
       MetaSourceSk metaSourceSk) {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode
         .getProfileCategory()
-        .map(claimProfile::getMetaProfiles)
-        .ifPresent(profiles -> profiles.forEach(meta::addProfile));
+        .map(category -> EobProfile.of(category, profileType))
+        .ifPresent(profile -> profile.getMetaProfiles().forEach(meta::addProfile));
     meta.addTag(metaSourceSk.toFhirSystemType());
     finalAction.toFhirFinalAction().ifPresent(meta::addTag);
     meta.addSecurity(ClaimSecurityStatus.toFhir(securityStatus));

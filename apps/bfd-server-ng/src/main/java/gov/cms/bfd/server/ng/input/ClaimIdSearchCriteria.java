@@ -22,7 +22,7 @@ public record ClaimIdSearchCriteria(
     @NotNull DateTimeRange lastUpdated,
     @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
     @NotNull List<List<MetaSourceSk>> sources,
-    @NotNull ProfileSelection profile) {
+    @NotNull EobProfileSelection profile) {
 
   /**
    * Default constructor for tests.
@@ -36,7 +36,7 @@ public record ClaimIdSearchCriteria(
         new DateTimeRange(),
         Collections.emptyList(),
         Collections.emptyList(),
-        new ProfileSelection());
+        new EobProfileSelection());
   }
 
   /**

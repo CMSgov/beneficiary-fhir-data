@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng;
 
-import static gov.cms.bfd.server.ng.claim.EobProfileCategory.OUTPATIENT_INSTITUTIONAL;
-import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PHARMACY;
+import static gov.cms.bfd.server.ng.claim.EobProfile.OUTPATIENT_INSTITUTIONAL_REGULAR;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_CMS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_REGULAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,15 +20,14 @@ import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
-import gov.cms.bfd.server.ng.claim.EobProfileCategory;
+import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.input.CoveragePart;
+import gov.cms.bfd.server.ng.input.EobProfileSelection;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
-import gov.cms.bfd.server.ng.input.ProfileSelection;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
@@ -72,9 +73,9 @@ class FhirInputConverterTest extends IntegrationTestBase {
     var emptyToken = new TokenParam();
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toString(emptyToken, ""));
 
-    assertEquals(new ProfileSelection(), FhirInputConverter.parseProfileParameter(null));
+    assertEquals(new EobProfileSelection(), FhirInputConverter.parseProfileParameter(null));
     assertEquals(
-        new ProfileSelection(), FhirInputConverter.parseProfileParameter(new UriOrListParam()));
+        new EobProfileSelection(), FhirInputConverter.parseProfileParameter(new UriOrListParam()));
   }
 
   @Test
@@ -227,37 +228,31 @@ class FhirInputConverterTest extends IntegrationTestBase {
   static Stream<Arguments> provideProfileParameterScenarios() {
     return Stream.of(
         Arguments.of(
-            "single",
-            profileParam(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)),
-            Map.of(PHARMACY, ClaimProfile.BASIS)),
+            "single", profileParam(PHARMACY_BASIS.getCanonicalUrl()), Set.of(PHARMACY_BASIS)),
         Arguments.of(
             "versioned",
-            profileParam(ClaimProfile.BASIS.getVersionedCanonicalUrl(PHARMACY)),
-            Map.of(PHARMACY, ClaimProfile.BASIS)),
+            profileParam(PHARMACY_BASIS.getVersionedCanonicalUrl()),
+            Set.of(PHARMACY_BASIS)),
         Arguments.of(
             "multiple",
             profileParam(
-                ClaimProfile.CMS.getCanonicalUrl(PHARMACY),
-                ClaimProfile.REGULAR.getCanonicalUrl(OUTPATIENT_INSTITUTIONAL)),
-            Map.of(PHARMACY, ClaimProfile.CMS, OUTPATIENT_INSTITUTIONAL, ClaimProfile.REGULAR)),
+                PHARMACY_CMS.getCanonicalUrl(), OUTPATIENT_INSTITUTIONAL_REGULAR.getCanonicalUrl()),
+            Set.of(PHARMACY_CMS, OUTPATIENT_INSTITUTIONAL_REGULAR)),
         Arguments.of(
             "duplicate",
             profileParam(
-                ClaimProfile.BASIS.getCanonicalUrl(PHARMACY),
-                ClaimProfile.BASIS.getVersionedCanonicalUrl(PHARMACY)),
-            Map.of(PHARMACY, ClaimProfile.BASIS)),
+                PHARMACY_BASIS.getCanonicalUrl(), PHARMACY_BASIS.getVersionedCanonicalUrl()),
+            Set.of(PHARMACY_BASIS)),
         Arguments.of(
             "whitespace",
-            profileParam(" " + ClaimProfile.BASIS.getCanonicalUrl(PHARMACY) + " "),
-            Map.of(PHARMACY, ClaimProfile.BASIS)));
+            profileParam(" " + PHARMACY_BASIS.getCanonicalUrl() + " "),
+            Set.of(PHARMACY_BASIS)));
   }
 
   @ParameterizedTest
   @MethodSource("provideProfileParameterScenarios")
   void parseProfileParameter(
-      String scenario,
-      UriOrListParam profileParam,
-      Map<EobProfileCategory, ClaimProfile> expectedProfiles) {
+      String scenario, UriOrListParam profileParam, Set<EobProfile> expectedProfiles) {
     assertEquals(
         expectedProfiles,
         FhirInputConverter.parseProfileParameter(profileParam).profiles(),
@@ -271,31 +266,27 @@ class FhirInputConverterTest extends IntegrationTestBase {
         Arguments.of("legacy name", profileParam("BASIS"), unsupported),
         Arguments.of(
             "unsupported version",
-            profileParam(ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY) + "|2.1.0"),
+            profileParam(PHARMACY_REGULAR.getCanonicalUrl() + "|2.1.0"),
             unsupported),
         Arguments.of(
-            "versioned CMS",
-            profileParam(ClaimProfile.CMS.getCanonicalUrl(PHARMACY) + "|2.2.0"),
-            unsupported),
+            "versioned CMS", profileParam(PHARMACY_CMS.getCanonicalUrl() + "|2.2.0"), unsupported),
         Arguments.of(
             "case sensitive",
-            profileParam(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY).toUpperCase()),
+            profileParam(PHARMACY_BASIS.getCanonicalUrl().toUpperCase()),
             unsupported),
         Arguments.of(
             "valid and invalid",
-            profileParam(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY), "BOGUS"),
+            profileParam(PHARMACY_CMS.getCanonicalUrl(), "BOGUS"),
             unsupported),
         Arguments.of(
             "conflicting",
-            profileParam(
-                ClaimProfile.REGULAR.getCanonicalUrl(PHARMACY),
-                ClaimProfile.BASIS.getCanonicalUrl(PHARMACY)),
+            profileParam(PHARMACY_REGULAR.getCanonicalUrl(), PHARMACY_BASIS.getCanonicalUrl()),
             "Conflicting _profile values"),
         Arguments.of(
             "modifier",
             new UriOrListParam()
                 .addOr(
-                    new UriParam(ClaimProfile.BASIS.getCanonicalUrl(PHARMACY))
+                    new UriParam(PHARMACY_BASIS.getCanonicalUrl())
                         .setQualifier(UriParamQualifierEnum.BELOW)),
             "_profile modifiers are not supported"));
   }

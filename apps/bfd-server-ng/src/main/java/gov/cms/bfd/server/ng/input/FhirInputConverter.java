@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchParameter;
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimTypeCode;
@@ -17,7 +17,7 @@ import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.text.Normalizer;
 import java.util.Arrays;
-import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,8 +63,8 @@ public class FhirInputConverter {
           .collect(Collectors.toMap(a -> a.getFinalAction().toUpperCase(), a -> a));
 
   private static final String SUPPORTED_PROFILES =
-      Stream.of(ClaimProfile.values())
-          .flatMap(profile -> profile.getCanonicalUrls().stream())
+      Stream.of(EobProfile.values())
+          .map(EobProfile::getCanonicalUrl)
           .sorted()
           .collect(Collectors.joining(", "));
 
@@ -573,50 +573,37 @@ public class FhirInputConverter {
    * @param profileParam _profile param from request
    * @return profile selection representing every OR value from _profile if valid
    */
-  public static ProfileSelection parseProfileParameter(@Nullable UriOrListParam profileParam) {
-
+  public static EobProfileSelection parseProfileParameter(@Nullable UriOrListParam profileParam) {
     if (profileParam == null || profileParam.getValuesAsQueryTokens().isEmpty()) {
-      return new ProfileSelection();
+      return new EobProfileSelection();
     }
 
-    var profiles = new EnumMap<EobProfileCategory, ClaimProfile>(EobProfileCategory.class);
+    var profiles =
+        profileParam.getValuesAsQueryTokens().stream()
+            .map(FhirInputConverter::parseProfileUri)
+            .collect(Collectors.toSet());
 
-    for (var uri : profileParam.getValuesAsQueryTokens()) {
-      var entry = parseProfileUri(uri);
-      var category = entry.getKey();
-      var profile = entry.getValue();
-      var existing = profiles.putIfAbsent(category, profile);
-
-      if (existing != null && existing != profile) {
+    var categories = EnumSet.noneOf(EobProfileCategory.class);
+    for (var profile : profiles) {
+      if (!categories.add(profile.getCategory())) {
         throw new InvalidRequestException(
-            "Conflicting _profile values for " + category.getProfileName() + ".");
+            "Conflicting _profile values for " + profile.getCategory() + ".");
       }
     }
-
-    return new ProfileSelection(profiles);
+    return new EobProfileSelection(profiles);
   }
 
-  private static Map.Entry<EobProfileCategory, ClaimProfile> parseProfileUri(UriParam uri) {
-
+  private static EobProfile parseProfileUri(UriParam uri) {
     if (uri.getQualifier() != null) {
       throw new InvalidRequestException("_profile modifiers are not supported.");
     }
-
     var value = Strings.nullToEmpty(uri.getValue()).trim();
-
-    // Look for the category (unversioned) or profile (versioned) that matches the uri from the
-    // query param.
-    for (var category : EobProfileCategory.values()) {
-      for (var profile : ClaimProfile.values()) {
-        if (profile.getAllowedUris(category).contains(value)) {
-          return Map.entry(category, profile);
-        }
-      }
-    }
-
-    throw new InvalidRequestException(
-        String.format(
-            "Unsupported _profile value '%s'. Supported values are: %s.",
-            value, SUPPORTED_PROFILES));
+    return EobProfile.fromUri(value)
+        .orElseThrow(
+            () ->
+                new InvalidRequestException(
+                    String.format(
+                        "Unsupported _profile value '%s'. Supported values are: %s.",
+                        value, SUPPORTED_PROFILES)));
   }
 }

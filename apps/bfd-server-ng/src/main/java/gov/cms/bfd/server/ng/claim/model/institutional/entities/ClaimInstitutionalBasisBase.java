@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.ProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoInstitutional;
@@ -26,8 +26,8 @@ abstract class ClaimInstitutionalBasisBase extends ClaimInstitutionalBase {
   }
 
   @Override
-  public ClaimProfile getClaimProfile() {
-    return ClaimProfile.BASIS;
+  public ProfileType getClaimProfile() {
+    return ProfileType.BASIS;
   }
 
   // endregion

@@ -82,16 +82,53 @@ public class SystemUrls {
   public static final String PROFILE_PRIOR_AUTH =
       "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization";
 
-  // FUTURE: Consider making these canonical URLs for all possible profile and type combination.
-  // https://jira.cms.gov/browse/BFD-4928
+  /** CMS Blue Button ExplanationOfBenefit Pharmacy profile. */
+  public static final String PROFILE_CMS_EOB_PHARMACY =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Pharmacy";
 
-  /** Prefix for CMS BBAPI EoB profiles. */
-  public static final String PROFILE_CMS_EOB_PREFIX =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-";
+  /** CMS Blue Button ExplanationOfBenefit Inpatient Institutional profile. */
+  public static final String PROFILE_CMS_EOB_INPATIENT_INSTITUTIONAL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Inpatient-Institutional";
 
-  /** Prefix for C4BB EoB profiles. */
-  public static final String PROFILE_C4BB_EOB_PREFIX =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-";
+  /** CMS Blue Button ExplanationOfBenefit Outpatient Institutional profile. */
+  public static final String PROFILE_CMS_EOB_OUTPATIENT_INSTITUTIONAL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Outpatient-Institutional";
+
+  /** CMS Blue Button ExplanationOfBenefit Professional NonClinician profile. */
+  public static final String PROFILE_CMS_EOB_PROFESSIONAL_NONCLINICIAN =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Professional-NonClinician";
+
+  /** C4BB ExplanationOfBenefit Pharmacy profile. */
+  public static final String PROFILE_C4BB_EOB_PHARMACY =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy";
+
+  /** C4BB ExplanationOfBenefit Inpatient Institutional profile. */
+  public static final String PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional";
+
+  /** C4BB ExplanationOfBenefit Outpatient Institutional profile. */
+  public static final String PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional";
+
+  /** C4BB ExplanationOfBenefit Professional NonClinician profile. */
+  public static final String PROFILE_C4BB_EOB_PROFESSIONAL_NONCLINICIAN =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician";
+
+  /** C4BB ExplanationOfBenefit Pharmacy Basis profile. */
+  public static final String PROFILE_C4BB_EOB_PHARMACY_BASIS =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy-Basis";
+
+  /** C4BB ExplanationOfBenefit Inpatient Institutional Basis profile. */
+  public static final String PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL_BASIS =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional-Basis";
+
+  /** C4BB ExplanationOfBenefit Outpatient Institutional Basis profile. */
+  public static final String PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL_BASIS =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional-Basis";
+
+  /** C4BB ExplanationOfBenefit Professional NonClinician Basis profile. */
+  public static final String PROFILE_C4BB_EOB_PROFESSIONAL_NONCLINICIAN_BASIS =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician-Basis";
 
   /** Version for C4BB EoB profiles . */
   public static final String PROFILE_C4BB_VERSION = "2.2.0";

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.ProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
@@ -47,8 +47,8 @@ abstract class ClaimProfessionalCmsBase extends ClaimProfessionalBase {
   }
 
   @Override
-  public ClaimProfile getClaimProfile() {
-    return ClaimProfile.CMS;
+  public ProfileType getClaimProfile() {
+    return ProfileType.CMS;
   }
 
   // endregion

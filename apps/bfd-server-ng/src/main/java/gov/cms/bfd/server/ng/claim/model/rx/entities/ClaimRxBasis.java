@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import gov.cms.bfd.server.ng.claim.ClaimProfile;
+import gov.cms.bfd.server.ng.claim.ProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.rx.ClaimItemRx;
@@ -32,7 +32,7 @@ public class ClaimRxBasis extends ClaimRxBase {
   }
 
   @Override
-  public ClaimProfile getClaimProfile() {
-    return ClaimProfile.BASIS;
+  public ProfileType getClaimProfile() {
+    return ProfileType.BASIS;
   }
 }

@@ -30,7 +30,7 @@ public record ClaimSearchCriteria(
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
     List<List<MetaSourceSk>> sources,
-    ProfileSelection profile) {
+    EobProfileSelection profile) {
 
   /**
    * Returns the offset or the default.
@@ -119,7 +119,7 @@ public record ClaimSearchCriteria(
    *
    * @return string of CMS, REGULAR, BASIS, or MIXED
    */
-  public String getProfileCategory() {
+  public String getProfileTag() {
     return profile().getProfileTag();
   }
 }

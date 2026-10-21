@@ -1,0 +1,140 @@
+package gov.cms.bfd.server.ng.claim;
+
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.INPATIENT_INSTITUTIONAL;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.OUTPATIENT_INSTITUTIONAL;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PHARMACY;
+import static gov.cms.bfd.server.ng.claim.EobProfileCategory.PROFESSIONAL_NONCLINICIAN;
+import static gov.cms.bfd.server.ng.claim.ProfileType.BASIS;
+import static gov.cms.bfd.server.ng.claim.ProfileType.CMS;
+import static gov.cms.bfd.server.ng.claim.ProfileType.REGULAR;
+
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+/** Supported ExplanationOfBenefit profiles: one per category and claim profile. */
+@Getter
+@AllArgsConstructor
+public enum EobProfile {
+
+  /** Pharmacy, CMS. */
+  PHARMACY_CMS(PHARMACY, CMS, SystemUrls.PROFILE_CMS_EOB_PHARMACY, ""),
+  /** Pharmacy, C4BB. */
+  PHARMACY_REGULAR(
+      PHARMACY, REGULAR, SystemUrls.PROFILE_C4BB_EOB_PHARMACY, SystemUrls.PROFILE_C4BB_VERSION),
+  /** Pharmacy, C4BB Basis. */
+  PHARMACY_BASIS(
+      PHARMACY, BASIS, SystemUrls.PROFILE_C4BB_EOB_PHARMACY_BASIS, SystemUrls.PROFILE_C4BB_VERSION),
+
+  /** Inpatient Institutional, CMS. */
+  INPATIENT_INSTITUTIONAL_CMS(
+      INPATIENT_INSTITUTIONAL, CMS, SystemUrls.PROFILE_CMS_EOB_INPATIENT_INSTITUTIONAL, ""),
+  /** Inpatient Institutional, C4BB. */
+  INPATIENT_INSTITUTIONAL_REGULAR(
+      INPATIENT_INSTITUTIONAL,
+      REGULAR,
+      SystemUrls.PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL,
+      SystemUrls.PROFILE_C4BB_VERSION),
+  /** Inpatient Institutional, C4BB Basis. */
+  INPATIENT_INSTITUTIONAL_BASIS(
+      INPATIENT_INSTITUTIONAL,
+      BASIS,
+      SystemUrls.PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL_BASIS,
+      SystemUrls.PROFILE_C4BB_VERSION),
+
+  /** Outpatient Institutional, CMS. */
+  OUTPATIENT_INSTITUTIONAL_CMS(
+      OUTPATIENT_INSTITUTIONAL, CMS, SystemUrls.PROFILE_CMS_EOB_OUTPATIENT_INSTITUTIONAL, ""),
+  /** Outpatient Institutional, C4BB. */
+  OUTPATIENT_INSTITUTIONAL_REGULAR(
+      OUTPATIENT_INSTITUTIONAL,
+      REGULAR,
+      SystemUrls.PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL,
+      SystemUrls.PROFILE_C4BB_VERSION),
+  /** Outpatient Institutional, C4BB Basis. */
+  OUTPATIENT_INSTITUTIONAL_BASIS(
+      OUTPATIENT_INSTITUTIONAL,
+      BASIS,
+      SystemUrls.PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL_BASIS,
+      SystemUrls.PROFILE_C4BB_VERSION),
+
+  /** Professional NonClinician, CMS. */
+  PROFESSIONAL_NONCLINICIAN_CMS(
+      PROFESSIONAL_NONCLINICIAN, CMS, SystemUrls.PROFILE_CMS_EOB_PROFESSIONAL_NONCLINICIAN, ""),
+  /** Professional NonClinician, C4BB. */
+  PROFESSIONAL_NONCLINICIAN_REGULAR(
+      PROFESSIONAL_NONCLINICIAN,
+      REGULAR,
+      SystemUrls.PROFILE_C4BB_EOB_PROFESSIONAL_NONCLINICIAN,
+      SystemUrls.PROFILE_C4BB_VERSION),
+  /** Professional NonClinician, C4BB Basis. */
+  PROFESSIONAL_NONCLINICIAN_BASIS(
+      PROFESSIONAL_NONCLINICIAN,
+      BASIS,
+      SystemUrls.PROFILE_C4BB_EOB_PROFESSIONAL_NONCLINICIAN_BASIS,
+      SystemUrls.PROFILE_C4BB_VERSION);
+
+  private final EobProfileCategory category;
+  private final ProfileType profileType;
+  private final String canonicalUrl;
+  private final String version;
+
+  /**
+   * Gets the profile for a category and claim profile.
+   *
+   * @param category profile category
+   * @param profileType claim profile
+   * @return profile
+   */
+  public static EobProfile of(EobProfileCategory category, ProfileType profileType) {
+    return Arrays.stream(values())
+        .filter(p -> p.category == category && p.profileType == profileType)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  /**
+   * Finds the profile matching a _profile value, versioned or unversioned.
+   *
+   * @param uri _profile value
+   * @return profile, if supported
+   */
+  public static Optional<EobProfile> fromUri(String uri) {
+    return Arrays.stream(values()).filter(p -> p.getAllowedUris().contains(uri)).findFirst();
+  }
+
+  /**
+   * Gets the canonical URL with its version, if it has one.
+   *
+   * @return versioned canonical URL
+   */
+  public String getVersionedCanonicalUrl() {
+    return version.isEmpty() ? canonicalUrl : canonicalUrl + "|" + version;
+  }
+
+  /**
+   * Gets the _profile values accepted for this profile.
+   *
+   * @return accepted URIs
+   */
+  public List<String> getAllowedUris() {
+    // Distinct because CMS doesn't currently have a version
+    return Stream.of(canonicalUrl, getVersionedCanonicalUrl()).distinct().toList();
+  }
+
+  /**
+   * Gets the meta.profile values for this profile.
+   *
+   * @return meta.profile values
+   */
+  public List<String> getMetaProfiles() {
+    // CMS is a superset of C4BB, so it also conforms to the C4BB profile
+    return profileType == CMS
+        ? List.of(of(category, REGULAR).getVersionedCanonicalUrl(), getVersionedCanonicalUrl())
+        : List.of(getVersionedCanonicalUrl());
+  }
+}

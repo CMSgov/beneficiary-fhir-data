@@ -17,10 +17,13 @@ import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.claim.EobProfile;
+import gov.cms.bfd.server.ng.claim.ProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -352,6 +355,13 @@ public class IntegrationTestBase {
 
   protected static ICriterion<?> profiles(List<String> urls) {
     return profiles(urls.toArray(String[]::new));
+  }
+
+  protected static List<String> canonicalUrls(ProfileType tier) {
+    return Arrays.stream(EobProfile.values())
+        .filter(profile -> profile.getProfileType() == tier)
+        .map(EobProfile::getCanonicalUrl)
+        .toList();
   }
 
   public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {

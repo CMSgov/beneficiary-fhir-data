@@ -18,7 +18,7 @@ import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.ProfileSelection;
+import gov.cms.bfd.server.ng.input.EobProfileSelection;
 import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.testUtil.SamhsaCertType;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
@@ -182,7 +182,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             List.of(),
             Collections.emptyList(),
-            new ProfileSelection());
+            new EobProfileSelection());
     var claims = eobHandler.searchByBene(criteria, options, Optional.empty());
     return getEobFromBundle(claims);
   }
