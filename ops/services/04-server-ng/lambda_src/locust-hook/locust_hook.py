@@ -19,7 +19,7 @@ RUN_LOCUST_LAMBDA_NAME = os.environ.get("RUN_LOCUST_LAMBDA_NAME", default="")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Ensure run-locust Lambdas that exceed the timeout do not get retried
-    retries={"max_attempts": 0, "total_max_attempts": 0},
+    retries={"max_attempts": 1, "total_max_attempts": 1},
     # Double the read timeout for some extra safety when synchronously invoking the run-locust
     # Lambda
     read_timeout=120,
