@@ -10,9 +10,9 @@ import gov.cms.bfd.server.ng.claim.model.common.NchClaim;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
-import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoCmsNch;
-import gov.cms.bfd.server.ng.claim.model.institutional.InstitutionalSupportingInfoCmsNch;
+import gov.cms.bfd.server.ng.claim.model.institutional.DateSupportingInfoInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.claim.model.institutional.ServiceCareTeam;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoInstitutionalCmsNch;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -48,8 +48,8 @@ public class ClaimInstitutionalCmsNch extends ClaimInstitutionalCmsBase implemen
   private ClaimRecordType claimRecordType;
 
   @Embedded private AdjudicationInstitutionalCmsNch adjudicationCharge;
-  @Embedded private DateSupportingInfoCmsNch dateSupportingInfo;
-  @Embedded private InstitutionalSupportingInfoCmsNch supportingInfo;
+  @Embedded private DateSupportingInfoInstitutionalCmsNch dateSupportingInfo;
+  @Embedded private SupportingInfoInstitutionalCmsNch supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
   @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;

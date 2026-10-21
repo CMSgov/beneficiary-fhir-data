@@ -344,6 +344,90 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence": 10,
     "category": {
       "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_MDCR_EXHSTD_DT",
+        "display": "Medicare Benefits Exhausted Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 11,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_ACTV_CARE_THRU_DT",
+        "display": "Covered Care Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-26"
+  }, {
+    "sequence": 12,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCVRD_FROM_DT",
+        "display": "Noncovered Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 13,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCVRD_THRU_DT",
+        "display": "Noncovered Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 14,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_FROM_DT",
+        "display": "Qualified Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-27"
+  }, {
+    "sequence": 15,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_THRU_DT",
+        "display": "Qualified Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 16,
+    "category": {
+      "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
         "code": "pointoforigin"
       } ]
@@ -359,7 +443,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 11,
+    "sequence": 17,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -377,7 +461,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 12,
+    "sequence": 18,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -395,7 +479,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 13,
+    "sequence": 19,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -415,7 +499,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 14,
+    "sequence": 20,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -435,7 +519,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 15,
+    "sequence": 21,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -455,7 +539,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 16,
+    "sequence": 22,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -469,7 +553,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     }
   }, {
-    "sequence": 17,
+    "sequence": 23,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -1549,6 +1633,90 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence": 13,
     "category": {
       "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_MDCR_EXHSTD_DT",
+        "display": "Medicare Benefits Exhausted Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 14,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_ACTV_CARE_THRU_DT",
+        "display": "Covered Care Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-26"
+  }, {
+    "sequence": 15,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCVRD_FROM_DT",
+        "display": "Noncovered Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 16,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCVRD_THRU_DT",
+        "display": "Noncovered Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 17,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_FROM_DT",
+        "display": "Qualified Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-27"
+  }, {
+    "sequence": 18,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_THRU_DT",
+        "display": "Qualified Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 19,
+    "category": {
+      "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
         "code": "pointoforigin"
       } ]
@@ -1564,7 +1732,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 14,
+    "sequence": 20,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -1582,7 +1750,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 15,
+    "sequence": 21,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -1600,7 +1768,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 16,
+    "sequence": 22,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -1620,7 +1788,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 17,
+    "sequence": 23,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -1640,7 +1808,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 18,
+    "sequence": 24,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -1660,7 +1828,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 19,
+    "sequence": 25,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -1674,7 +1842,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 20,
+    "sequence": 26,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -1694,7 +1862,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     }
   }, {
-    "sequence": 21,
+    "sequence": 27,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4267,20 +4435,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_ACTV_CARE_THRU_DT",
-        "display": "Covered Care Through Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 12,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code": "CLM_NCVRD_FROM_DT",
         "display": "Noncovered Stay From Date"
       }, {
@@ -4291,7 +4445,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 13,
+    "sequence": 12,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4305,21 +4459,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 14,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_MDCR_EXHSTD_DT",
-        "display": "Medicare Benefits Exhausted Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 15,
+    "sequence": 13,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4333,7 +4473,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 16,
+    "sequence": 14,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4345,7 +4485,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "end": "2021-10-03"
     }
   }, {
-    "sequence": 17,
+    "sequence": 15,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4354,7 +4494,63 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-10-03"
   }, {
+    "sequence": 16,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_MDCR_EXHSTD_DT",
+        "display": "Medicare Benefits Exhausted Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 17,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_ACTV_CARE_THRU_DT",
+        "display": "Covered Care Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-26"
+  }, {
     "sequence": 18,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_FROM_DT",
+        "display": "Qualified Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-27"
+  }, {
+    "sequence": 19,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_THRU_DT",
+        "display": "Qualified Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 20,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4372,7 +4568,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 19,
+    "sequence": 21,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4390,7 +4586,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 20,
+    "sequence": 22,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4408,7 +4604,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 21,
+    "sequence": 23,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4428,7 +4624,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 22,
+    "sequence": 24,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4448,7 +4644,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 23,
+    "sequence": 25,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4468,7 +4664,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 24,
+    "sequence": 26,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4488,7 +4684,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 25,
+    "sequence": 27,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4508,7 +4704,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 26,
+    "sequence": 28,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4527,7 +4723,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 27,
+    "sequence": 29,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4547,7 +4743,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 28,
+    "sequence": 30,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4566,7 +4762,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 29,
+    "sequence": 31,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4585,7 +4781,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 30,
+    "sequence": 32,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4604,7 +4800,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 31,
+    "sequence": 33,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4623,7 +4819,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 32,
+    "sequence": 34,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -4637,7 +4833,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     }
   }, {
-    "sequence": 33,
+    "sequence": 35,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -5926,20 +6122,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_ACTV_CARE_THRU_DT",
-        "display": "Covered Care Through Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 12,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code": "CLM_NCVRD_FROM_DT",
         "display": "Noncovered Stay From Date"
       }, {
@@ -5950,7 +6132,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 13,
+    "sequence": 12,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -5964,21 +6146,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 14,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_MDCR_EXHSTD_DT",
-        "display": "Medicare Benefits Exhausted Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 15,
+    "sequence": 13,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -5992,7 +6160,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 16,
+    "sequence": 14,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6004,7 +6172,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "end": "2021-10-03"
     }
   }, {
-    "sequence": 17,
+    "sequence": 15,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6013,7 +6181,63 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-10-03"
   }, {
+    "sequence": 16,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_MDCR_EXHSTD_DT",
+        "display": "Medicare Benefits Exhausted Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 17,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_ACTV_CARE_THRU_DT",
+        "display": "Covered Care Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-26"
+  }, {
     "sequence": 18,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_FROM_DT",
+        "display": "Qualified Stay From Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-09-27"
+  }, {
+    "sequence": 19,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_QLFY_STAY_THRU_DT",
+        "display": "Qualified Stay Through Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-04"
+  }, {
+    "sequence": 20,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6031,7 +6255,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 19,
+    "sequence": 21,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6049,7 +6273,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 20,
+    "sequence": 22,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6067,7 +6291,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 21,
+    "sequence": 23,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6087,7 +6311,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 22,
+    "sequence": 24,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6107,7 +6331,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 23,
+    "sequence": 25,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6127,7 +6351,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 24,
+    "sequence": 26,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6147,7 +6371,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 25,
+    "sequence": 27,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6167,7 +6391,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 26,
+    "sequence": 28,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6186,7 +6410,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 27,
+    "sequence": 29,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6206,7 +6430,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 28,
+    "sequence": 30,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6225,7 +6449,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 29,
+    "sequence": 31,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6244,7 +6468,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 30,
+    "sequence": 32,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6263,7 +6487,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 31,
+    "sequence": 33,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6282,7 +6506,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 32,
+    "sequence": 34,
     "category": {
       "coding": [ {
         "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -6296,7 +6520,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     }
   }, {
-    "sequence": 33,
+    "sequence": 35,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",

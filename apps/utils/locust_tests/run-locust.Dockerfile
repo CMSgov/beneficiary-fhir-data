@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.6.10 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b AS uv
 # First, bundle the dependencies into the task root.
 FROM public.ecr.aws/lambda/python:3.13-arm64 AS builder
 # Enable bytecode compilation, to improve cold-start performance.

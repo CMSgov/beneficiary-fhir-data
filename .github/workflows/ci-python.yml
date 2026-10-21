@@ -85,6 +85,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-generate-coverage-sample",
+              projectRoot: "apps/bfd-model-idr/src/generate_coverage_sample",
+              testsRoot: "apps/bfd-model-idr/src/generate_coverage_sample",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
@@ -95,7 +103,7 @@ jobs:
           ref: ${{ inputs.branch }}
       # Maven is needed to run the migrator
       - name: "Setup JDK"
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: "25"
           distribution: "corretto"

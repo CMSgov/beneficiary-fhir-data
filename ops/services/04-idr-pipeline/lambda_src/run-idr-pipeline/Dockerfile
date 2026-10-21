@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.11.2@sha256:c4f5de312ee66d46810635ffc5df34a1973ba753e7241ce3a08ef979ddd7bea5 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b AS uv
 
 FROM public.ecr.aws/lambda/python:3.14.2026.03.31.12-arm64@sha256:55f1f89e93c4ef72412896b6a3a99fa70fcffd68a4a3f5324992f10552d9b625 AS lambda
 
@@ -27,4 +27,3 @@ COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
 COPY ./app ${LAMBDA_TASK_ROOT}/app
 CMD [ "app.main.handler" ]
-
