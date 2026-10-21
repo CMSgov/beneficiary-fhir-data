@@ -8,6 +8,7 @@ from typing import (
     Any,
     Protocol,
     TypeVar,
+    cast,
 )
 
 from locust import TaskSet, User, events, tag, task
@@ -498,19 +499,16 @@ class HighVolumeUser(BFDUserBase):
         """
         # Filter out the class members without a tasks attribute
         class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-        potential_tasks = list(
-            filter(
-                lambda potential_task: (
-                    hasattr(potential_task[1], "tasks")
-                    and issubclass(potential_task[1], HighVolumeTaskSet)
-                ),
-                class_members,
-            )
-        )
+        potential_tasks: list[tuple[str, type[HighVolumeTaskSet]]] = [
+            (name, cls)
+            for name, cls in class_members
+            if hasattr(cls, "tasks") and issubclass(cls, HighVolumeTaskSet)
+        ]
 
         # Filter each task holder's tasks by the given tags and exclude_tags
-        tasks = []
-        for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
+        task_holders = [cast(type[TaskHolder], task_set) for _, task_set in potential_tasks]
+        tasks: list[Any] = []
+        for task_holder in task_holders:
             tasks.extend(HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags))
         return tasks
 
