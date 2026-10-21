@@ -18,11 +18,8 @@ LOCUST_HOST = os.environ.get("LOCUST_HOST", default="")
 RUN_LOCUST_LAMBDA_NAME = os.environ.get("RUN_LOCUST_LAMBDA_NAME", default="")
 BOTO_CONFIG = Config(
     region_name=REGION,
-    # Instructs boto3 to retry upto 10 times using an exponential backoff
-    retries={
-        "total_max_attempts": 10,
-        "mode": "adaptive",
-    },
+    # Ensure run-locust Lambdas that exceed the timeout do not get retried
+    retries={"max_attempts": 0, "total_max_attempts": 0},
     # Double the read timeout for some extra safety when synchronously invoking the run-locust
     # Lambda
     read_timeout=120,
