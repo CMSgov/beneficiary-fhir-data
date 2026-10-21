@@ -35,6 +35,8 @@ dev = [
 
 [tool.uv]
 exclude-newer = "7 days"
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { certifi = false }
 
 [tool.uv.sources]
 idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
