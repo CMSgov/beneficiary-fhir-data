@@ -34,6 +34,8 @@ dev = [
 
 [tool.uv]
 exclude-newer = "7 days"
+override-dependencies = ["filelock>=4.2.1"]
+exclude-newer-package = { filelock = false }
 
 [tool.uv.sources]
 idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
