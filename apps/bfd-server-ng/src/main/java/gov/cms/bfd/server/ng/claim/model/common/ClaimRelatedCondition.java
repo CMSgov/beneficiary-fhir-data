@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+/** ClaimRelatedCondition parses ClaimRelatedConditionCodes and converts them into FHIR objects. */
 @Embeddable
 public class ClaimRelatedCondition {
   @Column(name = "clm_rlt_cond_cd")
@@ -17,6 +17,7 @@ public class ClaimRelatedCondition {
   /** Precompile regex for speed gains. Matches on any two characters. */
   private static final Pattern TWO_CHAR_CHUNK = Pattern.compile("(?<=\\G.{2})");
 
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
