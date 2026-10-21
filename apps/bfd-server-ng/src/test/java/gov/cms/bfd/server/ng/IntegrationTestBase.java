@@ -99,9 +99,6 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_PROFESSIONAL_NON_LATEST = "3351266481404";
   protected static final String CLAIM_ID_INSTITUTIONAL = "1071939711296";
 
-  protected static final String CLAIM_PATIENT_CONTROL_NUMBER_INSTITUTIONAL = "00000000000001ABC";
-  protected static final String CLAIM_PATIENT_CONTROL_NUMBER_PROFESSIONAL = "00000000000002ABC";
-
   protected static final String CLAIM_LINE_NDC_CODE = "00409189001";
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
