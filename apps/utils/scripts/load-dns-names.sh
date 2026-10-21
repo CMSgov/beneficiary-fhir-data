@@ -44,34 +44,42 @@ find_internal_elb_dns() {
 	echo "${dns}"
 }
 
-# The next few lines run the lookups from the AWS CLI in parallel as they can individually be quite
-# slow.
-
-_bfd_tmp_v1v2=$(mktemp)
-_bfd_tmp_v3=$(mktemp)
-
-find_internal_elb_dns "$BFD_ENV" server >"${_bfd_tmp_v1v2}" &
-_bfd_pid_v1v2=$!
-
-find_internal_elb_dns "$BFD_ENV" server-ng >"${_bfd_tmp_v3}" &
-_bfd_pid_v3=$!
-
-wait "${_bfd_pid_v1v2}" && _bfd_status_v1v2=0 || _bfd_status_v1v2=$?
-wait "${_bfd_pid_v3}" && _bfd_status_v3=0 || _bfd_status_v3=$?
-
-if [[ ${_bfd_status_v1v2} -eq 0 ]]; then
-	BFD_V1V2_LB_DNSNAME="$(cat "$_bfd_tmp_v1v2")"
+if [[ $BFD_ENV == "test" || $BFD_ENV == "sandbox" || $BFD_ENV == "prod" ]]; then
+	BFD_V1V2_LB_DNSNAME="$BFD_ENV.fhir.bfd.cmscloud.local"
 	export BFD_V1V2_LB_DNSNAME
-else
-	unset BFD_V1V2_LB_DNSNAME
-fi
 
-if [[ ${_bfd_status_v3} -eq 0 ]]; then
-	BFD_V3_LB_DNSNAME="$(cat "$_bfd_tmp_v3")"
+	BFD_V3_LB_DNSNAME="$BFD_ENV.fhirv3.bfd.cmscloud.local"
 	export BFD_V3_LB_DNSNAME
 else
-	unset BFD_V3_LB_DNSNAME
-fi
+	# The next few lines run the lookups from the AWS CLI in parallel as they can individually be quite
+	# slow.
 
-rm -f "${_bfd_tmp_v1v2}" "${_bfd_tmp_v3}"
-unset _bfd_tmp_v1v2 _bfd_tmp_v3 _bfd_pid_v1v2 _bfd_pid_v3 _bfd_status_v1v2 _bfd_status_v3
+	_bfd_tmp_v1v2=$(mktemp)
+	_bfd_tmp_v3=$(mktemp)
+
+	find_internal_elb_dns "$BFD_ENV" server >"${_bfd_tmp_v1v2}" &
+	_bfd_pid_v1v2=$!
+
+	find_internal_elb_dns "$BFD_ENV" server-ng >"${_bfd_tmp_v3}" &
+	_bfd_pid_v3=$!
+
+	wait "${_bfd_pid_v1v2}" && _bfd_status_v1v2=0 || _bfd_status_v1v2=$?
+	wait "${_bfd_pid_v3}" && _bfd_status_v3=0 || _bfd_status_v3=$?
+
+	if [[ ${_bfd_status_v1v2} -eq 0 ]]; then
+		BFD_V1V2_LB_DNSNAME="$(cat "$_bfd_tmp_v1v2")"
+		export BFD_V1V2_LB_DNSNAME
+	else
+		unset BFD_V1V2_LB_DNSNAME
+	fi
+
+	if [[ ${_bfd_status_v3} -eq 0 ]]; then
+		BFD_V3_LB_DNSNAME="$(cat "$_bfd_tmp_v3")"
+		export BFD_V3_LB_DNSNAME
+	else
+		unset BFD_V3_LB_DNSNAME
+	fi
+
+	rm -f "${_bfd_tmp_v1v2}" "${_bfd_tmp_v3}"
+	unset _bfd_tmp_v1v2 _bfd_tmp_v3 _bfd_pid_v1v2 _bfd_pid_v3 _bfd_status_v1v2 _bfd_status_v3
+fi
