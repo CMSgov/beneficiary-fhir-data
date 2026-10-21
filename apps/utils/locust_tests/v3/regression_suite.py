@@ -7,8 +7,9 @@ from locust import events, tag, task
 from locust.env import Environment
 
 from common import data, db_idr
-from common.bfd_user_base import BFDUserBase
+from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
+from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 master_bene_sks: Collection[str] = []
 master_bene_sks_part_a: Collection[str] = []
@@ -63,6 +64,13 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
 
 logger = logging.getLogger(__name__)
+
+
+set_comparisons_metadata_path("./config/regression_suites_compare_meta.json")
+
+
+class TestLoadShape(UserInitAwareLoadShape):
+    pass
 
 
 class RegressionV3User(BFDUserBase):
