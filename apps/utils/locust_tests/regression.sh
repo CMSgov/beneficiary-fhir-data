@@ -2,8 +2,8 @@
 set -Eeou pipefail
 
 # @flag 	--headless
-# @option --table-sample-percent=0.25
 # @option --users=1
+# @option --table-sample-percent
 eval "$(argc --argc-eval "$0" "$@")"
 
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
@@ -16,6 +16,10 @@ headless=""
 if [[ -v argc_headless ]]; then
 	headless="--headless"
 fi
+tablesample=()
+if [[ -v argc_table_sample_percent ]]; then
+	tablesample=("--table-sample-percent" "$argc_table_sample_percent")
+fi
 (
 	cd "$SCRIPT_DIR"
 	# shellcheck disable=SC2154 # argc variables are generated externally
@@ -23,8 +27,8 @@ fi
 		--client-cert-path="$BFD_SAMHSA_COMBINED_CERT" \
 		--server-public-key="$BFD_PUBLIC_CERT" \
 		--host="https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}" \
-		--table-sample-percent "$argc_table_sample_percent" \
 		--users "$argc_users" \
 		--spawn-rate "$argc_users" \
+		"${tablesample[@]}" \
 		$headless
 )
