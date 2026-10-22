@@ -31,6 +31,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids",
     )
 
@@ -38,6 +39,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks_part_a = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_a_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids_part_a",
     )
 
@@ -45,6 +47,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks_part_b = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_b_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids_part_b",
     )
 
@@ -52,6 +55,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_mbis,
+        use_table_sample=True,
         data_type_name="bene_mbis",
     )
 
@@ -59,6 +63,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_claim_ids = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_claim_ids,
+        use_table_sample=True,
         data_type_name="claim_ids",
     )
 
