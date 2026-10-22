@@ -128,57 +128,42 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
-    claim_query = t"""
-    SELECT clm_uniq_id FROM (
-        SELECT clm_uniq_id FROM idr.claim_rx
-        JOIN {VALID_BENE_SQL:q} AS b
-            ON claim_rx.bene_sk = b.bene_sk
-        WHERE clm_ltst_clm_ind = 'Y'
-        LIMIT 200
-        ) t1
-    UNION ALL
-    SELECT clm_uniq_id FROM (
-            SELECT DISTINCT claim_institutional_nch.clm_uniq_id FROM idr.claim_institutional_nch
-            JOIN {VALID_BENE_SQL:q} AS b
-                ON claim_institutional_nch.bene_sk = b.bene_sk
-            WHERE EXISTS (
-                SELECT 1 FROM idr.claim_item_institutional_nch
-                WHERE claim_item_institutional_nch.clm_uniq_id = claim_institutional_nch.clm_uniq_id
-            ) AND clm_ltst_clm_ind = 'Y'
-            LIMIT 200
-        ) t2
-    UNION ALL
-    SELECT clm_uniq_id FROM (
-            SELECT DISTINCT claim_institutional_ss.clm_uniq_id FROM idr.claim_institutional_ss
-            JOIN {VALID_BENE_SQL:q} AS b
-                ON claim_institutional_ss.bene_sk = b.bene_sk
-            WHERE EXISTS (
-                SELECT 1 FROM idr.claim_item_institutional_ss
-                WHERE claim_item_institutional_ss.clm_uniq_id = claim_institutional_ss.clm_uniq_id
-            ) AND clm_ltst_clm_ind = 'Y'
-            LIMIT 200
-        ) t3
-    UNION ALL
-    SELECT clm_uniq_id FROM (
-            SELECT DISTINCT claim_professional_nch.clm_uniq_id FROM idr.claim_professional_nch
-            JOIN {VALID_BENE_SQL:q} AS b
-                ON claim_professional_nch.bene_sk = b.bene_sk
-            WHERE EXISTS (
-                SELECT 1 FROM idr.claim_item_professional_nch
-                WHERE claim_item_professional_nch.clm_uniq_id = claim_professional_nch.clm_uniq_id
-            ) AND clm_ltst_clm_ind = 'Y'
-            LIMIT 200
-        ) t4
-    UNION ALL
-    SELECT clm_uniq_id FROM (
-            SELECT DISTINCT claim_professional_ss.clm_uniq_id FROM idr.claim_professional_ss
-            JOIN {VALID_BENE_SQL:q} AS b
-                ON claim_professional_ss.bene_sk = b.bene_sk
-            WHERE EXISTS (
-                SELECT 1 FROM idr.claim_item_professional_ss
-                WHERE claim_item_professional_ss.clm_uniq_id = claim_professional_ss.clm_uniq_id
-            ) AND clm_ltst_clm_ind = 'Y'
-            LIMIT 200
-        ) t5;
-    """
+    limit = 200
+
+    # Each branch samples one claims table; claims tables that keep their items in a
+    # separate table are only testable for claims that have at least one item.
+    claims_and_items = [
+        ("claim_rx", None),
+        ("claim_institutional_nch", "claim_item_institutional_nch"),
+        ("claim_institutional_ss", "claim_item_institutional_ss"),
+        ("claim_professional_nch", "claim_item_professional_nch"),
+        ("claim_professional_ss", "claim_item_professional_ss"),
+    ]
+
+    branches: list[Template] = []
+    for claims_table, items_table in claims_and_items:
+        item_filter = (
+            t"""
+                AND EXISTS (
+                    SELECT 1 FROM idr.{items_table:i}
+                    WHERE {items_table:i}.clm_uniq_id = {claims_table:i}.clm_uniq_id
+                )
+            """
+            if items_table
+            else sql.SQL("")
+        )
+        branches.append(
+            t"""
+                SELECT clm_uniq_id FROM (
+                    SELECT DISTINCT {claims_table:i}.clm_uniq_id FROM idr.{claims_table:i}
+                    JOIN {VALID_BENE_SQL:q} AS b
+                        ON {claims_table:i}.bene_sk = b.bene_sk
+                    WHERE clm_ltst_clm_ind = 'Y'
+                        {item_filter:q}
+                    LIMIT {limit:l}
+                )
+            """
+        )
+
+    claim_query = t"{sql.SQL(' UNION ALL ').join(branches):q};"
     return [str(r[0]) for r in set(x for x in _execute(uri, claim_query))]
