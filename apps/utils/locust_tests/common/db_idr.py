@@ -183,4 +183,4 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
         )
 
     claim_query = t"{sql.SQL(' UNION ALL ').join(branches):q};"
-    return [str(r[0]) for r in set(x for x in _execute(uri, claim_query))]
+    return list({str(r[0]) for r in _execute(uri, claim_query)})
