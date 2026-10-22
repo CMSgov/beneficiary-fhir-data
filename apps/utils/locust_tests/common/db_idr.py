@@ -175,7 +175,7 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
                     SELECT DISTINCT {claims_table:i}.clm_uniq_id
                     FROM idr.{claims_table:i} {sampling:q}
                     JOIN {_valid_bene_sql():q} AS b ON {claims_table:i}.bene_sk = b.bene_sk
-                    WHERE clm_ltst_clm_ind = 'Y'
+                    WHERE {claims_table:i}.clm_ltst_clm_ind = 'Y'
                     {item_filter:q}
                     LIMIT {limit:l}
                 )
