@@ -34,7 +34,7 @@ def _sample_clause(table_sample_pct: float | None) -> Template:
 
 
 def _valid_bene_sql(table_sample_pct: float | None = None) -> Template:
-    """Return the definition of the idr.valid_beneficiary view."""
+    """Return a template query for querying valid beneficiaries, optionally sampling."""
     return t"""(
         SELECT b.*
         FROM idr.beneficiary b {_sample_clause(table_sample_pct):q}
