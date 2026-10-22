@@ -42,9 +42,9 @@ public abstract class BeneficiaryBase {
   /**
    * SQL QUERY representation of valid beneficiaries. This can be used for any query that needs
    * valid beneficiaries in a Subselect annotation. We cannot use inheritance because JPA does not
-   * respect it. This pattern allows for reuse without having to maintain in multiple places.
-   * The WHERE CLAUSE matches VALID_BENE_SQL_RESTRICTION. The need to be kept in sync
-   * This cannot concat from VALID_BENE_SQL_RESTRICTION due to aliasing with JPA.
+   * respect it. This pattern allows for reuse without having to maintain in multiple places. The
+   * WHERE CLAUSE matches VALID_BENE_SQL_RESTRICTION. The need to be kept in sync This cannot concat
+   * from VALID_BENE_SQL_RESTRICTION due to aliasing with JPA. They must be managed separately.
    */
   public static final String VALID_BENE_VIEW =
       """
