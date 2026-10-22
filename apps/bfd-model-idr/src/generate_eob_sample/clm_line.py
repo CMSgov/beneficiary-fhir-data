@@ -42,8 +42,6 @@ CLM_LINE_COL = [
     "HCPCS_4_MDFR_CD",
     "HCPCS_5_MDFR_CD",
     "PRVDR_RNDRNG_PRVDR_NPI_NUM",
-    # "CLM_REV_CNTR_TDAPA_AMT", pretty sure this should be in INSTL
-    # "CLM_LINE_INSTNL_REV_CTR_DT",  pretty sure this should be in INSTL
     "CLM_LINE_OTHR_TP_PD_AMT",
     "CLM_LINE_NCVRD_PD_AMT",
 ]
@@ -97,7 +95,13 @@ INST_LINE_COL = [
 
 ANSI_SGNTR_COL = [
     "CLM_1_REV_CNTR_ANSI_GRP_CD",
-    "CLM_1_REV_CNTR_ANSI_RSN_CD"
+    "CLM_1_REV_CNTR_ANSI_RSN_CD",
+    "CLM_2_REV_CNTR_ANSI_GRP_CD",
+    "CLM_2_REV_CNTR_ANSI_RSN_CD",
+    "CLM_3_REV_CNTR_ANSI_GRP_CD",
+    "CLM_3_REV_CNTR_ANSI_RSN_CD",
+    "CLM_4_REV_CNTR_ANSI_GRP_CD",
+    "CLM_4_REV_CNTR_ANSI_RSN_CD",
 ]
 
 DCMTN_LINE_COL = [
@@ -115,7 +119,6 @@ class ClmLineBuilder:
         instnl_lines = self.read_instnl_lines()
         prfnl_lines = self.read_prfnl_lines()
         dcmtn_lines = self.read_dcmtn_lines()
-        ansi_sgntr_sk = "CLM_ANSI_SGNTR_SK"
         return [
             {
                 # extract <-- CLM_LINE_COLs from line
@@ -140,7 +143,7 @@ class ClmLineBuilder:
                 **{
                     col: find_linked_field_in_tgt_by_line_num_sk(src_lines=instnl_lines,
                     clm_line=clm_line, source_directory=self.source_directory,
-                    sk_field=ansi_sgntr_sk, extracted_field=col)
+                    sk_field="CLM_ANSI_SGNTR_SK", extracted_field=col)
                     for col in ANSI_SGNTR_COL
                 },
             }
