@@ -19,59 +19,50 @@ import lombok.Getter;
 /** Supported ExplanationOfBenefit profiles: one per category and claim profile. */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("checkstyle:JavadocVariable")
 public enum EobProfile {
 
-  /** Pharmacy, CMS. */
+  // CMS
   PHARMACY_CMS(PHARMACY, CMS, SystemUrls.PROFILE_CMS_EOB_PHARMACY, ""),
-  /** Pharmacy, C4BB. */
-  PHARMACY_REGULAR(
-      PHARMACY, REGULAR, SystemUrls.PROFILE_C4BB_EOB_PHARMACY, SystemUrls.PROFILE_C4BB_VERSION),
-  /** Pharmacy, C4BB Basis. */
-  PHARMACY_BASIS(
-      PHARMACY, BASIS, SystemUrls.PROFILE_C4BB_EOB_PHARMACY_BASIS, SystemUrls.PROFILE_C4BB_VERSION),
-
-  /** Inpatient Institutional, CMS. */
   INPATIENT_INSTITUTIONAL_CMS(
       INPATIENT_INSTITUTIONAL, CMS, SystemUrls.PROFILE_CMS_EOB_INPATIENT_INSTITUTIONAL, ""),
-  /** Inpatient Institutional, C4BB. */
+  OUTPATIENT_INSTITUTIONAL_CMS(
+      OUTPATIENT_INSTITUTIONAL, CMS, SystemUrls.PROFILE_CMS_EOB_OUTPATIENT_INSTITUTIONAL, ""),
+  PROFESSIONAL_NONCLINICIAN_CMS(
+      PROFESSIONAL_NONCLINICIAN, CMS, SystemUrls.PROFILE_CMS_EOB_PROFESSIONAL_NONCLINICIAN, ""),
+
+  // C4BB - Regular
+  PHARMACY_REGULAR(
+      PHARMACY, REGULAR, SystemUrls.PROFILE_C4BB_EOB_PHARMACY, SystemUrls.PROFILE_C4BB_VERSION),
   INPATIENT_INSTITUTIONAL_REGULAR(
       INPATIENT_INSTITUTIONAL,
       REGULAR,
       SystemUrls.PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL,
       SystemUrls.PROFILE_C4BB_VERSION),
-  /** Inpatient Institutional, C4BB Basis. */
-  INPATIENT_INSTITUTIONAL_BASIS(
-      INPATIENT_INSTITUTIONAL,
-      BASIS,
-      SystemUrls.PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL_BASIS,
-      SystemUrls.PROFILE_C4BB_VERSION),
-
-  /** Outpatient Institutional, CMS. */
-  OUTPATIENT_INSTITUTIONAL_CMS(
-      OUTPATIENT_INSTITUTIONAL, CMS, SystemUrls.PROFILE_CMS_EOB_OUTPATIENT_INSTITUTIONAL, ""),
-  /** Outpatient Institutional, C4BB. */
   OUTPATIENT_INSTITUTIONAL_REGULAR(
       OUTPATIENT_INSTITUTIONAL,
       REGULAR,
       SystemUrls.PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL,
       SystemUrls.PROFILE_C4BB_VERSION),
-  /** Outpatient Institutional, C4BB Basis. */
-  OUTPATIENT_INSTITUTIONAL_BASIS(
-      OUTPATIENT_INSTITUTIONAL,
-      BASIS,
-      SystemUrls.PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL_BASIS,
-      SystemUrls.PROFILE_C4BB_VERSION),
-
-  /** Professional NonClinician, CMS. */
-  PROFESSIONAL_NONCLINICIAN_CMS(
-      PROFESSIONAL_NONCLINICIAN, CMS, SystemUrls.PROFILE_CMS_EOB_PROFESSIONAL_NONCLINICIAN, ""),
-  /** Professional NonClinician, C4BB. */
   PROFESSIONAL_NONCLINICIAN_REGULAR(
       PROFESSIONAL_NONCLINICIAN,
       REGULAR,
       SystemUrls.PROFILE_C4BB_EOB_PROFESSIONAL_NONCLINICIAN,
       SystemUrls.PROFILE_C4BB_VERSION),
-  /** Professional NonClinician, C4BB Basis. */
+
+  // C4BB - Basis
+  PHARMACY_BASIS(
+      PHARMACY, BASIS, SystemUrls.PROFILE_C4BB_EOB_PHARMACY_BASIS, SystemUrls.PROFILE_C4BB_VERSION),
+  INPATIENT_INSTITUTIONAL_BASIS(
+      INPATIENT_INSTITUTIONAL,
+      BASIS,
+      SystemUrls.PROFILE_C4BB_EOB_INPATIENT_INSTITUTIONAL_BASIS,
+      SystemUrls.PROFILE_C4BB_VERSION),
+  OUTPATIENT_INSTITUTIONAL_BASIS(
+      OUTPATIENT_INSTITUTIONAL,
+      BASIS,
+      SystemUrls.PROFILE_C4BB_EOB_OUTPATIENT_INSTITUTIONAL_BASIS,
+      SystemUrls.PROFILE_C4BB_VERSION),
   PROFESSIONAL_NONCLINICIAN_BASIS(
       PROFESSIONAL_NONCLINICIAN,
       BASIS,
@@ -108,7 +99,7 @@ public enum EobProfile {
   }
 
   /**
-   * Gets the canonical URL with its version, if it has one.
+   * Gets the canonical URL with its version, if it has one. CMS does not have one at the moment.
    *
    * @return versioned canonical URL
    */
