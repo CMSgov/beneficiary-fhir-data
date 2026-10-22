@@ -1,1 +1,1 @@
-../../bfd_synthetic_generator/claim_type_codes.py
+../../bfd-synthetic-generator/claim_type_codes.py
