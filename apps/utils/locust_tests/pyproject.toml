@@ -32,6 +32,8 @@ lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 
 [tool.uv]
 exclude-newer = "7 days"
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { certifi = false }
 
 [tool.ruff]
 # Set the maximum line length to 100.

@@ -22,6 +22,7 @@ generate-eob-sample = "generate_eob_sample:main"
 generate-bene-sample = "generate_bene_sample:main"
 gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"
+generate-coverage-sample = "generate_coverage_sample:main"
 
 [dependency-groups]
 dev = [
@@ -35,7 +36,8 @@ dev = [
 [tool.uv]
 exclude-newer = "7 days"
 override-dependencies = ["filelock>=4.2.1"]
-exclude-newer-package = { filelock = false }
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { filelock = false, certifi = false }
 
 [tool.uv.sources]
 idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
@@ -58,6 +60,7 @@ packages = [
   "src/generate_bene_sample",
   "src/gen_dd",
   "src/generate_prior_auth_sample",
+  "src/generate_coverage_sample",
 ]
 
 [tool.ruff]
