@@ -9,6 +9,7 @@ def common_options(function):
     function = click.option(
         "--force-ztm",
         is_flag=True,
+        default=False,
         help=(
             'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for an existing patient to '
             "be generated. This will introduce new rows for patients that previously had "

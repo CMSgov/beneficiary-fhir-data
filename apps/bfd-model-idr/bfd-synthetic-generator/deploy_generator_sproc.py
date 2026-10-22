@@ -1,25 +1,14 @@
 import os
 import sys
 import zipfile
-from typing import Any
+from enum import Enum
 
 import click
-from claims_generator import GeneratePacDataMode
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from load_synthetic_output import BeneSkMode
 from shared_options import common_options
 from snowflake.snowpark import Session
 from snowflake.snowpark.types import BooleanType, DataType, IntegerType, StringType, VariantType
-
-_BATCH_SIZE = 50_000
-
-_INPUT_TYPE_MAP: dict[Any, tuple[DataType, str]] = {
-    click.BOOL: (BooleanType(), "BOOLEAN"),
-    click.INT: (IntegerType(), "NUMBER"),
-    click.STRING: (StringType(), "VARCHAR"),
-    click.Choice: (StringType(), "VARCHAR"),
-}
 
 
 def _require_env(name: str) -> str:
@@ -27,7 +16,7 @@ def _require_env(name: str) -> str:
     if not val:
         print(
             f"Missing required env variable {name}. "
-            + "Source load-synthetic-credentials.sh with BFD_ENV set before running."
+            + "Source load-idr-credentials.sh with BFD_ENV set before running."
         )
         sys.exit(1)
     return val
@@ -35,9 +24,13 @@ def _require_env(name: str) -> str:
 
 def _get_snowpark_and_sql_types(param: click.Parameter) -> tuple[DataType, str]:
     param_type = param.type
-    if param.type in _INPUT_TYPE_MAP:
-        return _INPUT_TYPE_MAP[param_type]
 
+    if isinstance(param_type, click.types.BoolParamType):
+        return BooleanType(), "BOOLEAN"
+    if isinstance(param_type, click.types.IntParamType):
+        return IntegerType(), "NUMBER"
+    if isinstance(param_type, (click.types.StringParamType, click.Choice)):
+        return StringType(), "VARCHAR"
     return StringType(), "VARCHAR"
 
 
@@ -81,18 +74,9 @@ def _create_snowflake_session() -> Session:
 
 @click.command
 @common_options
-def main(
-    force_ztm: bool,
-    patients: int,
-    claims: bool,
-    min_claims: int,
-    max_claims: int,
-    samhsa: bool,
-    pac_gen: GeneratePacDataMode,
-    bene_sk_mode: BeneSkMode,
-    truncate: bool = False,
-    batch_size: int = _BATCH_SIZE,
-) -> None:
+def main(**kwargs) -> None:
+    min_claims = kwargs.get("min_claims")
+    max_claims = kwargs.get("max_claims")
     if min_claims > max_claims:
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
@@ -112,14 +96,20 @@ def main(
 
     input_types = []
     sql_input_types = []
+    ordered_inputs = []
     for param in main.params:
         snowpark_type, sql_string = _get_snowpark_and_sql_types(param)
         input_types.append(snowpark_type)
         sql_input_types.append(sql_string)
+        val = kwargs[param.name]
+        if isinstance(val, Enum):
+            ordered_inputs.append(val.value.upper())
+        else:
+            ordered_inputs.append(val)
 
     print("Creating/Updating stored procedure...")
     generator_sproc = session.sproc.register_from_file(
-        file_path=f"@{db_name}.{schema_name}.generator_files_stage/bfd_synthetic_generator.zip",
+        file_path=f"@{db_name}.{schema_name}.generator_files_stage/bfd-synthetic-generator.zip",
         func_name="generator_sproc_handler.generate_synthetic_data",
         return_type=VariantType(),
         name="generate_synthetic_data",
@@ -167,18 +157,7 @@ def main(
         sys.exit(1)
 
     print("Running stored procedure to generate synthetic data...")
-    generator_sproc(
-        force_ztm,
-        pac_gen.value,
-        bene_sk_mode.value,
-        patients,
-        claims,
-        min_claims,
-        max_claims,
-        samhsa,
-        truncate,
-        batch_size,
-    )
+    generator_sproc(*ordered_inputs)
     print("Finished!")
 
 

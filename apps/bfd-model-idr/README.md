@@ -192,7 +192,7 @@ If _any_ claims-related tables have had columns added to their respective genera
 
 ## Generating Synthetic Data Directly in Snowflake
 
-We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd_synthetic_generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
+We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd-synthetic-generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
 
 ### Granting Permissions
 

@@ -316,7 +316,7 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
 
     root="$(git rev-parse --show-toplevel)"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
-    cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/patient_generator.py $paths \
+    cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/patient_generator.py $paths \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
@@ -346,7 +346,7 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
 
     root="$(git rev-parse --show-toplevel)"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
-    cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/claims_generator.py $paths \
+    cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/claims_generator.py $paths \
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
@@ -376,7 +376,7 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
     {{ if database != "" { "export IDR_DATABASE=\"" + database + "\"" } else { "" } }}
     source "$root/apps/utils/scripts/load-idr-credentials.sh" synthetic
 
-    cd "$root/apps/bfd-model-idr" && uv run bfd_synthetic_generator/deploy_generator_sproc.py \
+    cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/deploy_generator_sproc.py \
         --patients "{{ patients }}" \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         --min-claims "{{ min-claims }}" \

@@ -19,21 +19,19 @@ from patient_generator import load_inputs  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
-_BATCH_SIZE = 50_000
-
 
 def generate_synthetic_data(
     session: Session,
-    force_ztm: bool,
-    pac_gen: str,
-    bene_sk_mode: str,
-    patients: int,
-    claims: bool,
-    min_claims: int,
-    max_claims: int,
-    samhsa: bool,
-    truncate: bool,
     batch_size: int,
+    truncate: bool,
+    bene_sk_mode: str,
+    pac_gen: str,
+    samhsa: bool,
+    max_claims: int,
+    min_claims: int,
+    claims: bool,
+    patients: int,
+    force_ztm: bool,
 ) -> None:
     perf_start = time.perf_counter()
     db = session.get_current_database().replace('"', "")
@@ -48,9 +46,6 @@ def generate_synthetic_data(
         truncate=truncate,
         writer=writer,
     )
-
-    pac_gen = pac_gen.split(".")[-1].upper() if pac_gen else "IF_NONE"
-    bene_sk_mode = bene_sk_mode.split(".")[-1].upper() if bene_sk_mode else "BOTH"
 
     # generate claim data
     if claims:
