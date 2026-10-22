@@ -28,31 +28,39 @@ def _execute(uri: str, query: Template) -> list:
     return results
 
 
-VALID_BENE_SQL = sql.SQL("""(
-    SELECT b.*
-    FROM idr.beneficiary b
-    WHERE b.idr_ltst_trans_flg = 'Y'
-        AND NOT EXISTS (
-            SELECT 1
-            FROM idr.beneficiary_overshare_mbi om
-            WHERE om.bene_mbi_id = b.bene_mbi_id
-        )
-)""")
+def _sample_clause(table_sample_pct: float | None) -> Template:
+    """Return a TABLESAMPLE clause for the given percent, or nothing if no percent is given."""
+    return t"" if table_sample_pct is None else t"TABLESAMPLE SYSTEM({table_sample_pct:l})"
 
 
-# table_sample_pct is required for the interface even though it's unused here
-def get_regression_bene_sks(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def _valid_bene_sql(table_sample_pct: float | None = None) -> Template:
+    """Return the definition of the idr.valid_beneficiary view."""
+    return t"""(
+        SELECT b.*
+        FROM idr.beneficiary b {_sample_clause(table_sample_pct):q}
+        WHERE b.idr_ltst_trans_flg = 'Y'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM idr.beneficiary_overshare_mbi om
+                WHERE om.bene_mbi_id = b.bene_mbi_id
+            )
+    )"""
+
+
+def get_regression_bene_sks(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
     Args:
         uri (str): Database URI
+        table_sample_pct (float | None): The percentage of the beneficiaries table to sample
 
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
+    valid_bene = _valid_bene_sql(table_sample_pct)
     bene_query = t"""
         SELECT bene_sk
-        FROM {VALID_BENE_SQL:q}
+        FROM {valid_bene:q}
         LIMIT 1000
     """
     return [str(r[0]) for r in _execute(uri, bene_query)]
@@ -60,19 +68,21 @@ def get_regression_bene_sks(uri: str, table_sample_pct: float | None = None) -> 
 
 def get_regression_current_part_a_bene_sks(
     uri: str,
-    table_sample_pct: float | None = None,  # noqa: ARG001
+    table_sample_pct: float | None = None,
 ) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
     Args:
         uri (str): Database URI
+        table_sample_pct (float | None): The percentage of the beneficiaries table to sample
 
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
+    valid_bene = _valid_bene_sql(table_sample_pct)
     bene_query = t"""
         SELECT b.bene_sk
-        FROM {VALID_BENE_SQL:q} b
+        FROM {valid_bene:q} b
         JOIN idr.beneficiary_third_party tp ON b.bene_sk = tp.bene_sk
         WHERE b.bene_sk = b.bene_xref_efctv_sk AND tp.bene_tp_type_cd = 'A'
         LIMIT 1000
@@ -82,19 +92,21 @@ def get_regression_current_part_a_bene_sks(
 
 def get_regression_current_part_b_bene_sks(
     uri: str,
-    table_sample_pct: float | None = None,  # noqa: ARG001
+    table_sample_pct: float | None = None,
 ) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
     Args:
         uri (str): Database URI
+        table_sample_pct (float | None): The percentage of the beneficiaries table to sample
 
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
+    valid_bene = _valid_bene_sql(table_sample_pct)
     bene_query = t"""
         SELECT b.bene_sk
-        FROM {VALID_BENE_SQL:q} b
+        FROM {valid_bene:q} b
         JOIN idr.beneficiary_third_party tp ON b.bene_sk = tp.bene_sk
         WHERE b.bene_sk = b.bene_xref_efctv_sk AND tp.bene_tp_type_cd = 'B'
         LIMIT 1000
@@ -102,33 +114,37 @@ def get_regression_current_part_b_bene_sks(
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_bene_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_bene_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a random list list of MBIs.
 
     Args:
         uri (str): Database URI
+        table_sample_pct (float | None): The percentage of the beneficiaries table to sample
 
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
+    valid_bene = _valid_bene_sql(table_sample_pct)
     bene_query = t"""
         SELECT bene_mbi_id
-        FROM {VALID_BENE_SQL:q}
+        FROM {valid_bene:q}
         LIMIT 1000
     """
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a random list list of claim Ids.
 
     Args:
         uri (str): Database URI
+        table_sample_pct (float | None): The percentage of each claims table to sample
 
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
     limit = 200
+    sampling = _sample_clause(table_sample_pct)
 
     # Each branch samples one claims table; claims tables that keep their items in a
     # separate table are only testable for claims that have at least one item.
@@ -145,7 +161,8 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
         item_filter = (
             t"""
                 AND EXISTS (
-                    SELECT 1 FROM idr.{items_table:i}
+                    SELECT 1
+                    FROM idr.{items_table:i}
                     WHERE {items_table:i}.clm_uniq_id = {claims_table:i}.clm_uniq_id
                 )
             """
@@ -155,11 +172,11 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
         branches.append(
             t"""
                 SELECT clm_uniq_id FROM (
-                    SELECT DISTINCT {claims_table:i}.clm_uniq_id FROM idr.{claims_table:i}
-                    JOIN {VALID_BENE_SQL:q} AS b
-                        ON {claims_table:i}.bene_sk = b.bene_sk
+                    SELECT DISTINCT {claims_table:i}.clm_uniq_id
+                    FROM idr.{claims_table:i} {sampling:q}
+                    JOIN {_valid_bene_sql():q} AS b ON {claims_table:i}.bene_sk = b.bene_sk
                     WHERE clm_ltst_clm_ind = 'Y'
-                        {item_filter:q}
+                    {item_filter:q}
                     LIMIT {limit:l}
                 )
             """
