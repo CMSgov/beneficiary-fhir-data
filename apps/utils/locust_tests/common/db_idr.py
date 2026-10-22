@@ -141,13 +141,11 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
         table_sample_pct (float | None): The percentage of each claims table to sample
 
     Returns:
-        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+        List[str]: A list of valid, unique claim IDs from each claim table
     """
     limit = 200
     sampling = _sample_clause(table_sample_pct)
 
-    # Each branch samples one claims table; claims tables that keep their items in a
-    # separate table are only testable for claims that have at least one item.
     claims_and_items = [
         ("claim_rx", None),
         ("claim_institutional_nch", "claim_item_institutional_nch"),
