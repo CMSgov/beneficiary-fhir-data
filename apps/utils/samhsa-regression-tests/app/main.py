@@ -368,7 +368,11 @@ async def query_samhsa_benes_with_claims(
                             INNER JOIN idr.beneficiary
                                 ON {table:i}.bene_sk = beneficiary.bene_sk
                             WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))})
-                                AND beneficiary.idr_ltst_trans_flg = 'Y';
+                                AND beneficiary.idr_ltst_trans_flg = 'Y'
+                                AND NOT EXISTS (
+                                    SELECT 1 FROM idr.beneficiary_overshare_mbi om
+                                    WHERE om.bene_mbi_id = beneficiary.bene_mbi_id
+                                );
                             """
                         )
                         for table in CLAIMS_TABLES
@@ -440,6 +444,10 @@ async def query_samhsa_benes_with_prior_auths(
                 INNER JOIN idr.beneficiary
                     ON {PRIOR_AUTH_TABLE:i}.mbi_num = beneficiary.bene_mbi_id
                 WHERE beneficiary.idr_ltst_trans_flg = 'Y'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM idr.beneficiary_overshare_mbi om
+                        WHERE om.bene_mbi_id = beneficiary.bene_mbi_id
+                    )
                     AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY(
                         {(list(query_params))}
                     )
