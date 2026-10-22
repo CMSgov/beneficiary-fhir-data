@@ -35,7 +35,9 @@ def load_from_parsed_opts(
         Collection[Any]: A Collection of data returned by the load function
     """
     database_constr = str(parsed_opts.database_constr)
-    table_sample_percent = float(parsed_opts.table_sample_percent)
+    table_sample_percent = (
+        float(parsed_opts.table_sample_percent) if parsed_opts.table_sample_percent else None
+    )
     return load_from_uri(
         database_constr,
         load_function,
@@ -49,14 +51,14 @@ def load_from_uri(
     database_constr: str,
     load_function: LoadFunction,
     use_table_sample: bool = False,
-    table_sample_percent: float = 0.25,
+    table_sample_percent: float | None = None,
     data_type_name: str = "<unknown>",
 ) -> Collection[Any]:
     """Load all of the data from the database, using the database connection provided."""
     logger = logging.getLogger()
 
     logger.info("Collecting %s test data...", data_type_name)
-    if use_table_sample:
+    if use_table_sample and table_sample_percent:
         logger.info("Table Sampling at %s", table_sample_percent)
         results = load_function(uri=database_constr, table_sample_pct=table_sample_percent)
     else:
