@@ -108,4 +108,18 @@ public abstract class BeneficiaryBase {
 
     return patient;
   }
+
+  /**
+   * SQL QUERY representation of valid beneficiaries latest record. This can be used for any query
+   * that needs valid beneficiaries in a Subselect annotation. We cannot use inheritance because JPA
+   * does not respect it. This pattern allows for reuse without having to maintain in multiple
+   * places.
+   */
+  public static final String LATEST_VALID_BENE_VIEW =
+      """
+             SELECT DISTINCT ON (bene_sk) *
+             FROM idr.beneficiary b
+             WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mbi_id = b.bene_mbi_id)
+             ORDER BY bene_sk, idr_trans_efctv_ts DESC
+           """;
 }
