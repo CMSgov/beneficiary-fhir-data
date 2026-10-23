@@ -4,8 +4,8 @@ RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corr
 
 FROM dnf as opentofu
 
-ARG opentofu_version=1.12.1
-ARG opentofu_checksum=1a53dd57697dc04d243ddb81a0f70e44ab83c256f15dde173e5538120dc6a0bb
+ARG opentofu_version=1.12.9
+ARG opentofu_checksum=454b25e0675f13da0b794dfcc562a16f64cb997b2491d5102170102aec701d4f
 
 RUN curl -fsSL -o /tmp/tofu.zip https://github.com/opentofu/opentofu/releases/download/v${opentofu_version}/tofu_${opentofu_version}_linux_arm64.zip \
     && checksum=$(sha256sum /tmp/tofu.zip | cut -f 1 -d ' ') \
@@ -16,8 +16,8 @@ ENV TF_DATA_DIR=/tmp
 
 FROM opentofu as yq
 
-ARG yq_version=4.52.4
-ARG yq_checksum=4c2cc022a129be5cc1187959bb4b09bebc7fb543c5837b93001c68f97ce39a5d
+ARG yq_version=4.54.1
+ARG yq_checksum=189088da0c6429ec5178dfaab1a114805f6cab0b61b165ab236efedf1d57a71b
 
 RUN curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${yq_version}/yq_linux_arm64 \
     && checksum=$(sha256sum /usr/local/bin/yq | cut -f 1 -d ' ') \
@@ -26,8 +26,8 @@ RUN curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/dow
 
 FROM yq as sops
 
-ARG sops_version=3.12.1
-ARG sops_checksum=c7904d07bf1fb3ffdc329b0103ce70ff6a884aa7af7931427402bea0c09cc522
+ARG sops_version=3.13.3
+ARG sops_checksum=53b0abacd38ef1b12a66d6c100956691b9cefce018d91f81e73ddf7438b94d77
 
 RUN curl -fsSL -o /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v${sops_version}/sops-v${sops_version}.linux.arm64 \
     && checksum=$(sha256sum /usr/local/bin/sops | cut -f 1 -d ' ') \
@@ -36,8 +36,8 @@ RUN curl -fsSL -o /usr/local/bin/sops https://github.com/getsops/sops/releases/d
 
 FROM sops as uv
 
-ARG uv_version=0.13.4
-ARG uv_checksum=1ae72b4718729e2ccc4f1ae2c6d1e531ca8467800e0546e9130b3886023a60ab
+ARG uv_version=0.13.5
+ARG uv_checksum=4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403
 
 RUN curl -fsSL -o /tmp/uv.tar.gz https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-aarch64-unknown-linux-gnu.tar.gz \
     && checksum=$(sha256sum /tmp/uv.tar.gz | cut -f 1 -d ' ') \
