@@ -15895,6 +15895,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -16386,6 +16406,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -16956,6 +17016,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -17262,6 +17342,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -18556,6 +18676,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 35,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -20105,6 +20245,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 29,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 30,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -21576,6 +21756,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 23,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -22840,6 +23040,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 26,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -25101,6 +25341,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -25712,6 +25972,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -26402,6 +26702,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -26844,6 +27164,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -27926,6 +28286,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -28417,6 +28797,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -28987,6 +29407,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -29293,6 +29733,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -30587,6 +31067,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 35,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -32136,6 +32636,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 29,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 30,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -33607,6 +34147,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 23,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -34871,6 +35431,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 26,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -37132,6 +37732,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGUL
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -37743,6 +38363,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGUL
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -38433,6 +39093,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGUL
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -38875,6 +39555,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGUL
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -39957,6 +40677,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASI
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -40448,6 +41188,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASI
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -41018,6 +41798,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASI
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -41324,6 +42124,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASI
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -42618,6 +43458,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "8"
+          } ]
+        }
+      }, {
+        "sequence": 35,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
           } ]
         }
       } ],
@@ -44167,6 +45027,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
             "code": "26"
           } ]
         }
+      }, {
+        "sequence": 29,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 30,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -45638,6 +46538,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 23,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -46902,6 +47822,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 26,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 27,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -49163,6 +50123,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGU
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -49774,6 +50754,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGU
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -50464,6 +51484,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGU
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -50906,6 +51946,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGU
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -55340,6 +56420,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_WITH_SEARC
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -55831,6 +56931,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_WITH_SEARC
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -56521,6 +57661,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_WITH_SEARC
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -56963,6 +58123,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_WITH_SEARC
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -58072,6 +59272,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_profile_mi
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -58563,6 +59783,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_profile_mi
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -59253,6 +60513,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_profile_mi
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -59695,6 +60975,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_profile_mi
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
@@ -60804,6 +62124,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[POST_profile_m
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "21",
+            "display": "BILLING FOR DENIAL NOTICE"
+          } ]
+        }
       } ],
       "diagnosis": [ {
         "sequence": 1,
@@ -61295,6 +62635,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[POST_profile_m
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "26"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "09",
+            "display": "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+          } ]
+        }
+      }, {
+        "sequence": 6,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "AF",
+            "display": "ABORTION PERFORMED DUE TO EMOTIONAL/PSYCHOLOGICAL HEALTH OF THE MOTHER (EFF. 10/1/02)"
           } ]
         }
       } ],
@@ -61985,6 +63365,26 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[POST_profile_m
             "code": "8"
           } ]
         }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "W2",
+            "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+          } ]
+        }
       } ],
       "insurance": [ {
         "focal": true,
@@ -62427,6 +63827,46 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[POST_profile_m
           "coding": [ {
             "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
             "code": "3"
+          } ]
+        }
+      }, {
+        "sequence": 4,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "05",
+            "display": "LIEN HAS BEEN FILED"
+          } ]
+        }
+      }, {
+        "sequence": 5,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_RLT_COND_CD",
+            "display": "Claim Related Condition Code"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "code": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+            "code": "64",
+            "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
           } ]
         }
       } ],
