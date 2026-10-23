@@ -36,6 +36,7 @@ locals {
     "bfd-platform-run-idr-pipeline",
     "bfd-platform-synthea-generation",
     "bfd-platform-idr-bfd-validator",
+    "bfd-platform-samhsa-regression",
     # base container image repositories
     "bfd-platform-base-python",
     "bfd-platform-base-java",

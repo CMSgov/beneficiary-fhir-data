@@ -351,13 +351,15 @@ claims-generator min-claims="5" max-claims="10" enable-samhsa="" pac-gen="if_non
         --pac-gen "{{ pac-gen }}"
 
 [arg("tablesample", long, help="Percent of table to sample")]
+[arg("users", long, help="Peak number of concurrent Locust users")]
 [arg("headless", long, value="1", help="Run in headless mode (outputs in the terminal instead of the web UI)")]
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("Runs locust regression tests against the specified env")]
 [group('regression')]
-regression-test env tablesample="0.25" headless="":
+regression-test env users="1" tablesample="" headless="":
     BFD_ENV="{{ env }}" apps/utils/locust_tests/regression.sh \
-        --table-sample-percent "{{ tablesample }}" \
+        --users "{{ users }}" \
+        {{ if tablesample != "" { "--table-sample-percent " + tablesample } else { "" } }} \
         {{ if headless != "" { "--headless" } else { "" } }}
 
 [arg("tablesample", long, help="Percent of the table to sample")]

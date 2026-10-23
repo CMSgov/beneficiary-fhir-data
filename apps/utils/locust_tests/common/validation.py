@@ -3,7 +3,6 @@
 import logging
 import time
 from enum import Enum, StrEnum
-from typing import Optional
 
 import gevent
 from locust.env import Environment
@@ -11,7 +10,7 @@ from locust.runners import STATE_CLEANUP, STATE_STOPPED, STATE_STOPPING
 
 _DEFAULT_SLA_FAILSAFE = 10000
 """Default failsafe, in ms, that the test's response time should not exceed"""
-_validation_goal: Optional["ValidationGoal"] = None
+_validation_goal: ValidationGoal | None = None
 """The SLA goals against which to measure the test run's results"""
 
 
