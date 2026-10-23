@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +15,25 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_third_party_latest", schema = "idr")
+@Subselect(
+"""
+ SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) bene_sk,
+    bene_buyin_cd,
+    bene_tp_type_cd,
+    bene_rng_bgn_dt,
+    bene_rng_end_dt,
+    idr_ltst_trans_flg,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_insrt_ts,
+    idr_updt_ts,
+    bfd_created_ts,
+    bfd_updated_ts
+   FROM idr.beneficiary_third_party
+  WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'::timestamp with time zone AND bene_rng_bgn_dt <= (now() - '12:00:00'::interval)
+  ORDER BY bene_sk, bene_tp_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
+""")
+@Immutable
 public class BeneficiaryThirdParty implements Comparable<BeneficiaryThirdParty> {
 
   @EmbeddedId private BeneficiaryThirdPartyId id;

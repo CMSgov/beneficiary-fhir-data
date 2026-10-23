@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.SQLRestriction;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -32,7 +34,9 @@ import org.hl7.fhir.r4.model.Reference;
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
 @Getter
-@Table(name = "valid_beneficiary", schema = "idr")
+@Table(name = "beneficiary", schema = "idr")
+@SQLRestriction(BeneficiaryBase.VALID_BENE_SQL_RESTRICTION)
+@Immutable
 public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
