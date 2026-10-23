@@ -15,7 +15,7 @@ ENV UV_LINK_MODE=copy
 # Omit any local packages (`--no-emit-workspace`) and development dependencies (`--no-dev`).
 # This ensures that the Docker layer cache is only invalidated when the `pyproject.toml` or `uv.lock`
 # files change, but remains robust to changes in the application code.
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock .python-version ./
 RUN --mount=from=uv,source=/uv,target=/bin/uv \
   --mount=type=cache,target=/root/.cache/uv \
   uv export --frozen --no-emit-workspace --no-dev --no-editable -o requirements.txt && \

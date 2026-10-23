@@ -44,7 +44,7 @@ WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
 COPY --from=idr-pipeline . /app/packages/idr-pipeline
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock .python-version ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --locked --no-install-project
 
