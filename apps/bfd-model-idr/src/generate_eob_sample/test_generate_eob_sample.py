@@ -167,7 +167,6 @@ def test_generate_eob_sample_pharmacy() -> None:
     assert int(result_data["CLM_TYPE_CD"]) in PHARMACY_CLM_TYPE_CDS
 
 
-
 def test_generate_eob_sample_carrier() -> None:
     result = CliRunner().invoke(
         main,
@@ -217,7 +216,6 @@ def test_generate_eob_sample_carrier_dme() -> None:
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "9298559719445"
     assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
-
 
 
 # this test is pointed at test_sample2 because test sample 1 does not have mcs claims
