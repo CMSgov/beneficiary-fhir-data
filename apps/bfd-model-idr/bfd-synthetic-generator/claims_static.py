@@ -49,6 +49,7 @@ AVAILABLE_SAMHSA_ICD_10_DGNS_CODES = [
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS
 ]
+# Top 5 by usage, covers over 95% of claims with values for cd
 AVAILABLE_ANSI_RSN_CODES = [
     "2",
     "253",
@@ -56,6 +57,7 @@ AVAILABLE_ANSI_RSN_CODES = [
     "223",
     "118"
 ]
+# Top 3 by usage, covers over 95% of claims with values for cd
 AVAILABLE_ANSI_GRP_CODES = [
     "PR",
     "CO",
