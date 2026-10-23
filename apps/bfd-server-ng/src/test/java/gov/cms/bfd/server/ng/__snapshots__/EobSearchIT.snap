@@ -16178,9 +16178,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -19622,9 +19619,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -25744,9 +25738,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -28569,9 +28560,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_BASIS
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -32013,9 +32001,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -38135,9 +38120,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_REGUL
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -40960,9 +40942,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_BASI
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -44404,9 +44383,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -50526,9 +50502,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_REGU
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -56700,9 +56673,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_WITH_SEARC
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -59552,9 +59522,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[GET_profile_mi
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -62404,9 +62371,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientMixedProfiles[POST_profile_m
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
