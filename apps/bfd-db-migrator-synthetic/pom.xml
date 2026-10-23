@@ -22,6 +22,7 @@
     </dependency>
   </dependencies>
   <properties>
+    <flyway.table>FLYWAY_SCHEMA_HISTORY</flyway.table>
     <flyway.schemas>CMS_VDM_VIEW_MDCR_PRD,CMS_EDP_VIEW_CVM_PRAU_PRD</flyway.schemas>
     <flyway.locations>filesystem:migrations</flyway.locations>
   </properties>
