@@ -120,6 +120,18 @@ AVAILABLE_SAMHSA_ICD_10_DGNS_CODES = [
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS
 ]
+AVAILABLE_ANSI_RSN_CODES = [
+    "2",
+    "253",
+    "1",
+    "223",
+    "118"
+]
+AVAILABLE_ANSI_GRP_CODES = [
+    "PR",
+    "CO",
+    "OA"
+]
 AVAILABLE_NON_SAMHSA_ICD_10_DGNS_CODES = [
     "W6162",
     "V972",
@@ -284,3 +296,13 @@ def get_drg_dgns_codes(enable_samhsa: bool) -> list[int]:
         if enable_samhsa
         else NON_SAMHSA_DGNS_DRG_CDS
     )
+
+def gen_clm_val_ansi_rsn_cd() -> str | None:
+    if random.randint(1, 5) == 1:
+        return random.choice(AVAILABLE_ANSI_RSN_CODES)
+    return None
+
+def gen_clm_val_ansi_grp_cd() -> str | None:
+    if random.randint(1, 5) == 1:
+        return random.choice(AVAILABLE_ANSI_GRP_CODES)
+    return None
