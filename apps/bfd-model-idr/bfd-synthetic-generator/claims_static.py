@@ -1,9 +1,8 @@
-import os
 import random
 from datetime import date, datetime
-from pathlib import Path
 
 import yaml
+from file_utils import ROOT
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
@@ -20,10 +19,8 @@ class SecurityLabelModel(BaseModel):
         return self.code.replace(".", "")
 
 
-SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("../../security_labels.yml")
-SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
-    yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
-)
+yaml_data = yaml.safe_load((ROOT / "security_labels.yml").read_text(encoding="utf-8"))
+SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(yaml_data, by_alias=True)
 
 
 SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]
@@ -36,73 +33,6 @@ SECURITY_LABELS_DRG_SYSTEMS = [
 
 NOW = date.today()
 
-FISS_CLM_TYPE_CDS = [
-    1011,
-    1041,
-    1012,
-    1013,
-    1014,
-    1022,
-    1023,
-    1034,
-    1071,
-    1072,
-    1073,
-    1074,
-    1075,
-    1076,
-    1077,
-    1083,
-    1085,
-    1087,
-    1089,
-    1032,
-    1033,
-    1081,
-    1082,
-    1021,
-    1018,
-    2011,
-    2041,
-    2012,
-    2013,
-    2014,
-    2022,
-    2023,
-    2034,
-    2071,
-    2072,
-    2073,
-    2074,
-    2075,
-    2076,
-    2077,
-    2083,
-    2085,
-    2087,
-    2089,
-    2032,
-    2033,
-    2081,
-    2082,
-    2021,
-    2018,
-]
-MCS_CLM_TYPE_CDS = [1700, 2700]
-VMS_CDS = [1800, 2800]
-PHARMACY_CLM_TYPE_CDS = [1, 2, 3, 4]
-INSTITUTIONAL_CLAIM_TYPES = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *FISS_CLM_TYPE_CDS]
-ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES = [71, 72]
-ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME = [81, 82]
-ADJUDICATED_PROFESSIONAL_CLAIM_TYPES = [
-    *ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
-    *ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
-]
-PROFESSIONAL_CLAIM_TYPES = [
-    *ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
-    *MCS_CLM_TYPE_CDS,
-    *VMS_CDS,
-]
 AVAIL_OSCAR_CODES_INSTITUTIONAL = [
     "-39T14",
     "-000000",
