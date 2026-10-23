@@ -154,12 +154,14 @@ public class BeneficiaryRepository {
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
     var queryBase =
         """
-            SELECT bene
-            FROM Beneficiary bene
-            WHERE bene.latestTransactionFlag = 'Y'
-            %s
-            ORDER BY bene.obsoleteTimestamp DESC
-            """;
+                SELECT bene
+                FROM Beneficiary bene
+                JOIN BeneficiarySimple latest
+                    ON latest.beneSk = bene.beneSk
+                    AND latest.effectiveTimestamp = bene.effectiveTimestamp
+                %s
+                ORDER BY bene.obsoleteTimestamp DESC
+                """;
 
     var result =
         metricRecorder.recordMetric(

@@ -25,13 +25,12 @@ public class PriorAuthorizationRepository {
     return entityManager
         .createQuery(
             """
-                 SELECT p
-                 FROM PriorAuthorization p
-                 JOIN FETCH p.beneficiary b
-                 JOIN FETCH p.items i
-                 WHERE b.latestTransactionFlag = 'Y'
-                 AND p.id.mbi = :mbi
-               """,
+                SELECT p
+                FROM PriorAuthorization p
+                JOIN FETCH p.beneficiary b
+                JOIN FETCH p.items i
+                WHERE p.id.mbi = :mbi
+                """,
             PriorAuthorization.class)
         .setParameter("mbi", mbi)
         .getResultList();
