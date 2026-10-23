@@ -1,0 +1,1 @@
+CREATE INDEX ON idr.claim_rx(clm_uniq_id, clm_ltst_clm_ind) WHERE clm_ltst_clm_ind = 'N';
