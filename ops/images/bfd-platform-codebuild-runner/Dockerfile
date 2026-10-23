@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/provided:al2023.2026.03.12.12-arm64 as dnf
+FROM public.ecr.aws/lambda/provided:al2023.2026.03.12.12-arm64@sha256:efec62fce00eaf83857cb6a382305e3aa12216d4bb47fbd0418513b11728e76c as dnf
 
 RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corretto-headless findutils zip -y && dnf clean all
 
