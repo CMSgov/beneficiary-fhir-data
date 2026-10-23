@@ -9,6 +9,11 @@ from claims_static import (
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
+    TARGET_RLT_OCRNC_CODES,
+    TARGET_OCRNC_SPAN_CODES,
+    VMS_CDS,
+    gen_clm_val_ansi_rsn_cd,
+    gen_clm_val_ansi_grp_cd,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
 from generator_util import GeneratorUtil
@@ -211,6 +216,24 @@ class PacGeneratorUtil:
                 "8",
             ]
         )
+        clm_lctn_hstry[f.CLM_AUDT_TRL_LCTN_CD] = random.choice(
+            [
+                "060"
+                "052"
+                "001"
+                "070"
+                "067"
+                "065"
+                "B0100"
+                "B9000"
+                "B9099"
+                "B9997"
+                "B9996"
+                "053"
+                "076"
+                "062"
+            ]
+        )
 
         add_meta_timestamps(clm_lctn_hstry, clm)
 
@@ -317,6 +340,8 @@ class PacGeneratorUtil:
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         return clm_val
 

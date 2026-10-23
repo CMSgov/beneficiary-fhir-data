@@ -26,6 +26,8 @@ from claims_static import (
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
     get_icd_10_prcdr_codes,
+    gen_clm_val_ansi_rsn_cd,
+    gen_clm_val_ansi_grp_cd,
 )
 from claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
 from generator_util import (
@@ -518,6 +520,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = 18
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 14
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
@@ -532,6 +536,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = 19
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 3
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
@@ -1087,6 +1093,7 @@ class AdjudicatedGeneratorUtil:
 
         if random.randint(0, 10) == 6:
             clm_line_prfnl[f.CLM_LINE_HCT_HGB_TYPE_CD] = random.choice(["R1", "R2"])
+            clm_line_prfnl[f.CLM_LINE_HCT_HGB_RSLT_NUM] = round(random.uniform(0.0, 99.9), 1)
             clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_LAB_NUM] = random.choice(
                 [
                     "11D1111111",

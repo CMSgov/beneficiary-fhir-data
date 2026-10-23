@@ -7,6 +7,10 @@ from idr_model.claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
     INSTITUTIONAL_CLAIM_TYPES,
+    INSTITUTIONAL_HHA,
+    INSTITUTIONAL_HOSPICE,
+    INSTITUTIONAL_OUTPATIENT,
+    INSTITUTIONAL_SNF,
     MCS_CLM_TYPE_CDS,
     PHARMACY_CLM_TYPE_CDS,
     VMS_CDS,
@@ -68,6 +72,8 @@ CLM_COL = [
     "PRVDR_ATNDG_PRVDR_NPI_NUM",
     "PRVDR_OPRTG_PRVDR_NPI_NUM",
     "PRVDR_OTHR_PRVDR_NPI_NUM",
+    "CLM_OTHR_PRVDR_NPI_NUM",
+    "CLM_RNDRG_PRVDR_NPI_NUM",
     "CLM_BLOOD_CHRG_AMT",
     "CLM_BLOOD_NCVRD_CHRG_AMT",
     "CLM_COB_PTNT_RESP_AMT",
@@ -176,6 +182,10 @@ INST_COL = [
     "DGNS_DRG_OUTLIER_CD",
     "CLM_MDCR_NPMT_RSN_CD",
     "CLM_FI_ACTN_CD",
+    "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+    "CLM_OP_SRVC_TYPE_CD",
+    "CLM_MDCR_INSTNL_BENE_PD_AMT",
+    "CLM_INSTNL_LOW_VOL_PMT_AMT",
 ]
 
 CLM_VAL_COL = [
@@ -290,7 +300,18 @@ class SampleGenerator:
         # for different institutional claim types
         # also fall back for known claim types that we do not have a special sample for
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_CDS:
-            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample.json")
+            if claim_type in INSTITUTIONAL_HOSPICE:
+                result_name = "EOB-Hospice-Sample.json"
+            elif claim_type in INSTITUTIONAL_OUTPATIENT:
+                result_name = "EOB-Institutional-Outpatient-Sample.json"
+            elif claim_type in INSTITUTIONAL_SNF:
+                result_name = "EOB-SNF-Sample.json"
+            elif claim_type in INSTITUTIONAL_HHA:
+                result_name = "EOB-HHA-Sample.json"
+            else:
+                result_name = "EOB-Base-Sample.json"
+
+            result = self.create_base(clm_uniq_id, claim_type, claim_row, result_name)
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)

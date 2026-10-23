@@ -1,5 +1,10 @@
 from .param import Param
-from .util import extract_col_str, find_field_in_line_by_num, read_multi_line_file
+from .util import (
+    extract_col_str,
+    find_field_in_line_by_num,
+    find_linked_field_in_tgt_by_line_num_sk,
+    read_multi_line_file,
+)
 
 CLM_LINE_COL = [
     "CLM_LINE_NUM",
@@ -37,8 +42,6 @@ CLM_LINE_COL = [
     "HCPCS_4_MDFR_CD",
     "HCPCS_5_MDFR_CD",
     "PRVDR_RNDRNG_PRVDR_NPI_NUM",
-    "CLM_REV_CNTR_TDAPA_AMT",
-    "CLM_LINE_INSTNL_REV_CTR_DT",
     "CLM_LINE_OTHR_TP_PD_AMT",
     "CLM_LINE_NCVRD_PD_AMT",
 ]
@@ -69,16 +72,36 @@ PRFNL_LINE_COL = [
 ]
 
 INST_LINE_COL = [
+    "CLM_ANSI_SGNTR_SK",
     "CLM_DDCTBL_COINSRNC_CD",
     "CLM_LINE_INSTNL_ADJSTD_AMT",
     "CLM_LINE_INSTNL_MSP1_PD_AMT",
     "CLM_LINE_INSTNL_MSP2_PD_AMT",
     "CLM_LINE_INSTNL_RATE_AMT",
     "CLM_LINE_INSTNL_RDCD_AMT",
-    "CLM_MTUS_IND_CD",
-    "CLM_REV_APC_HIPPS_CD",
+    "CLM_LINE_INSTNL_REV_CTR_DT",
     "CLM_LINE_ADD_ON_PYMT_AMT",
     "CLM_LINE_NON_EHR_RDCTN_AMT",
+    "CLM_LINE_NDC_QTY_QLFYR_CD",
+    "CLM_MTUS_IND_CD",
+    "CLM_OTAF_ONE_IND_CD",
+    "CLM_REV_APC_HIPPS_CD",
+    "CLM_REV_CNTR_TDAPA_AMT",
+    "CLM_REV_CNTR_STUS_CD",
+    "CLM_REV_PMT_MTHD_CD",
+    "CLM_REV_PACKG_IND_CD",
+    "CLM_REV_DSCNT_IND_CD",
+]
+
+ANSI_SGNTR_COL = [
+    "CLM_1_REV_CNTR_ANSI_GRP_CD",
+    "CLM_1_REV_CNTR_ANSI_RSN_CD",
+    "CLM_2_REV_CNTR_ANSI_GRP_CD",
+    "CLM_2_REV_CNTR_ANSI_RSN_CD",
+    "CLM_3_REV_CNTR_ANSI_GRP_CD",
+    "CLM_3_REV_CNTR_ANSI_RSN_CD",
+    "CLM_4_REV_CNTR_ANSI_GRP_CD",
+    "CLM_4_REV_CNTR_ANSI_RSN_CD",
 ]
 
 DCMTN_LINE_COL = [
@@ -98,18 +121,30 @@ class ClmLineBuilder:
         dcmtn_lines = self.read_dcmtn_lines()
         return [
             {
+                # extract <-- CLM_LINE_COLs from line
                 **{col: extract_col_str(clm_line, col) for col in CLM_LINE_COL},
+                # extract <-- professional line cols linked by line_num
                 **{
                     col: find_field_in_line_by_num(prfnl_lines, clm_line, col)
                     for col in PRFNL_LINE_COL
                 },
+                # extract <-- insitutional line cols linked by line_num
                 **{
                     col: find_field_in_line_by_num(instnl_lines, clm_line, col)
                     for col in INST_LINE_COL
                 },
+                # extract <-- dcmtn line cols linked by line_num
                 **{
                     col: find_field_in_line_by_num(dcmtn_lines, clm_line, col)
                     for col in DCMTN_LINE_COL
+                },
+                # extract <-- ansi_sgntr cols linked by line_num (clm_line -> instl_line)
+                # & sk (instl_line.ansi_sgntr_sk --> ansi_sgntr line)
+                **{
+                    col: find_linked_field_in_tgt_by_line_num_sk(src_lines=instnl_lines,
+                    clm_line=clm_line, source_directory=self.source_directory,
+                    sk_field="CLM_ANSI_SGNTR_SK", extracted_field=col)
+                    for col in ANSI_SGNTR_COL
                 },
             }
             for clm_line in clm_lines
