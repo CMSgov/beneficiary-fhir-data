@@ -173,7 +173,7 @@ public class AdjudicationPpsCms implements AdjudicationEmbedded {
                 ppsDrgWeight),
             // These are always whole numbers, but IDR stores them as floats
             AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationLong(
-                totalCoveredDays.map(BigDecimal::longValue)),
+                Optional.of(totalCoveredDays.get().longValue())),
             AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudicationOptional(perDiemAmount),
             AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT
                 .toFhirAdjudicationOptional(ppsDisproportionateAmount),
