@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
@@ -10,14 +11,12 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.util.List;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The institutional claim, regular profile base class. */
 @Getter
 @MappedSuperclass
-@Generated("TODO - Remove after query optimization implementation")
 abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
 
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
@@ -43,6 +42,11 @@ abstract class ClaimInstitutionalRegularBase extends ClaimInstitutionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return List.of();
+  }
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.REGULAR;
   }
 
   // endregion

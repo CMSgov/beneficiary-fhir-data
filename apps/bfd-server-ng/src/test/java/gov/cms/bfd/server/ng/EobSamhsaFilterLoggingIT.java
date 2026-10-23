@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -34,13 +34,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        new ClaimIdSearchCriteria(
-            List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
-            new DateTimeRange(),
-            new DateTimeRange(),
-            Collections.emptyList(),
-            Collections.emptyList()),
-        excludeOptions);
+        new ClaimIdSearchCriteria(List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS)), excludeOptions);
 
     var samhsaLogs =
         events.stream()
@@ -64,13 +58,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        new ClaimIdSearchCriteria(
-            List.of(CLAIM_ID_WITH_NO_SAMHSA),
-            new DateTimeRange(),
-            new DateTimeRange(),
-            Collections.emptyList(),
-            Collections.emptyList()),
-        excludeOptions);
+        new ClaimIdSearchCriteria(List.of(CLAIM_ID_WITH_NO_SAMHSA)), excludeOptions);
 
     var samhsaLogs =
         events.stream()

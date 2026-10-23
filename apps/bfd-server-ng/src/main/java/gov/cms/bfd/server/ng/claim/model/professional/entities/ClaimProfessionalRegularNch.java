@@ -18,13 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.stream.Stream;
-import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The professional claim, regular profile, sourced from nch. */
 @Entity
 @Table(name = "claim_professional_nch", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimProfessionalRegularNch extends ClaimProfessionalRegularBase implements NchClaim {
 
   @OneToMany(fetch = FetchType.EAGER)
