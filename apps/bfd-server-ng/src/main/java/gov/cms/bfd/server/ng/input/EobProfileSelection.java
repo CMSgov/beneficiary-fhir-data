@@ -3,7 +3,9 @@ package gov.cms.bfd.server.ng.input;
 import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.claim.EobProfileCategory;
 import gov.cms.bfd.server.ng.claim.EobProfileType;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents the profiles requested for each category of EoB.
@@ -15,11 +17,9 @@ public record EobProfileSelection(Set<EobProfile> profiles) {
   /** Default selection: every category as CMS. */
   public EobProfileSelection() {
     this(
-        Set.of(
-            EobProfile.PHARMACY_CMS,
-            EobProfile.INPATIENT_INSTITUTIONAL_CMS,
-            EobProfile.OUTPATIENT_INSTITUTIONAL_CMS,
-            EobProfile.PROFESSIONAL_NONCLINICIAN_CMS));
+        Arrays.stream(EobProfile.values())
+            .filter(p -> p.getProfileType() == EobProfileType.CMS)
+            .collect(Collectors.toSet()));
   }
 
   /**
