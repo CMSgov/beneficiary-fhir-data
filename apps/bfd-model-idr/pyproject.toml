@@ -37,7 +37,7 @@ exclude-newer-package = { filelock = false, certifi = false }
 idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
 
 [build-system]
-requires = ["uv_build<=0.12"]
+requires = ["uv_build>=0.13.5,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]

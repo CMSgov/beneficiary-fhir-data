@@ -31,7 +31,7 @@ idr-pipeline = "idr_pipeline:main"
 snowflake-extract = "snowflake_extract:main"
 
 [build-system]
-requires = ["uv_build>=0.13.4,<=0.14"]
+requires = ["uv_build>=0.13.5,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv]

@@ -34,7 +34,7 @@ services:
     volumes:
       - ./:/config/
   matchbox-setup:
-    image: ghcr.io/astral-sh/uv:python3.14-alpine@sha256:4ce2a2ef69130ffb97688c8446ae771415035406355fbcb7932c59a535f82888
+    image: ghcr.io/astral-sh/uv:0.13.5-python3.14-alpine@sha256:4ce2a2ef69130ffb97688c8446ae771415035406355fbcb7932c59a535f82888
     volumes:
       - ./:/app
     working_dir: /app
