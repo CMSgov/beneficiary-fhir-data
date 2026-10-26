@@ -268,17 +268,14 @@ class PriorAuthGeneratorUtil:
                 type_2_npi_to_name=type_2_npi_to_name,
                 init_prior_auth=init_rows[0],
             )
-            prior_auths.extend(
-                [
-                    self._gen_segment(
-                        gen_utils=gen_utils,
-                        header_fields=header_fields,
-                        segment_num=idx,
-                        type_1_npis=generated_type_1_npis,
-                        type_2_npis=generated_type_2_npis,
-                        init_prior_auth=init_row,
-                    )
-                    for idx, init_row in enumerate(init_rows, start=1)
-                ]
-            )
+            for idx, init_row in enumerate(init_rows, start=1):
+                prior_auth = self._gen_segment(
+                    gen_utils=gen_utils,
+                    header_fields=header_fields,
+                    segment_num=idx,
+                    type_1_npis=generated_type_1_npis,
+                    type_2_npis=generated_type_2_npis,
+                    init_prior_auth=init_row,
+                )
+            prior_auths.append(prior_auth)
         return prior_auths
