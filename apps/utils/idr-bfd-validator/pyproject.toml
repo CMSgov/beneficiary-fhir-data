@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["boto3-stubs[sns]", "ruff", "uv>=0.11.15"]
+dev = ["boto3-stubs[sns]", "ruff"]
 
 [tool.uv]
 exclude-newer = "7 days"
