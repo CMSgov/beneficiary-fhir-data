@@ -97,7 +97,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> dict[str, str]:  #
             "Starting Regression Suite test by invoking %s Lambda...", RUN_LOCUST_LAMBDA_NAME
         )
         compare_tag = (
-            f"{BFD_ENVIRONMENT}_release"
+            f"{BFD_ENVIRONMENT}_v3_release"
             if BFD_ENVIRONMENT in ["test", "prod", "sandbox"]
             else BFD_ENVIRONMENT.lower().replace("-", "_")
         )
