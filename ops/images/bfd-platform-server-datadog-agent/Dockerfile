@@ -1,1 +1,1 @@
-FROM public.ecr.aws/datadog/agent:7.84.5@sha256:51f025652f7973f84bf8005a72ff763669bf535c838be9f1a018684afd15ab65
+FROM public.ecr.aws/datadog/agent:7.84.6@sha256:4aa71f1f624e36ed4d04568e4ad3f323af14426db07d2f9ed98869f6d0bdbbd3
