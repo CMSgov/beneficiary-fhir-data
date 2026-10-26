@@ -65,8 +65,8 @@ resource "aws_lambda_function" "samhsa_hook" {
       HOSTNAME                      = "https://${data.aws_network_interface.load_balancer.private_ip}:${aws_lb_listener.this[local.green_state].port}"
       SAMHSA_REGRESSION_LAMBDA_NAME = one(aws_lambda_function.samhsa_regression[*].function_name)
       TABLESAMPLE                   = local.samhsa_tablesample
-      LIMIT                         = "300"
-      CONCURRENCY                   = "10"
+      LIMIT                         = "100"
+      CONCURRENCY                   = "15"
     }
   }
 
