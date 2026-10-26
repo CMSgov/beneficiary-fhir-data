@@ -372,7 +372,8 @@ async def query_samhsa_benes_with_claims(
                                 AND NOT EXISTS (
                                     SELECT 1 FROM idr.beneficiary_overshare_mbi om
                                     WHERE om.bene_mbi_id = beneficiary.bene_mbi_id
-                                );
+                                )
+                            LIMIT {limit};
                             """
                         )
                         for table in CLAIMS_TABLES
