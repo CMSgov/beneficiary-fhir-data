@@ -11,7 +11,6 @@ from claims_static import (
     TARGET_SEQUENCE_NUMBERS,
     TARGET_RLT_OCRNC_CODES,
     TARGET_OCRNC_SPAN_CODES,
-    VMS_CDS,
     gen_clm_val_ansi_rsn_cd,
     gen_clm_val_ansi_grp_cd,
 )
