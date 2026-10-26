@@ -17,18 +17,7 @@ import org.jetbrains.annotations.NotNull;
 @EqualsAndHashCode
 @Subselect(
 """
- SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) bene_sk,
-    bene_buyin_cd,
-    bene_tp_type_cd,
-    bene_rng_bgn_dt,
-    bene_rng_end_dt,
-    idr_ltst_trans_flg,
-    idr_trans_efctv_ts,
-    idr_trans_obslt_ts,
-    idr_insrt_ts,
-    idr_updt_ts,
-    bfd_created_ts,
-    bfd_updated_ts
+ SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) *
    FROM idr.beneficiary_third_party
   WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'::timestamp with time zone AND bene_rng_bgn_dt <= (now() - '12:00:00'::interval)
   ORDER BY bene_sk, bene_tp_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
