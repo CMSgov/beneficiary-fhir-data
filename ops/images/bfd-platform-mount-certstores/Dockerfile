@@ -8,7 +8,7 @@ ENV UV_LINK_MODE=copy
 # Change the working directory to the `app` directory
 WORKDIR /app
 # Install dependencies
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock .python-version ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --frozen --no-install-project --compile-bytecode --no-dev
 
