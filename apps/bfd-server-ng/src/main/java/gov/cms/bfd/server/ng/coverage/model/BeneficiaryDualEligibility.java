@@ -21,19 +21,7 @@ import org.hl7.fhir.r4.model.Period;
 @Entity
 @Subselect(
     """
-    SELECT DISTINCT ON (bene_sk) bene_sk,
-        bene_mdcd_elgblty_bgn_dt,
-        bene_mdcd_elgblty_end_dt,
-        bene_dual_stus_cd,
-        bene_dual_type_cd,
-        geo_usps_state_cd,
-        idr_ltst_trans_flg,
-        idr_trans_efctv_ts,
-        idr_trans_obslt_ts,
-        idr_insrt_ts,
-        idr_updt_ts,
-        bfd_created_ts,
-        bfd_updated_ts
+    SELECT DISTINCT ON (bene_sk) *
     FROM idr.beneficiary_dual_eligibility
     WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
       AND bene_mdcd_elgblty_bgn_dt <= (now() - interval '12 hours')
