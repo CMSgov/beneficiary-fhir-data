@@ -1,5 +1,6 @@
 *
 !pyproject.toml
 !uv.lock
+!.python-version
 !app/__init__.py
 !app/main.py

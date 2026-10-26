@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  * A simplified beneficiary model for use with claims data. Excess data is omitted to avoid the
@@ -14,7 +16,9 @@ import lombok.Getter;
  */
 @Entity
 @Getter
-@Table(name = "valid_beneficiary", schema = "idr")
+@Table(name = "beneficiary", schema = "idr")
+@SQLRestriction(BeneficiaryBase.VALID_BENE_SQL_RESTRICTION)
+@Immutable
 public class BeneficiarySimple {
   @Id
   @Column(name = "bene_sk")

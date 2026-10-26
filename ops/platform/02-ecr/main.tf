@@ -24,7 +24,6 @@ locals {
 
   ecr_container_repositories = toset([
     # utility container image repositories
-    "bfd-platform-eft-sftp-outbound-transfer-lambda",
     "bfd-platform-pipeline-ccw-manifests-verifier-lambda",
     "bfd-platform-server-load-broker",
     "bfd-platform-server-load-controller",

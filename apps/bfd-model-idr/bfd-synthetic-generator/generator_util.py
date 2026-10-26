@@ -1,0 +1,893 @@
+import csv
+import datetime
+import io
+import itertools
+import json
+import random
+import string
+import subprocess
+import sys
+from collections import defaultdict
+from collections.abc import Callable, Iterable
+from datetime import date, timedelta
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+import tqdm
+from constants import (
+    BENE_DUAL,
+    BENE_ENTLMT,
+    BENE_ENTLMT_RSN,
+    BENE_HSTRY,
+    BENE_LIS_CMBND,
+    BENE_MAPD_ENRLMT,
+    BENE_MAPD_ENRLMT_RX,
+    BENE_MBI_ID,
+    BENE_STUS,
+    BENE_TP,
+    BENE_XREF,
+    CNTRCT_PBP_CNTCT,
+    CNTRCT_PBP_NUM,
+)
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+from faker import Faker
+from file_utils import ROOT
+from id_generators import IdGenerator, RandomIdGenerator
+from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
+from row_adapter import RowAdapter
+
+AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+AVAIL_CONTRACT_NUMS = [
+    "Z0001",
+    "Z0002",
+    "Z0003",
+    "Z0004",
+    "Z0005",
+    "Z0006",
+    "Z0007",
+    "Z0008",
+    "Z0009",
+    "Z0010",
+]
+AVAIL_PBP_TYPE_CODES = ["01", "02", "48", "04", "09", "18", "10"]
+AVAIL_CONTRACT_NAMES = [
+    "Health Plan",
+    "Wellness",
+    "Silver Fox",
+    "Vitality Plan",
+    "Wellness Plus",
+    "Happy Heart",
+]
+NOW = date.today()
+
+# Lazily computed output table by filename (see above constants) to mappings of the file's rows by
+# BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
+# scanning via list comprehensions. Outermost dict is keyed by original filename, inner dict is
+# keyed by the patient's bene_sk, and innermost dict is the full row itself
+_tables_by_bene_sk: dict[str, dict[int, dict[str, Any]]] = {}
+
+
+def as_list[T](obj: T | None) -> list[T]:
+    if not obj:
+        return []
+
+    return [obj]
+
+
+def partition_rows[T](
+    llist: list[RowAdapter],
+    part_by: Callable[[RowAdapter], T],
+    filter_by: Callable[[RowAdapter], bool] | None = None,
+) -> dict[T, list[RowAdapter]]:
+    bucketed_rows: dict[T, list[RowAdapter]] = defaultdict(list)
+    for row in llist:
+        part_key = part_by(row)
+        if not filter_by or filter_by(row):
+            bucketed_rows[part_key].append(row)
+
+    return bucketed_rows
+
+
+def run_command(cmd: list[str] | str, cwd: str | None = None):
+    try:
+        result = subprocess.run(
+            cmd, cwd=cwd, shell=True, check=True, text=True, capture_output=True
+        )
+        return result.stdout, result.stderr
+    except subprocess.CalledProcessError as e:
+        print("Error running command:", cmd)
+        if e.stderr:
+            print("Error output:", e.stderr)
+        else:
+            print("Error info (not necessarily stderr):", e)
+        sys.exit(1)
+
+
+def add_days(input_dt: str, days_to_add: int = 0):
+    return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
+
+
+def random_date(start_date: str | date, end_date: str | date):
+    start_formatted = (
+        date.fromisoformat(start_date).toordinal()
+        if isinstance(start_date, str)
+        else start_date.toordinal()
+    )
+    end_formatted = (
+        date.fromisoformat(end_date).toordinal()
+        if isinstance(end_date, str)
+        else end_date.toordinal()
+    )
+    rand_date = random.randint(start_formatted, end_formatted)
+    return date.fromordinal(rand_date).isoformat()
+
+
+def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
+    from_date = date.fromisoformat(frm_dt) if isinstance(frm_dt, str) else frm_dt
+    days_to_add = random.randint(0, max_days)
+    return (from_date + timedelta(days=days_to_add)).isoformat()
+
+
+def load_file_dict(
+    files: dict[str, list[RowAdapter]],
+    paths: list[str] | list[Path],
+    exclude_empty: bool = False,
+):
+    file_paths = set(
+        itertools.chain.from_iterable(
+            [
+                [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
+                for x in paths
+                if (as_path := Path(x))
+            ]
+        )
+    )
+    if not file_paths:
+        return
+
+    print(
+        f"Loading all provided files, {
+            'ignoring empty columns' if exclude_empty else 'treating empty columns as meaningful'
+        }..."
+    )
+    file_tupls = [
+        (file_path, file_name)
+        for file_path in file_paths
+        for file_name in files
+        if f"{file_name}.csv" in str(file_path)
+    ]
+    with tqdm.tqdm(file_tupls) as t:
+        for file_path, file_name in t:
+            t.set_postfix(file=file_path)  # type: ignore
+            csv_data = pd.read_csv(  # type: ignore
+                file_path,
+                dtype=str,
+                na_filter=exclude_empty,
+            )
+            file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
+            if not exclude_empty:
+                files[file_name] = load_file(file_as_dictlist)  # type: ignore
+                continue
+
+            files[file_name] = load_file(
+                [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
+            )
+    print("All files loaded")
+
+
+def load_file(file: Iterable[dict[str, Any]]):
+    return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
+
+
+def probability(frac: float) -> bool:
+    return random.random() < (frac)
+
+
+def adapters_to_dicts(
+    adapters: list[RowAdapter] | list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
+
+
+def output_table_contains_by_bene_sk(
+    table: list[dict[str, Any]], for_file: str, bene_sk: str
+) -> bool:
+    if for_file not in _tables_by_bene_sk:
+        _tables_by_bene_sk[for_file] = {row["BENE_SK"]: row for row in table}
+
+    return bene_sk in _tables_by_bene_sk[for_file]
+
+
+def convert_tilde_str(val: str) -> str:
+    if val == "~":
+        return ""
+    return val
+
+
+class GeneratorUtil:
+    USE_COLS = "use_cols"
+
+    def __init__(self, id_gen: IdGenerator | None = None):
+        self.id_gen = id_gen or RandomIdGenerator()
+        self.fake = Faker()
+        self.bene_hstry_table: list[dict[str, Any]] = []
+        self.bene_xref_table: list[dict[str, Any]] = []
+        self.mbi_table: dict[str, dict[str, Any]] = {}
+        self.address_options: list[dict[str, Any]] = []
+        self.mdcr_stus: list[dict[str, Any]] = []
+        self.mdcr_entlmt: list[dict[str, Any]] = []
+        self.mdcr_tp: list[dict[str, Any]] = []
+        self.mdcr_rsn: list[dict[str, Any]] = []
+        self.bene_cmbnd_dual_mdcr: list[dict[str, Any]] = []
+        self.bene_lis: list[dict[str, Any]] = []
+        self.bene_lis_cmbnd: list[dict[str, Any]] = []
+        self.bene_mapd_enrlmt_rx: list[dict[str, Any]] = []
+        self.bene_mapd_enrlmt: list[dict[str, Any]] = []
+        self.code_systems = {}
+        self.cntrct_pbp_num: list[dict[str, Any]] = []
+        self.cntrct_pbp_cntct: list[dict[str, Any]] = []
+
+        self.load_addresses()
+        self.load_code_systems()
+
+    def load_code_systems(self):
+        resources_dir = ROOT / "sushi/fsh-generated/resources"
+        if not resources_dir.exists():
+            raise FileNotFoundError(f"{resources_dir} not found; run 'npm run sushi-build'")
+
+        self.code_systems = {}
+        for path in resources_dir.iterdir():
+            if "CodeSystem" not in path.name or not path.name.endswith(".json"):
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if "concept" in data and "name" in data:
+                self.code_systems[data["name"]] = [c["code"] for c in data["concept"]]
+
+    def load_addresses(self):
+        text = (ROOT / "beneficiary-components/addresses.csv").read_text(encoding="utf-8")
+        self.address_options = list(csv.DictReader(io.StringIO(text)))
+
+    def gen_mbi(self) -> str:
+        return self.id_gen.mbi()
+
+    def gen_bene_sk(self) -> int:
+        return self.id_gen.bene_sk()
+
+    def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int):
+        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
+
+        # 10% chance for invalid xref.
+        kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
+
+        efctv_ts = self.fake.date_time_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.datetime.now() - datetime.timedelta(days=1),
+        )
+        src_rec_ctre_ts = self.fake.date_time_between_dates(
+            efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+        src_rec_updt_ts = self.fake.date_time_between_dates(
+            src_rec_ctre_ts, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+        insrt_ts = self.fake.date_time_between_dates(
+            efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+        updt_ts = self.fake.date_time_between_dates(
+            insrt_ts, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+
+        bene_xref["BENE_SK"] = str(new_bene_sk)
+        bene_xref["BENE_XREF_SK"] = str(old_bene_sk)
+        bene_xref["BENE_HICN_NUM"] = bene_hicn_num
+        bene_xref["BENE_KILL_CRED_CD"] = str(kill_cred_cd)
+        bene_xref["SRC_REC_CRTE_TS"] = str(src_rec_ctre_ts)
+        bene_xref["SRC_REC_UPDT_TS"] = str(src_rec_updt_ts)
+        bene_xref["IDR_TRANS_EFCTV_TS"] = str(efctv_ts)
+        bene_xref["IDR_INSRT_TS"] = str(insrt_ts)
+        bene_xref["IDR_UPDT_TS"] = str(updt_ts)
+        bene_xref["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+
+        self.bene_xref_table.append(bene_xref.kv)
+
+    def gen_address(self):
+        return self.address_options[random.randint(0, len(self.address_options) - 1)]
+
+    def set_timestamps(self, patient: RowAdapter, min_date: datetime.date):
+        max_date = datetime.datetime.now() - datetime.timedelta(days=1)
+        efctv_ts = self.fake.date_time_between_dates(min_date, max_date)
+        insrt_ts = self.fake.date_time_between_dates(efctv_ts, max_date)
+        updt_ts = self.fake.date_time_between_dates(insrt_ts, max_date)
+        patient["IDR_TRANS_EFCTV_TS"] = str(efctv_ts)
+        patient["IDR_INSRT_TS"] = str(insrt_ts)
+        patient["IDR_UPDT_TS"] = str(updt_ts)
+        patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+
+    def create_base_patient(self, patient: RowAdapter):
+        self.set_timestamps(patient, datetime.date(year=2017, month=5, day=20))
+        patient["CNTCT_LANG_CD"] = random.choice(["~", "ENG", "SPA"])
+        patient["IDR_LTST_TRANS_FLG"] = "Y"
+        address = self.gen_address()
+        for component in address:
+            patient[component] = address[component]
+
+    def gen_mbis_for_patient(
+        self,
+        patient: RowAdapter,
+        num_mbis: int,
+        initial_mbi_obj: RowAdapter | None = None,
+    ):
+        previous_obslt_dt = None
+
+        for mbi_idx in range(num_mbis):
+            # This is a bit of a hack to support regeneration of existing BENE_MBI_ID rows without
+            # touching too much of the remaining generation code here. Basically, we know that
+            # regeneration will only ever call this function with "num_mbis" set to 1, so we can set
+            # the mbi_obj here immediately knowing that the mbi_idx = 0 and num_mbis = 1 case does
+            # not mutate the output BENE_HSTRY table
+            mbi_obj = RowAdapter({}) if num_mbis > 1 or not initial_mbi_obj else initial_mbi_obj
+            # Exclude rows from the original patient that will be modified so that RowAdapter does
+            # not ignore those changes when creating the historical patient if this is not the last
+            # iteration. If this is the last iteration, just use the current patient
+            historical_patient = (
+                RowAdapter(
+                    {
+                        k: v
+                        for k, v in patient.kv.items()
+                        if k
+                        not in {
+                            "BENE_MBI_ID",
+                            "IDR_LTST_TRANS_FLG",
+                            "IDR_TRANS_OBSLT_TS",
+                            "IDR_TRANS_EFCTV_TS",
+                            "IDR_INSRT_TS",
+                            "IDR_UPDT_TS",
+                        }
+                    }
+                )
+                if mbi_idx != num_mbis - 1
+                else patient
+            )
+
+            current_mbi = mbi_obj.get("BENE_MBI_ID") or historical_patient.get(
+                "BENE_MBI_ID", self.gen_mbi()
+            )
+            historical_patient["BENE_MBI_ID"] = current_mbi
+            if mbi_idx == 0:
+                efctv_dt = self.fake.date_between_dates(
+                    datetime.date(year=2017, month=5, day=20),
+                    datetime.date(year=2021, month=1, day=1),
+                )
+                self.set_timestamps(historical_patient, efctv_dt)
+            else:
+                # If we have a previous obsolescence date, start the new MBI the next day
+                if previous_obslt_dt:
+                    efctv_dt = previous_obslt_dt + datetime.timedelta(days=1)
+                else:
+                    # Fallback to random date if no previous obsolescence date
+                    efctv_dt = self.fake.date_between_dates(
+                        datetime.date(year=2021, month=1, day=2),
+                        datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
+                    )
+
+            # Create the MBI object with all required fields
+            mbi_obj["BENE_MBI_EFCTV_DT"] = str(efctv_dt)
+            mbi_obj["IDR_LTST_TRANS_FLG"] = "Y"
+            if mbi_idx != num_mbis - 1:
+                # Calculate obsolescence date
+                obslt_dt = self.fake.date_between_dates(
+                    efctv_dt,
+                    datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
+                )
+                mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
+
+                # if previous_mbi and previous_mbi != current_mbi:
+                historical_patient["IDR_LTST_TRANS_FLG"] = "N"
+
+                self.set_timestamps(historical_patient, obslt_dt)
+                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000"
+                self.bene_hstry_table.append(historical_patient.kv)
+
+                previous_obslt_dt = obslt_dt  # Store for next iteration
+            else:
+                # For the last MBI, no obsolescence date
+                mbi_obj["BENE_MBI_OBSLT_DT"] = None
+
+            self.set_timestamps(mbi_obj, efctv_dt)
+            self.mbi_table[current_mbi] = mbi_obj.kv
+
+    def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
+        parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
+        include_tp = random.random() > 0.2
+        expired = random.random() < 0.2
+        future = random.random() < 0.2
+        self._generate_coverages(
+            patient=patient,
+            coverage_parts=parts,
+            include_tp=include_tp,
+            expired=expired,
+            future=future,
+            force_ztm=force_ztm,
+        )
+
+    def _generate_coverages(
+        self,
+        patient: RowAdapter,
+        coverage_parts: list[str],
+        include_tp: bool,
+        expired: bool,
+        future: bool,
+        force_ztm: bool,
+    ):
+        if expired:
+            medicare_start_date = NOW - datetime.timedelta(days=730)
+            medicare_end_date = NOW - datetime.timedelta(days=365)
+        elif future:
+            medicare_start_date = NOW + datetime.timedelta(days=365)
+            medicare_end_date = NOW + datetime.timedelta(days=730)
+        else:
+            medicare_start_date_val = self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
+            medicare_start_date = (
+                parse(medicare_start_date_val).date()
+                if isinstance(medicare_start_date_val, str)
+                else medicare_start_date_val
+            )
+            medicare_end_date = datetime.date(9999, 12, 31)
+        mdcr_stus_cd = "~"
+        while mdcr_stus_cd in ("0", "~", "00"):
+            mdcr_stus_cd = random.choice(self.code_systems["BENE_MDCR_STUS_CD"])
+
+        # Gross, but Python will pass this by reference to everything that uses it. We want
+        # RowAdapters for empty rows to include the patient's BENE_SK as a foreign key, so
+        # everywhere this is used we copy it first to ensure the same inner RowAdapter dict isn't
+        # being mutated across different tables
+        initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
+
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
+            table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
+        ):
+            self.generate_bene_stus(
+                stus_row=RowAdapter(initial_kv_template.copy()),
+                medicare_start_date=medicare_start_date,
+                medicare_end_date=medicare_end_date,
+                mdcr_stus_cd=mdcr_stus_cd,
+            )
+
+        buy_in_cd = random.choice(self.code_systems["BENE_BUYIN_CD"])
+
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
+            table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
+        ):
+            self.generate_bene_entlmnt_rsn(
+                rsn_row=RowAdapter(initial_kv_template.copy()),
+                medicare_start_date=medicare_start_date,
+                medicare_end_date=medicare_end_date,
+            )
+
+        for coverage_type in coverage_parts:
+            # We need to check if the patient was loaded from file because there's a 10%
+            # chance for any given patient to not have a BENE_ENTLMT row generated for them so
+            # subsequent generations can introduce more data for patients that previously had none.
+            # "force_ztm" overrides this check so that those patients may have new rows generated if
+            # "coverage_parts" is not empty when it was in a previous run
+            if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
+                table=self.mdcr_entlmt, for_file=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
+            ):
+                self.generate_bene_entlmt(
+                    entlmt_row=RowAdapter(initial_kv_template.copy()),
+                    medicare_start_date=medicare_start_date,
+                    medicare_end_date=medicare_end_date,
+                    coverage_type=coverage_type,
+                )
+
+            if (
+                include_tp
+                and (not patient.loaded_from_file or force_ztm)
+                and not output_table_contains_by_bene_sk(
+                    table=self.mdcr_tp, for_file=BENE_TP, bene_sk=patient["BENE_SK"]
+                )
+            ):
+                self.generate_bene_tp(
+                    tp_row=RowAdapter(initial_kv_template.copy()),
+                    medicare_start_date=medicare_start_date,
+                    medicare_end_date=medicare_end_date,
+                    buy_in_cd=buy_in_cd,
+                    coverage_type=coverage_type,
+                )
+
+        # Generate dual coverage data 50% of the time
+        if (
+            (not patient.loaded_from_file or force_ztm)
+            and not output_table_contains_by_bene_sk(
+                table=self.bene_cmbnd_dual_mdcr,
+                for_file=BENE_DUAL,
+                bene_sk=patient["BENE_SK"],
+            )
+            and probability(0.5)
+        ):
+            # Generate dual eligibility dates
+            dual_start_date = str(
+                self.fake.date_between_dates(
+                    datetime.date(year=2017, month=5, day=20),
+                    datetime.date(year=2021, month=1, day=1),
+                )
+            )
+            dual_end_date = "9999-12-31"
+            dual_status_cd = random.choice(self.code_systems["BENE_DUAL_STUS_CD"])
+            dual_type_cd = random.choice(self.code_systems["BENE_DUAL_TYPE_CD"])
+
+            state_codes = [
+                "AL",
+                "TN",
+                "TX",
+                "UT",
+                "VT",
+                "VA",
+                "WA",
+                "WV",
+                "WI",
+                "WY",
+                "DC",
+            ]
+            medicaid_state_cd = random.choice(state_codes)
+
+            if not patient.loaded_from_file or force_ztm:
+                self.generate_bene_dual(
+                    dual_row=RowAdapter(initial_kv_template.copy()),
+                    dual_start_date=dual_start_date,
+                    dual_end_date=dual_end_date,
+                    dual_status_cd=dual_status_cd,
+                    dual_type_cd=dual_type_cd,
+                    medicaid_state_cd=medicaid_state_cd,
+                )
+
+    def generate_bene_dual(
+        self,
+        dual_row: RowAdapter,
+        dual_start_date: str,
+        dual_end_date: str,
+        dual_status_cd: str,
+        dual_type_cd: str,
+        medicaid_state_cd: str,
+    ):
+        dual_row["IDR_LTST_TRANS_FLG"] = "Y"
+        dual_row["BENE_DUAL_STUS_CD"] = dual_status_cd
+        dual_row["BENE_DUAL_TYPE_CD"] = dual_type_cd
+        dual_row["GEO_USPS_STATE_CD"] = medicaid_state_cd
+        dual_row["BENE_MDCD_ELGBLTY_BGN_DT"] = dual_start_date
+        dual_row["BENE_MDCD_ELGBLTY_END_DT"] = dual_end_date
+        dual_row["IDR_TRANS_EFCTV_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_INSRT_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
+
+    def generate_bene_tp(
+        self,
+        tp_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        buy_in_cd: str,
+        coverage_type: str,
+    ):
+        tp_row["IDR_LTST_TRANS_FLG"] = "Y"
+        tp_row["BENE_TP_TYPE_CD"] = coverage_type
+        tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        tp_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        tp_row["BENE_RNG_END_DT"] = medicare_end_date
+        tp_row["BENE_BUYIN_CD"] = buy_in_cd
+        self.mdcr_tp.append(tp_row.kv)
+
+    def generate_bene_entlmt(
+        self,
+        entlmt_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        coverage_type: str,
+    ):
+        entlmt_row["IDR_LTST_TRANS_FLG"] = "Y"
+        entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"] = coverage_type
+        entlmt_row["BENE_MDCR_ENRLMT_RSN_CD"] = random.choice(
+            self.code_systems["BENE_ENRLMT_RSN_CD"]
+        )
+        entlmt_row["BENE_MDCR_ENTLMT_STUS_CD"] = "Y"
+        entlmt_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        entlmt_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        entlmt_row["BENE_RNG_END_DT"] = medicare_end_date
+        self.mdcr_entlmt.append(entlmt_row.kv)
+
+    def generate_bene_entlmnt_rsn(
+        self,
+        rsn_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+    ):
+        entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
+        rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
+        rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        rsn_row["BENE_MDCR_ENTLMT_RSN_CD"] = entitlement_reason
+        rsn_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        rsn_row["BENE_RNG_END_DT"] = medicare_end_date
+        self.mdcr_rsn.append(rsn_row.kv)
+
+    def generate_bene_stus(
+        self,
+        stus_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        mdcr_stus_cd: str,
+    ):
+        stus_row["IDR_LTST_TRANS_FLG"] = "Y"
+        stus_row["BENE_MDCR_STUS_CD"] = mdcr_stus_cd
+        stus_row["MDCR_STUS_BGN_DT"] = medicare_start_date
+        stus_row["MDCR_STUS_END_DT"] = medicare_end_date
+        stus_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+        self.mdcr_stus.append(stus_row.kv)
+
+    def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
+        lis_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
+        lis_end_date = "9999-12-31"
+        copmt_lvl_cd = random.choice(self.code_systems["BENE_CMBND_DEEMD_COPMT_LVL_ID"])
+        ptd_prm_pct = random.choice(["025", "050", "075", "100"])
+
+        lis_row["IDR_LTST_TRANS_FLG"] = "Y"
+        lis_row["BENE_CMBND_DEEMD_IND"] = random.choice(["Y", " "])
+        lis_row["BENE_CMBND_DEEMD_COPMT_LVL_ID"] = copmt_lvl_cd
+        lis_row["BENE_CMBND_DEEMD_PRM_PCT"] = str(ptd_prm_pct)
+        lis_row["BENE_CMBND_DEEMD_EFCTV_DT"] = str(lis_start_date)
+        lis_row["BENE_CMBND_DEEMD_TRMNTN_DT"] = lis_end_date
+        lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+
+        self.bene_lis_cmbnd.append(lis_row.kv)
+
+    def generate_bene_mapd_enrlmt_rx(
+        self, rx_row: RowAdapter, contract_pbp_sk: str, contract_num: str, pbp_num: str
+    ):
+        enrollment_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
+        rx_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
+        member_id_num = self.id_gen.numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        group_num = str(random.randint(-999, -100))
+        prcsr_num = str(random.randint(-999999, -100000))
+        bank_id_num = str(random.randint(-99999, -10000))
+
+        rx_row["CNTRCT_PBP_SK"] = contract_pbp_sk
+        rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
+        rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"] = str(rx_start_date)
+        rx_row["IDR_LTST_TRANS_FLG"] = "Y"
+        rx_row["BENE_PDP_ENRLMT_MMBR_ID_NUM"] = member_id_num
+        rx_row["BENE_PDP_ENRLMT_GRP_NUM"] = group_num
+        rx_row["BENE_PDP_ENRLMT_PRCSR_NUM"] = prcsr_num
+        rx_row["BENE_PDP_ENRLMT_BANK_ID_NUM"] = bank_id_num
+        rx_row["BENE_CNTRCT_NUM"] = contract_num
+        rx_row["BENE_PBP_NUM"] = pbp_num
+        rx_row["IDR_TRANS_EFCTV_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_INSRT_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_UPDT_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+
+        self.bene_mapd_enrlmt_rx.append(rx_row.kv)
+
+    def generate_bene_mapd_enrlmt(self, enrollment_row: RowAdapter, pdp_only: bool = False):
+        enrollment_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
+        enrollment_end_date = "9999-12-31"
+        cvrg_type_cd = "11" if pdp_only else "3"
+        bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
+        bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
+        contract = random.choice(self.cntrct_pbp_num)
+        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.numeric_id(
+            field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
+        )
+        contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
+        pbp_num = contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS)
+
+        enrollment_row["CNTRCT_PBP_SK"] = contract_pbp_sk
+        enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
+        enrollment_row["BENE_CNTRCT_NUM"] = contract_num
+        enrollment_row["BENE_PBP_NUM"] = pbp_num
+        enrollment_row["BENE_CVRG_TYPE_CD"] = cvrg_type_cd
+        enrollment_row["BENE_ENRLMT_PGM_TYPE_CD"] = bene_enrlmt_pgm_type_cd
+        enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"] = bene_enrlmt_emplr_sbsdy_sw
+        enrollment_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
+        enrollment_row["BENE_ENRLMT_END_DT"] = enrollment_end_date
+        enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_INSRT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_UPDT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
+
+        self.bene_mapd_enrlmt.append(enrollment_row.kv)
+        return contract_pbp_sk, contract_num, pbp_num
+
+    def gen_contract_plan(
+        self,
+        amount: int,
+        init_contract_pbp_nums: list[RowAdapter] | None = None,
+        init_contract_pbp_contacts: list[RowAdapter] | None = None,
+    ):
+        init_contract_pbp_nums = init_contract_pbp_nums or []
+        init_contract_pbp_contacts = init_contract_pbp_contacts or []
+        additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]
+        additional_pbp_contacts = [
+            RowAdapter({}) for _ in range(amount - len(init_contract_pbp_contacts))
+        ]
+        all_pbp_nums = init_contract_pbp_nums + additional_pbp_nums
+        all_pbp_contacts = init_contract_pbp_contacts + additional_pbp_contacts
+
+        used_pairs = {
+            (
+                row.get("CNTRCT_NUM"),
+                row.get("CNTRCT_PBP_NUM"),
+            )
+            for row in init_contract_pbp_nums
+            if row.get("CNTRCT_NUM") and row.get("CNTRCT_PBP_NUM")
+        }
+
+        contract_num_and_pbp_num_pairs = list(
+            itertools.product(AVAIL_CONTRACT_NUMS, AVAIL_PBP_NUMS)
+        )
+        random.shuffle(contract_num_and_pbp_num_pairs)
+
+        available_contract_num_pairs = [
+            pair for pair in contract_num_and_pbp_num_pairs if pair not in used_pairs
+        ]
+        pair_index = 0
+
+        contract_pbp_nums: list[RowAdapter] = []
+        contract_pbp_contacts: list[RowAdapter] = []
+
+        for i in range(amount):
+            pbp_num = all_pbp_nums[i]
+            pbp_contact = all_pbp_contacts[i]
+            contract_num = pbp_num.get("CNTRCT_NUM")
+            pbp_val = pbp_num.get("CNTRCT_PBP_NUM")
+            if not contract_num or not pbp_val:
+                contract_num, pbp_val = available_contract_num_pairs[pair_index]
+                pair_index += 1
+            sk = pbp_num.get("CNTRCT_PBP_SK") or self.id_gen.numeric_id(
+                field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
+            )
+            effective_date = self.fake.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+            end_date = self.fake.date_between_dates(effective_date, NOW + relativedelta(years=3))
+            obsolete_date = random.choice(
+                [
+                    self.fake.date_between_dates(effective_date, NOW),
+                    date.fromisoformat("9999-12-31"),
+                ]
+            )
+            last_day = NOW.replace(month=12, day=31)
+
+            pbp_num["CNTRCT_PBP_SK"] = sk
+            pbp_num["CNTRCT_NUM"] = contract_num
+            pbp_num["CNTRCT_PBP_NUM"] = pbp_val
+            pbp_num["CNTRCT_PBP_NAME"] = random.choice(AVAIL_CONTRACT_NAMES)
+            pbp_num["CNTRCT_PBP_TYPE_CD"] = random.choice(AVAIL_PBP_TYPE_CODES)
+            pbp_num["CNTRCT_DRUG_PLAN_IND_CD"] = random.choice(["Y", "N"])
+            pbp_num["CNTRCT_PBP_SK_EFCTV_DT"] = effective_date.isoformat()
+            pbp_num["CNTRCT_PBP_END_DT"] = end_date.isoformat()
+            pbp_num["CNTRCT_PBP_SK_OBSLT_DT"] = obsolete_date.isoformat()
+
+            pbp_contact["CNTRCT_PBP_SK"] = sk
+            pbp_contact["CNTRCT_PLAN_CNTCT_OBSLT_DT"] = "9999-12-31"
+            pbp_contact["CNTRCT_PLAN_CNTCT_TYPE_CD"] = random.choice(["~", "30", "62"])
+            pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(random.choices(string.digits, k=7))
+            pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(random.choices(string.digits, k=10))
+            pbp_contact["CNTRCT_PLAN_CNTCT_EXTNSN_NUM"] = "".join(
+                random.choices(string.digits, k=7)
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(random.choices(string.digits, k=10))
+            pbp_contact["CNTRCT_PBP_END_DT"] = last_day.isoformat()
+            pbp_contact["CNTRCT_PBP_BGN_DT"] = NOW.isoformat()
+            pbp_contact["CNTRCT_PLAN_CNTCT_ST_1_ADR"] = random.choice(
+                [
+                    "319 E. Street",
+                    "North Street",
+                    "West Street",
+                ]
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_ST_2_ADR"] = random.choice(["Avenue M", ""])
+            pbp_contact["CNTRCT_PLAN_CNTCT_CITY_NAME"] = random.choice(
+                [
+                    "Los Angeles",
+                    "San Jose",
+                    "San Francisco",
+                ]
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_STATE_CD"] = "CA"
+            pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(random.choices(string.digits, k=9))
+
+            contract_pbp_nums.append(pbp_num)
+            contract_pbp_contacts.append(pbp_contact)
+            self.cntrct_pbp_num.append(pbp_num.kv)
+            self.cntrct_pbp_cntct.append(pbp_contact.kv)
+
+        return contract_pbp_nums, contract_pbp_contacts
+
+    def save_output_files(
+        self,
+        writer: OutputDestinationWriter,
+    ) -> None:
+        mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
+
+        beneficiary_and_contract_exports = [
+            (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
+            (mbi_arr, BENE_MBI_ID, ALL_KEYS),
+            (self.mdcr_stus, BENE_STUS, ALL_KEYS),
+            (self.mdcr_entlmt, BENE_ENTLMT, ALL_KEYS),
+            (self.mdcr_tp, BENE_TP, ALL_KEYS),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN, ALL_KEYS),
+            (self.bene_xref_table, BENE_XREF, ALL_KEYS),
+            (
+                self.bene_cmbnd_dual_mdcr,
+                BENE_DUAL,
+                ALL_KEYS,
+            ),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND, ALL_KEYS),
+            (
+                self.bene_mapd_enrlmt_rx,
+                BENE_MAPD_ENRLMT_RX,
+                ALL_KEYS,
+            ),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, ALL_KEYS),
+        ]
+
+        if isinstance(writer, CsvWriter):
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
+            beneficiary_and_contract_exports.append(
+                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
+            )
+
+        with tqdm.tqdm(beneficiary_and_contract_exports) as t:
+            for data, table_name, cols in t:
+                t.set_postfix(file=table_name)  # type: ignore
+                self.export_table(data, table_name, writer, cols)
+
+    def export_table(
+        self,
+        data: list[dict[str, Any]],
+        table_name: str,
+        writer: OutputDestinationWriter,
+        cols: list[str] | str = ALL_KEYS,
+    ) -> None:
+        writer.write_table(data, table_name, cols)
+
+    def flush_batch(self, writer: OutputDestinationWriter) -> None:
+        self.save_output_files(writer)
+        self.bene_hstry_table.clear()
+        self.bene_xref_table.clear()
+        self.mbi_table = {}
+        self.mdcr_stus.clear()
+        self.mdcr_entlmt.clear()
+        self.mdcr_tp.clear()
+        self.mdcr_rsn.clear()
+        self.bene_cmbnd_dual_mdcr.clear()
+        self.bene_lis_cmbnd.clear()
+        self.bene_mapd_enrlmt_rx.clear()
+        self.bene_mapd_enrlmt.clear()
+        _tables_by_bene_sk.clear()

@@ -29,3 +29,4 @@ ReferenceTables/source-to-target-mappings
 data/*
 temp_packages/*
 node_modules
+bfd-synthetic-generator.zip

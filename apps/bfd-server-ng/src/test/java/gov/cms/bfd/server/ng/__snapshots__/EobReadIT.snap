@@ -552,6 +552,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "code": "8"
       } ]
     }
+  }, {
+    "sequence": 23,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "W2",
+        "display": "DUPLICATE OF ORIGINAL BILL - (EFF. 10/1/08)"
+      } ]
+    }
   } ],
   "insurance": [ {
     "focal": true,
@@ -1821,6 +1841,46 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "code": "3"
       } ]
     }
+  }, {
+    "sequence": 26,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "05",
+        "display": "LIEN HAS BEEN FILED"
+      } ]
+    }
+  }, {
+    "sequence": 27,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "64",
+        "display": "PAYER CODE/OTHER THAN CLEAN CLAIM."
+      } ]
+    }
   } ],
   "insurance": [ {
     "focal": true,
@@ -2524,9 +2584,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
     "value": "28977596005798RIF"
-  }, {
-    "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-    "value": "00000000000002ABC"
   } ],
   "status": "active",
   "type": {
@@ -4772,6 +4829,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "code": "8"
       } ]
     }
+  }, {
+    "sequence": 35,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "21",
+        "display": "BILLING FOR DENIAL NOTICE"
+      } ]
+    }
   } ],
   "diagnosis": [ {
     "sequence": 1,
@@ -6437,6 +6514,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding": [ {
         "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
         "code": "8"
+      } ]
+    }
+  }, {
+    "sequence": 35,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_RLT_COND_CD",
+        "display": "Claim Related Condition Code"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "code": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code": "21",
+        "display": "BILLING FOR DENIAL NOTICE"
       } ]
     }
   } ],

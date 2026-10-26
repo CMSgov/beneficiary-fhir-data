@@ -1,6 +1,6 @@
 services:
   matchbox:
-    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.1.5
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.1.21@sha256:d73b558b87ead55a63c35174b53bca655d48f77abdd22db3ca5f68032533f51a
     container_name: matchbox
     restart: on-failure
     ports:
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./:/config/
   matchbox-setup:
-    image: ghcr.io/astral-sh/uv:python3.14-alpine
+    image: ghcr.io/astral-sh/uv:python3.14-alpine@sha256:4ce2a2ef69130ffb97688c8446ae771415035406355fbcb7932c59a535f82888
     volumes:
       - ./:/app
     working_dir: /app
@@ -46,7 +46,7 @@ services:
       - UV_PROJECT_ENVIRONMENT=/tmp/.venv
     command: uv run setup_matchbox.py --url http://matchbox:8080/matchboxv3/fhir
   matchbox-db:
-    image: postgres:17.7-alpine
+    image: postgres:17.7-alpine@sha256:bb377b7239d2774ac8cc76f481596ce96c5a6b5e9d141f6d0a0ee371a6e7c0f2
     container_name: matchbox-db
     restart: always
     ports:
