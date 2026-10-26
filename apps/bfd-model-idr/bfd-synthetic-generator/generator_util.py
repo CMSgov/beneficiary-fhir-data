@@ -165,6 +165,7 @@ def load_file_dict(
                 file_path,
                 dtype=str,
                 na_filter=exclude_empty,
+                keep_default_na=False,
             )
             file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
             if not exclude_empty:

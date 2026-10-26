@@ -829,23 +829,16 @@ def generate(
     }
     if isinstance(writer, CsvWriter):
         load_file_dict(files=files, paths=list(paths))
-
-    if (
-        isinstance(writer, CsvWriter)
-        and not files[f.BENE_HSTRY]
-        and not files[f.CLM]
-        and not files[f.CNTRCT_PBP_NUM]
-    ):
-        print(
-            f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
-            f"claims data generation to proceed"
-        )
-        sys.exit(1)
+        if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
+            print(
+                f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
+                f"claims data generation to proceed"
+            )
+            sys.exit(1)
 
     gen_utils.cntrct_pbp_num = writer.get_cntrct_pbp_nums(files)
 
     other_util = OtherGeneratorUtil()
-
     existing_providers = writer.get_provider_histories(files)
     generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
         other_util.gen_provider_history(
@@ -896,19 +889,17 @@ def generate(
             generated_type_2_npis,
         )
 
-        bene_sk_to_mbi = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
-        out_tables[f.PRAUC] = _generate_prior_auth(
-            gen_utils,
-            out_tables,
-            bene_sk_to_mbi,
-            generated_provider_histories,
-            generated_type_1_npis,
-            generated_type_2_npis,
+        pa_util = PriorAuthGeneratorUtil()
+        out_tables[f.PRVDR_HSTRY] = generated_provider_histories
+        out_tables[f.BENE_HSTRY] = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
+        existing_prior_auths = writer.get_prior_auths(out_tables[f.BENE_HSTRY], files)
+        out_tables[f.PRAUC] = pa_util.gen_prior_auths(
+            gen_utils=gen_utils,
+            out_tables=out_tables,
+            generated_type_1_npis=generated_type_1_npis,
+            generated_type_2_npis=generated_type_2_npis,
+            init_prior_auth=existing_prior_auths,
         )
-
-        if isinstance(writer, SnowflakeWriter) and not truncate:
-            # Do not regenerate PRAUC directly from Snowflake. TODO: Punted for future ticket.
-            out_tables[f.PRAUC].clear()
 
         for table_name, rows in out_tables.items():
             if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
@@ -949,12 +940,14 @@ def _generate_batch(
     )
 
     rx_clm_line_per_clm_uniq_id = {
-        str(x[f.CLM_UNIQ_ID]): x for x in existing[f.CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
+        str(x[f.CLM_UNIQ_ID]): x
+        for x in existing[f.CLM_LINE]
+        if int(x.get(f.CLM_TYPE_CD)) in PHARMACY_CLM_TYPE_CDS
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
         part_by=lambda x: x[f.CLM_UNIQ_ID],
-        filter_by=lambda x: not x.get(f.CLM_LINE_RX_NUM),
+        filter_by=lambda x: int(x.get(f.CLM_TYPE_CD)) not in PHARMACY_CLM_TYPE_CDS,
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
@@ -1399,25 +1392,6 @@ def _generate_batch(
                 out_tables[f.CLM_LINE_FISS].extend(clm_line_fiss)
 
     return out_tables
-
-
-def _generate_prior_auth(
-    gen_utils: GeneratorUtil,
-    out_tables: dict[str, list[RowAdapter]],
-    bene_sk_to_mbi: list[RowAdapter],
-    generated_providers=list[RowAdapter],
-    generated_type_1_npis=list[str],
-    generated_type_2_npis=list[str],
-) -> list[RowAdapter]:
-    pa_util = PriorAuthGeneratorUtil()
-    out_tables[f.PRVDR_HSTRY] = generated_providers
-    return pa_util.gen_prior_auths(
-        gen_utils=gen_utils,
-        files={f.BENE_HSTRY: bene_sk_to_mbi},
-        out_tables=out_tables,
-        generated_type_1_npis=generated_type_1_npis,
-        generated_type_2_npis=generated_type_2_npis,
-    )
 
 
 if __name__ == "__main__":
