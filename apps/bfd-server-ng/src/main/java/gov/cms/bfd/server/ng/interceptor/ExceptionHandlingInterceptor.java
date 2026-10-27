@@ -55,8 +55,11 @@ public class ExceptionHandlingInterceptor {
       HttpServletRequest request,
       HttpServletResponse response)
       throws IOException {
-
-    if (isInternalServerError(exception.getStatusCode()) && !response.isCommitted()) {
+    if (response.isCommitted()) {
+      // If response is already committed, we don't need to process any further.
+      return false;
+    }
+    if (isInternalServerError(exception.getStatusCode())) {
       // Force a default error message for any unexpected errors
       response.sendError(HTTP_ERROR_STATUS, "An unexpected error occurred");
       return false;
