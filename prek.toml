@@ -49,6 +49,9 @@ hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
 [[repos]]
 repo = "local"
 hooks = [
+  # The lockfile is written by `gh actions-lock`; this checks that every reference
+  # in a workflow or in-repo action has an entry in it.
+  { id = "actions-lock", name = "Workflow actions are locked", language = "system", files = "\\.github/(workflows|actions)/.*\\.ya?ml$", entry = "./hooks/verify-actions-lock.sh", pass_filenames = false },
   { id = "java", name = "java", language = "system", types = [
     "java",
   ], entry = "./hooks/java-format.sh" },
