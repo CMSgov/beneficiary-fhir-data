@@ -3,9 +3,6 @@ package gov.cms.bfd.server.ng.eob;
 import static gov.cms.bfd.server.ng.util.MetricRecorder.SAMHSA_FILTER_MODE;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
-import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
@@ -17,9 +14,11 @@ import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.priorauth.PriorAuthorizationItem;
 import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.input.ClaimIdSearchCriteria;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -64,15 +63,7 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, ClaimFilterOptions options) {
-    var eobs =
-        searchByIdsInner(
-            new ClaimIdSearchCriteria(
-                List.of(fhirId),
-                new DateTimeRange(),
-                new DateTimeRange(),
-                Collections.emptyList(),
-                Collections.emptyList()),
-            options);
+    var eobs = searchByIdsInner(new ClaimIdSearchCriteria(List.of(fhirId)), options);
     return eobs.stream().findFirst();
   }
 
@@ -95,22 +86,8 @@ public class EobHandler {
     if (beneSimple.isEmpty() || (beneSimple.get().getXrefSk() != beneSk)) {
       return new Bundle();
     }
-    var beneficiary = beneSimple.get();
 
-    var repositoryCriteria =
-        new ClaimSearchCriteria(
-            beneficiary.getXrefSk(),
-            beneficiary.getMbi(),
-            criteria.claimThroughDate(),
-            criteria.lastUpdated(),
-            criteria.limit(),
-            criteria.offset(),
-            criteria.tagCriteria(),
-            criteria.claimTypeCodes(),
-            criteria.outcomes(),
-            criteria.sources());
-
-    var claimAndAuthResult = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claimAndAuthResult = claimRepository.findByBeneXrefSk(criteria, beneSimple.get().getMbi());
     var claims = claimAndAuthResult.claims();
     var priorAuths = claimAndAuthResult.priorAuths();
     var samhsaFilterMode = options.getSamhsaFilterMode();
@@ -127,15 +104,15 @@ public class EobHandler {
                       .map(priorAuth -> transformPriorAuthorizationToFhir(priorAuth, options));
               var combinedResources =
                   Stream.concat(filteredClaims, filteredPriorAuths)
-                      .skip(repositoryCriteria.resolveOffset())
-                      .limit(repositoryCriteria.resolveLimitWithExtra(1));
+                      .skip(criteria.resolveOffset())
+                      .limit(criteria.resolveLimitWithExtra(1));
               return FhirUtil.bundleOrDefault(
                   combinedResources,
                   loadProgressRepository::lastUpdated,
                   requestDetails,
                   // we want the raw limit
-                  Optional.of(repositoryCriteria.resolveLimit()),
-                  Optional.of(repositoryCriteria.resolveOffset()));
+                  Optional.of(criteria.resolveLimit()),
+                  Optional.of(criteria.resolveOffset()));
             },
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
     metricRecorder.recordDistribution(

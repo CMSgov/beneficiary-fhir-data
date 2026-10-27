@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.claim.EobProfile.OUTPATIENT_INSTITUTIONAL_REGULAR;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_CMS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_REGULAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,11 +16,18 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.input.CoveragePart;
+import gov.cms.bfd.server.ng.input.EobProfileSelection;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
@@ -61,6 +72,10 @@ class FhirInputConverterTest extends IntegrationTestBase {
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toString(null, ""));
     var emptyToken = new TokenParam();
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toString(emptyToken, ""));
+
+    assertEquals(new EobProfileSelection(), FhirInputConverter.parseProfileParameter(null));
+    assertEquals(
+        new EobProfileSelection(), FhirInputConverter.parseProfileParameter(new UriOrListParam()));
   }
 
   @Test
@@ -202,5 +217,89 @@ class FhirInputConverterTest extends IntegrationTestBase {
     assertTrue(FhirInputConverter.parseCoverageClassPart("part-e").isEmpty());
     assertTrue(FhirInputConverter.parseCoverageClassPart("medicare").isEmpty());
     assertTrue(FhirInputConverter.parseCoverageClassPart("part/a").isEmpty());
+  }
+
+  private static UriOrListParam profileParam(String... urls) {
+    var profileParam = new UriOrListParam();
+    Arrays.stream(urls).map(UriParam::new).forEach(profileParam::addOr);
+    return profileParam;
+  }
+
+  static Stream<Arguments> provideProfileParameterScenarios() {
+    return Stream.of(
+        Arguments.of(
+            "single", profileParam(PHARMACY_BASIS.getCanonicalUrl()), Set.of(PHARMACY_BASIS)),
+        Arguments.of(
+            "versioned",
+            profileParam(PHARMACY_BASIS.getVersionedCanonicalUrl()),
+            Set.of(PHARMACY_BASIS)),
+        Arguments.of(
+            "multiple",
+            profileParam(
+                PHARMACY_CMS.getCanonicalUrl(), OUTPATIENT_INSTITUTIONAL_REGULAR.getCanonicalUrl()),
+            Set.of(PHARMACY_CMS, OUTPATIENT_INSTITUTIONAL_REGULAR)),
+        Arguments.of(
+            "duplicate",
+            profileParam(
+                PHARMACY_BASIS.getCanonicalUrl(), PHARMACY_BASIS.getVersionedCanonicalUrl()),
+            Set.of(PHARMACY_BASIS)),
+        Arguments.of(
+            "whitespace",
+            profileParam(" " + PHARMACY_BASIS.getCanonicalUrl() + " "),
+            Set.of(PHARMACY_BASIS)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideProfileParameterScenarios")
+  void parseProfileParameter(
+      String scenario, UriOrListParam profileParam, Set<EobProfile> expectedProfiles) {
+    assertEquals(
+        expectedProfiles,
+        FhirInputConverter.parseProfileParameter(profileParam).profiles(),
+        scenario);
+  }
+
+  static Stream<Arguments> provideInvalidProfileParameterScenarios() {
+    var unsupported = "Unsupported _profile value";
+    return Stream.of(
+        Arguments.of("unknown", profileParam("BOGUS"), unsupported),
+        Arguments.of("legacy name", profileParam("BASIS"), unsupported),
+        Arguments.of(
+            "unsupported version",
+            profileParam(PHARMACY_REGULAR.getCanonicalUrl() + "|2.1.0"),
+            unsupported),
+        Arguments.of(
+            "versioned CMS", profileParam(PHARMACY_CMS.getCanonicalUrl() + "|2.2.0"), unsupported),
+        Arguments.of(
+            "case sensitive",
+            profileParam(PHARMACY_BASIS.getCanonicalUrl().toUpperCase()),
+            unsupported),
+        Arguments.of(
+            "valid and invalid",
+            profileParam(PHARMACY_CMS.getCanonicalUrl(), "BOGUS"),
+            unsupported),
+        Arguments.of(
+            "conflicting",
+            profileParam(PHARMACY_REGULAR.getCanonicalUrl(), PHARMACY_BASIS.getCanonicalUrl()),
+            "Conflicting _profile values"),
+        Arguments.of(
+            "modifier",
+            new UriOrListParam()
+                .addOr(
+                    new UriParam(PHARMACY_BASIS.getCanonicalUrl())
+                        .setQualifier(UriParamQualifierEnum.BELOW)),
+            "_profile modifiers are not supported"));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideInvalidProfileParameterScenarios")
+  void parseProfileParameterInvalid(
+      String scenario, UriOrListParam profileParam, String expectedMessage) {
+    var thrown =
+        assertThrows(
+            InvalidRequestException.class,
+            () -> FhirInputConverter.parseProfileParameter(profileParam),
+            scenario);
+    assertTrue(thrown.getMessage().contains(expectedMessage), scenario);
   }
 }

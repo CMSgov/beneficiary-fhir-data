@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentAmount;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
@@ -9,12 +10,10 @@ import jakarta.persistence.MappedSuperclass;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
-import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
 @MappedSuperclass
-@Generated("TODO - Remove after query optimization implementation")
 abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
 
   @Embedded private PaymentComponentAmount paymentComponent;
@@ -40,6 +39,11 @@ abstract class ClaimProfessionalRegularBase extends ClaimProfessionalBase {
   @Override
   public PaymentComponentBase getPaymentComponent() {
     return paymentComponent;
+  }
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.REGULAR;
   }
 
   // endregion

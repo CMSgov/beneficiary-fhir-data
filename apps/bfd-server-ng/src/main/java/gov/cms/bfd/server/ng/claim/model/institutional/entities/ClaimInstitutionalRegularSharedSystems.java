@@ -20,14 +20,12 @@ import jakarta.persistence.Table;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 
 /** The institutional claim, regular profile, sourced from shared systems. */
 @Getter
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalRegularSharedSystems extends ClaimInstitutionalRegularBase
     implements SharedSystemsClaim {
 
