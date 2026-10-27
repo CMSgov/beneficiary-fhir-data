@@ -158,7 +158,7 @@ runs:
 
     - name: Setup OpenTofu
       if: steps.check-tfvm-installed.outputs.is-tofu-installed == 'false'
-      uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
+      uses: opentofu/setup-opentofu@v1.0.5
       with:
         tofu_version: ${{ steps.get-opentofu-version.outputs.tofu-version }}
         tofu_wrapper: false # Necessary to wrap with tofu-ci.sh

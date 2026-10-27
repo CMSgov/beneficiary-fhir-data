@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Run Shellcheck
         id: ShellCheck
-        uses: redhat-plumbers-in-action/differential-shellcheck@f51c7c0d32777d00de777131d25918617a246415 # v5.5.7
+        uses: redhat-plumbers-in-action/differential-shellcheck@v5.5.7
         env:
           SHELLCHECK_OPTS: "-e SC1071 -e SC2239"
         with:
