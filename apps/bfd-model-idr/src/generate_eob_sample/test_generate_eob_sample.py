@@ -52,14 +52,14 @@ def test_generate_eob_sample_institutional_outpatient() -> None:
             "--clm-uniq-id",
             "0113370100080",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Institutional-Outpatient-Sample.json")
+    output_file = Path("out-test/EOB-Institutional-Outpatient-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -77,14 +77,14 @@ def test_generate_eob_sample_institutional_hospice() -> None:
             "--clm-uniq-id",
             "7026678960101",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-Hospice-Sample.json")
+    output_file = Path("out-test/EOB-Hospice-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -100,23 +100,23 @@ def test_generate_eob_sample_institutional_snf() -> None:
         main,
         [
             "--clm-uniq-id",
-            "5081397161090",
+            "-7226585371632",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-SNF-Sample.json")
+    output_file = Path("out-test/EOB-SNF-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["CLM_UNIQ_ID"] == "5081397161090"
+    assert result_data["CLM_UNIQ_ID"] == "-7226585371632"
     assert int(result_data["CLM_TYPE_CD"]) == 30
 
 
@@ -127,14 +127,14 @@ def test_generate_eob_sample_institutional_hha() -> None:
             "--clm-uniq-id",
             "2512230584690",
             "--source-directory",
-            "../../../bfd-pipeline-idr/test_samples1",
+            SOURCE_DIR_SAMPLES1,
             "--output-directory",
-            "../../out-test",
+            "out-test",
         ],
     )
 
     assert result.exit_code == 0
-    output_file = Path("../../out-test/EOB-HHA-Sample.json")
+    output_file = Path("out-test/EOB-HHA-Sample.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
