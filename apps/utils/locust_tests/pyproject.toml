@@ -1,5 +1,5 @@
 [project]
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
@@ -25,6 +25,7 @@ dev = [
   "types-gevent>=25.4.0.20250516",
   "uv>=0.11.15",
   "pyright>=1.1.403",
+  "basedpyright>=1.40.2",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda

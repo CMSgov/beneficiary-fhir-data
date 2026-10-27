@@ -7,8 +7,9 @@ from locust import events, tag, task
 from locust.env import Environment
 
 from common import data, db_idr
-from common.bfd_user_base import BFDUserBase
+from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
+from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 master_bene_sks: Collection[str] = []
 master_bene_sks_part_a: Collection[str] = []
@@ -30,6 +31,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids",
     )
 
@@ -37,6 +39,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks_part_a = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_a_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids_part_a",
     )
 
@@ -44,6 +47,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_sks_part_b = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_b_bene_sks,
+        use_table_sample=True,
         data_type_name="bene_ids_part_b",
     )
 
@@ -51,6 +55,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_bene_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_mbis,
+        use_table_sample=True,
         data_type_name="bene_mbis",
     )
 
@@ -58,11 +63,19 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
     master_claim_ids = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_claim_ids,
+        use_table_sample=True,
         data_type_name="claim_ids",
     )
 
 
 logger = logging.getLogger(__name__)
+
+
+set_comparisons_metadata_path("./config/regression_suites_compare_meta.json")
+
+
+class TestLoadShape(UserInitAwareLoadShape):
+    pass
 
 
 class RegressionV3User(BFDUserBase):

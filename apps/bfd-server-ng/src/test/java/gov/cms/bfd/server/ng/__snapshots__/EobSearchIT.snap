@@ -2013,9 +2013,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -3311,9 +3308,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[GET_WITH_SEARCH
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -4609,9 +4603,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultipleDuplicate[POST]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -5907,9 +5898,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -7205,9 +7193,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[GET_WITH_SEARCH]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -8503,9 +8488,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByIdMultiple[POST]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "28977596005798RIF"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000002ABC"
       } ],
       "status": "active",
       "type": {
@@ -16621,9 +16603,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -19946,9 +19925,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -27102,9 +27078,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -34258,9 +34231,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -41430,9 +41400,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -48557,9 +48524,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -55684,9 +55648,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -62795,9 +62756,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -66734,9 +66692,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -72690,9 +72645,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -84516,9 +84468,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -88455,9 +88404,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -94411,9 +94357,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -106237,9 +106180,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -110176,9 +110116,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -116132,9 +116069,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -126274,9 +126208,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -132121,9 +132052,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -137968,9 +137896,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -143440,9 +143365,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -149287,9 +149209,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -155134,9 +155053,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -160606,9 +160522,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -166453,9 +166366,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {
@@ -172300,9 +172210,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "system": "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
         "value": "67289832423923BIX"
-      }, {
-        "system": "https://bluebutton.cms.gov/identifiers/CLM-PTNT-CNTL-NUM",
-        "value": "00000000000001ABC"
       } ],
       "status": "active",
       "type": {

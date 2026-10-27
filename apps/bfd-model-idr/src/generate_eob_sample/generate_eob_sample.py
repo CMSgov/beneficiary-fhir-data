@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from idr_model.claims_static import (
+from idr_model.claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
     INSTITUTIONAL_CLAIM_TYPES,

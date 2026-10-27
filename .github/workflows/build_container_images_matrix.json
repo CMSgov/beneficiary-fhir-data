@@ -48,12 +48,6 @@
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-platform-eft-sftp-outbound-transfer-lambda",
-    "dockerfile": "ops/services/02-eft/lambda_src/sftp_outbound_transfer/Dockerfile",
-    "contextDir": "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
-    "platform": "linux/arm64"
-  },
-  {
     "name": "bfd-platform-pipeline-ccw-manifests-verifier-lambda",
     "dockerfile": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier/Dockerfile",
     "contextDir": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
@@ -96,6 +90,15 @@
     "name": "bfd-platform-server-datadog-agent",
     "dockerfile": "ops/images/bfd-platform-server-datadog-agent/Dockerfile",
     "contextDir": "ops/images/bfd-platform-server-datadog-agent",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-platform-samhsa-regression",
+    "dockerfile": "apps/utils/samhsa-regression-tests/Dockerfile",
+    "contextDir": "apps/utils/samhsa-regression-tests",
+    "namedContexts": {
+      "server-ng-resources": "apps/bfd-server-ng/src/main/resources"
+    },
     "platform": "linux/arm64"
   }
 ]

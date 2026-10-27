@@ -101,7 +101,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         compare_tag = (
             "ecs_release"
             if BFD_ENVIRONMENT in ["test", "prod", "prod-sbx", "sandbox"]
-            else BFD_ENVIRONMENT
+            else BFD_ENVIRONMENT.lower().replace("-", "_")
         )
         response = lambda_client.invoke(
             FunctionName=RUN_LOCUST_LAMBDA_NAME,

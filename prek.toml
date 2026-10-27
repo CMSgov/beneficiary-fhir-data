@@ -42,6 +42,11 @@ rev = "v8.24.2"
 hooks = [{ id = "gitleaks" }]
 
 [[repos]]
+repo = "https://github.com/deadnews/pindock"
+rev = "v1.1.3"
+hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
+
+[[repos]]
 repo = "local"
 hooks = [
   { id = "java", name = "java", language = "system", types = [

@@ -1,5 +1,13 @@
 ARG base_version=latest
 
+# HACK: `idr-pipeline` is a named build context supplied by the release pipeline
+# (namedContexts in .github/workflows/build_container_images_matrix.json), and
+# pindock requires every `--from` reference to resolve to a stage in this file or
+# to a digest-pinned image. This empty stage is declared to satisfy it. BuildKit
+# always prefers a named context over a stage of the same name, so the stage is
+# never used. Tested with podman and it behaves as expected.
+FROM scratch AS idr-pipeline
+
 # Image is expected to exist locally prior to build. Operators will need to pull the image from ECR
 # first before building
 FROM bfd-platform-base-python:${base_version} AS groupadd
@@ -44,7 +52,7 @@ WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
 COPY --from=idr-pipeline . /app/packages/idr-pipeline
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock .python-version ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --locked --no-install-project
 

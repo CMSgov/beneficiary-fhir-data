@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
+import java.net.URI;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
@@ -19,7 +20,7 @@ import org.springframework.test.context.DynamicPropertySource;
 class ServerConfigurationIT extends IntegrationTestBase {
 
   static final String RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT = "Resource not allowed.";
-  static final String URL_CAPABILITY = "local.fhirv3.bfd.cmscloud.local/v3/fhir";
+  static final String PUBLISHER = "Centers for Medicare & Medicaid Services";
 
   @DynamicPropertySource
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
@@ -95,9 +96,10 @@ class ServerConfigurationIT extends IntegrationTestBase {
             .ofType(CapabilityStatement.class)
             .accept("application/fhir+json")
             .execute();
-    assertEquals(URL_CAPABILITY, metaData.getImplementation().getUrl());
+    assertEquals("localhost", URI.create(metaData.getImplementation().getUrl()).getHost());
+    assertEquals(PUBLISHER, metaData.getPublisher());
     assertEquals(
         this.configuration.getProject().getId(), metaData.getImplementation().getDescription());
-    assertEquals(this.configuration.getProject().getVersion(), metaData.getVersion());
+    assertEquals(this.configuration.getProject().getVersion(), metaData.getSoftware().getVersion());
   }
 }
