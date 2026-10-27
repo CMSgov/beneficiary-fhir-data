@@ -44,6 +44,7 @@ def test_generate_eob_sample_base() -> None:
         or int(result_data["CLM_TYPE_CD"]) in VMS_CDS
     )
 
+
 def test_generate_eob_sample_institutional_outpatient() -> None:
     result = CliRunner().invoke(
         main,
@@ -67,6 +68,7 @@ def test_generate_eob_sample_institutional_outpatient() -> None:
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "0113370100080"
     assert int(result_data["CLM_TYPE_CD"]) == 40
+
 
 def test_generate_eob_sample_institutional_hospice() -> None:
     result = CliRunner().invoke(
@@ -92,6 +94,7 @@ def test_generate_eob_sample_institutional_hospice() -> None:
     assert result_data["CLM_UNIQ_ID"] == "7026678960101"
     assert int(result_data["CLM_TYPE_CD"]) == 50
 
+
 def test_generate_eob_sample_institutional_snf() -> None:
     result = CliRunner().invoke(
         main,
@@ -116,6 +119,7 @@ def test_generate_eob_sample_institutional_snf() -> None:
     assert result_data["CLM_UNIQ_ID"] == "5081397161090"
     assert int(result_data["CLM_TYPE_CD"]) == 30
 
+
 def test_generate_eob_sample_institutional_hha() -> None:
     result = CliRunner().invoke(
         main,
@@ -139,7 +143,6 @@ def test_generate_eob_sample_institutional_hha() -> None:
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "2512230584690"
     assert int(result_data["CLM_TYPE_CD"]) == 10
-
 
 
 def test_generate_eob_sample_pharmacy() -> None:

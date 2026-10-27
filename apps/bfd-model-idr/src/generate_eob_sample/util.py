@@ -57,6 +57,7 @@ def find_field_in_line_by_num(
 
     return extract_col_str(line_matches[0], extracted_field)
 
+
 def find_linked_field_in_tgt_by_line_num_sk(
     source_directory: str,
     src_lines: list[dict[str, str]],
@@ -83,7 +84,9 @@ def find_linked_field_in_tgt_by_line_num_sk(
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
 
+
 ## 2nd order reads (clm_line --> supplementary_line.sk --> target_read.sk)
+
 
 def read_ansi_sgntr(ansi_sgntr_sk: str, source_directory: str) -> list[dict[str, str]]:
     return read_single_line_file(
