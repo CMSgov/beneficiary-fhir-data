@@ -64,7 +64,7 @@ resource "aws_lambda_function" "samhsa_regression" {
   architectures    = ["arm64"]
   package_type     = "Image"
 
-  memory_size = 512
+  memory_size = 2048
   timeout     = 5 * 60 # 5 minutes
 
   environment {
