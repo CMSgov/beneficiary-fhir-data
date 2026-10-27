@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
@@ -19,7 +21,16 @@ import org.jetbrains.annotations.NotNull;
 @Entity
 @Getter
 @EqualsAndHashCode
-@Table(name = "beneficiary_entitlement_latest", schema = "idr")
+@Subselect(
+    """
+    SELECT DISTINCT ON (bene_sk, bene_mdcr_entlmt_type_cd) *,
+        min(bene_rng_bgn_dt) OVER (PARTITION BY bene_sk, bene_mdcr_entlmt_type_cd) AS original_bgn_dt
+    FROM idr.beneficiary_entitlement
+    WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
+      AND bene_rng_bgn_dt <= (now() - interval '12 hours')
+    ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
+    """)
+@Immutable
 public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement> {
 
   @EmbeddedId private BeneficiaryEntitlementId id;

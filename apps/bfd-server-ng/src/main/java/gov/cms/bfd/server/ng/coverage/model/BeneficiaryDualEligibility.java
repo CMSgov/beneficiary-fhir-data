@@ -5,11 +5,12 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
@@ -18,7 +19,15 @@ import org.hl7.fhir.r4.model.Period;
 /** Dual Medicare/Medicaid eligibility info. */
 @Getter
 @Entity
-@Table(name = "beneficiary_dual_eligibility_latest", schema = "idr")
+@Subselect(
+    """
+    SELECT DISTINCT ON (bene_sk) *
+    FROM idr.beneficiary_dual_eligibility
+    WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'
+      AND bene_mdcd_elgblty_bgn_dt <= (now() - interval '12 hours')
+    ORDER BY bene_sk, bene_mdcd_elgblty_bgn_dt DESC, idr_trans_efctv_ts DESC
+    """)
+@Immutable
 public class BeneficiaryDualEligibility {
   @Id
   @Column(name = "bene_sk")

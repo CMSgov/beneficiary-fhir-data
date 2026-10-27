@@ -11,3 +11,20 @@ updates:
       github-actions:
         patterns:
           - "*"
+  - package-ecosystem: "docker"
+    directories:
+      - "**/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    ignore:
+      # "base" Images are not referred to by a specific tag and we are in complete control of their
+      # lifecycle. There is no way for Dependabot to resolve updates because resolving updates
+      # makes no sense in the contexts where we use them. So, we need to exclude them explicitly.
+      - dependency-name: "bfd-platform-base-*"
+    groups:
+      docker-images:
+        patterns:
+          - "*"
