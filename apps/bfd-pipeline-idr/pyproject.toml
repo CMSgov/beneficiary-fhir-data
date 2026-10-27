@@ -38,6 +38,8 @@ build-backend = "uv_build"
 exclude-newer = "7 days"
 # CA trust store fix (certifi 2026.10.19) exempted from cooldown
 exclude-newer-package = { certifi = false }
+# snowflake-connector-python 4.x caps filelock<4; override to pick up filelock security fixes
+override-dependencies = ["filelock>=4.2.1"]
 
 [tool.uv.build-backend]
 module-name = "idr_pipeline"
