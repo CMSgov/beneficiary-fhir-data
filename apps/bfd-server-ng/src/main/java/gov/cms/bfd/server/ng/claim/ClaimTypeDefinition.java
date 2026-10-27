@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
+import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
+import gov.cms.bfd.server.ng.input.EobProfileSelection;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,9 +15,17 @@ import java.util.List;
  * @param baseQuery base query
  * @param claimClass entity class
  * @param systemType system type which indicates a claim's source
+ * @param claimType claim type of the entity class
+ * @param profileType the profile the entity class is rendered in
  */
 public record ClaimTypeDefinition(
-    String baseQuery, Class<? extends ClaimBase> claimClass, SystemType systemType) {
+    String baseQuery,
+    Class<? extends ClaimBase> claimClass,
+    SystemType systemType,
+    ClaimType claimType,
+    EobProfileType profileType) {
+
+  private static final String PROFILE_CLAIM_TYPE_CODES = "profileClaimTypeCodes";
 
   /**
    * Determine whether this claim type definition is compatible with any active filters. Inactive
@@ -24,5 +36,44 @@ public record ClaimTypeDefinition(
    */
   public boolean matchesSystemType(List<DbFilterBuilder> filters) {
     return filters.stream().allMatch(filter -> filter.matchesSystemType(systemType));
+  }
+
+  /**
+   * Determine whether this claim type definition belongs to the requested profiles.
+   *
+   * @param profileSelection requested profiles
+   * @return boolean
+   */
+  public boolean matchesProfile(EobProfileSelection profileSelection) {
+    return EobProfileCategory.fromClaimType(claimType).stream()
+        .anyMatch(category -> profileSelection.isRequested(category, profileType));
+  }
+
+  /**
+   * Adds a claim type code filter when only some of this claim type's categories were requested.
+   *
+   * @param profileSelection requested profiles
+   * @param filters filters from the search criteria
+   * @return filters
+   */
+  public List<DbFilterBuilder> getProfileFilters(
+      EobProfileSelection profileSelection, List<DbFilterBuilder> filters) {
+
+    var categories = EobProfileCategory.fromClaimType(claimType);
+    var requested =
+        categories.stream()
+            .filter(category -> profileSelection.isRequested(category, profileType))
+            .toList();
+
+    if (requested.size() == categories.size()) {
+      return filters;
+    }
+
+    var claimTypeCodes =
+        requested.stream().flatMap(category -> category.getClaimTypeCodes().stream()).toList();
+    var profileFilters = new ArrayList<>(filters);
+    profileFilters.add(new ClaimTypeCodeFilterParam(PROFILE_CLAIM_TYPE_CODES, claimTypeCodes));
+
+    return profileFilters;
   }
 }

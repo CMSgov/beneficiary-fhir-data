@@ -10,7 +10,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.Optional;
-import javax.annotation.processing.Generated;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -19,7 +18,6 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @Table(name = "claim_item_professional_nch", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimItemProfessionalRegularNch implements ClaimItemBase {
 
   @EmbeddedId private ClaimItemId claimItemId;

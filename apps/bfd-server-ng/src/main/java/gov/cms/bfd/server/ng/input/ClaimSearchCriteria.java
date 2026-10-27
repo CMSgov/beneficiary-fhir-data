@@ -10,7 +10,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * Represents the search criteria used to retrieve claims for a specific beneficiary.
  *
  * @param beneSk bene sk
- * @param mbi mbi
  * @param claimThroughDate service date
  * @param lastUpdated last updated
  * @param limit record count
@@ -19,10 +18,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param claimTypeCodes claim type codes
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param profile claim profile
  */
 public record ClaimSearchCriteria(
     long beneSk,
-    String mbi,
     DateTimeRange claimThroughDate,
     DateTimeRange lastUpdated,
     Optional<Integer> limit,
@@ -30,34 +29,8 @@ public record ClaimSearchCriteria(
     List<List<TagCriterion>> tagCriteria,
     List<ClaimTypeCode> claimTypeCodes,
     List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    List<List<MetaSourceSk>> sources) {
-
-  /**
-   * Alternate constructor defaults the MBI to an empty string so that other areas of the
-   * application focused on just claims and not prior authorization don't have to provide it.
-   */
-  public ClaimSearchCriteria(
-      long beneSk,
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      Optional<Integer> limit,
-      Optional<Integer> offset,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes,
-      List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-      List<List<MetaSourceSk>> sources) {
-    this(
-        beneSk,
-        "",
-        claimThroughDate,
-        lastUpdated,
-        limit,
-        offset,
-        tagCriteria,
-        claimTypeCodes,
-        outcomes,
-        sources);
-  }
+    List<List<MetaSourceSk>> sources,
+    EobProfileSelection profile) {
 
   /**
    * Returns the offset or the default.
@@ -139,5 +112,14 @@ public record ClaimSearchCriteria(
    */
   public boolean hasSources() {
     return !sources.isEmpty();
+  }
+
+  /**
+   * Returns the _profile category from the query.
+   *
+   * @return string of CMS, REGULAR, BASIS, or MIXED
+   */
+  public String getProfileTag() {
+    return profile().getProfileTag();
   }
 }

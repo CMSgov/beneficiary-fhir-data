@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
