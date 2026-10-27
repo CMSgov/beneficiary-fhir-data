@@ -131,13 +131,13 @@
     <testcontainers-ministack.version>0.1.5</testcontainers-ministack.version>
     <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-    <jackson-databind.version>2.22.3</jackson-databind.version>
-    <jackson-datatype-jdk8.version>2.22.3</jackson-datatype-jdk8.version>
-    <jackson-dataformat-yaml.version>2.22.3</jackson-dataformat-yaml.version>
-    <jackson-datatype-jsr310.version>2.22.3</jackson-datatype-jsr310.version>
+    <jackson-databind.version>2.22.4</jackson-databind.version>
+    <jackson-datatype-jdk8.version>2.22.4</jackson-datatype-jdk8.version>
+    <jackson-dataformat-yaml.version>2.22.4</jackson-dataformat-yaml.version>
+    <jackson-datatype-jsr310.version>2.22.4</jackson-datatype-jsr310.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <!-- Jackson 3.x, pulled in transitively by Flyway. -->
-    <tools-jackson.version>3.1.7</tools-jackson.version>
+    <tools-jackson.version>3.1.8</tools-jackson.version>
     <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
     <snakeyaml.version>2.6</snakeyaml.version>
     <jakarta.xml.bind.api.version>4.0.5</jakarta.xml.bind.api.version>
@@ -386,7 +386,7 @@
         <version>${jackson-databind.version}</version>
       </dependency>
       <!-- Fix for CVE-2026-89425, CVE-2026-89407, CVE-2026-19032, CVE-2026-83557, CVE-2026-68497,
-           CVE-2026-91777 and CVE-2026-91776 (Jackson 3.x), transitive via flyway -->
+           CVE-2026-91777, CVE-2026-91776 and CVE-2026-110879 (Jackson 3.x), transitive via flyway -->
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
