@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.net.URI;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
@@ -101,5 +103,15 @@ class ServerConfigurationIT extends IntegrationTestBase {
     assertEquals(
         this.configuration.getProject().getId(), metaData.getImplementation().getDescription());
     assertEquals(this.configuration.getProject().getVersion(), metaData.getSoftware().getVersion());
+  }
+
+  @Test
+  void checkMalformedRequestReturns400() {
+    RestAssured.given()
+        .contentType(ContentType.URLENC)
+        .body("%@")
+        .post(getServerUrl() + "/metadata")
+        .then()
+        .statusCode(400);
   }
 }
