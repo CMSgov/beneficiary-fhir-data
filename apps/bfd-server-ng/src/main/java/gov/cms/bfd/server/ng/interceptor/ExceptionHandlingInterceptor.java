@@ -21,6 +21,15 @@ import org.jspecify.annotations.Nullable;
 public class ExceptionHandlingInterceptor {
   private static final int HTTP_ERROR_STATUS = 500;
 
+  private boolean isBadRequest(int statusCode) {
+    // 0 status code means it wasn't set in the response, most likely.
+    return statusCode > 0 && statusCode < HTTP_ERROR_STATUS;
+  }
+
+  private boolean isInternalServerError(int statusCode) {
+    return statusCode >= HTTP_ERROR_STATUS;
+  }
+
   @Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
   public @Nullable BaseServerResponseException preProcessException(
       RequestDetails requestDetails,
@@ -33,11 +42,8 @@ public class ExceptionHandlingInterceptor {
     // input.
     // If this happens, the HttpException will have a valid status code that we can use to short
     // circuit the rest of the exception handling process.
-    if (ex instanceof HttpException httpEx) {
-      var code = httpEx.getCode();
-      if (code > 0 && code < HTTP_ERROR_STATUS) {
-        httpServletResponse.sendError(httpEx.getCode(), httpEx.getReason());
-      }
+    if (ex instanceof HttpException httpEx && isBadRequest(httpEx.getCode())) {
+      httpServletResponse.sendError(httpEx.getCode(), httpEx.getReason());
     }
     return null;
   }
@@ -49,14 +55,12 @@ public class ExceptionHandlingInterceptor {
       HttpServletRequest request,
       HttpServletResponse response)
       throws IOException {
-    if (exception.getStatusCode() < HTTP_ERROR_STATUS) {
-      return true;
-    }
-    if (!response.isCommitted()) {
+
+    if (isInternalServerError(exception.getStatusCode()) && !response.isCommitted()) {
       // Force a default error message for any unexpected errors
       response.sendError(HTTP_ERROR_STATUS, "An unexpected error occurred");
+      return false;
     }
-
-    return false;
+    return true;
   }
 }
