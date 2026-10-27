@@ -71,14 +71,12 @@ def find_linked_field_in_tgt_by_line_num_sk(
     sk = find_field_in_line_by_num(src_lines, clm_line, sk_field)
 
     # only 2nd order line read implemented so far. Add logic for more
-    tgt_lines = read_ansi_sgntr(sk, source_directory)
+    ansi_sig_line = read_ansi_sgntr(sk, source_directory)
 
-    line_matches = [line for line in tgt_lines if extract_col_str(line, sk_field) == sk]
-
-    if not line_matches:
+    if not ansi_sig_line:
         return None
 
-    return extract_col_str(line_matches[0], extracted_field)
+    return extract_col_str(ansi_sig_line, extracted_field)
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
@@ -88,7 +86,7 @@ def extract_col_str(row: dict[str, str], name: str) -> str | None:
 ## 2nd order reads (clm_line --> supplementary_line.sk --> target_read.sk)
 
 
-def read_ansi_sgntr(ansi_sgntr_sk: str, source_directory: str) -> list[dict[str, str]]:
+def read_ansi_sgntr(ansi_sgntr_sk: str, source_directory: str) -> dict[str, str]:
     return read_single_line_file(
         source_directory=source_directory,
         file_name="SYNTHETIC_CLM_ANSI_SGNTR",
