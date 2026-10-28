@@ -3,8 +3,6 @@
 # Docs: https://gh.io/actions-lockfile
 version: 'v0.0.3'
 workflows:
-    '.github/actions/bfd-setup-tofu/action.yml':
-        - 'opentofu/setup-opentofu@v1.0.5'
     '.github/workflows/_deploy-tofuservice-layer.yml':
         - 'actions/checkout@v7.0.1'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
@@ -179,11 +177,6 @@ dependencies:
         commit: 'sha1-339a81892b84b4eeb0f6e744e4574d79d0d9b8dd'
         owner_id: 5712756
         repo_id: 204020546
-    'opentofu/setup-opentofu@v1.0.5':
-        ref: 'v1.0.5'
-        commit: 'sha1-592200bd4b9bbf4772ace78f887668b1aee8f716'
-        owner_id: 142061836
-        repo_id: 696284666
     'opentofu/setup-opentofu@v2.0.2':
         ref: 'v2.0.2'
         commit: 'sha1-a1320f892987e89d278cc92dc5adc984fb93aca4'
