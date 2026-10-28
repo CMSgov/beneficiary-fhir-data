@@ -14,12 +14,14 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["boto3-stubs[sns]", "ruff", "uv>=0.11.15"]
+dev = ["boto3-stubs[sns]", "ruff"]
 
 [tool.uv]
 exclude-newer = "7 days"
 # CA trust store fix (certifi 2026.10.19) exempted from cooldown
 exclude-newer-package = { certifi = false }
+# snowflake-connector-python 4.x caps filelock<4; override to pick up filelock security fixes
+override-dependencies = ["filelock>=4.2.1"]
 
 [tool.uv.sources]
 idr-pipeline = { path = "packages/idr-pipeline", editable = true }
