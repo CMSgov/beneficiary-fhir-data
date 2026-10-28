@@ -981,9 +981,12 @@ def _generate_batch(
         llist=existing[f.CLM_PRFNL],
         part_by=lambda x: four_part_key(x),
     )
-    clm_mcs_per_fpk = partition_rows(
+    clm_line_mcs_per_fpk = partition_rows(
         llist=existing[f.CLM_LINE_MCS],
         part_by=lambda x: four_part_key(x),
+    )
+    clm_line_fiss_per_fpk = partition_rows(
+        llist=existing[f.CLM_LINE_FISS], part_by=lambda x: four_part_key(x)
     )
     clm_line_instnls_per_fpk = partition_rows(
         llist=existing[f.CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
@@ -1217,7 +1220,8 @@ def _generate_batch(
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
                 ],
-                f.CLM_LINE_MCS: clm_mcs_per_fpk.get(four_part_key(file_pac_clm), []),
+                f.CLM_LINE_MCS: clm_line_mcs_per_fpk.get(four_part_key(file_pac_clm), []),
+                f.CLM_LINE_FISS: clm_line_fiss_per_fpk.get(four_part_key(file_pac_clm), []),
                 f.CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
                 f.CLM_PRFNL: clm_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
                 f.CLM_VAL: [
@@ -1377,22 +1381,32 @@ def _generate_batch(
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
                 if clm_type_cd in MCS_CLM_TYPE_CDS:
-                    clm_line_mcs = [
-                        pac_util.gen_pac_clm_line_mcs(
-                            clm=pac_clm,
-                            clm_line_num=clm_line_num,
-                        )
+                    init_clm_line_mcss = claims_tbls[f.CLM_LINE_MCS] or [
+                        RowAdapter({}) for _ in range(random.randint(1, 15))
                     ]
-                    out_tables[f.CLM_LINE_MCS].extend(clm_line_mcs)
+                    for idx, init_clm_line_mcs in enumerate(init_clm_line_mcss, start=1):
+                        clm_line_mcs = pac_util.gen_pac_clm_line_mcs(
+                            clm=pac_clm,
+                            clm_line_num=int(init_clm_line_mcs[f.CLM_LINE_NUM])
+                            if init_clm_line_mcs.get(f.CLM_LINE_NUM)
+                            else idx,
+                            init_clm_line_mcs=init_clm_line_mcs,
+                        )
+                        out_tables[f.CLM_LINE_MCS].append(clm_line_mcs)
 
             if clm_type_cd in FISS_CLM_TYPE_CDS:
-                clm_line_fiss = [
-                    pac_util.gen_pac_clm_line_fiss(
-                        clm=pac_clm,
-                        clm_line_num=clm_line_num,
-                    )
+                init_clm_line_fisss = claims_tbls[f.CLM_LINE_FISS] or [
+                    RowAdapter({}) for _ in range(random.randint(1, 15))
                 ]
-                out_tables[f.CLM_LINE_FISS].extend(clm_line_fiss)
+                for idx, init_clm_line_fiss in enumerate(init_clm_line_fisss, start=1):
+                    clm_line_fiss = pac_util.gen_pac_clm_line_fiss(
+                        clm=pac_clm,
+                        clm_line_num=int(init_clm_line_fiss[f.CLM_LINE_NUM])
+                        if init_clm_line_fiss.get(f.CLM_LINE_NUM)
+                        else idx,
+                        init_clm_line_fiss=init_clm_line_fiss,
+                    )
+                    out_tables[f.CLM_LINE_FISS].append(clm_line_fiss)
 
     return out_tables
 
