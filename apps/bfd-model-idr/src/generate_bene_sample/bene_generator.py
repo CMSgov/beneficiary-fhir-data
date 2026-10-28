@@ -40,7 +40,7 @@ class SampleGenerator:
             print("No primary bene found.")
             sys.exit(1)
 
-        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK") or ""
+        bene_xref_efctv_sk = extract_col_str(bene_line, "BENE_XREF_EFCTV_SK")
 
         # add current bene_sk to the list of all_bene_sks
         all_bene_sks = [bene_sk]
@@ -158,7 +158,7 @@ def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
 
 
-def extract_col_bool(row: dict[str, str], name: str) -> str | None:
+def extract_col_bool(row: dict[str, str], name: str) -> str:
     val = row.get(name, "").strip().upper()
 
     if val in ("TRUE", "1", "YES", "Y"):
