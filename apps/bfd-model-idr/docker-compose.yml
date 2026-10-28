@@ -19,6 +19,7 @@ services:
         "-Dspring.config.additional-location=optional:file:/config/application.yaml",
         "-jar",
         "/matchbox.jar",
+        "--matchbox.fhir.context.txServer=n/a",
       ]
     healthcheck:
       test:

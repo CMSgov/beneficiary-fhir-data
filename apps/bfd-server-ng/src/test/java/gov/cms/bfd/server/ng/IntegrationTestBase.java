@@ -7,17 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
+import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.claim.EobProfile;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -340,6 +346,21 @@ public class IntegrationTestBase {
     return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
   }
 
+  protected static ICriterion<?> profiles(String... urls) {
+    return new UriClientParam(Constants.PARAM_PROFILE).matches().values(urls);
+  }
+
+  protected static ICriterion<?> profiles(List<String> urls) {
+    return profiles(urls.toArray(String[]::new));
+  }
+
+  protected static List<String> canonicalUrls(EobProfileType tier) {
+    return Arrays.stream(EobProfile.values())
+        .filter(profile -> profile.getProfileType() == tier)
+        .map(EobProfile::getCanonicalUrl)
+        .toList();
+  }
+
   public IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {
     final var fhirClient = getFhirClient();
     final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
@@ -369,11 +390,16 @@ public class IntegrationTestBase {
     return auditEventRepository;
   }
 
-  public boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
+  protected boolean hasClaimLineNdcCoding(ExplanationOfBenefit eob) {
     return eob.getItem().stream()
         .flatMap(item -> item.getDetail().stream())
         .flatMap(detail -> detail.getProductOrService().getCoding().stream())
         .anyMatch(this::isClaimLineNdcCoding);
+  }
+
+  protected boolean hasPriorAuth(Bundle bundle) {
+    return getEobFromBundle(bundle).stream()
+        .anyMatch(eob -> eob.getMeta().hasProfile(SystemUrls.PROFILE_PRIOR_AUTH));
   }
 
   private boolean isClaimLineNdcCoding(Coding coding) {

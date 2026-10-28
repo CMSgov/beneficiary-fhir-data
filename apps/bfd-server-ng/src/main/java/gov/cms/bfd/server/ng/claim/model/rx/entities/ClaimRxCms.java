@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimIdrLoadDate;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -76,6 +77,11 @@ public class ClaimRxCms extends ClaimRxBase {
   @Override
   protected Optional<BigDecimal> getTotalDrugCostAmount() {
     return Optional.of(claimItem.getTotalDrugCost());
+  }
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.CMS;
   }
 
   // endregion
