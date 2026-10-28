@@ -133,10 +133,6 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         self.primary_keys_str = ", ".join(self.ordered_pkeys)
         update_set = [v for v in self.insert_cols if v not in self.ordered_pkeys]
         update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in update_set])
-        on_conflict_where_clause = (
-            f"WHERE ({', '.join(f't.{v}' for v in update_set)}) IS "
-            f"DISTINCT FROM ({', '.join(f'EXCLUDED.{v}' for v in update_set)})"
-        )
         self.npi_type_backfill_map = model.npi_type_backfill_compare_cols()
         self.npi_type_backfill_enabled = SETTINGS.enable_npi_type_backfill_compare and bool(
             self.npi_type_backfill_map
