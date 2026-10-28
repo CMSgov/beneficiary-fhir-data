@@ -2,7 +2,7 @@ from .param import Param
 from .util import (
     extract_col_str,
     find_field_in_line_by_num,
-    find_linked_field_in_tgt_by_line_num_sk,
+    find_ansi_sgntr_field_by_line_num_sk,
     read_multi_line_file,
 )
 
@@ -141,8 +141,7 @@ class ClmLineBuilder:
                 # extract <-- ansi_sgntr cols linked by line_num (clm_line -> instl_line)
                 # & sk (instl_line.ansi_sgntr_sk --> ansi_sgntr line)
                 **{
-                    col: find_linked_field_in_tgt_by_line_num_sk(
-                        sk_field="CLM_ANSI_SGNTR_SK",
+                    col: find_ansi_sgntr_field_by_line_num_sk(
                         src_lines=instnl_lines,
                         clm_line=clm_line,
                         extracted_field=col,
