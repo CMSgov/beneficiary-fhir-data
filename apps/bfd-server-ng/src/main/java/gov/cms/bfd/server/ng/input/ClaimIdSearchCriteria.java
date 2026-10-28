@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import jakarta.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -13,16 +14,33 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * @param lastUpdated last updated
  * @param outcomes claim outcomes
  * @param sources claim sources
+ * @param profile requested profiles
  */
 public record ClaimIdSearchCriteria(
     List<Long> claimUniqueIds,
     @NotNull DateTimeRange serviceDate,
     @NotNull DateTimeRange lastUpdated,
     @NotNull List<List<ExplanationOfBenefit.RemittanceOutcome>> outcomes,
-    @NotNull List<List<MetaSourceSk>> sources) {
+    @NotNull List<List<MetaSourceSk>> sources,
+    @NotNull EobProfileSelection profile) {
 
   /**
-   * Returns whether a last updated date filter has been provided.
+   * Default constructor for tests.
+   *
+   * @param claimUniqueIds the list of ids to for testing
+   */
+  public ClaimIdSearchCriteria(List<Long> claimUniqueIds) {
+    this(
+        claimUniqueIds,
+        new DateTimeRange(),
+        new DateTimeRange(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        new EobProfileSelection());
+  }
+
+  /**
+   * Returns whether a service date filter has been provided.
    *
    * @return boolean
    */
@@ -55,5 +73,14 @@ public record ClaimIdSearchCriteria(
    */
   public boolean hasSources() {
     return !sources.isEmpty();
+  }
+
+  /**
+   * Returns the _profile category from the query.
+   *
+   * @return boolean
+   */
+  public String getProfileTag() {
+    return profile().getProfileTag();
   }
 }
