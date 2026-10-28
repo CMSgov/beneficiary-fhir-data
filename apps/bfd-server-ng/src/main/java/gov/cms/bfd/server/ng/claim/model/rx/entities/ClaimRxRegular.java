@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
 import static gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubmissionFormatCode;
@@ -46,6 +47,11 @@ public class ClaimRxRegular extends ClaimRxBase {
   @Override
   protected ClaimItemBase getClaimItem() {
     return claimItem;
+  }
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.REGULAR;
   }
 
   // endregion

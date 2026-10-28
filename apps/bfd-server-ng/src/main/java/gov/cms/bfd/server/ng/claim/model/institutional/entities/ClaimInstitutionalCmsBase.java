@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional.entities;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.BenefitEnhancementCodes;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
@@ -83,6 +84,11 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
     getAdjudicationPpsCms().toFhirAdjudication().forEach(eob::addAdjudication);
     AdjudicationClaimValue.toFhir(getClaimValues()).forEach(eob::addAdjudication);
     eob.addTotal(AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirTotal(getBenePaidAmount()));
+  }
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.CMS;
   }
 
   // endregion

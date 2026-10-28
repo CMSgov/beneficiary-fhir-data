@@ -1,5 +1,14 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.claim.EobProfile.INPATIENT_INSTITUTIONAL_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.OUTPATIENT_INSTITUTIONAL_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.OUTPATIENT_INSTITUTIONAL_CMS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.OUTPATIENT_INSTITUTIONAL_REGULAR;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_CMS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PHARMACY_REGULAR;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PROFESSIONAL_NONCLINICIAN_BASIS;
+import static gov.cms.bfd.server.ng.claim.EobProfile.PROFESSIONAL_NONCLINICIAN_REGULAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,16 +20,20 @@ import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.professional.entities.ClaimProfessionalCmsNch;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -255,19 +268,19 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                  select max(bfd_claim_updated_ts)
-                  from (
-                      select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
-                      union all
-                      select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
-                      union all
-                      select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
-                      union all
-                      select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
-                      union all
-                      select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
-                  ) all_claims
-                  """)
+                select max(bfd_claim_updated_ts)
+                from (
+                    select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
+                    union all
+                    select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                ) all_claims
+                """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
                 .getSingleResult();
     ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
@@ -307,10 +320,10 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createQuery(
                     """
-                SELECT billablePeriod.claimThroughDate
-                FROM ClaimInstitutionalCmsNch c
-                WHERE c.claimUniqueId = :id
-                """,
+                        SELECT billablePeriod.claimThroughDate
+                        FROM ClaimInstitutionalCmsNch c
+                        WHERE c.claimUniqueId = :id
+                        """,
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
@@ -571,9 +584,9 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                SELECT COUNT(*) FROM idr.beneficiary
-                WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
-                """,
+                                SELECT COUNT(*) FROM idr.beneficiary
+                                WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
+                                """,
                     Integer.class)
                 .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
                 .getResultList()
@@ -830,12 +843,12 @@ class EobSearchIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 """
-                SELECT c
-                FROM ClaimProfessionalCmsNch c
-                JOIN FETCH c.beneficiary b
-                JOIN FETCH c.claimItems cl
-                WHERE c.claimUniqueId = :claimId
-                """,
+                            SELECT c
+                            FROM ClaimProfessionalCmsNch c
+                            JOIN FETCH c.beneficiary b
+                            JOIN FETCH c.claimItems cl
+                            WHERE c.claimUniqueId = :claimId
+                            """,
                 ClaimProfessionalCmsNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
@@ -851,4 +864,171 @@ class EobSearchIT extends IntegrationTestBase {
 
     assertEquals(0, getEobFromBundle(eobBundle).size());
   }
+
+  // region Profile
+
+  private IQuery<Bundle> searchByPatient() {
+    return searchBundle()
+        .where(
+            new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                .exactly()
+                .identifier(BENE_ID_ALL_PARTS_WITH_XREF));
+  }
+
+  static Stream<Arguments> provideProfileScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Arrays.stream(EobProfileType.values())
+                    .map(profile -> Arguments.of(profile, style)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideProfileScenarios")
+  void eobSearchByPatientAndProfile(EobProfileType profile, SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchByPatient().and(profiles(canonicalUrls(profile))).usingStyle(searchStyle).execute();
+    assertEquals(6, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name() + "_profile_" + profile).toMatchSnapshot(eobBundle);
+  }
+
+  static Stream<Arguments> provideProfileFilterScenarios() {
+    return Stream.of(
+        Arguments.of(List.of(PHARMACY_BASIS.getCanonicalUrl()), 1),
+        Arguments.of(List.of(INPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl()), 1),
+        Arguments.of(List.of(OUTPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl()), 3),
+        Arguments.of(List.of(PROFESSIONAL_NONCLINICIAN_BASIS.getCanonicalUrl()), 1),
+        Arguments.of(
+            List.of(
+                PHARMACY_REGULAR.getCanonicalUrl(),
+                PROFESSIONAL_NONCLINICIAN_REGULAR.getCanonicalUrl()),
+            2),
+        Arguments.of(
+            List.of(
+                INPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl(),
+                OUTPATIENT_INSTITUTIONAL_CMS.getCanonicalUrl()),
+            4));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideProfileFilterScenarios")
+  void eobSearchByPatientProfileFiltering(List<String> profileUrls, int expectedCount) {
+    var eobBundle = searchByPatient().and(profiles(profileUrls)).execute();
+    assertEquals(expectedCount, eobBundle.getEntry().size());
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByPatientMixedProfiles(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchByPatient()
+            .and(
+                profiles(
+                    PHARMACY_CMS.getCanonicalUrl(),
+                    INPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl(),
+                    OUTPATIENT_INSTITUTIONAL_REGULAR.getCanonicalUrl()))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(5, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name() + "_profile_mixed").toMatchSnapshot(eobBundle);
+  }
+
+  @Test
+  void eobSearchByPatientProfileIncludesPriorAuth() {
+    var patient =
+        new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+            .exactly()
+            .identifier(BENE_WITH_PRIOR_AUTH);
+
+    // PriorAuth is not filtered when a profile is passed in
+    var defaultBundle = searchBundle().where(patient).execute();
+    var profileBundle =
+        searchBundle()
+            .where(patient)
+            .and(profiles(canonicalUrls(EobProfileType.REGULAR)))
+            .execute();
+
+    assertTrue(hasPriorAuth(defaultBundle));
+    assertTrue(hasPriorAuth(profileBundle));
+    assertEquals(defaultBundle.getEntry().size(), profileBundle.getEntry().size());
+  }
+
+  @Test
+  void eobSearchByPatientProfileAndType() {
+    var outpatientType =
+        new TokenClientParam("type").exactly().identifier(ClaimSubtype.OUTPATIENT.getCode());
+
+    var inpatientBundle =
+        searchByPatient()
+            .and(outpatientType)
+            .and(profiles(INPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl()))
+            .execute();
+    assertEquals(0, inpatientBundle.getEntry().size());
+
+    var outpatientBundle =
+        searchByPatient()
+            .and(outpatientType)
+            .and(profiles((OUTPATIENT_INSTITUTIONAL_BASIS.getCanonicalUrl())))
+            .execute();
+    assertEquals(3, outpatientBundle.getEntry().size());
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByIdAndProfile(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX))
+            .and(profiles(PHARMACY_BASIS.getCanonicalUrl()))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(1, eobBundle.getEntry().size());
+    expectFhir()
+        .scenario(searchStyle.name() + "_profile_pharmacy_basis")
+        .toMatchSnapshot(eobBundle);
+  }
+
+  @Test
+  void eobSearchByPatientInvalidProfileBadRequest() {
+    var query = searchByPatient().and(profiles("BOGUS"));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByIdInvalidProfileBadRequest() {
+    var query =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_RX))
+            .and(profiles("NOT REAL HOORAH"));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByPatientRepeatedProfileBadRequest() {
+    var query =
+        searchByPatient()
+            .and(profiles(PHARMACY_CMS.getCanonicalUrl()))
+            .and(profiles(OUTPATIENT_INSTITUTIONAL_CMS.getCanonicalUrl()));
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  @Test
+  void eobSearchByPatientProfileModifierBadRequest() {
+    var url =
+        "ExplanationOfBenefit?patient="
+            + BENE_ID_ALL_PARTS_WITH_XREF
+            + "&_profile:below="
+            + URLEncoder.encode(PHARMACY_BASIS.getCanonicalUrl(), StandardCharsets.UTF_8);
+    var query = getFhirClient().search().byUrl(url).returnBundle(Bundle.class);
+    assertThrows(InvalidRequestException.class, query::execute);
+  }
+
+  // endregion
+
 }
