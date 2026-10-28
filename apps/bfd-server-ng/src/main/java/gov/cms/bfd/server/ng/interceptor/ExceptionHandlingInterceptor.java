@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.HttpStatus;
 import org.eclipse.jetty.http.HttpException;
 import org.jspecify.annotations.Nullable;
 
@@ -19,15 +20,14 @@ import org.jspecify.annotations.Nullable;
 @RequiredArgsConstructor
 @Interceptor
 public class ExceptionHandlingInterceptor {
-  private static final int HTTP_ERROR_STATUS = 500;
 
   private boolean isBadRequest(int statusCode) {
     // 0 status code means it wasn't set in the response, most likely.
-    return statusCode > 0 && statusCode < HTTP_ERROR_STATUS;
+    return statusCode > 0 && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR;
   }
 
   private boolean isInternalServerError(int statusCode) {
-    return statusCode >= HTTP_ERROR_STATUS;
+    return statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR;
   }
 
   @Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
@@ -61,7 +61,7 @@ public class ExceptionHandlingInterceptor {
     }
     if (isInternalServerError(exception.getStatusCode())) {
       // Force a default error message for any unexpected errors
-      response.sendError(HTTP_ERROR_STATUS, "An unexpected error occurred");
+      response.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR, "An unexpected error occurred");
       return false;
     }
     return true;
