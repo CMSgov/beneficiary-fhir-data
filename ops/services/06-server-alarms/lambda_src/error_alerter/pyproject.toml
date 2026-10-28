@@ -6,7 +6,7 @@ requires-python = ">=3.13"
 dependencies = ["boto3>=1.37.19"]
 
 [dependency-groups]
-dev = ["boto3-stubs[logs]", "ruff", "uv>=0.11.15"]
+dev = ["boto3-stubs[logs]", "ruff"]
 
 [tool.uv]
 exclude-newer = "7 days"
@@ -62,4 +62,3 @@ typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
 reportMissingTypeStubs = "none"
-

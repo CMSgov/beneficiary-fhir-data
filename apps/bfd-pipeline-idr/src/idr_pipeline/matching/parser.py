@@ -718,7 +718,7 @@ def _apply_pr_exceptions(text: str) -> str:
 
     # Deduplicate Urbanization lines (keep longest to avoid listed duplicates)
     if len(urb_lines) > 1:
-        urb_lines = [sorted(urb_lines, key=len)[-1]]
+        urb_lines = [max(reversed(urb_lines), key=len)]
 
     # Reorder Station lines to be ABOVE delivery lines
     if len(postal_lines) > 1:
