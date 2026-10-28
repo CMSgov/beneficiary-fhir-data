@@ -86,6 +86,12 @@ def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
 
 
+def sample_name_for_claim_type(groups: dict[tuple[int, ...], str], claim_type: int) -> str:
+    return next(
+        (name for types, name in groups.items() if claim_type in types), "EOB-Base-Sample.json"
+    )
+
+
 ## 2nd order reads (clm_line --> supplementary_line.sk --> target_read.sk)
 
 

@@ -22,6 +22,7 @@ from .util import (
     extract_col_str,
     read_multi_line_file,
     read_single_line_file,
+    sample_name_for_claim_type,
 )
 
 CLM_COL = [
@@ -231,6 +232,17 @@ RX_LINE_COL = [
     "CLM_DSPNSNG_STUS_CD",
 ]
 
+SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
+    tuple(PHARMACY_CLM_TYPE_CDS): "EOB-Pharmacy-Sample.json",
+    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES): "EOB-Carrier-Sample.json",
+    tuple(ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME): "EOB-DME-Sample.json",
+    tuple(MCS_CLM_TYPE_CDS): "EOB-Carrier-MCS-Sample.json",
+    tuple(INSTITUTIONAL_HOSPICE): "EOB-Hospice-Sample.json",
+    tuple(INSTITUTIONAL_OUTPATIENT): "EOB-Institutional-Outpatient-Sample.json",
+    tuple(INSTITUTIONAL_SNF): "EOB-SNF-Sample.json",
+    tuple(INSTITUTIONAL_HHA): "EOB-HHA-Sample.json",
+}
+
 
 class Result:
     def __init__(self, result_json: dict[str, Any], output_file: str):
@@ -268,50 +280,43 @@ class SampleGenerator:
                 clm_uniq_id=clm_uniq_id,
                 clm_type_cd=claim_type,
                 claim_row=claim_row,
-                destination_file_name="EOB-Pharmacy-Sample.json",
+                destination_file_name=sample_name_for_claim_type(
+                    SAMPLE_NAME_BY_CLAIM_TYPES, claim_type
+                ),
             )
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
-        elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
+        elif (
+            claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
+            or claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
+        ):
             result = self.create_base(
                 clm_uniq_id=clm_uniq_id,
                 clm_type_cd=claim_type,
                 claim_row=claim_row,
-                destination_file_name="EOB-Carrier-Sample.json",
-            )
-        elif claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME:
-            result = self.create_base(
-                clm_uniq_id=clm_uniq_id,
-                clm_type_cd=claim_type,
-                claim_row=claim_row,
-                destination_file_name="EOB-DME-Sample.json",
+                destination_file_name=sample_name_for_claim_type(
+                    SAMPLE_NAME_BY_CLAIM_TYPES, claim_type
+                ),
             )
         elif claim_type in MCS_CLM_TYPE_CDS:
             result = self.create_base(
                 clm_uniq_id=clm_uniq_id,
                 clm_type_cd=claim_type,
                 claim_row=claim_row,
-                destination_file_name="EOB-Carrier-MCS-Sample.json",
+                destination_file_name=sample_name_for_claim_type(
+                    SAMPLE_NAME_BY_CLAIM_TYPES, claim_type
+                ),
             )
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
-        # this a default fallback for institutional claim types at the moment
-        # as this work continues we may add more specific handling
-        # for different institutional claim types
-        # also fall back for known claim types that we do not have a special sample for
+        # INST and fall back for known claim types that we do not have a special sample for
         elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_CDS:
-            if claim_type in INSTITUTIONAL_HOSPICE:
-                result_name = "EOB-Hospice-Sample.json"
-            elif claim_type in INSTITUTIONAL_OUTPATIENT:
-                result_name = "EOB-Institutional-Outpatient-Sample.json"
-            elif claim_type in INSTITUTIONAL_SNF:
-                result_name = "EOB-SNF-Sample.json"
-            elif claim_type in INSTITUTIONAL_HHA:
-                result_name = "EOB-HHA-Sample.json"
-            else:
-                result_name = "EOB-Base-Sample.json"
-
-            result = self.create_base(clm_uniq_id, claim_type, claim_row, result_name)
+            result = self.create_base(
+                clm_uniq_id,
+                claim_type,
+                claim_row,
+                sample_name_for_claim_type(SAMPLE_NAME_BY_CLAIM_TYPES, claim_type),
+            )
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
