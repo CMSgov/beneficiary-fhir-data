@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -28,7 +27,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimInstitutionalBasisSharedSystems extends ClaimInstitutionalBasisBase
     implements SharedSystemsClaim {
 

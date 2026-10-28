@@ -198,16 +198,6 @@ jobs:
         run: |
           docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
 
-      - name: Install gitleaks
-        run: |
-          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
-            | grep "browser_download_url.*linux_x64.tar.gz" \
-            | cut -d : -f 2,3 \
-            | tr -d \" \
-            | wget -qi -
-          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
-          sudo chmod +x /usr/bin/gitleaks
-
       - name: Setup JDK
         uses: actions/setup-java@v6.1.0
         with:
