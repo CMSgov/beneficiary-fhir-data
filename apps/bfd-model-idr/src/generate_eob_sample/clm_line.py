@@ -142,11 +142,11 @@ class ClmLineBuilder:
                 # & sk (instl_line.ansi_sgntr_sk --> ansi_sgntr line)
                 **{
                     col: find_linked_field_in_tgt_by_line_num_sk(
+                        sk_field="CLM_ANSI_SGNTR_SK",
                         src_lines=instnl_lines,
                         clm_line=clm_line,
-                        source_directory=self.source_directory,
-                        sk_field="CLM_ANSI_SGNTR_SK",
                         extracted_field=col,
+                        source_directory=self.source_directory,
                     )
                     for col in ANSI_SGNTR_COL
                 },

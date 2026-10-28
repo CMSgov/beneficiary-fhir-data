@@ -59,16 +59,19 @@ def find_field_in_line_by_num(
 
 
 def find_linked_field_in_tgt_by_line_num_sk(
+    sk_field: str,
     source_directory: str,
     src_lines: list[dict[str, str]],
     clm_line: dict[str, str],
-    sk_field: str,
     extracted_field: str,
 ) -> str | None:
     if sk_field not in "CLM_ANSI_SGNTR_SK":
         return None
 
     sk = find_field_in_line_by_num(src_lines, clm_line, sk_field)
+
+    if not sk:
+        return None
 
     # only 2nd order line read implemented so far. Add logic for more
     ansi_sig_line = read_ansi_sgntr(sk, source_directory)
