@@ -45,7 +45,10 @@ class CsvFile:
 class Extractor(ABC, Generic[T]):  # noqa: UP046
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
-        self.type_adapter = TypeAdapter(list[self.cls])
+        # cls is only known at runtime, so it can't be a static type expression
+        self.type_adapter: TypeAdapter[list[T]] = TypeAdapter(
+            list[cls]  # pyright: ignore[reportInvalidTypeForm]
+        )
         self.partition = partition
         self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
         self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)
