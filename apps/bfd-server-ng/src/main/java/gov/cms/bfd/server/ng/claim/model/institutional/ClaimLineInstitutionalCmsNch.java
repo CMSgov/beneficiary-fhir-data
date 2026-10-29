@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineDeductibleCoinsuranceCode;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -14,7 +15,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @SuppressWarnings("java:S2201")
 @AttributeOverride(name = "trackingNumber", column = @Column(name = "clm_line_pmd_uniq_trkng_num"))
-public class ClaimLineInstitutionalCmsNch extends ClaimLineInstitutionalBase {
+public class ClaimLineInstitutionalCmsNch extends ClaimLineInstitutionalCms
+    implements ClaimLineBase {
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;

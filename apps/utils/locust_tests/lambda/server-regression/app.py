@@ -35,7 +35,7 @@ class InvokeEvent:
 @dataclass
 class PipelineSignalMessage:
     function_name: str
-    result: "TestResult"
+    result: TestResult
     message: str
     request_id: str
     log_stream_name: str

@@ -4,13 +4,22 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
 import java.util.Optional;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /** Entity representing BeneficiaryEntitlementReason. */
 @Entity
 @Getter
-@Table(name = "beneficiary_entitlement_reason_latest", schema = "idr")
+@Subselect(
+    """
+   SELECT DISTINCT ON (bene_sk) *
+    FROM idr.beneficiary_entitlement_reason
+   WHERE idr_trans_obslt_ts >= '9999-12-31 00:00:00+00'::timestamp with time zone AND bene_rng_bgn_dt <= (now() - '12:00:00'::interval)
+   ORDER BY bene_sk, bene_rng_bgn_dt DESC, idr_trans_efctv_ts DESC
+   """)
+@Immutable
 public class BeneficiaryEntitlementReason {
 
   @Id

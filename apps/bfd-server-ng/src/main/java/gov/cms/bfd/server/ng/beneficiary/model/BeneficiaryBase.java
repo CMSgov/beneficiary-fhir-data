@@ -25,6 +25,35 @@ import org.hl7.fhir.r4.model.Patient;
 @Getter
 @MappedSuperclass
 public abstract class BeneficiaryBase {
+  /**
+   * SQL Restriction statement needed to limit to valid beneficiaries. This has to be in the
+   * SQLRestriction annotation to allow for proper delimiting. We cannot use inheritance because JPA
+   * does not respect it. This pattern allows for reuse without having to maintain in multiple
+   * places.
+   */
+  public static final String VALID_BENE_SQL_RESTRICTION =
+      """
+      NOT EXISTS (
+          SELECT 1 FROM idr.beneficiary_overshare_mbi om
+          WHERE om.bene_mbi_id::text = bene_mbi_id::text
+      )
+      """;
+
+  /**
+   * SQL QUERY representation of valid beneficiaries. This can be used for any query that needs
+   * valid beneficiaries in a Subselect annotation. We cannot use inheritance because JPA does not
+   * respect it. This pattern allows for reuse without having to maintain in multiple places. The
+   * WHERE CLAUSE matches VALID_BENE_SQL_RESTRICTION. They need to be kept in sync. This cannot
+   * concat from VALID_BENE_SQL_RESTRICTION due to aliasing with JPA. They must be managed
+   * separately.
+   */
+  public static final String VALID_BENE_VIEW =
+      """
+         SELECT *
+         FROM idr.beneficiary b
+         WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mbi_id = b.bene_mbi_id)
+       """;
+
   @Id
   @Column(name = "bene_sk", insertable = false, updatable = false)
   protected long beneSk;

@@ -20,7 +20,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Optional;
 import java.util.SortedSet;
-import javax.annotation.processing.Generated;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -28,7 +27,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr")
-@Generated("TODO - Remove after query optimization implementation")
 public class ClaimProfessionalRegularSharedSystems extends ClaimProfessionalRegularBase
     implements SharedSystemsClaim {
 

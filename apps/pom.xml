@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>gov.cms.bfd</groupId>
   <artifactId>bfd-parent</artifactId>
-  <version>2.277.0-SNAPSHOT</version>
+  <version>2.279.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>bfd-parent</name>
   <description>
@@ -64,7 +64,7 @@
     <!-- The version of Java that we'll use for everything. -->
     <javaSourceVersion>25</javaSourceVersion>
     <maven.compiler.release>25</maven.compiler.release>
-    <project.build.outputTimestamp>2026-10-26T16:17:12Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-26T19:46:39Z</project.build.outputTimestamp>
     <!-- Disable jacoco until automated coverage generation is desired -->
     <maven.jacoco.skip>true</maven.jacoco.skip>
     <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -282,8 +282,6 @@
     <build.helper.maven.plugin.version>3.6.1</build.helper.maven.plugin.version>
     <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
     <exec.maven.plugin.version>3.1.1</exec.maven.plugin.version>
-    <fmt.maven.plugin.version>2.29</fmt.maven.plugin.version>
-    <google.java.format.version>1.36.1</google.java.format.version>
     <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
     <versions.maven.plugin.version>2.21.0</versions.maven.plugin.version>
     <antlr4.version>4.13.2</antlr4.version>
@@ -1083,11 +1081,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>com.spotify.fmt</groupId>
-          <artifactId>fmt-maven-plugin</artifactId>
-          <version>${fmt.maven.plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin.version}</version>
@@ -1328,28 +1321,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.spotify.fmt</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>${fmt.maven.plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <!-- Use this plugin to run https://github.com/google/google-java-format
-                                on every build, which will auto-format all of our Java source code. Note
-                                that we have a Git pre-commit hook that will also do this. -->
-              <goal>format</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.google.googlejavaformat</groupId>
-            <artifactId>google-java-format</artifactId>
-            <version>${google.java.format.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

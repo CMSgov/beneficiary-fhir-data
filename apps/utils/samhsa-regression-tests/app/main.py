@@ -272,23 +272,38 @@ async def query_samhsa_claim_any_ids(
             TABLESAMPLE SYSTEM({tablesample:l})
             {claim_join:q}
             WHERE {table:i}.{column:i} = ANY({(list(query_params))})
+                AND {(claims_table):i}.clm_ltst_clm_ind = 'Y'
             LIMIT {limit:l}
             """
         logger.debug("Running query:\n%s", sql.as_string(full_query))
         result = await (await curs.execute(full_query)).fetchall()
-        valid_samhsa_claim_ids = [
-            int(row["clm_uniq_id"])
-            for row in result
-            if (
-                matching_label := next(
-                    x
-                    for x in security_labels
-                    if normalize_code(x.code) == normalize_code(str(row[column]))
-                )
+        valid_samhsa_claim_ids: list[int] = []
+        for row in result:
+            matching_label = next(
+                x
+                for x in security_labels
+                if normalize_code(x.code) == normalize_code(str(row[column]))
             )
-            and row["clm_thru_dt"] >= matching_label.start_date
-            and row["clm_thru_dt"] <= matching_label.end_date
-        ]
+            if (
+                row["clm_thru_dt"] >= matching_label.start_date
+                and row["clm_thru_dt"] <= matching_label.end_date
+            ):
+                logger.debug(
+                    (
+                        "SAMHSA claim %s (table %s, column %s, code %r): matched security label "
+                        "system %s, code %s, valid from %s to %s; claim date %s"
+                    ),
+                    row["clm_uniq_id"],
+                    table,
+                    column,
+                    row[column],
+                    matching_label.system,
+                    matching_label.code,
+                    matching_label.start_date,
+                    matching_label.end_date,
+                    row["clm_thru_dt"],
+                )
+                valid_samhsa_claim_ids.append(int(row["clm_uniq_id"]))
         logger.info(
             (
                 "%d/%d valid (claim date in bounds) SAMHSA clm_uniq_ids under column %s in table "
@@ -352,7 +367,13 @@ async def query_samhsa_benes_with_claims(
                             SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr.{table:i}
                             INNER JOIN idr.beneficiary
                                 ON {table:i}.bene_sk = beneficiary.bene_sk
-                            WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))});
+                            WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))})
+                                AND beneficiary.idr_ltst_trans_flg = 'Y'
+                                AND NOT EXISTS (
+                                    SELECT 1 FROM idr.beneficiary_overshare_mbi om
+                                    WHERE om.bene_mbi_id = beneficiary.bene_mbi_id
+                                )
+                            LIMIT {limit};
                             """
                         )
                         for table in CLAIMS_TABLES
@@ -424,6 +445,10 @@ async def query_samhsa_benes_with_prior_auths(
                 INNER JOIN idr.beneficiary
                     ON {PRIOR_AUTH_TABLE:i}.mbi_num = beneficiary.bene_mbi_id
                 WHERE beneficiary.idr_ltst_trans_flg = 'Y'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM idr.beneficiary_overshare_mbi om
+                        WHERE om.bene_mbi_id = beneficiary.bene_mbi_id
+                    )
                     AND {PRIOR_AUTH_ITEM_TABLE:i}.hcpcs_or_cpt_or_hipps = ANY(
                         {(list(query_params))}
                     )
@@ -458,6 +483,19 @@ async def query_samhsa_benes_with_prior_auths(
                 and row["utn_valid_st_dt"] >= matching_label.start_date
                 and row["utn_valid_st_dt"] <= matching_label.end_date
             ):
+                logger.debug(
+                    (
+                        "SAMHSA prior auth UTN %s (code %r): matched security label system %s, "
+                        "code %s, valid from %s to %s; UTN valid from %s"
+                    ),
+                    row["utn"],
+                    prior_auth_code,
+                    matching_label.system,
+                    matching_label.code,
+                    matching_label.start_date,
+                    matching_label.end_date,
+                    row["utn_valid_st_dt"],
+                )
                 bene_sk = str(row["bene_sk"])
 
                 if bene_sk not in bene_sks_and_prior_auths:
@@ -694,6 +732,133 @@ async def gather_with_concurrency[T](n: int, *coros: Awaitable[T]) -> list[T]:
     return await asyncio.gather(*(sem_coro(c) for c in coros))
 
 
+async def run_samhsa_regression(
+    hostname: str,
+    security_labels: list[SecurityLabelModel],
+    db_details: DatabaseDetailsModel,
+    samhsa_cert: Path | None,
+    samhsa_cert_key: Path | None,
+    no_samhsa_cert: Path | None,
+    no_samhsa_cert_key: Path | None,
+    host_cert: Path | None,
+    tablesample: float,
+    limit: int,
+    concurrency: int,
+) -> bool:
+    """Run the SAMHSA filtering regression test; returns True when all checks pass."""
+    samhsa_benes = await query_samhsa_benes(
+        security_labels=security_labels, db_details=db_details, tablesample=tablesample, limit=limit
+    )
+
+    if LOGGING_LEVEL == "DEBUG":
+        for samhsa_bene in samhsa_benes:
+            logger.debug(
+                "Bene SK: %s, clms: %s, prior auth UTNs: %s",
+                samhsa_bene.bene_sk,
+                ",".join(samhsa_bene.samhsa_claim_ids),
+                ",".join(samhsa_bene.samhsa_prior_auth_utns),
+            )
+
+    # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
+    # a local test. If it is, we don't supply real certificate values or worry about loading
+    # certificates at all. We just provide the dummy certificates directly via the header. We use
+    # any() instead of a single "in" expression to allow for hostnames like "localhost:8080" and
+    # so-on
+    is_local = any(x in hostname for x in ["localhost", "127.0.0.1"])
+
+    # The hostname may already include a scheme (e.g. when supplied by an ECS deployment hook);
+    # otherwise default to https for remote hosts and http for local ones
+    if hostname.startswith(("http://", "https://")):
+        base_url = hostname
+    else:
+        base_url = f"{'http' if is_local else 'https'}://{hostname}"
+    full_eob_url = f"{base_url.rstrip('/')}/v3/fhir/ExplanationOfBenefit"
+
+    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    if not is_local:
+        if not samhsa_cert or not samhsa_cert_key or not no_samhsa_cert or not no_samhsa_cert_key:
+            raise RuntimeError("SAMHSA/non-SAMHSA certificates and keys MUST be provided")
+
+        samhsa_ssl_ctx.load_cert_chain(
+            certfile=samhsa_cert.absolute(),
+            keyfile=samhsa_cert_key.absolute(),
+        )
+        no_samhsa_ssl_ctx.load_cert_chain(
+            certfile=no_samhsa_cert.absolute(),
+            keyfile=no_samhsa_cert_key.absolute(),
+        )
+
+        if host_cert:
+            samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+            no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+        else:
+            samhsa_ssl_ctx.check_hostname = False
+            samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+            no_samhsa_ssl_ctx.check_hostname = False
+            no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+
+    async with (
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_allowed"} if is_local else None,
+        ) as samhsa_session,
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=no_samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
+        ) as no_samhsa_session,
+    ):
+        results = await gather_with_concurrency(
+            concurrency,
+            *(
+                verify_samhsa_filtering(
+                    url=full_eob_url,
+                    samhsa_session=samhsa_session,
+                    no_samhsa_session=no_samhsa_session,
+                    samhsa_bene=samhsa_bene,
+                )
+                for samhsa_bene in samhsa_benes
+            ),
+        )
+
+        all_samhsa_filtered = all(
+            res == VerifyFilteringResult.PASS
+            for res in results
+            if res != VerifyFilteringResult.EMPTY_RESPONSE
+        )
+
+        logger.info(
+            "Passing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.PASS]),
+        )
+        logger.info(
+            "Failing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.FAIL]),
+        )
+        logger.info(
+            "Empty responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
+        )
+        logger.log(
+            logging.INFO if all_samhsa_filtered else logging.ERROR,
+            "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
+            len(
+                [
+                    res
+                    for res in results
+                    if res
+                    in [
+                        VerifyFilteringResult.PASS,
+                        VerifyFilteringResult.FAIL,
+                    ]
+                ]
+            ),
+            "PASSED" if all_samhsa_filtered else "FAILED",
+        )
+
+        return all_samhsa_filtered
+
+
 @click.command()
 @click.option(
     "-h",
@@ -831,113 +996,19 @@ async def main(
         else DatabaseDetailsModel.from_env()
     )
 
-    samhsa_benes = await query_samhsa_benes(
-        security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
+    return await run_samhsa_regression(
+        hostname=hostname,
+        security_labels=samhsa_labels,
+        db_details=db_details,
+        samhsa_cert=samhsa_cert,
+        samhsa_cert_key=samhsa_cert_key,
+        no_samhsa_cert=no_samhsa_cert,
+        no_samhsa_cert_key=no_samhsa_cert_key,
+        host_cert=host_cert,
+        tablesample=tablesample,
+        limit=limit,
+        concurrency=concurrency,
     )
-
-    if LOGGING_LEVEL == "DEBUG":
-        for samhsa_bene in samhsa_benes:
-            logger.debug(
-                "Bene SK: %s, clms: %s, prior auth UTNs: %s",
-                samhsa_bene.bene_sk,
-                ",".join(samhsa_bene.samhsa_claim_ids),
-                ",".join(samhsa_bene.samhsa_prior_auth_utns),
-            )
-
-    # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
-    # a local test. If it is, we don't supply real certificate values or worry about loading
-    # certificates at all. We just provide the dummy certificates directly via the header. We use
-    # any() instead of a single "in" expression to allow for hostnames like "localhost:8080" and
-    # so-on
-    is_local = any(x in hostname for x in ["localhost", "127.0.0.1"])
-
-    base_url = f"https://{hostname}" if not is_local else f"http://{hostname}"
-    full_eob_url = f"{base_url.lstrip('/')}/v3/fhir/ExplanationOfBenefit"
-
-    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    if not is_local:
-        if not samhsa_cert or not samhsa_cert_key or not no_samhsa_cert or not no_samhsa_cert_key:
-            logger.error("SAMHSA/non-SAMHSA certificates and keys MUST be provided")
-            sys.exit(1)
-
-        samhsa_ssl_ctx.load_cert_chain(
-            certfile=samhsa_cert.absolute(),
-            keyfile=samhsa_cert_key.absolute(),
-        )
-        no_samhsa_ssl_ctx.load_cert_chain(
-            certfile=no_samhsa_cert.absolute(),
-            keyfile=no_samhsa_cert_key.absolute(),
-        )
-
-        if host_cert:
-            samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-            no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-        else:
-            samhsa_ssl_ctx.check_hostname = False
-            samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
-            no_samhsa_ssl_ctx.check_hostname = False
-            no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
-
-    async with (
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=samhsa_ssl_ctx) if not is_local else None,
-            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_allowed"} if is_local else None,
-        ) as samhsa_session,
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=no_samhsa_ssl_ctx) if not is_local else None,
-            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
-        ) as no_samhsa_session,
-    ):
-        results = await gather_with_concurrency(
-            concurrency,
-            *(
-                verify_samhsa_filtering(
-                    url=full_eob_url,
-                    samhsa_session=samhsa_session,
-                    no_samhsa_session=no_samhsa_session,
-                    samhsa_bene=samhsa_bene,
-                )
-                for samhsa_bene in samhsa_benes
-            ),
-        )
-
-        all_samhsa_filtered = all(
-            res == VerifyFilteringResult.PASS
-            for res in results
-            if res != VerifyFilteringResult.EMPTY_RESPONSE
-        )
-
-        logger.info(
-            "Passing responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.PASS]),
-        )
-        logger.info(
-            "Failing responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.FAIL]),
-        )
-        logger.info(
-            "Empty responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
-        )
-        logger.log(
-            logging.INFO if all_samhsa_filtered else logging.ERROR,
-            "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
-            len(
-                [
-                    res
-                    for res in results
-                    if res
-                    in [
-                        VerifyFilteringResult.PASS,
-                        VerifyFilteringResult.FAIL,
-                    ]
-                ]
-            ),
-            "PASSED" if all_samhsa_filtered else "FAILED",
-        )
-
-        return all_samhsa_filtered
 
 
 if __name__ == "__main__":

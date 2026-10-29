@@ -198,16 +198,6 @@ jobs:
         run: |
           docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
 
-      - name: Install gitleaks
-        run: |
-          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
-            | grep "browser_download_url.*linux_x64.tar.gz" \
-            | cut -d : -f 2,3 \
-            | tr -d \" \
-            | wget -qi -
-          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
-          sudo chmod +x /usr/bin/gitleaks
-
       - name: Setup JDK
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
@@ -293,7 +283,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: "0.13.4"
+          version: "0.13.5"
 
       - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
@@ -446,7 +436,8 @@ jobs:
         bfd-platform-consume-idr-events,
         bfd-platform-run-idr-pipeline,
         bfd-platform-codebuild-runner,
-        bfd-platform-idr-bfd-validator
+        bfd-platform-idr-bfd-validator,
+        bfd-platform-samhsa-regression
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
