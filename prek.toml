@@ -61,7 +61,7 @@ id = "actions-lock"
 name = "Workflow actions are locked"
 language = "system"
 files = "\\.github/(workflows|actions)/.*(\\.ya?ml|.lock)$"
-entry = "./hooks/verify-actions-lock.sh"
+entry = "./hooks/actions-lock.sh"
 pass_filenames = false
 
 [[repos]]
