@@ -15,7 +15,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - id: check
         run: |
           # If manually triggered, always run
@@ -60,9 +60,9 @@ jobs:
     env:
       RAW_JSON: ${{ needs.resolve-repolinter-json.outputs.raw-json }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - run: echo $RAW_JSON > repolinter.json
-      - uses: DSACMS/repolinter-action@7869c7671df12b546c953dee3b756576f84d6522 # main
+      - uses: DSACMS/repolinter-actions@main
         with:
           config_file: "repolinter.json"
           output_type: "pull-request"
