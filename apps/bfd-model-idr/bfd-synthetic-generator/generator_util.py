@@ -401,8 +401,8 @@ class GeneratorUtil:
     def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
-        expired = random.random() < 0.2
-        future = random.random() < 0.2
+        expired = probability(0.2)
+        future = probability(0.2)
         self._generate_coverages(
             patient=patient,
             coverage_parts=parts,
