@@ -30,5 +30,7 @@ jobs:
       - id: changed-files
         uses: tj-actions/changed-files@v47.0.6
       - uses: j178/prek-action@v3.1.0
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           extra-args: --files ${{ steps.changed-files.outputs.all_changed_files }}
