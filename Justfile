@@ -24,14 +24,11 @@ bootstrap:
     then
         brew install --cask visual-studio-code
     fi
-    # We overwrite the default prek hook with our own script
-    # that will automatically re-add any formatting changes before committing
-    # This is not possible out of the box at the time of writing this
+    # Install prek and overwrite the default prek hook with our own shims and wrapper around it
+    # that will automatically re-add any formatting and specific lockfile changes before
+    # committing. This is not possible out of the box at the time of writing this
     # See https://github.com/j178/prek/issues/1051
-    prek install --force
-    mv .git/hooks/pre-commit .git/hooks/pre-commit.prek
-    cp -p ./hooks/run-pre-commit.sh .git/hooks/pre-commit
-    cp -p ./hooks/rerun-changed.sh .git/hooks/pre-commit.rerun
+    ./hooks/refresh-hook-shims.sh
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("""Extracts the certificate from the server.
