@@ -142,7 +142,7 @@ class ClmLineBuilder:
                 # & sk (instl_line.ansi_sgntr_sk --> ansi_sgntr line)
                 **{
                     col: find_ansi_sgntr_field_by_line_num_sk(
-                        src_lines=instnl_lines,
+                        instnl_lines=instnl_lines,
                         clm_line=clm_line,
                         extracted_field=col,
                         source_directory=self.source_directory,

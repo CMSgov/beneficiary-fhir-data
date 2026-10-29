@@ -274,8 +274,6 @@ class SampleGenerator:
             sys.exit(1)
 
         claim_type = int(claim_type_raw)
-        # TODO refactor to allow result creation outside of all IFs,
-        #   then add required changes per type as before
         result = self.create_base(
             clm_uniq_id=clm_uniq_id,
             clm_type_cd=claim_type,
@@ -284,13 +282,10 @@ class SampleGenerator:
                 SAMPLE_NAME_BY_CLAIM_TYPES, claim_type
             ),
         )
+        # type specific line joins
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
-        # elif ( no special logic for these so commented for now
-        #     claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
-        #     or claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
-        # ):
         elif claim_type in MCS_CLM_TYPE_CDS:
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
@@ -299,6 +294,10 @@ class SampleGenerator:
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
+        # elif ( no special logic for these so commented for now
+        #     claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
+        #     or claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
+        # ):
         else:
             print("Unknown Type")
             sys.exit(1)
