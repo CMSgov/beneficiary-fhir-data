@@ -47,6 +47,16 @@ hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
 [[repos]]
 repo = "local"
 [[repos.hooks]]
+id = "git-hook-shims-fresh"
+name = "git hook shims match the scripts in hooks/"
+language = "system"
+always_run = true
+pass_filenames = false
+entry = "./hooks/refresh-hook-shims.sh"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
 id = "actions-lock"
 name = "Workflow actions are locked"
 language = "system"
