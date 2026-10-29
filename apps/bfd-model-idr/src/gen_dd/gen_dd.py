@@ -60,6 +60,7 @@ def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
         stdout=subprocess.PIPE,
     )
 
+
 ## resource json have become prohibitively large for the OS python argument threshold
 ## utilizing namedTemporaryFile to pass json file name rather than entire json on cli
 def eval_fhirpath(resource, expression):

@@ -294,7 +294,7 @@ class SampleGenerator:
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
-            #no special logic for these so commented for now
+            # no special logic for these so commented for now
         elif (
             claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
             or claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
