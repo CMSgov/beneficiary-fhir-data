@@ -5,7 +5,7 @@ from typing import Any
 
 import constants as f
 from claims_util import four_part_key
-from generator_util import GeneratorUtil, partition_rows
+from generator_util import GeneratorUtil, partition_rows, probability
 from row_adapter import RowAdapter
 
 PA_INDS = [
@@ -49,7 +49,7 @@ class PriorAuthGeneratorUtil:
 
     def _roll_segment_count(self) -> int:
         seg_count = 1
-        while random.random() < 0.70 and seg_count < 19:
+        while probability(0.7) and seg_count < 19:
             seg_count += 1
         return seg_count
 
@@ -118,7 +118,7 @@ class PriorAuthGeneratorUtil:
         )
         header[f.NAME] = type_2_npi_to_name.get(header[f.NPI]) or random.choice(NPI_TYPE_2_NAMES)
         header[f.CMS_CERT] = random.choice(CCN_LIST)
-        header[f.REV_CODE_1] = "    " if random.random() < 0.80 else "0024"
+        header[f.REV_CODE_1] = "    " if probability(0.8) else "0024"
         header[f.TOB] = random.choices(["32X", "13X", "   "], weights=[80, 10, 10])[0]
         header[f.SVC_RENDER_ST] = random.choices(
             ["TX", "FL", "IL", "OK"], weights=[50, 30, 10, 10]
@@ -157,18 +157,14 @@ class PriorAuthGeneratorUtil:
         segment[f.ATT_PHY_NPI] = (
             random.choice(type_1_npis) if type_1_npis else gen_utils.id_gen.npi_id("PRVDR_SK")
         )
-        segment[f.PRICE_MOD1] = (
-            "  " if random.random() < 0.80 else random.choice(["NU", "RR", "50"])
-        )
-        segment[f.PLACE_OF_SERV] = (
-            "  " if random.random() < 0.80 else random.choice(["24", "11", "41"])
-        )
+        segment[f.PRICE_MOD1] = "  " if probability(0.8) else random.choice(["NU", "RR", "50"])
+        segment[f.PLACE_OF_SERV] = "  " if probability(0.8) else random.choice(["24", "11", "41"])
         segment[f.MR_COUNT_IND] = random.randint(0, 100)
         segment[f.MR_COUNT_ST_DT] = self._add_days_iso(
             segment[f.PA_REQ_REC_DT], random.randint(-21, 21)
         )
         segment[f.MR_COUNT_END_DT] = self._add_days_iso(segment[f.MR_COUNT_ST_DT], 365)
-        segment[f.RRB_EXCL_IND] = " " if random.random() < 0.90 else "Y"
+        segment[f.RRB_EXCL_IND] = " " if probability(0.9) else "Y"
         segment[f.IDR_INSRT_TS] = segment[f.PA_REQ_REC_DT]
 
         segment.extend(
