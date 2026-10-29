@@ -118,7 +118,7 @@ jobs:
       bfd_dev_version: ${{ steps.bfd-version-strings.outputs.BFD_DEV_VERSION }}
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch || github.ref_name }}
@@ -175,20 +175,20 @@ jobs:
     steps:
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        uses: actions/create-github-app-token@v3.3.0
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch || github.ref_name }}
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Retrieve base java image
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: "*bfd-platform-base-java*"
           merge-multiple: true
@@ -199,7 +199,7 @@ jobs:
           docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
 
       - name: Setup JDK
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@v6.1.0
         with:
           java-version: "25"
           distribution: corretto
@@ -261,7 +261,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Upload jib image artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: jib-images
           path: ${{ runner.temp }}/*.tar
@@ -276,19 +276,19 @@ jobs:
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
       - name: Install node
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: "22.23.4"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: "0.13.5"
 
-      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
+      - uses: taiki-e/install-action@v2.87.31
         with:
           tool: just
-      - uses: sigoden/install-binary@bea43f0d6192f38559f1850838d1fd7801f546d7 #v1.3.0
+      - uses: sigoden/install-binary@v1.3.0
         with:
           repo: sigoden/argc
 
@@ -339,7 +339,7 @@ jobs:
           ls -l assets
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: release-artifacts
           path: assets/*
@@ -369,13 +369,13 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download jib image artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: jib-images
           path: ${{ runner.temp }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
@@ -383,7 +383,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
+        uses: aws-actions/amazon-ecr-login@v2.1.7
 
       - name: Push jib images
         env:
@@ -457,12 +457,12 @@ jobs:
     steps:
       - name: Pull release artifacts
         id: pull-release-artifacts
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: release-artifacts
 
       - name: Release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        uses: ncipollo/release-action@v1.21.0
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
           makeLatest: "${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}"
