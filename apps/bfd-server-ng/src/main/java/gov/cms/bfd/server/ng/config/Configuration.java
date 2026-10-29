@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
