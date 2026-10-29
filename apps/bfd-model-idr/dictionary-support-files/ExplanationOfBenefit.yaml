@@ -4512,6 +4512,6 @@
   sources:
     - NCH
     - FISS
-  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_DLYS_MIN_AMT').exists()).amount.value
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_DLYS_MIN_AMT').exists()).amount.value
   profiles:
     - CMS
