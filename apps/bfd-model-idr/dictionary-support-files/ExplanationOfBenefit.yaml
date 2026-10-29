@@ -4505,3 +4505,13 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MIPS_PMT_AMT').exists()).amount.value
   profiles:
     - CMS
+- inputPath: ExplanationOfBenefit-Base.CLM_DLYS_MIN_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+  sources:
+    - NCH
+    - FISS
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_DLYS_MIN_AMT').exists()).amount.value
+  profiles:
+    - CMS

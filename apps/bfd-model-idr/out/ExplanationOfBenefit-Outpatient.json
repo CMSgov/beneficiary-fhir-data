@@ -784,6 +784,25 @@
         "code" : "123"
       }]
     }
+  },
+  {
+    "sequence" : 30,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_DLYS_MIN_AMT",
+        "display" : "Dialysis Billing Period Minutes"
+      }]
+    },
+    "valueQuantity" : {
+      "value" : 600,
+      "system" : "http://unitsofmeasure.org"
+    }
   }],
   "diagnosis" : [{
     "sequence" : 1,

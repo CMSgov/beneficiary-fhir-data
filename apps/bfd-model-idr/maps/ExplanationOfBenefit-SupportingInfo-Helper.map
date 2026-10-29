@@ -46,6 +46,8 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.GEO_BLG_SSA_STATE_CD as blgSsaCd -> tgt then addBlgStCd(src, tgt) "Add Billing State Code";
     src.GEO_RNDRG_SSA_STATE_CD as rndStCd -> tgt then addRndrgStCd(src, tgt) "Add Rendering State Code";
 
+    src.claimValues as claimValues -> tgt then addSupportingInfoClmVal(claimValues, tgt) "Add claim values for Supporting Info";
+
     src.CLM_LINE_HCT_HGB_TYPE_CD as typeCd where typeCd != '~' -> tgt.value = create('Reference') as tgtReference then{
         src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-",rowNum) "Add observation num";
      } "Add reference";
@@ -152,6 +154,23 @@ group addBenefitEnhancementCode(source src: string, target tgt: BackboneElement)
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BNFT_ENHNCMT_CD") "Add Coding";
     } "Add category";
     src as code -> tgt.code = cc("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",code) "add benefit enhancement code";
+}
+
+group addSupportingInfoClmVal(source src: BFDClaimValues, target tgt: BackboneElement){
+    src.CLM_VAL_CD as valCode where (valCode in ('D6')) -> tgt then {
+        src -> translate(valCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_VAL_CD', 'code') as idrField then {
+            src -> tgt.category = create('CodeableConcept') as tgtCC then {
+                src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add coding";
+                src -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information', idrField) "Add coding";
+            } "Set category";
+        } "Get clmValCode";
+    } "Add category";
+
+    src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
+        src.CLM_VAL_AMT as amountValue -> tgtQuantity.value = cast(amountValue,"integer") "Set value";
+        src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
+        src where (valCode in ('D6')) -> tgtQuantity.unit = "minute", tgtQuantity.code = "min" "Set minutes unit/code";
+    } "Set blood pints furnished";
 }
 
 //To get the individual codes, join V2_MDCR_CLM.CLM_RLT_COND_SGNTR_SK to V2_MDCR_CLM_RLT_COND_SGNTR_MBR, and for each CLM_RLT_COND_SGNTR_SQNC_NUM, there should be a CLM_RLT_COND_CD populated. EG clm_rlt_cond_sgntr_sk 89543 would have 5 CLM_RLT_COND_CD

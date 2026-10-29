@@ -57,6 +57,7 @@ Id: ExplanationOfBenefit-Base
 * CLM_SQSTRTN_RDCTN_AMT 0..1 string "Sequestration Adjustment Amount" "The amount adjusted by sequestration."
 * CLM_INSTNL_LOW_VOL_PMT_AMT 0..1 string "Low Volume Payment Amount" "A payment adjustment given to hospitals to account for the higher costs per discharge for low-income hospitals under the Inpatient Prospective Payment System (IPPS)."
 * CLM_MDCR_NEW_TECH_AMT 0..1 string "New Technology Add-On Payment Amount" "Indicates the amount of Medicare additional payment for new technology."
+* CLM_DLYS_MIN_AMT 0..1 string "Dialysis Billing Period Minutes" "Total number of minutes of dialysis provided during the billing period."
 * CLM_PBP_INCLSN_AMT 0..1 string "Medicare Payment Before Model Reduction Amount" "The amount that would have paid prior in the absence of PBP/AIPBP Reduction."
 * CLM_PBP_RDCTN_AMT 0..1 string "Actual Model Reduction Amount" "The PBP/AIPBP Reduction amount withheld from payment to the provider."
 * CLM_MIPS_PMT_AMT 0..1 string "Incentive Payment Adjustment Amount" "The merit based incentive payment system adjustment amount."
