@@ -283,7 +283,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v10.3.2
         with:
-          version: "0.13.4"
+          version: "0.13.5"
 
       - uses: taiki-e/install-action@v2.87.31
         with:
