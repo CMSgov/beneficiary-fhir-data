@@ -600,11 +600,8 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 
 group addAdjudicationClmVal(source src: BFDClaimValues, target tgt: BackboneElement){
   src.CLM_VAL_CD as valCode where (valCode in ('17' | '18' | '19' | '73' | '74' | '77' | 'Q0' | 'Q1' | 'QM')) -> tgt then {
-    src -> tgt.category = create('CodeableConcept') as tgtCategory then {
-      src -> tgtCategory.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication" "Set system";
-        src -> tgtCoding.code = translate(valCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_VAL_CD', 'code') "Set code";
-      } "Add coding";
+    src -> translate(valCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_VAL_CD', 'code') as idrField then {
+      src -> tgt.category = cc('https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication', idrField) "Add category";
     } "Set category";
     src.CLM_VAL_AMT as amt -> tgt.amount = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add amount";
   } "Add adjudication CLM_VAL";

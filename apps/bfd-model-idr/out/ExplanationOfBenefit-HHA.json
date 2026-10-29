@@ -1834,7 +1834,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_OUTLR_AMT"
+        "code" : "CLM_OPRTNL_OUTLR_AMT",
+        "display" : "Operating Outlier Amount"
       }]
     },
     "amount" : {
@@ -1846,7 +1847,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT"
+        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
+        "display" : "Operating Disproportionate Share Amount"
       }]
     },
     "amount" : {
@@ -1858,7 +1860,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_IME_AMT"
+        "code" : "CLM_OPRTNL_IME_AMT",
+        "display" : "Operating Indirect Medical Education Amount"
       }]
     },
     "amount" : {
@@ -1870,7 +1873,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_SQSTRTN_RDCTN_AMT"
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
       }]
     },
     "amount" : {
@@ -1882,7 +1886,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT"
+        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
+        "display" : "Low Volume Payment Amount"
       }]
     },
     "amount" : {
@@ -1894,7 +1899,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_MDCR_NEW_TECH_AMT"
+        "code" : "CLM_MDCR_NEW_TECH_AMT",
+        "display" : "New Technology Add-On Payment Amount"
       }]
     },
     "amount" : {
@@ -1906,7 +1912,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_PBP_INCLSN_AMT"
+        "code" : "CLM_PBP_INCLSN_AMT",
+        "display" : "Medicare Payment Before Model Reduction Amount"
       }]
     },
     "amount" : {
@@ -1918,7 +1925,8 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_PBP_RDCTN_AMT"
+        "code" : "CLM_PBP_RDCTN_AMT",
+        "display" : "Actual Model Reduction Amount"
       }]
     },
     "amount" : {
