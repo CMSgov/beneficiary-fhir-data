@@ -5,7 +5,7 @@ version = "1.0.0"
 dependencies = ["aws-lambda-powertools[all]", "boto3"]
 
 [dependency-groups]
-dev = ["boto3-stubs[lambda,codedeploy]", "ruff", "uv"]
+dev = ["boto3-stubs[lambda,codedeploy]", "ruff"]
 
 [tool.uv]
 exclude-newer = "7 days"

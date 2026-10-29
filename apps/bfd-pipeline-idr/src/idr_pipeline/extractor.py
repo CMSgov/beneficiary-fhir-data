@@ -45,7 +45,10 @@ class CsvFile:
 class Extractor(ABC, Generic[T]):  # noqa: UP046
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
-        self.type_adapter = TypeAdapter(list[self.cls])
+        # cls is only known at runtime, so it can't be a static type expression
+        self.type_adapter: TypeAdapter[list[T]] = TypeAdapter(
+            list[cls]  # pyright: ignore[reportInvalidTypeForm]
+        )
         self.partition = partition
         self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
         self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)
@@ -242,6 +245,7 @@ class PostgresExtractor(Extractor[T]):
         params: dict[str, DbType],
     ) -> Iterator[list[T]]:
         logger.log(SQL_LOG_TYPE, sql)
+        logger.log(SQL_LOG_TYPE, params)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -333,6 +337,7 @@ class SnowflakeExtractor(Extractor[T]):
     ) -> Iterator[list[T]]:
         cur = None
         logger.log(SQL_LOG_TYPE, sql)
+        logger.log(SQL_LOG_TYPE, params)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
