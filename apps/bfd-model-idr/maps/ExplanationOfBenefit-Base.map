@@ -548,7 +548,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
   } "Add wrapper for institutional components";
 }
 
-
 group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
   src -> tgt.type = create('CodeableConcept') as tgtCC then{
