@@ -108,6 +108,7 @@
   structureDef:
     path: ExplanationOfBenefit.billablePeriod.start
     id: ExplanationOfBenefit.billablePeriod.start
+    min: 1
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_THRU_DT
   appliesTo:
     - Pharmacy
@@ -150,6 +151,10 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.meta.source
+    id: ExplanationOfBenefit.meta.source
+    min: 1
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM
   appliesTo:
     - Pharmacy
@@ -166,6 +171,28 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:genericIdNum
+    sliceName: genericIdNum
+    slicing:
+      id: ExplanationOfBenefit.contained
+      path: ExplanationOfBenefit.contained
+      discriminator:
+        - type: profile
+          path: $this
+      rules: open
+    type:
+      - code: Practitioner
+    constraint:
+      - key: provider-generic-provider-num-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-generic-provider-num-req
+        severity: error
+        human: The contained provider Practitioner must have a GenericIdNum identifier with a value.
+        expression: ($this as Practitioner).identifier.where(system='http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum').value.exists()
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM
   appliesTo:
     - Pharmacy
@@ -181,6 +208,21 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:npiNum
+    sliceName: npiNum
+    type:
+      - code: Practitioner
+    constraint:
+      - key: provider-npi-provider-num-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-generic-provider-num-req
+        severity: error
+        human: The contained provider Practitioner must have a us-npi identifier with a value.
+        expression: ($this as Practitioner).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value.exists()
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_ID_QLFYR_CD
   appliesTo:
     - Pharmacy
