@@ -15,6 +15,8 @@ dependencies = [
   "requests>=2.32.5",
   "snowflake-snowpark-python>=1.54.0",
   "prompt-toolkit>=3.0.53",
+  "fhir-resources>=7.0.0",
+  "fhirpathpy>=2.2.4",
 ]
 
 [project.scripts]
@@ -23,6 +25,7 @@ generate-bene-sample = "generate_bene_sample:main"
 gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"
 generate-coverage-sample = "generate_coverage_sample:main"
+gen-structure-def = "gen_structure_def:main"
 
 [dependency-groups]
 dev = ["ruff>=0.12.9", "pyright>=1.1.403", "debugpy>=1.8.19", "pytest>=9.0.1"]
@@ -47,6 +50,7 @@ module-name = [
   "generate_bene_sample",
   "gen_dd",
   "generate_prior_auth_sample",
+  "gen_structure_def",
 ]
 packages = [
   "src/idr_model",
@@ -55,6 +59,7 @@ packages = [
   "src/gen_dd",
   "src/generate_prior_auth_sample",
   "src/generate_coverage_sample",
+  "src/gen_structure_def",
 ]
 
 [tool.ruff]
