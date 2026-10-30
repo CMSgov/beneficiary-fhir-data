@@ -49,7 +49,7 @@ just generate-eob-sample --clm-uniq-id <clm_uniq_id_here>
 ```
 This will search for the clm_uniq_id in out/SYNTHETIC_CLM.csv, collect the appropriate data fields and format it to be able to be mapped to fml.
 
-This will currently only work for Pharmacy, Professional, Institutional (excluding Hospice-Election and Inpatient) and Basic types but will be continued to work on other types.
+This will work for Pharmacy, Professional NCH and SS, Institutional NCH and SS
 
 There are two optional parameters .
 - --source-directory  Directory where the source csv files are located.  Default: ./out
