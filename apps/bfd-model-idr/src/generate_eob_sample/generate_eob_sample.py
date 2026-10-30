@@ -239,18 +239,20 @@ RX_LINE_COL = [
 
 SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
     tuple(PHARMACY_CLM_TYPE_CDS): "eob-pharmacy.json",
+    # professional
     tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH): "eob-carrier-nch.json",
     tuple(ADJUDICATED_PROFESSIONAL_DME_NCH): "eob-dme-nch.json",
     tuple(MCS_SS): "eob-mcs-multi-carrier-ss.json",
+    tuple(VMS_SS): "eob-vms-ss.json",
+    # institutional
     tuple(INSTITUTIONAL_HHA_NCH): "eob-hha-nch.json",
     tuple(INSTITUTIONAL_SNF_NCH): "eob-snf-nch.json",
     tuple(INSTITUTIONAL_OUTPATIENT_NCH): "eob-outpatient-nch.json",
     tuple(INSTITUTIONAL_HOSPICE_NCH): "eob-hospice-nch.json",
     tuple(INSTITUTIONAL_INPATIENT_NCH): "eob-inpatient-nch.json",
-    tuple(FISS_SS): "eob-inpatient-ss.json",
-    tuple(VMS_SS): "eob-vms-ss.json",
-    tuple(INSTITUTIONAL_HOSPICE_ELECTION): "eob-hospice-election.json",
     tuple(INSTITUTIONAL_MA_NCH): "eob-ma-nch.json",
+    tuple(FISS_SS): "eob-inpatient-ss.json",
+    tuple(INSTITUTIONAL_HOSPICE_ELECTION): "eob-hospice-election.json",
 }
 
 
