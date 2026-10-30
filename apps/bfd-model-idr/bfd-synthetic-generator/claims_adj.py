@@ -16,7 +16,9 @@ from claims_static import (
     AVAILABLE_NDC,
     AVAILABLE_SSA_STATE_CDS,
     CLM_POA_IND_CHOICES,
+    DISPROPORTIONATE_AMOUNT_CLM_VAL_CD,
     HCPCS_MODS,
+    INDIRECT_AMOUNT_CLM_VAL_CD,
     NOW,
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
@@ -71,7 +73,7 @@ class AdjudicatedGeneratorUtil:
         )
 
         clm_type_cd = (
-            int(clm[f.CLM_TYPE_CD])
+            clm[f.CLM_TYPE_CD]
             if clm.kv.get(f.CLM_TYPE_CD)
             else random.choice([1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 71, 72, 81, 82])
         )
@@ -93,7 +95,7 @@ class AdjudicatedGeneratorUtil:
                 field=f.CLM_ORIG_CNTL_NUM,
                 parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
             )
-            clm[f.CLM_RLT_COND_SGNTR_SK] = "-1"
+            clm[f.CLM_RLT_COND_SGNTR_SK] = -1
             clm[f.META_SRC_SK] = 1
 
         if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
@@ -104,7 +106,7 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_OBSLT_DT] = "9999-12-31"
         clm[f.GEO_BENE_SK] = gen_utils.id_gen.numeric_id(field=f.GEO_BENE_SK)
         clm[f.CLM_NUM_SK] = gen_utils.id_gen.claim_num_sk(
-            str(clm_type_cd), clm[f.CLM_DT_SGNTR_SK], clm[f.GEO_BENE_SK]
+            clm_type_cd, clm[f.CLM_DT_SGNTR_SK], clm[f.GEO_BENE_SK]
         )
         clm[f.BENE_SK] = bene_sk
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
@@ -220,7 +222,7 @@ class AdjudicatedGeneratorUtil:
             clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
         if clm_type_cd > 70 and clm_type_cd <= 82:
             clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
-            clm[f.CLM_RLT_COND_SGNTR_SK] = "0"
+            clm[f.CLM_RLT_COND_SGNTR_SK] = 0
             if random.choice([0, 1]):
                 clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = clm[f.CLM_BLG_PRVDR_NPI_NUM]
@@ -286,7 +288,7 @@ class AdjudicatedGeneratorUtil:
         clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
-            if str(clm.get(f.CLM_RLT_COND_SGNTR_SK, "")).startswith("-")
+            if clm.get(f.CLM_RLT_COND_SGNTR_SK)
             else gen_utils.id_gen.numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(
@@ -307,7 +309,7 @@ class AdjudicatedGeneratorUtil:
         clm_ocrnc_sgntr_mbr = init_clm_ocrnc_sgntr_mbr or RowAdapter({})
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SK] = (
             clm[f.CLM_OCRNC_SGNTR_SK]
-            if str(clm.get(f.CLM_OCRNC_SGNTR_SK, "")).startswith("-")
+            if clm.get(f.CLM_OCRNC_SGNTR_SK)
             else gen_utils.id_gen.numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
         )
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
@@ -337,7 +339,7 @@ class AdjudicatedGeneratorUtil:
         clm_rlt_ocrnc_sgntr_mbr = init_clm_rlt_ocrnc_sgntr_mbr or RowAdapter({})
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SK] = (
             clm[f.CLM_RLT_OCRNC_SGNTR_SK]
-            if str(clm.get(f.CLM_RLT_OCRNC_SGNTR_SK, "")).startswith("-")
+            if clm.get(f.CLM_RLT_OCRNC_SGNTR_SK)
             else gen_utils.id_gen.numeric_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, start=-2)
         )
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM] = random.choice(
@@ -355,7 +357,7 @@ class AdjudicatedGeneratorUtil:
     def gen_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
         clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})
         clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
             clm_dt_sgntr[f.CLM_ACTV_CARE_FROM_DT] = clm[f.CLM_FROM_DT]
             clm_dt_sgntr[f.CLM_DSCHRG_DT] = clm[f.CLM_THRU_DT]
@@ -515,7 +517,7 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = 18
+        clm_val[f.CLM_VAL_CD] = DISPROPORTIONATE_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 14
 
@@ -529,7 +531,7 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = 19
+        clm_val[f.CLM_VAL_CD] = INDIRECT_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 3
 
@@ -576,7 +578,7 @@ class AdjudicatedGeneratorUtil:
             ) or RowAdapter({})
 
         diagnoses: list[RowAdapter] = []
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         num_add_diags = 0
         if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
             # inpatient uses concepts of principal, admitting, other, external
@@ -741,7 +743,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         init_clm_instnl: RowAdapter | None = None,
     ):
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_instnl = init_clm_instnl or RowAdapter({})
 
         clm_instnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -841,7 +843,7 @@ class AdjudicatedGeneratorUtil:
             gen_utils.code_systems[f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW]
         )
         clm_prfnl[f.CLM_CLNCL_TRIL_NUM] = str(random.randint(0, 10000))
-        if int(clm[f.CLM_TYPE_CD]) in (71, 72, 81, 82):
+        if clm[f.CLM_TYPE_CD] in (71, 72, 81, 82):
             clm_prfnl[f.CLM_PRVDR_ACNT_RCVBL_OFST_AMT] = round(random.uniform(0, 1000), 2)
 
         add_meta_timestamps(clm_prfnl, clm)
@@ -857,7 +859,7 @@ class AdjudicatedGeneratorUtil:
         init_clm_line: RowAdapter | None = None,
         type_1_npis: list = [0],
     ):
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -978,7 +980,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_num: int,
         init_clm_line_instnl: RowAdapter | None = None,
     ):
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_instnl = init_clm_line_instnl or RowAdapter({})
         clm_line_instnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line_instnl[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -1050,7 +1052,7 @@ class AdjudicatedGeneratorUtil:
         clm_line_num: int,
         init_clm_line_prfnl: RowAdapter | None = None,
     ):
-        clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_prfnl = init_clm_line_prfnl or RowAdapter({})
         clm_line_prfnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line_prfnl[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
