@@ -509,6 +509,7 @@ class _ClaimsFile(StrEnum):
             f.GEO_RNDRG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            f.CLM_FAC_PRVDR_OSCAR_NUM,
         ],
     )
     CLM_PRFNL = (

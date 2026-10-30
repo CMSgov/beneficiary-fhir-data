@@ -488,6 +488,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     prvdr_rndrng_prvdr_npi_num VARCHAR(10),
     geo_rndrg_ssa_state_cd VARCHAR(2),
     clm_pos_cd VARCHAR(2),
+    clm_fac_prvdr_oscar_num VARCHAR(20),
     -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),
     clm_line_ndc_cd VARCHAR(11),
