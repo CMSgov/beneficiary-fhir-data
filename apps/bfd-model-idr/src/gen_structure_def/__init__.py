@@ -19,13 +19,13 @@ from .gen_def import StructureDefinitionGenerator
     default="structure-definition",
 )
 @click.option(
-    "--fsh-directory",
-    type=str,
+    "--delete-temp-files",
+    type=bool,
     required=False,
-    help="Pass the fsh source directory for the result files.",
-    default="./sushi/fsh-generated/resources",
+    help="Allows for temp files to persist for debugging.",
+    default=True,
 )
-def main(source_directory: str, output_directory: str, fsh_directory: str) -> None:
+def main(source_directory: str, output_directory: str, delete_temp_files: bool) -> None:
     pharmacy_generator = StructureDefinitionGenerator(
         source_directory=source_directory,
         output_directory=output_directory,
@@ -36,8 +36,10 @@ def main(source_directory: str, output_directory: str, fsh_directory: str) -> No
         name="ExplanationOfBenefit-Pharmacy-CMS",
         title="ExplanationOfBenefit Pharmacy CMS",
         description="""This is the CMS Pharmacy Profile.""",
-        fsh_directory=fsh_directory,
         base_definition="https://hl7.org/fhir/us/carin-bb/STU2.2/en/StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy",
+        resource_type="ExplanationOfBenefit",
+        output_file_name="CMS-ExplanationOfBenefit-Pharmacy.json",
+        delete_tmp_files=delete_temp_files,
     )
     pharmacy_generator.run()
 
