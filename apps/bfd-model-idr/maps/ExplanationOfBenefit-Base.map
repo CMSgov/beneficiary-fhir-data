@@ -228,7 +228,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.profComponents as profComponents -> tgt as profTgt then addProfessionalItems(src, profTgt) "Add professional components";
 
-    src.claimValues as claimValues -> tgt.adjudication as adjTgt then addAdjudicationClmVal(claimValues, adjTgt) "Add claim values for Adjudication ";
+    src.claimValues as claimValues -> tgt.adjudication as adjTgt then addAdjudicationClmVal(claimValues, adjTgt) "Add claim values for Adjudication";
 
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";

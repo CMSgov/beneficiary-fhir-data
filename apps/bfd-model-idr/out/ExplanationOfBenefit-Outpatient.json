@@ -1762,19 +1762,6 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_MDCR_NEW_TECH_AMT",
-        "display" : "New Technology Add-On Payment Amount"
-      }]
-    },
-    "amount" : {
-      "value" : 99.98,
-      "currency" : "USD"
-    }
-  },
-  {
-    "category" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_PBP_INCLSN_AMT",
         "display" : "Medicare Payment Before Model Reduction Amount"
       }]

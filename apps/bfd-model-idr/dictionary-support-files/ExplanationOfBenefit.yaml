@@ -3797,10 +3797,10 @@
   appliesTo:
     - Inpatient
     - Outpatient
-    - SNF
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_LOW_VOL_PMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_INSTNL_LOW_VOL_PMT_AMT')).amount.value
@@ -4435,6 +4435,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_PBP_INCLSN_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_INCLSN_AMT').exists()).amount.value
@@ -4450,6 +4451,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_PBP_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PBP_RDCTN_AMT').exists()).amount.value
@@ -4463,6 +4465,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_OPRTNL_OUTLR_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_OUTLR_AMT').exists()).amount.value
@@ -4474,6 +4477,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_MDCR_NEW_TECH_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_NEW_TECH_AMT').exists()).amount.value
@@ -4489,6 +4493,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_SQSTRTN_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_SQSTRTN_RDCTN_AMT').exists()).amount.value
@@ -4500,6 +4505,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   cclfMapping:
     - CCFLA.CLM_MIPS_PMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MIPS_PMT_AMT').exists()).amount.value
@@ -4512,6 +4518,7 @@
   sources:
     - NCH
     - FISS
+  bfdDerived: True
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_DLYS_MIN_AMT').exists()).amount.value
   profiles:
     - CMS
