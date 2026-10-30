@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.config;
 
 import io.micrometer.common.annotation.ValueExpressionResolver;
 import org.jetbrains.annotations.Nullable;

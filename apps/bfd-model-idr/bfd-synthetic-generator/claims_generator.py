@@ -9,9 +9,9 @@ import click
 import constants as f
 import tqdm
 from claim_type_codes import (
-    FISS_CLM_TYPE_CDS,
+    FISS_SS,
     INSTITUTIONAL_CLAIM_TYPES,
-    MCS_CLM_TYPE_CDS,
+    MCS_SS,
     PHARMACY_CLM_TYPE_CDS,
     PROFESSIONAL_CLAIM_TYPES,
 )
@@ -292,7 +292,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_TYPE_CD,
             f.CLM_LCTN_CD_SQNC_NUM,
             f.CLM_AUDT_TRL_STUS_CD,
-            f.CLM_AUDT_TRL_LCTN_CD,  # TODO: Generate this; values in test-samples2 are static
+            f.CLM_AUDT_TRL_LCTN_CD,  # generating values in claims_pac; test-samples2 remain static
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -349,26 +349,26 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_NUM,
             f.CLM_BENE_PRMRY_PYR_PD_AMT,
             f.CLM_SRVC_DDCTBL_SW,
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_MTUS_IND_CD,
             f.CLM_PRCSG_IND_CD,
             f.CLM_PMT_80_100_CD,
-            f.CLM_MTUS_IND_CD,
-            f.CLM_LINE_PRFNL_MTUS_CNT,
             f.CLM_PHYSN_ASTNT_CD,
-            f.CLM_LINE_CARR_CLNCL_CHRG_AMT,
-            f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT,
-            f.CLM_LINE_PRFNL_INTRST_AMT,
-            f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT,
-            f.CLM_LINE_HCT_HGB_TYPE_CD,
-            f.CLM_LINE_CARR_CLNCL_LAB_NUM,
-            f.CLM_LINE_DMERC_SCRN_SVGS_AMT,
-            f.CLM_SUPLR_TYPE_CD,
-            f.CLM_LINE_PRFNL_DME_PRICE_AMT,
-            f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
-            f.CLM_FED_TYPE_SRVC_CD,
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
-            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRCNG_LCLTY_CD,
+            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRVDR_SPCLTY_CD,
+            f.CLM_SUPLR_TYPE_CD,
+            f.CLM_LINE_CARR_CLNCL_CHRG_AMT,
+            f.CLM_LINE_CARR_CLNCL_LAB_NUM,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT,
+            f.CLM_LINE_DMERC_SCRN_SVGS_AMT,
+            f.CLM_LINE_HCT_HGB_TYPE_CD,
+            f.CLM_LINE_HCT_HGB_RSLT_NUM,
+            f.CLM_LINE_PRFNL_DME_PRICE_AMT,
+            f.CLM_LINE_PRFNL_INTRST_AMT,
+            f.CLM_LINE_PRFNL_MTUS_CNT,
+            f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -462,7 +462,7 @@ class _ClaimsFile(StrEnum):
             f.HCPCS_3_MDFR_CD,
             f.HCPCS_4_MDFR_CD,
             f.HCPCS_5_MDFR_CD,
-            f.CLM_LINE_ANSTHSA_UNIT_CNT,  # TODO: generate this
+            f.CLM_LINE_ANSTHSA_UNIT_CNT,
             f.CLM_LINE_SRVC_UNIT_QTY,
             f.CLM_LINE_REV_CTR_CD,
             f.CLM_LINE_BENE_PMT_AMT,
@@ -588,8 +588,8 @@ class _ClaimsFile(StrEnum):
             f.CLM_VAL_CD,
             f.CLM_VAL_AMT,
             f.CLM_VAL_SQNC_NUM,
-            f.CLM_VAL_ANSI_RSN_CD,  # TODO: not generated yet
-            f.CLM_VAL_ANSI_GRP_CD,  # TODO: not generated yet
+            f.CLM_VAL_ANSI_RSN_CD,
+            f.CLM_VAL_ANSI_GRP_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -1380,7 +1380,7 @@ def _generate_batch(
                 ]
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
-                if clm_type_cd in MCS_CLM_TYPE_CDS:
+                if clm_type_cd in MCS_SS:
                     clm_line_mcs = [
                         pac_util.gen_pac_clm_line_mcs(
                             clm=pac_clm,
@@ -1389,7 +1389,7 @@ def _generate_batch(
                     ]
                     out_tables[f.CLM_LINE_MCS].extend(clm_line_mcs)
 
-            if clm_type_cd in FISS_CLM_TYPE_CDS:
+            if clm_type_cd in FISS_SS:
                 clm_line_fiss = [
                     pac_util.gen_pac_clm_line_fiss(
                         clm=pac_clm,

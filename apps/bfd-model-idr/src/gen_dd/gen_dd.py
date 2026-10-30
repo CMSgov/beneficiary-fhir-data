@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pandas as pd
@@ -58,6 +59,23 @@ def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
         check=True,
         stdout=subprocess.PIPE,
     )
+
+
+## resource json have become prohibitively large for the OS python argument threshold
+## utilizing namedTemporaryFile to pass json file name rather than entire json on cli
+def eval_fhirpath(resource, expression):
+    with tempfile.NamedTemporaryFile("w", suffix=".json", encoding="utf-8") as f:
+        json.dump(resource, f)
+        f.flush()  # make sure the data is on disk before Node reads it
+        res = run_subprocess(
+            [
+                "node",
+                "eval_fhirpath.js",
+                f.name,
+                expression,
+            ]
+        )
+    return json.loads(res.stdout)
 
 
 if not Path(structure_def_folder).exists():
@@ -132,15 +150,9 @@ for walk_info in os.walk(dd_support_folder):
 
                     # This opportunistically populates examples based upon the samples
                     # created from executing FML
-                    result = run_subprocess(
-                        [
-                            "node",
-                            "eval_fhirpath.js",
-                            json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
-                            entry["fhirPath"],
-                        ]
+                    entry["example"] = eval_fhirpath(
+                        sample_resources_by_profile[entry["appliesTo"][0]], entry["fhirPath"]
                     )
-                    entry["example"] = json.loads(result.stdout)
                     if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
                         pass
                     elif len(entry["example"]) > 0:

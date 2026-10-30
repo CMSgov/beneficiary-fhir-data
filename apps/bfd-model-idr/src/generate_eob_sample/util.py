@@ -43,7 +43,7 @@ def read_single_line_file(
 def find_field_in_line_by_num(
     lines: list[dict[str, str]],
     clm_line: dict[str, str],
-    field_name: str,
+    extracted_field: str,
 ) -> str | None:
     if not lines:
         return None
@@ -55,8 +55,50 @@ def find_field_in_line_by_num(
     if not line_matches:
         return None
 
-    return extract_col_str(line_matches[0], field_name)
+    return extract_col_str(line_matches[0], extracted_field)
+
+
+def find_ansi_sgntr_field_by_line_num_sk(
+    source_directory: str,
+    instnl_lines: list[dict[str, str]],
+    clm_line: dict[str, str],
+    extracted_field: str,
+) -> str | None:
+    if not instnl_lines or not clm_line:
+        return None
+
+    sk = find_field_in_line_by_num(instnl_lines, clm_line, "CLM_ANSI_SGNTR_SK")
+
+    if not sk:
+        return None
+
+    ansi_sig_line = read_ansi_sgntr(sk, source_directory)
+
+    if not ansi_sig_line:
+        return None
+
+    return extract_col_str(ansi_sig_line, extracted_field)
 
 
 def extract_col_str(row: dict[str, str], name: str) -> str | None:
     return str(row.get(name, "")).strip() or None
+
+
+def sample_name_for_claim_type(groups: dict[tuple[int, ...], str], claim_type: int) -> str:
+    return next(
+        (name for types, name in groups.items() if claim_type in types), "EOB-Base-Sample.json"
+    )
+
+
+## 2nd order reads (clm_line --> supplementary_line.sk --> target_read.sk)
+
+
+def read_ansi_sgntr(ansi_sgntr_sk: str, source_directory: str) -> dict[str, str]:
+    return read_single_line_file(
+        source_directory=source_directory,
+        file_name="SYNTHETIC_CLM_ANSI_SGNTR",
+        not_found_fail=False,
+        params=[
+            Param("CLM_ANSI_SGNTR_SK", ansi_sgntr_sk),
+        ],
+    )
