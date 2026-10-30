@@ -282,7 +282,7 @@ class GeneratorUtil:
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
-        kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
+        kill_cred_cd = 1 if probability(0.10) else 2
 
         efctv_ts = self.fake.date_time_between_dates(
             datetime.date(year=2017, month=5, day=20),
