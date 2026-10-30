@@ -11,7 +11,7 @@ _faker = Faker()
 
 def match_line_num(clm_lines: list[RowAdapter] | None, clm_line_num: int):
     return next(
-        (x for x in clm_lines or [] if int(x[f.CLM_LINE_NUM]) == clm_line_num),
+        (x for x in clm_lines or [] if x[f.CLM_LINE_NUM] == clm_line_num),
         None,
     )
 
@@ -19,9 +19,7 @@ def match_line_num(clm_lines: list[RowAdapter] | None, clm_line_num: int):
 def four_part_key(row: RowAdapter):
     # It is common across many tables that the unique key is a composite key of the following four
     # columns, so this func makes it easy to generate it
-    return (
-        f"{int(row[f.CLM_DT_SGNTR_SK])}{row[f.CLM_NUM_SK]}{row[f.GEO_BENE_SK]}{row[f.CLM_TYPE_CD]}"
-    )
+    return f"{row[f.CLM_DT_SGNTR_SK]}-{row[f.CLM_NUM_SK]}-{row[f.GEO_BENE_SK]}-{row[f.CLM_TYPE_CD]}"
 
 
 def get_ric_cd_for_clm_type_cd(clm_type_cd: int):

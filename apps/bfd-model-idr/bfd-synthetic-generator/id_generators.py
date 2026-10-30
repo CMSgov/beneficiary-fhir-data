@@ -47,7 +47,7 @@ class IdGenerator(ABC):
     def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str: ...
 
     @abstractmethod
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str: ...
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int: ...
 
     @abstractmethod
     def npi_id(self, field: str) -> str: ...
@@ -59,7 +59,7 @@ class IdGenerator(ABC):
     def mbi(self) -> str: ...
 
     @abstractmethod
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str: ...
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int: ...
 
 
 def _sorted_chars(chars: Iterable[str]) -> str:
@@ -90,7 +90,7 @@ class RandomIdGenerator(IdGenerator):
         self._used_bene_sk: set[int] = set()
         self._used_mbi: set[str] = set()
 
-    def _gen_id(self, field: str, gen_func: Callable[[], str]) -> str:
+    def _gen_id(self, field: str, gen_func: Callable[[], str | int]) -> str | int:
         id_set = self._used_by_field.setdefault(field, set())
         while True:
             id = gen_func()
@@ -113,13 +113,13 @@ class RandomIdGenerator(IdGenerator):
             ),
         )
 
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int:
         if start > 0 or end > 0 or end > start:
             raise ValueError(
                 "'end' and 'start' must be negative and 'end' must be less than 'start'"
             )
 
-        return self._gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
+        return self._gen_id(field=field, gen_func=lambda: random.randint(end, start))
 
     def npi_id(self, field: str) -> str:
         def make_npi():
@@ -145,7 +145,7 @@ class RandomIdGenerator(IdGenerator):
         self._used_mbi.add(full_mbi)
         return full_mbi
 
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:  # noqa: ARG002
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int:  # noqa: ARG002
         return self.numeric_id(field="CLM_NUM_SK")
 
 
@@ -171,7 +171,7 @@ class SnowflakeIdState:
     npi_next: int = DEFAULT_INITIAL_NPI
     # CLM_NUM_SK is unique within (CLM_TYPE_CD, CLM_DT_SGNTR_SK, GEO_BENE_SK) so each combo has its
     # own counter. Counts up.
-    claim_num_sk_next: dict[tuple[str, str, str], int] = field(default_factory=dict)
+    claim_num_sk_next: dict[tuple[int, int, int], int] = field(default_factory=dict)
 
 
 def _query(writer: SnowflakeWriter, sql: str) -> Any:
@@ -278,7 +278,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         )
 
         for clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk, max_clm_num_sk in claims_rows:
-            key_columns = (str(clm_type_cd), str(clm_dt_sgntr_sk), str(geo_bene_sk))
+            key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
             state.claim_num_sk_next[key_columns] = int(max_clm_num_sk) + 1
 
     return state
@@ -339,14 +339,14 @@ class SequentialIdGenerator(IdGenerator):
 
         return "-" + _encode_identifier(position, position_alphabets)
 
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int:
         if start > 0 or end > 0 or end > start:
             raise ValueError(
                 "'end' and 'start' must be negative and 'end' must be less than 'start'"
             )
         value = self.state.numeric_id_next.setdefault(field, start)
         self.state.numeric_id_next[field] = value - 1
-        return str(value)
+        return value
 
     def bene_sk(self) -> int:
         value = self.state.bene_sk_next
@@ -367,8 +367,8 @@ class SequentialIdGenerator(IdGenerator):
         npi_9 = str(position)
         return npi_9 + self.calculate_npi_checksum(npi_9)
 
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int:
         key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
         value = self.state.claim_num_sk_next.setdefault(key_columns, DEFAULT_INITIAL_CLM_NUM_SK)
         self.state.claim_num_sk_next[key_columns] = value + 1
-        return str(value)
+        return value

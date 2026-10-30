@@ -53,17 +53,16 @@ class PriorAuthGeneratorUtil:
             seg_count += 1
         return seg_count
 
-    def _map_clm_type(self, clm_type_cd: Any) -> str:
-        val = int(clm_type_cd) if clm_type_cd.isdigit() else 0
-        if val in (50, 1900, 2900, 1081, 1082, 2081, 2082):
+    def _map_clm_type(self, clm_type_cd: int) -> str:
+        if clm_type_cd in (50, 1900, 2900, 1081, 1082, 2081, 2082):
             return "C"
-        if val in (10, 60, 61, 62, 63, 64, 1032, 1033, 1034, 2032, 2033, 2034):
+        if clm_type_cd in (10, 60, 61, 62, 63, 64, 1032, 1033, 1034, 2032, 2033, 2034):
             return "H"
-        if val in (30, 72, 81, 82, 1800, 2800):
+        if clm_type_cd in (30, 72, 81, 82, 1800, 2800):
             return "D"
-        if val in (40, 1013, 2013, 1023, 2023):
+        if clm_type_cd in (40, 1013, 2013, 1023, 2023):
             return "O"
-        if val in (
+        if clm_type_cd in (
             20,
             60,
             61,
@@ -104,7 +103,7 @@ class PriorAuthGeneratorUtil:
         header[f.UTN_VALID_ST_DT] = details["from_dt"]
         header[f.UTN_VALID_EN_DT] = self._add_days_iso(header[f.UTN_VALID_ST_DT], 365)
         header[f.PA_IND] = random.choice(PA_INDS)
-        header[f.CLM_TYPE] = self._map_clm_type(details["mac_id"])
+        header[f.CLM_TYPE] = self._map_clm_type(details["clm_type"])
         header[f.MAC_ID] = str(details["mac_id"])
         header[f.ICN_DCN] = "".join(random.choices(string.digits, k=14))
         header[f.PA_DT_ADDED] = self._add_days_iso(header[f.UTN_VALID_ST_DT], -10)
