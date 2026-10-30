@@ -7,7 +7,7 @@ PHARMACY_CLM_TYPE_CDS = [1, 2, 3, 4]
 
 ## INSTNL SS
 FISS_SS = [
-    1011, # begin PHASE I FISS CLAIMS
+    1011,  # begin PHASE I FISS CLAIMS
     1012,
     1018,
     1013,
@@ -42,7 +42,7 @@ FISS_SS = [
     1086,
     1087,
     1089,
-    2011, # begin PHASE II and PHASE III FISS CLAIMS
+    2011,  # begin PHASE II and PHASE III FISS CLAIMS
     2012,
     2013,
     2014,
