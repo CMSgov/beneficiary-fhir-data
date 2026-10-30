@@ -48,6 +48,7 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
+    this.registerInterceptor(new CapabilityStatementInterceptor());
     this.registerInterceptor(requestMetricsInterceptor);
   }
 

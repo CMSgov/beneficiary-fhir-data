@@ -128,4 +128,13 @@ public enum EobProfile {
         ? List.of(of(category, REGULAR).getVersionedCanonicalUrl(), getVersionedCanonicalUrl())
         : List.of(getVersionedCanonicalUrl());
   }
+
+  /**
+   * Helper method to return all canonical profile URLs for EoBs with the versions appended
+   *
+   * @return the list of profile URLs
+   */
+  public static List<String> getAllVersionedCanonicalUrls() {
+    return Arrays.stream(values()).map(EobProfile::getVersionedCanonicalUrl).toList();
+  }
 }
