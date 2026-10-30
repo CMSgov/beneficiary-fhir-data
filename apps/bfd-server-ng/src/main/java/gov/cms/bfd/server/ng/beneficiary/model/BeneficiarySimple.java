@@ -6,9 +6,10 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Subselect;
 
 /**
  * A simplified beneficiary model for use with claims data. Excess data is omitted to avoid the
@@ -17,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Getter
 @Table(name = "beneficiary", schema = "idr")
-@SQLRestriction(BeneficiaryBase.VALID_BENE_SQL_RESTRICTION)
+@Subselect(BeneficiaryBase.LATEST_VALID_BENE_VIEW)
 @Immutable
 public class BeneficiarySimple {
   @Id
@@ -29,6 +30,9 @@ public class BeneficiarySimple {
 
   @Column(name = "bene_xref_efctv_sk")
   private long xrefSk;
+
+  @Column(name = "idr_trans_efctv_ts")
+  private ZonedDateTime effectiveTimestamp;
 
   @Convert(converter = DefaultFalseBooleanConverter.class)
   @Column(name = "idr_ltst_trans_flg")
