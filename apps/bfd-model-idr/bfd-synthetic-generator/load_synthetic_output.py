@@ -45,6 +45,7 @@ from constants import (
     CLM_RLT_OCRNC_SGNTR_MBR,
     CLM_VAL,
     CNTRCT_PBP_NUM,
+    MBI_NUM,
     PRAUC,
     PRVDR_HSTRY,
 )
@@ -96,6 +97,20 @@ class OutputDestinationWriter(ABC):
         self,
         files: dict[str, list[RowAdapter]],
     ) -> list[dict[str, Any]]: ...
+
+    @abstractmethod
+    def get_bene_sk_to_mbi(
+        self,
+        bene_sks: list[int],
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]: ...
+
+    @abstractmethod
+    def get_prior_auths(
+        self,
+        bene_sk_to_mbi: list[RowAdapter],
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]: ...
 
     @abstractmethod
     def get_bene_sks(
@@ -191,6 +206,14 @@ class CsvWriter(OutputDestinationWriter):
             for row in files[BENE_HSTRY]
             if row.get("BENE_MBI_ID") and int(row["BENE_SK"]) in bene_sks
         ]
+
+    def get_prior_auths(
+        self,
+        bene_sk_to_mbi: list[RowAdapter],
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]:
+        mbis = {row["BENE_MBI_ID"] for row in bene_sk_to_mbi}
+        return [row for row in files[PRAUC] if row[MBI_NUM] in mbis]
 
 
 class SnowflakeWriter(OutputDestinationWriter):
@@ -505,6 +528,28 @@ class SnowflakeWriter(OutputDestinationWriter):
         files: dict[str, list[RowAdapter]],  # noqa: ARG002
     ) -> list[dict[str, Any]]:
         return self.get_rows(CNTRCT_PBP_NUM)
+
+    def get_prior_auths(
+        self,
+        bene_sk_to_mbi: list[RowAdapter],
+        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+    ) -> list[RowAdapter]:
+        if not bene_sk_to_mbi:
+            return []
+
+        mbis = {row["BENE_MBI_ID"] for row in bene_sk_to_mbi}
+        temp_table = f"{self.database}.{self.schema}.TEMP_BATCH_MBIS"
+        self.session.sql(f"DROP TABLE IF EXISTS {temp_table}").collect()
+        bene_df = self.session.create_dataframe([[m] for m in mbis], schema=["MBI_NUM"])
+        bene_df.write.mode("overwrite").save_as_table(temp_table, table_type="transient")
+        rows = (
+            self._qualified_session_table(PRAUC)
+            .join(self.session.table(temp_table), on="MBI_NUM")
+            .collect()
+        )
+        self.session.table(temp_table).drop_table()
+
+        return [RowAdapter(row.as_dict(), loaded_from_file=True) for row in rows]
 
     def truncate_tables(self, table_names: Iterable[str]) -> None:
         for table_name in table_names:

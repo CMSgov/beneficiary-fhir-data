@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import logging
 import random
@@ -449,13 +448,15 @@ def main(
     if claims:
         print("Generating claims for generated benes")
         try:
-            current_script_dir = Path(__file__).resolve().parent
-            claims_generator_path = current_script_dir / "claims_generator.py"
+            current_dir = Path(__file__).resolve().parent
+            claims_generator = str(current_dir / "claims_generator.py")
 
-            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY and SYNTHETIC_CNTRCT_PBP_NUM
+            # Only for CSV flow does this call claims_generator.py with the generated
+            # SYNTHETIC_BENE_HSTRY and SYNTHETIC_CNTRCT_PBP_NUM to prevent disconnected claims from
+            # benes and disconeccted contracts from claims
             claims_args = [
                 sys.executable,
-                str(claims_generator_path),  # Pass the absolute path string
+                claims_generator,
                 f"out/{BENE_HSTRY}.csv",
                 f"out/{CNTRCT_PBP_NUM}.csv",
             ]
