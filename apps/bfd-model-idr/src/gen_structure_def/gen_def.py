@@ -1,5 +1,6 @@
 import json
 import subprocess
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -16,6 +17,8 @@ from fhir.resources.R4B.structuredefinition import (
     StructureDefinitionDifferential,
 )
 
+from .fhir_def import FHIRDefinitions
+
 
 class StructureDefinitionGenerator:
     def __init__(
@@ -29,8 +32,10 @@ class StructureDefinitionGenerator:
         version: str,
         name: str,
         description: str,
-        fsh_directory: str,
         base_definition: str,
+        resource_type: str,
+        output_file_name: str,
+        delete_tmp_files: bool = True
     ):
         self.source_directory = source_directory
         self.output_directory = output_directory
@@ -41,171 +46,174 @@ class StructureDefinitionGenerator:
         self.version = version
         self.name = name
         self.description = description
-        self.fsh_directory = fsh_directory
         self.base_definition = base_definition
+        self.resource_type = resource_type
+        self.output_file_name = output_file_name
+        self.delete_tmp_files = delete_tmp_files
 
     def run(self) -> None:
         """Generate StructureDefinition Resource."""
         print(f"Source Directory: {self.source_directory}")
         print(f"Target Directory: {self.output_directory}")
-        print(f"FSH Directory: {self.fsh_directory}")
 
         yaml_path = Path(f"{self.source_directory}/{self.source_yaml}")
         with yaml_path.open(mode="r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        data = [node for node in data if self.profile in node.get("profiles", [])]
+        data = [
+            node
+            for node in data
+            if self.profile in node.get("profiles", []) and node.get("structureDef")
+        ]
 
-        sd_json_path = self.download_structure_definition(
-            self.base_definition,
-            Path(f"{self.output_directory}/C4BB-ExplanationOfBenefit-Pharmacy-Basis.json"),
-        )
-
-        source_structure_def = StructureDefinition.model_construct(
-            **json.loads(sd_json_path.read_text(encoding="UTF-8"))
-        )
-
-        print(source_structure_def.id)
-
-        elements = []
-        slicing_added = set()
-        for node in data:
-            struct_def_data = node.get("structureDef")
-            if not struct_def_data:
-                continue
-            el_id = struct_def_data.get("id")
-            path = struct_def_data.get("path")
-            input_path = node.get("inputPath")
-            column_name = node.get("sourceColumn")
-            slicing = struct_def_data.get("slicing")
-            pattern = struct_def_data.get("pattern")
-            max = node.get("max") or "1"
-
-            if not column_name:
-                input_path.split(".")[1]
-
-            column_name = str(column_name).replace("_", "-")
-
-            human = node.get("definitionOverride")
-            if not human:
-                sd_sushi_path = Path(f"{self.fsh_directory}/StructureDefinition-{column_name}.json")
-                if sd_sushi_path.exists():
-                    gen_structure_def = StructureDefinition.model_construct(
-                        **json.loads(sd_sushi_path.read_text(encoding="utf-8"))
-                    )
-                    human = gen_structure_def.description
-                else:
-                    human = f"CMS Field: {column_name}"
-
-            if slicing:
-                if path in slicing_added:
-                    raise ValueError(
-                        f"Slice path {path} appears on more than one node."
-                        + " Please consildate slicing to a single node"
-                    )
-                slicing_el = ElementDefinition(
-                    path=path,
-                    id=path,
-                    slicing=ElementDefinitionSlicing(
-                        rules=slicing.get("rules") or "open",
-                    ),
-                )
-                discriminator = slicing.get("discriminator")
-                if discriminator:
-                    slicing_el.slicing.discriminator = discriminator
-
-                elements.append(slicing_el)
-                slicing_added.add(path)
-
-            el = ElementDefinition(
-                path=path,
-                id=el_id,
-                short=input_path,
-                min=struct_def_data.get("min") or 0,
-                max=max,
-                isSummary=struct_def_data.get("isSummary") or None,
-                mustSupport=struct_def_data.get("mustSupport") or None,
-                sliceName=struct_def_data.get("sliceName") or None,
+        output_dir = Path(self.output_directory)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        with (
+            tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=self.delete_tmp_files, dir=output_dir
+            ) as sd_json_file,
+            tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", delete=self.delete_tmp_files, dir=output_dir
+            ) as differential_file,
+        ):
+            sd_json_path = Path(sd_json_file.name)
+            self.download_structure_definition(
+                self.base_definition,
+                sd_json_path,
             )
-            if pattern:
-                setattr(el, f"pattern{pattern.get('type')}", pattern.get("detail"))
 
-            elements.append(el)
+            source_structure_def = StructureDefinition.model_construct(
+                **json.loads(sd_json_path.read_text(encoding="UTF-8"))
+            )
 
-        sorted_elements = sorted(
-            elements,
-            key=lambda element: (
-                element.path,
-                element.slicing is None,
-                element.id,
-                element.sliceName,
-            ),
-        )
+            fhir_defs = FHIRDefinitions()
 
-        structure_def = StructureDefinition(
-            url=self.url,
-            name=self.name,
-            status="active",
-            kind="resource",
-            abstract=False,
-            type="ExplanationOfBenefit",
-            differential=StructureDefinitionDifferential(element=sorted_elements),
-            version=self.version,
-            fhirVersion="4.0.1",
-            title=self.title,
-            date=datetime.now(UTC).isoformat(),
-            language="en",
-            baseDefinition=source_structure_def.url,
-            derivation="constraint",
-            jurisdiction=[
-                CodeableConcept(
-                    coding=[
-                        Coding(
-                            system="urn:iso:std:iso:3166",
-                            code="US",
-                            display="United States of America",
-                        )
-                    ]
+            elements = []
+            slicing_added = set()
+            for p in fhir_defs.expand_type_paths(self.resource_type):
+                path_data = [node for node in data if node.get("structureDef").get("path") == p]
+                path_data = sorted(
+                    path_data,
+                    key=lambda node: (node.get("structureDef").get("slicing") is None,),
                 )
-            ],
-            description=self.description,
-        )
+                for node in path_data:
+                    struct_def_data = node.get("structureDef")
+                    el_id = struct_def_data.get("id")
+                    path = struct_def_data.get("path")
+                    input_path = node.get("inputPath")
+                    column_name = node.get("sourceColumn")
+                    slicing = struct_def_data.get("slicing")
+                    pattern = struct_def_data.get("pattern")
+                    max = struct_def_data.get("max") or "1"
+                    type_node = struct_def_data.get("type")
+                    constraint = struct_def_data.get("constraint")
 
-        output_file_name = "StructureDef.json"
-        output_path = Path(f"{self.output_directory}/{output_file_name}")
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+                    if not column_name:
+                        input_path.split(".")[1]
 
-        with output_path.open(mode="w", encoding="utf-8") as f:
-            f.write(structure_def.model_dump_json(indent=2))
+                    column_name = str(column_name).replace("_", "-")
 
-        self.generate_snapshot(input_sd_path=sd_json_path, output_path=output_path)
+                    if slicing:
+                        if path in slicing_added:
+                            raise ValueError(
+                                f"Slice path {path} appears on more than one node."
+                                + " Please consildate slicing to a single node"
+                            )
+                        slicing_el = ElementDefinition(
+                            path=path,
+                            id=path,
+                            slicing=ElementDefinitionSlicing(
+                                rules=slicing.get("rules") or "open",
+                            ),
+                        )
+                        discriminator = slicing.get("discriminator")
+                        if discriminator:
+                            slicing_el.slicing.discriminator = discriminator
 
-        print(f"Successfully generated sample JSON: {output_file_name}")
+                        elements.append(slicing_el)
+                        slicing_added.add(path)
 
-    def download_structure_definition(self, narrative_url: str, output_path: Path) -> Path:
+                    el = ElementDefinition(
+                        path=path,
+                        id=el_id,
+                        short=input_path,
+                        min=struct_def_data.get("min") or 0,
+                        max=max,
+                        isSummary=struct_def_data.get("isSummary") or None,
+                        mustSupport=struct_def_data.get("mustSupport") or None,
+                        sliceName=struct_def_data.get("sliceName") or None,
+                    )
+                    if pattern:
+                        setattr(el, f"pattern{pattern.get('type')}", pattern.get("detail"))
+
+                    if type_node:
+                        print("found type")
+                        el.type = type_node
+
+                    if constraint:
+                        el.constraint = constraint
+
+                    elements.append(el)
+
+            structure_def = StructureDefinition(
+                url=self.url,
+                name=self.name,
+                status="active",
+                kind="resource",
+                abstract=False,
+                type="ExplanationOfBenefit",
+                differential=StructureDefinitionDifferential(element=elements),
+                version=self.version,
+                fhirVersion="4.0.1",
+                title=self.title,
+                date=datetime.now(UTC).isoformat(),
+                language="en",
+                baseDefinition=source_structure_def.url,
+                derivation="constraint",
+                jurisdiction=[
+                    CodeableConcept(
+                        coding=[
+                            Coding(
+                                system="urn:iso:std:iso:3166",
+                                code="US",
+                                display="United States of America",
+                            )
+                        ]
+                    )
+                ],
+                description=self.description,
+            )
+
+            differential_file.write(structure_def.model_dump_json(indent=2))
+            differential_file.flush()
+
+            self.generate_snapshot(
+                input_sd_path=sd_json_path, differential_path=Path(differential_file.name)
+            )
+
+        print(f"Successfully generated sample JSON: {self.output_file_name}")
+
+    def download_structure_definition(self, narrative_url: str, output_path: Path) -> None:
         """Convert an IG narrative page URL into its raw JSON canonical form and download it."""
         json_url = narrative_url.replace("/en/", "/") + ".json"
         resp = requests.get(json_url, headers={"Accept": "application/fhir+json"})
         resp.raise_for_status()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(resp.text, encoding="utf-8")
         print(f"Downloaded: {json_url} -> {output_path}")
-        return output_path
 
     def generate_snapshot(
         self,
         input_sd_path: Path,
-        output_path: Path,
+        differential_path: Path,
         validator_jar_path: str = "validator_cli.jar",
-    ) -> Path:
-        output_file_name = "StructureDefNew.json"
-        output_path_new = Path(f"{self.output_directory}/{output_file_name}")
+    ) -> None:
+        output_path = Path(f"{self.output_directory}/{self.output_file_name}")
         cmd = [
             "java",
             "-jar",
             validator_jar_path,
             str(
-                output_path.resolve()
+                differential_path.resolve()
             ),  # existing profile, already has a snapshot — used as context
             "-ig",
             str(
@@ -213,7 +221,7 @@ class StructureDefinitionGenerator:
             ),  # the one you're creating, differential only, no snapshot yet
             "-snapshot",
             "-output",
-            str(output_path_new.resolve()),
+            str(output_path.resolve()),
         ]
         print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, check=False, capture_output=True, text=True)
@@ -224,4 +232,3 @@ class StructureDefinitionGenerator:
             raise RuntimeError(f"Snapshot generation failed (exit {result.returncode})")
 
         print(f"Snapshot written to: {output_path}")
-        return output_path
