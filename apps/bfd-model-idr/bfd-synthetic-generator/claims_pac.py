@@ -3,7 +3,7 @@ import string
 from collections.abc import Callable
 
 import constants as f
-from claim_type_codes import FISS_CLM_TYPE_CDS, MCS_CLM_TYPE_CDS, VMS_CDS
+from claim_type_codes import FISS_SS, MCS_SS, VMS_SS
 from claims_static import (
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
@@ -131,17 +131,17 @@ class PacGeneratorUtil:
 
         clm[f.CLM_PD_STUS_CD] = random.choice(["S", "T", "R", "D", "1", "P", "2", "I"])
 
-        if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
+        if pac_clm_type_cd in FISS_SS:
             clm[f.CLM_SRC_ID] = 21000  # FISS
             clm[f.META_SRC_SK] = 1003  # FISS
-        elif pac_clm_type_cd in MCS_CLM_TYPE_CDS:
+        elif pac_clm_type_cd in MCS_SS:
             clm[f.CLM_SRC_ID] = 22000  # MCS
             clm[f.META_SRC_SK] = 1001  # MCS
-        elif pac_clm_type_cd in VMS_CDS:
+        elif pac_clm_type_cd in VMS_SS:
             clm[f.CLM_SRC_ID] = 23000  # VMS
             clm[f.META_SRC_SK] = 1002  # VMS
 
-        if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
+        if pac_clm_type_cd in FISS_SS:
             clm[f.CLM_RIC_CD] = get_ric_cd_for_clm_type_cd(pac_clm_type_cd)
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_RLT_COND_SGNTR_SK, start=-2

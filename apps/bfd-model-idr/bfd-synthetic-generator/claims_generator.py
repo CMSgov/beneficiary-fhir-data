@@ -9,9 +9,9 @@ import click
 import constants as f
 import tqdm
 from claim_type_codes import (
-    FISS_CLM_TYPE_CDS,
+    FISS_SS,
     INSTITUTIONAL_CLAIM_TYPES,
-    MCS_CLM_TYPE_CDS,
+    MCS_SS,
     PHARMACY_CLM_TYPE_CDS,
     PROFESSIONAL_CLAIM_TYPES,
 )
@@ -1380,7 +1380,7 @@ def _generate_batch(
                 ]
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
-                if clm_type_cd in MCS_CLM_TYPE_CDS:
+                if clm_type_cd in MCS_SS:
                     clm_line_mcs = [
                         pac_util.gen_pac_clm_line_mcs(
                             clm=pac_clm,
@@ -1389,7 +1389,7 @@ def _generate_batch(
                     ]
                     out_tables[f.CLM_LINE_MCS].extend(clm_line_mcs)
 
-            if clm_type_cd in FISS_CLM_TYPE_CDS:
+            if clm_type_cd in FISS_SS:
                 clm_line_fiss = [
                     pac_util.gen_pac_clm_line_fiss(
                         clm=pac_clm,

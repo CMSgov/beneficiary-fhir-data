@@ -5,8 +5,8 @@ from typing import Any
 
 import constants as f
 from claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
-    FISS_CLM_TYPE_CDS,
+    ADJUDICATED_PROFESSIONAL_NCH,
+    FISS_SS,
     INSTITUTIONAL_CLAIM_TYPES,
     PHARMACY_CLM_TYPE_CDS,
 )
@@ -172,7 +172,7 @@ class AdjudicatedGeneratorUtil:
             clm_ltst_clm_ind = random.choice(["Y", "N"])
         clm[f.CLM_LTST_CLM_IND] = clm_ltst_clm_ind
 
-        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_CLM_TYPE_CDS:
+        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_SS:
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
             clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
             clm[f.PRVDR_ATNDG_PRVDR_NPI_NUM] = clm[f.CLM_ATNDG_PRVDR_NPI_NUM]
@@ -678,7 +678,7 @@ class AdjudicatedGeneratorUtil:
             num_add_diags = (
                 len(init_diagnoses) - 3 if len(init_diagnoses) > 3 else random.randint(2, 15)
             )
-        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH:
             # professional claims use principal diagnosis and other diagnoses
             principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
@@ -721,7 +721,7 @@ class AdjudicatedGeneratorUtil:
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                 }
-            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH:
                 diagnosis_data = {
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],

@@ -4,16 +4,21 @@ from pathlib import Path
 from typing import Any
 
 from idr_model.claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
+    ADJUDICATED_PROFESSIONAL_CARRIER_NCH,
+    ADJUDICATED_PROFESSIONAL_DME_NCH,
+    ADJUDICATED_PROFESSIONAL_NCH,
+    INSTITUTIONAL_MA_NCH,
     INSTITUTIONAL_CLAIM_TYPES,
-    INSTITUTIONAL_HHA,
-    INSTITUTIONAL_HOSPICE,
-    INSTITUTIONAL_OUTPATIENT,
-    INSTITUTIONAL_SNF,
-    MCS_CLM_TYPE_CDS,
+    INSTITUTIONAL_HHA_NCH,
+    INSTITUTIONAL_SNF_NCH,
+    INSTITUTIONAL_OUTPATIENT_NCH,
+    INSTITUTIONAL_INPATIENT_NCH,
+    INSTITUTIONAL_HOSPICE_NCH,
+    INSTITUTIONAL_HOSPICE_ELECTION,
+    FISS_SS,
+    MCS_SS,
     PHARMACY_CLM_TYPE_CDS,
-    VMS_CDS,
+    VMS_SS,
 )
 
 from .clm_line import ClmLineBuilder
@@ -233,14 +238,19 @@ RX_LINE_COL = [
 ]
 
 SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
-    tuple(PHARMACY_CLM_TYPE_CDS): "EOB-Pharmacy-Sample.json",
-    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES): "EOB-Carrier-Sample.json",
-    tuple(ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME): "EOB-DME-Sample.json",
-    tuple(MCS_CLM_TYPE_CDS): "EOB-Carrier-MCS-Sample.json",
-    tuple(INSTITUTIONAL_HOSPICE): "EOB-Hospice-Sample.json",
-    tuple(INSTITUTIONAL_OUTPATIENT): "EOB-Institutional-Outpatient-Sample.json",
-    tuple(INSTITUTIONAL_SNF): "EOB-SNF-Sample.json",
-    tuple(INSTITUTIONAL_HHA): "EOB-HHA-Sample.json",
+    tuple(PHARMACY_CLM_TYPE_CDS): "eob-pharmacy.json",
+    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH): "eob-carrier-nch.json",
+    tuple(ADJUDICATED_PROFESSIONAL_DME_NCH): "eob-dme-nch.json",
+    tuple(VMS_SS): "eob-vms-ss.json",
+    tuple(MCS_SS): "eob-mcs-multi-carrier-ss.json",
+    tuple(INSTITUTIONAL_HHA_NCH): "eob-hha-nch.json",
+    tuple(INSTITUTIONAL_SNF_NCH): "eob-snf-nch.json",
+    tuple(INSTITUTIONAL_OUTPATIENT_NCH): "eob-outpatient-nch.json",
+    tuple(INSTITUTIONAL_HOSPICE_NCH): "eob-hospice-nch.json",
+    tuple(INSTITUTIONAL_INPATIENT_NCH): "eob-inpatient-nch.json",
+    tuple(FISS_SS): "eob-inpatient-ss.json",
+    tuple(INSTITUTIONAL_HOSPICE_ELECTION): "eob-hospice-election.json",
+    tuple(INSTITUTIONAL_MA_NCH): "eob-ma-nch.json",
 }
 
 
@@ -286,19 +296,16 @@ class SampleGenerator:
         if claim_type in PHARMACY_CLM_TYPE_CDS:
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
-        elif claim_type in MCS_CLM_TYPE_CDS:
+        elif claim_type in MCS_SS:
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
         # INST and fall back for known claim types that we do not have a special sample for
-        elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_CDS:
+        elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_SS:
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
             # no special logic for these so commented for now
-        elif (
-            claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
-            or claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
-        ):
+        elif claim_type in ADJUDICATED_PROFESSIONAL_NCH:
             print("found Carrier or Carrier DME -- no special joins")
         else:
             print("Unknown Type")

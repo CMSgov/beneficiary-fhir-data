@@ -5,12 +5,17 @@ from click.testing import CliRunner
 
 from generate_eob_sample import main
 from idr_model.claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
+    ADJUDICATED_PROFESSIONAL_CARRIER_NCH,
+    ADJUDICATED_PROFESSIONAL_DME_NCH,
     INSTITUTIONAL_CLAIM_TYPES,
-    MCS_CLM_TYPE_CDS,
+    MCS_SS,
     PHARMACY_CLM_TYPE_CDS,
-    VMS_CDS,
+    VMS_SS,
+    INSTITUTIONAL_HHA_NCH,
+    INSTITUTIONAL_SNF_NCH,
+    INSTITUTIONAL_OUTPATIENT_NCH,
+    INSTITUTIONAL_HOSPICE_NCH,
+    INSTITUTIONAL_INPATIENT_NCH,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -31,7 +36,7 @@ def test_generate_eob_sample_base() -> None:
         ],
     )
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-Base-Sample.json")
+    output_file = Path("out-test/eob-inpatient-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -39,10 +44,7 @@ def test_generate_eob_sample_base() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "8520736890144"
-    assert (
-        int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_CLAIM_TYPES
-        or int(result_data["CLM_TYPE_CD"]) in VMS_CDS
-    )
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_INPATIENT_NCH
 
 
 def test_generate_eob_sample_institutional_outpatient() -> None:
@@ -59,7 +61,7 @@ def test_generate_eob_sample_institutional_outpatient() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-Institutional-Outpatient-Sample.json")
+    output_file = Path("out-test/eob-outpatient-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -67,7 +69,7 @@ def test_generate_eob_sample_institutional_outpatient() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "0113370100080"
-    assert int(result_data["CLM_TYPE_CD"]) == 40
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_OUTPATIENT_NCH
 
 
 def test_generate_eob_sample_institutional_hospice() -> None:
@@ -84,7 +86,7 @@ def test_generate_eob_sample_institutional_hospice() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-Hospice-Sample.json")
+    output_file = Path("out-test/eob-hospice-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -92,7 +94,7 @@ def test_generate_eob_sample_institutional_hospice() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "7026678960101"
-    assert int(result_data["CLM_TYPE_CD"]) == 50
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HOSPICE_NCH
 
 
 def test_generate_eob_sample_institutional_snf() -> None:
@@ -109,7 +111,7 @@ def test_generate_eob_sample_institutional_snf() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-SNF-Sample.json")
+    output_file = Path("out-test/eob-snf-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -117,7 +119,7 @@ def test_generate_eob_sample_institutional_snf() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "-7226585371632"
-    assert int(result_data["CLM_TYPE_CD"]) == 30
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_SNF_NCH
 
 
 def test_generate_eob_sample_institutional_hha() -> None:
@@ -134,7 +136,7 @@ def test_generate_eob_sample_institutional_hha() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-HHA-Sample.json")
+    output_file = Path("out-test/eob-hha-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -142,7 +144,7 @@ def test_generate_eob_sample_institutional_hha() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "2512230584690"
-    assert int(result_data["CLM_TYPE_CD"]) == 10
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HHA_NCH
 
 
 def test_generate_eob_sample_pharmacy() -> None:
@@ -159,7 +161,7 @@ def test_generate_eob_sample_pharmacy() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-Pharmacy-Sample.json")
+    output_file = Path("out-test/eob-pharmacy.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -184,7 +186,7 @@ def test_generate_eob_sample_carrier() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/EOB-Carrier-Sample.json")
+    output_file = Path("out-test/eob-carrier-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -192,7 +194,7 @@ def test_generate_eob_sample_carrier() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "4045037817088"
-    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CARRIER_NCH
 
 
 def test_generate_eob_sample_carrier_dme() -> None:
@@ -210,7 +212,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
 
     assert result.exit_code == 0
 
-    output_file = Path("out-test/EOB-DME-Sample.json")
+    output_file = Path("out-test/eob-dme-nch.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -218,7 +220,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "9298559719445"
-    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_DME_NCH
 
 
 # this test is pointed at test_sample2 because test sample 1 does not have mcs claims
@@ -237,7 +239,7 @@ def test_generate_eob_sample_carrier_mcs() -> None:
 
     assert result.exit_code == 0
 
-    output_file = Path("out-test/EOB-Carrier-MCS-Sample.json")
+    output_file = Path("out-test/eob-mcs-multi-carrier-ss.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
@@ -245,4 +247,4 @@ def test_generate_eob_sample_carrier_mcs() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == "3351266481403"
-    assert int(result_data["CLM_TYPE_CD"]) in MCS_CLM_TYPE_CDS
+    assert int(result_data["CLM_TYPE_CD"]) in MCS_SS
