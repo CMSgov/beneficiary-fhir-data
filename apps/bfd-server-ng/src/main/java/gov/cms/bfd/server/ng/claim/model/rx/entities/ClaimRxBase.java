@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -78,7 +79,17 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-    getClaimItem().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
+    Optional<ExplanationOfBenefit.ItemComponent> claimLineItem =
+        getClaimItem().getClaimLine().toFhirItemComponent(options);
+
+    claimLineItem.ifPresent(
+        item -> {
+          if (eob.hasBillablePeriod() && eob.getBillablePeriod().hasStart()) {
+            DateType servicedDate = new DateType(eob.getBillablePeriod().getStart());
+            item.setServiced(servicedDate);
+          }
+          eob.addItem(item);
+        });
   }
 
   protected void addServiceProvider(ExplanationOfBenefit eob) {
