@@ -529,7 +529,6 @@ for cv in cur_sample_data.get("claimValues", []):
         supporting_info_components.append({"ROW_NUM": supporting_info_seq, "claimValues": [cv]})
         supporting_info_seq += 1
 
-
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
