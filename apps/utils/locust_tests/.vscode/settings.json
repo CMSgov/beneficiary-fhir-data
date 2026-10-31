@@ -7,10 +7,6 @@
       "source.organizeImports": "explicit"
     }
   },
-  "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features",
-    "editor.formatOnSave": false
-  },
   "python.sortImports.args": [
     "--profile",
     "black"
