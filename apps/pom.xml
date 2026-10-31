@@ -7,8 +7,8 @@
   <packaging>pom</packaging>
   <name>bfd-parent</name>
   <description>
-        A parent POM for the CMS Beneficiary FHIR Data projects/applications.
-    </description>
+    A parent POM for the CMS Beneficiary FHIR Data projects/applications.
+  </description>
   <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
   <organization>
     <name>Centers for Medicare &amp; Medicaid Services</name>
@@ -74,32 +74,32 @@
     <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
     <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
     <sonar.issue.ignore.multicriteria.e1.resourceKey>
-            **/*.java
-        </sonar.issue.ignore.multicriteria.e1.resourceKey>
+      **/*.java
+    </sonar.issue.ignore.multicriteria.e1.resourceKey>
     <!-- rule for "A field should not duplicate the name of its containing class"
             we want to allow this because of how we structure the fhir mappings -
             sometimes we'll have a class for one specific database field and
             the class name will match the field name.-->
     <sonar.issue.ignore.multicriteria.e2.ruleKey>java:S1700</sonar.issue.ignore.multicriteria.e2.ruleKey>
     <sonar.issue.ignore.multicriteria.e2.resourceKey>
-            **/*.java
-        </sonar.issue.ignore.multicriteria.e2.resourceKey>
+      **/*.java
+    </sonar.issue.ignore.multicriteria.e2.resourceKey>
     <!-- Rule for "Circular dependencies between classes in the same package".
             This is common when using foreign keys in JPA.
          -->
     <sonar.issue.ignore.multicriteria.e3.ruleKey>
-            javaarchitecture:S7027
-        </sonar.issue.ignore.multicriteria.e3.ruleKey>
+      javaarchitecture:S7027
+    </sonar.issue.ignore.multicriteria.e3.ruleKey>
     <sonar.issue.ignore.multicriteria.e3.resourceKey>
-            **/*.java
-        </sonar.issue.ignore.multicriteria.e3.resourceKey>
+      **/*.java
+    </sonar.issue.ignore.multicriteria.e3.resourceKey>
     <!-- Rule for "Constant names should comply with a naming convention"
             This causes false positives with some enum names that start with a number.
         -->
     <sonar.issue.ignore.multicriteria.e4.ruleKey>java:S115</sonar.issue.ignore.multicriteria.e4.ruleKey>
     <sonar.issue.ignore.multicriteria.e4.resourceKey>
-            **/bfd-server-ng/src/main/java/gov/cms/bfd/server/ng/claim/model/*.java
-        </sonar.issue.ignore.multicriteria.e4.resourceKey>
+      **/bfd-server-ng/src/main/java/gov/cms/bfd/server/ng/claim/model/*.java
+    </sonar.issue.ignore.multicriteria.e4.resourceKey>
     <!-- Rule for "Define and throw a dedicated exception instead of using a generic one".
             This can be useful sometimes, such as making a public library or throwing exceptions that
             are meant to be caught, we're generally just using RuntimeException to get around Java's
@@ -107,8 +107,8 @@
         -->
     <sonar.issue.ignore.multicriteria.e5.ruleKey>java:S112</sonar.issue.ignore.multicriteria.e5.ruleKey>
     <sonar.issue.ignore.multicriteria.e5.resourceKey>
-            **/*.java
-        </sonar.issue.ignore.multicriteria.e5.resourceKey>
+      **/*.java
+    </sonar.issue.ignore.multicriteria.e5.resourceKey>
     <sonar.version>5.7.0.6970</sonar.version>
     <jacoco.version>0.8.15</jacoco.version>
     <micrometer.version>1.16.7</micrometer.version>
@@ -155,7 +155,7 @@
     <slf4j.version>2.0.18</slf4j.version>
     <log4j.version>2.26.1</log4j.version>
     <hikari.version>7.1.0</hikari.version>
-    <flyway.version>13.2.0</flyway.version>
+    <flyway.version>13.11.0</flyway.version>
     <checkstyle.version>13.10.0</checkstyle.version>
     <guava.version>33.7.2-jre</guava.version>
     <!-- Guava 33 no longer exports jsr305; needed for javax.annotation.concurrent / Nullable. -->
@@ -1137,7 +1137,7 @@
               <its.db.password>${its.db.password}</its.db.password>
               <its.testcontainer.db.image>${its.testcontainer.db.image}</its.testcontainer.db.image>
               <its.testcontainer.ministack.version>${its.testcontainer.ministack.version}
-                            </its.testcontainer.ministack.version>
+              </its.testcontainer.ministack.version>
               <generateTestData>false</generateTestData>
             </systemPropertyVariables>
             <includes>
@@ -1296,13 +1296,13 @@
               <rules>
                 <requirePluginVersions>
                   <message>Undefined plugin versions can lead to un-reproducible
-                                        builds.
-                                    </message>
+                    builds.
+                  </message>
                   <banTimestamps>false</banTimestamps>
                   <!-- Allow SNAPSHOT version of these plugins since we build them in our own project rather than pulling from a repository. -->
                   <unCheckedPluginList>
-                                        gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-plugin
-                                    </unCheckedPluginList>
+                    gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-plugin
+                  </unCheckedPluginList>
                 </requirePluginVersions>
               </rules>
             </configuration>

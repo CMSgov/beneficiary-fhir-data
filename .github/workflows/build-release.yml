@@ -285,7 +285,7 @@ jobs:
         with:
           version: "0.13.5"
 
-      - uses: taiki-e/install-action@v2.87.31
+      - uses: taiki-e/install-action@v2.87.32
         with:
           tool: just
       - uses: sigoden/install-binary@v1.3.0
