@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023.12.20260817.0-minimal@sha256:66e9e022070c9eaf1ef9cdbd3f56ca9f9b3dee008621e7aaf55195dff1ef324e AS base
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.12.20261021.0-minimal@sha256:5a0fa28a0ef6511c7e01e8b96c676a345ccdd03877cf1f24708784b86ee40832 AS base
 
 RUN dnf -y update && \
     dnf -y clean all && \
@@ -6,4 +6,4 @@ RUN dnf -y update && \
 
 FROM base AS uv
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.5@sha256:e85be844203885286c60ffad8a858d48afb6c5a5c237ca0e67f12e74b8f174b1 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff /uv /uvx /bin/

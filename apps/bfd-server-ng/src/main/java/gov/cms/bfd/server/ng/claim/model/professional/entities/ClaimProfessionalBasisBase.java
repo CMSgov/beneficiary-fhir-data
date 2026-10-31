@@ -1,21 +1,22 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
+import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponent;
 import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.List;
-import javax.annotation.processing.Generated;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Shared base for regular profile professional claims. */
 @MappedSuperclass
-@Generated("TODO - Remove after query optimization implementation")
 public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
   // Basis does not contain an amount field
   @Embedded private PaymentComponent paymentComponent;
+
+  // region Overrides
 
   @Override
   public PaymentComponentBase getPaymentComponent() {
@@ -32,4 +33,12 @@ public abstract class ClaimProfessionalBasisBase extends ClaimProfessionalBase {
 
   @Override
   void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {}
+
+  @Override
+  public EobProfileType getClaimProfile() {
+    return EobProfileType.BASIS;
+  }
+
+  // endregion
+
 }

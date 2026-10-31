@@ -13,7 +13,7 @@ dependencies = [
   "tqdm>=4.67.1",
   "click>=8.3.1",
   "requests>=2.32.5",
-  "cryptography>=50.0.0",
+  "snowflake-snowpark-python>=1.54.0",
   "prompt-toolkit>=3.0.53",
 ]
 
@@ -25,26 +25,29 @@ generate-prior-auth-sample = "generate_prior_auth_sample:main"
 generate-coverage-sample = "generate_coverage_sample:main"
 
 [dependency-groups]
-dev = [
-  "ruff>=0.12.9",
-  "uv>=0.12.18",
-  "pyright>=1.1.403",
-  "debugpy>=1.8.19",
-  "pytest>=9.0.1",
-]
+dev = ["ruff>=0.12.9", "pyright>=1.1.403", "debugpy>=1.8.19", "pytest>=9.0.1"]
 
 [tool.uv]
 exclude-newer = "7 days"
+override-dependencies = ["filelock>=4.2.1"]
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { filelock = false, certifi = false }
 
 [tool.uv.sources]
 idr-pipeline = { path = "../bfd-pipeline-idr", editable = true }
 
 [build-system]
-requires = ["uv_build<=0.12"]
+requires = ["uv_build>=0.13.5,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "idr_model"
+module-name = [
+  "idr_model",
+  "generate_eob_sample",
+  "generate_bene_sample",
+  "gen_dd",
+  "generate_prior_auth_sample",
+]
 packages = [
   "src/idr_model",
   "src/generate_eob_sample",

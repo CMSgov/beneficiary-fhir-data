@@ -1,6 +1,6 @@
-FROM ghcr.io/astral-sh/uv:0.6.10 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff AS uv
 # First, bundle the dependencies into the task root.
-FROM public.ecr.aws/lambda/python:3.13-arm64 AS builder
+FROM public.ecr.aws/lambda/python:3.14.2026.10.22.03-arm64@sha256:9b353a9c5d361d322f58ce176f1322deb983ecd8da367a52256a20e1ccc7ad06 AS builder
 # Enable bytecode compilation, to improve cold-start performance.
 ENV UV_COMPILE_BYTECODE=1
 # Disable installer metadata, to create a deterministic layer.
@@ -19,10 +19,9 @@ RUN --mount=from=uv,source=/uv,target=/bin/uv \
   uv export --frozen --no-emit-workspace --no-dev --no-editable -o requirements.txt && \
   uv pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-FROM public.ecr.aws/lambda/python:3.13-arm64
+FROM public.ecr.aws/lambda/python:3.14.2026.10.22.03-arm64@sha256:9b353a9c5d361d322f58ce176f1322deb983ecd8da367a52256a20e1ccc7ad06
 # Copy the runtime dependencies from the builder stage.
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
 COPY . ${LAMBDA_TASK_ROOT}/app
 CMD [ "app.ccw_runner.handler" ]
-

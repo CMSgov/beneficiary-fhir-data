@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.rx.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationChargeType;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimPricingReasonCode;
@@ -15,6 +14,7 @@ import gov.cms.bfd.server.ng.claim.model.rx.PrescribingCareTeam;
 import gov.cms.bfd.server.ng.claim.model.rx.ServiceProviderPharmacy;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractNumber;
 import gov.cms.bfd.server.ng.claim.model.rx.SubmitterContractPBPNumber;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -78,7 +79,17 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-    getClaimItem().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
+    Optional<ExplanationOfBenefit.ItemComponent> claimLineItem =
+        getClaimItem().getClaimLine().toFhirItemComponent(options);
+
+    claimLineItem.ifPresent(
+        item -> {
+          if (eob.hasBillablePeriod() && eob.getBillablePeriod().hasStart()) {
+            DateType servicedDate = new DateType(eob.getBillablePeriod().getStart());
+            item.setServiced(servicedDate);
+          }
+          eob.addItem(item);
+        });
   }
 
   protected void addServiceProvider(ExplanationOfBenefit eob) {

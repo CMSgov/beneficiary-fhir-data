@@ -4,10 +4,15 @@ version = "0.1.0"
 description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
 requires-python = "~=3.14.0"
-dependencies = ["boto3>=1.42.81", "aws-lambda-powertools>=3.26.0", "psycopg[binary]>=3.3.3", "pydantic>=2.12.5"]
+dependencies = [
+  "boto3>=1.42.81",
+  "aws-lambda-powertools>=3.26.0",
+  "psycopg[binary]>=3.3.3",
+  "pydantic>=2.12.5",
+]
 
 [dependency-groups]
-dev = ["boto3-stubs[lambda]", "ruff", "uv>=0.11.15", "pyright"]
+dev = ["boto3-stubs[lambda]", "ruff", "pyright"]
 
 [tool.uv]
 exclude-newer = "7 days"
@@ -18,35 +23,35 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
+  "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF",
 ]
 
 # Don't require docstrings

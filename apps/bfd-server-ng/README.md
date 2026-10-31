@@ -103,9 +103,9 @@ just server-ng-test
 
 ### Regenerating snapshots
 
-Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
+Run with `--update-snapshots` to update the snapshots.
 
-If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your diff tool
+If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your IDE or diff tool
 of choice.
 
 ```sh

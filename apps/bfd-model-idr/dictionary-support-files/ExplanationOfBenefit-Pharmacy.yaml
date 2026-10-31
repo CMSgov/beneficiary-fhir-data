@@ -237,8 +237,6 @@
     - Pharmacy
   sources:
     - DDPS
-  ccwMapping:
-    - OTHR_TROOP_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_OTHR_TP_PD_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OTHR_TP_PD_AMT').exists()).amount.value

@@ -111,7 +111,6 @@ public class ClaimAsyncService {
   private String buildWhereClause(DbFilter filter) {
     return String.format(
         """
-      AND b.latestTransactionFlag = 'Y'
       AND c.latestClaimIndicator = 'Y'
       %s
       """,

@@ -23,7 +23,7 @@ address_parts = [
     model.bene_line_5_adr,
     model.bene_line_6_adr,
     # Assemble the last line formatting City State Zip
-    f"{model.geo_zip_plc_name} {model.geo_usps_state_cd} {model.geo_zip5_cd}"
+    f"{model.geo_zip_plc_name} {model.geo_usps_state_cd} {model.geo_zip5_cd}",
 ]
 
 # Consolidate, removing any explicit empty lines

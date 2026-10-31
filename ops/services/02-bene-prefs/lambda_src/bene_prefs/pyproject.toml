@@ -5,25 +5,26 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = "~=3.13.0"
 dependencies = [
-    "cryptography>=50.0.0",
-    "snowflake-connector-python>=4.7.2",
-    "python-dateutil>=2.9.0",
-    "boto3>=1.42.56",
-    "jinja2>=3.1.6",
-    "aws-lambda-powertools>=3.25.0",
+  "cryptography>=50.0.0",
+  "snowflake-connector-python>=4.7.2",
+  "python-dateutil>=2.9.0",
+  "boto3>=1.42.56",
+  "jinja2>=3.1.6",
+  "aws-lambda-powertools>=3.25.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.14.6",
-    "uv>=0.11.15",
-    "pytest>=9.0.1",
-    "testcontainers>=4.13.3",
-    "pyright>=1.1.407",
+  "ruff>=0.14.6",
+  "pytest>=9.0.1",
+  "testcontainers>=4.13.3",
+  "pyright>=1.1.407",
 ]
 
 [tool.uv]
 exclude-newer = "7 days"
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { certifi = false }
 
 [tool.ruff]
 # Set the maximum line length to 100.
@@ -31,35 +32,35 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
+  "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF",
 ]
 
 # Don't require docstrings

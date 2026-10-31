@@ -1,5 +1,5 @@
 [project]
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
@@ -23,8 +23,8 @@ dev = [
   "ruff>=0.11.11",
   "types-boto3[essential,ssm]>=1.38.19",
   "types-gevent>=25.4.0.20250516",
-  "uv>=0.11.15",
   "pyright>=1.1.403",
+  "basedpyright>=1.40.2",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
@@ -32,6 +32,8 @@ lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 
 [tool.uv]
 exclude-newer = "7 days"
+# CA trust store fix (certifi 2026.10.19) exempted from cooldown
+exclude-newer-package = { certifi = false }
 
 [tool.ruff]
 # Set the maximum line length to 100.

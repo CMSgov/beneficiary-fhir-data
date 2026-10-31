@@ -99,6 +99,10 @@ Note, it takes several minutes and requires a good bit of RAM. Once the uploads 
 curl -X GET "http://localhost:18080/matchboxv3/actuator/health"
 ```
 
+## Generating Synthetic Data
+
+### Local Generation
+
 #### Patient Data - `patient_generator.py`
 
 ##### Generating patient data
@@ -129,7 +133,7 @@ The files output will be in the `out` folder:
 - `SYNTHETIC_BENE_XREF.csv`
 - `SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv`
 - `SYNTHETIC_BENE_LIS.csv`
-- `SYNTHETIC_BENE_LIS_CMBND.csv`
+- `SYNTHETIC_BENE_CMBND_LIS.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv`
 - `SYNTHETIC_BENE_MAPD_ENRLMT.csv`
 
@@ -185,6 +189,38 @@ If _any_ claims-related tables have had columns added to their respective genera
 
 > [!CAUTION]
 > If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
+
+## Generating Synthetic Data Directly in Snowflake
+
+We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd-synthetic-generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
+
+### Granting Permissions
+
+Snowflake requires these permissions to allow the snowflake stored procedure to work.
+Here are the list of commands in case they need to be re-ran in the future for both schemas
+(CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
+
+```text
+GRANT MODIFY ON DATABASE BFD_{ENV} TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON DATABASE BFD_{ENV} TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT USAGE ON SCHEMA CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE STAGE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE PROCEDURE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT CREATE EVENT TABLE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE {ENV}_SERVICE_USER;
+```
+
+Running the stored procedure:
+
+```text
+First, specify kn or kp depending on the environment that you're targeting
+To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --claims --truncate`
+To regenerate data: `just deploy_generator_sproc --env test --claims`
+
+To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
+```
 
 ## Testing Mapping Changes
 

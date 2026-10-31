@@ -31,7 +31,7 @@ chmod 600 "$combined_samhsa_filename"
 pub_cert_path="$tmpdir/${BFD_ENV}_pub_cert.pem"
 
 if [ ! -f "$pub_cert_path" ]; then
-	pub_cert=$(curl -k -w "%{certs}" "https://$BFD_ENV.fhirv3.bfd.cmscloud.local")
+	pub_cert=$(curl -k -w "%{certs}" "https://${BFD_V3_LB_DNSNAME:-"$BFD_ENV.fhirv3.bfd.cmscloud.local"}")
 	echo "${pub_cert}" >"$pub_cert_path"
 	chmod 600 "$pub_cert_path"
 fi

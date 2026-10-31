@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>gov.cms.bfd</groupId>
   <artifactId>bfd-parent</artifactId>
-  <version>2.276.0-SNAPSHOT</version>
+  <version>2.279.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>bfd-parent</name>
   <description>
@@ -64,7 +64,7 @@
     <!-- The version of Java that we'll use for everything. -->
     <javaSourceVersion>25</javaSourceVersion>
     <maven.compiler.release>25</maven.compiler.release>
-    <project.build.outputTimestamp>2026-10-14T20:16:24Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-26T19:46:39Z</project.build.outputTimestamp>
     <!-- Disable jacoco until automated coverage generation is desired -->
     <maven.jacoco.skip>true</maven.jacoco.skip>
     <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -131,13 +131,13 @@
     <testcontainers-ministack.version>0.1.5</testcontainers-ministack.version>
     <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-    <jackson-databind.version>2.22.3</jackson-databind.version>
-    <jackson-datatype-jdk8.version>2.22.3</jackson-datatype-jdk8.version>
-    <jackson-dataformat-yaml.version>2.22.3</jackson-dataformat-yaml.version>
-    <jackson-datatype-jsr310.version>2.22.3</jackson-datatype-jsr310.version>
+    <jackson-databind.version>2.22.4</jackson-databind.version>
+    <jackson-datatype-jdk8.version>2.22.4</jackson-datatype-jdk8.version>
+    <jackson-dataformat-yaml.version>2.22.4</jackson-dataformat-yaml.version>
+    <jackson-datatype-jsr310.version>2.22.4</jackson-datatype-jsr310.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <!-- Jackson 3.x, pulled in transitively by Flyway. -->
-    <tools-jackson.version>3.1.7</tools-jackson.version>
+    <tools-jackson.version>3.1.8</tools-jackson.version>
     <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
     <snakeyaml.version>2.6</snakeyaml.version>
     <jakarta.xml.bind.api.version>4.0.5</jakarta.xml.bind.api.version>
@@ -175,9 +175,9 @@
     <poi.version>5.4.0</poi.version>
     <javapoet.version>1.13.0</javapoet.version>
     <netty.version>4.1.138.Final</netty.version>
-    <jetty.version>12.1.12</jetty.version>
+    <jetty.version>12.1.14</jetty.version>
     <!-- Jetty 12.0.x line used by spring-boot-starter-jetty in bfd-server-ng. -->
-    <jetty-spring-boot.version>12.0.38</jetty-spring-boot.version>
+    <jetty-spring-boot.version>12.0.40</jetty-spring-boot.version>
     <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
     <datasource-proxy.version>1.10</datasource-proxy.version>
     <cors.filter.version>1.0.1</cors.filter.version>
@@ -282,8 +282,6 @@
     <build.helper.maven.plugin.version>3.6.1</build.helper.maven.plugin.version>
     <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
     <exec.maven.plugin.version>3.1.1</exec.maven.plugin.version>
-    <fmt.maven.plugin.version>2.29</fmt.maven.plugin.version>
-    <google.java.format.version>1.36.1</google.java.format.version>
     <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
     <versions.maven.plugin.version>2.21.0</versions.maven.plugin.version>
     <antlr4.version>4.13.2</antlr4.version>
@@ -386,7 +384,7 @@
         <version>${jackson-databind.version}</version>
       </dependency>
       <!-- Fix for CVE-2026-89425, CVE-2026-89407, CVE-2026-19032, CVE-2026-83557, CVE-2026-68497,
-           CVE-2026-91777 and CVE-2026-91776 (Jackson 3.x), transitive via flyway -->
+           CVE-2026-91777, CVE-2026-91776 and CVE-2026-110879 (Jackson 3.x), transitive via flyway -->
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
@@ -401,7 +399,7 @@
       <dependency>
         <groupId>io.opentelemetry</groupId>
         <artifactId>opentelemetry-api</artifactId>
-        <version>1.62.0</version>
+        <version>1.67.0</version>
       </dependency>
       <dependency>
         <groupId>io.opentelemetry</groupId>
@@ -1083,11 +1081,6 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>com.spotify.fmt</groupId>
-          <artifactId>fmt-maven-plugin</artifactId>
-          <version>${fmt.maven.plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven.compiler.plugin.version}</version>
@@ -1328,28 +1321,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>com.spotify.fmt</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>${fmt.maven.plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <!-- Use this plugin to run https://github.com/google/google-java-format
-                                on every build, which will auto-format all of our Java source code. Note
-                                that we have a Git pre-commit hook that will also do this. -->
-              <goal>format</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.google.googlejavaformat</groupId>
-            <artifactId>google-java-format</artifactId>
-            <version>${google.java.format.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

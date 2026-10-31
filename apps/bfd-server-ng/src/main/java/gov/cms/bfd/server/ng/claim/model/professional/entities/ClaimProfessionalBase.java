@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
-import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.claim.model.common.BlueButtonSupportingInfoCategory;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
@@ -11,17 +10,15 @@ import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.professional.BillingProviderProfessional;
 import gov.cms.bfd.server.ng.claim.model.professional.ReferringProfessionalCareTeam;
+import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
-import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -29,9 +26,6 @@ import org.hl7.fhir.r4.model.Reference;
 @MappedSuperclass
 @Getter
 abstract class ClaimProfessionalBase extends ClaimBase {
-
-  @Column(name = "clm_ptnt_cntl_num")
-  private Optional<String> patientControlNumber;
 
   @Embedded private DateClaimOcrncSupportingInfo commonDateSupportingInfo;
 
@@ -97,7 +91,6 @@ abstract class ClaimProfessionalBase extends ClaimBase {
     getAdjudication().ifPresent(ac -> ac.toFhirTotal().forEach(eob::addTotal));
     getAdjudication().ifPresent(ac -> ac.toFhirAdjudication().forEach(eob::addAdjudication));
     getPaymentComponent().toFhir().ifPresent(eob::setPayment);
-    addPatientControlNumberIdentifier(eob);
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
     addInsurance(eob);
@@ -204,15 +197,6 @@ abstract class ClaimProfessionalBase extends ClaimBase {
 
   private void addInsurance(ExplanationOfBenefit eob) {
     eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
-  }
-
-  private void addPatientControlNumberIdentifier(ExplanationOfBenefit eob) {
-    patientControlNumber.ifPresent(
-        s ->
-            eob.addIdentifier(
-                new Identifier()
-                    .setSystem(SystemUrls.BLUE_BUTTON_PATIENT_CONTROL_NUMBER)
-                    .setValue(s)));
   }
 
   @Override

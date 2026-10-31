@@ -19,12 +19,10 @@ hooks = [
   { id = "check-executables-have-shebangs" },
 ]
 
-
 [[repos]]
 repo = "https://github.com/shellcheck-py/shellcheck-py"
 rev = "v0.11.0.1-1"
 hooks = [{ id = "shellcheck", args = ["--severity=warning"] }]
-
 
 [[repos]]
 repo = "https://github.com/scop/pre-commit-shfmt"
@@ -42,26 +40,75 @@ rev = "v8.24.2"
 hooks = [{ id = "gitleaks" }]
 
 [[repos]]
+repo = "https://github.com/deadnews/pindock"
+rev = "v1.1.3"
+hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
+
+[[repos]]
 repo = "local"
-hooks = [
-  { id = "java", name = "java", language = "system", types = [
-    "java",
-  ], entry = "./hooks/java-format.sh" },
-  { id = "sops", name = "sops", language = "system", files = "\\.sopsw\\.yaml$", entry = "./hooks/sops.sh" },
-  { id = "toml", name = "toml", language = "system", types = [
-    "toml",
-  ], entry = "taplo format" },
-  # xmllint can only process one file at a time
-  { id = "xml", name = "xml", language = "system", types = [
-    "xml",
-  ], entry = "./hooks/xml-format.sh", pass_filenames = 1 },
-  { id = "prettier", name = "prettier", entry = "prettier", args = [
-    "--check",
-    "--write",
-    "--ignore-unknown",
-  ], language = "node", types = [
-    "yaml",
-  ], additional_dependencies = [
-    "prettier",
-  ] },
-]
+[[repos.hooks]]
+id = "git-hook-shims-fresh"
+name = "git hook shims match the scripts in hooks/"
+language = "system"
+always_run = true
+pass_filenames = false
+entry = "./hooks/refresh-hook-shims.sh"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "actions-lock"
+name = "Workflow actions are locked"
+language = "system"
+files = "\\.github/(workflows|actions)/.*(\\.ya?ml|.lock)$"
+entry = "./hooks/actions-lock.sh"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "java"
+name = "java"
+language = "system"
+types = ["java"]
+entry = "./hooks/java-format.sh"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "sops"
+name = "sops"
+language = "system"
+files = "\\.sopsw\\.yaml$"
+entry = "./hooks/sops.sh"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "toml"
+name = "toml"
+language = "system"
+types = ["toml"]
+entry = "taplo format"
+
+# xmllint can only process one file at a time
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "xml"
+name = "xml"
+language = "system"
+types = ["xml"]
+entry = "./hooks/xml-format.sh"
+pass_filenames = 1
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "prettier"
+name = "prettier"
+entry = "prettier"
+args = ["--check", "--write", "--ignore-unknown"]
+language = "node"
+types = ["yaml"]
+additional_dependencies = ["prettier"]

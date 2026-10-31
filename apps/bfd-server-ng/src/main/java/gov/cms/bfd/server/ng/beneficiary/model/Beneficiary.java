@@ -3,9 +3,13 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.SQLRestriction;
 
 /** Main entity representing the beneficiary table. */
 @Entity
 @Getter
-@Table(name = "valid_beneficiary", schema = "idr")
+@Table(name = "beneficiary", schema = "idr")
+@SQLRestriction(BeneficiaryBase.VALID_BENE_SQL_RESTRICTION)
+@Immutable
 public class Beneficiary extends BeneficiaryBase {}
