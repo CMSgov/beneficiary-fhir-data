@@ -521,6 +521,13 @@ if actv_from or dschrg_dt:
     supporting_info_components.append(temp_var)
     supporting_info_seq += 1
 
+# We only want records from CLM_VAL if the CLM_VAL_CD corresponds to a supp info value
+SUPPORTING_INFO_CLM_VAL_CDS = {"D6"}
+
+for cv in cur_sample_data.get("claimValues", []):
+    if cv.get("CLM_VAL_CD") in SUPPORTING_INFO_CLM_VAL_CDS:
+        supporting_info_components.append({"ROW_NUM": supporting_info_seq, "claimValues": [cv]})
+        supporting_info_seq += 1
 
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
