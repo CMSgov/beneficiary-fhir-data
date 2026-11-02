@@ -936,17 +936,17 @@ def _generate_batch(
 
     cond_sgntr_mbr_per_cond_sgntr_sk = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_RLT_COND_SGNTR_SK]),
+        part_by=lambda x: str(x.get(f.CLM_RLT_COND_SGNTR_SK, "")),
     )
 
     ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_OCRNC_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_OCRNC_SGNTR_SK]),
+        part_by=lambda x: str(x.get(f.CLM_OCRNC_SGNTR_SK, "")),
     )
 
     rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_RLT_OCRNC_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_RLT_OCRNC_SGNTR_SK]),
+        part_by=lambda x: str(x.get(f.CLM_RLT_OCRNC_SGNTR_SK, "")),
     )
 
     rx_clm_line_per_clm_uniq_id = {
@@ -1208,13 +1208,13 @@ def _generate_batch(
                 f.CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_cond_sgntr_sk.get(
-                    str(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK]), []
+                    str(file_pac_clm.get(f.CLM_RLT_COND_SGNTR_SK, "")), []
                 ),
                 f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(file_pac_clm[f.CLM_OCRNC_SGNTR_SK]), []
+                    str(file_pac_clm.get(f.CLM_OCRNC_SGNTR_SK, "")), []
                 ),
                 f.CLM_RLT_OCRNC_SGNTR_MBR: rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK]), []
+                    str(file_pac_clm.get(f.CLM_RLT_OCRNC_SGNTR_SK, "")), []
                 ),
                 f.CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),
