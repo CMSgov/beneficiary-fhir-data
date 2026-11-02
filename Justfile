@@ -305,12 +305,14 @@ the generated BENE_HSTRY""")]
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
 none. Useful if not all tables for a patient have been generated yet.""")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [doc("""Generates patient data using the IDR schema to feed into the BFD pipeline.
 The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" *paths:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -320,7 +322,8 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
@@ -335,12 +338,14 @@ Sets the mode for which input files from which distinct BENE_SKs are read. 'bene
 indicates that BENE_SKs are only loaded from BENE_HSTRY, 'clm' indicates loading from
 only from CLM. 'both' indicates loading from both
 """)]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [doc("""Generates claims data using the IDR schema to feed into the BFD pipeline.
 The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths: sushi
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" *paths: sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -351,7 +356,8 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
         --min-claims "{{ min-claims }}" \
-        --pac-gen "{{ pac-gen }}"
+        --pac-gen "{{ pac-gen }}" \
+        --overwrite "{{ overwrite }}"
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
@@ -365,9 +371,12 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
 [arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
 [arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
 [arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
-deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
+deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" \
+    bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000" overwrite="" : sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -386,7 +395,8 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if truncate == "1" { "--truncate" } else { "" } }} \
         --batch-size "{{ batch-size }}" \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
 
 
 [arg("tablesample", long, help="Percent of table to sample")]

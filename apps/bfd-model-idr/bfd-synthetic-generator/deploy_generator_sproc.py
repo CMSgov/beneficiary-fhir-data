@@ -75,8 +75,8 @@ def _create_snowflake_session() -> Session:
 @click.command
 @common_options
 def main(**kwargs) -> None:
-    min_claims = kwargs.get("min_claims")
-    max_claims = kwargs.get("max_claims")
+    min_claims = kwargs["min_claims"]
+    max_claims = kwargs["max_claims"]
     if min_claims > max_claims:
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"

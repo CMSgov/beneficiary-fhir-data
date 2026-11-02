@@ -103,4 +103,14 @@ def common_options(function):
         help="Batch size of claims to process",
     )(function)
 
+    function = click.option(
+        "--overwrite",
+        show_default=True,
+        help=(
+            "Overwrites fields when regenerating synthetic data. For Snowflake flow should be "
+            + "comma separated TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or "
+            + "SYNTHETIC_FILE_NAME.FIELD if CSV flow"
+        ),
+    )(function)
+
     return function

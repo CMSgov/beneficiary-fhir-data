@@ -3,7 +3,7 @@ import io
 import logging
 import time
 from abc import ABC, abstractmethod
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -11,6 +11,7 @@ from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any
 
+import click
 import pandas as pd
 from constants import (
     BENE_DUAL,
@@ -59,6 +60,38 @@ logger = logging.getLogger(__name__)
 ALL_KEYS = "all_keys"
 _SYNTHETIC_PREX = "SYNTHETIC"
 _TABLE_PREFIX = "V2_MDCR"
+
+_NON_OVERWRITEABLE = {
+    "BENE_SK",
+    "BENE_MBI_ID",
+    "BENE_XREF_SK",
+    "GEO_BENE_SKCLM_UNIQ_ID",
+    "CLM_NUM_SK",
+    "CLM_LINE_NUM",
+    "CLM_DT_SGNTR_SK",
+}
+
+
+def parse_overwrites(qualified_fields: str) -> dict[str, set[str]]:
+    fields_to_overwrite: dict[str, set[str]] = defaultdict(set)
+
+    if not qualified_fields:
+        return fields_to_overwrite
+
+    for qualified_field in qualified_fields.split(","):
+        table, _, field = qualified_field.partition(".")
+        if not table or not field:
+            raise click.UsageError(
+                f"Invalid --overwrite entry {qualified_field} expected TABLE.FIELD "
+                + "for Snowflake flow or SYNTHETIC_FILE_NAME.FIELD if CSV flow"
+            )
+        if field in _NON_OVERWRITEABLE:
+            raise click.UsageError(
+                f"{qualified_field} cannot be overwritten since it's a primary key"
+            )
+        fields_to_overwrite[table].add(field)
+
+    return fields_to_overwrite
 
 
 @dataclass
@@ -122,9 +155,14 @@ class OutputDestinationWriter(ABC):
 
 
 class CsvWriter(OutputDestinationWriter):
-    def __init__(self, out_dir: str = "./out") -> None:
+    def __init__(
+        self,
+        out_dir: str = "./out",
+        overwrites: dict[str, set[str]] | None = None,
+    ) -> None:
         self.out_dir = Path(out_dir)
         self._tables: set[str] = set()
+        self.overwrites = overwrites or {}
 
     def write_table(
         self,
@@ -217,11 +255,18 @@ class CsvWriter(OutputDestinationWriter):
 
 
 class SnowflakeWriter(OutputDestinationWriter):
-    def __init__(self, session: Session, database: str, schema: str) -> None:
+    def __init__(
+        self,
+        session: Session,
+        database: str,
+        schema: str,
+        overwrites: dict[str, set[str]] | None = None,
+    ) -> None:
         self.session = session
         self.database = database
         self.schema = schema
         self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self.overwrites = overwrites or {}
 
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
         override = _TABLE_OVERRIDES.get(table_name)
@@ -245,6 +290,13 @@ class SnowflakeWriter(OutputDestinationWriter):
         table = self.qualified_table(table_name)
         return self.session.table(table)
 
+    def _drop_fields(self, data, table_name: str):
+        # Drop fields from the query so they aren't fetched, allowing us to generate specified
+        # fields from scratch during a regeneration.
+        resolved_table_name, _, _ = self.resolve_target_table(table_name)
+        fields = self.overwrites.get(resolved_table_name)
+        return data.drop(*fields) if fields else data
+
     def get_bene_sks(
         self,
         batch_size: int,
@@ -267,8 +319,9 @@ class SnowflakeWriter(OutputDestinationWriter):
             yield bene_sks[start : start + batch_size]
 
     def get_rows(self, table_name: str) -> list[dict[str, Any]]:
-        rows = self._qualified_session_table(table_name).collect()
-        return [row.as_dict() for row in rows]
+        df = self._qualified_session_table(table_name)
+        df = self._drop_fields(df, table_name)
+        return [row.as_dict() for row in df.collect()]
 
     def get_bene_sk_to_mbi(
         self,
@@ -320,7 +373,8 @@ class SnowflakeWriter(OutputDestinationWriter):
         )
         result: dict[str, list[RowAdapter]] = {
             BENE_HSTRY: [
-                RowAdapter(r.as_dict(), loaded_from_file=True) for r in bene_hstry_df.collect()
+                RowAdapter(r.as_dict(), loaded_from_file=True)
+                for r in self._drop_fields(bene_hstry_df, BENE_HSTRY).collect()
             ]
         }
         mbi_ids_df = (
@@ -328,18 +382,12 @@ class SnowflakeWriter(OutputDestinationWriter):
         )
 
         for table_name in table_names:
+            table_df = self._qualified_session_table(table_name)
             if _TABLE_RELATIONS[table_name] is KeyRelation.BENE_SK:
-                rows = (
-                    self._qualified_session_table(table_name)
-                    .filter(col("BENE_SK").isin(bene_sks))
-                    .collect()
-                )
+                df = table_df.filter(col("BENE_SK").isin(bene_sks))
             else:
-                rows = (
-                    self._qualified_session_table(table_name)
-                    .join(mbi_ids_df, using_columns=["BENE_MBI_ID"])
-                    .collect()
-                )
+                df = table_df.join(mbi_ids_df, using_columns=["BENE_MBI_ID"])
+            rows = self._drop_fields(df, table_name).collect()
             result[table_name] = [RowAdapter(row.as_dict(), loaded_from_file=True) for row in rows]
         return result
 
@@ -375,7 +423,8 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         result: dict[str, list[RowAdapter]] = {}
         result[CLM] = [
-            RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.to_local_iterator()
+            RowAdapter(row.as_dict(), loaded_from_file=True)
+            for row in self._drop_fields(clm_df, CLM).to_local_iterator()
         ]
 
         def fetch_table_data(table_name):
@@ -383,6 +432,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             joined = self._qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
             )
+            joined = self._drop_fields(joined, table_name)
             return table_name, [
                 RowAdapter(row.as_dict(), loaded_from_file=True)
                 for row in joined.to_local_iterator()
@@ -397,7 +447,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.table(temp_table).drop_table()
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Took {duration:.6f} seconds to fetch existing claims")
+        logger.info("Took %.3f seconds to fetch existing claims", duration)
 
         return result
 
@@ -434,7 +484,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         csv_buffer.close()
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Packaging data into CSV completed in {duration:.6f} seconds")
+        logger.info("Packaging data into CSV completed in %.3f seconds", duration)
 
         session_schema = self.session.get_current_schema().replace('"', "")
         staging_table_name = f"{database}.{session_schema}.MERGE_STAGE_{resolved_table_name}"
@@ -475,7 +525,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         source = self.session.table(staging_table_name)
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Staged data to merge in {duration:.6f} seconds")
+        logger.info("Staged data to merge in %.3f seconds", duration)
 
         pks = self._get_primary_keys(table_name)
         update_cols = [c for c in target_columns if c not in pks]
@@ -508,8 +558,13 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.table(staging_table_name).drop_table()
         duration = time.perf_counter() - perf_start
 
-        message = f"Wrote to {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"
-        logger.info(message)
+        logger.info(
+            "Wrote to %s in %.3f seconds: %s inserted, %s updated",
+            resolved_table_name,
+            duration,
+            result.rows_inserted,
+            result.rows_updated,
+        )
 
     def _get_primary_keys(self, table_name: str) -> list[str]:
         cleaned_table_name, database, schema = self.resolve_target_table(table_name)

@@ -153,6 +153,7 @@ def load_file_dict(
     files: dict[str, list[RowAdapter]],
     paths: list[str] | list[Path],
     exclude_empty: bool = False,
+    overwrites: dict[str, set[str]] | None = None,
 ):
     file_paths = set(
         itertools.chain.from_iterable(
@@ -186,6 +187,9 @@ def load_file_dict(
                 na_filter=exclude_empty,
                 keep_default_na=False,
             )
+            if overwrites.get(file_name):
+                for field in overwrites.get(file_name):
+                    csv_data.pop(field)
             for field in _CAST_TO_INT_FIELDS:
                 if field in csv_data.columns:
                     csv_data[field] = csv_data[field].astype(int)
