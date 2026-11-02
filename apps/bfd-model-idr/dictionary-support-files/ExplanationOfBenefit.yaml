@@ -4519,6 +4519,6 @@
     - NCH
     - FISS
   bfdDerived: True
-  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_DLYS_MIN_AMT').exists()).amount.value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_DLYS_MIN_AMT').exists()).value.value
   profiles:
     - CMS
