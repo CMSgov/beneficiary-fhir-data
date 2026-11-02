@@ -16,7 +16,7 @@ jobs:
         id: code-checkout
         uses: actions/checkout@v7.0.1
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "0.13.5"
       - name: Install node
@@ -29,7 +29,7 @@ jobs:
         with:
           java-version: "25"
           distribution: "corretto"
-      - uses: taiki-e/install-action@v2.87.32
+      - uses: taiki-e/install-action@v2.88.1
         with:
           tool: just
       - uses: sigoden/install-binary@v1.3.0
