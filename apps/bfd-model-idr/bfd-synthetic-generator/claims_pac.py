@@ -387,15 +387,16 @@ class PacGeneratorUtil:
         self,
         clm: RowAdapter,
         clm_line_num: int,
+        init_clm_line_mcs: RowAdapter | None = None,
     ) -> RowAdapter:
-        clm_mcs = RowAdapter({})
+        clm_line_mcs = init_clm_line_mcs or RowAdapter({})
 
-        clm_mcs[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
-        clm_mcs[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_mcs[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_mcs[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
-        clm_mcs[f.CLM_LINE_NUM] = clm_line_num
-        clm_mcs[f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD] = random.choice(
+        clm_line_mcs[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+        clm_line_mcs[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+        clm_line_mcs[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_line_mcs[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+        clm_line_mcs[f.CLM_LINE_NUM] = clm_line_num
+        clm_line_mcs[f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD] = random.choice(
             [
                 "A4",
                 "AE",
@@ -403,24 +404,25 @@ class PacGeneratorUtil:
                 "45",
             ]
         )
-        clm_mcs[f.CLM_LINE_RBNDLG_CRTFCTN_NUM] = random.choice(
+        clm_line_mcs[f.CLM_LINE_RBNDLG_CRTFCTN_NUM] = random.choice(
             [
                 "11D1111111",
                 "22D2222222",
             ]
         )
-        clm_mcs[f.CLM_LINE_HCT_LVL_NUM] = round(random.uniform(30, 45), 1)
-        clm_mcs[f.CLM_LINE_HGB_LVL_NUM] = round(random.uniform(12, 20), 1)
+        clm_line_mcs[f.CLM_LINE_HCT_LVL_NUM] = round(random.uniform(30, 45), 1)
+        clm_line_mcs[f.CLM_LINE_HGB_LVL_NUM] = round(random.uniform(12, 20), 1)
 
-        add_meta_timestamps(clm_mcs, clm)
-        return clm_mcs
+        add_meta_timestamps(clm_line_mcs, clm)
+        return clm_line_mcs
 
     def gen_pac_clm_line_fiss(
         self,
         clm: RowAdapter,
         clm_line_num: int,
+        init_clm_line_fiss: RowAdapter,
     ) -> RowAdapter:
-        clm_line_fiss = RowAdapter({})
+        clm_line_fiss = init_clm_line_fiss or RowAdapter({})
 
         clm_line_fiss[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line_fiss[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
