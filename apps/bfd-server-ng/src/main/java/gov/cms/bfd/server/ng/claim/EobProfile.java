@@ -130,7 +130,7 @@ public enum EobProfile {
   }
 
   /**
-   * Helper method to return all canonical profile URLs for EoBs with the versions appended
+   * Helper method to return all canonical profile URLs for EoBs with the versions appended.
    *
    * @return the list of profile URLs
    */
