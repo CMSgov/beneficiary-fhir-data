@@ -1,7 +1,8 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:25-al2023-headless-arm64@sha256:ba6700b84ce706503e1025c78e19c4fbd459e77d7d6b9e22e0cf055200b8409b AS base
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.12.20261026.1-minimal@sha256:c25add18b6c35620a6e096ef03ecbafbcaed993281ad227792f67c324980011b AS base
 
-RUN yum -y --security update && \
-    yum -y clean all && \
+RUN dnf -y install java-25-amazon-corretto-headless && \
+    dnf -y upgrade && \
+    dnf -y clean all && \
     rm -rf /var/cache
 
 FROM base AS java
