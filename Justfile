@@ -170,6 +170,11 @@ extract-snowflake env:
 idr-bfd-validator env:
     cd ./apps/utils/idr-bfd-validator && BFD_ENV="{{ env }}" ./run-validator.sh
 
+[doc("Runs the backfill pipeline in prod")]
+[group('pipeline')]
+run-backfill-pipeline:
+    cd ./ops/services/04-idr-pipeline && ./run-backfill.sh
+
 [doc("installs npm dependencies for the model project")]
 [group('model')]
 install-model-dependencies:
