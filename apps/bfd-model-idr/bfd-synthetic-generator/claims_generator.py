@@ -19,6 +19,7 @@ from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
 from claims_priorauth import PriorAuthGeneratorUtil
+from claims_static import DISPROPORTIONATE_AMOUNT_CLM_VAL_CD, INDIRECT_AMOUNT_CLM_VAL_CD
 from claims_util import four_part_key, match_line_num
 from constants import GeneratePacDataMode
 from generator_util import (
@@ -829,23 +830,16 @@ def generate(
     }
     if isinstance(writer, CsvWriter):
         load_file_dict(files=files, paths=list(paths))
-
-    if (
-        isinstance(writer, CsvWriter)
-        and not files[f.BENE_HSTRY]
-        and not files[f.CLM]
-        and not files[f.CNTRCT_PBP_NUM]
-    ):
-        print(
-            f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
-            f"claims data generation to proceed"
-        )
-        sys.exit(1)
+        if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
+            print(
+                f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
+                f"claims data generation to proceed"
+            )
+            sys.exit(1)
 
     gen_utils.cntrct_pbp_num = writer.get_cntrct_pbp_nums(files)
 
     other_util = OtherGeneratorUtil()
-
     existing_providers = writer.get_provider_histories(files)
     generated_provider_histories, generated_type_1_npis, generated_type_2_npis = (
         other_util.gen_provider_history(
@@ -896,19 +890,17 @@ def generate(
             generated_type_2_npis,
         )
 
-        bene_sk_to_mbi = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
-        out_tables[f.PRAUC] = _generate_prior_auth(
-            gen_utils,
-            out_tables,
-            bene_sk_to_mbi,
-            generated_provider_histories,
-            generated_type_1_npis,
-            generated_type_2_npis,
+        pa_util = PriorAuthGeneratorUtil()
+        out_tables[f.PRVDR_HSTRY] = generated_provider_histories
+        out_tables[f.BENE_HSTRY] = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
+        existing_prior_auths = writer.get_prior_auths(out_tables[f.BENE_HSTRY], files)
+        out_tables[f.PRAUC] = pa_util.gen_prior_auths(
+            gen_utils=gen_utils,
+            out_tables=out_tables,
+            generated_type_1_npis=generated_type_1_npis,
+            generated_type_2_npis=generated_type_2_npis,
+            init_prior_auth=existing_prior_auths,
         )
-
-        if isinstance(writer, SnowflakeWriter) and not truncate:
-            # Do not regenerate PRAUC directly from Snowflake. TODO: Punted for future ticket.
-            out_tables[f.PRAUC].clear()
 
         for table_name, rows in out_tables.items():
             if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
@@ -935,26 +927,28 @@ def _generate_batch(
 
     cond_sgntr_mbr_per_cond_sgntr_sk = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_RLT_COND_SGNTR_SK]),
+        part_by=lambda x: x[f.CLM_RLT_COND_SGNTR_SK],
     )
 
     ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_OCRNC_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_OCRNC_SGNTR_SK]),
+        part_by=lambda x: x[f.CLM_OCRNC_SGNTR_SK],
     )
 
     rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_RLT_OCRNC_SGNTR_MBR],
-        part_by=lambda x: str(x[f.CLM_RLT_OCRNC_SGNTR_SK]),
+        part_by=lambda x: x[f.CLM_RLT_OCRNC_SGNTR_SK],
     )
 
     rx_clm_line_per_clm_uniq_id = {
-        str(x[f.CLM_UNIQ_ID]): x for x in existing[f.CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
+        str(x[f.CLM_UNIQ_ID]): x
+        for x in existing[f.CLM_LINE]
+        if x.get(f.CLM_TYPE_CD) in PHARMACY_CLM_TYPE_CDS
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
         part_by=lambda x: x[f.CLM_UNIQ_ID],
-        filter_by=lambda x: not x.get(f.CLM_LINE_RX_NUM),
+        filter_by=lambda x: x.get(f.CLM_TYPE_CD) not in PHARMACY_CLM_TYPE_CDS,
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
@@ -962,10 +956,14 @@ def _generate_batch(
         part_by=lambda x: four_part_key(x),
     )
     dsprtnt_clm_val_per_fpk = {
-        four_part_key(x): x for x in existing[f.CLM_VAL] if int(x[f.CLM_VAL_CD]) == 18
+        four_part_key(x): x
+        for x in existing[f.CLM_VAL]
+        if x[f.CLM_VAL_CD] == DISPROPORTIONATE_AMOUNT_CLM_VAL_CD
     }
     ime_clm_val_per_fpk = {
-        four_part_key(x): x for x in existing[f.CLM_VAL] if int(x[f.CLM_VAL_CD]) == 19
+        four_part_key(x): x
+        for x in existing[f.CLM_VAL]
+        if x[f.CLM_VAL_CD] == INDIRECT_AMOUNT_CLM_VAL_CD
     }
     proc_clm_prod_per_fpk = partition_rows(
         llist=existing[f.CLM_PROD],
@@ -977,7 +975,7 @@ def _generate_batch(
         part_by=lambda x: four_part_key(x),
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] != "S",
     )
-    clm_dt_sgntr_per_sk = {int(row[f.CLM_DT_SGNTR_SK]): row for row in existing[f.CLM_DT_SGNTR]}
+    clm_dt_sgntr_per_sk = {row[f.CLM_DT_SGNTR_SK]: row for row in existing[f.CLM_DT_SGNTR]}
     clm_instnl_per_fpk = {four_part_key(row): row for row in existing[f.CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=existing[f.CLM_PRFNL],
@@ -1004,7 +1002,7 @@ def _generate_batch(
     # claims data is not generated if it already exists, only regenerated, so this checks if there's
     # any pac CLMs in the provided FILEs or if the --force-pac-claims flag is disable and disables
     # _new_ pac claim data generation if so
-    any_pac_clms = any(int(x[f.CLM_TYPE_CD]) >= 1011 for x in existing[f.CLM])
+    any_pac_clms = any(x[f.CLM_TYPE_CD] >= 1011 for x in existing[f.CLM])
     gen_new_pac_clms = pac_gen == GeneratePacDataMode.ALWAYS or (
         not any_pac_clms and pac_gen == GeneratePacDataMode.IF_NONE
     )
@@ -1013,8 +1011,8 @@ def _generate_batch(
 
     for pt_bene_sk in tqdm.tqdm(bene_sks):
         existing_clms = clms_per_bene_sk.get(pt_bene_sk, [])
-        existing_adj_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) < 1011]
-        existing_pac_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) >= 1011]
+        existing_adj_clms = [x for x in existing_clms if x[f.CLM_TYPE_CD] < 1011]
+        existing_pac_clms = [x for x in existing_clms if x[f.CLM_TYPE_CD] >= 1011]
         init_adj_clms = (
             existing_adj_clms
             if existing_adj_clms or existing_pac_clms
@@ -1045,7 +1043,7 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_cond_sgntr_mbr=row
                 )
                 for row in cond_sgntr_mbr_per_cond_sgntr_sk.get(
-                    str(clm[f.CLM_RLT_COND_SGNTR_SK]),
+                    clm[f.CLM_RLT_COND_SGNTR_SK],
                     [] if cond_sgntr_mbr_per_cond_sgntr_sk else [None],
                 )
             ]
@@ -1056,7 +1054,7 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_ocrnc_sgntr_mbr=row
                 )
                 for row in ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(clm[f.CLM_OCRNC_SGNTR_SK]),
+                    clm[f.CLM_OCRNC_SGNTR_SK],
                     [] if ocrnc_sgntr_mbr_per_ocrnc_sk else [None],
                 )
             ]
@@ -1067,13 +1065,13 @@ def _generate_batch(
                     clm=clm, gen_utils=gen_utils, init_clm_rlt_ocrnc_sgntr_mbr=row
                 )
                 for row in rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(clm[f.CLM_RLT_OCRNC_SGNTR_SK]),
+                    clm[f.CLM_RLT_OCRNC_SGNTR_SK],
                     [] if rlt_ocrnc_sgntr_mbr_per_ocrnc_sk else [None],
                 )
             ]
             adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].extend(clm_rlt_ocrnc_sgntr_mbr)
 
-            clm_type_cd = int(clm[f.CLM_TYPE_CD])
+            clm_type_cd = clm[f.CLM_TYPE_CD]
             if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
                 pharm_clm_line = adj_util.gen_pharm_clm_line(
                     clm=clm,
@@ -1123,7 +1121,7 @@ def _generate_batch(
 
             clm_dt_sgntr = adj_util.gen_clm_dt_sgntr(
                 clm=clm,
-                init_clm_dt_sgntr=clm_dt_sgntr_per_sk.get(int(clm[f.CLM_DT_SGNTR_SK])),
+                init_clm_dt_sgntr=clm_dt_sgntr_per_sk.get(clm[f.CLM_DT_SGNTR_SK]),
             )
             adj_clms_tbls[f.CLM_DT_SGNTR].append(clm_dt_sgntr)
 
@@ -1157,7 +1155,7 @@ def _generate_batch(
                 clm_line = adj_util.gen_clm_line(
                     gen_utils=gen_utils,
                     clm=clm,
-                    clm_line_num=int(init_clm_line[f.CLM_LINE_NUM])
+                    clm_line_num=init_clm_line[f.CLM_LINE_NUM]
                     if init_clm_line.get(f.CLM_LINE_NUM)
                     else idx,
                     diagnoses=diagnoses,
@@ -1166,7 +1164,7 @@ def _generate_batch(
                 )
                 adj_clms_tbls[f.CLM_LINE].append(clm_line)
 
-                line_num = int(clm_line[f.CLM_LINE_NUM])
+                line_num = clm_line[f.CLM_LINE_NUM]
                 fpk = four_part_key(clm)
                 if clm_type_cd >= 10 and clm_type_cd <= 65:
                     clm_line_instnl = adj_util.gen_clm_line_instnl(
@@ -1207,13 +1205,13 @@ def _generate_batch(
                 f.CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_cond_sgntr_sk.get(
-                    str(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK]), []
+                    file_pac_clm[f.CLM_RLT_COND_SGNTR_SK], []
                 ),
                 f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(file_pac_clm[f.CLM_OCRNC_SGNTR_SK]), []
+                    file_pac_clm[f.CLM_OCRNC_SGNTR_SK], []
                 ),
                 f.CLM_RLT_OCRNC_SGNTR_MBR: rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    str(file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK]), []
+                    file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK], []
                 ),
                 f.CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),
@@ -1234,9 +1232,7 @@ def _generate_batch(
                     *proc_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
                     *diag_clm_prod_per_fpk.get(four_part_key(file_pac_clm), []),
                 ],
-                f.CLM_DT_SGNTR: as_list(
-                    clm_dt_sgntr_per_sk.get(int(file_pac_clm[f.CLM_DT_SGNTR_SK]))
-                ),
+                f.CLM_DT_SGNTR: as_list(clm_dt_sgntr_per_sk.get(file_pac_clm[f.CLM_DT_SGNTR_SK])),
             }
             for file_pac_clm in existing_pac_clms
         ]
@@ -1247,7 +1243,7 @@ def _generate_batch(
                 x
                 for x in all_adj_clms_tbls
                 if probability(0.5)
-                and int(x[f.CLM][0][f.CLM_TYPE_CD])
+                and x[f.CLM][0][f.CLM_TYPE_CD]
                 not in (1, 2, 3, 4)  # obviously we don't have pac claims for PD claims
             ]
             if gen_new_pac_clms
@@ -1288,7 +1284,7 @@ def _generate_batch(
                 # CLM_LINE_DCMTN (we're regenerating it) the CLM_LINE does not have that field
                 # anymore so we need to get it from the CLM_LINE_DCMTN. Pretty dumb, but it works
                 clm_line_dcmtns = claims_tbls.get(f.CLM_LINE_DCMTN, [])
-                clm_line_num = int(clm_line[f.CLM_LINE_NUM])
+                clm_line_num = clm_line[f.CLM_LINE_NUM]
                 init_clm_line_dcmtn = match_line_num(
                     clm_lines=clm_line_dcmtns,
                     clm_line_num=clm_line_num,
@@ -1368,7 +1364,7 @@ def _generate_batch(
                 ]
             )
 
-            clm_type_cd = int(pac_clm[f.CLM_TYPE_CD])
+            clm_type_cd = pac_clm[f.CLM_TYPE_CD]
             if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
                 clm_prfnls = [
                     pac_util.gen_pac_clm_prfnl(
@@ -1399,25 +1395,6 @@ def _generate_batch(
                 out_tables[f.CLM_LINE_FISS].extend(clm_line_fiss)
 
     return out_tables
-
-
-def _generate_prior_auth(
-    gen_utils: GeneratorUtil,
-    out_tables: dict[str, list[RowAdapter]],
-    bene_sk_to_mbi: list[RowAdapter],
-    generated_providers=list[RowAdapter],
-    generated_type_1_npis=list[str],
-    generated_type_2_npis=list[str],
-) -> list[RowAdapter]:
-    pa_util = PriorAuthGeneratorUtil()
-    out_tables[f.PRVDR_HSTRY] = generated_providers
-    return pa_util.gen_prior_auths(
-        gen_utils=gen_utils,
-        files={f.BENE_HSTRY: bene_sk_to_mbi},
-        out_tables=out_tables,
-        generated_type_1_npis=generated_type_1_npis,
-        generated_type_2_npis=generated_type_2_npis,
-    )
 
 
 if __name__ == "__main__":
