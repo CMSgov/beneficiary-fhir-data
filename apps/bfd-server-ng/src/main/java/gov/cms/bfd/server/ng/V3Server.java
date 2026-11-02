@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
+import gov.cms.bfd.server.ng.interceptor.CapabilityStatementInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
