@@ -29,6 +29,7 @@ bootstrap:
     # committing. This is not possible out of the box at the time of writing this
     # See https://github.com/j178/prek/issues/1051
     ./hooks/refresh-hook-shims.sh
+    ./hooks/merge_vscode_settings.py
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("""Extracts the certificate from the server.

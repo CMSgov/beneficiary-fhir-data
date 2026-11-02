@@ -47,6 +47,16 @@ hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
 [[repos]]
 repo = "local"
 [[repos.hooks]]
+id = "merge-vscode-settings"
+name = "merge VS Code settings with workspace defaults"
+language = "system"
+always_run = true
+pass_filenames = false
+entry = "./hooks/merge_vscode_settings.py"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
 id = "git-hook-shims-fresh"
 name = "git hook shims match the scripts in hooks/"
 language = "system"
@@ -110,5 +120,5 @@ name = "prettier"
 entry = "prettier"
 args = ["--check", "--write", "--ignore-unknown"]
 language = "node"
-types = ["yaml"]
+types = ["yaml", "json"]
 additional_dependencies = ["prettier"]
