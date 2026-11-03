@@ -76,7 +76,8 @@ class FHIRDefinitions:
 
             types = child.get("type", [])
             if not types:
-                # Inline backbone element - children live in the same snapshot.
+                # Inline backbone element with no "type" entry at all -
+                # children live in the same snapshot.
                 out.append(child_cur_path)
                 self.__expand_children(
                     children_index,
@@ -98,6 +99,23 @@ class FHIRDefinitions:
                     emitted_path = child_cur_path
 
                 out.append(emitted_path)
+
+                if code in ("BackboneElement", "Element"):
+                    # Inline structure - its children are declared in this
+                    # same snapshot, under child["path"], not in a separate
+                    # type definition. Resolving "BackboneElement" as if it
+                    # were a real complex type (it technically exists in
+                    # profiles-types.json) loses the real children.
+                    self.__expand_children(
+                        children_index,
+                        child["path"],
+                        emitted_path,
+                        type_chain,
+                        depth + 1,
+                        max_depth,
+                        out,
+                    )
+                    continue
 
                 if self.__is_primitive_type(code) or code in type_chain:
                     continue  # leaf, or already expanding this type (avoids
