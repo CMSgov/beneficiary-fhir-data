@@ -35,7 +35,7 @@ class StructureDefinitionGenerator:
         base_definition: str,
         resource_type: str,
         output_file_name: str,
-        delete_tmp_files: bool = True
+        delete_tmp_files: bool = True,
     ):
         self.source_directory = source_directory
         self.output_directory = output_directory
@@ -90,7 +90,7 @@ class StructureDefinitionGenerator:
 
             elements: list[ElementDefinition] = []
             slicing_added = set()
-            #for p in fhir_defs.expand_type_paths(self.resource_type):
+            # for p in fhir_defs.expand_type_paths(self.resource_type):
             #    path_data = [node for node in data if node.get("structureDef").get("path") == p]
             #    path_data = sorted(
             #        path_data,
@@ -126,10 +126,10 @@ class StructureDefinitionGenerator:
                         id=slicing.get("id") or path,
                         slicing=ElementDefinitionSlicing(
                             rules=slicing.get("rules") or "open",
-                            ordered=slicing.get("ordered") or None
+                            ordered=slicing.get("ordered") or None,
                         ),
-                        min = slicing.get("min"),
-                        max = slicing.get("max"),
+                        min=slicing.get("min"),
+                        max=slicing.get("max"),
                     )
                     discriminator = slicing.get("discriminator")
                     if discriminator:
@@ -171,21 +171,25 @@ class StructureDefinitionGenerator:
 
             sorted_elements = []
             for p in fhir_defs.expand_type_paths(self.resource_type):
-                els = [el for el in elements if get_field(el,'path') == p]
-                slice_names = [get_field(el,'sliceName') for el in els if get_field(el,'sliceName')]
-                if p == "ExplanationOfBenefit.item.adjudication":
-                     print("found")
-                     print(slice_names)
+                els = [el for el in elements if get_field(el, "path") == p]
+                slice_names = [
+                    get_field(el, "sliceName") for el in els if get_field(el, "sliceName")
+                ]
                 if slice_names:
-                    slices = [el for el in els if get_field(el,'slicing')]
+                    slices = [el for el in els if get_field(el, "slicing")]
                     if slices:
                         sorted_elements.extend(slices)
                     for slice_name in slice_names:
                         print(slice_name)
-                        for el in [el for el in els if get_field(el,'sliceName') == slice_name]:
+                        for el in [el for el in els if get_field(el, "sliceName") == slice_name]:
                             if el not in sorted_elements:
                                 sorted_elements.append(el)
-                        for el in [el for el in elements if str(get_field(el,'path')).startswith(p) and f":{slice_name}" in get_field(el,'id')]:
+                        for el in [
+                            el
+                            for el in elements
+                            if str(get_field(el, "path")).startswith(p)
+                            and f":{slice_name}" in get_field(el, "id")
+                        ]:
                             if el not in sorted_elements:
                                 sorted_elements.append(el)
                 else:
@@ -272,6 +276,7 @@ class StructureDefinitionGenerator:
             raise RuntimeError(f"Snapshot generation failed (exit {result.returncode})")
 
         print(f"Snapshot written to: {output_path}")
+
 
 def get_field(el: any, field: str):
     if isinstance(el, dict):
