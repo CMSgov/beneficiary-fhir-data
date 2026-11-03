@@ -26,6 +26,9 @@ jobs:
       - uses: taiki-e/install-action@v2.87.32
         with:
           tool: taplo
+      - uses: taiki-e/install-action@v2.87.32
+        with:
+          tool: just
       - uses: opentofu/setup-opentofu@v2.0.2
       - id: changed-files
         uses: tj-actions/changed-files@v47.0.6
