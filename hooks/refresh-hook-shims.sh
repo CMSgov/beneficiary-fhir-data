@@ -29,3 +29,7 @@ done
 if [[ ! -f "${hooks_dir}/post-checkout" ]]; then
 	prek install --hook-type post-checkout
 fi
+
+if [[ ! -f "${hooks_dir}/post-merge" ]]; then
+	prek install --hook-type post-merge
+fi
