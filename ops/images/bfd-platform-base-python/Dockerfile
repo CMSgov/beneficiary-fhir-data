@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023.12.20261021.0-minimal@sha256:5a0fa28a0ef6511c7e01e8b96c676a345ccdd03877cf1f24708784b86ee40832 AS base
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.12.20261026.1-minimal@sha256:c25add18b6c35620a6e096ef03ecbafbcaed993281ad227792f67c324980011b AS base
 
 RUN dnf -y update && \
     dnf -y clean all && \

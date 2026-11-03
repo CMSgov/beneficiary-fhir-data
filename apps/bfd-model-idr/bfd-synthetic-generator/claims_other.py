@@ -15,7 +15,7 @@ from claims_static import (
 )
 from faker import Faker
 from file_utils import ROOT
-from generator_util import GeneratorUtil
+from generator_util import GeneratorUtil, probability
 from row_adapter import RowAdapter
 
 _faker = Faker()
@@ -33,7 +33,7 @@ class OtherGeneratorUtil:
         max_dt = datetime.fromisoformat(str(NOW))
         min_dt = datetime(2010, 1, 1)
 
-        if random.random() < 0.05:
+        if probability(0.05):
             update_dt = _faker.date_time_between_dates(min_dt, max_dt)
             obj[f.META_SK] = 501
             obj[f.META_LST_UPDT_SK] = encode(update_dt)
