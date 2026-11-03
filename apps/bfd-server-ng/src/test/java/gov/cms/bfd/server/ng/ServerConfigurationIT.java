@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import gov.cms.bfd.server.ng.claim.EobProfile;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.net.URI;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
@@ -113,5 +115,27 @@ class ServerConfigurationIT extends IntegrationTestBase {
         .post(getServerUrl() + "/metadata")
         .then()
         .statusCode(400);
+  }
+
+  @Test
+  void capabilityStatementListsEobProfiles() {
+    var fhirClient = getFhirClient();
+    var metaData =
+        fhirClient
+            .capabilities()
+            .ofType(CapabilityStatement.class)
+            .accept("application/fhir+json")
+            .execute();
+
+    var eob =
+        metaData.getRestFirstRep().getResource().stream()
+            .filter(resource -> resource.getType().equals("ExplanationOfBenefit"))
+            .findFirst()
+            .orElseThrow();
+
+    var expectedProfiles = EobProfile.getAllVersionedCanonicalUrls();
+    var actualProfiles = eob.getSupportedProfile().stream().map(CanonicalType::getValue).toList();
+
+    assertEquals(expectedProfiles, actualProfiles);
   }
 }
