@@ -31,7 +31,7 @@ workflows:
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'ncipollo/release-action@v1.21.0'
         - 'sigoden/install-binary@v1.3.0'
-        - 'taiki-e/install-action@v2.87.31'
+        - 'taiki-e/install-action@v2.87.32'
     '.github/workflows/ci-java.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
@@ -44,14 +44,14 @@ workflows:
         - 'actions/setup-node@v7.1.0'
         - 'astral-sh/setup-uv@v10.3.2'
         - 'sigoden/install-binary@v1.3.0'
-        - 'taiki-e/install-action@v2.87.31'
+        - 'taiki-e/install-action@v2.87.32'
     '.github/workflows/ci-prek.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
         - 'j178/prek-action@v3.1.0'
         - 'opentofu/setup-opentofu@v2.0.2'
         - 'sigoden/install-binary@v1.3.0'
-        - 'taiki-e/install-action@v2.87.31'
+        - 'taiki-e/install-action@v2.87.32'
         - 'tj-actions/changed-files@v47.0.6'
     '.github/workflows/ci-python.yml':
         - 'actions/checkout@v7.0.1'
@@ -61,7 +61,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'pozetroninc/github-action-get-latest-release@v0.8.0'
-        - 'ruby/setup-ruby@v1.334.0'
+        - 'ruby/setup-ruby@v1.335.0'
     '.github/workflows/deploy-env-services.yml': []
     '.github/workflows/deploy-platform-services.yml': []
     '.github/workflows/release-and-deploy-bfd.yml':
@@ -192,9 +192,9 @@ dependencies:
         commit: 'sha1-f51c7c0d32777d00de777131d25918617a246415'
         owner_id: 96823034
         repo_id: 432240469
-    'ruby/setup-ruby@v1.334.0':
-        ref: 'v1.334.0'
-        commit: 'sha1-26e5b7d197ebf60545ee9667bcbace0be11ccaec'
+    'ruby/setup-ruby@v1.335.0':
+        ref: 'v1.335.0'
+        commit: 'sha1-7f797815d8adceb1c412e7abefdd1ab4abc47a5f'
         owner_id: 210414
         repo_id: 231208785
     'sigoden/install-binary@v1.3.0':
@@ -207,9 +207,9 @@ dependencies:
         commit: 'sha1-dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
         owner_id: 6962987
         repo_id: 306439799
-    'taiki-e/install-action@v2.87.31':
-        ref: 'v2.87.31'
-        commit: 'sha1-1e29709c0ec63babbe8f266397a465f29a825f91'
+    'taiki-e/install-action@v2.87.32':
+        ref: 'v2.87.32'
+        commit: 'sha1-5488ac5a951645ce95062214902ac4b6bc1a1037'
         owner_id: 43724913
         repo_id: 442947557
     'tj-actions/changed-files@v47.0.6':
