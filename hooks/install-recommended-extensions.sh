@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeou pipefail
 
-installed="/tmp/installed_extensions.txt"
-recommended="/tmp/recommended_extensions.txt"
+installed="$(mktemp)"
+recommended="$(mktemp)"
 
 cleanup() {
 	rm -f "$installed" "$recommended"

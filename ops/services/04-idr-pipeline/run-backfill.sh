@@ -8,8 +8,8 @@ if ! [[ $REPLY =~ ^[Yy]$ ]]; then
 	exit 0
 fi
 
-infile="/tmp/input.json"
-outfile="/tmp/output.json"
+infile="$(mktemp)"
+outfile="$(mktemp)"
 cleanup() {
 	rm -f "$infile" "$outfile"
 	exit
