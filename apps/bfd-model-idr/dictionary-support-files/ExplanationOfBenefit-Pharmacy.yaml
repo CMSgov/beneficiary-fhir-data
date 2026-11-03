@@ -583,6 +583,18 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item:ndcPrdOrSer.detail.productOrService.coding
+    path: ExplanationOfBenefit.item.detail.productOrService.coding
+    binding:
+      strength: preferred
+      valueSet: http://hl7.org/fhir/sid/ndc
+    proceedingEd:
+      - id: xplanationOfBenefit.item:ndcPrdOrSer.productOrService.coding
+        path: ExplanationOfBenefit.item.productOrService.coding
+        binding:
+          strength: preferred
+          valueSet: http://hl7.org/fhir/sid/ndc
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Pharmacy
