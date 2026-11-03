@@ -26,6 +26,10 @@ for pair in "pre-commit run-pre-commit.sh" "pre-commit.rerun rerun-changed.sh"; 
 	mv "$tmp" "$dest"
 done
 
+# We previously had a pre-push hook
+# Ensure it's removed to prevent any conflicts with the current checks
+rm -f "${hooks_dir}/pre-push"
+
 if [[ ! -f "${hooks_dir}/post-checkout" ]]; then
 	prek install --hook-type post-checkout
 fi
