@@ -36,7 +36,7 @@ hooks = [{ id = "tofu_fmt" }, { id = "tofu_docs" }]
 
 [[repos]]
 repo = "https://github.com/gitleaks/gitleaks"
-rev = "v8.24.2"
+rev = "v8.30.1"
 hooks = [{ id = "gitleaks" }]
 
 [[repos]]
@@ -50,6 +50,7 @@ repo = "local"
 id = "merge-vscode-settings"
 name = "merge VS Code settings with workspace defaults"
 language = "system"
+stages = ["post-checkout"]
 always_run = true
 pass_filenames = false
 entry = "./hooks/merge_vscode_settings.py"

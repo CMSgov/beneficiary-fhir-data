@@ -42,5 +42,9 @@ def merge_files(main: str, workspace: str) -> None:
         f.write(merged)
 
 
+# VS Code currently has no built-in way of sharing settings across multiple files
+# Some things you might not want to check in to the repo, so here we merge a workspace file
+# with the file read by VS Code, allowing us to keep workspace settings separate
+# from your personal settings, which remain gitignored.
 merge_files("./.vscode/launch.json", "./.vscode/workspace_launch.json")
 merge_files("./.vscode/settings.json", "./.vscode/workspace_settings.json")
