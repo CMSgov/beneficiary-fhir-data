@@ -7,7 +7,7 @@
     "aphp.fhir-mapbuilder",
     "FHIR-Shorthand.vscode-fsh",
     "ms-python.python",
-    "ms-python.vscode-pylance",
+    "detachhead.basedpyright",
     "EditorConfig.EditorConfig",
     "charliermarsh.ruff",
     "nefrob.vscode-just-syntax",
