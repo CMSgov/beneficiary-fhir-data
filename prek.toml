@@ -58,6 +58,17 @@ entry = "./hooks/merge_vscode_settings.py"
 [[repos]]
 repo = "local"
 [[repos.hooks]]
+id = "install-vscode-extensions"
+name = "install recommended VS Code extensions if missing"
+language = "system"
+stages = ["post-checkout"]
+always_run = true
+pass_filenames = false
+entry = "./hooks/install-recommended-extensions.sh"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
 id = "git-hook-shims-fresh"
 name = "git hook shims match the scripts in hooks/"
 language = "system"
