@@ -460,6 +460,7 @@
   profiles:
     - Regular
     - CMS
+  # need slicing here
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_NUM
   appliesTo:
     - Pharmacy
@@ -590,7 +591,7 @@
       strength: preferred
       valueSet: http://hl7.org/fhir/sid/ndc
     proceedingEd:
-      - id: xplanationOfBenefit.item:ndcPrdOrSer.productOrService.coding
+      - id: ExplanationOfBenefit.item:ndcPrdOrSer.productOrService.coding
         path: ExplanationOfBenefit.item.productOrService.coding
         binding:
           strength: preferred
@@ -636,6 +637,24 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:benefit.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: benefit
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:benefit
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: benefit
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_LINE_GRS_ABOVE_THRSHLD_AMT
   appliesTo:
     - Pharmacy
@@ -648,6 +667,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_ABOVE_THRSHLD_AMT').amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineGrsAboveThrshldAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_GRS_ABOVE_THRSHLD_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineGrsAboveThrshldAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineGrsAboveThrshldAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_LINE_GRS_BLW_THRSHLD_AMT
   appliesTo:
     - Pharmacy
@@ -660,6 +697,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_BLW_THRSHLD_AMT').amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineGrsBlwThrshldAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_GRS_BLW_THRSHLD_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineGrsBlwThrshldAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineGrsBlwThrshldAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_LINE_LIS_AMT
   appliesTo:
     - Pharmacy
@@ -672,6 +727,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_LIS_AMT').amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineLisAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_LIS_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineLisAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineLisAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_LINE_TROOP_TOT_AMT
   appliesTo:
     - Pharmacy
@@ -695,6 +768,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_PLRO_AMT').amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLinePlroAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_PLRO_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLinePlroAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLinePlroAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_RPTD_MFTR_DSCNT_AMT
   appliesTo:
     - Pharmacy
@@ -775,6 +866,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_RPTD_GAP_DSCNT_AMT').amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineRptdGapDscntAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_RPTD_GAP_DSCNT_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineRptdGapDscntAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineRptdGapDscntAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.TOT_RX_CST_AMT
   appliesTo:
     - Pharmacy
@@ -788,6 +897,24 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:totRxCstAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: TOT_RX_CST_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:totRxCstAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: totRxCstAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_PRCNG_EXCPTN_CD
   appliesTo:
     - Pharmacy
@@ -831,6 +958,25 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_PHRMCY_SRVC_TYPE_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmPhrmcySrvcTypeCd.code.coding
+    path: ExplanationOfBenefit.supportingInfo.code.coding
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmPhrmcySrvcTypeCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmPhrmcySrvcTypeCd
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmPhrmcySrvcTypeCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_PHRMCY_SRVC_TYPE_CD
 - inputPath: LineItemComponent.CLM_LINE_RX_ORGN_CD
   appliesTo:
     - Pharmacy
@@ -1135,6 +1281,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NCVRD_PD_AMT')).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineNcvrdPdAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_NCVRD_PD_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineNcvrdPdAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineNcvrdPdAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_LINE_OTHR_TP_PD_AMT
   appliesTo:
     - Pharmacy
@@ -1147,6 +1311,24 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTHR_TP_PD_AMT')).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineOthrTpPdAmt.category
+    path: ExplanationOfBenefit.item.adjudication.category
+    min: 1
+    type:
+      - code: CodeableConcept
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - system: http://terminology.hl7.org/CodeSystem/adjudication
+            code: CLM_LINE_OTHR_TP_PD_AMT
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineOthrTpPdAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineOthrTpPdAmt
+        min: 1
+        max: "1"
 - inputPath: LineItemComponent.CLM_CMS_CALCD_MFTR_DSCNT_AMT
   appliesTo:
     - Pharmacy

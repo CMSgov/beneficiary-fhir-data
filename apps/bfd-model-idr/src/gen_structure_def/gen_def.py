@@ -173,20 +173,19 @@ class StructureDefinitionGenerator:
             for p in fhir_defs.expand_type_paths(self.resource_type):
                 els = [el for el in elements if get_field(el,'path') == p]
                 slice_names = [get_field(el,'sliceName') for el in els if get_field(el,'sliceName')]
+                if p == "ExplanationOfBenefit.item.adjudication":
+                     print("found")
+                     print(slice_names)
                 if slice_names:
-                    print(slice_names)
                     slices = [el for el in els if get_field(el,'slicing')]
                     if slices:
                         sorted_elements.extend(slices)
-                        for slice_name in slice_names:
-                            for el in [el for el in els if get_field(el,'sliceName') == slice_name]:
-                                if el not in sorted_elements:
-                                    sorted_elements.append(el)
-                            for el in [el for el in elements if str(get_field(el,'path')).startswith(get_field(slices[0],'path')) and f":{slice_name}" in get_field(el,'id')]:
-                                if el not in sorted_elements:
-                                    sorted_elements.append(el)
-                    else:
-                        for el in els:
+                    for slice_name in slice_names:
+                        print(slice_name)
+                        for el in [el for el in els if get_field(el,'sliceName') == slice_name]:
+                            if el not in sorted_elements:
+                                sorted_elements.append(el)
+                        for el in [el for el in elements if str(get_field(el,'path')).startswith(p) and f":{slice_name}" in get_field(el,'id')]:
                             if el not in sorted_elements:
                                 sorted_elements.append(el)
                 else:
