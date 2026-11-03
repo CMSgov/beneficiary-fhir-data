@@ -4,14 +4,15 @@ import json
 from typing import Any
 
 
-def check_type(key:str, base:dict,value:Any, cls:type):
+def check_type(key: str, base: dict[str, Any], value: Any, cls: type):
     return key in base and isinstance(base[key], cls) and isinstance(value, cls)
 
-def deep_merge(base: dict, override: dict) -> dict:
+
+def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     for key, value in override.items():
         # For dicts, recursively merge items
-        if check_type(key, base,value, dict):
-            deep_merge(base[key], value)
+        if check_type(key, base, value, dict):
+            _ = deep_merge(base[key], value)
         # For lists, add any items that don't exist in the base
         elif check_type(key, base, value, list):
             for v in value:

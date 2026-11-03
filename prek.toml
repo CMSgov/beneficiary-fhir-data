@@ -116,6 +116,16 @@ pass_filenames = 1
 [[repos]]
 repo = "local"
 [[repos.hooks]]
+id = "just"
+name = "just"
+language = "system"
+files = "Justfile"
+entry = "just --fmt"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
 id = "prettier"
 name = "prettier"
 entry = "prettier"
