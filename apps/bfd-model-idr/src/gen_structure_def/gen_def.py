@@ -88,72 +88,111 @@ class StructureDefinitionGenerator:
 
             fhir_defs = FHIRDefinitions()
 
-            elements = []
+            elements: list[ElementDefinition] = []
             slicing_added = set()
-            for p in fhir_defs.expand_type_paths(self.resource_type):
-                path_data = [node for node in data if node.get("structureDef").get("path") == p]
-                path_data = sorted(
-                    path_data,
-                    key=lambda node: (node.get("structureDef").get("slicing") is None,),
-                )
-                for node in path_data:
-                    struct_def_data = node.get("structureDef")
-                    el_id = struct_def_data.get("id")
-                    path = struct_def_data.get("path")
-                    input_path = node.get("inputPath")
-                    column_name = node.get("sourceColumn")
-                    slicing = struct_def_data.get("slicing")
-                    pattern = struct_def_data.get("pattern")
-                    max = struct_def_data.get("max") or "1"
-                    type_node = struct_def_data.get("type")
-                    constraint = struct_def_data.get("constraint")
+            #for p in fhir_defs.expand_type_paths(self.resource_type):
+            #    path_data = [node for node in data if node.get("structureDef").get("path") == p]
+            #    path_data = sorted(
+            #        path_data,
+            #        key=lambda node: (node.get("structureDef").get("slicing") is None,),
+            #    )
+            for node in data:
+                struct_def_data = node.get("structureDef")
+                el_id = struct_def_data.get("id")
+                path = struct_def_data.get("path")
+                input_path = node.get("inputPath")
+                column_name = node.get("sourceColumn")
+                slicing = struct_def_data.get("slicing")
+                pattern = struct_def_data.get("pattern")
+                max = struct_def_data.get("max") or "1"
+                type_node = struct_def_data.get("type")
+                constraint = struct_def_data.get("constraint")
+                binding = struct_def_data.get("binding")
+                mapping = struct_def_data.get("mapping")
 
-                    if not column_name:
-                        input_path.split(".")[1]
+                if not column_name:
+                    input_path.split(".")[1]
 
-                    column_name = str(column_name).replace("_", "-")
+                column_name = str(column_name).replace("_", "-")
 
-                    if slicing:
-                        if path in slicing_added:
-                            raise ValueError(
-                                f"Slice path {path} appears on more than one node."
-                                + " Please consildate slicing to a single node"
-                            )
-                        slicing_el = ElementDefinition(
-                            path=path,
-                            id=path,
-                            slicing=ElementDefinitionSlicing(
-                                rules=slicing.get("rules") or "open",
-                            ),
+                if slicing:
+                    if path in slicing_added:
+                        raise ValueError(
+                            f"Slice path {path} appears on more than one node."
+                            + " Please consildate slicing to a single node"
                         )
-                        discriminator = slicing.get("discriminator")
-                        if discriminator:
-                            slicing_el.slicing.discriminator = discriminator
-
-                        elements.append(slicing_el)
-                        slicing_added.add(path)
-
-                    el = ElementDefinition(
-                        path=path,
-                        id=el_id,
-                        short=input_path,
-                        min=struct_def_data.get("min") or 0,
-                        max=max,
-                        isSummary=struct_def_data.get("isSummary") or None,
-                        mustSupport=struct_def_data.get("mustSupport") or None,
-                        sliceName=struct_def_data.get("sliceName") or None,
+                    slicing_el = ElementDefinition(
+                        path=slicing.get("path") or path,
+                        id=slicing.get("id") or path,
+                        slicing=ElementDefinitionSlicing(
+                            rules=slicing.get("rules") or "open",
+                            ordered=slicing.get("ordered") or None
+                        ),
+                        min = slicing.get("min"),
+                        max = slicing.get("max"),
                     )
-                    if pattern:
-                        setattr(el, f"pattern{pattern.get('type')}", pattern.get("detail"))
+                    discriminator = slicing.get("discriminator")
+                    if discriminator:
+                        slicing_el.slicing.discriminator = discriminator
 
-                    if type_node:
-                        print("found type")
-                        el.type = type_node
+                    elements.append(slicing_el)
+                    slicing_added.add(path)
 
-                    if constraint:
-                        el.constraint = constraint
+                if struct_def_data.get("proceedingEd"):
+                    elements.extend(struct_def_data.get("proceedingEd"))
 
-                    elements.append(el)
+                el = ElementDefinition(
+                    path=path,
+                    id=el_id,
+                    short=input_path,
+                    min=struct_def_data.get("min") or 0,
+                    max=max,
+                    isSummary=struct_def_data.get("isSummary") or None,
+                    mustSupport=struct_def_data.get("mustSupport") or None,
+                    sliceName=struct_def_data.get("sliceName") or None,
+                )
+
+                if pattern:
+                    setattr(el, f"pattern{pattern.get('type')}", pattern.get("detail"))
+
+                if type_node:
+                    el.type = type_node
+
+                if constraint:
+                    el.constraint = constraint
+
+                if mapping:
+                    el.mapping = mapping
+
+                if binding:
+                    el.binding = binding
+
+                elements.append(el)
+
+            sorted_elements = []
+            for p in fhir_defs.expand_type_paths(self.resource_type):
+                els = [el for el in elements if get_field(el,'path') == p]
+                slice_names = [get_field(el,'sliceName') for el in els if get_field(el,'sliceName')]
+                if slice_names:
+                    print(slice_names)
+                    slices = [el for el in els if get_field(el,'slicing')]
+                    if slices:
+                        sorted_elements.extend(slices)
+                        for slice_name in slice_names:
+                            for el in [el for el in els if get_field(el,'sliceName') == slice_name]:
+                                if el not in sorted_elements:
+                                    sorted_elements.append(el)
+                            for el in [el for el in elements if str(get_field(el,'path')).startswith(get_field(slices[0],'path')) and f":{slice_name}" in get_field(el,'id')]:
+                                if el not in sorted_elements:
+                                    sorted_elements.append(el)
+                    else:
+                        for el in els:
+                            if el not in sorted_elements:
+                                sorted_elements.append(el)
+                else:
+                    for el in els:
+                        if el not in sorted_elements:
+                            sorted_elements.append(el)
 
             structure_def = StructureDefinition(
                 url=self.url,
@@ -162,7 +201,7 @@ class StructureDefinitionGenerator:
                 kind="resource",
                 abstract=False,
                 type="ExplanationOfBenefit",
-                differential=StructureDefinitionDifferential(element=elements),
+                differential=StructureDefinitionDifferential(element=sorted_elements),
                 version=self.version,
                 fhirVersion="4.0.1",
                 title=self.title,
@@ -215,6 +254,8 @@ class StructureDefinitionGenerator:
             str(
                 differential_path.resolve()
             ),  # existing profile, already has a snapshot — used as context
+            "-tx",
+            "n/a",
             "-ig",
             str(
                 input_sd_path.resolve()
@@ -232,3 +273,8 @@ class StructureDefinitionGenerator:
             raise RuntimeError(f"Snapshot generation failed (exit {result.returncode})")
 
         print(f"Snapshot written to: {output_path}")
+
+def get_field(el: any, field: str):
+    if isinstance(el, dict):
+        return el.get(field)
+    return getattr(el, field, None)

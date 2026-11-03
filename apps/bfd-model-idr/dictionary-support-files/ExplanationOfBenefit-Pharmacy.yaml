@@ -219,7 +219,7 @@
         severity: error
         human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
         expression: "%context.id = %resource.provider.reference.substring(1)"
-      - key: provider-generic-provider-num-req
+      - key: provider-npi-provider-num-req
         severity: error
         human: The contained provider Practitioner must have a us-npi identifier with a value.
         expression: ($this as Practitioner).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value.exists()
@@ -237,6 +237,21 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:prvdrIdQlpyrCd
+    sliceName: prvdrIdQlpyrCd
+    type:
+      - code: Practitioner
+    constraint:
+      - key: provider-id-qlfyr-cd-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-id-qlfyr-cd-match-1-req
+        severity: error
+        human: The contained provider Practitioner must have a PRVDR-ID-QLFYR-CD identifier with a value.
+        expression: ($this as Practitioner).identifier.where(system='http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD').value.exists()
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSBNG_ID_QLFYR_CD
   appliesTo:
     - Pharmacy
@@ -251,6 +266,26 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.careTeam.provider.identifier.type.coding
+    id: ExplanationOfBenefit.careTeam:prescribing.provider.identifier.type.coding
+    slicing:
+      path: ExplanationOfBenefit.careTeam
+      id: ExplanationOfBenefit.careTeam
+      discriminator:
+        - type: value
+          path: role.coding.code
+      rules: open
+    pattern:
+      type: Coding
+      detail:
+        system: http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD
+    proceedingEd:
+      - id: ExplanationOfBenefit.careTeam:prescribing
+        path: ExplanationOfBenefit.careTeam
+        sliceName: prescribing
+        min: 0
+        max: "1"
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_PRSBNG_PRVDR_GNRC_ID_NUM
   appliesTo:
     - Pharmacy
@@ -267,6 +302,13 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:prescribing.provider.identifier:genericIdNum
+    path: ExplanationOfBenefit.contained.identifier
+    pattern:
+      type: Identifier
+      detail:
+        system: http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_NUM
   appliesTo:
     - Pharmacy
@@ -282,6 +324,13 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:prescribing.provider.identifier:npiNum
+    path: ExplanationOfBenefit.contained.identifier
+    pattern:
+      type: Identifier
+      detail:
+        system: http://hl7.org/fhir/sid/us-npi
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_LAST_NAME
   appliesTo:
     - Pharmacy
@@ -294,6 +343,11 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:prescribing.provider.display
+    path: ExplanationOfBenefit.careTeam.provider.display
+    min: 0
+    max: "1"
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_PD_DT
   appliesTo:
     - Pharmacy
@@ -308,6 +362,11 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.payment.date
+    path: ExplanationOfBenefit.payment.date
+    min: 0
+    max: "1"
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_CMS_PROC_DT
   appliesTo:
     - Pharmacy
@@ -318,6 +377,30 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).timing
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:claimCmsProcDt.timing[x]
+    path: ExplanationOfBenefit.supportingInfo.timing[x]
+    min: 0
+    max: "1"
+    slicing:
+      id: ExplanationOfBenefit.supportingInfo
+      path: ExplanationOfBenefit.supportingInfo
+      discriminator:
+        - type: value
+          path: category
+      rules: open
+      ordered: false
+    type:
+      - code: date
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:claimCmsProcDt.timing[x]
+        path: ExplanationOfBenefit.supportingInfo.timing[x]
+        min: 0
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_CMS_PROC_DT
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD
   appliesTo:
     - Pharmacy
@@ -332,6 +415,25 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmSbmtFrmtCd.code.coding
+    path: ExplanationOfBenefit.supportingInfo.code.coding
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtFrmtCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmSbmtFrmtCd
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtFrmtCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_SBMT_FRMT_CD
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_BENE_PMT_AMT
   appliesTo:
     - Pharmacy
@@ -372,6 +474,25 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctNum.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctNum
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmSbmtrCntrctNum
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctNum.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_SBMTR_CNTRCT_NUM
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_PBP_NUM
   appliesTo:
     - Pharmacy
@@ -386,6 +507,25 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctPbpNum.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctPbpNum
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmSbmtrCntrctPbpNum
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmSbmtrCntrctPbpNum.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_SBMTR_CNTRCT_PBP_NUM
 - inputPath: ExplanationOfBenefit-Pharmacy.CNTRCT_PBP_NAME
   appliesTo:
     - Pharmacy
@@ -722,6 +862,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmPtntRsdncCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmPtntRsdncCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmPtntRsdncCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD'
 - inputPath: LineItemComponent.CLM_LTC_DSPNSNG_MTHD_CD
   appliesTo:
     - Pharmacy
@@ -735,6 +889,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLtcDspnsngMthdCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLtcDspnsngMthdCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLtcDspnsngMthdCd
+        min: 0
+        max: "1"
 - inputPath: LineItemComponent.CLM_CMPND_CD
   appliesTo:
     - Pharmacy
@@ -811,6 +979,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmDrugCvrgStusCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmDrugCvrgStusCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmDrugCvrgStusCd
+        min: 0
+        max: "1"
 - inputPath: LineItemComponent.CLM_CTSTRPHC_CVRG_IND_CD
   appliesTo:
     - Pharmacy
@@ -824,6 +1006,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmCtstrphcCvrgIndCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmCtstrphcCvrgIndCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmCtstrphcCvrgIndCd
+        min: 0
+        max: "1"
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Pharmacy
@@ -841,6 +1037,25 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmAdjstmtTypeCd.code.coding
+    path: ExplanationOfBenefit.supportingInfo.code.coding
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmAdjstmtTypeCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmAdjstmtTypeCd
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmAdjstmtTypeCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_ADJSTMT_TYPE_CD
 - inputPath: LineItemComponent.CLM_DSPNSNG_STUS_CD
   appliesTo:
     - Pharmacy
@@ -856,6 +1071,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmDspnsngStusCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD'
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmDspnsngStusCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmDspnsngStusCd
+        min: 0
+        max: "1"
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT
   appliesTo:
     - Pharmacy
