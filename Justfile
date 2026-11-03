@@ -31,6 +31,8 @@ bootstrap: && setup-vscode
     # See https://github.com/j178/prek/issues/1051
     ./hooks/refresh-hook-shims.sh
 
+[doc("Sets up recommended VS Code settings and extensions")]
+[group("setup")]
 setup-vscode:
     ./hooks/merge_vscode_settings.py
     ./hooks/install-recommended-extensions.sh
