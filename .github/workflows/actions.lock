@@ -51,6 +51,7 @@ workflows:
         - 'j178/prek-action@v3.1.0'
         - 'opentofu/setup-opentofu@v2.0.2'
         - 'sigoden/install-binary@v1.3.0'
+        - 'taiki-e/install-action@v2.87.32'
         - 'taiki-e/install-action@v2.88.1'
         - 'tj-actions/changed-files@v47.0.6'
     '.github/workflows/ci-python.yml':
@@ -72,9 +73,6 @@ workflows:
     '.github/workflows/repo-hygiene-check.yml':
         - 'actions/checkout@v7.0.1'
         - 'dsacms/repolinter-actions@main'
-    '.github/workflows/run-shellcheck.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'redhat-plumbers-in-action/differential-shellcheck@v5.5.7'
     '.github/workflows/update-code-json.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -187,11 +185,6 @@ dependencies:
         commit: 'sha1-2a61c339ea7ef0a336d1daa35ef0cb1418e7676c'
         owner_id: 7717635
         repo_id: 259099570
-    'redhat-plumbers-in-action/differential-shellcheck@v5.5.7':
-        ref: 'v5.5.7'
-        commit: 'sha1-f51c7c0d32777d00de777131d25918617a246415'
-        owner_id: 96823034
-        repo_id: 432240469
     'ruby/setup-ruby@v1.336.0':
         ref: 'v1.336.0'
         commit: 'sha1-de492cf36cbab201753d720ce4f4e336cd688c94'
@@ -207,6 +200,11 @@ dependencies:
         commit: 'sha1-dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
         owner_id: 6962987
         repo_id: 306439799
+    'taiki-e/install-action@v2.87.32':
+        ref: 'v2.87.32'
+        commit: 'sha1-5488ac5a951645ce95062214902ac4b6bc1a1037'
+        owner_id: 43724913
+        repo_id: 442947557
     'taiki-e/install-action@v2.88.1':
         ref: 'v2.88.1'
         commit: 'sha1-68a389c788b2cd04016ce8c80ee23b80d2ab3d68'
