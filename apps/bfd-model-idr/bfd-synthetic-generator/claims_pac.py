@@ -9,10 +9,8 @@ from claims_static import (
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
-    TARGET_RLT_OCRNC_CODES,
-    TARGET_OCRNC_SPAN_CODES,
-    gen_clm_val_ansi_rsn_cd,
     gen_clm_val_ansi_grp_cd,
+    gen_clm_val_ansi_rsn_cd,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
 from generator_util import GeneratorUtil

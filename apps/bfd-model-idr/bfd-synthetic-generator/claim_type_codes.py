@@ -7,24 +7,29 @@ PHARMACY_CLM_TYPE_CDS = [1, 2, 3, 4]
 
 ## INSTNL SS
 FISS_SS = [
-    1011,  # begin PHASE I FISS CLAIMS
+    1000,  # begin PHASE I FISS CLAIMS
+    1011,
     1012,
-    1018,
     1013,
     1014,
     1018,
+    1019,
     1021,
     1022,
     1023,
     1028,
+    1029,
     1032,
     1033,
     1034,
+    1039,
     1041,
     1042,
     1043,
+    1049,
     1065,
     1066,
+    1069,
     1071,
     1072,
     1073,
@@ -41,8 +46,19 @@ FISS_SS = [
     1085,
     1086,
     1087,
+    1088,
     1089,
-    2011,  # begin PHASE II and PHASE III FISS CLAIMS
+    1091,
+    1092,
+    1093,
+    1094,
+    1095,
+    1096,
+    1097,
+    1098,
+    1099,
+    2000,
+    2011,  # begin PHASE II and PHASE   III FISS CLAIMS
     2012,
     2013,
     2014,
@@ -52,14 +68,18 @@ FISS_SS = [
     2022,
     2023,
     2028,
+    2029,
     2032,
     2033,
     2034,
+    2039,
     2041,
     2042,
     2043,
+    2049,
     2065,
     2066,
+    2069,
     2071,
     2072,
     2073,
@@ -77,6 +97,15 @@ FISS_SS = [
     2086,
     2087,
     2089,
+    2091,
+    2092,
+    2093,
+    2094,
+    2095,
+    2096,
+    2097,
+    2098,
+    2099,
 ]
 
 # INSTNL NCH
@@ -179,51 +208,5 @@ MA_ENC = [
     4089,  # 089X Medicare Part C Encounter (ENC) Special Facility - Other
     4700,  # PROF Medicare Part C Encounter (ENC) Professional Part B
     4800,  # DME Medicare Part C Encounter (ENC) Durable Medical Equipment (DME)
-    4900,  # DNTL Medicare Advantage Encounter (ENC) DENTAL
 ]
 # end Medicare Advantage Plan (ENC) (Part C)
-
-# begin Medicare-Medicaid Plan (MMP) Encounter Data (5000-5901) (unused so far)
-MMP_ENC = [
-    5000,  # 000X Medicare DUALS Encounter (ENC) Other Type of Bill Groups
-    5011,  # 011X Medicare DUALS Encounter (ENC) Hospital Inpatient (Including Medicare Part A)
-    5012,  # 012X Medicare DUALS Encounter (ENC) Hospital Inpatient (Medicare Part B only)
-    5013,  # 013X Medicare DUALS Encounter (ENC) Hospital Outpatient
-    5014,  # 014X Medicare DUALS Encounter (ENC) Hospital Laboratory Services Provided to Non-patients
-    5018,  # 018X Medicare DUALS Encounter (ENC) Hospital Swing Beds
-    5021,  # 021X Medicare DUALS Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Including Medicare Part A)
-    5022,  # 022X Medicare DUALS Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Medicare Part B only)
-    5023,  # 023X Medicare DUALS Encounter (ENC) Skilled Nursing Facility (SNF) Outpatient
-    5024,  # 024X Medicare DUALS Encounter (ENC) Skilled Nursing Facility (SNF) Other + Laboratory Services Provided to Non-patients
-    5028,  # 028X Medicare DUALS Encounter (ENC) Skilled Nursing Facility (SNF) Swing Beds
-    5032,  # 032X Medicare DUALS Encounter (ENC) Home Health + Inpatient (Medicare Part B only)
-    5033,  # 033X Medicare DUALS Encounter (ENC) Home Health + Outpatient
-    5034,  # 034X Medicare DUALS Encounter (ENC) Home Health + Laboratory Services Provided to Non-patients
-    5041,  # 041X Medicare DUALS Encounter (ENC) Religious Nonmedical Health Care Institutions (RNHCI) - Hospital Inpatient
-    5043,  # 043X Medicare DUALS Encounter (ENC) Religious Nonmedical Health Care Institutions  (RNHCI) - Outpatient
-    5065,  # 065X Medicare DUALS Encounter (ENC) Intermediate Care Intermediate Care Level I
-    5066,  # 066X Medicare DUALS Encounter (ENC) Intermediate Care Intermediate Care Level II
-    5071,  # 071X Medicare DUALS Encounter (ENC) Clinic Rural Health (RHC)
-    5072,  # 072X Medicare DUALS Encounter (ENC) Clinic End-Stage Renal Dialysis (ESRD)- Hospital Based or Independent
-    5073,  # 073X Medicare DUALS Encounter (ENC) Clinic Freestanding
-    5074,  # 074X Medicare DUALS Encounter (ENC) Clinic Outpatient Rehabilitation Facility (ORF)
-    5075,  # 075X Medicare DUALS Encounter (ENC) Clinic Comprehensive Outpatient Rehabilitation Facility ( CORF)
-    5076,  # 076X Medicare DUALS Encounter (ENC) Clinic Community Mental Health Centers (CMHC)
-    5077,  # 077X Medicare DUALS Encounter (ENC) Clinic Federal Qualified Health Center (FQHC)
-    5079,  # 079X Medicare DUALS Encounter (ENC) Clinic - Other
-    5081,  # 081X Medicare DUALS Encounter (ENC) Special Facility Hospice Non-Hospital-based
-    5082,  # 082X Medicare DUALS Encounter (ENC) Special Facility Hospice Hospital-based
-    5083,  # 083X Medicare DUALS Encounter (ENC) Special Facility Ambulatory Surgery Center (ASC)
-    5084,  # 084X Medicare DUALS Encounter (ENC) Special Facility Freestanding Birthing Center
-    5085,  # 085X Medicare DUALS Encounter (ENC) Special Facility Critical Access Hospital (CAH)
-    5086,  # 086X Medicare DUALS Encounter (ENC) Special Facility Residential Facility
-    5089,  # 089X Medicare DUALS Encounter (ENC) Special Facility - Other
-    5601,  # DRUG Medicaid DUALS Encounter Pharmacy (New Record - Original/Rebill)
-    5602,  # DRUG Medicaid DUALS Encounter Pharmacy (Overwrite Record - Rebill/Adjustment)
-    5603,  # DRUG Medicaid DUALS Encounter Pharmacy (Delete Record - Void)
-    5700,  # PROF Medicare DUALS Encounter (ENC) Professional Part B
-    5800,  # DME Medicare DUALS Encounter (ENC) Durable Medical Equipment (DME)
-    5900,  # DNTL Medicaid DUALS Encounter Dental
-    5901,  # DNPB Medicaid DUALS Encounter Dental Predetermination of Benefits
-]
-# end Medicare-Medicaid Plan (MMP) Encounter Data (5000-5901) (unused so far)

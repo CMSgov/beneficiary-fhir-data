@@ -22,12 +22,12 @@ from claims_static import (
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
+    gen_clm_val_ansi_grp_cd,
+    gen_clm_val_ansi_rsn_cd,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
     get_icd_10_prcdr_codes,
-    gen_clm_val_ansi_rsn_cd,
-    gen_clm_val_ansi_grp_cd,
 )
 from claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
 from generator_util import (
