@@ -3,8 +3,10 @@ StructureMaps/*
 !StructureMaps/.gitkeep
 batched_out/*
 !batched_out/.gitkeep
+# out-test/ (no *) makes / trailing slash, covering all levels of out-test
+out-test/
+# out, and exclusions from out
 out/*
-out-test/*
 !out/.gitkeep
 !out/AuditEvent.json
 !out/Patient.json
@@ -23,6 +25,7 @@ out-test/*
 !out/ExplanationOfBenefit-DME.json
 !out/ExplanationOfBenefit-Pharmacy.json
 !out/ExplanationOfBenefit-PriorAuth.json
+# sushi and etc
 sushi/fsh-generated/*
 validator_cli.jar
 ReferenceTables/source-to-target-mappings
