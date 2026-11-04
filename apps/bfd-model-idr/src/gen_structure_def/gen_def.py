@@ -16,7 +16,9 @@ from fhir.resources.R4B.structuredefinition import (
     StructureDefinition,
     StructureDefinitionDifferential,
 )
-from install_fhir_validator import get_validator_jar_path, main as install_validator
+
+from install_fhir_validator import get_validator_jar_path
+from install_fhir_validator import main as install_validator
 
 from .fhir_def import FHIRDefinitions
 
