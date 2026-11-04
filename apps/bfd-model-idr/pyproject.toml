@@ -26,6 +26,7 @@ gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"
 generate-coverage-sample = "generate_coverage_sample:main"
 gen-structure-def = "gen_structure_def:main"
+install-fhir-validator = "install_fhir_validator:main"
 
 [dependency-groups]
 dev = ["ruff>=0.12.9", "pyright>=1.1.403", "debugpy>=1.8.19", "pytest>=9.0.1"]
@@ -51,6 +52,7 @@ module-name = [
   "gen_dd",
   "generate_prior_auth_sample",
   "gen_structure_def",
+  "install_fhir_validator",
 ]
 packages = [
   "src/idr_model",
@@ -60,6 +62,7 @@ packages = [
   "src/generate_prior_auth_sample",
   "src/generate_coverage_sample",
   "src/gen_structure_def",
+  "src/install_fhir_validator",
 ]
 
 [tool.ruff]
