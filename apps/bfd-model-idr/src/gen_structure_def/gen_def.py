@@ -278,7 +278,7 @@ class StructureDefinitionGenerator:
         print(f"Snapshot written to: {output_path}")
 
 
-def get_field(el: any, field: str):
+def get_field(el: any, field: str) -> str:
     if isinstance(el, dict):
         return el.get(field)
     return getattr(el, field, None)
