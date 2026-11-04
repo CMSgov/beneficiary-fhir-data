@@ -87,6 +87,7 @@ language = "system"
 files = "\\.github/(workflows|actions)/.*(\\.ya?ml|.lock)$"
 entry = "./hooks/actions-lock.sh"
 pass_filenames = false
+include_deleted = true
 
 [[repos]]
 repo = "local"
