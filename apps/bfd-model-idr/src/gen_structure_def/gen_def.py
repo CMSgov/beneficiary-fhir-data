@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 
 import requests
 import yaml
@@ -11,11 +12,13 @@ from fhir.resources.R4B.coding import Coding
 from fhir.resources.R4B.elementdefinition import (
     ElementDefinition,
     ElementDefinitionSlicing,
+    ElementDefinitionSlicingDiscriminator
 )
 from fhir.resources.R4B.structuredefinition import (
     StructureDefinition,
     StructureDefinitionDifferential,
 )
+from fhir.resources.fhirtypes import DateTimeType
 
 from install_fhir_validator import get_validator_jar_path
 from install_fhir_validator import main as install_validator
@@ -136,7 +139,7 @@ class StructureDefinitionGenerator:
                     )
                     discriminator = slicing.get("discriminator")
                     if discriminator:
-                        slicing_el.slicing.discriminator = discriminator
+                        slicing_el.slicing.discriminator = cast(list[ElementDefinitionSlicingDiscriminator],discriminator)
 
                     elements.append(slicing_el)
                     slicing_added.add(path)
@@ -210,7 +213,7 @@ class StructureDefinitionGenerator:
                 version=self.version,
                 fhirVersion="4.0.1",
                 title=self.title,
-                date=datetime.now(UTC).isoformat(),
+                date=cast(DateTimeType,datetime.now(UTC).isoformat()),
                 language="en",
                 baseDefinition=source_structure_def.url,
                 derivation="constraint",
