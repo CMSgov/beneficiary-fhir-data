@@ -85,7 +85,7 @@ public abstract class ClaimRxBase extends ClaimBase {
     claimLineItem.ifPresent(
         item -> {
           if (eob.hasBillablePeriod() && eob.getBillablePeriod().hasStart()) {
-            DateType servicedDate = new DateType(eob.getBillablePeriod().getStart());
+            var servicedDate = new DateType(eob.getBillablePeriod().getStart());
             item.setServiced(servicedDate);
           }
           eob.addItem(item);

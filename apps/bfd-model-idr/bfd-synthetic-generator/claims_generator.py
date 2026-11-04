@@ -139,7 +139,6 @@ class _ClaimsFile(StrEnum):
             f.PRVDR_SRVC_PRVDR_NPI_NUM,
             f.CLM_PD_DT,
             f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM,
-            f.CLM_PRNT_CNTL_NUM,  # TODO: not generated yet
             f.CLM_SBMT_FRMT_CD,
             f.CLM_SBMTR_CNTRCT_NUM,
             f.CLM_SBMTR_CNTRCT_PBP_NUM,
@@ -490,7 +489,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_PMD_UNIQ_TRKNG_NUM,
             f.CLM_LINE_NCVRD_PD_AMT,
             f.CLM_LINE_RX_NUM,
-            f.CLM_LINE_GRS_CVRD_CST_TOT_AMT,
             f.CLM_LINE_OTHR_TP_PD_AMT,
             f.CLM_LINE_BNFT_ENHNCMT_1_CD,
             f.CLM_LINE_BNFT_ENHNCMT_2_CD,

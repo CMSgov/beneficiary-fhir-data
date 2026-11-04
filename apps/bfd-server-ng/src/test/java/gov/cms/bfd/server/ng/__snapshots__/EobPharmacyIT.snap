@@ -78,7 +78,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "reference": "Patient/280720433"
   },
   "billablePeriod": {
-    "start": "2018-08-12"
+    "start": "2018-08-12",
+    "end": "2018-08-12"
   },
   "created": "2025-10-31T00:00:00+00:00",
   "provider": {
@@ -692,7 +693,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "reference": "Patient/587115515"
   },
   "billablePeriod": {
-    "start": "2025-08-10"
+    "start": "2025-08-10",
+    "end": "2025-08-10"
   },
   "created": "2025-11-12T00:00:00+00:00",
   "provider": {
