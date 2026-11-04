@@ -155,7 +155,7 @@
     <slf4j.version>2.0.18</slf4j.version>
     <log4j.version>2.26.1</log4j.version>
     <hikari.version>7.1.0</hikari.version>
-    <flyway.version>13.11.0</flyway.version>
+    <flyway.version>13.12.0</flyway.version>
     <checkstyle.version>13.10.0</checkstyle.version>
     <guava.version>33.7.2-jre</guava.version>
     <!-- Guava 33 no longer exports jsr305; needed for javax.annotation.concurrent / Nullable. -->

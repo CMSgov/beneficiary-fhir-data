@@ -1,4 +1,4 @@
-FROM docker.io/flyway/flyway:13.11.1@sha256:fd082457bd0a470f567e236e16ec886c5fd1bd579b1bd1431e65d0e05fde88e2
+FROM docker.io/flyway/flyway:13.12.0@sha256:3704e17c99e22adb8385552cdf8dd7fbc05ae6c420cb78215d9ac6cf1261a15c
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends --only-upgrade ca-certificates \
