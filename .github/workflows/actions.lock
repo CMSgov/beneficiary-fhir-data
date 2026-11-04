@@ -6,6 +6,7 @@ workflows:
     '.github/workflows/_deploy-tofuservice-layer.yml':
         - 'actions/checkout@v7.0.1'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'opentofu/setup-opentofu@v2.0.2'
     '.github/workflows/_deploy-tofuservices.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/build-container-images.yml':
@@ -57,11 +58,6 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
         - 'astral-sh/setup-uv@v10.3.3'
-    '.github/workflows/ci-static-site.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'aws-actions/configure-aws-credentials@v6.3.0'
-        - 'pozetroninc/github-action-get-latest-release@v0.8.0'
-        - 'ruby/setup-ruby@v1.336.0'
     '.github/workflows/deploy-env-services.yml': []
     '.github/workflows/deploy-platform-services.yml': []
     '.github/workflows/release-and-deploy-bfd.yml':
@@ -192,11 +188,6 @@ dependencies:
         commit: 'sha1-f51c7c0d32777d00de777131d25918617a246415'
         owner_id: 96823034
         repo_id: 432240469
-    'ruby/setup-ruby@v1.336.0':
-        ref: 'v1.336.0'
-        commit: 'sha1-de492cf36cbab201753d720ce4f4e336cd688c94'
-        owner_id: 210414
-        repo_id: 231208785
     'sigoden/install-binary@v1.3.0':
         ref: 'v1.3.0'
         commit: 'sha1-bea43f0d6192f38559f1850838d1fd7801f546d7'
