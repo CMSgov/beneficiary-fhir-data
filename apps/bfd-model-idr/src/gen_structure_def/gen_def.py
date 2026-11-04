@@ -16,6 +16,7 @@ from fhir.resources.R4B.structuredefinition import (
     StructureDefinition,
     StructureDefinitionDifferential,
 )
+from install_fhir_validator import get_validator_jar_path, main as install_validator
 
 from .fhir_def import FHIRDefinitions
 
@@ -180,7 +181,6 @@ class StructureDefinitionGenerator:
                     if slices:
                         sorted_elements.extend(slices)
                     for slice_name in slice_names:
-                        print(slice_name)
                         for el in [el for el in els if get_field(el, "sliceName") == slice_name]:
                             if el not in sorted_elements:
                                 sorted_elements.append(el)
@@ -247,13 +247,15 @@ class StructureDefinitionGenerator:
         self,
         input_sd_path: Path,
         differential_path: Path,
-        validator_jar_path: str = "validator_cli.jar",
     ) -> None:
         output_path = Path(f"{self.output_directory}/{self.output_file_name}")
+        validator_jar_path = get_validator_jar_path()
+        if not validator_jar_path.exists():
+            install_validator()
         cmd = [
             "java",
             "-jar",
-            validator_jar_path,
+            str(validator_jar_path.resolve()),
             str(
                 differential_path.resolve()
             ),  # existing profile, already has a snapshot — used as context

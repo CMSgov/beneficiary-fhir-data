@@ -27,6 +27,7 @@ gen-dd = "gen_dd:main"
 generate-prior-auth-sample = "generate_prior_auth_sample:main"
 generate-coverage-sample = "generate_coverage_sample:main"
 gen-structure-def = "gen_structure_def:main"
+install-fhir-validator = "install_fhir_validator:main"
 
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14"]
@@ -41,4 +42,5 @@ module-name = [
   "generate_prior_auth_sample",
   "generate_coverage_sample",
   "gen_structure_def",
+  "install_fhir_validator",
 ]
