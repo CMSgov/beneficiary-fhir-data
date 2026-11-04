@@ -133,16 +133,14 @@ class StructureDefinitionGenerator:
                         slicing=ElementDefinitionSlicing(
                             rules=slicing.get("rules") or "open",
                             ordered=slicing.get("ordered") or None,
+                            discriminator=cast(
+                                list[ElementDefinitionSlicingDiscriminator],
+                                slicing.get("discriminator"),
+                            ),
                         ),
                         min=slicing.get("min"),
                         max=slicing.get("max"),
                     )
-
-                    if slicing.get("discriminator"):
-                        slicing_el.slicing.discriminator = cast(
-                            list[ElementDefinitionSlicingDiscriminator],
-                            slicing.get("discriminator"),
-                        )
 
                     elements.append(slicing_el)
                     slicing_added.add(path)

@@ -15,17 +15,9 @@ import click
     default="6.7.10",
 )
 def main(validator_cli_version: str) -> None:
-    try:
-        git_root = subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"], text=True, stderr=subprocess.STDOUT
-        ).strip()
-    except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to find git repository root.\n{e.output}", file=sys.stderr)
-        sys.exit(1)
-
     jar_path = get_validator_jar_path()
 
-    if (jar_path.exists()):
+    if jar_path.exists():
         print("validator_cli.jar exists. Exiting.")
         sys.exit(0)
 
@@ -35,6 +27,7 @@ def main(validator_cli_version: str) -> None:
     except Exception as e:
         print(f"Error downloading the jar file: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 def get_validator_jar_path() -> Path:
     try:
