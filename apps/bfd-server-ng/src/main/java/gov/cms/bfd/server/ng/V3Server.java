@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import gov.cms.bfd.server.ng.config.Configuration;
 import gov.cms.bfd.server.ng.config.NonCachingCapabilityStatementProvider;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
+import gov.cms.bfd.server.ng.interceptor.CapabilityStatementInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
@@ -46,6 +47,7 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
+    this.registerInterceptor(new CapabilityStatementInterceptor());
     this.registerInterceptor(requestMetricsInterceptor);
   }
 
