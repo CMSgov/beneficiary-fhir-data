@@ -194,7 +194,7 @@ class StructureDefinitionGenerator:
                             el
                             for el in elements
                             if str(get_field(el, "path")).startswith(p)
-                            and f":{slice_name}" in get_field(el, "id")
+                            and f":{slice_name}" in str(get_field(el, "id"))
                         ]:
                             if el not in sorted_elements:
                                 sorted_elements.append(el)
