@@ -141,7 +141,7 @@ class StructureDefinitionGenerator:
                     if slicing.get("discriminator"):
                         slicing_el.slicing.discriminator = cast(
                             list[ElementDefinitionSlicingDiscriminator],
-                            slicing.get("discriminator")
+                            slicing.get("discriminator"),
                         )
 
                     elements.append(slicing_el)
