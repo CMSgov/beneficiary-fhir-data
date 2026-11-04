@@ -51,14 +51,14 @@ from constants import (
     PRVDR_HSTRY,
 )
 from row_adapter import RowAdapter
-from snowflake.snowpark import Session
+from snowflake.snowpark import DataFrame, Session, Table
 from snowflake.snowpark.functions import col, when_matched, when_not_matched
 from snowflake.snowpark.functions import hash as snowpark_hash
 
 logger = logging.getLogger(__name__)
 
 ALL_KEYS = "all_keys"
-_SYNTHETIC_PREX = "SYNTHETIC"
+_SYNTHETIC_PREFIX = "SYNTHETIC"
 _TABLE_PREFIX = "V2_MDCR"
 
 _NON_OVERWRITEABLE = {
@@ -265,7 +265,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session = session
         self.database = database
         self.schema = schema
-        self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._column_types_cache: dict[tuple[str, str, str], set[str]] = {}
         self.overwrites = overwrites or {}
 
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
@@ -277,7 +277,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 override.schema or self.schema,
             )
         return (
-            _TABLE_PREFIX + table_name.removeprefix(_SYNTHETIC_PREX),
+            _TABLE_PREFIX + table_name.removeprefix(_SYNTHETIC_PREFIX),
             self.database,
             self.schema,
         )
@@ -286,11 +286,11 @@ class SnowflakeWriter(OutputDestinationWriter):
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         return f"{database}.{schema}.{resolved_table_name}"
 
-    def _qualified_session_table(self, table_name: str) -> Any:
+    def _qualified_session_table(self, table_name: str) -> Table:
         table = self.qualified_table(table_name)
         return self.session.table(table)
 
-    def _drop_fields(self, data, table_name: str):
+    def _drop_fields(self, data: Table | DataFrame, table_name: str) -> DataFrame | Table:
         # Drop fields from the query so they aren't fetched, allowing us to generate specified
         # fields from scratch during a regeneration.
         resolved_table_name, _, _ = self.resolve_target_table(table_name)
@@ -353,7 +353,7 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         if cache_key not in self._column_types_cache:
             rows = (
-                self.session.table(f'"{database}".information_schema.columns')
+                self.session.table(f"{database}.information_schema.columns")
                 .filter(
                     (col("TABLE_SCHEMA") == schema.upper())
                     & (col("TABLE_NAME") == table_name.upper())

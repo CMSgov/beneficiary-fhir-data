@@ -398,6 +398,15 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
         --overwrite "{{ overwrite }}"
 
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("source", long, help="Database to clone from e.g. BFD_TEST")]
+[arg("target", long, help="Database to clone to create or replace e.g. BFD_SANDBOX")]
+[doc("Copy over all data from one synthetic database environment to the specified environments")]
+[group('model')]
+copy-synthetic-data env source target:
+    cd ./apps/bfd-model-idr/bfd-synthetic-generator && BFD_ENV="{{ env }}" ./copy-synthetic-data.sh \
+        --source "{{ source }}" \
+        --target "{{ target }}"
 
 [arg("tablesample", long, help="Percent of table to sample")]
 [arg("users", long, help="Peak number of concurrent Locust users")]

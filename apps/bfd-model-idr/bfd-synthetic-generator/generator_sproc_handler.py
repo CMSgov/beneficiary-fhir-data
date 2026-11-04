@@ -1,17 +1,17 @@
 import logging
-import os
 import sys
 import time
+from pathlib import Path
 
 from snowflake.snowpark import Session
 
-# Needed to find generator files inside Snowflake's environment
-current_file_dir = os.path.dirname(os.path.abspath(__file__))
-package_root_dir = os.path.dirname(current_file_dir)
+current_file_dir = Path(__file__).resolve().parent
+package_root_dir = current_file_dir.parent
 
-for path in (current_file_dir, package_root_dir):
-    if path not in sys.path:
-        sys.path.append(path)
+for path_obj in (current_file_dir, package_root_dir):
+    string_path = str(path_obj)
+    if string_path not in sys.path:
+        sys.path.append(string_path)
 
 from claims_generator import GeneratePacDataMode, generate  # noqa: E402
 from load_synthetic_output import BeneSkMode, SnowflakeWriter, parse_overwrites  # noqa: E402
