@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import requests
 import yaml
@@ -288,7 +288,7 @@ class StructureDefinitionGenerator:
         print(f"Snapshot written to: {output_path}")
 
 
-def get_field(el: any, field: str) -> any | None:
+def get_field(el: Any, field: str) -> Any | None:
     if isinstance(el, dict):
         return el.get(field)
     return getattr(el, field, None)
