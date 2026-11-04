@@ -242,7 +242,7 @@ SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
     # professional
     tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH): "eob-carrier-nch.json",
     tuple(ADJUDICATED_PROFESSIONAL_DME_NCH): "eob-dme-nch.json",
-    tuple(MCS_SS): "eob-mcs-multi-carrier-ss.json",
+    tuple(MCS_SS): "eob-carrier-mcs-ss.json",
     tuple(VMS_SS): "eob-vms-ss.json",
     # institutional
     tuple(INSTITUTIONAL_HHA_NCH): "eob-hha-nch.json",
@@ -306,7 +306,6 @@ class SampleGenerator:
             self.add_instl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
-            # no special logic for these so commented for now
         elif claim_type in ADJUDICATED_PROFESSIONAL_NCH:
             print("found Carrier or Carrier DME -- no special joins")
         else:

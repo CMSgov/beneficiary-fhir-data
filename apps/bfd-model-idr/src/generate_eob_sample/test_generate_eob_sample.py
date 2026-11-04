@@ -237,7 +237,7 @@ def test_generate_eob_sample_carrier_mcs() -> None:
 
     assert result.exit_code == 0
 
-    output_file = Path("out-test/eob-mcs-multi-carrier-ss.json")
+    output_file = Path("out-test/eob-carrier-mcs-ss.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:

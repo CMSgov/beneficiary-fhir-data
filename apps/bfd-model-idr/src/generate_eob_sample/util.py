@@ -86,7 +86,8 @@ def extract_col_str(row: dict[str, str], name: str) -> str | None:
 
 def sample_name_for_claim_type(groups: dict[tuple[int, ...], str], claim_type: int) -> str:
     return next(
-        (name for types, name in groups.items() if claim_type in types), "EOB-Base-Sample.json"
+        (name for types, name in groups.items() if claim_type in types),
+        "eob-type-missing-name.json"
     )
 
 
