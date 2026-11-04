@@ -137,10 +137,11 @@ class StructureDefinitionGenerator:
                         min=slicing.get("min"),
                         max=slicing.get("max"),
                     )
-                    discriminator = slicing.get("discriminator")
-                    if discriminator:
+
+                    if slicing.get("discriminator"):
                         slicing_el.slicing.discriminator = cast(
-                            list[ElementDefinitionSlicingDiscriminator], discriminator
+                            list[ElementDefinitionSlicingDiscriminator],
+                            slicing.get("discriminator")
                         )
 
                     elements.append(slicing_el)
@@ -287,7 +288,7 @@ class StructureDefinitionGenerator:
         print(f"Snapshot written to: {output_path}")
 
 
-def get_field(el: any, field: str) -> str:
+def get_field(el: any, field: str) -> any | None:
     if isinstance(el, dict):
         return el.get(field)
     return getattr(el, field, None)
