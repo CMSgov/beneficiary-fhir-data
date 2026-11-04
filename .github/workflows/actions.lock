@@ -6,6 +6,7 @@ workflows:
     '.github/workflows/_deploy-tofuservice-layer.yml':
         - 'actions/checkout@v7.0.1'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'opentofu/setup-opentofu@v2.0.2'
     '.github/workflows/_deploy-tofuservices.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/build-container-images.yml':
