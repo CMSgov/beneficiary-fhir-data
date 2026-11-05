@@ -383,7 +383,8 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
     cur = conn.execute(
         """select * from idr.claim_item_institutional_nch
-           where clm_uniq_id = -9879437343384 and clm_line_num = 1""")
+           where clm_uniq_id = -9879437343384 and clm_line_num = 1"""
+    )
 
     rows = cur.fetchmany(1)
     assert rows[0]["clm_fac_prvdr_oscar_num"] == "-39T14"
