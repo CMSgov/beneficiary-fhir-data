@@ -27,8 +27,16 @@ from constants import (
     BENE_STUS,
     BENE_TP,
     BENE_XREF,
+    CLM_DT_SGNTR_SK,
+    CLM_LINE_NUM,
+    CLM_NUM_SK,
+    CLM_OCRNC_SGNTR_SK,
+    CLM_RLT_COND_SGNTR_SK,
+    CLM_RLT_OCRNC_SGNTR_SK,
+    CLM_TYPE_CD,
     CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
+    GEO_BENE_SK,
 )
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -61,6 +69,17 @@ AVAIL_CONTRACT_NAMES = [
     "Happy Heart",
 ]
 NOW = date.today()
+
+_CAST_TO_INT_FIELDS = [
+    CLM_NUM_SK,
+    GEO_BENE_SK,
+    CLM_TYPE_CD,
+    CLM_DT_SGNTR_SK,
+    CLM_LINE_NUM,
+    CLM_RLT_COND_SGNTR_SK,
+    CLM_OCRNC_SGNTR_SK,
+    CLM_RLT_OCRNC_SGNTR_SK,
+]
 
 # Lazily computed output table by filename (see above constants) to mappings of the file's rows by
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
@@ -165,7 +184,11 @@ def load_file_dict(
                 file_path,
                 dtype=str,
                 na_filter=exclude_empty,
+                keep_default_na=False,
             )
+            for field in _CAST_TO_INT_FIELDS:
+                if field in csv_data.columns:
+                    csv_data[field] = csv_data[field].astype(int)
             file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
             if not exclude_empty:
                 files[file_name] = load_file(file_as_dictlist)  # type: ignore
@@ -259,7 +282,7 @@ class GeneratorUtil:
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
-        kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
+        kill_cred_cd = 1 if probability(0.10) else 2
 
         efctv_ts = self.fake.date_time_between_dates(
             datetime.date(year=2017, month=5, day=20),
@@ -400,8 +423,8 @@ class GeneratorUtil:
     def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
-        expired = random.random() < 0.2
-        future = random.random() < 0.2
+        expired = probability(0.2)
+        future = probability(0.2)
         self._generate_coverages(
             patient=patient,
             coverage_parts=parts,
@@ -670,7 +693,7 @@ class GeneratorUtil:
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
         )
-        member_id_num = self.id_gen.numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        member_id_num = str(self.id_gen.numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM"))
         group_num = str(random.randint(-999, -100))
         prcsr_num = str(random.randint(-999999, -100000))
         bank_id_num = str(random.randint(-99999, -10000))
