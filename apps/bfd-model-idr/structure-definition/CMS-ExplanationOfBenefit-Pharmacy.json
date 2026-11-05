@@ -6,7 +6,7 @@
   "name" : "ExplanationOfBenefit-Pharmacy-CMS",
   "title" : "ExplanationOfBenefit Pharmacy CMS",
   "status" : "active",
-  "date" : "2026-11-04T19:05:00.836579Z",
+  "date" : "2026-11-05T15:12:00.508342Z",
   "description" : "This is the CMS Pharmacy Profile.",
   "jurisdiction" : [{
     "coding" : [{
@@ -3755,7 +3755,7 @@
     {
       "id" : "ExplanationOfBenefit.created",
       "path" : "ExplanationOfBenefit.created",
-      "short" : "Response creation date",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_EFCTV_DT",
       "definition" : "The date this resource was created.",
       "comment" : "Date the claim was adjudicated (179)",
       "requirements" : "Need to record a timestamp for use by both the recipient and the issuer.",
@@ -24287,6 +24287,13 @@
       "path" : "ExplanationOfBenefit.billablePeriod.end",
       "short" : "ExplanationOfBenefit-Pharmacy.CLM_THRU_DT",
       "min" : 0,
+      "max" : "1"
+    },
+    {
+      "id" : "ExplanationOfBenefit.created",
+      "path" : "ExplanationOfBenefit.created",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_EFCTV_DT",
+      "min" : 1,
       "max" : "1"
     },
     {
