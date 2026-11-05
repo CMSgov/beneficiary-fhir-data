@@ -39,9 +39,29 @@ def main(source_directory: str, output_directory: str, delete_temp_files: bool) 
         base_definition="https://hl7.org/fhir/us/carin-bb/STU2.2/en/StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy",
         resource_type="ExplanationOfBenefit",
         output_file_name="CMS-ExplanationOfBenefit-Pharmacy.json",
+        applies_to="Pharmacy",
         delete_tmp_files=delete_temp_files,
     )
     pharmacy_generator.run()
+
+    inpatient_generator = StructureDefinitionGenerator(
+        source_directory=source_directory,
+        output_directory=output_directory,
+        url="https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Inpatient-Institutional",
+        profile="CMS",
+        source_yaml="ExplanationOfBenefit.yaml",
+        version="2.2.0",
+        name="ExplanationOfBenefit-Inpatient-CMS",
+        title="ExplanationOfBenefit Inpatient Institutional CMS",
+        description="""This is the CMS Inpatient Institutional Profile.""",
+        base_definition="https://build.fhir.org/ig/HL7/carin-bb/en/StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional",
+        resource_type="ExplanationOfBenefit",
+        output_file_name="CMS-ExplanationOfBenefit-Inpatient-Institutional.json",
+        applies_to="Inpatient",
+        delete_tmp_files=delete_temp_files,
+    )
+
+    inpatient_generator.run()
 
 
 if __name__ == "__main__":

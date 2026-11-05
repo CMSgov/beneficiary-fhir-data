@@ -41,6 +41,7 @@ class StructureDefinitionGenerator:
         base_definition: str,
         resource_type: str,
         output_file_name: str,
+        applies_to: str,
         delete_tmp_files: bool = True,
     ):
         self.source_directory = source_directory
@@ -55,12 +56,15 @@ class StructureDefinitionGenerator:
         self.base_definition = base_definition
         self.resource_type = resource_type
         self.output_file_name = output_file_name
+        self.applies_to = applies_to
         self.delete_tmp_files = delete_tmp_files
 
     def run(self) -> None:
         """Generate StructureDefinition Resource."""
+        print(f"Title: {self.title}")
         print(f"Source Directory: {self.source_directory}")
         print(f"Target Directory: {self.output_directory}")
+        print(f"File: {self.output_file_name}")
 
         yaml_path = Path(f"{self.source_directory}/{self.source_yaml}")
         with yaml_path.open(mode="r", encoding="utf-8") as f:
@@ -69,7 +73,7 @@ class StructureDefinitionGenerator:
         data = [
             node
             for node in data
-            if self.profile in node.get("profiles", []) and node.get("structureDef")
+            if self.profile in node.get("profiles", []) and node.get("structureDef") and self.applies_to in node.get("appliesTo",[])
         ]
 
         output_dir = Path(self.output_directory)

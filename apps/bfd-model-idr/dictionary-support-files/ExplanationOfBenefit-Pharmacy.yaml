@@ -138,6 +138,10 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.created
+    id: ExplanationOfBenefit.created
+    min: 1
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SRC_ID
   appliesTo:
     - Pharmacy
