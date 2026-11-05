@@ -1056,7 +1056,7 @@
         max: "1"
     binding:
       strength: preferred
-      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD'
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD
 - inputPath: LineItemComponent.CLM_LTC_DSPNSNG_MTHD_CD
   appliesTo:
     - Pharmacy

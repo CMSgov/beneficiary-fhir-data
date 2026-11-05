@@ -441,6 +441,26 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:prvdrBlgPrvdrNpiNum
+    sliceName: prvdrBlgPrvdrNpiNum
+    slicing:
+      id: ExplanationOfBenefit.contained
+      path: ExplanationOfBenefit.contained
+      discriminator:
+        - type: profile
+          path: $this
+      rules: open
+    constraint:
+      - key: provider-blg-provider-num-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-blg-provider-num-req
+        severity: error
+        human: The contained provider Practitioner must have a PRVDR_BLG_PRVDR_NPI_NUM identifier with a value.
+        expression: $this.identifier.where(system='http://hl7.org/fhir/sid/us-npi').value.exists()
 - inputPath: ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD
   appliesTo:
     - Inpatient
@@ -462,6 +482,19 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:clmBlgPrvdrZip5Cd
+    sliceName: clmBlgPrvdrZip5Cd
+    constraint:
+      - key: provider-blg-provider-zip-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-blg-provider-num-req
+        severity: error
+        human: The contained provider Practitioner must have a PRVDR_BLG_PRVDR_NPI_NUM identifier with a value.
+        expression: $this.address.postalCode.exists()
 - inputPath: Provider.CLM_BLG_PRVDR_TAX_NUM
   appliesTo:
     - Inpatient
@@ -480,6 +513,19 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.contained
+    id: ExplanationOfBenefit.contained:clmBlgPrvdrTaxNum
+    sliceName: clmBlgPrvdrTaxNum
+    constraint:
+      - key: provider-blg-tax-num-match-1
+        severity: error
+        human: This contained Practitioner's id must match the local reference in ExplanationOfBenefit.provider
+        expression: "%context.id = %resource.provider.reference.substring(1)"
+      - key: provider-blg-tax-num-req
+        severity: error
+        human: The contained provider must have a CLM_BLG_PRVDR_TAX_NUM identifier with a value.
+        expression: $this.identifier.where(system='urn:oid:2.16.840.1.113883.4.4').value.exists()
 - inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient
@@ -505,6 +551,25 @@
     - CMS
     - Basis
     - Regular
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmQueryCd.code.coding
+    path: ExplanationOfBenefit.supportingInfo.code.coding
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmQueryCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmQueryCd
+        min: 1
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmQueryCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_QUERY_CD
 - inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -568,6 +633,20 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNrlnRicCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNrlnRicCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNrlnRicCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD
   appliesTo:
     - Outpatient
