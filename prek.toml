@@ -7,11 +7,13 @@ repo = "builtin"
 hooks = [
   { id = "trailing-whitespace" },
   { id = "end-of-file-fixer", exclude = "\\.snap" },
-  { id = "check-added-large-files" },
+  { id = "check-added-large-files", exclude = "^apps/bfd-model-idr/structure-definition/" },
   { id = "check-case-conflict" },
   { id = "fix-byte-order-marker" },
   # Normalize line endings to LF
-  { id = "mixed-line-ending", args = ["--fix=lf"] },
+  { id = "mixed-line-ending", args = [
+    "--fix=lf",
+  ] },
   { id = "check-symlinks" },
   { id = "destroyed-symlinks" },
   { id = "check-merge-conflict" },
