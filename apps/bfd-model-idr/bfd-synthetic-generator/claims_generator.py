@@ -1407,8 +1407,7 @@ def _generate_batch(
                         else idx,
                         init_clm_line_fiss=init_clm_line_fiss,
                     )
-                ]
-                out_tables[f.CLM_LINE_FISS].extend(clm_line_fiss)
+                    out_tables[f.CLM_LINE_FISS].append(clm_line_fiss)
 
     return out_tables
 
