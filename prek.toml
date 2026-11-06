@@ -69,20 +69,23 @@ pass_filenames = false
 entry = "./hooks/install-recommended-extensions.sh"
 
 [[repos]]
-repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.8"
-hooks = [
-  { id = "ruff-check", args = [
-    "--fix",
-  ], types_or = [
-    "python",
-    "pyi",
-  ], exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/" },
+repo = "local"
+# ruff runs from the workspace dev group, so the hooks and `just py-check` use the same version.
+[[repos.hooks]]
+id = "ruff-check"
+name = "ruff check"
+language = "system"
+entry = "uv run ruff check --fix"
+types_or = ["python", "pyi"]
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
 
-  { id = "ruff-format", types = [
-    "python",
-  ], exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/" },
-]
+[[repos.hooks]]
+id = "ruff-format"
+name = "ruff format"
+language = "system"
+entry = "uv run ruff format"
+types = ["python"]
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
 
 [[repos]]
 repo = "local"
