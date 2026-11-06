@@ -914,6 +914,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["bfd_prvdr_rndrng_npi_type"] is None
     assert row["bfd_updated_ts"] == old_update_ts
 
+
 def _reset_db(
     conn: psycopg.Connection[TupleRow], sample_path: Path, postgres: PostgresContainer
 ) -> None:

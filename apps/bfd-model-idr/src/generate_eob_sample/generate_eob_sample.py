@@ -332,9 +332,7 @@ class SampleGenerator:
         provider_qualifier = str(claim_row.get("PRVDR_PRSBNG_ID_QLFYR_CD", "")).strip()
 
         prov_row = (
-            self.read_provider(provider_id)
-            if provider_qualifier == "01" and provider_id
-            else {}
+            self.read_provider(provider_id) if provider_qualifier == "01" and provider_id else {}
         )
 
         clm_sbmtr_cntrct_num = str(claim_row.get("CLM_SBMTR_CNTRCT_NUM", "")).strip()
