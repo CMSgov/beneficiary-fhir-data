@@ -79,8 +79,8 @@ class OtherGeneratorUtil:
         all_provider_historys = init_provider_historys + additional_provider_historys
 
         provider_historys: list[RowAdapter] = []
-        generated_type_1_npis = set()
-        generated_type_2_npis = set()
+        generated_type_1_npis: set[str] = set()
+        generated_type_2_npis: set[str] = set()
         for idx, provider_history in enumerate(all_provider_historys):
             prvdr_sk = provider_history.get(f.PRVDR_SK) or gen_utils.id_gen.npi_id(field="PRVDR_SK")
             # make half of providers type 1 npi and half type 2

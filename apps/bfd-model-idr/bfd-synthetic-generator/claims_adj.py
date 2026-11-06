@@ -206,7 +206,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
@@ -915,7 +915,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_LINE_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
