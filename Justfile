@@ -83,6 +83,13 @@ docker-images:
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
+[doc("""Runs every check a Python change must pass: lockfile consistency, lint, formatting and type
+checking. Works from any directory and always checks the workspace root. The same checks, plus the
+workspace member test suites, run as prek hooks on each commit.""")]
+[group('python')]
+py-check:
+    ./ops/utils/scripts/py-check.sh
+
 [doc("Removes the local db container")]
 [group('database')]
 remove-db:
