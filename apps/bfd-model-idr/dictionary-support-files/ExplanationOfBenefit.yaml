@@ -111,6 +111,14 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.identifier
+    id: ExplanationOfBenefit.identifier:CLM-CNTL-NUM
+    sliceName: CLM-CNTL-NUM
+    pattern:
+      type: Identifier
+      detail:
+        system: https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM
 - inputPath: ExplanationOfBenefit-Base.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Inpatient
@@ -134,6 +142,43 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: "ExplanationOfBenefit.related:priorClaim.reference.identifier:clmCntlNum.value"
+    path: ExplanationOfBenefit.related.reference.identifier.value
+    min: 1
+    slicing:
+      id: ExplanationOfBenefit.related
+      path: ExplanationOfBenefit.related
+      slicing:
+        discriminator:
+          - type: value
+            path: relationship.coding.System
+    precedingEd:
+      - id: "ExplanationOfBenefit.related:priorClaim"
+        path: ExplanationOfBenefit.related
+        sliceName: priorClaim
+        min: 0
+        max: "*"
+      - id: "ExplanationOfBenefit.related:priorClaim.relationship.coding.system"
+        path: ExplanationOfBenefit.related.relationship.coding.system
+        min: 1
+        patternUri: http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship
+      - id: "ExplanationOfBenefit.related:priorClaim.reference.identifier"
+        path: ExplanationOfBenefit.related.reference.identifier
+        slicing:
+          discriminator:
+            - type: value
+              path: system
+          rules: open
+      - id: "ExplanationOfBenefit.related:priorClaim.reference.identifier:clmCntlNum"
+        path: ExplanationOfBenefit.related.reference.identifier
+        sliceName: clmCntlNum
+        min: 0
+        max: "1"
+      - id: "ExplanationOfBenefit.related:priorClaim.reference.identifier:clmCntlNum.system"
+        path: ExplanationOfBenefit.related.reference.identifier.system
+        min: 1
+        patternUri: https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
     - Inpatient
