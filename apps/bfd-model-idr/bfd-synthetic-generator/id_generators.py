@@ -22,6 +22,7 @@ from constants import (
     PRVDR_HSTRY,
 )
 from load_synthetic_output import SnowflakeWriter
+from snowflake.snowpark import Row
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +87,11 @@ class RandomIdGenerator(IdGenerator):
     # remembered in memory per field. Used only by the CSV flow.
 
     def __init__(self) -> None:
-        self._used_by_field: dict[str, set[str]] = {}
+        self._used_by_field: dict[str, set[str | int]] = {}
         self._used_bene_sk: set[int] = set()
         self._used_mbi: set[str] = set()
 
-    def _gen_id(self, field: str, gen_func: Callable[[], str | int]) -> str | int:
+    def _gen_id[T: str | int](self, field: str, gen_func: Callable[[], T]) -> T:
         id_set = self._used_by_field.setdefault(field, set())
         while True:
             id = gen_func()
@@ -179,7 +180,7 @@ def _query(writer: SnowflakeWriter, sql: str) -> Any:
     return result[0][0] if result else None
 
 
-def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[tuple[Any, ...]]:
+def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[Row]:
     return writer.session.sql(sql).collect()
 
 

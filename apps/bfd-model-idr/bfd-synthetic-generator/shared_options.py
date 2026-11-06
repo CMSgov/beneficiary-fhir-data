@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import Any
+
 import click
 from constants import GeneratePacDataMode
 from load_synthetic_output import BeneSkMode
@@ -5,7 +8,7 @@ from load_synthetic_output import BeneSkMode
 _BATCH_SIZE = 50_000
 
 
-def common_options(function):
+def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
     function = click.option(
         "--force-ztm",
         is_flag=True,

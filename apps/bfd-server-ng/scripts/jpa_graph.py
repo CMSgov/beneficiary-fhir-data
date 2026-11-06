@@ -217,7 +217,9 @@ def entity_profile(class_name: str) -> tuple[str, bool]:
     return "CMS", True
 
 
-def entity_exposed_columns(graph: dict, class_name: str, visited: set = None) -> set[str]:
+def entity_exposed_columns(
+    graph: dict, class_name: str, visited: set[str] | None = None
+) -> set[str]:
     """Every db_col reachable from this entity through inheritance and
     nested @Embedded types, flattened into one set. Used only for the
     profile-completeness check, which doesn't care where a column lives,
@@ -283,7 +285,7 @@ def print_entity_tree(
     class_name: str,
     profile: str,
     indent: str = "",
-    visited: set = None,
+    visited: set[str] | None = None,
     debug_col: str | None = None,
 ) -> None:
     """Print this class's own columns and embeds, then recurse into its
@@ -344,7 +346,7 @@ def print_entity_tree(
 
 def print_entity(
     graph: dict, profile_map: dict, entity_name: str, debug_col: str | None = None
-) -> tuple[str, list]:
+) -> tuple[str, set[str]]:
     node = graph[entity_name]
     profile, inferred = entity_profile(entity_name)
 
@@ -371,7 +373,7 @@ def _collect_reachable_profiles(graph: dict) -> dict[str, set]:
     """
     reachable: dict[str, set] = {}
 
-    def walk(class_name: str, profile, visited: set) -> None:
+    def walk(class_name: str, profile: str, visited: set[str]) -> None:
         if class_name in visited or class_name not in graph:
             return
         visited.add(class_name)
@@ -427,7 +429,7 @@ def _print_shared_fields(
     indent: str,
     expand_embeds: bool,
     reachable: dict,
-    visited: set = None,
+    visited: set[str] | None = None,
 ) -> None:
     visited = visited if visited is not None else set()
     if class_name in visited or class_name not in graph:
@@ -464,7 +466,7 @@ def print_shared_class(
     profile_map: dict,
     class_name: str,
     expand_embeds: bool = False,
-    reachable: dict = None,
+    reachable: dict[str, set[str]] | None = None,
 ) -> None:
     """Print a MappedSuperclass/Embeddable's own declared columns (not
     resolved through inheritance -- the parent gets its own section) with
@@ -791,7 +793,9 @@ def check_cms_superset(
     return findings, skipped_stubs
 
 
-def _print_cms_superset_findings(findings: list, skipped_stubs: list = None) -> None:
+def _print_cms_superset_findings(
+    findings: list, skipped_stubs: list[tuple[str, str]] | None = None
+) -> None:
     skipped_stubs = skipped_stubs or []
     if skipped_stubs:
         print(

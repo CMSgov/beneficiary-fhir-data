@@ -7,7 +7,7 @@ MATCHBOX_SERVER = "http://localhost:18080/matchboxv3"
 
 
 # populate matchbox's tx library
-def upload_resources(resource_dir, server_url):
+def upload_resources(resource_dir: Path, server_url: str) -> None:
     print("Uploading resources to matchbox")
     try:
         if not resource_dir.exists():

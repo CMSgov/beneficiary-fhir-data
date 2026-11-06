@@ -174,7 +174,7 @@ for walk_info in os.walk(dd_support_folder):
 dd_df = pd.DataFrame(dd_df)
 
 
-def replace_str(input_str):
+def replace_str(input_str: object) -> str:
     if isinstance(input_str, str) and len(str(input_str)) > 0:
         return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
     return ""

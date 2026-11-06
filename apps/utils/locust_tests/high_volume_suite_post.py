@@ -19,11 +19,11 @@ from locust import TaskSet, User, events, tag, task
 from locust.env import Environment
 
 TaskT = TypeVar("TaskT", Callable[..., None], type["TaskSet"])
-MASTER_BENE_IDS: Collection[str] = []
-MASTER_CONTRACT_DATA: Collection[dict[str, str]] = []
-MASTER_MBIS: Collection[str] = []
-TAGS: set[str] = set()
-EXCLUDE_TAGS: set[str] = set()
+_master_bene_ids: Collection[str] = []
+_master_contract_data: Collection[dict[str, str]] = []
+_master_mbis: Collection[str] = []
+_tags: set[str] = set()
+_exclude_tags: set[str] = set()
 
 
 @events.test_start.add_listener
@@ -35,38 +35,38 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global MASTER_BENE_IDS  # noqa: PLW0603
-    MASTER_BENE_IDS = data.load_from_parsed_opts(
+    global _master_bene_ids  # noqa: PLW0603
+    _master_bene_ids = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_bene_ids,
         use_table_sample=True,
         data_type_name="bene_ids",
     )
 
-    global TAGS  # noqa: PLW0603
-    TAGS = (
+    global _tags  # noqa: PLW0603
+    _tags = (
         set(environment.parsed_options.locust_tags.split())
         if hasattr(environment.parsed_options, "locust_tags")
         else set()
     )
 
-    global EXCLUDE_TAGS  # noqa: PLW0603
-    EXCLUDE_TAGS = (
+    global _exclude_tags  # noqa: PLW0603
+    _exclude_tags = (
         set(environment.parsed_options.locust_exclude_tags.split())
         if hasattr(environment.parsed_options, "locust_exclude_tags")
         else set()
     )
 
-    global MASTER_CONTRACT_DATA  # noqa: PLW0603
-    MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
+    global _master_contract_data  # noqa: PLW0603
+    _master_contract_data = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_contract_ids,
         use_table_sample=True,
         data_type_name="contract_data",
     )
 
-    global MASTER_MBIS  # noqa: PLW0603
-    MASTER_MBIS = data.load_from_parsed_opts(
+    global _master_mbis  # noqa: PLW0603
+    _master_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_mbis,
         use_table_sample=True,
@@ -428,9 +428,9 @@ class HighVolumeUser(BFDUserBase):
 
     def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
-        self.bene_ids = list(MASTER_BENE_IDS)
-        self.contract_data = list(MASTER_CONTRACT_DATA)
-        self.mbis = list(MASTER_MBIS)
+        self.bene_ids = list(_master_bene_ids)
+        self.contract_data = list(_master_contract_data)
+        self.mbis = list(_master_mbis)
 
         # Shuffle the data to ensure each User isn't making requests with the same data in the same
         # order
@@ -467,7 +467,7 @@ class HighVolumeUser(BFDUserBase):
             type(
                 "HVUFilteredTaskSet",
                 (HighVolumeTaskSet,),
-                {"tasks": self.get_runnable_tasks(TAGS, EXCLUDE_TAGS)},
+                {"tasks": self.get_runnable_tasks(_tags, _exclude_tags)},
             )
         ]
 

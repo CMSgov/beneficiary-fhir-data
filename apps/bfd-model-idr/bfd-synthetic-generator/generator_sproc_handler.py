@@ -34,8 +34,8 @@ def generate_synthetic_data(
     force_ztm: bool,
 ) -> None:
     perf_start = time.perf_counter()
-    db = session.get_current_database().replace('"', "")
-    schema = session.get_current_schema().replace('"', "")
+    db = (session.get_current_database() or "").replace('"', "")
+    schema = (session.get_current_schema() or "").replace('"', "")
     writer = SnowflakeWriter(session, db, schema)
 
     # generate patient data

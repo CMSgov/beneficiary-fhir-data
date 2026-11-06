@@ -4,6 +4,7 @@ import sys
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -39,7 +40,7 @@ if os.path.exists(synth_prvdr_file):
         pass
 
 
-def lookup_provider_history(npi_num: str | int | None) -> dict | None:
+def lookup_provider_history(npi_num: str | int | None) -> dict[str, Any] | None:
     if not npi_num:
         return None
     npi_str = str(npi_num).strip()
@@ -102,7 +103,7 @@ def load_profile_map():
     return profile_map
 
 
-def filter_by_profile(data, profile_type, profile_map):
+def filter_by_profile(data: Any, profile_type: str, profile_map: dict[str, Any]) -> None:
     if isinstance(data, dict):
         for k, v in list(data.items()):
             if k == "providerList":
@@ -116,7 +117,7 @@ def filter_by_profile(data, profile_type, profile_map):
             filter_by_profile(item, profile_type, profile_map)
 
 
-def cleanup_empty_items(data):
+def cleanup_empty_items(data: dict[str, Any]) -> None:
     if sic := data.get("supportingInfoComponents"):
         new_sic = []
         si_map = {}
@@ -124,7 +125,7 @@ def cleanup_empty_items(data):
         filtered_sic = [i for i in sic if any(k != "ROW_NUM" for k in i)]
 
         # Sort on avail columns for consistency.
-        def get_sort_key(item):
+        def get_sort_key(item: dict[str, Any]) -> list[tuple[str, str]]:
             return sorted([(k, str(v)) for k, v in item.items() if k != "ROW_NUM"])
 
         sorted_sic = sorted(filtered_sic, key=get_sort_key)
@@ -277,10 +278,12 @@ rx_line_financial_fields = [
 
 
 def convert_to_decimal(val: str | None) -> Decimal:
+    if val is None:
+        return Decimal(0)
     try:
         return Decimal(val)
-    except (TypeError, ValueError):
-        return 0.0
+    except ValueError:
+        return Decimal(0)
 
 
 @dataclass
@@ -289,7 +292,7 @@ class Provider:
     PRVDR_ID_QLFYR_CD: str | None = None
     NPI_TYPE: str | None = None
     careTeamType: str | None = None
-    careTeamSequenceNumber: str | None = None
+    careTeamSequenceNumber: int | None = None
     PRVDR_LAST_OR_LGL_NAME: str | None = None
     PRVDR_1ST_NAME: str | None = None
     PRVDR_CARETEAM_NAME: str | None = None
@@ -320,7 +323,7 @@ else:
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
 # The reason being: it's possible to lose context on rendering vs ordering
-def create_billing_and_service_provider(billing_col_name):
+def create_billing_and_service_provider(billing_col_name: str) -> Provider:
     provider_object = Provider(PRVDR_LAST_OR_LGL_NAME="N/A")
 
     qualifier = cur_sample_data.get("PRVDR_SRVC_ID_QLFYR_CD")
@@ -363,7 +366,7 @@ provider_list.append(create_billing_and_service_provider(billing_column))
 
 # For careteam elements, we don't need OSCAR number, TAX num (it's line-item), etc.
 # We DO care about qualifiers + taxonomy, so we have a separate method.
-def create_careteam_provider(careteam_column):
+def create_careteam_provider(careteam_column: str) -> Provider:
     provider_object = Provider(PRVDR_CARETEAM_NAME="N/A")
     qualifier = cur_sample_data.get("PRVDR_PRSBNG_ID_QLFYR_CD")
     if qualifier:
@@ -410,13 +413,13 @@ for careteam_column in careteam_header_columns:
         continue
     provider_object = create_careteam_provider(careteam_column)
     provider_object.careTeamSequenceNumber = sum(
-        1 for item in provider_list if provider_object.careTeamType
+        1 for _ in provider_list if provider_object.careTeamType
     )
     provider_list.append(provider_object)
 
 
 # Distinct method since line items end up cleaner
-def create_rendering_line_provider(npi_num):
+def create_rendering_line_provider(npi_num: str | None) -> Provider:
     provider_object = Provider(
         PRVDR_SK=npi_num, careTeamType="rendering", PRVDR_CARETEAM_NAME="N/A"
     )
@@ -445,9 +448,7 @@ for line_item in cur_sample_data.get("lineItemComponents", []):
         provider = create_rendering_line_provider(prvdr_npi_num)
         if line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD"):
             provider.specialtyCode = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
-        provider.careTeamSequenceNumber = sum(
-            1 for item in provider_list if provider_object.careTeamType
-        )
+        provider.careTeamSequenceNumber = sum(1 for _ in provider_list if provider.careTeamType)
         line_item["careTeamSequence"] = provider.careTeamSequenceNumber
         provider_list.append(provider)
 
@@ -476,7 +477,9 @@ if cond_sk:
 
 
 ## mapping ocrnc_sgntr_mbr and rlt_ocrnc_sgntr_mbr to clm_dt_sgntr equivalent columns
-def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
+def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(
+    data: dict[str, Any], ocrnc_sk_df: pd.DataFrame, rlt_ocrnc_sk_df: pd.DataFrame
+) -> None:
     if ocrnc_sk := data.get("CLM_OCRNC_SGNTR_SK"):
         matching_sks = ocrnc_sk_df["CLM_OCRNC_SGNTR_SK"] == ocrnc_sk
         # not covered from and thru
@@ -683,7 +686,7 @@ def meta_src_prefix(meta_src_sk: str | None) -> str:
     }.get(str(meta_src_sk), "")
 
 
-def build_claim_audit_trail_composite(sample: dict) -> str:
+def build_claim_audit_trail_composite(sample: dict[str, Any]) -> str | None:
     meta_src_sk = str(sample.get("META_SRC_SK", ""))
     status = sample.get("CLM_AUDT_TRL_STUS_CD")
 
@@ -700,7 +703,7 @@ def build_claim_audit_trail_composite(sample: dict) -> str:
     return f"{prefix}{status}"
 
 
-def next_row_num(supporting_info):
+def next_row_num(supporting_info: list[dict[str, Any]]) -> str:
     row_nums = [
         int(si["ROW_NUM"])
         for si in supporting_info

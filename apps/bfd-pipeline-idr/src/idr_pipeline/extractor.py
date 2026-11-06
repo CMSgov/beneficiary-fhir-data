@@ -41,14 +41,10 @@ class CsvFile:
         return ",".join(self.cols)
 
 
-# TODO: UP046 seems to cause issues with pyright
 class Extractor(ABC, Generic[T]):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
-        # cls is only known at runtime, so it can't be a static type expression
-        self.type_adapter: TypeAdapter[list[T]] = TypeAdapter(
-            list[cls]  # pyright: ignore[reportInvalidTypeForm]
-        )
+        self.type_adapter: TypeAdapter[list[T]] = TypeAdapter(list[cls])
         self.partition = partition
         self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
         self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)

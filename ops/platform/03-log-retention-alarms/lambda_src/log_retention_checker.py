@@ -1,6 +1,6 @@
 import json
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import boto3
 from aws_lambda_powertools import Logger

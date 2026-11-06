@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def get_referenced_maps(compiled_map_path):
+def get_referenced_maps(compiled_map_path: str) -> set[str]:
     try:
         with Path(compiled_map_path).open() as f:
             map_data = json.load(f)

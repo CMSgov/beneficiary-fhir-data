@@ -7,7 +7,7 @@ import requests
 MATCHBOX_SERVER = "http://localhost:18080/matchboxv3"
 
 
-def run_conformance_test(input_file, output_file):
+def run_conformance_test(input_file: str | Path, output_file: str | Path) -> bool | None:
     try:
         print(f"Running conformance testing against {MATCHBOX_SERVER}")
 

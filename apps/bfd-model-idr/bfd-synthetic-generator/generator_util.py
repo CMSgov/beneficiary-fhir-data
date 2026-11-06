@@ -8,7 +8,7 @@ import string
 import subprocess
 import sys
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -85,7 +85,7 @@ _CAST_TO_INT_FIELDS = [
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
 # scanning via list comprehensions. Outermost dict is keyed by original filename, inner dict is
 # keyed by the patient's bene_sk, and innermost dict is the full row itself
-_tables_by_bene_sk: dict[str, dict[int, dict[str, Any]]] = {}
+_tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 
 def as_list[T](obj: T | None) -> list[T]:
@@ -151,9 +151,9 @@ def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
 
 def load_file_dict(
     files: dict[str, list[RowAdapter]],
-    paths: list[str] | list[Path],
+    paths: Sequence[str | Path],
     exclude_empty: bool = False,
-):
+) -> None:
     file_paths = set(
         itertools.chain.from_iterable(
             [
@@ -725,11 +725,12 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
         contract = random.choice(self.cntrct_pbp_num)
-        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or self.id_gen.numeric_id(
-            field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1)
+        contract_pbp_sk = str(
+            contract["CNTRCT_PBP_SK"]
+            or self.id_gen.numeric_id(field="CNTRCT_PBP_SK", start=-1, end=-(10**12 - 1))
         )
-        contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
-        pbp_num = contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS)
+        contract_num = str(contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS))
+        pbp_num = str(contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS))
 
         enrollment_row["CNTRCT_PBP_SK"] = contract_pbp_sk
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"

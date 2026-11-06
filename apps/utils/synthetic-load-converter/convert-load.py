@@ -30,8 +30,11 @@ new_incoming = Path(f"./Incoming/{timestamp}")
 new_incoming.mkdir(parents=True, exist_ok=True)
 
 response = client.list_objects_v2(Bucket=source_bucket, Delimiter="/", Prefix=source_prefix)
-for item in response["Contents"]:
-    client.download_file(source_bucket, item["Key"], f"./{files.name}/{item['Key'].split('/')[-1]}")
+for item in response.get("Contents", []):
+    key = item.get("Key")
+    if not key:
+        continue
+    client.download_file(source_bucket, key, f"./{files.name}/{key.split('/')[-1]}")
 
 manifest_template = open("./manifest-template.xml").read()
 id_num = 1

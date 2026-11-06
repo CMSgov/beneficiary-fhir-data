@@ -67,6 +67,10 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:
         s3_event = next(x for x in parse(model=S3Model, event=event).Records)
         glue_client = boto3.client(service_name="glue", region_name=REGION, config=BOTO_CONFIG)  # type: ignore
 
+        if s3_event.s3.object is None:
+            logger.warning("S3 event does not contain an object, nothing to crawl.")
+            return
+
         decoded_file_key = unquote(s3_event.s3.object.key)
         partition_matches = [
             m.group(1) for m in re.finditer(pattern=S3_KEY_MATCH_REGEX, string=decoded_file_key)

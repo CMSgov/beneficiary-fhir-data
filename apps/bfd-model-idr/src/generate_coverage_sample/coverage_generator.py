@@ -148,6 +148,9 @@ class SampleGenerator:
                     self.create_coverage(
                         bene_hist=bene_hist, part=part, output_file_name="Coverage-Dual-Sample.json"
                     )
+                case MedicarePart.ALL:
+                    # ALL is expanded into the individual parts above, so it never reaches here.
+                    raise ValueError("MedicarePart.ALL must be expanded before generating coverage")
 
     def create_coverage(
         self, bene_hist: dict[str, str], part: MedicarePart, output_file_name: str
@@ -186,6 +189,8 @@ class SampleGenerator:
                 if not bene_dual:
                     print(f"Coverage not found for Medicare Part {part.name}.")
                     return
+            case MedicarePart.ALL:
+                raise ValueError("MedicarePart.ALL must be expanded before generating coverage")
 
         bene_status = self.read_bene_status()
         bene_lis = self.read_bene_cmbnd()

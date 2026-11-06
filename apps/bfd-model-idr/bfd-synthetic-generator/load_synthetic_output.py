@@ -137,17 +137,13 @@ class CsvWriter(OutputDestinationWriter):
 
         df = pd.json_normalize(data)
 
-        if cols is not None and not isinstance(cols, str):
+        if not isinstance(cols, str):
             df = df.reindex(columns=cols).fillna("")
 
         for column in df.columns:
             if df[column].dtype == "float64":
                 df[column] = df[column].apply(
-                    lambda x: (
-                        str(int(x))
-                        if isinstance(x, (int, float)) and not pd.isna(x) and x != ""
-                        else ""
-                    )
+                    lambda x: str(int(x)) if isinstance(x, (int, float)) and not pd.isna(x) else ""
                 )
 
         out_path = self.out_dir / f"{table_name}.csv"
@@ -174,6 +170,8 @@ class CsvWriter(OutputDestinationWriter):
         bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
         files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]:
+        if files is None:
+            raise ValueError("CsvWriter.get_bene_sks requires the input files to read BENE_SK from")
         clm_bene_sks = (
             [int(row[BENE_SK]) for row in files[CLM]]
             if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
@@ -221,7 +219,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session = session
         self.database = database
         self.schema = schema
-        self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._column_types_cache: dict[tuple[str, str, str], set[str]] = {}
 
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
         override = _TABLE_OVERRIDES.get(table_name)
@@ -308,7 +306,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 .select("COLUMN_NAME")
                 .collect()
             )
-            self._column_types_cache[cache_key] = {row["COLUMN_NAME"].upper() for row in rows}
+            self._column_types_cache[cache_key] = {str(row["COLUMN_NAME"]).upper() for row in rows}
 
         return self._column_types_cache[cache_key]
 
@@ -378,7 +376,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.to_local_iterator()
         ]
 
-        def fetch_table_data(table_name):
+        def fetch_table_data(table_name: str) -> tuple[str, list[RowAdapter]]:
             key_df = key_dfs[_TABLE_RELATIONS[table_name]]
             joined = self._qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
@@ -436,7 +434,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         duration = time.perf_counter() - perf_start
         logger.info(f"Packaging data into CSV completed in {duration:.6f} seconds")
 
-        session_schema = self.session.get_current_schema().replace('"', "")
+        session_schema = (self.session.get_current_schema() or "").replace('"', "")
         staging_table_name = f"{database}.{session_schema}.MERGE_STAGE_{resolved_table_name}"
         target_filename = f"batch_{resolved_table_name}.csv"
 
@@ -515,7 +513,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         cleaned_table_name, database, schema = self.resolve_target_table(table_name)
         qualified_table = f"{database}.{schema}.{cleaned_table_name}"
         pk_df = self.session.sql(f"SHOW PRIMARY KEYS IN TABLE {qualified_table}")
-        return [row["column_name"] for row in pk_df.select('"column_name"').collect()]
+        return [str(row["column_name"]) for row in pk_df.select('"column_name"').collect()]
 
     def get_provider_histories(
         self,

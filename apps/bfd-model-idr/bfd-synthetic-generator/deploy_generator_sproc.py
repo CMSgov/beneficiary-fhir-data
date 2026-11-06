@@ -2,6 +2,7 @@ import os
 import sys
 import zipfile
 from enum import Enum
+from typing import Any, cast
 
 import click
 from cryptography.hazmat.backends import default_backend
@@ -60,31 +61,30 @@ def _create_snowflake_session() -> Session:
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    return Session.builder.configs(
-        {
-            "account": _require_env("IDR_ACCOUNT"),
-            "user": _require_env("IDR_USERNAME"),
-            "private_key": private_key_bytes,
-            "warehouse": _require_env("IDR_WAREHOUSE"),
-            "database": _require_env("IDR_DATABASE"),
-            "schema": "CMS_VDM_VIEW_MDCR_PRD",
-        }
-    ).create()
+    options: dict[str, Any] = {
+        "account": _require_env("IDR_ACCOUNT"),
+        "user": _require_env("IDR_USERNAME"),
+        "private_key": private_key_bytes,
+        "warehouse": _require_env("IDR_WAREHOUSE"),
+        "database": _require_env("IDR_DATABASE"),
+        "schema": "CMS_VDM_VIEW_MDCR_PRD",
+    }
+    return Session.builder.configs(options).create()
 
 
 @click.command
 @common_options
-def main(**kwargs) -> None:
-    min_claims = kwargs.get("min_claims")
-    max_claims = kwargs.get("max_claims")
+def main(**kwargs: Any) -> None:
+    min_claims: int = kwargs.get("min_claims", 0)
+    max_claims: int = kwargs.get("max_claims", 0)
     if min_claims > max_claims:
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
     session = _create_snowflake_session()
-    db_name = session.get_current_database().replace('"', "")
-    schema_name = session.get_current_schema().replace('"', "")
+    db_name = (session.get_current_database() or "").replace('"', "")
+    schema_name = (session.get_current_schema() or "").replace('"', "")
 
     zip_file = _zip_current_directory()
     session.sql(f"create or replace stage {db_name}.{schema_name}.generator_files_stage").collect()
@@ -148,7 +148,7 @@ def main(**kwargs) -> None:
             AND query_text ILIKE 'CALL generate_synthetic_data%'
     """).collect()
 
-    if active_sproc[0]["ACTIVE_COUNT"] > 0:
+    if cast(int, active_sproc[0]["ACTIVE_COUNT"]) > 0:
         print(
             "ABORTED: The synthetic data generator stored procedure is already running. "
             "Please wait for the current run to complete before launching another. "

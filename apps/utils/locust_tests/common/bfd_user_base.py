@@ -19,7 +19,7 @@ from locust.argument_parser import LocustArgumentParser
 from locust.contrib.fasthttp import ResponseContextManager
 from locust.env import Environment
 
-_COMPARISONS_METADATA_PATH = None
+_comparisons_metadata_path = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
 overriden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
 Also overriden by the value of --stats-compare-meta-file"""
@@ -78,7 +78,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
         try:
             stat_comparsion_meta_path = (
-                stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH
+                stats_config.stats_compare_meta_file or _comparisons_metadata_path
             )
             if stat_comparsion_meta_path:
                 compare_result = stats_compare.do_stats_comparison(
@@ -115,8 +115,8 @@ def set_comparisons_metadata_path(path: str) -> None:
     Args:
         path (str): Path to a JSON file describing stat comparison metadata
     """
-    global _COMPARISONS_METADATA_PATH  # noqa: PLW0603
-    _COMPARISONS_METADATA_PATH = path
+    global _comparisons_metadata_path  # noqa: PLW0603
+    _comparisons_metadata_path = path
 
 
 class BFDUserBase(FastHttpUser):

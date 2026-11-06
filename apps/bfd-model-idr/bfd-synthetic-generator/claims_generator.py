@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from enum import StrEnum
 from pathlib import Path
+from typing import Any
 
 import click
 import constants as f
@@ -733,7 +734,7 @@ def generate_locally(
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
-    **kwargs,
+    **kwargs: Any,
 ):
     generate(
         min_claims,
@@ -828,7 +829,7 @@ def generate(
         f.CNTRCT_PBP_NUM: [],
         f.PRAUC: [],
     }
-    if isinstance(writer, CsvWriter):
+    if isinstance(writer, CsvWriter) and paths:
         load_file_dict(files=files, paths=list(paths))
         if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
             print(
@@ -1254,6 +1255,7 @@ def _generate_batch(
             else []
         )
         for claims_tbls in init_pac_clms_tbls:
+            clm_line_num = 0
             pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[f.CLM][0], gen_utils=gen_utils)
             out_tables[f.CLM].append(pac_clm)
 
