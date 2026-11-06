@@ -59,8 +59,27 @@ bfd-request resource query env samhsa="":
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
 
+[arg("tag", long, help="Tag the image, and any base images built, with this version")]
+[arg("platform", long, help="Target platform, overriding the one in the build matrix")]
+[arg("no_base", long="no-base", value="1", help="Do not build the base images this image needs")]
+[doc("""Builds one of the repository's container images locally with podman.
+The image name is one of the names printed by `just docker-images`. A tag pins derived images to the
+base images built in the same run, so `just docker-build bfd-platform-idr-pipeline --tag 2.999.0`
+builds and tags `bfd-platform-base-python:2.999.0` first.""")]
+[group('docker')]
+docker-build image tag="" platform="" no_base="":
+    ./ops/utils/scripts/build-image.sh "{{ image }}" \
+        {{ if tag != "" { "--tag " + tag } else { "" } }} \
+        {{ if platform != "" { "--platform " + platform } else { "" } }} \
+        {{ if no_base == "1" { "--no-base" } else { "" } }}
+
+[doc("Lists the images that `just docker-build` can build")]
+[group('docker')]
+docker-images:
+    ./ops/utils/scripts/build-image.sh --list
+
 [doc("Helper command to remove all containers")]
-[group('utilities')]
+[group('docker')]
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 

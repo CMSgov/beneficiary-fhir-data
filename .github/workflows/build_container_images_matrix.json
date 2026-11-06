@@ -36,6 +36,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-migrator-synthetic",
+    "dockerfile": "apps/bfd-db-migrator-synthetic/Dockerfile",
+    "contextDir": "apps/bfd-db-migrator-synthetic",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": ".",
