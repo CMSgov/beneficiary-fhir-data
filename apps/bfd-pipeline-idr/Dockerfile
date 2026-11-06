@@ -39,21 +39,22 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 # Use the non-root user to run our application
 USER nonroot
 
-# Install the project into `/app`
+# Build context is the repository root (the uv workspace root).
 WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
-COPY ../../ ./
+COPY pyproject.toml uv.lock .python-version ./
+COPY apps/bfd-pipeline-idr/pyproject.toml apps/bfd-pipeline-idr/pyproject.toml
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked --no-install-project
+  uv sync --frozen --no-install-project --project apps/bfd-pipeline-idr
 
 FROM deps
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
-COPY . /app
+COPY apps/bfd-pipeline-idr /app/apps/bfd-pipeline-idr
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked
+  uv sync --frozen --project apps/bfd-pipeline-idr
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

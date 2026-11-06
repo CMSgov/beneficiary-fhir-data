@@ -1,4 +1,6 @@
 *
 !pyproject.toml
 !uv.lock
-!ccw_runner.py
+!.python-version
+!ops/services/04-ccw-pipeline/lambda-src/ccw-runner/pyproject.toml
+!ops/services/04-ccw-pipeline/lambda-src/ccw-runner/ccw_runner.py

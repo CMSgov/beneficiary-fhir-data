@@ -2,11 +2,10 @@
 
 set -Eeou pipefail
 
-SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-readonly SCRIPT_DIR
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+readonly REPO_ROOT
 
-DOCKER_BUILDKIT=1 podman buildx build "$SCRIPT_DIR" \
-  --file "$SCRIPT_DIR"/Dockerfile \
-  --platform "linux/arm64" \
-  --build-context idr-pipeline="$SCRIPT_DIR/packages/$(readlink "$SCRIPT_DIR"/packages/idr-pipeline)" \
-  --tag "bfd-platform-idr-bfd-validator" "$@"
+DOCKER_BUILDKIT=1 podman buildx build "$REPO_ROOT" \
+	--file "$REPO_ROOT"/apps/utils/idr-bfd-validator/Dockerfile \
+	--platform "linux/arm64" \
+	--tag "bfd-platform-idr-bfd-validator" "$@"

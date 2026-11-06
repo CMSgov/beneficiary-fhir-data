@@ -1,13 +1,5 @@
 ARG base_version=latest
 
-# HACK: `idr-pipeline` is a named build context supplied by the release pipeline
-# (namedContexts in .github/workflows/build_container_images_matrix.json), and
-# pindock requires every `--from` reference to resolve to a stage in this file or
-# to a digest-pinned image. This empty stage is declared to satisfy it. BuildKit
-# always prefers a named context over a stage of the same name, so the stage is
-# never used. Tested with podman and it behaves as expected.
-FROM scratch AS idr-pipeline
-
 # Image is expected to exist locally prior to build. Operators will need to pull the image from ECR
 # first before building
 FROM bfd-platform-base-python:${base_version} AS groupadd
@@ -47,22 +39,26 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 # Use the non-root user to run our application
 USER nonroot
 
-# Install the project into `/app`
+# Build context is the repository root (the uv workspace root).
 WORKDIR /app
 
 # Install the project's dependencies using the lockfile and settings
-COPY --from=idr-pipeline . /app/packages/idr-pipeline
 COPY pyproject.toml uv.lock .python-version ./
+COPY apps/utils/idr-bfd-validator/pyproject.toml apps/utils/idr-bfd-validator/pyproject.toml
+COPY apps/bfd-pipeline-idr/pyproject.toml apps/bfd-pipeline-idr/pyproject.toml
+COPY apps/bfd-pipeline-idr/src apps/bfd-pipeline-idr/src
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked --no-install-project
+  uv sync --frozen --no-install-project --project apps/utils/idr-bfd-validator
 
 FROM deps
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
-COPY . /app
+COPY apps/utils/idr-bfd-validator /app/apps/utils/idr-bfd-validator
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked
+  uv sync --frozen --project apps/utils/idr-bfd-validator
+
+WORKDIR /app/apps/utils/idr-bfd-validator
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

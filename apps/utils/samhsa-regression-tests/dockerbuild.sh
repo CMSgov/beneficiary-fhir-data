@@ -2,11 +2,10 @@
 
 set -Eeou pipefail
 
-SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-readonly SCRIPT_DIR
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+readonly REPO_ROOT
 
-DOCKER_BUILDKIT=1 podman buildx build "$SCRIPT_DIR" \
-	--file "$SCRIPT_DIR"/Dockerfile \
+DOCKER_BUILDKIT=1 podman buildx build "$REPO_ROOT" \
+	--file "$REPO_ROOT"/apps/utils/samhsa-regression-tests/Dockerfile \
 	--platform "linux/arm64" \
-	--build-context server-ng-resources="$SCRIPT_DIR/../../bfd-server-ng/src/main/resources" \
 	--tag "bfd-platform-samhsa-regression" "$@"

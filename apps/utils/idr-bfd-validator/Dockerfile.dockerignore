@@ -2,4 +2,9 @@
 !pyproject.toml
 !uv.lock
 !.python-version
-!main.py
+!apps/utils/idr-bfd-validator/pyproject.toml
+!apps/utils/idr-bfd-validator/main.py
+!apps/bfd-pipeline-idr/pyproject.toml
+!apps/bfd-pipeline-idr/src/idr_pipeline/*.py
+!apps/bfd-pipeline-idr/src/idr_pipeline/matching/*.py
+!apps/bfd-pipeline-idr/src/idr_pipeline/model/*.py
