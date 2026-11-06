@@ -45,8 +45,8 @@ CLM_COL = [
     "CLM_ORIG_CNTL_NUM",
     "CLM_SRVC_PRVDR_GNRC_ID_NUM",
     "CLM_PD_DT",
-    "CLM_PRSBNG_PRVDR_GNRC_ID_NUMPRVDR_PRSBNG_ID_QLFYR_CD",
-    "CLM_BENE_PMT_AMT",
+    "CLM_PRSBNG_PRVDR_GNRC_ID_NUM",
+    "PRVDR_PRSBNG_ID_QLFYR_CDCLM_BENE_PMT_AMT",
     "CLM_OTHR_TP_PD_AMT",
     "PRVDR_SRVC_ID_QLFYR_CD",
     "CLM_MDCR_DDCTBL_AMT",
@@ -222,8 +222,8 @@ RX_LINE_COL = [
     "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
     "CLM_LINE_REBT_PASSTHRU_POS_AMT",
     "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-    "CLM_LINE_RPTD_GAP_DSCNT_AMTCLM_LINE_AUTHRZD_FILL_NUM",
-    "CLM_PHRMCY_SRVC_TYPE_CD",
+    "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+    "CLM_LINE_AUTHRZD_FILL_NUMCLM_PHRMCY_SRVC_TYPE_CD",
     "CLM_LINE_RX_ORGN_CD",
     "CLM_BRND_GNRC_CD",
     "CLM_PTNT_RSDNC_CD",
@@ -251,7 +251,7 @@ SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
     tuple(INSTITUTIONAL_HOSPICE_NCH): "eob-hospice-nch.json",
     tuple(INSTITUTIONAL_INPATIENT_NCH): "eob-inpatient-nch.json",
     tuple(INSTITUTIONAL_MA_NCH): "eob-ma-nch.json",
-    tuple(FISS_SS): "eob-inpatient-ss.json",
+    tuple(FISS_SS): "eob-fiss-ss.json",
     tuple(INSTITUTIONAL_HOSPICE_ELECTION): "eob-hospice-election.json",
 }
 
@@ -301,13 +301,15 @@ class SampleGenerator:
         elif claim_type in MCS_SS:
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
-        # INST and fall back for known claim types that we do not have a special sample for
-        elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_SS:
-            self.add_instl(claim_row=claim_row, result=result)
-            self.add_proc_lines(claim_row=claim_row, result=result)
-            self.add_clm_values(claim_row=claim_row, result=result)
         elif claim_type in ADJUDICATED_PROFESSIONAL_NCH:
             print("found Carrier or Carrier DME -- no special joins")
+        # INST and fall back for known claim types that we do not have a special sample for
+        elif claim_type in [*INSTITUTIONAL_CLAIM_TYPES, *VMS_SS]:
+            self.add_instnl(claim_row=claim_row, result=result)
+            self.add_proc_lines(claim_row=claim_row, result=result)
+            self.add_clm_values(claim_row=claim_row, result=result)
+            if claim_type in FISS_SS:
+                self.add_fiss_lines(claim_row=claim_row, result=result)
         else:
             print("Unknown Type")
             sys.exit(1)
@@ -390,7 +392,7 @@ class SampleGenerator:
             }
         )
 
-    def add_instl(self, claim_row: dict[str, str], result: Result) -> None:
+    def add_instnl(self, claim_row: dict[str, str], result: Result) -> None:
         instnl = self.read_instnl(clm_row=claim_row)
         result.result_json["institutionalComponents"] = {
             col: extract_col_str(instnl, col) for col in INST_COL

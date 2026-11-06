@@ -7,6 +7,7 @@ from generate_eob_sample import main
 from idr_model.claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CARRIER_NCH,
     ADJUDICATED_PROFESSIONAL_DME_NCH,
+    FISS_SS,
     INSTITUTIONAL_HHA_NCH,
     INSTITUTIONAL_HOSPICE_NCH,
     INSTITUTIONAL_INPATIENT_NCH,
@@ -148,6 +149,32 @@ def test_generate_eob_sample_institutional_hha() -> None:
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
     assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HHA_NCH
+
+
+def test_generate_eob_sample_institutional_fiss() -> None:
+    sample_clm_uniq_id = "9376571949948"
+    result = CliRunner().invoke(
+        main,
+        [
+            "--clm-uniq-id",
+            sample_clm_uniq_id,
+            "--source-directory",
+            SOURCE_DIR_SAMPLES1,
+            "--output-directory",
+            "out-test",
+        ],
+    )
+
+    assert result.exit_code == 0
+    output_file = Path("out-test/eob-fiss-ss.json")
+    assert output_file.exists(), f"Expected output file not found: {output_file}"
+
+    with output_file.open("r", encoding="utf-8") as f:
+        result_data = json.load(f)
+
+    assert isinstance(result_data, dict)
+    assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
+    assert int(result_data["CLM_TYPE_CD"]) in FISS_SS
 
 
 def test_generate_eob_sample_pharmacy() -> None:

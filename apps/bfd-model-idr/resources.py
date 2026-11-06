@@ -95,6 +95,14 @@ resources = [
         "resource": "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base",
     },
     {
+        "name": "EOB - FISS",
+        "type": "EOB",
+        "map": "maps/ExplanationOfBenefit-Base.map",
+        "sample": "sample-data/eob-fiss-ss.json",
+        "output": "out/ExplanationOfBenefit-FISS.json",
+        "resource": "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base",
+    },
+    {
         "name": "EOB - MCS",
         "type": "EOB",
         "map": "maps/ExplanationOfBenefit-Base.map",

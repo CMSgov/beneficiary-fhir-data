@@ -20,6 +20,7 @@ out/*
 !out/ExplanationOfBenefit-HHA.json
 !out/ExplanationOfBenefit-Hospice.json
 !out/ExplanationOfBenefit-Outpatient.json
+!out/ExplanationOfBenefit-FISS.json
 !out/ExplanationOfBenefit-MCS.json
 !out/ExplanationOfBenefit-Carrier.json
 !out/ExplanationOfBenefit-DME.json
