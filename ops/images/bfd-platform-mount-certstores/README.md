@@ -12,4 +12,6 @@ Used in `ops/services/server` ECS Task Definitions for the `server` ECS Service 
 
 ### Setup
 
-To set up your development environment, just run `uv sync`. Assumning you have `uv` installed, this will create a `.venv` within this subfolder with all the necessary dependencies.
+This project is a member of the repository-wide `uv` workspace. Run `uv sync` from the repository root:
+the dependencies come from the root `pyproject.toml` and the shared `uv.lock`, and the virtual
+environment is created at `.venv` in the repository root.
