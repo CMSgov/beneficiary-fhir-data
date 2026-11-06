@@ -61,7 +61,28 @@
     - Basis
     - Regular
     - CMS
-
+  structureDef:
+    path: ExplanationOfBenefit.meta.tag
+    id: ExplanationOfBenefit.meta.tag:finalAction
+    min: 0
+    pattern:
+      type: Coding
+      detail:
+        system: https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action
+    slicing:
+      id: ExplanationOfBenefit.meta.tag
+      path: ExplanationOfBenefit.meta.tag
+      discriminator:
+        - type: value
+          path: system
+      rules: open
+      ordered: false
+    proceedingEd:
+      - id: ExplanationOfBenefit.meta.tag
+        path: ExplanationOfBenefit.meta.tag:finalAction
+        sliceName: finalAction
+        min: 1
+        max: "1"
 - inputPath: ExplanationOfBenefit-Base.CLM_CNTL_NUM
   appliesTo:
     - Inpatient
@@ -274,6 +295,9 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    path: ExplanationOfBenefit.billablePeriod.end
+    id: ExplanationOfBenefit.billablePeriod.end
 - inputPath: ExplanationOfBenefit-Base.CLM_EFCTV_DT
   appliesTo:
     - Inpatient
@@ -377,14 +401,6 @@
     id: ExplanationOfBenefit.meta.tag:systemType
     min: 1
     sliceName: systemType
-    slicing:
-      id: ExplanationOfBenefit.meta.tag
-      path: ExplanationOfBenefit.meta.tag
-      discriminator:
-        - type: value
-          path: system
-      rules: open
-      ordered: false
 - inputPath: ExplanationOfBenefit-Base.META_SRC_SK
   appliesTo:
     - Inpatient
@@ -612,6 +628,7 @@
   profiles:
     - Regular
     - CMS
+
 - inputPath: ExplanationOfBenefit-Base.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
@@ -660,6 +677,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD').code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmOpSrvcTypeCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmOpSrvcTypeCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmOpSrvcTypeCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
@@ -674,6 +705,24 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_DSPRTNT_AMT').exists()).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmOprtnlDsprtntAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmOprtnlDsprtntAmt
+        path: ExplanationOfBenefit.adjudication
+        min: 0
+        max: "1"
+        sliceName: clmOprtnlDsprtntAmt
+      - id: ExplanationOfBenefit.adjudication:clmOprtnlDsprtntAmt.category
+        path: ExplanationOfBenefit.adjudication.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+              code: CLM_OPRTNL_DSPRTNT_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
   appliesTo:
     - Inpatient
