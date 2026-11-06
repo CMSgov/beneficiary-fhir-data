@@ -111,7 +111,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                 host=LOCUST_HOST,
                 spawn_rate=10,
                 users=10,
-                spawned_runtime="30s",
+                spawned_runtime="1m",
                 compare=CompareConfigModel(type=CompareType.AVERAGE, tag=compare_tag, load_limit=5),
                 store=StoreConfigModel(
                     tags=[
