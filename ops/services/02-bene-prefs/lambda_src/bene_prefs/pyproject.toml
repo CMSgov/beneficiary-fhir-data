@@ -3,7 +3,7 @@ name = "bene-prefs"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = "~=3.13.0"
+requires-python = ">=3.14.3"
 dependencies = [
   "cryptography>=50.0.0",
   "snowflake-connector-python>=4.7.2",
@@ -12,77 +12,3 @@ dependencies = [
   "jinja2>=3.1.6",
   "aws-lambda-powertools>=3.25.0",
 ]
-
-[dependency-groups]
-dev = [
-  "ruff>=0.14.6",
-  "pytest>=9.0.1",
-  "testcontainers>=4.13.3",
-  "pyright>=1.1.407",
-]
-
-[tool.uv]
-exclude-newer = "7 days"
-# CA trust store fix (certifi 2026.10.19) exempted from cooldown
-exclude-newer-package = { certifi = false }
-
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-  "D",    # pydocstyle
-  "E501",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # isort
-  "I",
-  "ANN",
-  "LOG",
-  "G",
-  "PT",
-  "RSE",
-  "PIE",
-  "RET",
-  "SLF",
-  "ARG",
-  "PTH",
-  "PLE",
-  "PLW",
-  "PERF",
-  "FURB",
-  "RUF",
-]
-
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
-
-[tool.pyright]
-typeCheckingMode = "strict"
-venvPath = "."
-venv = ".venv"
-reportMissingTypeStubs = "none"
-# Usage of _some_ of Powertools for AWS Lambda necessitates disabling some of Pyright's strict mode
-# features, sadly. The Powertools team seems to be aware of this incompatibility, but it seems
-# unlikely that any improvements will be made.
-reportUnknownMemberType = false
-reportUnknownVariableType = false
-reportUnknownArgumentType = false
-reportUnknownParameterType = false

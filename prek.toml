@@ -69,6 +69,20 @@ pass_filenames = false
 entry = "./hooks/install-recommended-extensions.sh"
 
 [[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.16.8"
+hooks = [
+  { id = "ruff-check", args = ["--fix"], types_or = ["python", "pyi"] },
+
+  { id = "ruff-format", types = ["python"] },
+]
+
+[[repos]]
+repo = "https://github.com/RobertCraigie/pyright-python"
+rev = "v1.1.414"
+hooks = [{ id = "pyright" }]
+
+[[repos]]
 repo = "local"
 [[repos.hooks]]
 id = "git-hook-shims-fresh"

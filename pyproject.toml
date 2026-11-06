@@ -1,0 +1,175 @@
+# This file is the root of the repository-wide uv workspace. Every Python project in the
+# repository is a workspace member and shares this `uv.lock`.
+# Run `uv sync` from here for the whole workspace, or `uv sync --package <name>` for one member.
+[tool.uv.workspace]
+members = [
+  # generator
+  "apps/bfd-model-idr",
+  # idr-pipeline
+  "apps/bfd-pipeline-idr",
+  # codegen
+  "apps/bfd-server-ng/codegen",
+  # scripts
+  "apps/bfd-server-ng/scripts",
+  # idr-bfd-validator
+  "apps/utils/idr-bfd-validator",
+  # locust-tests
+  "apps/utils/locust_tests",
+  # samhsa-regression-tests
+  "apps/utils/samhsa-regression-tests",
+  # synthetic-load-converter
+  "apps/utils/synthetic-load-converter",
+  # bfd-mgmt-mount-certstores
+  "ops/images/bfd-platform-mount-certstores",
+  # slack-alerter
+  "ops/platform/02-alerting/lambda_src/slack-alerter",
+  # log_retention_checker
+  "ops/platform/03-log-retention-alarms/lambda_src",
+  # bene-prefs
+  "ops/services/02-bene-prefs/lambda_src/bene_prefs",
+  # ccw-runner
+  "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+  # consume-idr-events
+  "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+  # run-idr-pipeline
+  "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+  # regression-wrapper
+  "ops/services/04-server/lambda_src/regression-wrapper",
+  # locust-hook
+  "ops/services/04-server-ng/lambda_src/locust-hook",
+  # samhsa-hook
+  "ops/services/04-server-ng/lambda_src/samhsa-hook",
+  # ccw-manifests-verifier
+  "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+  # error-alerter
+  "ops/services/06-server-alarms/lambda_src/error_alerter",
+  # trigger-glue-trigger
+  "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
+
+[dependency-groups]
+dev = [
+  "basedpyright>=1.40.2",
+  "boto3-stubs[codedeploy,ecs,glue,lambda,logs,rds,s3,sns,ssm]",
+  "debugpy>=1.8.19",
+  "pandas-stubs>=3.0.5.260914",
+  "pytest>=9.0.1",
+  "ruff>=0.16.8",
+  "testcontainers>=4.13.3",
+  "types-boto3[essential,ssm]>=1.38.19",
+  "types-gevent>=25.4.0.20250516",
+]
+
+[tool.uv]
+exclude-newer = "7 days"
+override-dependencies = ["filelock>=4.2.1"]
+# The `exclude-newer` cooldown applies to every dependency unless a package overrides it here.
+# certifi 2026.10.19 carries the CA trust store fix.
+exclude-newer-package = { filelock = false, certifi = false }
+
+[tool.uv.sources]
+loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }
+
+[tool.ruff]
+line-length = 100
+# Every workspace member requires Python 3.14+, so a forward reference in an annotation is a real
+# expression and annotations are not quoted.
+target-version = "py314"
+# Code outside the uv workspace (legacy scripts, diagram generators, docs assets) is neither
+# linted nor type-checked.
+extend-exclude = [
+  "insights",
+  "ops/utils/synthetic-data",
+  "docs",
+  "ops/services/06-server-alarms/docs",
+  "apps/utils/scripts",
+  "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
+]
+
+[tool.ruff.lint]
+select = [
+  # pydocstyle
+  "D",
+  # pycodestyle
+  "E501",
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  # flake8-annotations
+  "ANN",
+  # flake8-logging
+  "LOG",
+  # flake8-logging-format
+  "G",
+  # flake8-pytest-style
+  "PT",
+  # flake8-raise
+  "RSE",
+  # flake8-pie
+  "PIE",
+  # flake8-return
+  "RET",
+  # flake8-self
+  "SLF",
+  # flake8-unused-arguments
+  "ARG",
+  # flake8-use-pathlib
+  "PTH",
+  # Pylint
+  "PLE",
+  "PLW",
+  # Perflint
+  "PERF",
+  # refurb
+  "FURB",
+  # Ruff-specific rules
+  "RUF",
+]
+# Docstrings are not required for any Python code.
+# Ignoring D205 means a docstring summary does not need a blank line after it.
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+# FUTURE: the "partially unknown" diagnostics are downgraded to warnings so that CI is not blocked
+# by pre-existing untyped code.
+# Change these rules back to errors when the legacy scripts are annotated.
+[tool.basedpyright]
+typeCheckingMode = "strict"
+reportUnknownArgumentType = "warning"
+reportUnknownLambdaType = "warning"
+reportUnknownMemberType = "warning"
+reportUnknownParameterType = "warning"
+reportUnknownVariableType = "warning"
+reportMissingTypeArgument = "warning"
+venvPath = "."
+venv = ".venv"
+# pyright searches the workspace root, a root-level src directory, and the venv by default.
+# The paths below are the two built packages.
+# Without their source dirs listed here, their imports resolve through the editable installs in
+# .venv and are checked as third-party code.
+extraPaths = ["apps/bfd-model-idr/src", "apps/bfd-pipeline-idr/src"]
+# Code outside the uv workspace (legacy scripts, diagram generators, docs assets) is neither
+# linted nor type-checked.
+exclude = [
+  "insights",
+  "ops/utils/synthetic-data",
+  "docs",
+  "ops/services/06-server-alarms/docs",
+  "apps/utils/scripts",
+  "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
+]
