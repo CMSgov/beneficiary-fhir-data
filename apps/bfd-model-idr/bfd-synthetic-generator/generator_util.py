@@ -248,7 +248,7 @@ class GeneratorUtil:
         self.bene_lis_cmbnd: list[dict[str, Any]] = []
         self.bene_mapd_enrlmt_rx: list[dict[str, Any]] = []
         self.bene_mapd_enrlmt: list[dict[str, Any]] = []
-        self.code_systems = {}
+        self.code_systems: dict[str, list[str]] = {}
         self.cntrct_pbp_num: list[dict[str, Any]] = []
         self.cntrct_pbp_cntct: list[dict[str, Any]] = []
 
