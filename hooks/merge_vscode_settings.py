@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import json
+from pathlib import Path
 from typing import Any
 
 
-def check_type(key: str, base: dict[str, Any], value: Any, cls: type):
+def check_type(key: str, base: dict[str, Any], value: object, cls: type) -> bool:
     return key in base and isinstance(base[key], cls) and isinstance(value, cls)
 
 
@@ -25,22 +26,18 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 
 def safe_read_file(name: str) -> str:
     try:
-        with open(name) as f:
-            return f.read()
+        return Path(name).read_text()
     except FileNotFoundError:
         return ""
 
 
-def safe_read_json(name: str) -> Any:
+def safe_read_json(name: str) -> dict[str, Any]:
     return json.loads(safe_read_file(name) or "{}")
 
 
 def merge_files(main: str, workspace: str) -> None:
-    merged = json.dumps(
-        deep_merge(safe_read_json(main), safe_read_json(workspace)), indent=2
-    )
-    with open(main, "w") as f:
-        f.write(merged)
+    merged = json.dumps(deep_merge(safe_read_json(main), safe_read_json(workspace)), indent=2)
+    Path(main).write_text(merged)
 
 
 # VS Code currently has no built-in way of sharing settings across multiple files

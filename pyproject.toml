@@ -19,6 +19,8 @@ members = [
   "apps/utils/samhsa-regression-tests",
   # synthetic-load-converter
   "apps/utils/synthetic-load-converter",
+  # repository-hooks
+  "hooks",
   # server-mount-certstores
   "ops/images/bfd-platform-mount-certstores",
   # slack-alerter
@@ -98,6 +100,7 @@ src = [
   "apps/utils/locust_tests",
   "apps/utils/samhsa-regression-tests",
   "apps/utils/synthetic-load-converter",
+  "hooks",
   "ops/images/bfd-platform-mount-certstores",
   "ops/platform/02-alerting/lambda_src/slack-alerter",
   "ops/platform/03-log-retention-alarms/lambda_src",
