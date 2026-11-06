@@ -50,13 +50,12 @@ members = [
 [dependency-groups]
 dev = [
   "basedpyright>=1.40.2",
-  "boto3-stubs[codedeploy,ecs,glue,lambda,logs,rds,s3,sns,ssm]",
+  "boto3-stubs[essential,codedeploy,ecs,glue,lambda,logs,rds,s3,scheduler,sns,ssm]",
   "debugpy>=1.8.19",
   "pandas-stubs>=3.0.5.260914",
   "pytest>=9.0.1",
   "ruff>=0.16.8",
   "testcontainers>=4.13.3",
-  "types-boto3[essential,ssm]>=1.38.19",
   "types-gevent>=25.4.0.20250516",
 ]
 
