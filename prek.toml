@@ -36,13 +36,37 @@ hooks = [{ id = "tofu_fmt" }, { id = "tofu_docs" }]
 
 [[repos]]
 repo = "https://github.com/gitleaks/gitleaks"
-rev = "v8.24.2"
+rev = "v8.30.1"
 hooks = [{ id = "gitleaks" }]
 
 [[repos]]
 repo = "https://github.com/deadnews/pindock"
 rev = "v1.1.3"
 hooks = [{ id = "pindock-check", name = "Dockerfile images are digest-pinned" }]
+
+# We can use post-checkout and post-merge to run settings sync operations
+# post-merge also runs on pull
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "merge-vscode-settings"
+name = "merge VS Code settings with workspace defaults"
+language = "system"
+stages = ["post-checkout", "post-merge"]
+always_run = true
+pass_filenames = false
+entry = "./hooks/merge_vscode_settings.py"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "install-vscode-extensions"
+name = "install recommended VS Code extensions if missing"
+language = "system"
+stages = ["post-checkout", "post-merge"]
+always_run = true
+pass_filenames = false
+entry = "./hooks/install-recommended-extensions.sh"
 
 [[repos]]
 repo = "local"
@@ -106,10 +130,20 @@ pass_filenames = 1
 [[repos]]
 repo = "local"
 [[repos.hooks]]
+id = "just"
+name = "just"
+language = "system"
+files = "Justfile"
+entry = "just --fmt"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
 id = "prettier"
 name = "prettier"
 entry = "prettier"
 args = ["--check", "--write", "--ignore-unknown"]
 language = "node"
-types = ["yaml"]
+types = ["yaml", "json"]
 additional_dependencies = ["prettier"]
