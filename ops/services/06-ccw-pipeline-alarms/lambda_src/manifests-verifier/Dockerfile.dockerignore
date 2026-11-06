@@ -1,4 +1,6 @@
 *
 !pyproject.toml
 !uv.lock
-!manifests_verifier.py
+!.python-version
+!ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier/pyproject.toml
+!ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier/manifests_verifier.py

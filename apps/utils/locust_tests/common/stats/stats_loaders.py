@@ -9,7 +9,7 @@ from dataclasses import fields
 from functools import cmp_to_key, reduce
 from pathlib import Path
 from statistics import mean
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from gevent import monkey
 
@@ -32,7 +32,20 @@ from common.validation import ValidationResult
 monkey.patch_all()
 import boto3  # noqa: E402
 
-AthenaQueryRowResult = dict[str, list[dict[str, str]]]
+if TYPE_CHECKING:
+    from mypy_boto3_athena.type_defs import (
+        DatumTypeDef,
+        RowTypeDef,
+        StartQueryExecutionInputTypeDef,
+        StartQueryExecutionOutputTypeDef,
+    )
+else:
+    DatumTypeDef = object
+    RowTypeDef = object
+    StartQueryExecutionInputTypeDef = object
+    StartQueryExecutionOutputTypeDef = object
+
+AthenaQueryRowResult = RowTypeDef
 """Type representing a single row result from the result of an Athena query"""
 
 TOTAL_RUNTIME_DELTA = 3.0
@@ -145,7 +158,7 @@ class StatsFileLoader(StatsLoader):
         )
         stats_files = [path / file for file in Path(path).iterdir() if file.name.endswith(suffix)]
 
-        aggregated_stats_list = []
+        aggregated_stats_list: list[AggregatedStats] = []
         for stats_file in stats_files:
             with Path(stats_file).open(encoding="utf-8") as json_file:
                 aggregated_stats_list.append(AggregatedStats(**json.load(json_file)))
@@ -208,26 +221,41 @@ class StatsAthenaLoader(StatsLoader):
         raw_json_data = self.__get_raw_json_data(query_result)
         return self.__stats_from_json_data(raw_json_data)
 
-    def __start_athena_query(self, query: str) -> dict[str, Any]:
-        return self.client.start_query_execution(
-            QueryString=query,
-            QueryExecutionContext={"Database": self.stats_config.stats_store_s3_database},
-            WorkGroup=self.stats_config.stats_store_s3_workgroup,
-        )
+    def __start_athena_query(self, query: str) -> StartQueryExecutionOutputTypeDef:
+        database = self.stats_config.stats_store_s3_database
+        if not database:
+            raise ValueError("--stats-store-s3-database must be specified")
+
+        request: StartQueryExecutionInputTypeDef = {
+            "QueryString": query,
+            "QueryExecutionContext": {"Database": database},
+        }
+        if self.stats_config.stats_store_s3_workgroup:
+            request["WorkGroup"] = self.stats_config.stats_store_s3_workgroup
+
+        return self.client.start_query_execution(**request)
 
     def __get_athena_query_status(self, query_execution_id: str) -> str:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_execution
         # for the structure of the returned Dict
-        return self.client.get_query_execution(QueryExecutionId=query_execution_id)[
+        execution = self.client.get_query_execution(QueryExecutionId=query_execution_id)[
             "QueryExecution"
-        ]["Status"]["State"]
+        ]
+        status = execution.get("Status")
+        if not status:
+            raise RuntimeError("Athena query execution had no status in the response")
+
+        state = status.get("State")
+        if not state:
+            raise RuntimeError("Athena query status had no state in the response")
+
+        return state
 
     def __get_athena_query_result(self, query_execution_id: str) -> list[AthenaQueryRowResult]:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
         # for the structure of the returned Dict
-        return self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"][
-            "Rows"
-        ]
+        result_set = self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"]
+        return result_set.get("Rows", [])
 
     def __run_query(self, query: str, max_retries: int = 10) -> list[AthenaQueryRowResult] | None:
         start_response = self.__start_athena_query(query)
@@ -266,7 +294,7 @@ class StatsAthenaLoader(StatsLoader):
         return " AND ".join(explicit_checks)
 
     def __get_raw_json_data(
-        self, query_result: list[dict[str, list[dict[str, str]]]]
+        self, query_result: list[AthenaQueryRowResult]
     ) -> list[tuple[str, str]]:
         # The data is returned as an array of dicts, each with a 'Data' key. These 'Data' dicts
         # values are arrays of dicts with the key being the data type and the value being the actual
@@ -277,8 +305,22 @@ class StatsAthenaLoader(StatsLoader):
         # 1. The first 'Data' dict in the array is always the column names
         # 2. The data returned is always of the type `VarCharValue`
         # 3. We are only retrieving two columns
-        raw_data = [item["Data"] for item in query_result[1:]]
-        return [(data[0]["VarCharValue"], data[1]["VarCharValue"]) for data in raw_data]
+        raw_data: list[tuple[str, str]] = []
+        for row in query_result[1:]:
+            data = row.get("Data")
+            if not data:
+                raise RuntimeError("Athena result row had no Data key")
+            raw_data.append((self.__varchar_value(data[0]), self.__varchar_value(data[1])))
+
+        return raw_data
+
+    @staticmethod
+    def __varchar_value(cell: DatumTypeDef) -> str:
+        value = cell.get("VarCharValue")
+        if not value:
+            raise RuntimeError("Athena result cell was not a VarCharValue")
+
+        return value
 
     def __stats_from_json_data(self, raw_json_data: list[tuple[str, str]]) -> list[AggregatedStats]:
         # Deserializing from a tuple of raw JSON objects; first tuple is a raw JSON object string

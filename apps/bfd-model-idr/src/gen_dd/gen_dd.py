@@ -48,7 +48,7 @@ sample_sources_by_profile = {
 
 sample_resources_by_profile = {}
 dd_df = []
-structure_def_names_descriptions = {}
+structure_def_names_descriptions: dict[str, dict[str, str]] = {}
 
 
 def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -174,7 +174,7 @@ for walk_info in os.walk(dd_support_folder):
 dd_df = pd.DataFrame(dd_df)
 
 
-def replace_str(input_str):
+def replace_str(input_str: object) -> str:
     if isinstance(input_str, str) and len(str(input_str)) > 0:
         return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
     return ""

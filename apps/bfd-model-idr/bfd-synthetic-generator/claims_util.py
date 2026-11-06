@@ -9,20 +9,20 @@ from row_adapter import RowAdapter
 _faker = Faker()
 
 
-def match_line_num(clm_lines: list[RowAdapter] | None, clm_line_num: int):
+def match_line_num(clm_lines: list[RowAdapter] | None, clm_line_num: int) -> RowAdapter | None:
     return next(
         (x for x in clm_lines or [] if x[f.CLM_LINE_NUM] == clm_line_num),
         None,
     )
 
 
-def four_part_key(row: RowAdapter):
+def four_part_key(row: RowAdapter) -> str:
     # It is common across many tables that the unique key is a composite key of the following four
     # columns, so this func makes it easy to generate it
     return f"{row[f.CLM_DT_SGNTR_SK]}-{row[f.CLM_NUM_SK]}-{row[f.GEO_BENE_SK]}-{row[f.CLM_TYPE_CD]}"
 
 
-def get_ric_cd_for_clm_type_cd(clm_type_cd: int):
+def get_ric_cd_for_clm_type_cd(clm_type_cd: int) -> str | None:
     if clm_type_cd in (20, 30, 50, 60, 61, 62, 63, 64):
         # part A!
         return "V"  # inpatient
@@ -47,7 +47,7 @@ def add_meta_timestamps(
     obj: RowAdapter,
     clm: RowAdapter,
     max_date: str = str(NOW),
-):
+) -> None:
     clm_load_dt = (
         date.fromisoformat(clm[f.CLM_IDR_LD_DT])
         if isinstance(clm[f.CLM_IDR_LD_DT], str)

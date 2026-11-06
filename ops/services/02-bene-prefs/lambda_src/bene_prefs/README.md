@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 -->
+
 # README
 
 ## Overview
@@ -46,10 +48,10 @@ A solution will be available shortly after parity with the existing EFT-based pr
 
 ### Initial Setup
 
-1. Run `uv sync` to install packages and provision the local `.venv`.
+1. Run `uv sync` from the repository root to install packages into the shared `.venv` there. This project is a member of the repository-wide `uv` workspace. Its dependencies come from the root `uv.lock`.
 2. Subsequent steps assume you're shell has either
 
-- executed `source .venv/bin/activate`
+- activated the shared venv with `source .venv/bin/activate` from the repository root
 - prefix execution with `uv run`, e.g. `uv run python` for the appropriate interpreter
 
 ### Exploratory Testing

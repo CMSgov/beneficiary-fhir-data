@@ -6,7 +6,7 @@ import pandas as pd
 
 
 class SampleGenerator:
-    def __init__(self, source_directory: str, output_directory: str):
+    def __init__(self, source_directory: str, output_directory: str) -> None:
         self.source_directory = source_directory
         self.output_directory = output_directory
 
@@ -21,7 +21,7 @@ class SampleGenerator:
             sys.exit(1)
 
         bene_line = None
-        mbi_lines = []
+        mbi_lines: list[dict[str, str | None]] = []
 
         for bene_tmp_line in self.read_bene_hist(bene_sk=bene_sk):
             lastest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")

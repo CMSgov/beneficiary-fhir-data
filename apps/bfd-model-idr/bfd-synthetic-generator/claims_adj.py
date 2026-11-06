@@ -1,5 +1,6 @@
 import random
 import string
+from collections.abc import Sequence
 from datetime import date
 from typing import Any
 
@@ -52,9 +53,9 @@ class AdjudicatedGeneratorUtil:
         init_clm: RowAdapter | None = None,
         min_date: str = "2018-01-01",
         max_date: str = str(NOW),
-        type_1_npis: list = [0],
-        type_2_npis: list = [0],
-    ):
+        type_1_npis: Sequence[str] = (),
+        type_2_npis: Sequence[str] = (),
+    ) -> RowAdapter:
         clm = init_clm or RowAdapter({})
         clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**13 - 1)
@@ -205,7 +206,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
@@ -284,7 +285,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
@@ -305,7 +306,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_ocrnc_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_ocrnc_sgntr_mbr = init_clm_ocrnc_sgntr_mbr or RowAdapter({})
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SK] = (
             clm[f.CLM_OCRNC_SGNTR_SK]
@@ -335,7 +336,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_rlt_ocrnc_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_rlt_ocrnc_sgntr_mbr = init_clm_rlt_ocrnc_sgntr_mbr or RowAdapter({})
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SK] = (
             clm[f.CLM_RLT_OCRNC_SGNTR_SK]
@@ -354,7 +355,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_rlt_ocrnc_sgntr_mbr
 
-    def gen_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
+    def gen_clm_dt_sgntr(
+        self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})
         clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_type_cd = clm[f.CLM_TYPE_CD]
@@ -391,7 +394,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dt_sgntr
 
-    def gen_pharm_clm_line(self, clm: RowAdapter, init_clm_line: RowAdapter | None = None):
+    def gen_pharm_clm_line(
+        self, clm: RowAdapter, init_clm_line: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
         clm_line[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -426,7 +431,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_line_rx: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_line_rx = init_clm_line_rx or RowAdapter({})
         clm_line_rx[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
         clm_line_rx[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -487,7 +492,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_dcmtn: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_dcmtn = init_clm_dcmtn or RowAdapter({})
         clm_dcmtn[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_dcmtn[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -508,7 +513,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_dsprtnt_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
+    def gen_dsprtnt_clm_val(
+        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
+    ) -> RowAdapter:
         # CLM_OPRTNL_DSPRTNT_AMT
         # Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique
         # identifier with CLM_UNIQ_ID.
@@ -525,7 +532,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_val
 
-    def gen_ime_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
+    def gen_ime_clm_val(
+        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -544,7 +553,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_val_sqnc_num: int,
         init_clm_prod: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_prod = init_clm_prod or RowAdapter({})
         clm_prod[f.CLM_PROD_TYPE_CD] = "S"
         clm_prod[f.CLM_PRCDR_CD] = random.choice(get_icd_10_prcdr_codes(self.enable_samhsa))
@@ -562,11 +571,11 @@ class AdjudicatedGeneratorUtil:
 
     def gen_diag_clm_prod_list(
         self, clm: RowAdapter, init_diagnoses: list[RowAdapter] | None = None
-    ):
+    ) -> list[RowAdapter]:
         if init_diagnoses is None:
             init_diagnoses = []
 
-        def match_diag(subdict: dict[str, Any]):
+        def match_diag(subdict: dict[str, Any]) -> RowAdapter:
             sub_str = {k: str(v) for k, v in subdict.items()}
             return next(
                 (
@@ -742,7 +751,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_instnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_instnl = init_clm_instnl or RowAdapter({})
 
@@ -828,7 +837,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_prfnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_prfnl = init_clm_prfnl or RowAdapter({})
 
         clm_prfnl[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -857,8 +866,8 @@ class AdjudicatedGeneratorUtil:
         clm_line_num: int,
         diagnoses: list[RowAdapter],
         init_clm_line: RowAdapter | None = None,
-        type_1_npis: list = [0],
-    ):
+        type_1_npis: Sequence[str] = (),
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -906,7 +915,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_LINE_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
@@ -979,7 +988,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_line_num: int,
         init_clm_line_instnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_instnl = init_clm_line_instnl or RowAdapter({})
         clm_line_instnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -1051,7 +1060,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_line_num: int,
         init_clm_line_prfnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_prfnl = init_clm_line_prfnl or RowAdapter({})
         clm_line_prfnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]

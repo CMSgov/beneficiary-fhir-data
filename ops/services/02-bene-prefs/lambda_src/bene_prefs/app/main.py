@@ -101,7 +101,7 @@ def execute_query(query: str) -> list[dict[str, Any]]:
 
 class PartnerPreferences:
     def __init__(self, partner: str) -> None:
-        self._execution = None
+        self._execution: str | None = None
         self.partner = partner
         self.query_template = TEMPLATES.get_template(f"{partner}.sql.j2")
         self.prefs_template = TEMPLATES.get_template(f"{partner}.prefs.j2")
@@ -115,13 +115,14 @@ class PartnerPreferences:
             response = TABLE.get_item(Key={"partner": self.partner})
 
             if "Item" in response:
-                self._execution = response["Item"].get("last_execution")
+                raw = response["Item"].get("last_execution")
+                self._execution = str(raw) if raw is not None else None
                 return self._execution
 
         except ClientError as e:
+            error = e.response.get("Error", {})
             self._logger.exception(
-                "Error retrieving last execution: %s",
-                e.response["Error"]["Message"],  # pyright: ignore[reportAttributeAccessIssue]
+                "Error retrieving last execution: %s", error.get("Message", str(e))
             )
             raise
 
@@ -164,9 +165,9 @@ class PartnerPreferences:
             self._execution = latest_timestamp
 
         except ClientError as e:
+            error = e.response.get("Error", {})
             self._logger.exception(
-                "Error updating last execution: %s",
-                e.response["Error"]["Message"],  # pyright: ignore[reportAttributeAccessIssue]
+                "Error updating last execution: %s", error.get("Message", str(e))
             )
             raise
 
@@ -188,7 +189,7 @@ class PartnerPreferences:
             buffer = BytesIO(bs_report)
             buffer.seek(0)
 
-            bucket = SSM.get(f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket")
+            bucket = str(SSM.get(f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket"))
 
             self._logger.info("Storing remote file: s3://%s/%s", bucket, file_name)
             S3.upload_fileobj(buffer, bucket, file_name)

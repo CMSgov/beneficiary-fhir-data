@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from types_boto3_lambda.type_defs import InvocationResponseTypeDef
+    from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 else:
     InvocationResponseTypeDef = object
 

@@ -1,4 +1,10 @@
+<!-- markdownlint-disable MD013 -->
+
 # IDR Model
+
+## Setup
+
+This project is a member of the repository-wide `uv` workspace. Install [`uv`](https://docs.astral.sh/uv/). Run `uv sync` from the repository root. Dependencies are resolved from the root `pyproject.toml` and the shared `uv.lock`. The virtual environment is created at `.venv` in the repository root.
 
 ## `synthetic-data`
 
