@@ -865,6 +865,33 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_IME_AMT').exists()).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmOprtnlImeAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmOprtnlImeAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmOprtnlImeAmt
+        min: 0
+        max: "1"
+        short: Claim Operational Indirect Medical Education (IME) Amount
+      - id: ExplanationOfBenefit.adjudication:clmOprtnlImeAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmOprtnlImeAmt.category.coding:clmOprtnlImeAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmOprtnlImeAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_OPRTNL_IME_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
@@ -882,6 +909,33 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).timing
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.timing[x]
+    path: ExplanationOfBenefit.supportingInfo.timing[x]
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmCmsProcDt
+        min: 0
+        max: "1"
+        short: Claim CMS Processing Date
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding
+        path: ExplanationOfBenefit.supportingInfo.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding:clmCmsProcDtCoding
+        path: ExplanationOfBenefit.supportingInfo.category.coding
+        sliceName: clmCmsProcDtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+          code: CLM_CMS_PROC_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
