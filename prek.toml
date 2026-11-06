@@ -96,12 +96,15 @@ exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarm
 
 [[repos]]
 repo = "local"
+# uv prefers already-locked versions. This hook adds new dependencies to the lockfile without
+# changing versions that are already pinned.
+# Upgrading a pinned version stays an explicit `uv lock --upgrade`.
 [[repos.hooks]]
-id = "uv-lock-consistent"
-name = "uv lock is consistent"
+id = "uv-lock"
+name = "uv lockfile is regenerated"
 language = "system"
-files = "^(pyproject\\.toml|uv\\.lock)$"
-entry = "uv lock --check"
+files = "pyproject\\.toml$|uv\\.lock$"
+entry = "uv lock"
 pass_filenames = false
 
 [[repos]]
