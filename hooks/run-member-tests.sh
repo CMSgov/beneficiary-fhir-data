@@ -7,9 +7,31 @@ set -Eeuo pipefail
 # A new member with tests is covered without adding a hook to prek.toml.
 # A change to the root pyproject.toml or uv.lock changes every member's environment. Every member
 # with tests then runs.
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 readonly REPO_ROOT
 cd "$REPO_ROOT"
+
+# Darwin (MacOS) hosts get the GNU tools this script uses from Homebrew (contributors via
+# `just bootstrap`):
+# 1. `grealpath` (GNU `realpath`), used for path resolution
+# 2. bash new enough for the `member_dirs` associative array
+# Note that a GUI git client can start a commit with a PATH that holds neither, so the version
+# and the tool are checked here to report that instead of failing later with a builtin error.
+if [[ "$(uname)" == "Darwin" ]]; then
+	if ((BASH_VERSINFO[0] < 4)); then
+		echo "hooks/run-member-tests.sh needs bash 4 or newer on macOS, running ${BASH_VERSION}; run 'just bootstrap' and make sure Homebrew's bin directory is in your PATH" >&2
+		exit 1
+	fi
+	if ! command -v grealpath >/dev/null 2>&1; then
+		echo "hooks/run-member-tests.sh needs GNU coreutils for grealpath on macOS; run 'just bootstrap'" >&2
+		exit 1
+	fi
+	realpath_cmd=grealpath
+else
+	realpath_cmd=realpath
+fi
+readonly realpath_cmd
 
 member_of() {
 	local dir
@@ -31,7 +53,7 @@ has_tests() {
 declare -A member_dirs=()
 root_changed=false
 for file in "$@"; do
-	relative_path="$(realpath -m --relative-to="$REPO_ROOT" "$file")"
+	relative_path="$("$realpath_cmd" -m --relative-to="$REPO_ROOT" "$file")"
 	# The root pyproject.toml or uv.lock changed, so we need to run every member with tests.
 	if [[ "$relative_path" == "pyproject.toml" || "$relative_path" == "uv.lock" ]]; then
 		root_changed=true

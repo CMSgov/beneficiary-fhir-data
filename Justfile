@@ -15,7 +15,7 @@ bootstrap: && setup-vscode
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh findutils
+    brew install uv yq taplo prek tenv argc bash coreutils fd jq nvm terraform-docs shfmt gh findutils
     # The extension used by the prek hook that checks the Actions lockfile.
     # Installing an extension that is already present is a no-op.
     gh extension install github/gh-actions-lock
