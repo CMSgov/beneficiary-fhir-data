@@ -143,10 +143,10 @@ class BFDUserBase(FastHttpUser):
         self.last_updated = data.get_last_updated()
 
         # Initialize URL pools
-        self.url_pools = {}
+        self.url_pools: dict[str, list[str]] = {}
 
         self.logger = logging.getLogger()
-        self.has_reported_no_data = []
+        self.has_reported_no_data: list[str] = []
 
     def ssl_context_factory(self) -> ssl.SSLContext:
         """Configure the SSLContext for FastHttpUser requests. Specifically, the context returned
