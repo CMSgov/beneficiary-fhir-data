@@ -9,7 +9,7 @@ def get_referenced_maps(compiled_map_path: str) -> set[str]:
         with Path(compiled_map_path).open() as f:
             map_data = json.load(f)
 
-        referenced_maps = set()
+        referenced_maps: set[str] = set()
         if "import" in map_data:
             for imp in map_data["import"]:
                 map_name = "maps/" + imp.split("/")[-1] + ".map"

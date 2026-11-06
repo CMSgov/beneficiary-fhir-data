@@ -41,7 +41,7 @@ def parse_manifest(manifest_file: str) -> dict[str, list[str]]:
         logger.error("Manifest %s not found.", manifest_file)
         return {}
 
-    package_map = defaultdict(list)
+    package_map: defaultdict[str, list[str]] = defaultdict(list)
     current_package = None
 
     with path.open() as f:
