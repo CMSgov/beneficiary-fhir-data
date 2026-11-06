@@ -15,7 +15,7 @@ bootstrap: && setup-vscode
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh findutils
+    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh findutils grep
     # The extension used by the prek hook that checks the Actions lockfile.
     # Installing an extension that is already present is a no-op.
     gh extension install github/gh-actions-lock
@@ -307,6 +307,8 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         byte-identical output file. Take care to avoid providing a partial set of tables with
         foreign key constraints (e.g. BENE_SK) without providing the root table as this could
         result in broken output data""")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
 the generated BENE_HSTRY""")]
 [arg("force-ztm", long, value="1", help="""
@@ -322,7 +324,7 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" *paths:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -332,9 +334,12 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per person")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per person")]
@@ -352,7 +357,7 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths: sushi
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" *paths: sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -363,9 +368,12 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
         --min-claims "{{ min-claims }}" \
-        --pac-gen "{{ pac-gen }}"
+        --pac-gen "{{ pac-gen }}" \
+        --overwrite "{{ overwrite }}"
 
 [arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("claims", long, value="1", help="Generate claims after patient generation")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
@@ -379,7 +387,7 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
 [arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
-deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
+deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000" overwrite="": sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -398,7 +406,18 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if truncate == "1" { "--truncate" } else { "" } }} \
         --batch-size "{{ batch-size }}" \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
+
+[arg("source", long, help="Database to clone from e.g. BFD_TEST")]
+[arg("target", long, help="Database to clone to create or replace e.g. BFD_SANDBOX")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[doc("Copy over all data from one synthetic database environment to the specified environments")]
+[group('model')]
+copy-synthetic-data env source target:
+    cd ./apps/bfd-model-idr/bfd-synthetic-generator && BFD_ENV="{{ env }}" ./copy-synthetic-data.sh \
+        --source "{{ source }}" \
+        --target "{{ target }}"
 
 [arg("users", long, help="Peak number of concurrent Locust users")]
 [arg("tablesample", long, help="Percent of table to sample")]
@@ -423,3 +442,10 @@ samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
         --tablesample "{{ tablesample }}" \
         --limit "{{ limit }}" \
         --concurrency "{{ concurrency }}"
+
+[arg("source-directory", long, help="Directory containing the original synthetic CSV files")]
+[arg("target-directory", long, help="Directory containing the regenerated CSV files to check")]
+[doc("Compares checksums of original and regenerated synthetic CSV files to detect mismatches")]
+[group('utilities')]
+diff-synthetic-files source-directory target-directory:
+    ./apps/utils/scripts/diff-synthetic-files.sh "{{ source-directory }}" "{{ target-directory }}"

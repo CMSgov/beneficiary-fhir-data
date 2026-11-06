@@ -42,6 +42,7 @@ from load_synthetic_output import (
     CsvWriter,
     OutputDestinationWriter,
     SnowflakeWriter,
+    parse_overwrites,
 )
 from row_adapter import RowAdapter
 from shared_options import common_options
@@ -733,6 +734,7 @@ def generate_locally(
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    overwrite: str | None = None,
     **kwargs,
 ):
     generate(
@@ -745,6 +747,7 @@ def generate_locally(
         writer,
         truncate,
         batch_size,
+        overwrite,
     )
 
 
@@ -758,6 +761,7 @@ def generate(
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    overwrite: str | None = None,
 ):
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
@@ -766,7 +770,7 @@ def generate(
         )
 
     if writer is None:
-        writer = CsvWriter()
+        writer = CsvWriter(overwrites=parse_overwrites(overwrite))
 
     claims_tables = [
         f.CLM,
@@ -829,7 +833,7 @@ def generate(
         f.PRAUC: [],
     }
     if isinstance(writer, CsvWriter):
-        load_file_dict(files=files, paths=list(paths))
+        load_file_dict(files=files, paths=list(paths), overwrites=writer.overwrites)
         if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
             print(
                 f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "

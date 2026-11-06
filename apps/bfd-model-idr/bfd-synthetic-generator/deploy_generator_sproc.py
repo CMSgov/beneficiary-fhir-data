@@ -1,25 +1,12 @@
-import os
 import sys
 import zipfile
 from enum import Enum
+from pathlib import Path
 
 import click
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from shared_options import common_options
-from snowflake.snowpark import Session
 from snowflake.snowpark.types import BooleanType, DataType, IntegerType, StringType, VariantType
-
-
-def _require_env(name: str) -> str:
-    val = os.environ.get(name)
-    if not val:
-        print(
-            f"Missing required env variable {name}. "
-            + "Source load-idr-credentials.sh with BFD_ENV set before running."
-        )
-        sys.exit(1)
-    return val
+from snowflake_session import create_snowflake_session
 
 
 def _get_snowpark_and_sql_types(param: click.Parameter) -> tuple[DataType, str]:
@@ -35,54 +22,31 @@ def _get_snowpark_and_sql_types(param: click.Parameter) -> tuple[DataType, str]:
 
 
 def _zip_current_directory() -> str:
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    folder_to_zip = os.path.basename(current_dir)
-    parent_dir = os.path.dirname(current_dir)
-    output_zip_path = os.path.join(parent_dir, f"{folder_to_zip}.zip")
+    current_dir = Path(__file__).resolve().parent
+    folder_to_zip = current_dir.name
+    parent_dir = current_dir.parent
+    output_zip_path = parent_dir / f"{folder_to_zip}.zip"
 
     with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(current_dir, followlinks=True):
+        for root, _, files in current_dir.walk(follow_symlinks=True):
             for file in files:
-                full_path = os.path.join(root, file)
-                relative_path = os.path.relpath(full_path, parent_dir)
+                full_path = root / file
+                relative_path = full_path.relative_to(parent_dir)
                 zipf.write(full_path, relative_path)
-    return output_zip_path
-
-
-def _create_snowflake_session() -> Session:
-    private_key = serialization.load_pem_private_key(
-        _require_env("IDR_PRIVATE_KEY").encode(),
-        password=None,
-        backend=default_backend(),
-    )
-    private_key_bytes = private_key.private_bytes(
-        encoding=serialization.Encoding.DER,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-    return Session.builder.configs(
-        {
-            "account": _require_env("IDR_ACCOUNT"),
-            "user": _require_env("IDR_USERNAME"),
-            "private_key": private_key_bytes,
-            "warehouse": _require_env("IDR_WAREHOUSE"),
-            "database": _require_env("IDR_DATABASE"),
-            "schema": "CMS_VDM_VIEW_MDCR_PRD",
-        }
-    ).create()
+    return str(output_zip_path)
 
 
 @click.command
 @common_options
 def main(**kwargs) -> None:
-    min_claims = kwargs.get("min_claims")
-    max_claims = kwargs.get("max_claims")
+    min_claims = kwargs["min_claims"]
+    max_claims = kwargs["max_claims"]
     if min_claims > max_claims:
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
-    session = _create_snowflake_session()
+    session = create_snowflake_session()
     db_name = session.get_current_database().replace('"', "")
     schema_name = session.get_current_schema().replace('"', "")
 
