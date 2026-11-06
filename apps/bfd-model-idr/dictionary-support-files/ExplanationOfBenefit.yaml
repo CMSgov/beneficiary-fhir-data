@@ -715,7 +715,48 @@
   profiles:
     - Regular
     - CMS
-
+  structureDef:
+    id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.amount.value"
+    path: ExplanationOfBenefit.total.amount.value
+    min: 1
+    proceedingEd:
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt"
+        path: ExplanationOfBenefit.total
+        sliceName: clmMdcrDdctblAmt
+        min: 0
+        max: "1"
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.category"
+        path: ExplanationOfBenefit.total.category
+        min: 1
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.category.coding"
+        path: ExplanationOfBenefit.total.category.coding
+        slicing:
+          discriminator:
+            - type: value
+              path: system
+          description: Slice based on coding system
+          ordered: false
+          rules: open
+        min: 2
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.category.coding:c4bb"
+        path: ExplanationOfBenefit.total.category.coding
+        sliceName: c4bb
+        min: 1
+        max: "1"
+        patternCoding:
+          system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication
+          code: deductible
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.category.coding:cms"
+        path: ExplanationOfBenefit.total.category.coding
+        sliceName: cms
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_MDCR_DDCTBL_AMT
+      - id: "ExplanationOfBenefit.total:clmMdcrDdctblAmt.amount"
+        path: ExplanationOfBenefit.total.amount
+        min: 1
 - inputPath: ExplanationOfBenefit-Base.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
