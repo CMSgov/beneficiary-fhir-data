@@ -41,10 +41,10 @@ from constants import (
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
-from file_utils import ROOT
 from id_generators import IdGenerator, RandomIdGenerator
 from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
 from row_adapter import RowAdapter
+from utils import ROOT
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 AVAIL_CONTRACT_NUMS = [

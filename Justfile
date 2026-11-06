@@ -431,3 +431,10 @@ samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
         --tablesample "{{ tablesample }}" \
         --limit "{{ limit }}" \
         --concurrency "{{ concurrency }}"
+
+[arg("source-directory", long, help="Directory containing the original synthetic CSV files")]
+[arg("target-directory", long, help="Directory containing the regenerated CSV files to check")]
+[doc("Compares checksums of original and regenerated synthetic CSV files to detect mismatches")]
+[group('utilities')]
+diff-synthetic-files source-directory target-directory:
+    ./apps/utils/scripts/diff-synthetic-files.sh "{{ source-directory }}" "{{ target-directory }}"

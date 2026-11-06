@@ -1,6 +1,7 @@
 import click
 from snowflake.snowpark import Session
 from snowflake_session import create_snowflake_session
+from utils import parse_input
 
 
 def _database_exists(session: Session, database: str) -> bool:
@@ -22,7 +23,7 @@ def _database_exists(session: Session, database: str) -> bool:
 )
 def main(source: str, target: str) -> None:
     source_database = source.strip()
-    target_databases = [t.strip() for t in target.split(",") if t.strip()]
+    target_databases = parse_input(target)
 
     if not source_database or source_database in target_databases:
         raise click.UsageError(

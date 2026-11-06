@@ -232,12 +232,12 @@ just deploy-generator-sproc --env test --patients 100 --claims --truncate
 To regenerate data, you only need to regenerate in one environment and then you can run a separate script to copy the synthetic data from the regenerated environment to the specified environments:
 
 ```sh
-just deploy_generator_sproc --env test --claims
+just deploy-generator-sproc --env test --claims
 just copy-synthetic-data --env test --source BFD_TEST --target BFD_TEMP
 ```
 
 Notes:
-- deploy_generator_sproc will regenerate only patients unless --claims is specified
+- deploy-generator-sproc will regenerate only patients unless --claims is specified
 - Permission needed to run copy-synthetic-data for an environment for the first time: `GRANT CREATE DATABASE ON ACCOUNT TO ROLE {ENV}_SERVICE_USER`
 - After running copy-synthetic-data, you'll need to grant ACCOUNTADMIN select permision to query the procedure event table since the owner of the event table is the service user: `GRANT SELECT ON TABLE  BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table TO ROLE ACCOUNTADMIN`
 
