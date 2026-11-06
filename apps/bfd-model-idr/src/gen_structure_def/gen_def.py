@@ -73,7 +73,9 @@ class StructureDefinitionGenerator:
         data = [
             node
             for node in data
-            if self.profile in node.get("profiles", []) and node.get("structureDef") and self.applies_to in node.get("appliesTo",[])
+            if self.profile in node.get("profiles", [])
+            and node.get("structureDef")
+            and self.applies_to in node.get("appliesTo", [])
         ]
 
         output_dir = Path(self.output_directory)
@@ -136,7 +138,7 @@ class StructureDefinitionGenerator:
                         id=slicing.get("id") or path,
                         slicing=ElementDefinitionSlicing(
                             rules=slicing.get("rules") or "open",
-                            ordered=slicing.get("ordered") or None,
+                            ordered=slicing.get("ordered") or False,
                             discriminator=cast(
                                 list[ElementDefinitionSlicingDiscriminator],
                                 slicing.get("discriminator"),
