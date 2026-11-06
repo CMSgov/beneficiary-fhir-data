@@ -3,7 +3,7 @@ import time
 import requests
 
 
-def wait_for_matchbox():
+def wait_for_matchbox() -> None:
     print("Waiting for local matchbox server to start...")
     while True:
         try:

@@ -76,7 +76,7 @@ def _publish_alert(sns_client: SNSClient, message: str) -> None:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def lambda_handler(event: dict[str, Any], context: LambdaContext):
+def lambda_handler(_event: dict[str, Any], _context: LambdaContext) -> dict[str, str | int]:
 
     logger.info(
         "Environment: REQUIRED_RETENTION_DAYS=%r, ALERT_SNS_TOPIC_ARN=%r",
@@ -107,7 +107,10 @@ def lambda_handler(event: dict[str, Any], context: LambdaContext):
 
     payload = {
         "AlarmName": "log-retention-non-compliance",
-        "AlarmDescription": f"Found {len(non_compliant)} log groups with non-compliant retention (required: {REQUIRED_RETENTION_DAYS} days)",
+        "AlarmDescription": (
+            f"Found {len(non_compliant)} log groups with non-compliant retention "
+            f"(required: {REQUIRED_RETENTION_DAYS} days)"
+        ),
         "NewStateReason": json.dumps(non_compliant, indent=2),
         "Trigger": {"MetricName": None},
     }

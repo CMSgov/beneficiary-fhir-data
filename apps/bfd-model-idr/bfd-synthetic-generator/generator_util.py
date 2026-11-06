@@ -109,7 +109,7 @@ def partition_rows[T](
     return bucketed_rows
 
 
-def run_command(cmd: list[str] | str, cwd: str | None = None):
+def run_command(cmd: list[str] | str, cwd: str | None = None) -> tuple[str, str]:
     try:
         result = subprocess.run(
             cmd, cwd=cwd, shell=True, check=True, text=True, capture_output=True
@@ -124,11 +124,11 @@ def run_command(cmd: list[str] | str, cwd: str | None = None):
         sys.exit(1)
 
 
-def add_days(input_dt: str, days_to_add: int = 0):
+def add_days(input_dt: str, days_to_add: int = 0) -> str:
     return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
 
 
-def random_date(start_date: str | date, end_date: str | date):
+def random_date(start_date: str | date, end_date: str | date) -> str:
     start_formatted = (
         date.fromisoformat(start_date).toordinal()
         if isinstance(start_date, str)
@@ -143,7 +143,7 @@ def random_date(start_date: str | date, end_date: str | date):
     return date.fromordinal(rand_date).isoformat()
 
 
-def gen_thru_dt(frm_dt: str | date, max_days: int = 30):
+def gen_thru_dt(frm_dt: str | date, max_days: int = 30) -> str:
     from_date = date.fromisoformat(frm_dt) if isinstance(frm_dt, str) else frm_dt
     days_to_add = random.randint(0, max_days)
     return (from_date + timedelta(days=days_to_add)).isoformat()
@@ -200,7 +200,7 @@ def load_file_dict(
     print("All files loaded")
 
 
-def load_file(file: Iterable[dict[str, Any]]):
+def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
     return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
 
@@ -232,7 +232,7 @@ def convert_tilde_str(val: str) -> str:
 class GeneratorUtil:
     USE_COLS = "use_cols"
 
-    def __init__(self, id_gen: IdGenerator | None = None):
+    def __init__(self, id_gen: IdGenerator | None = None) -> None:
         self.id_gen = id_gen or RandomIdGenerator()
         self.fake = Faker()
         self.bene_hstry_table: list[dict[str, Any]] = []
@@ -255,7 +255,7 @@ class GeneratorUtil:
         self.load_addresses()
         self.load_code_systems()
 
-    def load_code_systems(self):
+    def load_code_systems(self) -> None:
         resources_dir = ROOT / "sushi/fsh-generated/resources"
         if not resources_dir.exists():
             raise FileNotFoundError(f"{resources_dir} not found; run 'npm run sushi-build'")
@@ -268,7 +268,7 @@ class GeneratorUtil:
             if "concept" in data and "name" in data:
                 self.code_systems[data["name"]] = [c["code"] for c in data["concept"]]
 
-    def load_addresses(self):
+    def load_addresses(self) -> None:
         text = (ROOT / "beneficiary-components/addresses.csv").read_text(encoding="utf-8")
         self.address_options = list(csv.DictReader(io.StringIO(text)))
 
@@ -278,7 +278,7 @@ class GeneratorUtil:
     def gen_bene_sk(self) -> int:
         return self.id_gen.bene_sk()
 
-    def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int):
+    def generate_bene_xref(self, bene_xref: RowAdapter, new_bene_sk: str, old_bene_sk: int) -> None:
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
@@ -314,10 +314,10 @@ class GeneratorUtil:
 
         self.bene_xref_table.append(bene_xref.kv)
 
-    def gen_address(self):
+    def gen_address(self) -> dict[str, Any]:
         return self.address_options[random.randint(0, len(self.address_options) - 1)]
 
-    def set_timestamps(self, patient: RowAdapter, min_date: datetime.date):
+    def set_timestamps(self, patient: RowAdapter, min_date: datetime.date) -> None:
         max_date = datetime.datetime.now() - datetime.timedelta(days=1)
         efctv_ts = self.fake.date_time_between_dates(min_date, max_date)
         insrt_ts = self.fake.date_time_between_dates(efctv_ts, max_date)
@@ -327,7 +327,7 @@ class GeneratorUtil:
         patient["IDR_UPDT_TS"] = str(updt_ts)
         patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
-    def create_base_patient(self, patient: RowAdapter):
+    def create_base_patient(self, patient: RowAdapter) -> None:
         self.set_timestamps(patient, datetime.date(year=2017, month=5, day=20))
         patient["CNTCT_LANG_CD"] = random.choice(["~", "ENG", "SPA"])
         patient["IDR_LTST_TRANS_FLG"] = "Y"
@@ -340,7 +340,7 @@ class GeneratorUtil:
         patient: RowAdapter,
         num_mbis: int,
         initial_mbi_obj: RowAdapter | None = None,
-    ):
+    ) -> None:
         previous_obslt_dt = None
 
         for mbi_idx in range(num_mbis):
@@ -420,7 +420,7 @@ class GeneratorUtil:
             self.set_timestamps(mbi_obj, efctv_dt)
             self.mbi_table[current_mbi] = mbi_obj.kv
 
-    def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
+    def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False) -> None:
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = probability(0.2)
@@ -442,7 +442,7 @@ class GeneratorUtil:
         expired: bool,
         future: bool,
         force_ztm: bool,
-    ):
+    ) -> None:
         if expired:
             medicare_start_date = NOW - datetime.timedelta(days=730)
             medicare_end_date = NOW - datetime.timedelta(days=365)
@@ -573,7 +573,7 @@ class GeneratorUtil:
         dual_status_cd: str,
         dual_type_cd: str,
         medicaid_state_cd: str,
-    ):
+    ) -> None:
         dual_row["IDR_LTST_TRANS_FLG"] = "Y"
         dual_row["BENE_DUAL_STUS_CD"] = dual_status_cd
         dual_row["BENE_DUAL_TYPE_CD"] = dual_type_cd
@@ -593,7 +593,7 @@ class GeneratorUtil:
         medicare_end_date: datetime.date,
         buy_in_cd: str,
         coverage_type: str,
-    ):
+    ) -> None:
         tp_row["IDR_LTST_TRANS_FLG"] = "Y"
         tp_row["BENE_TP_TYPE_CD"] = coverage_type
         tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
@@ -611,7 +611,7 @@ class GeneratorUtil:
         medicare_start_date: datetime.date,
         medicare_end_date: datetime.date,
         coverage_type: str,
-    ):
+    ) -> None:
         entlmt_row["IDR_LTST_TRANS_FLG"] = "Y"
         entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"] = coverage_type
         entlmt_row["BENE_MDCR_ENRLMT_RSN_CD"] = random.choice(
@@ -631,7 +631,7 @@ class GeneratorUtil:
         rsn_row: RowAdapter,
         medicare_start_date: datetime.date,
         medicare_end_date: datetime.date,
-    ):
+    ) -> None:
         entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
         rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
         rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
@@ -649,7 +649,7 @@ class GeneratorUtil:
         medicare_start_date: datetime.date,
         medicare_end_date: datetime.date,
         mdcr_stus_cd: str,
-    ):
+    ) -> None:
         stus_row["IDR_LTST_TRANS_FLG"] = "Y"
         stus_row["BENE_MDCR_STUS_CD"] = mdcr_stus_cd
         stus_row["MDCR_STUS_BGN_DT"] = medicare_start_date
@@ -660,7 +660,7 @@ class GeneratorUtil:
         stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.mdcr_stus.append(stus_row.kv)
 
-    def generate_bene_lis_cmbnd(self, lis_row: RowAdapter):
+    def generate_bene_lis_cmbnd(self, lis_row: RowAdapter) -> None:
         lis_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -684,7 +684,7 @@ class GeneratorUtil:
 
     def generate_bene_mapd_enrlmt_rx(
         self, rx_row: RowAdapter, contract_pbp_sk: str, contract_num: str, pbp_num: str
-    ):
+    ) -> None:
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -715,7 +715,9 @@ class GeneratorUtil:
 
         self.bene_mapd_enrlmt_rx.append(rx_row.kv)
 
-    def generate_bene_mapd_enrlmt(self, enrollment_row: RowAdapter, pdp_only: bool = False):
+    def generate_bene_mapd_enrlmt(
+        self, enrollment_row: RowAdapter, pdp_only: bool = False
+    ) -> tuple[str, str, str]:
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -754,7 +756,7 @@ class GeneratorUtil:
         amount: int,
         init_contract_pbp_nums: list[RowAdapter] | None = None,
         init_contract_pbp_contacts: list[RowAdapter] | None = None,
-    ):
+    ) -> tuple[list[RowAdapter], list[RowAdapter]]:
         init_contract_pbp_nums = init_contract_pbp_nums or []
         init_contract_pbp_contacts = init_contract_pbp_contacts or []
         additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]

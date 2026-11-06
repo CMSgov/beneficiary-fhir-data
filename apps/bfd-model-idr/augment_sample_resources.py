@@ -1,5 +1,5 @@
+import contextlib
 import json
-import os
 import sys
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
@@ -8,6 +8,8 @@ from typing import Any
 
 import pandas as pd
 import yaml
+
+type JsonValue = dict[str, JsonValue] | list[JsonValue] | str | int | float | bool | None
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
@@ -32,12 +34,10 @@ rlt_ocrnc_sk_df = pd.read_csv(
 )
 
 synth_df = None
-synth_prvdr_file = "out/SYNTHETIC_PRVDR_HSTRY.csv"
-if os.path.exists(synth_prvdr_file):
-    try:
+synth_prvdr_file = Path("out/SYNTHETIC_PRVDR_HSTRY.csv")
+if synth_prvdr_file.is_file():
+    with contextlib.suppress(Exception):
         synth_df = pd.read_csv(synth_prvdr_file, dtype={"PRVDR_SK": str})
-    except Exception:
-        pass
 
 
 def lookup_provider_history(npi_num: str | int | None) -> dict[str, Any] | None:
@@ -82,8 +82,8 @@ careteam_header_columns = {
 }
 
 
-def load_profile_map():
-    profile_map = {}
+def load_profile_map() -> dict[str, list[str]]:
+    profile_map: dict[str, list[str]] = {}
     paths = [
         Path("dictionary-support-files/ExplanationOfBenefit.yaml"),
         Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml"),
@@ -95,15 +95,21 @@ def load_profile_map():
             for item in yaml.safe_load(f) or []:
                 if (profiles := item.get("profiles")) is None:
                     continue
-                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {
-                    "",
-                    None,
+                keys = {
+                    key
+                    for key in (
+                        item.get("sourceColumn"),
+                        item.get("inputPath", "").split(".")[-1],
+                    )
+                    if key
                 }
                 profile_map.update(dict.fromkeys(keys, profiles))
     return profile_map
 
 
-def filter_by_profile(data: Any, profile_type: str, profile_map: dict[str, Any]) -> None:
+def filter_by_profile(
+    data: JsonValue, profile_type: str, profile_map: dict[str, list[str]]
+) -> None:
     if isinstance(data, dict):
         for k, v in list(data.items()):
             if k == "providerList":
@@ -383,9 +389,8 @@ def create_careteam_provider(careteam_column: str) -> Provider:
             provider_object.PRVDR_CARETEAM_NAME = (
                 prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
                 if provider_object.NPI_TYPE == "2"
-                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
-                    ", "
-                )
+                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, "
+                f"{prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
             )
         else:
             provider_object.NPI_TYPE = "1"
@@ -429,9 +434,8 @@ def create_rendering_line_provider(npi_num: str | None) -> Provider:
         provider_object.PRVDR_CARETEAM_NAME = (
             prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
             if provider_object.NPI_TYPE == "2"
-            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
-                ", "
-            )
+            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, "
+            f"{prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
         )
     return provider_object
 

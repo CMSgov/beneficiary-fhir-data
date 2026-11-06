@@ -223,7 +223,7 @@ RX_LINE_COL = [
 
 
 class Result:
-    def __init__(self, result_json: dict[str, Any], output_file: str):
+    def __init__(self, result_json: dict[str, Any], output_file: str) -> None:
         self.result_json = result_json
         self.output_file = output_file
 
@@ -232,7 +232,7 @@ class Result:
 
 
 class SampleGenerator:
-    def __init__(self, source_directory: str, output_directory: str):
+    def __init__(self, source_directory: str, output_directory: str) -> None:
         self.source_directory = source_directory
         self.output_directory = output_directory
 

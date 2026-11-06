@@ -61,10 +61,10 @@ available_given_names = [
 available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "Sheep"]
 
 
-def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
+def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]) -> None:
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
-    logger.info(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
+    logger.info("Regenerating/updating %s...", ", ".join(k for k, v in files.items() if v))
 
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
@@ -150,7 +150,7 @@ def load_inputs(
     paths: tuple[Path, ...] = (),
     exclude_empty: bool = False,
     writer: CsvWriter | SnowflakeWriter | None = None,
-):
+) -> None:
     if writer is None:
         writer = CsvWriter()
 
@@ -162,7 +162,7 @@ def load_inputs(
 
 def _handle_csv_flow(
     writer: CsvWriter, paths: tuple[Path, ...], patients: int, force_ztm: bool, exclude_empty: bool
-):
+) -> None:
     generator: GeneratorUtil = GeneratorUtil(id_gen=RandomIdGenerator())
 
     csv_tables = [
@@ -219,7 +219,7 @@ def _handle_snowflake_flow(
     force_ztm: bool,
     batch_size: int,
     truncate: bool,
-):
+) -> None:
     patient_tables = [
         BENE_MBI_ID,
         BENE_STUS,
@@ -391,7 +391,7 @@ def _generate_patients_batch(
 
         generator.bene_hstry_table.append(patient.kv)
 
-    logger.info(f"Done generating {len(patients)} patients")
+    logger.info("Done generating %d patients", len(patients))
 
 
 def _generate_contracts(
@@ -434,7 +434,7 @@ def main(
     truncate: bool,
     batch_size: int,
     paths: tuple[Path, ...],
-    **kwargs: Any,
+    **kwargs: Any,  # noqa: ANN401, ARG001
 ) -> None:
     load_inputs(
         patients=patients,

@@ -711,10 +711,10 @@ class _ClaimsFile(StrEnum):
         self.out_path = Path(f"../out/{value}.csv")
 
     def __new__(
-        cls: type["_ClaimsFile"],
+        cls: type[_ClaimsFile],
         value: str,
         ordered_headers: list[str],
-    ) -> "_ClaimsFile":
+    ) -> _ClaimsFile:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.ordered_headers = ordered_headers
@@ -734,8 +734,8 @@ def generate_locally(
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
-    **kwargs: Any,
-):
+    **kwargs: Any,  # noqa: ANN401, ARG001
+) -> None:
     generate(
         min_claims,
         max_claims,
@@ -759,7 +759,7 @@ def generate(
     writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
-):
+) -> None:
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
         raise click.UsageError(
@@ -954,7 +954,7 @@ def _generate_batch(
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
         llist=existing[f.CLM_DCMTN],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     dsprtnt_clm_val_per_fpk = {
         four_part_key(x): x
@@ -968,37 +968,35 @@ def _generate_batch(
     }
     proc_clm_prod_per_fpk = partition_rows(
         llist=existing[f.CLM_PROD],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] == "S",
     )
     diag_clm_prod_per_fpk = partition_rows(
         llist=existing[f.CLM_PROD],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] != "S",
     )
     clm_dt_sgntr_per_sk = {row[f.CLM_DT_SGNTR_SK]: row for row in existing[f.CLM_DT_SGNTR]}
     clm_instnl_per_fpk = {four_part_key(row): row for row in existing[f.CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=existing[f.CLM_PRFNL],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_line_mcs_per_fpk = partition_rows(
         llist=existing[f.CLM_LINE_MCS],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
-    clm_line_fiss_per_fpk = partition_rows(
-        llist=existing[f.CLM_LINE_FISS], part_by=lambda x: four_part_key(x)
-    )
+    clm_line_fiss_per_fpk = partition_rows(llist=existing[f.CLM_LINE_FISS], part_by=four_part_key)
     clm_line_instnls_per_fpk = partition_rows(
-        llist=existing[f.CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
+        llist=existing[f.CLM_LINE_INSTNL], part_by=four_part_key
     )
     clm_line_prfnls_per_fpk = partition_rows(
-        llist=existing[f.CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
+        llist=existing[f.CLM_LINE_PRFNL], part_by=four_part_key
     )
     clm_fiss_per_fpk = {four_part_key(row): row for row in existing[f.CLM_FISS]}
     clm_lctn_hstry_per_fpk = {four_part_key(row): row for row in existing[f.CLM_LCTN_HSTRY]}
     clm_line_dcmtns_per_clk = partition_rows(
-        llist=existing[f.CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
+        llist=existing[f.CLM_LINE_DCMTN], part_by=four_part_key
     )
 
     # pac CLM generation is random per-generation iteration, so the number of pac CLMs rows is
@@ -1241,10 +1239,8 @@ def _generate_batch(
             }
             for file_pac_clm in existing_pac_clms
         ]
-        init_pac_clms_tbls = (
-            pac_clms_tbls_from_file
-            if pac_clms_tbls_from_file
-            else [
+        init_pac_clms_tbls = pac_clms_tbls_from_file or (
+            [
                 x
                 for x in all_adj_clms_tbls
                 if probability(0.5)

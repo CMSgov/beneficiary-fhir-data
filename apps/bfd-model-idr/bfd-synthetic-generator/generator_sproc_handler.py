@@ -1,15 +1,15 @@
 import logging
-import os
 import sys
 import time
+from pathlib import Path
 
 from snowflake.snowpark import Session
 
 # Needed to find generator files inside Snowflake's environment
-current_file_dir = os.path.dirname(os.path.abspath(__file__))
-package_root_dir = os.path.dirname(current_file_dir)
+current_file_dir = Path(__file__).resolve().parent
+package_root_dir = current_file_dir.parent
 
-for path in (current_file_dir, package_root_dir):
+for path in (str(current_file_dir), str(package_root_dir)):
     if path not in sys.path:
         sys.path.append(path)
 
@@ -61,4 +61,4 @@ def generate_synthetic_data(
         )
 
     duration = time.perf_counter() - perf_start
-    logger.info(f"{duration:.6f} seconds to run the procedure")
+    logger.info("%.6f seconds to run the procedure", duration)

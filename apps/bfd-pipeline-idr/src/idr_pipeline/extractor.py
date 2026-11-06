@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Generic, override
+from typing import override
 
 import psycopg
 import snowflake.connector
@@ -22,6 +22,7 @@ from .db_utils import get_connection_string
 from .load_partition import LoadPartition
 from .model.base_model import (
     DbType,
+    IdrBaseModel,
     Source,
     T,
     format_date_opt,
@@ -41,7 +42,7 @@ class CsvFile:
         return ",".join(self.cols)
 
 
-class Extractor(ABC, Generic[T]):
+class Extractor[T: IdrBaseModel](ABC):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
         self.type_adapter: TypeAdapter[list[T]] = TypeAdapter(list[cls])

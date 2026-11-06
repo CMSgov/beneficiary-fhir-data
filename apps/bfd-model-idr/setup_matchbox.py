@@ -81,7 +81,7 @@ def upload_resource(
         logger.error("Error uploading %s: %s", rid, e)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:18080/matchboxv3/fhir")
     parser.add_argument("--manifest", default="matchbox_profiles.txt")

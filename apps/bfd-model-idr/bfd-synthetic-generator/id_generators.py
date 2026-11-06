@@ -5,7 +5,7 @@ import sys
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any
+from decimal import Decimal
 
 from constants import (
     BENE_HSTRY,
@@ -123,7 +123,7 @@ class RandomIdGenerator(IdGenerator):
         return self._gen_id(field=field, gen_func=lambda: random.randint(end, start))
 
     def npi_id(self, field: str) -> str:
-        def make_npi():
+        def make_npi() -> str:
             first_digit = random.choice(["1", "2"])
             rest = "".join(random.choices(population=string.digits, k=8))
             npi_9 = first_digit + rest
@@ -175,9 +175,19 @@ class SnowflakeIdState:
     claim_num_sk_next: dict[tuple[int, int, int], int] = field(default_factory=dict)
 
 
-def _query(writer: SnowflakeWriter, sql: str) -> Any:
-    result = writer.session.sql(sql).collect()
-    return result[0][0] if result else None
+def _query_value(writer: SnowflakeWriter, sql: str) -> object | None:
+    rows = writer.session.sql(sql).collect()
+    return rows[0][0] if rows else None
+
+
+def _query_int(writer: SnowflakeWriter, sql: str) -> int | None:
+    value = _query_value(writer, sql)
+    return int(value) if isinstance(value, int | float | str | Decimal) else None
+
+
+def _query_str(writer: SnowflakeWriter, sql: str) -> str | None:
+    value = _query_value(writer, sql)
+    return None if value is None else str(value)
 
 
 def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[Row]:
@@ -190,21 +200,21 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     # if truncate is set then the tables are emptied so every field starts from scratch
     if not truncate:
         # Get or set the min ben_sk
-        existing_min_bene_sk = _query(
+        existing_min_bene_sk = _query_int(
             writer, f"SELECT MIN(BENE_SK) FROM {writer.qualified_table(BENE_HSTRY)}"
         )
         if existing_min_bene_sk is not None:
-            state.bene_sk_next = int(existing_min_bene_sk) - 1
+            state.bene_sk_next = existing_min_bene_sk - 1
 
         # Get or set the max mbi
-        existing_max_mbi = _query(
+        existing_max_mbi = _query_str(
             writer, f"SELECT MAX(BENE_MBI_ID) FROM {writer.qualified_table(BENE_MBI_ID)}"
         )
         if existing_max_mbi is not None:
             state.mbi_next = _decode_identifier(existing_max_mbi, _MBI_ALPHABETS) + 1
 
         # Get or set the max npi
-        existing_max_npi = _query(
+        existing_max_npi = _query_str(
             writer, f"SELECT MAX(PRVDR_NPI_NUM) FROM {writer.qualified_table(PRVDR_HSTRY)}"
         )
         if existing_max_npi is not None:
@@ -234,11 +244,11 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     for field_name, table_name in _NUMERIC_FIELDS.items():
         existing_min = None
         if not truncate:
-            existing_min = _query(
+            existing_min = _query_int(
                 writer, f"SELECT MIN({field_name}) FROM {writer.qualified_table(table_name)}"
             )
         if existing_min is not None:
-            state.numeric_id_next[field_name] = int(existing_min) - 1
+            state.numeric_id_next[field_name] = existing_min - 1
         else:
             state.numeric_id_next[field_name] = 0
 
@@ -249,7 +259,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
         existing_max = None
         if not truncate:
-            existing_max = _query(
+            existing_max = _query_str(
                 writer, f"SELECT MAX({field_name}) FROM {writer.qualified_table(table_name)}"
             )
 

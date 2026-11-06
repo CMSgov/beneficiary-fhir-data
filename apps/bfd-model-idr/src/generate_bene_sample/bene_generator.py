@@ -6,7 +6,7 @@ import pandas as pd
 
 
 class SampleGenerator:
-    def __init__(self, source_directory: str, output_directory: str):
+    def __init__(self, source_directory: str, output_directory: str) -> None:
         self.source_directory = source_directory
         self.output_directory = output_directory
 

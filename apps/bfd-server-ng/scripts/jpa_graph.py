@@ -86,7 +86,7 @@ def parse_yaml_map(yaml_dir: Path) -> dict:
     if not yaml_dir.exists():
         return mappings
     for file_path in yaml_dir.rglob("*.y*ml"):
-        with open(file_path, encoding="utf-8") as f:
+        with file_path.open(encoding="utf-8") as f:
             try:
                 for entry in yaml.safe_load(f) or []:
                     if source_col := entry.get("sourceColumn"):
@@ -115,7 +115,7 @@ def _override_dict(match: re.Match) -> dict:
 
 
 def _extract_columns_and_embeds(content: str) -> tuple[list, list]:
-    """Splits a class's annotations into (plain columns, embeds). An
+    """Split a class's annotations into (plain columns, embeds). An
     @AttributeOverride immediately preceding an @Embedded field is
     attached to that embed's own "overrides" list instead of becoming a
     disconnected top-level column -- it's overriding one of the embedded
@@ -338,7 +338,8 @@ def print_entity_tree(
             )
         elif not node["columns"] and not node["embeddeds"]:
             print(
-                f"{indent}└── extends {parent}  ⚠️  not resolved -- interface, or a missing/unparsed class"
+                f"{indent}└── extends {parent}  ⚠️  not resolved "
+                "-- interface, or a missing/unparsed class"
             )
         else:
             print(f"{indent}└── extends {parent}")
@@ -403,7 +404,10 @@ def _shared_class_flag(
     if class_profile and set(allowed_profiles) >= ALL_PROFILES_SET:
         return "  ▲ PULL UP candidate: valid for all profiles, could move to a shared base"
     if not class_profile and set(allowed_profiles) < ALL_PROFILES_SET:
-        return f"  ▼ PUSH DOWN candidate: only valid for {allowed_profiles}, move to profile-specific subclass(es)"
+        return (
+            f"  ▼ PUSH DOWN candidate: only valid for {allowed_profiles}, "
+            "move to profile-specific subclass(es)"
+        )
     return ""
 
 
@@ -567,7 +571,7 @@ def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
 
 
 def _entity_path_key(class_name: str) -> str | None:
-    """Strips the profile token out of an entity's name to get its
+    """Strip the profile token out of an entity's name to get its
     domain+source 'path', e.g. ClaimInstitutionalCmsSharedSystems and
     ClaimInstitutionalRegularSharedSystems both collapse to
     ClaimInstitutionalSharedSystems -- the same path, different profile.
@@ -605,7 +609,7 @@ SOURCE_SUFFIXES = ("Nch", "SharedSystems")
 
 
 def _entity_domain_and_source(class_name: str) -> tuple[str, str] | None:
-    """Splits the trailing source suffix (Nch/SharedSystems) off an
+    """Split the trailing source suffix (Nch/SharedSystems) off an
     entity's already profile-stripped path, e.g.
     ClaimInstitutionalSharedSystems -> ('ClaimInstitutional',
     'SharedSystems'). Returns None if the path doesn't end in a
@@ -679,28 +683,28 @@ def check_source_split_consistency(graph: dict, entity_index: dict) -> list[dict
         cms_nch_only = cms_sources["Nch"] - cms_sources["SharedSystems"]
         cms_ss_only = cms_sources["SharedSystems"] - cms_sources["Nch"]
 
-        for db_col in sorted(shared_in_this_profile & cms_nch_only):
-            findings.append(
-                {
-                    "domain": domain,
-                    "profile": profile,
-                    "db_col": db_col,
-                    "cms_source": "Nch",
-                    "nch_entity": by_source["Nch"],
-                    "ss_entity": by_source["SharedSystems"],
-                }
-            )
-        for db_col in sorted(shared_in_this_profile & cms_ss_only):
-            findings.append(
-                {
-                    "domain": domain,
-                    "profile": profile,
-                    "db_col": db_col,
-                    "cms_source": "SharedSystems",
-                    "nch_entity": by_source["Nch"],
-                    "ss_entity": by_source["SharedSystems"],
-                }
-            )
+        findings.extend(
+            {
+                "domain": domain,
+                "profile": profile,
+                "db_col": db_col,
+                "cms_source": "Nch",
+                "nch_entity": by_source["Nch"],
+                "ss_entity": by_source["SharedSystems"],
+            }
+            for db_col in sorted(shared_in_this_profile & cms_nch_only)
+        )
+        findings.extend(
+            {
+                "domain": domain,
+                "profile": profile,
+                "db_col": db_col,
+                "cms_source": "SharedSystems",
+                "nch_entity": by_source["Nch"],
+                "ss_entity": by_source["SharedSystems"],
+            }
+            for db_col in sorted(shared_in_this_profile & cms_ss_only)
+        )
 
     return findings
 
@@ -762,17 +766,17 @@ def check_cms_superset(
                 skipped_stubs.append((sibling_name, profile))
                 continue
 
-            for db_col in sorted(sibling_cols - cms_cols):
-                findings.append(
-                    {
-                        "kind": "missing_from_cms",
-                        "path": path,
-                        "profile": profile,
-                        "cms_entity": cms_name,
-                        "sibling_entity": sibling_name,
-                        "db_col": db_col,
-                    }
-                )
+            findings.extend(
+                {
+                    "kind": "missing_from_cms",
+                    "path": path,
+                    "profile": profile,
+                    "cms_entity": cms_name,
+                    "sibling_entity": sibling_name,
+                    "db_col": db_col,
+                }
+                for db_col in sorted(sibling_cols - cms_cols)
+            )
 
             for db_col in sorted(cms_cols):
                 if db_col not in profile_map:
@@ -837,7 +841,7 @@ def _print_cms_superset_findings(
             )
 
 
-def _print_unmatched_columns(profile_map: dict) -> None:
+def _print_unmatched_columns() -> None:
     if not UNMATCHED_COLUMNS:
         return
     print(
@@ -938,7 +942,7 @@ def _print_unresolved_parents(unresolved: dict) -> None:
         print(f"    - {parent} (extended by: {referenced_by})")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     debug_col = None
     if "--debug-column" in args:
@@ -964,7 +968,7 @@ def main():
     print()
     print_shared_classes(graph, profile_map, expand_embeds=expand_embeds, group_embeds=group_embeds)
 
-    _print_unmatched_columns(profile_map)
+    _print_unmatched_columns()
     _print_duplicate_bindings()
     _print_completeness_gaps(check_profile_completeness(profile_map, entity_index))
     _print_unresolved_embeds(find_unresolved_embeds(graph))

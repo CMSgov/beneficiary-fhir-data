@@ -3,13 +3,13 @@ import html
 import json
 import re
 import sys
+from pathlib import Path
 from typing import Any
 
 
 def gen_enum(fsh_output_file: str, int_codes: bool = False) -> None:
-    with open(
-        f"../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json",
-    ) as f:
+    source = Path(f"../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json")
+    with source.open() as f:
         content = f.read()
         json_content = json.loads(content)
         enum_vals = [
@@ -17,7 +17,8 @@ def gen_enum(fsh_output_file: str, int_codes: bool = False) -> None:
             for concept in json_content["concept"]
             if concept["code"] != "~"
         ]
-        with open(f"{sys.path[0]}/out/{fsh_output_file}.txt", "w") as f_out:
+        output = Path(sys.path[0]) / "out" / f"{fsh_output_file}.txt"
+        with output.open("w") as f_out:
             f_out.write(",\n".join(enum_vals) + ";")
 
 
@@ -25,10 +26,7 @@ def get_enum_val(concept: dict[str, Any], int_codes: bool) -> str:
     code = concept["code"]
     display = concept["display"].replace('"', "")
     prefix = "_" if re.match("\\d", code[0]) else ""
-    if int_codes:
-        code_fmt = code
-    else:
-        code_fmt = f'"{code}"'
+    code_fmt = code if int_codes else f'"{code}"'
     punct = "" if display.endswith(".") else "."
     javadoc = html.escape(f"/**\n{code} - {display}{punct}\n*/", quote=False)
     return f'{javadoc}\n{prefix}{code}({code_fmt},"{display}")'

@@ -2,6 +2,7 @@ import os
 import sys
 import zipfile
 from enum import Enum
+from pathlib import Path
 from typing import Any, cast
 
 import click
@@ -36,18 +37,16 @@ def _get_snowpark_and_sql_types(param: click.Parameter) -> tuple[DataType, str]:
 
 
 def _zip_current_directory() -> str:
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    folder_to_zip = os.path.basename(current_dir)
-    parent_dir = os.path.dirname(current_dir)
-    output_zip_path = os.path.join(parent_dir, f"{folder_to_zip}.zip")
+    current_dir = Path(__file__).resolve().parent
+    parent_dir = current_dir.parent
+    output_zip_path = parent_dir / f"{current_dir.name}.zip"
 
     with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(current_dir, followlinks=True):
             for file in files:
-                full_path = os.path.join(root, file)
-                relative_path = os.path.relpath(full_path, parent_dir)
-                zipf.write(full_path, relative_path)
-    return output_zip_path
+                full_path = Path(root) / file
+                zipf.write(full_path, full_path.relative_to(parent_dir))
+    return str(output_zip_path)
 
 
 def _create_snowflake_session() -> Session:
@@ -74,7 +73,7 @@ def _create_snowflake_session() -> Session:
 
 @click.command
 @common_options
-def main(**kwargs: Any) -> None:
+def main(**kwargs: Any) -> None:  # noqa: ANN401
     min_claims: int = kwargs.get("min_claims", 0)
     max_claims: int = kwargs.get("max_claims", 0)
     if min_claims > max_claims:
