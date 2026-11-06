@@ -6,7 +6,7 @@ Small utilities used by developers and by the `just` recipes. `just --list` show
 
 - `build-image.sh`: builds any of the repository's container images locally with podman (see below).
 - `lambda-error-metrics`: queries Lambda error metrics from CloudWatch.
-- `py-check.sh`: runs the four checks a Python change must pass against the workspace root, from any directory. Called by `just py-check`.
+- `py-check.sh`: runs the four checks a Python change must pass against the workspace root, from any directory. Called by `just py-check`. Its `--no-baseline` flag lists the type findings the committed baseline suppresses.
 - `update-tofu-docs`: regenerates the OpenTofu documentation blocks in `ops/`.
 
 ## Building container images locally

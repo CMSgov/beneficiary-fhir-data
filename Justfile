@@ -85,12 +85,14 @@ docker-images:
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
+[arg("no_baseline", long="no-baseline", value="1", help="Run basedpyright with the baseline disabled, listing the findings it normally suppresses")]
 [doc("""Runs every check a Python change must pass: lockfile consistency, lint, formatting and type
 checking. Works from any directory and always checks the workspace root. The same checks, plus the
-workspace member test suites, run as prek hooks on each commit.""")]
+workspace member test suites, run as prek hooks on each commit. The `--no-baseline` run reports
+failure by design, since the baselined findings are then visible errors.""")]
 [group('python')]
-py-check:
-    ./ops/utils/scripts/py-check.sh
+py-check no_baseline="":
+    ./ops/utils/scripts/py-check.sh {{ if no_baseline == "1" { "--no-baseline" } else { "" } }}
 
 [doc("Removes the local db container")]
 [group('database')]
