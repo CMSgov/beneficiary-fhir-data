@@ -94,6 +94,18 @@ failure by design, since the baselined findings are then visible errors.""")]
 py-check no_baseline="":
     ./ops/utils/scripts/py-check.sh {{ if no_baseline == "1" { "--no-baseline" } else { "" } }}
 
+[arg("yes", long, value="1", help="Delete every stale environment without asking")]
+[arg("dry_run", long="dry-run", value="1", help="List the environments and their sizes without deleting anything")]
+[doc("""Deletes the per-project virtual environments left over from before the repository became a uv
+workspace, asking before each one. Those environments are inert now that every Python command runs
+from the workspace root, though a bare `uv pip` inside a member still reads that member's `.venv`.
+Only directories named `.venv` below the repository root are considered, and the root `.venv` is
+never offered.""")]
+[group('python')]
+py-rm-venvs yes="" dry_run="":
+    ./ops/utils/scripts/py-rm-venvs.sh {{ if yes == "1" { "--yes" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
+
 [doc("Removes the local db container")]
 [group('database')]
 remove-db:
