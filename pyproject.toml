@@ -3,13 +3,13 @@
 # Run `uv sync` from here for the whole workspace, or `uv sync --package <name>` for one member.
 [tool.uv.workspace]
 members = [
-  # generator
+  # synthetic-data-generator
   "apps/bfd-model-idr",
   # idr-pipeline
   "apps/bfd-pipeline-idr",
-  # codegen
+  # server-ng-codegen
   "apps/bfd-server-ng/codegen",
-  # scripts
+  # server-ng-scripts
   "apps/bfd-server-ng/scripts",
   # idr-bfd-validator
   "apps/utils/idr-bfd-validator",
@@ -19,11 +19,11 @@ members = [
   "apps/utils/samhsa-regression-tests",
   # synthetic-load-converter
   "apps/utils/synthetic-load-converter",
-  # bfd-mgmt-mount-certstores
+  # server-mount-certstores
   "ops/images/bfd-platform-mount-certstores",
   # slack-alerter
   "ops/platform/02-alerting/lambda_src/slack-alerter",
-  # log_retention_checker
+  # log-retention-checker
   "ops/platform/03-log-retention-alarms/lambda_src",
   # bene-prefs
   "ops/services/02-bene-prefs/lambda_src/bene_prefs",
@@ -33,15 +33,15 @@ members = [
   "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
   # run-idr-pipeline
   "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
-  # regression-wrapper
+  # server-regression-wrapper
   "ops/services/04-server/lambda_src/regression-wrapper",
-  # locust-hook
+  # server-ng-locust-hook
   "ops/services/04-server-ng/lambda_src/locust-hook",
-  # samhsa-hook
+  # server-ng-samhsa-hook
   "ops/services/04-server-ng/lambda_src/samhsa-hook",
   # ccw-manifests-verifier
   "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
-  # error-alerter
+  # server-error-alerter
   "ops/services/06-server-alarms/lambda_src/error_alerter",
   # trigger-glue-trigger
   "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",

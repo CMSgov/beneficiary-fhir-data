@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 -->
 
-# `locust-hook` Lambda Source
+# `server-ng-locust-hook` (`locust-hook` Lambda)
 
-This subdirectory contains the Python source code for the `locust-hook` Lambda.
+This subdirectory is the `server-ng-locust-hook` workspace member. It is the Python source of the `locust-hook` Lambda.
 
 ## Environment Setup
 

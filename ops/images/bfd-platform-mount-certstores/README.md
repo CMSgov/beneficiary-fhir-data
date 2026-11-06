@@ -1,4 +1,4 @@
-# `bfd-mgmt-mount-certstores` Image and Application
+# `server-mount-certstores` (`bfd-platform-mount-certstores` image)
 
 This subfolder contains the source code for a small Python script that downloads the certstores for the BFD Server into a specified location and the corresponding `Dockerfile` for building it into a container image.
 

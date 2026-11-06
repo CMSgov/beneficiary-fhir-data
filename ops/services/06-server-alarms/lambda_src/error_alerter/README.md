@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 -->
 
-# `error-alerter` Lambda Source
+# `server-error-alerter` (`error-alerter` Lambda)
 
-This subdirectory contains the Python source code for the `error-alerter` Lambda.
+This subdirectory is the `server-error-alerter` workspace member. It is the Python source of the `error-alerter` Lambda.
 
 ## Environment Setup
 

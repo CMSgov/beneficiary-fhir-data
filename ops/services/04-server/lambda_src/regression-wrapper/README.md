@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 -->
 
-# `regression-wrapper` Lambda Source
+# `server-regression-wrapper` (`regression-wrapper` Lambda)
 
-This subdirectory contains the Python source code for the `regression-wrapper` Lambda.
+This subdirectory is the `server-regression-wrapper` workspace member. It is the Python source of the `regression-wrapper` Lambda.
 
 ## Environment Setup
 

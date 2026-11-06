@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 -->
 
-# `log_retention_checker` Lambda Source
+# `log-retention-checker` Lambda Source
 
-This subdirectory contains the Python source code for the `log_retention_checker` Lambda.
+This subdirectory is the `log-retention-checker` workspace member. It is the Python source of the `log-retention-checker` Lambda.
 
 ## Environment Setup
 

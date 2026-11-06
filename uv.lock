@@ -18,24 +18,24 @@ filelock = false
 [manifest]
 members = [
     "bene-prefs",
-    "bfd-mgmt-mount-certstores",
     "ccw-manifests-verifier",
     "ccw-runner",
-    "codegen",
     "consume-idr-events",
-    "error-alerter",
-    "generator",
     "idr-bfd-validator",
     "idr-pipeline",
-    "locust-hook",
     "locust-tests",
     "log-retention-checker",
-    "regression-wrapper",
     "run-idr-pipeline",
-    "samhsa-hook",
     "samhsa-regression-tests",
-    "scripts",
+    "server-error-alerter",
+    "server-mount-certstores",
+    "server-ng-codegen",
+    "server-ng-locust-hook",
+    "server-ng-samhsa-hook",
+    "server-ng-scripts",
+    "server-regression-wrapper",
     "slack-alerter",
+    "synthetic-data-generator",
     "synthetic-load-converter",
     "trigger-glue-trigger",
 ]
@@ -314,21 +314,6 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "python-dateutil", specifier = ">=2.9.0" },
     { name = "snowflake-connector-python", specifier = ">=4.7.2" },
-]
-
-[[package]]
-name = "bfd-mgmt-mount-certstores"
-version = "1.0.0"
-source = { virtual = "ops/images/bfd-platform-mount-certstores" }
-dependencies = [
-    { name = "boto3" },
-    { name = "click" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", specifier = ">=1.37.12" },
-    { name = "click", specifier = ">=8.1.8" },
 ]
 
 [[package]]
@@ -681,11 +666,6 @@ wheels = [
 ]
 
 [[package]]
-name = "codegen"
-version = "0.1.0"
-source = { virtual = "apps/bfd-server-ng/codegen" }
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -804,17 +784,6 @@ wheels = [
 ]
 
 [[package]]
-name = "error-alerter"
-version = "1.0.0"
-source = { virtual = "ops/services/06-server-alarms/lambda_src/error_alerter" }
-dependencies = [
-    { name = "boto3" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "boto3", specifier = ">=1.37.19" }]
-
-[[package]]
 name = "faker"
 version = "40.38.0"
 source = { registry = "https://pypi.org/simple" }
@@ -926,39 +895,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/89/76/c615883b7b521ead2944bb3480398cbb07e12b7b4e4d073d3752eb721558/frozenlist-1.8.0-cp314-cp314t-win_amd64.whl", hash = "sha256:06be8f67f39c8b1dc671f5d83aaefd3358ae5cdcf8314552c57e7ed3e6475bdd", size = 49451, upload-time = "2025-10-06T05:37:53.425Z" },
     { url = "https://files.pythonhosted.org/packages/e0/a3/5982da14e113d07b325230f95060e2169f5311b1017ea8af2a29b374c289/frozenlist-1.8.0-cp314-cp314t-win_arm64.whl", hash = "sha256:102e6314ca4da683dca92e3b1355490fed5f313b768500084fbe6371fddfdb79", size = 42507, upload-time = "2025-10-06T05:37:54.513Z" },
     { url = "https://files.pythonhosted.org/packages/9a/9a/e35b4a917281c0b8419d4207f4334c8e8c5dbf4f3f5f9ada73958d937dcc/frozenlist-1.8.0-py3-none-any.whl", hash = "sha256:0c18a16eab41e82c295618a77502e17b195883241c563b00f0aa5106fc4eaa0d", size = 13409, upload-time = "2025-10-06T05:38:16.721Z" },
-]
-
-[[package]]
-name = "generator"
-version = "0.1.0"
-source = { editable = "apps/bfd-model-idr" }
-dependencies = [
-    { name = "click" },
-    { name = "cryptography" },
-    { name = "faker" },
-    { name = "pandas" },
-    { name = "prompt-toolkit" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "requests" },
-    { name = "snowflake-snowpark-python" },
-    { name = "tqdm" },
-    { name = "xlsxwriter" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.3.1" },
-    { name = "cryptography", specifier = ">=50.0.0" },
-    { name = "faker", specifier = ">=37.1.0" },
-    { name = "pandas", specifier = ">=3.0.2" },
-    { name = "prompt-toolkit", specifier = ">=3.0.53" },
-    { name = "pydantic", specifier = ">=2.12.3" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "requests", specifier = ">=2.32.5" },
-    { name = "snowflake-snowpark-python", specifier = ">=1.54.0" },
-    { name = "tqdm", specifier = ">=4.67.1" },
-    { name = "xlsxwriter", specifier = ">=3.2.5" },
 ]
 
 [[package]]
@@ -1223,21 +1159,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c7/09/6487af16b8abaa58259e5f68ab3b72e3140156478af1b02fac5d9a20a9dd/locust-2.46.7.tar.gz", hash = "sha256:cf112214068abe59615d36769db31ffd1430b67c6e5f693b9a23b8510224442b", size = 1479672, upload-time = "2026-10-04T20:51:36.72Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/75/74/9c5b14bf99b2d059bf7651893b656e9cc8dc984341bec760bd46278b6124/locust-2.46.7-py3-none-any.whl", hash = "sha256:a737bcf8d6728d4f0efe9e460ef9c69d0084e1dd085734db6e4775ece453b7fe", size = 1499328, upload-time = "2026-10-04T20:51:35.118Z" },
-]
-
-[[package]]
-name = "locust-hook"
-version = "1.0.0"
-source = { virtual = "ops/services/04-server-ng/lambda_src/locust-hook" }
-dependencies = [
-    { name = "aws-lambda-powertools", extra = ["all"] },
-    { name = "boto3" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aws-lambda-powertools", extras = ["all"] },
-    { name = "boto3" },
 ]
 
 [[package]]
@@ -2240,21 +2161,6 @@ wheels = [
 ]
 
 [[package]]
-name = "regression-wrapper"
-version = "1.0.0"
-source = { virtual = "ops/services/04-server/lambda_src/regression-wrapper" }
-dependencies = [
-    { name = "aws-lambda-powertools", extra = ["all"] },
-    { name = "boto3" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aws-lambda-powertools", extras = ["all"], specifier = ">=3.8.0" },
-    { name = "boto3", specifier = ">=1.37.14" },
-]
-
-[[package]]
 name = "requests"
 version = "2.34.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2326,21 +2232,6 @@ wheels = [
 ]
 
 [[package]]
-name = "samhsa-hook"
-version = "1.0.0"
-source = { virtual = "ops/services/04-server-ng/lambda_src/samhsa-hook" }
-dependencies = [
-    { name = "aws-lambda-powertools", extra = ["all"] },
-    { name = "boto3" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aws-lambda-powertools", extras = ["all"] },
-    { name = "boto3" },
-]
-
-[[package]]
 name = "samhsa-regression-tests"
 version = "1.0.0"
 source = { virtual = "apps/utils/samhsa-regression-tests" }
@@ -2366,9 +2257,85 @@ requires-dist = [
 ]
 
 [[package]]
-name = "scripts"
+name = "server-error-alerter"
+version = "1.0.0"
+source = { virtual = "ops/services/06-server-alarms/lambda_src/error_alerter" }
+dependencies = [
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "boto3", specifier = ">=1.37.19" }]
+
+[[package]]
+name = "server-mount-certstores"
+version = "1.0.0"
+source = { virtual = "ops/images/bfd-platform-mount-certstores" }
+dependencies = [
+    { name = "boto3" },
+    { name = "click" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3", specifier = ">=1.37.12" },
+    { name = "click", specifier = ">=8.1.8" },
+]
+
+[[package]]
+name = "server-ng-codegen"
+version = "0.1.0"
+source = { virtual = "apps/bfd-server-ng/codegen" }
+
+[[package]]
+name = "server-ng-locust-hook"
+version = "1.0.0"
+source = { virtual = "ops/services/04-server-ng/lambda_src/locust-hook" }
+dependencies = [
+    { name = "aws-lambda-powertools", extra = ["all"] },
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aws-lambda-powertools", extras = ["all"] },
+    { name = "boto3" },
+]
+
+[[package]]
+name = "server-ng-samhsa-hook"
+version = "1.0.0"
+source = { virtual = "ops/services/04-server-ng/lambda_src/samhsa-hook" }
+dependencies = [
+    { name = "aws-lambda-powertools", extra = ["all"] },
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aws-lambda-powertools", extras = ["all"] },
+    { name = "boto3" },
+]
+
+[[package]]
+name = "server-ng-scripts"
 version = "0.1.0"
 source = { virtual = "apps/bfd-server-ng/scripts" }
+
+[[package]]
+name = "server-regression-wrapper"
+version = "1.0.0"
+source = { virtual = "ops/services/04-server/lambda_src/regression-wrapper" }
+dependencies = [
+    { name = "aws-lambda-powertools", extra = ["all"] },
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aws-lambda-powertools", extras = ["all"], specifier = ">=3.8.0" },
+    { name = "boto3", specifier = ">=1.37.14" },
+]
 
 [[package]]
 name = "setuptools"
@@ -2481,6 +2448,39 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
+name = "synthetic-data-generator"
+version = "0.1.0"
+source = { editable = "apps/bfd-model-idr" }
+dependencies = [
+    { name = "click" },
+    { name = "cryptography" },
+    { name = "faker" },
+    { name = "pandas" },
+    { name = "prompt-toolkit" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "snowflake-snowpark-python" },
+    { name = "tqdm" },
+    { name = "xlsxwriter" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "click", specifier = ">=8.3.1" },
+    { name = "cryptography", specifier = ">=50.0.0" },
+    { name = "faker", specifier = ">=37.1.0" },
+    { name = "pandas", specifier = ">=3.0.2" },
+    { name = "prompt-toolkit", specifier = ">=3.0.53" },
+    { name = "pydantic", specifier = ">=2.12.3" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "requests", specifier = ">=2.32.5" },
+    { name = "snowflake-snowpark-python", specifier = ">=1.54.0" },
+    { name = "tqdm", specifier = ">=4.67.1" },
+    { name = "xlsxwriter", specifier = ">=3.2.5" },
 ]
 
 [[package]]

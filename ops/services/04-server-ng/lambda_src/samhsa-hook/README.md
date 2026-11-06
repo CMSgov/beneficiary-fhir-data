@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 -->
 
-# `samhsa-hook` Lambda Source
+# `server-ng-samhsa-hook` (`samhsa-hook` Lambda)
 
-This subdirectory contains the Python source code for the `samhsa-hook` Lambda.
+This subdirectory is the `server-ng-samhsa-hook` workspace member. It is the Python source of the `samhsa-hook` Lambda.
 
 ## Environment Setup
 
