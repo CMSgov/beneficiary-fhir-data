@@ -8,6 +8,7 @@
 import re
 import sys
 from pathlib import Path
+from typing import TypedDict
 
 import yaml
 
@@ -81,8 +82,51 @@ DUPLICATE_COLUMN_BINDINGS: dict[tuple[str, str], set[str]] = {}
 FORMAT_SPACING = "    │"
 
 
-def parse_yaml_map(yaml_dir: Path) -> dict:
-    mappings = {}
+class ColumnEntry(TypedDict):
+    db_col: str
+    java_var: str
+
+
+class EmbedEntry(TypedDict):
+    type: str
+    java_var: str
+    overrides: list[ColumnEntry]
+
+
+class JpaNode(TypedDict):
+    type: str
+    parent: str | None
+    table: str | None
+    columns: list[ColumnEntry]
+    embeddeds: list[EmbedEntry]
+
+
+class SourceSplitFinding(TypedDict):
+    domain: str
+    profile: str
+    db_col: str
+    cms_source: str
+    nch_entity: str
+    ss_entity: str
+
+
+class CmsSupersetFinding(TypedDict):
+    kind: str
+    path: str
+    profile: str
+    cms_entity: str
+    sibling_entity: str
+    db_col: str
+
+
+type ProfileMap = dict[str, list[str]]
+type EntityIndex = dict[str, tuple[str, set[str]]]
+type ReachableProfiles = dict[str, set[str]]
+type JpaGraph = dict[str, JpaNode]
+
+
+def parse_yaml_map(yaml_dir: Path) -> ProfileMap:
+    mappings: ProfileMap = {}
     if not yaml_dir.exists():
         return mappings
     for file_path in yaml_dir.rglob("*.y*ml"):
@@ -97,7 +141,7 @@ def parse_yaml_map(yaml_dir: Path) -> dict:
     return mappings
 
 
-def _hide_attribute_overrides(content: str, override_matches: list) -> str:
+def _hide_attribute_overrides(content: str, override_matches: list[re.Match[str]]) -> str:
     """Blank out each @AttributeOverride(...) span so COLUMN_RE/EMBEDDED_RE
     can't see (or backtrack into) the @Column nested inside it.
     """
@@ -107,14 +151,14 @@ def _hide_attribute_overrides(content: str, override_matches: list) -> str:
     return content
 
 
-def _override_dict(match: re.Match) -> dict:
+def _override_dict(match: re.Match[str]) -> ColumnEntry:
     return {
         "db_col": match.group("col1") or match.group("col2"),
         "java_var": match.group("name1") or match.group("name2"),
     }
 
 
-def _extract_columns_and_embeds(content: str) -> tuple[list, list]:
+def _extract_columns_and_embeds(content: str) -> tuple[list[ColumnEntry], list[EmbedEntry]]:
     """Split a class's annotations into (plain columns, embeds). An
     @AttributeOverride immediately preceding an @Embedded field is
     attached to that embed's own "overrides" list instead of becoming a
@@ -127,16 +171,16 @@ def _extract_columns_and_embeds(content: str) -> tuple[list, list]:
     override_matches = list(ATTRIBUTE_OVERRIDE_RE.finditer(content))
     clean_content = _hide_attribute_overrides(content, override_matches)
 
-    plain_columns = [
+    plain_columns: list[ColumnEntry] = [
         {"db_col": match.group(1), "java_var": match.group(3)}
         for match in COLUMN_RE.finditer(clean_content)
     ]
 
-    embeds = []
+    embeds: list[EmbedEntry] = []
     claimed: set[int] = set()
     for m in EMBEDDED_RE.finditer(clean_content):
         clean_type = re.sub(r"^(?:private|protected|public)\s+", "", m.group(1)).strip()
-        own_overrides = []
+        own_overrides: list[ColumnEntry] = []
         for i, override_match in enumerate(override_matches):
             if i in claimed:
                 continue
@@ -151,7 +195,7 @@ def _extract_columns_and_embeds(content: str) -> tuple[list, list]:
     for target_type, java_var in ONE_TO_MANY_RE.findall(clean_content):
         embeds.append({"type": target_type, "java_var": java_var, "overrides": []})
 
-    leftover_columns = [
+    leftover_columns: list[ColumnEntry] = [
         _override_dict(override_match)
         for i, override_match in enumerate(override_matches)
         if i not in claimed
@@ -160,7 +204,9 @@ def _extract_columns_and_embeds(content: str) -> tuple[list, list]:
     return plain_columns + leftover_columns, embeds
 
 
-def _record_duplicate_bindings(class_name: str, columns: list, embeds: list) -> None:
+def _record_duplicate_bindings(
+    class_name: str, columns: list[ColumnEntry], embeds: list[EmbedEntry]
+) -> None:
     all_column_like = columns + [override for embed in embeds for override in embed["overrides"]]
     java_vars_by_column: dict[str, set[str]] = {}
     for col in all_column_like:
@@ -170,8 +216,8 @@ def _record_duplicate_bindings(class_name: str, columns: list, embeds: list) -> 
             DUPLICATE_COLUMN_BINDINGS[(class_name, db_col)] = java_vars
 
 
-def parse_java_graph(src_dir: Path) -> dict:
-    graph = {}
+def parse_java_graph(src_dir: Path) -> JpaGraph:
+    graph: JpaGraph = {}
     if not src_dir.exists():
         return graph
 
@@ -218,7 +264,7 @@ def entity_profile(class_name: str) -> tuple[str, bool]:
 
 
 def entity_exposed_columns(
-    graph: dict, class_name: str, visited: set[str] | None = None
+    graph: JpaGraph, class_name: str, visited: set[str] | None = None
 ) -> set[str]:
     """Every db_col reachable from this entity through inheritance and
     nested @Embedded types, flattened into one set. Used only for the
@@ -243,7 +289,7 @@ def entity_exposed_columns(
 
 
 def _debug_field(
-    col: dict, declaring_class: str, profile: str, allowed_profiles: list, in_dict: bool
+    col: ColumnEntry, declaring_class: str, profile: str, allowed_profiles: list[str], in_dict: bool
 ) -> None:
     print(
         f"[DEBUG] {col['db_col']} declared on {declaring_class!r} entity_profile={profile!r} "
@@ -253,8 +299,8 @@ def _debug_field(
 
 
 def _print_entity_column(
-    profile_map: dict,
-    col: dict,
+    profile_map: ProfileMap,
+    col: ColumnEntry,
     declaring_class: str,
     profile: str,
     indent: str,
@@ -280,8 +326,8 @@ def _print_entity_column(
 
 
 def print_entity_tree(
-    graph: dict,
-    profile_map: dict,
+    graph: JpaGraph,
+    profile_map: ProfileMap,
     class_name: str,
     profile: str,
     indent: str = "",
@@ -346,7 +392,7 @@ def print_entity_tree(
 
 
 def print_entity(
-    graph: dict, profile_map: dict, entity_name: str, debug_col: str | None = None
+    graph: JpaGraph, profile_map: ProfileMap, entity_name: str, debug_col: str | None = None
 ) -> tuple[str, set[str]]:
     node = graph[entity_name]
     profile, inferred = entity_profile(entity_name)
@@ -361,7 +407,7 @@ def print_entity(
     return profile, entity_exposed_columns(graph, entity_name)
 
 
-def _collect_reachable_profiles(graph: dict) -> dict[str, set]:
+def _collect_reachable_profiles(graph: JpaGraph) -> ReachableProfiles:
     """For every class, every entity-level profile it's reachable under
     anywhere in the codebase -- walking both inheritance and @Embedded
     chains from every concrete Entity (the only real usage sites; a
@@ -372,7 +418,7 @@ def _collect_reachable_profiles(graph: dict) -> dict[str, set]:
     via ClaimPaymentComponentAmount by a Cms entity -- flagging its
     columns against just one of those contexts would be misleading.
     """
-    reachable: dict[str, set] = {}
+    reachable: ReachableProfiles = {}
 
     def walk(class_name: str, profile: str, visited: set[str]) -> None:
         if class_name in visited or class_name not in graph:
@@ -395,7 +441,7 @@ def _collect_reachable_profiles(graph: dict) -> dict[str, set]:
 
 
 def _shared_class_flag(
-    class_profile: str | None, allowed_profiles: list, ambiguous: bool = False
+    class_profile: str | None, allowed_profiles: list[str], ambiguous: bool = False
 ) -> str:
     if ambiguous:
         return ""
@@ -412,7 +458,11 @@ def _shared_class_flag(
 
 
 def _print_shared_column(
-    profile_map: dict, col: dict, governing_profile: str | None, indent: str, ambiguous: bool
+    profile_map: ProfileMap,
+    col: ColumnEntry,
+    governing_profile: str | None,
+    indent: str,
+    ambiguous: bool,
 ) -> None:
     db_col = col["db_col"].upper()
     if db_col not in profile_map:
@@ -426,13 +476,13 @@ def _print_shared_column(
 
 
 def _print_shared_fields(
-    graph: dict,
-    profile_map: dict,
+    graph: JpaGraph,
+    profile_map: ProfileMap,
     class_name: str,
     governing_profile: str | None,
     indent: str,
     expand_embeds: bool,
-    reachable: dict,
+    reachable: ReachableProfiles,
     visited: set[str] | None = None,
 ) -> None:
     visited = visited if visited is not None else set()
@@ -466,11 +516,11 @@ def _print_shared_fields(
 
 
 def print_shared_class(
-    graph: dict,
-    profile_map: dict,
+    graph: JpaGraph,
+    profile_map: ProfileMap,
     class_name: str,
     expand_embeds: bool = False,
-    reachable: dict[str, set[str]] | None = None,
+    reachable: ReachableProfiles | None = None,
 ) -> None:
     """Print a MappedSuperclass/Embeddable's own declared columns (not
     resolved through inheritance -- the parent gets its own section) with
@@ -517,7 +567,10 @@ def print_shared_class(
 
 
 def print_shared_classes(
-    graph: dict, profile_map: dict, expand_embeds: bool = False, group_embeds: bool = False
+    graph: JpaGraph,
+    profile_map: ProfileMap,
+    expand_embeds: bool = False,
+    group_embeds: bool = False,
 ) -> None:
     reachable = _collect_reachable_profiles(graph)
     shared = sorted(
@@ -552,7 +605,9 @@ def print_shared_classes(
         visit(name)
 
 
-def check_profile_completeness(profile_map: dict, entity_index: dict) -> dict:
+def check_profile_completeness(
+    profile_map: ProfileMap, entity_index: EntityIndex
+) -> dict[str, list[str]]:
     """For every db_col the dictionary says a profile can see, confirm at
     least one concrete entity for that profile actually exposes it. Flags
     dictionary entries with no matching entity -- either the entity model
@@ -585,7 +640,7 @@ def _entity_path_key(class_name: str) -> str | None:
     return class_name[:start] + class_name[end:]
 
 
-def _group_entities_by_path(graph: dict) -> dict[str, dict[str, str]]:
+def _group_entities_by_path(graph: JpaGraph) -> dict[str, dict[str, str]]:
     """Path -> {profile: entity_name}, built only from entities whose
     name actually encodes a profile (the CMS-default fallback doesn't
     apply here -- there's no real sibling to compare a defaulted entity
@@ -625,7 +680,7 @@ def _entity_domain_and_source(class_name: str) -> tuple[str, str] | None:
     return None
 
 
-def _group_entities_by_domain_and_profile(graph: dict) -> dict[tuple[str, str], dict[str, str]]:
+def _group_entities_by_domain_and_profile(graph: JpaGraph) -> dict[tuple[str, str], dict[str, str]]:
     """(domain, profile) -> {source: entity_name}, e.g.
     ('ClaimInstitutional', 'REGULAR') -> {'Nch': 'ClaimInstitutionalRegularNch',
     'SharedSystems': 'ClaimInstitutionalRegularSharedSystems'}.
@@ -645,7 +700,9 @@ def _group_entities_by_domain_and_profile(graph: dict) -> dict[tuple[str, str], 
     return groups
 
 
-def check_source_split_consistency(graph: dict, entity_index: dict) -> list[dict]:
+def check_source_split_consistency(
+    graph: JpaGraph, entity_index: EntityIndex
+) -> list[SourceSplitFinding]:
     """Within a single profile, a domain with both an Nch and a
     SharedSystems entity should split source-specific columns the same
     way CMS already does. If CMS keeps a column on only one of its two
@@ -656,15 +713,14 @@ def check_source_split_consistency(graph: dict, entity_index: dict) -> list[dict
     """
     by_domain_profile = _group_entities_by_domain_and_profile(graph)
 
-    cms_cols_by_domain_source: dict[str, dict[str, set]] = {}
+    cms_cols_by_domain_source: dict[str, dict[str, set[str]]] = {}
     for (domain, profile), by_source in by_domain_profile.items():
         if profile == "CMS":
             cms_cols_by_domain_source[domain] = {
-                source: entity_index.get(name, (None, set()))[1]
-                for source, name in by_source.items()
+                source: entity_index.get(name, ("", set()))[1] for source, name in by_source.items()
             }
 
-    findings = []
+    findings: list[SourceSplitFinding] = []
     for (domain, profile), by_source in by_domain_profile.items():
         if profile == "CMS":
             continue
@@ -674,8 +730,8 @@ def check_source_split_consistency(graph: dict, entity_index: dict) -> list[dict
         if "Nch" not in by_source or "SharedSystems" not in by_source:
             continue
 
-        nch_cols = entity_index.get(by_source["Nch"], (None, set()))[1]
-        ss_cols = entity_index.get(by_source["SharedSystems"], (None, set()))[1]
+        nch_cols = entity_index.get(by_source["Nch"], ("", set()))[1]
+        ss_cols = entity_index.get(by_source["SharedSystems"], ("", set()))[1]
         if not nch_cols or not ss_cols:
             continue
 
@@ -709,7 +765,7 @@ def check_source_split_consistency(graph: dict, entity_index: dict) -> list[dict
     return findings
 
 
-def _print_source_split_findings(findings: list) -> None:
+def _print_source_split_findings(findings: list[SourceSplitFinding]) -> None:
     if not findings:
         return
     print(
@@ -726,8 +782,8 @@ def _print_source_split_findings(findings: list) -> None:
 
 
 def check_cms_superset(
-    graph: dict, profile_map: dict, entity_index: dict
-) -> tuple[list[dict], list[tuple[str, str]]]:
+    graph: JpaGraph, profile_map: ProfileMap, entity_index: EntityIndex
+) -> tuple[list[CmsSupersetFinding], list[tuple[str, str]]]:
     """CMS is meant to be the fullest profile for each domain+source
     path: (1) every column a Basis/Regular sibling exposes should also
     exist on its CMS counterpart, and (2) every CMS column the
@@ -748,20 +804,20 @@ def check_cms_superset(
     entity produces one finding per column against a placeholder class
     that just hasn't been implemented yet, which is noise, not signal.
     """
-    findings = []
+    findings: list[CmsSupersetFinding] = []
     skipped_stubs: list[tuple[str, str]] = []
     for path, by_profile in _group_entities_by_path(graph).items():
         cms_name = by_profile.get("CMS")
         if not cms_name:
             continue
-        cms_cols = entity_index.get(cms_name, (None, set()))[1]
+        cms_cols = entity_index.get(cms_name, ("", set()))[1]
         if not cms_cols:
             continue
 
         for profile, sibling_name in by_profile.items():
             if profile == "CMS":
                 continue
-            sibling_cols = entity_index.get(sibling_name, (None, set()))[1]
+            sibling_cols = entity_index.get(sibling_name, ("", set()))[1]
             if not sibling_cols:
                 skipped_stubs.append((sibling_name, profile))
                 continue
@@ -798,7 +854,7 @@ def check_cms_superset(
 
 
 def _print_cms_superset_findings(
-    findings: list, skipped_stubs: list[tuple[str, str]] | None = None
+    findings: list[CmsSupersetFinding], skipped_stubs: list[tuple[str, str]] | None = None
 ) -> None:
     skipped_stubs = skipped_stubs or []
     if skipped_stubs:
@@ -865,7 +921,7 @@ def _print_duplicate_bindings() -> None:
         print(f"    - {cls}.{db_col}: {', '.join(sorted(java_vars))}")
 
 
-def _print_completeness_gaps(gaps: dict) -> None:
+def _print_completeness_gaps(gaps: dict[str, list[str]]) -> None:
     if not gaps:
         return
     print(
@@ -878,7 +934,7 @@ def _print_completeness_gaps(gaps: dict) -> None:
             print(f"    - {db_col}")
 
 
-def find_unresolved_embeds(graph: dict) -> dict[str, set[str]]:
+def find_unresolved_embeds(graph: JpaGraph) -> dict[str, set[str]]:
     """Every type referenced via @Embedded that never got parsed as its
     own @Entity/@MappedSuperclass/@Embeddable class. Almost always means
     that class is missing the @Embeddable annotation and is silently
@@ -897,7 +953,7 @@ def find_unresolved_embeds(graph: dict) -> dict[str, set[str]]:
     return unresolved
 
 
-def _print_unresolved_embeds(unresolved: dict) -> None:
+def _print_unresolved_embeds(unresolved: dict[str, set[str]]) -> None:
     if not unresolved:
         return
     print(
@@ -910,7 +966,7 @@ def _print_unresolved_embeds(unresolved: dict) -> None:
         print(f"    - {embed_type} (referenced by: {referenced_by})")
 
 
-def find_unresolved_parents(graph: dict) -> dict[str, set[str]]:
+def find_unresolved_parents(graph: JpaGraph) -> dict[str, set[str]]:
     """Every 'extends' target that never got parsed as its own class,
     for classes that have nothing of their own to fall back on. A class
     with real columns/embeds loses nothing visible when its parent
@@ -929,7 +985,7 @@ def find_unresolved_parents(graph: dict) -> dict[str, set[str]]:
     return unresolved
 
 
-def _print_unresolved_parents(unresolved: dict) -> None:
+def _print_unresolved_parents(unresolved: dict[str, set[str]]) -> None:
     if not unresolved:
         return
     print(
@@ -957,7 +1013,7 @@ def main() -> None:
 
     entity_names = sorted(n for n, d in graph.items() if d["type"] == "Entity")
 
-    entity_index = {}
+    entity_index: EntityIndex = {}
     for name in entity_names:
         profile, fields = print_entity(graph, profile_map, name, debug_col)
         entity_index[name] = (profile, fields)
