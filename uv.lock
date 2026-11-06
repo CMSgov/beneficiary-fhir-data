@@ -44,7 +44,7 @@ overrides = [{ name = "filelock", specifier = ">=4.2.1" }]
 [manifest.dependency-groups]
 dev = [
     { name = "basedpyright", specifier = ">=1.40.2" },
-    { name = "boto3-stubs", extras = ["essential", "codedeploy", "ecs", "glue", "lambda", "logs", "rds", "s3", "scheduler", "sns", "ssm"] },
+    { name = "boto3-stubs", extras = ["essential", "athena", "codedeploy", "ecs", "glue", "lambda", "logs", "rds", "s3", "scheduler", "sns", "ssm"] },
     { name = "debugpy", specifier = ">=1.8.19" },
     { name = "pandas-stubs", specifier = ">=3.0.5.260914" },
     { name = "pytest", specifier = ">=9.0.1" },
@@ -361,6 +361,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+athena = [
+    { name = "mypy-boto3-athena" },
+]
 codedeploy = [
     { name = "mypy-boto3-codedeploy" },
 ]
@@ -1462,6 +1465,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/ce/2efa1f32a07adfe041d48c6d04c08b6f9db66b8512c765983172399b2855/multidict-7.1.0-cp315-cp315t-win_amd64.whl", hash = "sha256:55392202cb374dd1a1f89a8ce1586644870d9e936752059d053e576acc50bc89", size = 99671, upload-time = "2026-10-09T20:31:31.282Z" },
     { url = "https://files.pythonhosted.org/packages/a9/b3/a44c301fe13716c5f2c08afd89a481018988cde4b337b36e28a2b0fcf3a3/multidict-7.1.0-cp315-cp315t-win_arm64.whl", hash = "sha256:f979a077d1c0a9a36dd4fab0d3a36b8de7b593bf935e13df85a380395b2c11ad", size = 98893, upload-time = "2026-10-09T20:31:33.62Z" },
     { url = "https://files.pythonhosted.org/packages/d0/86/a3de309c5e28ee85b314d0e3ba0e0dea6fd361c313322a05e67be4656e1e/multidict-7.1.0-py3-none-any.whl", hash = "sha256:d9ef29cfd98e17085b4f91bba8fa1570bec6787d5c52ce653ed33a58785585d0", size = 28087, upload-time = "2026-10-09T20:31:35.945Z" },
+]
+
+[[package]]
+name = "mypy-boto3-athena"
+version = "1.43.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/17/2f/9274df33e9147ee12b3b21b75e4c50b55001d9e8849fca28ab31065c2379/mypy_boto3_athena-1.43.0.tar.gz", hash = "sha256:d3effaedd902facb838af779de11c9f9dd43f0a836671449bd44b41146998d71", size = 37536, upload-time = "2026-04-29T22:57:27.556Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/fe/57c6417d15730158bfada97e903f88291a59dac7d0275d26461663985f5b/mypy_boto3_athena-1.43.0-py3-none-any.whl", hash = "sha256:b216ec5f34c94ec45a8edec3e7a84b93280aab24509cc1a2f4c885964052cb4f", size = 42035, upload-time = "2026-04-29T22:57:25.416Z" },
 ]
 
 [[package]]
