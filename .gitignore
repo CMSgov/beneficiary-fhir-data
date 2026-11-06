@@ -6,6 +6,7 @@
 !.containerignore
 !.gitignore
 !.gitattributes
+!.basedpyright
 !.github
 !.terraform-docs.yml
 !.python-version

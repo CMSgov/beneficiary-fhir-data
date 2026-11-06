@@ -144,17 +144,9 @@ quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 
-# FUTURE: the "partially unknown" diagnostics are downgraded to warnings so that CI is not blocked
-# by pre-existing untyped code.
-# Change these rules back to errors when the legacy scripts are annotated.
 [tool.basedpyright]
 typeCheckingMode = "strict"
-reportUnknownArgumentType = "warning"
-reportUnknownLambdaType = "warning"
-reportUnknownMemberType = "warning"
-reportUnknownParameterType = "warning"
-reportUnknownVariableType = "warning"
-reportMissingTypeArgument = "warning"
+failOnWarnings = true
 venvPath = "."
 venv = ".venv"
 # pyright searches the workspace root, a root-level src directory, and the venv by default.
