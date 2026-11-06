@@ -72,15 +72,67 @@ entry = "./hooks/install-recommended-extensions.sh"
 repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "v0.16.8"
 hooks = [
-  { id = "ruff-check", args = ["--fix"], types_or = ["python", "pyi"] },
+  { id = "ruff-check", args = [
+    "--fix",
+  ], types_or = [
+    "python",
+    "pyi",
+  ], exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/" },
 
-  { id = "ruff-format", types = ["python"] },
+  { id = "ruff-format", types = [
+    "python",
+  ], exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/" },
 ]
 
 [[repos]]
-repo = "https://github.com/RobertCraigie/pyright-python"
-rev = "v1.1.414"
-hooks = [{ id = "pyright" }]
+repo = "local"
+[[repos.hooks]]
+id = "basedpyright"
+name = "basedpyright"
+language = "system"
+types_or = ["python", "pyi"]
+entry = "uv run basedpyright"
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "uv-lock-consistent"
+name = "uv lock is consistent"
+language = "system"
+files = "^(pyproject\\.toml|uv\\.lock)$"
+entry = "uv lock --check"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "pytest-model-idr"
+name = "IDR model tests"
+language = "system"
+files = "^apps/bfd-model-idr/.*\\.py$"
+entry = "uv run pytest apps/bfd-model-idr/src"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "pytest-idr-pipeline"
+name = "IDR pipeline tests"
+language = "system"
+files = "^apps/bfd-pipeline-idr/.*\\.py$"
+entry = "uv run pytest apps/bfd-pipeline-idr/test"
+pass_filenames = false
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "pytest-run-idr-pipeline"
+name = "run-idr-pipeline tests"
+language = "system"
+files = "^ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline/.*\\.py$"
+entry = "uv run pytest ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline/tests"
+pass_filenames = false
 
 [[repos]]
 repo = "local"
