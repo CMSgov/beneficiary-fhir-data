@@ -12,6 +12,17 @@
 !.opentofu-version
 !.mvn
 
+# Un-ignore workspace settings for VSCode
+# .vscode is ignored by default via parent .gitignores, so we must unignore the directory
+# (due to .gitignore's handling of directory exclusions, see https://git-scm.com/docs/gitignore#_pattern_format)
+!/.vscode
+
+# We ignore everything under .vscode, preferring to explicitly unignore certain files
+.vscode/**/*
+!.vscode/extensions.json
+!.vscode/workspace_launch.json
+!.vscode/workspace_settings.json
+
 # Ignore everything within top-level dist directory
 /dist/**/*
 
