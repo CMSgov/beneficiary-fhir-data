@@ -35,7 +35,8 @@ CLM_COL = [
     "CLM_ORIG_CNTL_NUM",
     "CLM_SRVC_PRVDR_GNRC_ID_NUM",
     "CLM_PD_DT",
-    "CLM_PRSBNG_PRVDR_GNRC_ID_NUMPRVDR_PRSBNG_ID_QLFYR_CD",
+    "CLM_PRSBNG_PRVDR_GNRC_ID_NUM",
+    "PRVDR_PRSBNG_ID_QLFYR_CD",
     "CLM_BENE_PMT_AMT",
     "CLM_OTHR_TP_PD_AMT",
     "PRVDR_SRVC_ID_QLFYR_CD",
@@ -194,7 +195,6 @@ RX_LINE_COL = [
     "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
     "CLM_LINE_GRS_BLW_THRSHLD_AMT",
     "CLM_LINE_LIS_AMT",
-    "CLM_LINE_TROOP_TOT_AMT",
     "CLM_LINE_PLRO_AMT",
     "CLM_RPTD_MFTR_DSCNT_AMT",
     "CLM_LINE_INGRDNT_CST_AMT",
@@ -202,11 +202,8 @@ RX_LINE_COL = [
     "CLM_LINE_SLS_TAX_AMT",
     "CLM_LINE_VCCN_ADMIN_FEE_AMT",
     "CLM_PRCNG_EXCPTN_CD",
-    "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
-    "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
-    "CLM_LINE_REBT_PASSTHRU_POS_AMT",
-    "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-    "CLM_LINE_RPTD_GAP_DSCNT_AMTCLM_LINE_AUTHRZD_FILL_NUM",
+    "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+    "CLM_LINE_AUTHRZD_FILL_NUM",
     "CLM_PHRMCY_SRVC_TYPE_CD",
     "CLM_LINE_RX_ORGN_CD",
     "CLM_BRND_GNRC_CD",
@@ -328,9 +325,16 @@ class SampleGenerator:
         lctn_hist = self.read_lctn_hist(clm_row=claim_row)
         dcmtn = self.read_dcmtn(clm_row=claim_row)
         sig_line = self.read_sig_line(str(claim_row.get("CLM_DT_SGNTR_SK", "")).strip())
-        provider_npi = str(claim_row.get("PRVDR_PRSCRBNG_PRVDR_NPI_NUM", "")).strip()
 
-        prov_row = self.read_provider(provider_npi)
+        # Resolve the prescribing provider's last name using the retained
+        # generic provider identifier instead of the removed NPI field.
+        provider_id = str(claim_row.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM", "")).strip()
+        provider_qualifier = str(claim_row.get("PRVDR_PRSBNG_ID_QLFYR_CD", "")).strip()
+
+        prov_row = (
+            self.read_provider(provider_id) if provider_qualifier == "01" and provider_id else {}
+        )
+
         clm_sbmtr_cntrct_num = str(claim_row.get("CLM_SBMTR_CNTRCT_NUM", "")).strip()
         clm_sbmtr_cntrct_pbp_num = str(claim_row.get("CLM_SBMTR_CNTRCT_PBP_NUM", "")).strip()
 
@@ -343,7 +347,6 @@ class SampleGenerator:
             "CLM_TYPE_CD": clm_type_cd,
             **{col: extract_col_str(claim_row, col) for col in CLM_COL},
             **{col: extract_col_str(prov_row, col) for col in PROV_COL},
-            "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": provider_npi,
             **{col: extract_col_str(ctr_pbp_row, col) for col in CTN_PBP_COL},
             "diagnoses": diagnoses_lines,
             "supportingInfoComponents": [],

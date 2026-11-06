@@ -30,14 +30,20 @@ public class BillablePeriod {
   private Optional<LocalDate> claimThroughDate;
 
   /**
-   * LocalDate -> Period.
+   * Converts claim dates to a FHIR Period. For Part D claims, the claim from date is used as both
+   * the start and end date.
    *
-   * @return the Period generated from claimFromDate and claimThroughDate
+   * @param claimTypeCode the claim type code
+   * @return the Period generated from the claim dates
    */
-  public Period toFhir() {
+  public Period toFhir(ClaimTypeCode claimTypeCode) {
     var period = new Period();
     period.setStartElement(DateUtil.toFhirDate(claimFromDate));
-    claimThroughDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
+    if (claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
+      period.setEndElement(DateUtil.toFhirDate(claimFromDate));
+    } else {
+      claimThroughDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
+    }
     return period;
   }
 }
