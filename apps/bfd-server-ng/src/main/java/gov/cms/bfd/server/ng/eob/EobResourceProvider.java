@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Offset;
@@ -25,6 +26,7 @@ import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.input.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -114,7 +116,8 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final UriOrListParam profile,
+      @OptionalParam(name = Constants.PARAM_PROFILE) @Description(value = PROFILE_DESCRIPTION)
+          final UriOrListParam profile,
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
@@ -173,7 +176,8 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request,
       @OptionalParam(name = OUTCOME) final TokenAndListParam outcome,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
-      @OptionalParam(name = Constants.PARAM_PROFILE) final UriOrListParam profile) {
+      @OptionalParam(name = Constants.PARAM_PROFILE) @Description(value = PROFILE_DESCRIPTION)
+          final UriOrListParam profile) {
 
     var includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
@@ -213,4 +217,38 @@ public class EobResourceProvider implements IResourceProvider {
       case UNSPECIFIED -> SamhsaFilterMode.INCLUDE;
     };
   }
+
+  // region Parameter Descriptions
+
+  // Fields are based off of StructureDefinition, all descriptions in the future may want to follow
+  // this template
+  private static final String PROFILE_DESCRIPTION =
+      """
+          Selects which claim categories are returned and the profile each one is rendered in.
+
+          **type:** `uri`. A supported ExplanationOfBenefit profile URL. C4BB URLs may include \
+          `|2.2.0`; CMS URLs are unversioned. Supported URLs are listed under \
+          `ExplanationOfBenefit.supportedProfile` in `/metadata`. Unsupported values return 400.
+
+          **multipleOr:** true (supported). Two profiles for the same claim category return 400.
+
+          **multipleAnd:** false (not supported). Repeating `_profile` returns 400.
+
+          **modifier:** not supported. Modifiers (`:above`, `:below`) return 400.
+
+          **Differs from FHIR spec:**
+          - Selects how claims are rendered rather than matching existing `meta.profile` values.
+          - When omitted, all claim categories are rendered in the CMS profile.
+          - Only claims in the requested categories are returned. To get every claim in one \
+          profile, list that profile's URL for each category.
+          - Prior authorizations are always returned and are not profiled.
+
+          **Example:** `_profile=\
+          """
+          + SystemUrls.PROFILE_C4BB_EOB_PHARMACY_BASIS
+          + ","
+          + SystemUrls.PROFILE_CMS_EOB_INPATIENT_INSTITUTIONAL
+          + "`";
+
+  // endregion
 }

@@ -7,14 +7,15 @@ default:
 
 [doc("""Installs development dependencies in your local machine.
 Should be ran once for new devs or when dependencies change""")]
-bootstrap:
+[group("setup")]
+bootstrap: && setup-vscode
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh
+    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh findutils
     # The extension used by the prek hook that checks the Actions lockfile.
     # Installing an extension that is already present is a no-op.
     gh extension install github/gh-actions-lock
@@ -29,6 +30,12 @@ bootstrap:
     # committing. This is not possible out of the box at the time of writing this
     # See https://github.com/j178/prek/issues/1051
     ./hooks/refresh-hook-shims.sh
+
+[doc("Sets up recommended VS Code settings and extensions")]
+[group("setup")]
+setup-vscode:
+    ./hooks/merge_vscode_settings.py
+    ./hooks/install-recommended-extensions.sh
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("""Extracts the certificate from the server.
@@ -169,6 +176,11 @@ extract-snowflake env:
 idr-bfd-validator env:
     cd ./apps/utils/idr-bfd-validator && BFD_ENV="{{ env }}" ./run-validator.sh
 
+[doc("Runs the backfill pipeline in prod")]
+[group('pipeline')]
+run-backfill-pipeline:
+    cd ./ops/services/04-idr-pipeline && ./run-backfill.sh
+
 [doc("installs npm dependencies for the model project")]
 [group('model')]
 install-model-dependencies:
@@ -276,9 +288,9 @@ generate-bene-sample bene-sk source-directory="" output-directory="":
         {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
 
 [arg("bene-sk", long, help="Bene key to generate sample with")]
-[arg("parts", long, pattern="(A|B|C|D|DUAL)?", help="Parts request comma delimited without spaces.")]
 [arg("source-directory", long, help="Directory to find bene CSV inputs")]
 [arg("output-directory", long, help="Directory to save the output")]
+[arg("parts", long, pattern="(A|B|C|D|DUAL)?", help="Parts request comma delimited without spaces.")]
 [doc("Generates sample coverage data to feed into the FHIR transform scripts")]
 [group('model')]
 generate-coverage-sample bene-sk parts="" source-directory="" output-directory="":
@@ -295,18 +307,18 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         byte-identical output file. Take care to avoid providing a partial set of tables with
         foreign key constraints (e.g. BENE_SK) without providing the root table as this could
         result in broken output data""")]
-[arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
-Does not affect patients regenerated when a BENE_HSTRY file is provided""")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
 the generated BENE_HSTRY""")]
-[arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
-                        and allow the generator to generate new values""")]
 [arg("force-ztm", long, value="1", help="""
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
 none. Useful if not all tables for a patient have been generated yet.""")]
-[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
-TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
+[arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
+Does not affect patients regenerated when a BENE_HSTRY file is provided""")]
+[arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
+                        and allow the generator to generate new values""")]
 [doc("""Generates patient data using the IDR schema to feed into the BFD pipeline.
 The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
@@ -326,6 +338,8 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite=
         --overwrite "{{ overwrite }}"
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per person")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per person")]
@@ -338,8 +352,6 @@ Sets the mode for which input files from which distinct BENE_SKs are read. 'bene
 indicates that BENE_SKs are only loaded from BENE_HSTRY, 'clm' indicates loading from
 only from CLM. 'both' indicates loading from both
 """)]
-[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
-TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [doc("""Generates claims data using the IDR schema to feed into the BFD pipeline.
 The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
@@ -359,24 +371,23 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
         --pac-gen "{{ pac-gen }}" \
         --overwrite "{{ overwrite }}"
 
-[arg("env", long, pattern=env_pattern, help=env_help)]
 [arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
-[arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
-[arg("claims", long, value="1", help="Generate claims after patient generation")]
-[arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per patient")]
-[arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per patient")]
-[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
-[arg("pac-gen", long, pattern="(no|if_none|always)", help="Partially-adjudicated claims generation mode")]
-[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
-[arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
-[arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
-[arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
 [arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
 TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
+[arg("claims", long, value="1", help="Generate claims after patient generation")]
+[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
+[arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
+[arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
+[arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per patient")]
+[arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per patient")]
+[arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
+[arg("pac-gen", long, pattern="(no|if_none|always)", help="Partially-adjudicated claims generation mode")]
+[arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
-deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" \
-    bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000" overwrite="" : sushi
+deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000" overwrite="": sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -398,9 +409,9 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
         --overwrite "{{ overwrite }}"
 
-[arg("env", long, pattern=env_pattern, help=env_help)]
 [arg("source", long, help="Database to clone from e.g. BFD_TEST")]
 [arg("target", long, help="Database to clone to create or replace e.g. BFD_SANDBOX")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("Copy over all data from one synthetic database environment to the specified environments")]
 [group('model')]
 copy-synthetic-data env source target:
@@ -408,8 +419,8 @@ copy-synthetic-data env source target:
         --source "{{ source }}" \
         --target "{{ target }}"
 
-[arg("tablesample", long, help="Percent of table to sample")]
 [arg("users", long, help="Peak number of concurrent Locust users")]
+[arg("tablesample", long, help="Percent of table to sample")]
 [arg("headless", long, value="1", help="Run in headless mode (outputs in the terminal instead of the web UI)")]
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("Runs locust regression tests against the specified env")]

@@ -6,9 +6,9 @@
 # never used. Tested with podman and it behaves as expected.
 FROM scratch AS server-ng-resources
 
-FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff AS uv
+FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
 
-FROM public.ecr.aws/lambda/python:3.14.2026.10.20.00-arm64@sha256:25860f9a052c84ab3354e7616bf6461d6f6cb45d92f754fadfbc9b87c68dcce9 AS lambda
+FROM public.ecr.aws/lambda/python:3.14.2026.10.31.17-arm64@sha256:36a56dd455d445a23e9f45e4959cdcaf6422068bd3390996c0f9544e6372d986 AS lambda
 
 # First, bundle the dependencies into the task root.
 FROM lambda AS builder

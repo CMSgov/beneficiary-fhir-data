@@ -6,6 +6,7 @@ workflows:
     '.github/workflows/_deploy-tofuservice-layer.yml':
         - 'actions/checkout@v7.0.1'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'opentofu/setup-opentofu@v2.0.2'
     '.github/workflows/_deploy-tofuservices.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/build-container-images.yml':
@@ -26,25 +27,25 @@ workflows:
         - 'actions/setup-java@v6.1.0'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
         - 'aws-actions/amazon-ecr-login@v2.1.7'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'ncipollo/release-action@v1.21.0'
         - 'sigoden/install-binary@v1.3.0'
-        - 'taiki-e/install-action@v2.87.32'
+        - 'taiki-e/install-action@v2.88.1'
     '.github/workflows/ci-java.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
         - 'actions/setup-node@v7.1.0'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
         - 'cmsgov/cdap@e58035649536e98207b13977e894256f8c590be9'
     '.github/workflows/ci-pipeline-synthetic.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
         - 'actions/setup-node@v7.1.0'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
         - 'sigoden/install-binary@v1.3.0'
-        - 'taiki-e/install-action@v2.87.32'
+        - 'taiki-e/install-action@v2.88.1'
     '.github/workflows/ci-prek.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
@@ -52,16 +53,12 @@ workflows:
         - 'opentofu/setup-opentofu@v2.0.2'
         - 'sigoden/install-binary@v1.3.0'
         - 'taiki-e/install-action@v2.87.32'
+        - 'taiki-e/install-action@v2.88.1'
         - 'tj-actions/changed-files@v47.0.6'
     '.github/workflows/ci-python.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-java@v6.1.0'
-        - 'astral-sh/setup-uv@v10.3.2'
-    '.github/workflows/ci-static-site.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'aws-actions/configure-aws-credentials@v6.3.0'
-        - 'pozetroninc/github-action-get-latest-release@v0.8.0'
-        - 'ruby/setup-ruby@v1.335.0'
+        - 'astral-sh/setup-uv@v10.3.3'
     '.github/workflows/deploy-env-services.yml': []
     '.github/workflows/deploy-platform-services.yml': []
     '.github/workflows/release-and-deploy-bfd.yml':
@@ -72,9 +69,6 @@ workflows:
     '.github/workflows/repo-hygiene-check.yml':
         - 'actions/checkout@v7.0.1'
         - 'dsacms/repolinter-actions@main'
-    '.github/workflows/run-shellcheck.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'redhat-plumbers-in-action/differential-shellcheck@v5.5.7'
     '.github/workflows/update-code-json.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -117,9 +111,9 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'astral-sh/setup-uv@v10.3.2':
-        ref: 'v10.3.2'
-        commit: 'sha1-07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
+    'astral-sh/setup-uv@v10.3.3':
+        ref: 'v10.3.3'
+        commit: 'sha1-68559e99cc807c1eb7e9238fd43a15bba460eec2'
         owner_id: 115962839
         repo_id: 846733598
     'aws-actions/amazon-ecr-login@v2.1.7':
@@ -187,16 +181,6 @@ dependencies:
         commit: 'sha1-2a61c339ea7ef0a336d1daa35ef0cb1418e7676c'
         owner_id: 7717635
         repo_id: 259099570
-    'redhat-plumbers-in-action/differential-shellcheck@v5.5.7':
-        ref: 'v5.5.7'
-        commit: 'sha1-f51c7c0d32777d00de777131d25918617a246415'
-        owner_id: 96823034
-        repo_id: 432240469
-    'ruby/setup-ruby@v1.335.0':
-        ref: 'v1.335.0'
-        commit: 'sha1-7f797815d8adceb1c412e7abefdd1ab4abc47a5f'
-        owner_id: 210414
-        repo_id: 231208785
     'sigoden/install-binary@v1.3.0':
         ref: 'v1.3.0'
         commit: 'sha1-bea43f0d6192f38559f1850838d1fd7801f546d7'
@@ -210,6 +194,11 @@ dependencies:
     'taiki-e/install-action@v2.87.32':
         ref: 'v2.87.32'
         commit: 'sha1-5488ac5a951645ce95062214902ac4b6bc1a1037'
+        owner_id: 43724913
+        repo_id: 442947557
+    'taiki-e/install-action@v2.88.1':
+        ref: 'v2.88.1'
+        commit: 'sha1-68a389c788b2cd04016ce8c80ee23b80d2ab3d68'
         owner_id: 43724913
         repo_id: 442947557
     'tj-actions/changed-files@v47.0.6':
