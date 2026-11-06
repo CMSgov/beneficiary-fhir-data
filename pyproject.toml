@@ -191,4 +191,8 @@ exclude = [
   "ops/services/06-server-alarms/docs",
   "apps/utils/scripts",
   "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
+  # Build copies of the db scripts above land in gitignored target directories. pyright does
+  # not read .gitignore, so they need excluding here; ruff skips them through the `**/target/`
+  # rule in apps/.gitignore.
+  "apps/**/target",
 ]
