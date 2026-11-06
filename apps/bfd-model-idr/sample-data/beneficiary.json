@@ -1,0 +1,35 @@
+{
+  "resourceType": "Beneficiary",
+  "BENE_SK": "47347082",
+  "lastUpdated": "2025-02-17T17:00:20.764085",
+  "BENE_1ST_NAME": "Le Petit Prince",
+  "BENE_LAST_NAME": "Coffee",
+  "BENE_MIDL_NAME": "Alex",
+  "BENE_BRTH_DT": "1931-09-07",
+  "BENE_DEATH_DT": null,
+  "BENE_VRFY_DEATH_DAY_SW": "false",
+  "mbi": [
+    {
+      "BENE_MBI_ID": "6LM1C27GV22",
+      "BENE_MBI_EFCTV_DT": "2021-01-20",
+      "BENE_MBI_OBSLT_DT": null
+    }
+  ],
+  "BENE_XREF_EFCTV_SK": "47347082",
+  "ALL_BENE_SKs": [
+    "47347082",
+    "313081892"
+  ],
+  "GEO_USPS_STATE_CD": "AL",
+  "GEO_ZIP5_CD": "36609",
+  "BENE_LINE_1_ADR": "1970 S University Blvd",
+  "BENE_LINE_2_ADR": null,
+  "BENE_LINE_3_ADR": null,
+  "BENE_LINE_4_ADR": null,
+  "BENE_LINE_5_ADR": null,
+  "BENE_LINE_6_ADR": null,
+  "GEO_ZIP_PLC_NAME": "Mobile",
+  "CNTCT_LANG_CD": "SPA",
+  "BENE_SEX_CD": "2",
+  "BENE_RACE_CD": "5"
+}
