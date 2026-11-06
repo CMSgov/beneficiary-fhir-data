@@ -21,7 +21,7 @@ class SampleGenerator:
             sys.exit(1)
 
         bene_line = None
-        mbi_lines = []
+        mbi_lines: list[dict[str, str | None]] = []
 
         for bene_tmp_line in self.read_bene_hist(bene_sk=bene_sk):
             lastest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")

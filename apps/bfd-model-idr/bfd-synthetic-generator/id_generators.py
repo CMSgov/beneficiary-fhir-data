@@ -322,7 +322,7 @@ def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
 
 
 def _encode_identifier(position: int, position_alphabets: list[str]) -> str:
-    characters = []
+    characters: list[str] = []
     for alphabet in reversed(position_alphabets):
         position, character_position = divmod(position, len(alphabet))
         characters.append(alphabet[character_position])

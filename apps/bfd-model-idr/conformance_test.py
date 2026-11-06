@@ -16,7 +16,7 @@ def run_conformance_test(input_file: str | Path, output_file: str | Path) -> boo
 
         url = f"{MATCHBOX_SERVER}/fhir/$validate"
         headers = {"Content-Type": "application/fhir+json", "Accept": "application/fhir+json"}
-        params = {}
+        params: dict[str, str] = {}
 
         # Extract profile from meta.profile if there is one
         if "meta" in resource_content and "profile" in resource_content["meta"]:

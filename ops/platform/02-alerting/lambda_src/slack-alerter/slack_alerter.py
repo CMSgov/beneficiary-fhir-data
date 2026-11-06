@@ -1,7 +1,7 @@
 import json
 import os
 from functools import singledispatch
-from typing import Any
+from typing import Any, cast
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -118,7 +118,7 @@ def handler(event: dict[str, Any], _context: LambdaContext) -> None:
         topic_arn = sns_notif.TopicArn
         topic_name = topic_arn.split(":")[-1]
         raw_message = str(sns_notif.Message)
-        alert = TypeAdapter(Alert).validate_json(raw_message)
+        alert = cast(Alert, TypeAdapter(Alert).validate_json(raw_message))
         webhook_url = TOPIC_TO_WEBHOOK_MAP.get(topic_name)
         channel = TOPIC_TO_CHANNEL_MAP.get(topic_name)
         if not webhook_url or not channel:

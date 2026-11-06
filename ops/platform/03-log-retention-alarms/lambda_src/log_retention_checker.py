@@ -34,7 +34,7 @@ BOTO_CONFIG = Config(
 
 def _list_non_compliant_log_groups(logs_client: CloudWatchLogsClient) -> list[dict[str, object]]:
     """Return log groups that are missing or not equal to required retention."""
-    non_compliant = []
+    non_compliant: list[dict[str, object]] = []
     paginator = logs_client.get_paginator("describe_log_groups")
 
     for page in paginator.paginate():

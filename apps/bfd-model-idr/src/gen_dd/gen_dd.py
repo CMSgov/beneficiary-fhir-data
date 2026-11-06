@@ -48,7 +48,7 @@ sample_sources_by_profile = {
 
 sample_resources_by_profile = {}
 dd_df = []
-structure_def_names_descriptions = {}
+structure_def_names_descriptions: dict[str, dict[str, str]] = {}
 
 
 def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:

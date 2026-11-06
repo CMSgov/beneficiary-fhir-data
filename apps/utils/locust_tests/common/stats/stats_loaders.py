@@ -157,7 +157,7 @@ class StatsFileLoader(StatsLoader):
         )
         stats_files = [path / file for file in Path(path).iterdir() if file.name.endswith(suffix)]
 
-        aggregated_stats_list = []
+        aggregated_stats_list: list[AggregatedStats] = []
         for stats_file in stats_files:
             with Path(stats_file).open(encoding="utf-8") as json_file:
                 aggregated_stats_list.append(AggregatedStats(**json.load(json_file)))

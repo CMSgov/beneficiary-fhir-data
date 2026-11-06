@@ -199,7 +199,7 @@ def _handle_csv_flow(
         print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
         sys.exit(1)
 
-    log_messages = []
+    log_messages: list[str] = []
     if num_existing:
         log_messages.append(f"regenerating {num_existing} existing patients")
     if num_new > 0:

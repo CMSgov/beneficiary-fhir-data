@@ -245,7 +245,7 @@ class PriorAuthGeneratorUtil:
             part_by=lambda x: (x["MBI_NUM"], x["UTN"]),
         )
 
-        prior_auths = []
+        prior_auths: list[RowAdapter] = []
         for (mbi, utn), details in utn_combos.items():
             init_rows = existing_prior_auth_by_key[(mbi, utn)] or [
                 RowAdapter({}) for _ in range(self._roll_segment_count())
