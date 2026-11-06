@@ -102,12 +102,6 @@ class StructureDefinitionGenerator:
 
             elements: list[ElementDefinition] = []
             slicing_added = set()
-            # for p in fhir_defs.expand_type_paths(self.resource_type):
-            #    path_data = [node for node in data if node.get("structureDef").get("path") == p]
-            #    path_data = sorted(
-            #        path_data,
-            #        key=lambda node: (node.get("structureDef").get("slicing") is None,),
-            #    )
             for node in data:
                 struct_def_data = node.get("structureDef")
                 el_id = struct_def_data.get("id")
@@ -191,7 +185,9 @@ class StructureDefinitionGenerator:
                 if slice_names:
                     slices = [el for el in els if get_field(el, "slicing")]
                     if slices:
-                        sorted_elements.extend(slices)
+                        for el in slices:
+                            if el not in sorted_elements:
+                                sorted_elements.append(el)
                     for slice_name in slice_names:
                         for el in [el for el in els if get_field(el, "sliceName") == slice_name]:
                             if el not in sorted_elements:
