@@ -25,13 +25,15 @@ just docker-build bfd-platform-run-idr-pipeline           # build one image
 | `--tag <tag>` | Tag the image as `<name>:<tag>` in addition to `<name>`. Tag any base images built along the way the same way. Dockerfiles that declare `ARG base_version` are then built against `<tag>`. Without it the image is tagged `latest`. |
 | `--platform <platform>` | Build for a different platform than the matrix entry. |
 | `--no-base` | Do not build the base images the requested image depends on. |
+| `--dry-run` | Print the podman command for each image in the chain, in the order the run would issue them. Exit without building. |
 
 ```sh
 just docker-build bfd-platform-idr-pipeline --tag 2.999.0
+just docker-build bfd-platform-idr-pipeline --dry-run    # the commands the run would issue, nothing executed
 ```
 
 ### Base images
 
 `ops/images/bfd-platform-base-python` is the base of the IDR pipeline, the validator and the cert-stores image. Those Dockerfiles resolve `FROM bfd-platform-base-python:${base_version}` from the local image store. `build-image.sh` reads the Dockerfile, finds any base that is itself in the matrix, and builds it first. It is rebuilt on every run.
 
-`--tag <tag>` pins the chain: the base is tagged `<tag>`, and the derived image is built with `base_version=<tag>` so it uses that base rather than an untagged one from a previous run. With `--no-base` nothing is built for the bases, so the version the Dockerfile asks for must already be in the local image store. The script checks first and, when it is missing, says which image to build.
+`--tag <tag>` sets the version used across the chain. The base is tagged `<tag>`. The derived image is built with `base_version=<tag>` so it uses that base rather than an untagged one from a previous run. With `--no-base` nothing is built for the bases, so the version the Dockerfile asks for must already be in the local image store. The script checks first and, when it is missing, says which image to build. `--dry-run` skips that check, because a dry run prints commands instead of acting on the local store. With `--no-base --dry-run` only the leaf command prints.

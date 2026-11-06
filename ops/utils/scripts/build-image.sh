@@ -11,6 +11,7 @@ readonly MATRIX
 # @option --tag Tag to apply to the image and to any base images built along the way
 # @option --platform Target platform, overriding the one in the build matrix
 # @flag --no-base Do not build the base images this image depends on
+# @flag --dry-run Print the podman command for each image in the chain and stop without building
 eval "$(argc --argc-eval "$0" "$@")"
 
 readonly image="${argc_image:-}"
@@ -18,6 +19,7 @@ readonly list="${argc_list:-}"
 readonly tag="${argc_tag:-}"
 readonly platform="${argc_platform:-}"
 readonly no_base="${argc_no_base:-}"
+readonly dry_run="${argc_dry_run:-}"
 
 cd "$REPO_ROOT"
 
@@ -56,7 +58,7 @@ declares_base_version() {
 build_image() {
 	local name="$1"
 	local entry dockerfile context image_platform bases version base
-	declare -a tags build_args
+	declare -a tags build_args cmd
 
 	entry="$(entry_for "$name")"
 	if [[ -z "$entry" ]]; then
@@ -80,7 +82,7 @@ build_image() {
 				build_image "$base"
 			fi
 		done
-	elif [[ -n "$bases" ]]; then
+	elif [[ -n "$bases" ]] && [[ -z "$dry_run" ]]; then
 		version="${tag:-latest}"
 		for base in $bases; do
 			if ! podman image exists "${base}:${version}"; then
@@ -105,9 +107,18 @@ build_image() {
 		build_args+=(--build-arg "base_version=$tag")
 	fi
 
+	cmd=(podman buildx build "$context" --file "$dockerfile" --platform "$image_platform"
+		"${tags[@]/#/--tag=}" "${build_args[@]}")
+
+	if [[ -n "$dry_run" ]]; then
+		printf '%q' "${cmd[0]}"
+		printf ' %q' "${cmd[@]:1}"
+		echo
+		return 0
+	fi
+
 	echo "building ${name} from ${dockerfile} (context: ${context}, platform: ${image_platform})"
-	podman buildx build "$context" --file "$dockerfile" --platform "$image_platform" \
-		"${tags[@]/#/--tag=}" "${build_args[@]}"
+	"${cmd[@]}"
 }
 
 build_image "$image"

@@ -62,16 +62,18 @@ java-build-all:
 [arg("tag", long, help="Tag the image, and any base images built, with this version")]
 [arg("platform", long, help="Target platform, overriding the one in the build matrix")]
 [arg("no_base", long="no-base", value="1", help="Do not build the base images this image needs")]
+[arg("dry_run", long="dry-run", value="1", help="Print the podman command for each image in the chain and stop")]
 [doc("""Builds one of the repository's container images locally with podman.
 The image name is one of the names printed by `just docker-images`. A tag pins derived images to the
 base images built in the same run, so `just docker-build bfd-platform-idr-pipeline --tag 2.999.0`
 builds and tags `bfd-platform-base-python:2.999.0` first.""")]
 [group('docker')]
-docker-build image tag="" platform="" no_base="":
+docker-build image tag="" platform="" no_base="" dry_run="":
     ./ops/utils/scripts/build-image.sh "{{ image }}" \
         {{ if tag != "" { "--tag " + tag } else { "" } }} \
         {{ if platform != "" { "--platform " + platform } else { "" } }} \
-        {{ if no_base == "1" { "--no-base" } else { "" } }}
+        {{ if no_base == "1" { "--no-base" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
 
 [doc("Lists the images that `just docker-build` can build")]
 [group('docker')]
