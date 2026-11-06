@@ -223,7 +223,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_rfrg_prvdr_name VARCHAR(120),
     clm_rfrg_prvdr_pin_num VARCHAR(14),
     -- prescribing provider
-    prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
     clm_prscrbng_prvdr_last_name VARCHAR(60),
     prvdr_prsbng_id_qlfyr_cd VARCHAR(2),
     clm_prsbng_prvdr_gnrc_id_num VARCHAR(35),

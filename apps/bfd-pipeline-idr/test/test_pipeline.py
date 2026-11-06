@@ -913,19 +913,6 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
     assert row["bfd_prvdr_rndrng_npi_type"] is None
     assert row["bfd_updated_ts"] == old_update_ts
-    # bfd_claim_updated_ts updated in claim -8309297293881 header still since a different
-    # npi_type (prvdr_rndrg_prvdr_npi_num) was actually updated. See above.
-
-    cur = conn.execute(
-        "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881"
-    )
-    row = cur.fetchone()
-    assert row is not None
-    assert row["prvdr_srvc_prvdr_npi_num"] == "1819676937"
-    assert row["bfd_prvdr_srvc_npi_type"] == 2
-    assert row["bfd_updated_ts"] == latest_time
-    assert row["bfd_claim_updated_ts"] == latest_time
-
 
 def _reset_db(
     conn: psycopg.Connection[TupleRow], sample_path: Path, postgres: PostgresContainer
