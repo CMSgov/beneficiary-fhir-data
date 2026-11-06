@@ -40,12 +40,3 @@ lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 # stats-store-tag = some_tag
 # stats-store-tag = some_tag2
 # stats-compare-previous = true
-
-[tool.black]
-# Compromise between Black's default of 88 and wasting horizontal screen space.
-# According to Black's style guide, line lengths greater than 100 cause issues
-# for individuals with poor sight. So, 100 seems like the best bet here.
-line-length = 100
-
-[tool.isort]
-profile = "isort"
