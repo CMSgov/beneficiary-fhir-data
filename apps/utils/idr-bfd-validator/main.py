@@ -17,6 +17,9 @@ import anyio
 import boto3
 import click
 from botocore.config import Config
+from loguru import logger
+from pydantic_partial import create_partial_model
+
 from idr_pipeline.constants import DEFAULT_MAX_DATE, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
@@ -53,8 +56,6 @@ from idr_pipeline.pipeline_stages import (
     CLAIM_TABLES,
     PRIOR_AUTH_TABLES,
 )
-from loguru import logger
-from pydantic_partial import create_partial_model
 
 if TYPE_CHECKING:
     from loguru import Record

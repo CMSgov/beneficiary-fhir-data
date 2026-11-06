@@ -11,13 +11,14 @@ from typing import (
     cast,
 )
 
+from locust import TaskSet, User, events, tag, task
+from locust.env import Environment
+
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
-from locust import TaskSet, User, events, tag, task
-from locust.env import Environment
 
 TaskT = TypeVar("TaskT", Callable[..., None], type["TaskSet"])
 _master_bene_ids: Collection[str] = []

@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 from click.testing import CliRunner
+
+from generate_eob_sample import main
 from idr_model.claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
@@ -10,8 +12,6 @@ from idr_model.claim_type_codes import (
     PHARMACY_CLM_TYPE_CDS,
     VMS_CDS,
 )
-
-from generate_eob_sample import main
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SOURCE_DIR_SAMPLES1 = str(PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples1")

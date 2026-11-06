@@ -84,6 +84,34 @@ extend-exclude = [
   "apps/utils/scripts",
   "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
 ]
+# Import roots of every workspace member. Ruff classifies an import as first-party from these
+# paths, so checking one file (a commit hook) sorts imports the same way checking the whole tree
+# does. Both a member directory and its `src` directory are listed, because each is where that
+# member's top-level modules live.
+src = [
+  "apps/bfd-model-idr",
+  "apps/bfd-model-idr/src",
+  "apps/bfd-pipeline-idr/src",
+  "apps/bfd-server-ng/codegen",
+  "apps/bfd-server-ng/scripts",
+  "apps/utils/idr-bfd-validator",
+  "apps/utils/locust_tests",
+  "apps/utils/samhsa-regression-tests",
+  "apps/utils/synthetic-load-converter",
+  "ops/images/bfd-platform-mount-certstores",
+  "ops/platform/02-alerting/lambda_src/slack-alerter",
+  "ops/platform/03-log-retention-alarms/lambda_src",
+  "ops/services/02-bene-prefs/lambda_src/bene_prefs",
+  "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+  "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+  "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+  "ops/services/04-server/lambda_src/regression-wrapper",
+  "ops/services/04-server-ng/lambda_src/locust-hook",
+  "ops/services/04-server-ng/lambda_src/samhsa-hook",
+  "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+  "ops/services/06-server-alarms/lambda_src/error_alerter",
+  "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
 
 [tool.ruff.lint]
 select = [

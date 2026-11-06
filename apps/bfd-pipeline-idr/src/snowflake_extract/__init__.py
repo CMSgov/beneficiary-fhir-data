@@ -1,4 +1,5 @@
 import click
+
 from idr_pipeline.load_synthetic import tables
 
 from .extractor import SnowflakeExecutor
