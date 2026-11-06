@@ -92,7 +92,7 @@ class PostgresLoader:
             ).load()
 
 
-class BatchLoader(Generic[T]):  # noqa: UP046
+class BatchLoader(Generic[T]):
     def __init__(
         self,
         fetch_results: Iterator[list[T]],

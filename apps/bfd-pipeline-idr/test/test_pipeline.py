@@ -12,14 +12,6 @@ from uuid import uuid4
 
 import psycopg
 import pytest
-from loguru import logger
-from psycopg import Connection, sql
-from psycopg.rows import DictRow, TupleRow, dict_row
-from testcontainers.core.config import testcontainers_config  # type: ignore
-
-# https://github.com/testcontainers/testcontainers-python/issues/305
-from testcontainers.postgres import PostgresContainer  # type: ignore
-
 from idr_pipeline import Executor, run
 from idr_pipeline.extractor import PostgresExecutor
 from idr_pipeline.load_events import IdrJobLoadEvent, IdrJobType
@@ -30,6 +22,13 @@ from idr_pipeline.model.base_model import LoadMode, Source
 from idr_pipeline.parallel_executor import MultiprocessingExecutor, MultithreadingExecutor
 from idr_pipeline.pydantic_utils import fields
 from idr_pipeline.settings import SETTINGS
+from loguru import logger
+from psycopg import Connection, sql
+from psycopg.rows import DictRow, TupleRow, dict_row
+from testcontainers.core.config import testcontainers_config  # type: ignore
+
+# https://github.com/testcontainers/testcontainers-python/issues/305
+from testcontainers.postgres import PostgresContainer  # type: ignore
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753

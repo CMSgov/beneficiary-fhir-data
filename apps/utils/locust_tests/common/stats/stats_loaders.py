@@ -11,8 +11,6 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from gevent import monkey
-
 from common.stats.aggregated_stats import (
     AggregatedStats,
     FinalCompareResult,
@@ -25,6 +23,7 @@ from common.stats.stats_config import (
     StatsStorageType,
 )
 from common.validation import ValidationResult
+from gevent import monkey
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.

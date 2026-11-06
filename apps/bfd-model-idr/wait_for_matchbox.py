@@ -1,8 +1,6 @@
 import time
 
 import requests
-import urllib3
-from urllib3.exceptions import NewConnectionError
 
 
 def wait_for_matchbox():

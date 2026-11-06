@@ -42,7 +42,7 @@ class CsvFile:
 
 
 # TODO: UP046 seems to cause issues with pyright
-class Extractor(ABC, Generic[T]):  # noqa: UP046
+class Extractor(ABC, Generic[T]):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
         # cls is only known at runtime, so it can't be a static type expression
