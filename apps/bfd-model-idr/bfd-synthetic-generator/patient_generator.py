@@ -269,7 +269,7 @@ def _handle_snowflake_flow(
 def _generate_patients_batch(
     generator: GeneratorUtil,
     patients: list[RowAdapter],
-    patient_mbi_id_rows: dict[str, dict],
+    patient_mbi_id_rows: dict[str, dict[str, Any]],
     force_ztm: bool,
 ) -> None:
     for patient in tqdm.tqdm(patients):
