@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 import yaml
 from file_utils import ROOT
+from generator_util import probability
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
@@ -222,12 +223,12 @@ def get_drg_dgns_codes(enable_samhsa: bool) -> list[int]:
 
 
 def gen_clm_val_ansi_rsn_cd() -> str | None:
-    if random.randint(1, 5) == 1:
+    if probability(0.20):
         return random.choice(AVAILABLE_ANSI_RSN_CODES)
     return None
 
 
 def gen_clm_val_ansi_grp_cd() -> str | None:
-    if random.randint(1, 5) == 1:
+    if probability(0.20):
         return random.choice(AVAILABLE_ANSI_GRP_CODES)
     return None
