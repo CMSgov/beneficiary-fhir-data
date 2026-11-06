@@ -23,8 +23,7 @@ idr-pipeline = "idr_pipeline:main"
 snowflake-extract = "snowflake_extract:main"
 
 [tool.uv.build-backend]
-module-name = "idr_pipeline"
-packages = ["src/idr_pipeline", "src/idr_extract"]
+module-name = ["idr_pipeline", "snowflake_extract"]
 
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14"]
