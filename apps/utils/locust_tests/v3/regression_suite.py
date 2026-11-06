@@ -90,7 +90,7 @@ class RegressionV3User(BFDUserBase):
     LAST_UPDATED_FILTER: ClassVar = {"_lastUpdated": "gt2020-05-05"}
     SERVICE_DATE_RANGE: ClassVar = {"service-date": "ge2020-01-01"}
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         logger.info("Loaded %s bene_sks.", len(master_bene_sks))
         logger.info("Loaded %s bene_sks_part_a.", len(master_bene_sks_part_a))

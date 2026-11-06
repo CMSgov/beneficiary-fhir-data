@@ -134,7 +134,7 @@ class BFDUserBase(FastHttpUser):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = True
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
@@ -241,7 +241,7 @@ class BFDUserBase(FastHttpUser):
 
     def run_task(
         self,
-        url_callback: Callable,
+        url_callback: Callable[[], str],
         headers: dict[str, str] | None = None,
         body: dict[str, str] | None = None,
         name: str = "",

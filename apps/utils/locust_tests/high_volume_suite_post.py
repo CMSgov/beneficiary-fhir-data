@@ -343,7 +343,7 @@ class HighVolumeUser(BFDUserBase):
 
     @staticmethod
     def filter_tasks_by_tags(
-        task_holder: type[TaskHolder],
+        task_holder: type[TaskHolder[Any]],
         tags: set[str],
         exclude_tags: set[str],
         checked: dict[TaskT, bool] | None = None,
@@ -357,7 +357,7 @@ class HighVolumeUser(BFDUserBase):
         :param checked: The running score of tasks which have or have not been processed
         :return: A list of filtered tasks to execute.
         """
-        filtered_tasks = []
+        filtered_tasks: list[Any] = []
         if checked is None:
             checked = {}
         for cur_task in task_holder.tasks:  # type: ignore
@@ -407,7 +407,7 @@ class HighVolumeUser(BFDUserBase):
         ]
 
         # Filter each task holder's tasks by the given tags and exclude_tags
-        task_holders = [cast(type[TaskHolder], task_set) for _, task_set in potential_tasks]
+        task_holders = [cast(type[TaskHolder[Any]], task_set) for _, task_set in potential_tasks]
         tasks: list[Any] = []
         for task_holder in task_holders:
             tasks.extend(HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags))
@@ -426,7 +426,7 @@ class HighVolumeUser(BFDUserBase):
         """
         return HighVolumeUser.get_tasks(tags, exclude_tags)
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.bene_ids = list(_master_bene_ids)
         self.contract_data = list(_master_contract_data)
