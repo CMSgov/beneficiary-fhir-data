@@ -110,32 +110,11 @@ pass_filenames = false
 [[repos]]
 repo = "local"
 [[repos.hooks]]
-id = "pytest-model-idr"
-name = "IDR model tests"
+id = "pytest-members"
+name = "tests for workspace members with changes"
 language = "system"
-files = "^apps/bfd-model-idr/.*\\.py$"
-entry = "uv run pytest apps/bfd-model-idr/src"
-pass_filenames = false
-
-[[repos]]
-repo = "local"
-[[repos.hooks]]
-id = "pytest-idr-pipeline"
-name = "IDR pipeline tests"
-language = "system"
-files = "^apps/bfd-pipeline-idr/.*\\.py$"
-entry = "uv run pytest apps/bfd-pipeline-idr/test"
-pass_filenames = false
-
-[[repos]]
-repo = "local"
-[[repos.hooks]]
-id = "pytest-run-idr-pipeline"
-name = "run-idr-pipeline tests"
-language = "system"
-files = "^ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline/.*\\.py$"
-entry = "uv run pytest ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline/tests"
-pass_filenames = false
+files = "\\.py$|pyproject\\.toml$|uv\\.lock$"
+entry = "./hooks/run-member-tests.sh"
 
 [[repos]]
 repo = "local"
