@@ -508,7 +508,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        return ["bfd_claim_updated_ts"]
+        return ["bfd_updated_ts"]
 
     @override
     @staticmethod

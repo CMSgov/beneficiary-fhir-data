@@ -125,8 +125,13 @@ class BatchLoader(Generic[T]):  # noqa: UP046
         if last_updated_col:
             target_updated_date_table = self.model.last_updated_date_table()
             current_table = self.model.table()
-            if current_table == target_updated_date_table:
+            # avoid duplicate column operations with last_updated_col
+            if (
+                current_table == target_updated_date_table
+                and last_updated_col[0] not in self.meta_keys
+            ):
                 self.meta_keys.append(last_updated_col[0])
+
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
         self.ordered_pkeys = model.ordered_pkeys()
