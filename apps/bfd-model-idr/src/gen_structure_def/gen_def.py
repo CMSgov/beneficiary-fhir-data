@@ -178,6 +178,8 @@ class StructureDefinitionGenerator:
 
             sorted_elements = []
             for p in fhir_defs.expand_type_paths(self.resource_type):
+                if p.startswith("ExplanationOfBenefit.diagnosis.diagnosis[x]"):
+                    print(p)
                 els = [el for el in elements if get_field(el, "path") == p]
                 slice_names = [
                     get_field(el, "sliceName") for el in els if get_field(el, "sliceName")
