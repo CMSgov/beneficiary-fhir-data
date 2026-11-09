@@ -1659,7 +1659,7 @@
     id: ExplanationOfBenefit.item.productOrService.coding:dar.code
     path: ExplanationOfBenefit.item.productOrService.coding.code
     min: 1
-    precedingEd:
+    proceedingEd:
       - id: ExplanationOfBenefit.item.productOrService
         path: ExplanationOfBenefit.item.productOrService
         min: 1
@@ -1721,6 +1721,18 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.productOrService.coding:hipps.code
+    path: ExplanationOfBenefit.item.productOrService.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.productOrService.coding:hipps
+        path: ExplanationOfBenefit.item.productOrService.coding
+        sliceName: hipps
+        min: 0
+        max: "1"
+        patternCoding:
+          system: https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   appliesTo:
     - Inpatient
