@@ -1518,6 +1518,9 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.procedure.procedure[x].coding.system
+    path: ExplanationOfBenefit.procedure.procedure[x].coding.system
 - inputPath: LineItemComponent.CLM_LINE_SBMT_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -1541,6 +1544,35 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineSbmtChrgAmt.amount.value
+    path: ExplanationOfBenefit.item.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineSbmtChrgAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineSbmtChrgAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.item.adjudication:clmLineSbmtChrgAmt.category.coding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.item.adjudication:clmLineSbmtChrgAmt.category.coding:clmLineSbmtChrgAmtCoding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        sliceName: clmLineSbmtChrgAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_SBMT_CHRG_AMT
+      - id: ExplanationOfBenefit.item.adjudication:clmLineSbmtChrgAmt.amount
+        path: ExplanationOfBenefit.item.adjudication.amount
+        min: 1
 - inputPath: LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT
   appliesTo:
     - Carrier
