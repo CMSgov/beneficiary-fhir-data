@@ -6,7 +6,7 @@
   "name" : "ExplanationOfBenefit-Pharmacy-CMS",
   "title" : "ExplanationOfBenefit Pharmacy CMS",
   "status" : "active",
-  "date" : "2026-11-05T18:38:26.818398Z",
+  "date" : "2026-11-09T19:07:58.432669Z",
   "description" : "This is the CMS Pharmacy Profile.",
   "jurisdiction" : [{
     "coding" : [{
@@ -544,6 +544,7 @@
           "type" : "profile",
           "path" : "$this"
         }],
+        "ordered" : false,
         "rules" : "open"
       },
       "short" : "Contained, inline Resources",
@@ -3272,6 +3273,7 @@
           "type" : "value",
           "path" : "system"
         }],
+        "ordered" : false,
         "rules" : "open"
       },
       "short" : "Code defined by a terminology system",
@@ -4770,6 +4772,7 @@
           "type" : "value",
           "path" : "role.coding.code"
         }],
+        "ordered" : false,
         "rules" : "open"
       },
       "short" : "Care Team members",
@@ -9232,6 +9235,561 @@
       }
     },
     {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt",
+      "path" : "ExplanationOfBenefit.supportingInfo",
+      "sliceName" : "clmCmsProcDt",
+      "short" : "Claim CMS Processing Date",
+      "definition" : "Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues.",
+      "comment" : "Defines data elements not available in the base EOB resource",
+      "requirements" : "Typically these information codes are required to support the services rendered or the adjudication of the services rendered.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "BackboneElement"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "mustSupport" : true,
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.id",
+      "path" : "ExplanationOfBenefit.supportingInfo.id",
+      "representation" : ["xmlAttr"],
+      "short" : "Unique id for inter-element referencing",
+      "definition" : "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "Element.id",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+          "valueUrl" : "string"
+        }],
+        "code" : "http://hl7.org/fhirpath/System.String"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.extension",
+      "path" : "ExplanationOfBenefit.supportingInfo.extension",
+      "short" : "Additional content defined by implementations",
+      "definition" : "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "comment" : "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+      "alias" : ["extensions",
+      "user content"],
+      "min" : 0,
+      "max" : "*",
+      "base" : {
+        "path" : "Element.extension",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Extension"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      },
+      {
+        "key" : "ext-1",
+        "severity" : "error",
+        "human" : "Must have either extensions or value[x], not both",
+        "expression" : "extension.exists() != value.exists()",
+        "xpath" : "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Extension"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.modifierExtension",
+      "path" : "ExplanationOfBenefit.supportingInfo.modifierExtension",
+      "short" : "Extensions that cannot be ignored even if unrecognized",
+      "definition" : "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+      "comment" : "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+      "requirements" : "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](http://hl7.org/fhir/R4/extensibility.html#modifierExtension).",
+      "alias" : ["extensions",
+      "user content",
+      "modifiers"],
+      "min" : 0,
+      "max" : "*",
+      "base" : {
+        "path" : "BackboneElement.modifierExtension",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Extension"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      },
+      {
+        "key" : "ext-1",
+        "severity" : "error",
+        "human" : "Must have either extensions or value[x], not both",
+        "expression" : "extension.exists() != value.exists()",
+        "xpath" : "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Extension"
+      }],
+      "isModifier" : true,
+      "isModifierReason" : "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+      "isSummary" : true,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "N/A"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.sequence",
+      "path" : "ExplanationOfBenefit.supportingInfo.sequence",
+      "short" : "Information instance identifier",
+      "definition" : "A number to uniquely identify supporting information entries.",
+      "comment" : "Client app implementations should look-up supportingInfo elements based on category values instead of sequence values",
+      "requirements" : "Necessary to maintain the order of the supporting information items and provide a mechanism to link to claim details.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.sequence",
+        "min" : 1,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "positiveInt"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category",
+      "path" : "ExplanationOfBenefit.supportingInfo.category",
+      "short" : "Classification of the supplied information",
+      "definition" : "The general class of the information supplied: information; exception; accident, employment; onset, etc.",
+      "comment" : "This may contain a category for the local bill type codes.",
+      "requirements" : "Required to group or associate information items with common characteristics. For example: admission information or prior treatments.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.category",
+        "min" : 1,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "CodeableConcept"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "strength" : "extensible",
+        "valueSet" : "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBSupportingInfoType"
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.id",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.id",
+      "representation" : ["xmlAttr"],
+      "short" : "Unique id for inter-element referencing",
+      "definition" : "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "Element.id",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+          "valueUrl" : "string"
+        }],
+        "code" : "http://hl7.org/fhirpath/System.String"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.extension",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.extension",
+      "slicing" : {
+        "discriminator" : [{
+          "type" : "value",
+          "path" : "url"
+        }],
+        "description" : "Extensions are always sliced by (at least) url",
+        "rules" : "open"
+      },
+      "short" : "Additional content defined by implementations",
+      "definition" : "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "comment" : "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+      "alias" : ["extensions",
+      "user content"],
+      "min" : 0,
+      "max" : "*",
+      "base" : {
+        "path" : "Element.extension",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Extension"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      },
+      {
+        "key" : "ext-1",
+        "severity" : "error",
+        "human" : "Must have either extensions or value[x], not both",
+        "expression" : "extension.exists() != value.exists()",
+        "xpath" : "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Extension"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.coding",
+      "slicing" : {
+        "discriminator" : [{
+          "type" : "pattern",
+          "path" : "$this"
+        }],
+        "rules" : "open"
+      },
+      "short" : "Code defined by a terminology system",
+      "definition" : "A reference to a code defined by a terminology system.",
+      "comment" : "Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true.",
+      "requirements" : "Allows for alternative encodings within a code system, and translations to other code systems.",
+      "min" : 1,
+      "max" : "*",
+      "base" : {
+        "path" : "CodeableConcept.coding",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Coding"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : true,
+      "mapping" : [{
+        "identity" : "v2",
+        "map" : "C*E.1-8, C*E.10-22"
+      },
+      {
+        "identity" : "rim",
+        "map" : "union(., ./translation)"
+      },
+      {
+        "identity" : "orim",
+        "map" : "fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding:clmCmsProcDtCoding",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.coding",
+      "sliceName" : "clmCmsProcDtCoding",
+      "short" : "Code defined by a terminology system",
+      "definition" : "A reference to a code defined by a terminology system.",
+      "comment" : "Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true.",
+      "requirements" : "Allows for alternative encodings within a code system, and translations to other code systems.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "CodeableConcept.coding",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Coding"
+      }],
+      "patternCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_CMS_PROC_DT"
+      },
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : true,
+      "mapping" : [{
+        "identity" : "v2",
+        "map" : "C*E.1-8, C*E.10-22"
+      },
+      {
+        "identity" : "rim",
+        "map" : "union(., ./translation)"
+      },
+      {
+        "identity" : "orim",
+        "map" : "fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.text",
+      "extension" : [{
+        "url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
+        "valueBoolean" : true
+      }],
+      "path" : "ExplanationOfBenefit.supportingInfo.category.text",
+      "short" : "Plain text representation of the concept",
+      "definition" : "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+      "comment" : "Very often the text is the same as a displayName of one of the codings.",
+      "requirements" : "The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "CodeableConcept.text",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "string"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : true,
+      "mapping" : [{
+        "identity" : "v2",
+        "map" : "C*E.9. But note many systems use C*E.2 for this"
+      },
+      {
+        "identity" : "rim",
+        "map" : "./originalText[mediaType/code=\"text/plain\"]/data"
+      },
+      {
+        "identity" : "orim",
+        "map" : "fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.code",
+      "path" : "ExplanationOfBenefit.supportingInfo.code",
+      "short" : "Type of information",
+      "definition" : "System and code pertaining to the specific information regarding special conditions relating to the setting, treatment or patient  for which care is sought.",
+      "comment" : "This may contain the local bill type codes such as the US UB-04 bill type code.",
+      "requirements" : "Required to identify the kind of additional information.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.code",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "CodeableConcept"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+          "valueString" : "InformationCode"
+        }],
+        "strength" : "example",
+        "description" : "The valuset used for additional information codes.",
+        "valueSet" : "http://hl7.org/fhir/ValueSet/claim-exception|4.0.1"
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.timing[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_CMS_PROC_DT",
+      "definition" : "The date when or period to which this information refers.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "date"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.value[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.value[x]",
+      "short" : "Data to be provided",
+      "definition" : "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.",
+      "comment" : "Could be used to provide references to other resources, document. For example, could contain a PDF in an Attachment of the Police Report for an Accident.",
+      "requirements" : "To convey the data content to be provided when the information is more than a simple code or period.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.value[x]",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "boolean"
+      },
+      {
+        "code" : "string"
+      },
+      {
+        "code" : "Quantity"
+      },
+      {
+        "code" : "Attachment"
+      },
+      {
+        "code" : "Reference",
+        "targetProfile" : ["http://hl7.org/fhir/StructureDefinition/Resource|4.0.1"]
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.reason",
+      "path" : "ExplanationOfBenefit.supportingInfo.reason",
+      "short" : "Explanation for the information",
+      "definition" : "Provides the reason in the situation where a reason code is required in addition to the content.",
+      "comment" : "For example: the reason for the additional stay, or why a tooth is  missing.",
+      "requirements" : "Needed when the supporting information has both a date and amount/value and requires explanation.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.reason",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "Coding"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+          "valueString" : "MissingReason"
+        }],
+        "strength" : "example",
+        "description" : "Reason codes for the missing teeth.",
+        "valueSet" : "http://hl7.org/fhir/ValueSet/missing-tooth-reason|4.0.1"
+      }
+    },
+    {
       "id" : "ExplanationOfBenefit.supportingInfo:clmSbmtFrmtCd",
       "path" : "ExplanationOfBenefit.supportingInfo",
       "sliceName" : "clmSbmtFrmtCd",
@@ -11190,7 +11748,7 @@
       "isSummary" : false,
       "binding" : {
         "strength" : "preferred",
-        "valueSet" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD'"
+        "valueSet" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       }
     },
     {
@@ -13177,6 +13735,355 @@
       }
     },
     {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt",
+      "path" : "ExplanationOfBenefit.supportingInfo",
+      "sliceName" : "clmIdrLdDt",
+      "short" : "Supporting information",
+      "definition" : "Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues.",
+      "comment" : "Defines data elements not available in the base EOB resource",
+      "requirements" : "Typically these information codes are required to support the services rendered or the adjudication of the services rendered.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "BackboneElement"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "mustSupport" : true,
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.id",
+      "path" : "ExplanationOfBenefit.supportingInfo.id",
+      "representation" : ["xmlAttr"],
+      "short" : "Unique id for inter-element referencing",
+      "definition" : "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "Element.id",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+          "valueUrl" : "string"
+        }],
+        "code" : "http://hl7.org/fhirpath/System.String"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.extension",
+      "path" : "ExplanationOfBenefit.supportingInfo.extension",
+      "short" : "Additional content defined by implementations",
+      "definition" : "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "comment" : "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+      "alias" : ["extensions",
+      "user content"],
+      "min" : 0,
+      "max" : "*",
+      "base" : {
+        "path" : "Element.extension",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Extension"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      },
+      {
+        "key" : "ext-1",
+        "severity" : "error",
+        "human" : "Must have either extensions or value[x], not both",
+        "expression" : "extension.exists() != value.exists()",
+        "xpath" : "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Extension"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "n/a"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.modifierExtension",
+      "path" : "ExplanationOfBenefit.supportingInfo.modifierExtension",
+      "short" : "Extensions that cannot be ignored even if unrecognized",
+      "definition" : "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+      "comment" : "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+      "requirements" : "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](http://hl7.org/fhir/R4/extensibility.html#modifierExtension).",
+      "alias" : ["extensions",
+      "user content",
+      "modifiers"],
+      "min" : 0,
+      "max" : "*",
+      "base" : {
+        "path" : "BackboneElement.modifierExtension",
+        "min" : 0,
+        "max" : "*"
+      },
+      "type" : [{
+        "code" : "Extension"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      },
+      {
+        "key" : "ext-1",
+        "severity" : "error",
+        "human" : "Must have either extensions or value[x], not both",
+        "expression" : "extension.exists() != value.exists()",
+        "xpath" : "exists(f:extension)!=exists(f:*[starts-with(local-name(.), \"value\")])",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Extension"
+      }],
+      "isModifier" : true,
+      "isModifierReason" : "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+      "isSummary" : true,
+      "mapping" : [{
+        "identity" : "rim",
+        "map" : "N/A"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.sequence",
+      "path" : "ExplanationOfBenefit.supportingInfo.sequence",
+      "short" : "Information instance identifier",
+      "definition" : "A number to uniquely identify supporting information entries.",
+      "comment" : "Client app implementations should look-up supportingInfo elements based on category values instead of sequence values",
+      "requirements" : "Necessary to maintain the order of the supporting information items and provide a mechanism to link to claim details.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.sequence",
+        "min" : 1,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "positiveInt"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.category",
+      "path" : "ExplanationOfBenefit.supportingInfo.category",
+      "short" : "Classification of the supplied information",
+      "definition" : "The general class of the information supplied: information; exception; accident, employment; onset, etc.",
+      "comment" : "This may contain a category for the local bill type codes.",
+      "requirements" : "Required to group or associate information items with common characteristics. For example: admission information or prior treatments.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.category",
+        "min" : 1,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "CodeableConcept"
+      }],
+      "patternCodeableConcept" : {
+        "coding" : [{
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+          "code" : "CLM_IDR_LD_DT"
+        }]
+      },
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "strength" : "extensible",
+        "valueSet" : "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBSupportingInfoType"
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.code",
+      "path" : "ExplanationOfBenefit.supportingInfo.code",
+      "short" : "Type of information",
+      "definition" : "System and code pertaining to the specific information regarding special conditions relating to the setting, treatment or patient  for which care is sought.",
+      "comment" : "This may contain the local bill type codes such as the US UB-04 bill type code.",
+      "requirements" : "Required to identify the kind of additional information.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.code",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "CodeableConcept"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+          "valueString" : "InformationCode"
+        }],
+        "strength" : "example",
+        "description" : "The valuset used for additional information codes.",
+        "valueSet" : "http://hl7.org/fhir/ValueSet/claim-exception|4.0.1"
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+      "definition" : "The date when or period to which this information refers.",
+      "min" : 1,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "date"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.value[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.value[x]",
+      "short" : "Data to be provided",
+      "definition" : "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.",
+      "comment" : "Could be used to provide references to other resources, document. For example, could contain a PDF in an Attachment of the Police Report for an Accident.",
+      "requirements" : "To convey the data content to be provided when the information is more than a simple code or period.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.value[x]",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "boolean"
+      },
+      {
+        "code" : "string"
+      },
+      {
+        "code" : "Quantity"
+      },
+      {
+        "code" : "Attachment"
+      },
+      {
+        "code" : "Reference",
+        "targetProfile" : ["http://hl7.org/fhir/StructureDefinition/Resource|4.0.1"]
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.reason",
+      "path" : "ExplanationOfBenefit.supportingInfo.reason",
+      "short" : "Explanation for the information",
+      "definition" : "Provides the reason in the situation where a reason code is required in addition to the content.",
+      "comment" : "For example: the reason for the additional stay, or why a tooth is  missing.",
+      "requirements" : "Needed when the supporting information has both a date and amount/value and requires explanation.",
+      "min" : 0,
+      "max" : "1",
+      "base" : {
+        "path" : "ExplanationOfBenefit.supportingInfo.reason",
+        "min" : 0,
+        "max" : "1"
+      },
+      "type" : [{
+        "code" : "Coding"
+      }],
+      "constraint" : [{
+        "key" : "ele-1",
+        "severity" : "error",
+        "human" : "All FHIR elements must have a @value or children",
+        "expression" : "hasValue() or (children().count() > id.count())",
+        "xpath" : "@value|f:*|h:div",
+        "source" : "http://hl7.org/fhir/StructureDefinition/Element"
+      }],
+      "isModifier" : false,
+      "isSummary" : false,
+      "binding" : {
+        "extension" : [{
+          "url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+          "valueString" : "MissingReason"
+        }],
+        "strength" : "example",
+        "description" : "Reason codes for the missing teeth.",
+        "valueSet" : "http://hl7.org/fhir/ValueSet/missing-tooth-reason|4.0.1"
+      }
+    },
+    {
       "id" : "ExplanationOfBenefit.diagnosis",
       "path" : "ExplanationOfBenefit.diagnosis",
       "short" : "Pertinent diagnosis information",
@@ -14433,7 +15340,7 @@
     {
       "id" : "ExplanationOfBenefit.item.sequence",
       "path" : "ExplanationOfBenefit.item.sequence",
-      "short" : "Item instance identifier",
+      "short" : "LineItemComponent.CLM_LINE_NUM",
       "definition" : "A number to uniquely identify item entries.",
       "comment" : "Line identification number that represents the number assigned in a source system for identification and processing. (36)",
       "requirements" : "Necessary to provide a mechanism to link to items from within the claim and within the adjudication details of the ClaimResponse.",
@@ -24139,6 +25046,7 @@
           "type" : "profile",
           "path" : "$this"
         }],
+        "ordered" : false,
         "rules" : "open"
       }
     },
@@ -24250,6 +25158,7 @@
           "type" : "value",
           "path" : "system"
         }],
+        "ordered" : false,
         "rules" : "open"
       }
     },
@@ -24304,6 +25213,7 @@
           "type" : "value",
           "path" : "role.coding.code"
         }],
+        "ordered" : false,
         "rules" : "open"
       }
     },
@@ -24339,8 +25249,50 @@
           "type" : "value",
           "path" : "category"
         }],
+        "ordered" : false,
         "rules" : "open"
       }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt",
+      "path" : "ExplanationOfBenefit.supportingInfo",
+      "sliceName" : "clmCmsProcDt",
+      "short" : "Claim CMS Processing Date",
+      "min" : 0,
+      "max" : "1"
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.coding",
+      "slicing" : {
+        "discriminator" : [{
+          "type" : "pattern",
+          "path" : "$this"
+        }],
+        "rules" : "open"
+      },
+      "min" : 1
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding:clmCmsProcDtCoding",
+      "path" : "ExplanationOfBenefit.supportingInfo.category.coding",
+      "sliceName" : "clmCmsProcDtCoding",
+      "min" : 1,
+      "max" : "1",
+      "patternCoding" : {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_CMS_PROC_DT"
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmCmsProcDt.timing[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_CMS_PROC_DT",
+      "min" : 1,
+      "max" : "1",
+      "type" : [{
+        "code" : "date"
+      }]
     },
     {
       "id" : "ExplanationOfBenefit.supportingInfo:clmSbmtFrmtCd",
@@ -24461,7 +25413,7 @@
       "max" : "1",
       "binding" : {
         "strength" : "preferred",
-        "valueSet" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD'"
+        "valueSet" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       }
     },
     {
@@ -24561,6 +25513,42 @@
         "strength" : "preferred",
         "valueSet" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD'"
       }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt",
+      "path" : "ExplanationOfBenefit.supportingInfo",
+      "sliceName" : "clmIdrLdDt",
+      "min" : 0,
+      "max" : "1"
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.category",
+      "path" : "ExplanationOfBenefit.supportingInfo.category",
+      "min" : 1,
+      "max" : "1",
+      "patternCodeableConcept" : {
+        "coding" : [{
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+          "code" : "CLM_IDR_LD_DT"
+        }]
+      }
+    },
+    {
+      "id" : "ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]",
+      "path" : "ExplanationOfBenefit.supportingInfo.timing[x]",
+      "short" : "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+      "min" : 1,
+      "max" : "1",
+      "type" : [{
+        "code" : "date"
+      }]
+    },
+    {
+      "id" : "ExplanationOfBenefit.item.sequence",
+      "path" : "ExplanationOfBenefit.item.sequence",
+      "short" : "LineItemComponent.CLM_LINE_NUM",
+      "min" : 1,
+      "max" : "1"
     },
     {
       "id" : "ExplanationOfBenefit.item.productOrService.coding",
@@ -24796,6 +25784,7 @@
           "type" : "value",
           "path" : "category"
         }],
+        "ordered" : false,
         "rules" : "open"
       }
     },
