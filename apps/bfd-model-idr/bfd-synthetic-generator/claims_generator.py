@@ -829,8 +829,9 @@ def generate(
         f.CNTRCT_PBP_NUM: [],
         f.PRAUC: [],
     }
-    if isinstance(writer, CsvWriter) and paths:
-        load_file_dict(files=files, paths=list(paths))
+    if isinstance(writer, CsvWriter):
+        if paths:
+            load_file_dict(files=files, paths=list(paths))
         if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
             print(
                 f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
