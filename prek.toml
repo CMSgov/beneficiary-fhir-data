@@ -118,6 +118,7 @@ name = "tests for workspace members with changes"
 language = "system"
 files = "\\.py$|pyproject\\.toml$|uv\\.lock$"
 entry = "./hooks/run-member-tests.sh"
+require_serial = true
 
 [[repos]]
 repo = "local"
