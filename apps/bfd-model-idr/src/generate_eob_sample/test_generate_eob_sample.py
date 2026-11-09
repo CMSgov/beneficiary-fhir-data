@@ -5,16 +5,16 @@ from click.testing import CliRunner
 
 from generate_eob_sample import main
 from idr_model.claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CARRIER_NCH,
-    ADJUDICATED_PROFESSIONAL_DME_NCH,
-    FISS_SS,
-    INSTITUTIONAL_HHA_NCH,
-    INSTITUTIONAL_HOSPICE_NCH,
-    INSTITUTIONAL_INPATIENT_NCH,
-    INSTITUTIONAL_OUTPATIENT_NCH,
-    INSTITUTIONAL_SNF_NCH,
-    MCS_SS,
-    PHARMACY_CLM_TYPE_CDS,
+    ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS,
+    ADJUDICATED_PROFESSIONAL_DME_NCH_CDS,
+    FISS_SS_CDS,
+    INSTITUTIONAL_HHA_NCH_CD,
+    INSTITUTIONAL_HOSPICE_NCH_CD,
+    INSTITUTIONAL_INPATIENT_NCH_CD,
+    INSTITUTIONAL_OUTPATIENT_NCH_CD,
+    INSTITUTIONAL_SNF_NCH_CDS,
+    MCS_SS_CDS,
+    PHARMACY_CDS,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -44,7 +44,7 @@ def test_generate_eob_sample_base() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_INPATIENT_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_INPATIENT_NCH_CD
 
 
 def test_generate_eob_sample_institutional_outpatient() -> None:
@@ -70,7 +70,7 @@ def test_generate_eob_sample_institutional_outpatient() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_OUTPATIENT_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_OUTPATIENT_NCH_CD
 
 
 def test_generate_eob_sample_institutional_hospice() -> None:
@@ -96,7 +96,7 @@ def test_generate_eob_sample_institutional_hospice() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HOSPICE_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HOSPICE_NCH_CD
 
 
 def test_generate_eob_sample_institutional_snf() -> None:
@@ -122,7 +122,7 @@ def test_generate_eob_sample_institutional_snf() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_SNF_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_SNF_NCH_CDS
 
 
 def test_generate_eob_sample_institutional_hha() -> None:
@@ -148,7 +148,7 @@ def test_generate_eob_sample_institutional_hha() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HHA_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in INSTITUTIONAL_HHA_NCH_CD
 
 
 def test_generate_eob_sample_institutional_fiss() -> None:
@@ -174,7 +174,7 @@ def test_generate_eob_sample_institutional_fiss() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in FISS_SS
+    assert int(result_data["CLM_TYPE_CD"]) in FISS_SS_CDS
 
 
 def test_generate_eob_sample_pharmacy() -> None:
@@ -200,7 +200,7 @@ def test_generate_eob_sample_pharmacy() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in PHARMACY_CLM_TYPE_CDS
+    assert int(result_data["CLM_TYPE_CD"]) in PHARMACY_CDS
 
 
 def test_generate_eob_sample_carrier() -> None:
@@ -226,7 +226,7 @@ def test_generate_eob_sample_carrier() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CARRIER_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS
 
 
 def test_generate_eob_sample_carrier_dme() -> None:
@@ -252,7 +252,7 @@ def test_generate_eob_sample_carrier_dme() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_DME_NCH
+    assert int(result_data["CLM_TYPE_CD"]) in ADJUDICATED_PROFESSIONAL_DME_NCH_CDS
 
 
 # this test is pointed at test_sample2 because test sample 1 does not have mcs claims
@@ -279,4 +279,4 @@ def test_generate_eob_sample_carrier_mcs() -> None:
 
     assert isinstance(result_data, dict)
     assert result_data["CLM_UNIQ_ID"] == sample_clm_uniq_id
-    assert int(result_data["CLM_TYPE_CD"]) in MCS_SS
+    assert int(result_data["CLM_TYPE_CD"]) in MCS_SS_CDS

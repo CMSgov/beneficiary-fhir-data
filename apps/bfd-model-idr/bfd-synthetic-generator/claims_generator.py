@@ -9,11 +9,11 @@ import click
 import constants as f
 import tqdm
 from claim_type_codes import (
-    FISS_SS,
-    INSTITUTIONAL_CLAIM_TYPES,
-    MCS_SS,
-    PHARMACY_CLM_TYPE_CDS,
-    PROFESSIONAL_CLAIM_TYPES,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    MCS_SS_CDS,
+    PHARMACY_CDS,
+    PROFESSIONAL_CDS,
 )
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
@@ -943,12 +943,12 @@ def _generate_batch(
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x
         for x in existing[f.CLM_LINE]
-        if x.get(f.CLM_TYPE_CD) in PHARMACY_CLM_TYPE_CDS
+        if x.get(f.CLM_TYPE_CD) in PHARMACY_CDS
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
         part_by=lambda x: x[f.CLM_UNIQ_ID],
-        filter_by=lambda x: x.get(f.CLM_TYPE_CD) not in PHARMACY_CLM_TYPE_CDS,
+        filter_by=lambda x: x.get(f.CLM_TYPE_CD) not in PHARMACY_CDS,
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
@@ -1075,7 +1075,7 @@ def _generate_batch(
             adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].extend(clm_rlt_ocrnc_sgntr_mbr)
 
             clm_type_cd = clm[f.CLM_TYPE_CD]
-            if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+            if clm_type_cd in PHARMACY_CDS:
                 pharm_clm_line = adj_util.gen_pharm_clm_line(
                     clm=clm,
                     init_clm_line=rx_clm_line_per_clm_uniq_id.get(str(clm[f.CLM_UNIQ_ID])),
@@ -1129,7 +1129,7 @@ def _generate_batch(
             adj_clms_tbls[f.CLM_DT_SGNTR].append(clm_dt_sgntr)
 
             clm_instnl = None
-            if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+            if clm_type_cd in INSTITUTIONAL_CDS:
                 clm_instnl = adj_util.gen_clm_instnl(
                     gen_utils=gen_utils,
                     clm=clm,
@@ -1137,7 +1137,7 @@ def _generate_batch(
                 )
                 adj_clms_tbls[f.CLM_INSTNL].append(clm_instnl)
 
-            if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
+            if clm_type_cd in PROFESSIONAL_CDS:
                 clm_prfnls = [
                     adj_util.gen_clm_prfnl(
                         gen_utils=gen_utils,
@@ -1152,7 +1152,7 @@ def _generate_batch(
                 RowAdapter({}) for _ in range(random.randint(1, 15))
             ]
             for idx, init_clm_line in enumerate(init_clm_lines, start=1):
-                if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+                if clm_type_cd in PHARMACY_CDS:
                     continue
 
                 clm_line = adj_util.gen_clm_line(
@@ -1369,7 +1369,7 @@ def _generate_batch(
             )
 
             clm_type_cd = pac_clm[f.CLM_TYPE_CD]
-            if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
+            if clm_type_cd in PROFESSIONAL_CDS:
                 clm_prfnls = [
                     pac_util.gen_pac_clm_prfnl(
                         gen_utils=gen_utils,
@@ -1380,7 +1380,7 @@ def _generate_batch(
                 ]
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
-                if clm_type_cd in MCS_SS:
+                if clm_type_cd in MCS_SS_CDS:
                     init_clm_line_mcss = claims_tbls[f.CLM_LINE_MCS] or [
                         RowAdapter({}) for _ in range(random.randint(1, 15))
                     ]
@@ -1394,7 +1394,7 @@ def _generate_batch(
                         )
                         out_tables[f.CLM_LINE_MCS].append(clm_line_mcs)
 
-            if clm_type_cd in FISS_SS:
+            if clm_type_cd in FISS_SS_CDS:
                 init_clm_line_fisss = claims_tbls[f.CLM_LINE_FISS] or [
                     RowAdapter({}) for _ in range(random.randint(1, 15))
                 ]

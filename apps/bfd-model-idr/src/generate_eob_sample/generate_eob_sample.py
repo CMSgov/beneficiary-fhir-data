@@ -4,21 +4,21 @@ from pathlib import Path
 from typing import Any
 
 from idr_model.claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CARRIER_NCH,
-    ADJUDICATED_PROFESSIONAL_DME_NCH,
-    ADJUDICATED_PROFESSIONAL_NCH,
-    FISS_SS,
-    INSTITUTIONAL_CLAIM_TYPES,
-    INSTITUTIONAL_HHA_NCH,
-    INSTITUTIONAL_HOSPICE_ELECTION,
-    INSTITUTIONAL_HOSPICE_NCH,
-    INSTITUTIONAL_INPATIENT_NCH,
-    INSTITUTIONAL_MA_NCH,
-    INSTITUTIONAL_OUTPATIENT_NCH,
-    INSTITUTIONAL_SNF_NCH,
-    MCS_SS,
-    PHARMACY_CLM_TYPE_CDS,
-    VMS_SS,
+    ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS,
+    ADJUDICATED_PROFESSIONAL_DME_NCH_CDS,
+    ADJUDICATED_PROFESSIONAL_NCH_CDS,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    INSTITUTIONAL_HHA_NCH_CD,
+    INSTITUTIONAL_HOSPICE_ELECTION_CDS,
+    INSTITUTIONAL_HOSPICE_NCH_CD,
+    INSTITUTIONAL_INPATIENT_NCH_CD,
+    INSTITUTIONAL_MA_NCH_CDS,
+    INSTITUTIONAL_OUTPATIENT_NCH_CD,
+    INSTITUTIONAL_SNF_NCH_CDS,
+    MCS_SS_CDS,
+    PHARMACY_CDS,
+    VMS_SS_CDS,
 )
 
 from .clm_line import ClmLineBuilder
@@ -238,21 +238,21 @@ RX_LINE_COL = [
 ]
 
 SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
-    tuple(PHARMACY_CLM_TYPE_CDS): "eob-pharmacy.json",
+    tuple(PHARMACY_CDS): "eob-pharmacy.json",
     # professional
-    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH): "eob-carrier-nch.json",
-    tuple(ADJUDICATED_PROFESSIONAL_DME_NCH): "eob-dme-nch.json",
-    tuple(MCS_SS): "eob-carrier-mcs-ss.json",
-    tuple(VMS_SS): "eob-vms-ss.json",
+    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS): "eob-carrier-nch.json",
+    tuple(ADJUDICATED_PROFESSIONAL_DME_NCH_CDS): "eob-dme-nch.json",
+    tuple(MCS_SS_CDS): "eob-carrier-mcs-ss.json",
+    tuple(VMS_SS_CDS): "eob-vms-ss.json",
     # institutional
-    tuple(INSTITUTIONAL_HHA_NCH): "eob-hha-nch.json",
-    tuple(INSTITUTIONAL_SNF_NCH): "eob-snf-nch.json",
-    tuple(INSTITUTIONAL_OUTPATIENT_NCH): "eob-outpatient-nch.json",
-    tuple(INSTITUTIONAL_HOSPICE_NCH): "eob-hospice-nch.json",
-    tuple(INSTITUTIONAL_INPATIENT_NCH): "eob-inpatient-nch.json",
-    tuple(INSTITUTIONAL_MA_NCH): "eob-ma-nch.json",
-    tuple(FISS_SS): "eob-fiss-ss.json",
-    tuple(INSTITUTIONAL_HOSPICE_ELECTION): "eob-hospice-election.json",
+    tuple(INSTITUTIONAL_HHA_NCH_CD): "eob-hha-nch.json",
+    tuple(INSTITUTIONAL_SNF_NCH_CDS): "eob-snf-nch.json",
+    tuple(INSTITUTIONAL_OUTPATIENT_NCH_CD): "eob-outpatient-nch.json",
+    tuple(INSTITUTIONAL_HOSPICE_NCH_CD): "eob-hospice-nch.json",
+    tuple(INSTITUTIONAL_INPATIENT_NCH_CD): "eob-inpatient-nch.json",
+    tuple(INSTITUTIONAL_MA_NCH_CDS): "eob-ma-nch.json",
+    tuple(FISS_SS_CDS): "eob-fiss-ss.json",
+    tuple(INSTITUTIONAL_HOSPICE_ELECTION_CDS): "eob-hospice-election.json",
 }
 
 
@@ -295,20 +295,20 @@ class SampleGenerator:
             ),
         )
         # type specific line joins
-        if claim_type in PHARMACY_CLM_TYPE_CDS:
+        if claim_type in PHARMACY_CDS:
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
-        elif claim_type in MCS_SS:
+        elif claim_type in MCS_SS_CDS:
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
-        elif claim_type in ADJUDICATED_PROFESSIONAL_NCH:
+        elif claim_type in ADJUDICATED_PROFESSIONAL_NCH_CDS:
             print("found Carrier or Carrier DME -- no special joins")
         # INST and fall back for known claim types that we do not have a special sample for
-        elif claim_type in [*INSTITUTIONAL_CLAIM_TYPES, *VMS_SS]:
+        elif claim_type in [*INSTITUTIONAL_CDS, *VMS_SS_CDS]:
             self.add_instnl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
-            if claim_type in FISS_SS:
+            if claim_type in FISS_SS_CDS:
                 self.add_fiss_lines(claim_row=claim_row, result=result)
         else:
             print("Unknown Type")
