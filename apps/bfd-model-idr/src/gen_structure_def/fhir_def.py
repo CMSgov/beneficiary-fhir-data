@@ -90,26 +90,31 @@ class FHIRDefinitions:
                 )
                 continue
 
+            is_choice = child_cur_path.endswith("[x]")
+            out.append(child_cur_path)  # the element itself, e.g. "diagnosis[x]" or "role"
+
             for t in types:
                 code = t.get("code", "")
-                if child_cur_path.endswith("[x]"):
-                    # polymorphic element, e.g. value[x] -> valueQuantity
-                    emitted_path = child_cur_path[:-3] + code[0].upper() + code[1:]
-                else:
-                    emitted_path = child_cur_path
 
-                out.append(emitted_path)
+                if is_choice:
+                    # polymorphic element, e.g. diagnosis[x] -> diagnosisCodeableConcept.
+                    # Descendants still live under the generic "[x]" path,
+                    # e.g. diagnosis[x].coding, since that's the addressable
+                    # path regardless of which concrete type is populated.
+                    concrete_name = code[0].upper() + code[1:]
+                    concrete_path = child_cur_path[:-3] + concrete_name
+                    out.append(concrete_path)
+
+                recurse_path = child_cur_path
 
                 if code in ("BackboneElement", "Element"):
                     # Inline structure - its children are declared in this
                     # same snapshot, under child["path"], not in a separate
-                    # type definition. Resolving "BackboneElement" as if it
-                    # were a real complex type (it technically exists in
-                    # profiles-types.json) loses the real children.
+                    # type definition.
                     self.__expand_children(
                         children_index,
                         child["path"],
-                        emitted_path,
+                        recurse_path,
                         type_chain,
                         depth + 1,
                         max_depth,
@@ -130,7 +135,7 @@ class FHIRDefinitions:
                 self.__expand_children(
                     sub_children,
                     sub_root,
-                    emitted_path,
+                    recurse_path,
                     type_chain | {code},
                     depth + 1,
                     max_depth,
@@ -155,4 +160,8 @@ class FHIRDefinitions:
             max_depth,
             out,
         )
-        return out
+        # Multiple choice-type branches (e.g. CodeableConcept and Reference
+        # under diagnosis[x]) can each emit shared base paths like
+        # diagnosis[x].id / diagnosis[x].extension. Dedupe while preserving
+        # the order paths were first produced in.
+        return list(dict.fromkeys(out))

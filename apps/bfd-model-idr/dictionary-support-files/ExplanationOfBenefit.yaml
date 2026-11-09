@@ -398,8 +398,7 @@
   structureDef:
     id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]
     path: ExplanationOfBenefit.supportingInfo.timing[x]
-    min: 0
-    max: "1"
+    min: 1
     slicing:
       id: ExplanationOfBenefit.supportingInfo
       path: ExplanationOfBenefit.supportingInfo
@@ -411,9 +410,14 @@
     type:
       - code: date
     proceedingEd:
-      - id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]
-        path: ExplanationOfBenefit.supportingInfo.timing[x]
+      - id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmIdrLdDt
         min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
         max: "1"
         patternCodeableConcept:
           coding:
@@ -913,6 +917,8 @@
     id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.timing[x]
     path: ExplanationOfBenefit.supportingInfo.timing[x]
     min: 1
+    type:
+      - code: date
     proceedingEd:
       - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt
         path: ExplanationOfBenefit.supportingInfo
@@ -1049,6 +1055,32 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:otheroperating.role
+    path: ExplanationOfBenefit.careTeam.role
+    min: 1
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - code: otheroperating
+    proceedingEd:
+      - id: ExplanationOfBenefit.careTeam:otheroperating
+        path: ExplanationOfBenefit.careTeam
+        sliceName: otheroperating
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.careTeam:otheroperating.provider
+        path: ExplanationOfBenefit.careTeam.provider
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:otheroperating.provider.identifier
+        path: ExplanationOfBenefit.careTeam.provider.identifier
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:otheroperating.provider.identifier.value
+        path: ExplanationOfBenefit.careTeam.provider.identifier.value
+        short: ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM
+        min: 1
+        max: "1"
 - inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
@@ -1153,6 +1185,17 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding.code
+    path: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
+        path: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
+        min: 1
+      - id: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding
+        path: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding
+        min: 1
 - inputPath: DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
@@ -1224,6 +1267,10 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding.system
+    path: ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept.coding.system
+    min: 1
 - inputPath: DiagnosisComponent.CLM_PROD_TYPE_CD
   appliesTo:
     - Inpatient
@@ -1297,6 +1344,16 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.diagnosis.type.coding.code
+    path: ExplanationOfBenefit.diagnosis.type.coding.code
+    precedingEd:
+      - id: ExplanationOfBenefit.diagnosis.type
+        path: ExplanationOfBenefit.diagnosis.type
+        min: 1
+      - id: ExplanationOfBenefit.diagnosis.type.coding
+        path: ExplanationOfBenefit.diagnosis.type.coding
+        min: 1
 - inputPath: ProcedureComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
@@ -1404,6 +1461,18 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.procedure.procedure[x].coding.code
+    path: ExplanationOfBenefit.procedure.procedure[x].coding.code
+    precedingEd:
+      - id: ExplanationOfBenefit.procedure.procedure[x]
+        path: ExplanationOfBenefit.procedure.procedure[x]
+        min: 1
+        type:
+          - code: CodeableConcept
+      - id: ExplanationOfBenefit.procedure.procedure[x].coding
+        path: ExplanationOfBenefit.procedure.procedure[x].coding
+        min: 1
 - inputPath: ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
