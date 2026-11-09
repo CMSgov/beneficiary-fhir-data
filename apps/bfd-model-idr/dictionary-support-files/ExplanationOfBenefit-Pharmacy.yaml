@@ -382,29 +382,34 @@
   profiles:
     - CMS
   structureDef:
-    id: ExplanationOfBenefit.supportingInfo:claimCmsProcDt.timing[x]
+    id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.timing[x]
     path: ExplanationOfBenefit.supportingInfo.timing[x]
-    min: 0
-    max: "1"
-    slicing:
-      id: ExplanationOfBenefit.supportingInfo
-      path: ExplanationOfBenefit.supportingInfo
-      discriminator:
-        - type: value
-          path: category
-      rules: open
-      ordered: false
+    min: 1
     type:
       - code: date
     proceedingEd:
-      - id: ExplanationOfBenefit.supportingInfo:claimCmsProcDt.timing[x]
-        path: ExplanationOfBenefit.supportingInfo.timing[x]
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmCmsProcDt
         min: 0
         max: "1"
-        patternCodeableConcept:
-          coding:
-            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
-              code: CLM_CMS_PROC_DT
+        short: Claim CMS Processing Date
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding
+        path: ExplanationOfBenefit.supportingInfo.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding:clmCmsProcDtCoding
+        path: ExplanationOfBenefit.supportingInfo.category.coding
+        sliceName: clmCmsProcDtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+          code: CLM_CMS_PROC_DT
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD
   appliesTo:
     - Pharmacy
@@ -574,6 +579,14 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.sequence
+    path: ExplanationOfBenefit.item.sequence
+    min: 1
+    proceedingEd:
+      id: ExplanationOfBenefit.item
+      path: ExplanationOfBenefit.item
+      min: 1
 - inputPath: LineItemComponent.CLM_LINE_FROM_DT
   appliesTo:
     - Pharmacy
@@ -1278,6 +1291,34 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_IDR_LD_DT').exists()).timing
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]
+    path: ExplanationOfBenefit.supportingInfo.timing[x]
+    min: 1
+    slicing:
+      id: ExplanationOfBenefit.supportingInfo
+      path: ExplanationOfBenefit.supportingInfo
+      discriminator:
+        - type: value
+          path: category
+      rules: open
+      ordered: false
+    type:
+      - code: date
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmIdrLdDt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_IDR_LD_DT
 - inputPath: LineItemComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Pharmacy

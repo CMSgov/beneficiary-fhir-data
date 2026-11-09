@@ -1620,6 +1620,14 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.sequence
+    path: ExplanationOfBenefit.item.sequence
+    min: 1
+    proceedingEd:
+      id: ExplanationOfBenefit.item
+      path: ExplanationOfBenefit.item
+      min: 1
 - inputPath: LineItemComponent.CLM_LINE_HCPCS_CD
   appliesTo:
     - Inpatient
@@ -1647,6 +1655,51 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.productOrService.coding:dar.code
+    path: ExplanationOfBenefit.item.productOrService.coding.code
+    min: 1
+    precedingEd:
+      - id: ExplanationOfBenefit.item.productOrService
+        path: ExplanationOfBenefit.item.productOrService
+        min: 1
+      - id: ExplanationOfBenefit.item.productOrService.coding
+        path: ExplanationOfBenefit.item.productOrService.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.item.productOrService.coding:cpt
+        path: ExplanationOfBenefit.item.productOrService.coding
+        sliceName: cpt
+        min: 0
+        max: "1"
+        patternCoding:
+          system: http://www.ama-assn.org/go/cpt
+      - id: ExplanationOfBenefit.item.productOrService.coding:cpt.code
+        path: ExplanationOfBenefit.item.productOrService.coding.code
+        short: ExplanationOfBenefit-Base.HCPCS_CD (CPT)
+        min: 1
+      - id: ExplanationOfBenefit.item.productOrService.coding:hcpcs
+        path: ExplanationOfBenefit.item.productOrService.coding
+        sliceName: hcpcs
+        min: 0
+        max: "1"
+        patternCoding:
+          system: https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets
+      - id: ExplanationOfBenefit.item.productOrService.coding:hcpcs.code
+        path: ExplanationOfBenefit.item.productOrService.coding.code
+        short: ExplanationOfBenefit-Base.HCPCS_CD (HCPCS)
+        min: 1
+      - id: ExplanationOfBenefit.item.productOrService.coding:dar
+        path: ExplanationOfBenefit.item.productOrService.coding
+        sliceName: dar
+        min: 0
+        max: "1"
+        patternCoding:
+          system: http://terminology.hl7.org/CodeSystem/data-absent-reason
 - inputPath: LineItemComponent.CLM_REV_APC_HIPPS_CD
   appliesTo:
     - Outpatient
