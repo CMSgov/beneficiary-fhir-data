@@ -959,6 +959,19 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.payment.amount.value
+    path: ExplanationOfBenefit.payment.amount.value
+    min: 1
+  proceedingEd:
+    - id: ExplanationOfBenefit.payment
+      path: ExplanationOfBenefit.payment
+      min: 1
+      mustSupport: true
+    - id: ExplanationOfBenefit.payment.amount
+      path: ExplanationOfBenefit.payment.amount
+      min: 1
+      mustSupport: true
 - inputPath: ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -981,6 +994,39 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:attending.role
+    path: ExplanationOfBenefit.careTeam.role
+    min: 1
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - code: attending
+    slicing:
+      path: ExplanationOfBenefit.careTeam
+      id: ExplanationOfBenefit.careTeam
+      discriminator:
+        - type: pattern
+          path: role
+      rules: open
+    proceedingEd:
+      - id: ExplanationOfBenefit.careTeam:attending
+        path: ExplanationOfBenefit.careTeam
+        sliceName: attending
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.careTeam:attending.provider
+        path: ExplanationOfBenefit.careTeam.provider
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:attending.provider.identifier
+        path: ExplanationOfBenefit.careTeam.provider.identifier
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:attending.provider.identifier.value
+        path: ExplanationOfBenefit.careTeam.provider.identifier.value
+        short: ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM
+        min: 1
+        max: "1"
 - inputPath: ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
