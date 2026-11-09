@@ -55,6 +55,7 @@ for path in "${stale[@]}"; do
 
 	if [[ -n "$dry_run" ]]; then
 		echo "${path} (${size})"
+		kept=$((kept + 1))
 		continue
 	fi
 
