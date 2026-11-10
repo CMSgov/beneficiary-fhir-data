@@ -2926,6 +2926,40 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:admissionType.code.coding:clmAdmsnTypeCd.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:admissionType
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: admissionType
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:admissionType.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: admtype
+      - id: ExplanationOfBenefit.supportingInfo:admissionType.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:admissionType.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:admissionType.code.coding:clmAdmsnTypeCd
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: clmAdmsnTypeCd
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD
 - inputPath: ExplanationOfBenefit-Base.CLM_SUBMSN_DT
   appliesTo:
     - Inpatient
@@ -2992,6 +3026,40 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:dischargeStatus.code.coding:benePtntStusCd.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:dischargeStatus
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: dischargeStatus
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:dischargeStatus.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: discharge-status
+      - id: ExplanationOfBenefit.supportingInfo:dischargeStatus.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:dischargeStatus.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:dischargeStatus.code.coding:benePtntStusCd
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: benePtntStusCd
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD
 - inputPath: ExplanationOfBenefit-Institutional-Base.DGNS_DRG_CD
   appliesTo:
     - Inpatient
@@ -3010,6 +3078,40 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:drgCode.code.coding:msDrg.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:drgCode
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: drgCode
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:drgCode.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: discharge-status
+      - id: ExplanationOfBenefit.supportingInfo:drgCode.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:drgCode.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:drgCode.code.coding:msDrg
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: msDrg
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
@@ -3025,6 +3127,25 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BLOOD_PT_FRNSH_QTY').exists()).value.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmBloodPtFrnshQty.valueQuantity.value
+    path: ExplanationOfBenefit.supportingInfo.valueQuantity.value
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmBloodPtFrnshQty
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmBloodPtFrnshQty
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmBloodPtFrnshQty.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_BLOOD_PT_FRNSH_QTY
+      - id: ExplanationOfBenefit.supportingInfo:clmBloodPtFrnshQty.valueQuantity
+        path: ExplanationOfBenefit.supportingInfo.valueQuantity
+        min: 1
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_MCO_PD_SW
   appliesTo:
     - Inpatient
@@ -3043,6 +3164,29 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_INSTNL_MCO_PD_SW').exists()).code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmMdcrInstnlMcoPdSw.code.coding.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmMdcrInstnlMcoPdSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmMdcrInstnlMcoPdSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmMdcrInstnlMcoPdSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_MDCR_INSTNL_MCO_PD_SW
+      - id: ExplanationOfBenefit.supportingInfo:clmMdcrInstnlMcoPdSw.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:clmMdcrInstnlMcoPdSw.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        min: 1
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_ADMSN_SRC_CD
   appliesTo:
     - Inpatient
@@ -3062,6 +3206,44 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:pointOfOrigin.code.coding:clmAdmsnSrcCd.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    short: ExplanationOfBenefit-Base.CLM_IP_ADMSN_SRC_CD
+    min: 1
+    max: "1"
+    mustSupport: true
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: pointOfOrigin
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: pointoforigin
+      - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin.code.coding:clmAdmsnSrcCd
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: clmAdmsnSrcCd
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD
 - inputPath: SupportingInfoComponent.TYPE_OF_BILL_CD
   appliesTo:
     - Inpatient
@@ -3079,6 +3261,41 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:typeBill.code.coding:nubcTypeOfBill.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:typeBill
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: typeBill
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:typeBill.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: typeofbill
+      - id: ExplanationOfBenefit.supportingInfo:typeBill.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:typeBill.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:typeBill.code.coding:nubcTypeOfBill
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: nubcTypeOfBill
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://www.nubc.org/CodeSystem/TypeOfBill
 - inputPath: ExplanationOfBenefit-Base.CLM_BILL_FAC_TYPE_CD
   appliesTo:
     - Inpatient
@@ -3101,6 +3318,41 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:typeOfBill.code.coding:clmBillFacTypeCd.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:typeOfBill
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: typeOfBill
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:typeOfBill.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: typeofbill
+      - id: ExplanationOfBenefit.supportingInfo:typeOfBill.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:typeOfBill.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:typeOfBill.code.coding:clmBillFacTypeCd
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        sliceName: clmBillFacTypeCd
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD
 - inputPath: ExplanationOfBenefit-Base.CLM_BILL_CLSFCTN_CD
   appliesTo:
     - Inpatient
