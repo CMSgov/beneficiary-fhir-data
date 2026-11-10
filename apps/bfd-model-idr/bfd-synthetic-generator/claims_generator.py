@@ -1252,7 +1252,6 @@ def _generate_batch(
             else []
         )
         for claims_tbls in init_pac_clms_tbls:
-            clm_line_num = 0
             pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[f.CLM][0], gen_utils=gen_utils)
             out_tables[f.CLM].append(pac_clm)
 
