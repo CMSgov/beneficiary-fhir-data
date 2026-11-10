@@ -399,14 +399,6 @@
     id: ExplanationOfBenefit.supportingInfo:clmIdrLdDt.timing[x]
     path: ExplanationOfBenefit.supportingInfo.timing[x]
     min: 1
-    slicing:
-      id: ExplanationOfBenefit.supportingInfo
-      path: ExplanationOfBenefit.supportingInfo
-      discriminator:
-        - type: value
-          path: category
-      rules: open
-      ordered: false
     type:
       - code: date
     proceedingEd:
@@ -925,23 +917,14 @@
         sliceName: clmCmsProcDt
         min: 0
         max: "1"
-        short: Claim CMS Processing Date
-      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding
-        path: ExplanationOfBenefit.supportingInfo.category.coding
-        slicing:
-          discriminator:
-            - type: pattern
-              path: $this
-          rules: open
-        min: 1
-      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category.coding:clmCmsProcDtCoding
-        path: ExplanationOfBenefit.supportingInfo.category.coding
-        sliceName: clmCmsProcDtCoding
+      - id: ExplanationOfBenefit.supportingInfo:clmCmsProcDt.category
+        path: ExplanationOfBenefit.supportingInfo.category
         min: 1
         max: "1"
-        patternCoding:
-          system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
-          code: CLM_CMS_PROC_DT
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_CMS_PROC_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
@@ -2464,58 +2447,6 @@
     - Regular
     - CMS
   structureDef:
-    id: ExplanationOfBenefit.item.adjudication:ClmLineBenePmtAmt.amount.value
-    path: ExplanationOfBenefit.item.adjudication.amount.value
-    min: 1
-    proceedingEd:
-      - id: ExplanationOfBenefit.item.adjudication:ClmLineBenePmtAmt
-        path: ExplanationOfBenefit.item.adjudication
-        sliceName: ClmLineBenePmtAmt
-        min: 0
-        max: "1"
-      - id: ExplanationOfBenefit.item.adjudication:ClmLineBenePmtAmt.category.coding
-        path: ExplanationOfBenefit.item.adjudication.category.coding
-        slicing:
-          discriminator:
-            - type: pattern
-              path: $this
-          rules: open
-        min: 1
-      - id: ExplanationOfBenefit.item.adjudication:ClmLineBenePmtAmt.category.coding:ClmLineBenePmtAmtCoding
-        path: ExplanationOfBenefit.item.adjudication.category.coding
-        sliceName: ClmLineBenePmtAmtCoding
-        min: 1
-        max: "1"
-        patternCoding:
-          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
-          code: CLM_LINE_BENE_PMT_AMT
-      - id: ExplanationOfBenefit.item.adjudication:ClmLineBenePmtAmt.amount
-        path: ExplanationOfBenefit.item.adjudication.amount
-        min: 1
-- inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
-  appliesTo:
-    - Inpatient
-    - Outpatient
-    - Hospice
-    - HHA
-    - SNF
-    - Carrier
-    - DME
-  sources:
-    - NCH
-    - FISS
-    - VMS
-    - MCS
-  ccwMapping:
-    - LINE_BENE_PMT_AMT
-    - REV_CNTR_BENE_PMT_AMT
-  sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: CLM_LINE_BENE_PD_AMT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PD_AMT')).amount.value
-  profiles:
-    - Regular
-    - CMS
-  structureDef:
     id: ExplanationOfBenefit.item.adjudication:clmLineBenePmtAmt.amount.value
     path: ExplanationOfBenefit.item.adjudication.amount.value
     min: 1
@@ -2542,6 +2473,58 @@
           system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
           code: CLM_LINE_BENE_PMT_AMT
       - id: ExplanationOfBenefit.item.adjudication:clmLineBenePmtAmt.amount
+        path: ExplanationOfBenefit.item.adjudication.amount
+        min: 1
+- inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+    - Carrier
+    - DME
+  sources:
+    - NCH
+    - FISS
+    - VMS
+    - MCS
+  ccwMapping:
+    - LINE_BENE_PMT_AMT
+    - REV_CNTR_BENE_PMT_AMT
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_BENE_PD_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PD_AMT')).amount.value
+  profiles:
+    - Regular
+    - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineBenePdAmt.amount.value
+    path: ExplanationOfBenefit.item.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineBenePdAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineBenePdAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.item.adjudication:clmLineBenePdAmt.category.coding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.item.adjudication:clmLineBenePdAmt.category.coding:clmLineBenePdAmtCoding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        sliceName: clmLineBenePdAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_BENE_PMT_AMT
+      - id: ExplanationOfBenefit.item.adjudication:clmLineBenePdAmt.amount
         path: ExplanationOfBenefit.item.adjudication.amount
         min: 1
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
@@ -2844,7 +2827,7 @@
         min: 1
       - id: ExplanationOfBenefit.item.adjudication:clmLineInstnlMsp2PdAmt.category.coding:clmLineInstnlMsp2PdAmtCoding
         path: ExplanationOfBenefit.item.adjudication.category.coding
-        sliceName: clmLineInstnlMsp1PdAmtCoding
+        sliceName: clmLineInstnlMsp2PdAmtCoding
         min: 1
         max: "1"
         patternCoding:
@@ -2964,6 +2947,27 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmSubmsnDt.timing[x]
+    path: ExplanationOfBenefit.supportingInfo.timing[x]
+    min: 1
+    "max": "1"
+    type:
+      - code: date
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmSubmsnDt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmSubmsnDt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmSubmsnDt.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        max: "1"
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType
+              code: clmrecvddate
 - inputPath: ExplanationOfBenefit-Institutional-Base.BENE_PTNT_STUS_CD
   appliesTo:
     - Inpatient
