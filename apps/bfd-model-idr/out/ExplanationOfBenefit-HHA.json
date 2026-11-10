@@ -1834,12 +1834,12 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
-        "display" : "Operating Disproportionate Share Amount"
+        "code" : "CLM_OPRTNL_OUTLR_AMT",
+        "display" : "Operating Outlier Amount"
       }]
     },
     "amount" : {
-      "value" : 14.14,
+      "value" : 5.32,
       "currency" : "USD"
     }
   },
@@ -1847,12 +1847,38 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_OPRTNL_IME_AMT",
-        "display" : "Operating Indirect Medical Education Amount"
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
       }]
     },
     "amount" : {
-      "value" : 12342.14,
+      "value" : 10.04,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT",
+        "display" : "Medicare Payment Before Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 11.38,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT",
+        "display" : "Actual Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 86.19,
       "currency" : "USD"
     }
   },
