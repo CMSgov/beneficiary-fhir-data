@@ -6,7 +6,6 @@ import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.DateType;
@@ -59,30 +58,23 @@ public class NoncoveredDatesNormalized {
                         s.getFirst()
                             .map(
                                 d ->
-                                    toSupportingInfo(
-                                        d,
-                                        BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT,
-                                        supportingInfoFactory)),
+                                    supportingInfoFactory
+                                        .createSupportingInfo()
+                                        .setCategory(
+                                            BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT
+                                                .toFhir())
+                                        .setTiming(new DateType().setValue(DateUtil.toDate(d)))),
                         s.getLast()
                             .map(
                                 d ->
-                                    toSupportingInfo(
-                                        d,
-                                        BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT,
-                                        supportingInfoFactory)))
+                                    supportingInfoFactory
+                                        .createSupportingInfo()
+                                        .setCategory(
+                                            BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT
+                                                .toFhir())
+                                        .setTiming(new DateType().setValue(DateUtil.toDate(d)))))
                     .flatMap(Optional::stream)
                     .toList())
         .orElseGet(List::of);
-  }
-
-  private ExplanationOfBenefit.SupportingInformationComponent toSupportingInfo(
-      LocalDate localDate,
-      BlueButtonSupportingInfoCategory category,
-      SupportingInfoFactory supportingInfoFactory) {
-    if (Objects.isNull(localDate)) return null;
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(category.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(localDate)));
   }
 }
