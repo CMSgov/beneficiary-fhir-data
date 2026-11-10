@@ -28,7 +28,7 @@ jobs:
           tool: taplo
       - uses: taiki-e/install-action@v2.88.1
         with:
-          tool: fd
+          tool: fd-find
       - uses: taiki-e/install-action@v2.87.32
         with:
           tool: just
