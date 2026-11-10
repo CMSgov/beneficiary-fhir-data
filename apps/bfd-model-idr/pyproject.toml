@@ -5,17 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
-  "faker>=37.1.0",
-  "pandas>=3.0.2",
-  "xlsxwriter>=3.2.5",
-  "pyyaml>=6.0.2",
-  "pydantic>=2.12.3",
-  "tqdm>=4.67.1",
-  "click>=8.3.1",
-  "requests>=2.32.5",
-  "snowflake-snowpark-python>=1.54.0",
-  "prompt-toolkit>=3.0.53",
-  "cryptography>=50.0.0",
+  "faker",
+  "pandas",
+  "xlsxwriter",
+  "pyyaml",
+  "pydantic",
+  "tqdm",
+  "click",
+  "requests",
+  "snowflake-snowpark-python",
+  "prompt-toolkit",
+  "cryptography",
 ]
 
 [project.scripts]

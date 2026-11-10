@@ -5,10 +5,10 @@ description = "Lambda to consolidate running the IDR Pipeline Task"
 readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
-  "boto3>=1.42.80",
-  "aws-lambda-powertools>=3.26.0",
-  "pydantic>=2.12.5",
-  "pydantic-settings>=2.13.1",
+  "boto3",
+  "aws-lambda-powertools",
+  "pydantic",
+  "pydantic-settings",
 ]
 
 [tool.pytest.ini_options]

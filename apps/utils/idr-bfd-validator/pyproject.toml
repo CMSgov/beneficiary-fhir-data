@@ -10,7 +10,7 @@ dependencies = [
   "loguru",
   "pydantic-partial",
   "boto3",
-  "click>=8.4.2",
+  "click",
 ]
 
 [tool.uv.sources]

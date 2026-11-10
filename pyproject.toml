@@ -51,14 +51,14 @@ members = [
 
 [dependency-groups]
 dev = [
-  "basedpyright>=1.40.2",
+  "basedpyright",
   "boto3-stubs[essential,athena,codedeploy,ecs,glue,lambda,logs,rds,s3,scheduler,sns,ssm]",
-  "debugpy>=1.8.19",
-  "pandas-stubs>=3.0.5.260914",
-  "pytest>=9.0.1",
-  "ruff>=0.16.8",
-  "testcontainers>=4.13.3",
-  "types-gevent>=25.4.0.20250516",
+  "debugpy",
+  "pandas-stubs",
+  "pytest",
+  "ruff",
+  "testcontainers",
+  "types-gevent",
 ]
 
 [tool.uv]
@@ -67,6 +67,53 @@ override-dependencies = ["filelock>=4.2.1"]
 # The `exclude-newer` cooldown applies to every dependency unless a package overrides it here.
 # certifi 2026.10.19 carries the CA trust store fix.
 exclude-newer-package = { filelock = false, certifi = false }
+# Constraints for every direct dependency in the workspace; new member dependencies should have
+# their constraints added here rather than in their direct pyproject.toml
+constraint-dependencies = [
+  "aiohttp>=3.14.5",
+  "anyio>=4.15.1",
+  "asyncclick>=8.4.2.1",
+  "aws-lambda-powertools>=3.38.0",
+  "basedpyright>=1.40.2",
+  "boto3>=1.43.121,<2.0.0",
+  "boto3-stubs>=1.43.121",
+  "certifi>=2026.10.23",
+  "click>=8.5.0",
+  "cryptography>=50.0.2",
+  "debugpy>=1.8.22",
+  "faker>=40.44.0",
+  "flask>=3.1.3",
+  "flask-cors>=6.0.5",
+  "gevent>=26.9.0",
+  "idna>=3.20",
+  "jinja2>=3.1.6",
+  "locust>=2.47.0",
+  "loguru>=0.7.3",
+  "pandas>=3.1.0",
+  "pandas-stubs>=3.1.0.261029",
+  "prompt-toolkit>=3.0.53",
+  "psycopg>=3.3.6",
+  "pydantic>=2.14.2",
+  "pydantic-partial>=0.11.1",
+  "pydantic-settings>=2.16.2",
+  "pytest>=9.2.0",
+  "python-dateutil>=2.9.0.post0",
+  "python-socketio>=5.17.0",
+  "pyyaml>=6.0.3",
+  "requests>=2.34.2",
+  "ruff>=0.17.3",
+  "snowflake-connector-python>=4.8.1,<5.0.0",
+  "snowflake-snowpark-python>=1.55.3",
+  "tblib>=3.2.2",
+  "testcontainers>=4.15.0",
+  "tqdm>=4.70.1",
+  "types-gevent>=26.9.0.20261006",
+  "unidecode>=1.4.0",
+  "urllib3>=2.8.0",
+  "usaddress>=0.5.16",
+  "werkzeug>=3.1.9",
+  "xlsxwriter>=3.3.1",
+]
 
 [tool.uv.sources]
 loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }
