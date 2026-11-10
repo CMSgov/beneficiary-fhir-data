@@ -8,6 +8,7 @@ Small utilities used by developers and by the `just` recipes. `just --list` show
 - `lambda-error-metrics`: queries Lambda error metrics from CloudWatch.
 - `py-check.sh`: runs the four checks a Python change must pass against the workspace root, from any directory. Called by `just py-check`. Its `--no-baseline` flag lists the type findings the committed baseline suppresses.
 - `py-rm-venvs.sh`: deletes the per-project `.venv` directories left over from before the workspace consolidation, asking before each one. Called by `just py-rm-venvs`.
+- `py-test.sh`: runs the pytest suite of every workspace member that has tests. `--member <member>` runs one member, given by project name (for example `idr-pipeline`) or by a directory relative to the current directory (for example `apps/bfd-pipeline-idr`), and `--list` prints the names of the members that have tests. Called by `just py-test`. Members come from `uv workspace`, test files from `fd`. On macOS it needs Homebrew's bash and `fd`, both installed by `just bootstrap`.
 - `update-tofu-docs`: regenerates the OpenTofu documentation blocks in `ops/`.
 
 ## Building container images locally

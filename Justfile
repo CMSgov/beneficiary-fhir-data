@@ -94,6 +94,17 @@ failure by design, since the baselined findings are then visible errors.""")]
 py-check no_baseline="":
     ./ops/utils/scripts/py-check.sh {{ if no_baseline == "1" { "--no-baseline" } else { "" } }}
 
+[arg("member", long, help="Run one member's tests, by project name (e.g. idr-pipeline) or directory (e.g. apps/bfd-pipeline-idr, relative to the current directory)")]
+[arg("list", long, value="1", help="List the names of workspace members that have tests")]
+[doc("""Runs the pytest suites of workspace members. With no arguments, the suite of every member
+that has tests runs. `--member` runs just one, given by project name or directory, and `--list`
+prints the member names that have tests.""")]
+[group('python')]
+[no-cd]
+py-test list="" member="":
+    {{ justfile_directory() }}/ops/utils/scripts/py-test.sh {{ if list == "1" { "--list" } else { "" } }} \
+        {{ if member != "" { f"--member \"{{ member }}\"" } else { "" } }}
+
 [arg("yes", long, value="1", help="Delete every stale environment without asking")]
 [arg("dry_run", long="dry-run", value="1", help="List the environments and their sizes without deleting anything")]
 [doc("""Deletes the per-project virtual environments left over from before the repository became a uv
