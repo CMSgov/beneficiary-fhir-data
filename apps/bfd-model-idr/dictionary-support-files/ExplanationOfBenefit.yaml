@@ -1757,6 +1757,18 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.productOrService.coding:ndc.code
+    path: ExplanationOfBenefit.item.productOrService.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.productOrService.coding:ndc
+        path: ExplanationOfBenefit.item.productOrService.coding
+        sliceName: ndc
+        min: 0
+        max: "1"
+        patternCoding:
+          system: http://hl7.org/fhir/sid/ndc
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Inpatient
@@ -1779,6 +1791,27 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.detail:ndc.quantity.value
+    path: ExplanationOfBenefit.item.detail.quantity.value
+    min: 1
+    preceedingEd:
+      - id: ExplanationOfBenefit.item.detail:ndc
+        path: ExplanationOfBenefit.item.detail
+        sliceName: ndc
+        min: 0
+        max: "*"
+        short: NDC Drug Detail Item
+      - id: ExplanationOfBenefit.item.detail:ndc.productOrService
+        path: ExplanationOfBenefit.item.detail.productOrService
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: http://hl7.org/fhir/sid/ndc
+      - id: ExplanationOfBenefit.item.detail:ndc.quantity
+        path: ExplanationOfBenefit.item.detail.quantity
+        min: 1
+        min: 0
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
   appliesTo:
     - Inpatient
@@ -1801,6 +1834,10 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.detail:ndc.quantity.code
+    path: ExplanationOfBenefit.item.detail.quantity.code
+    min: 1
 - inputPath: LineItemComponent.CLM_LINE_SRVC_UNIT_QTY
   appliesTo:
     - Inpatient
@@ -1829,6 +1866,14 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.quantity.value
+    path: ExplanationOfBenefit.item.quantity.value
+    min: 0
+    preceedingEd:
+      - id: ExplanationOfBenefit.item.quantity
+        path: ExplanationOfBenefit.item.quantity
+        min: 0
 - inputPath: LineItemComponent.CLM_LINE_REV_CTR_CD
   appliesTo:
     - Inpatient
@@ -1851,6 +1896,30 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.revenue.coding:clmRevCntrCd.code
+    path: ExplanationOfBenefit.item.revenue.coding.code
+    min: 1
+    slicing:
+      id: ExplanationOfBenefit.item.revenue.coding
+      path: ExplanationOfBenefit.item.revenue.coding
+      slicing:
+        discriminator:
+          - type: pattern
+            path: $this
+        rules: open
+      min: 1
+    preceedingEd:
+      - id: ExplanationOfBenefit.item.revenue.coding:clmRevCntrCd
+        path: ExplanationOfBenefit.item.revenue.coding
+        sliceName: clmRevCntrCd
+        min: 0
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD
+      - id: ExplanationOfBenefit.item.revenue.coding:clmRevCntrCd.code
+        path: ExplanationOfBenefit.item.revenue.coding.code
+        min: 1
 - inputPath: LineItemComponent.CLM_DDCTBL_COINSRNC_CD
   appliesTo:
     - Inpatient
@@ -1869,6 +1938,21 @@
   fhirPath: ExplanationOfBenefit.item.revenue.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD').code
   profiles:
     - CMS
+  structureDef:
+  id: ExplanationOfBenefit.item.revenue.coding:clmDdctblCoinsrncCd.code
+  path: ExplanationOfBenefit.item.revenue.coding.code
+  min: 1
+  preceedingEd:
+    - id: ExplanationOfBenefit.item.revenue.coding:clmDdctblCoinsrncCd
+      path: ExplanationOfBenefit.item.revenue.coding
+      sliceName: clmDdctblCoinsrncCd
+      min: 0
+      max: "1"
+      patternCoding:
+        system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD
+    - id: ExplanationOfBenefit.item.revenue.coding:clmDdctblCoinsrncCd.code
+      path: ExplanationOfBenefit.item.revenue.coding.code
+      min: 1
 - inputPath: LineItemComponent.HCPCS_1_MDFR_CD
   appliesTo:
     - Inpatient

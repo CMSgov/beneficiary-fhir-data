@@ -146,8 +146,6 @@ class StructureDefinitionGenerator:
                     slicing_added.add(path)
 
                 if struct_def_data.get("proceedingEd"):
-                    if (path == "ExplanationOfBenefit.item.productOrService.coding:dar.code"):
-                        print("proceeding")
                     elements.extend(struct_def_data.get("proceedingEd"))
 
                 el = ElementDefinition(
@@ -184,9 +182,6 @@ class StructureDefinitionGenerator:
                 slice_names = [
                     get_field(el, "sliceName") for el in els if get_field(el, "sliceName")
                 ]
-                if p == "ExplanationOfBenefit.item.productOrService.coding":
-                    print(p)
-                    print(slice_names)
                 if slice_names:
                     slices = [el for el in els if get_field(el, "slicing")]
                     if slices:
