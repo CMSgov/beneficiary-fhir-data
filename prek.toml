@@ -113,16 +113,6 @@ pass_filenames = false
 [[repos]]
 repo = "local"
 [[repos.hooks]]
-id = "pytest-members"
-name = "tests for workspace members with changes"
-language = "system"
-files = "\\.py$|pyproject\\.toml$|uv\\.lock$"
-entry = "./hooks/run-member-tests.sh"
-require_serial = true
-
-[[repos]]
-repo = "local"
-[[repos.hooks]]
 id = "git-hook-shims-fresh"
 name = "git hook shims match the scripts in hooks/"
 language = "system"

@@ -26,6 +26,9 @@ jobs:
       - uses: taiki-e/install-action@v2.88.1
         with:
           tool: taplo
+      - uses: taiki-e/install-action@v2.88.1
+        with:
+          tool: fd
       - uses: taiki-e/install-action@v2.87.32
         with:
           tool: just
@@ -42,3 +45,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           extra-args: --files ${{ steps.changed-files.outputs.all_changed_files }}
+      - name: "Run tests for workspace members with changes"
+        run: ./ops/utils/scripts/run-member-tests.sh ${{ steps.changed-files.outputs.all_changed_files }}
