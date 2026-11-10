@@ -31,16 +31,18 @@ from generator_util import (
     probability,
 )
 from id_generators import IdGenerator, RandomIdGenerator, SequentialIdGenerator, load_id_state
-from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import (
+    CsvWriter,
+    OutputDestinationWriter,
+    SnowflakeWriter,
+    parse_overwrites,
+)
 from row_adapter import RowAdapter
 from shared_options import common_options
 
 logger = logging.getLogger(__name__)
 
 fake = Faker()
-
-_BATCH_SIZE = 50_000
-
 
 available_given_names = [
     "Alex",
@@ -149,9 +151,10 @@ def load_inputs(
     paths: tuple[Path, ...] = (),
     exclude_empty: bool = False,
     writer: OutputDestinationWriter | None = None,
+    overwrite: str | None = None,
 ):
     if writer is None:
-        writer = CsvWriter()
+        writer = CsvWriter(overwrites=parse_overwrites(overwrite))
 
     if isinstance(writer, SnowflakeWriter):
         _handle_snowflake_flow(writer, patients, force_ztm, batch_size, truncate)
@@ -181,7 +184,9 @@ def _handle_csv_flow(
     ]
 
     files: dict[str, list[RowAdapter]] = {table: [] for table in csv_tables}
-    load_file_dict(files=files, paths=paths, exclude_empty=exclude_empty)
+    load_file_dict(
+        files=files, paths=paths, exclude_empty=exclude_empty, overwrites=writer.overwrites
+    )
 
     generator.gen_contract_plan(
         amount=10,
@@ -390,7 +395,7 @@ def _generate_patients_batch(
 
         generator.bene_hstry_table.append(patient.kv)
 
-    logger.info(f"Done generating {len(patients)} patients")
+    logger.info("Done generating %s patients", len(patients))
 
 
 def _generate_contracts(
@@ -433,6 +438,7 @@ def main(
     truncate: bool,
     batch_size: int,
     paths: tuple[Path, ...],
+    overwrite: str | None = None,
     **kwargs,
 ) -> None:
     load_inputs(
@@ -443,6 +449,7 @@ def main(
         paths=paths,
         exclude_empty=exclude_empty,
         writer=None,
+        overwrite=overwrite,
     )
 
     if claims:

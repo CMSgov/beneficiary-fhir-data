@@ -14,9 +14,9 @@ from claims_static import (
     NOW,
 )
 from faker import Faker
-from file_utils import ROOT
 from generator_util import GeneratorUtil, probability
 from row_adapter import RowAdapter
+from utils import ROOT
 
 _faker = Faker()
 
