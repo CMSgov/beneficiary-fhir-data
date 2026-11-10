@@ -471,7 +471,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.sql(
             f"""
             COPY INTO {staging_table_name}
-            FROM @{database}.{session_schema}.generator_files_stage/{target_filename}.csv.gz
+            FROM @{database}.{session_schema}.generator_files_stage/{target_filename}.gz
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 SKIP_HEADER = 1
