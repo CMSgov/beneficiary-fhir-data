@@ -118,7 +118,10 @@ public enum BlueButtonSupportingInfoCategory {
   PRVDR_FAC_FIPS_ST_CD(
       "PRVDR_FAC_FIPS_ST_CD", "Federal Information Processing Standards (FIPS) State Code"),
   /** RNDRG_PRVDR_FIPS_ST_CD - Rendering Provider FIPS State Code. */
-  RNDRG_PRVDR_FIPS_ST_CD("RNDRG_PRVDR_FIPS_ST_CD", "Rendering Provider FIPS State Code");
+  RNDRG_PRVDR_FIPS_ST_CD("RNDRG_PRVDR_FIPS_ST_CD", "Rendering Provider FIPS State Code"),
+  // Begin clm_val fields
+  /** CLM_DLYS_MIN_AMT - Billing Cycle Dialysis Minutes. */
+  DIALYSIS_MINUTES_AMOUNT("CLM_DLYS_MIN_AMT", "Dialysis Minutes Amount");
 
   private final String code;
   private final String display;

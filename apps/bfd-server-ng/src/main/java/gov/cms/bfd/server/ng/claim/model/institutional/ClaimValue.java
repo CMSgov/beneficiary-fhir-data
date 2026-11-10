@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model.institutional;
 
+import gov.cms.bfd.server.ng.converter.NonZeroBigDecimalConverter;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -8,7 +9,16 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 
-@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:MissingJavadocMethod:"})
+/**
+ * Represents various amounts associated with a claim, either as an Adjudication or SupportingInfo
+ * on the EOB.
+ *
+ * <ul>
+ *   <li>{@code sequenceNumber}: The sequence number for the claim value.
+ *   <li>{@code claimValueCode}: The code representing kind of value amount.
+ *   <li>{@code claimValueAmount}: The amount relating to the claim.
+ * </ul>
+ */
 @Getter
 @Embeddable
 public class ClaimValue {
@@ -19,38 +29,28 @@ public class ClaimValue {
   @Column(name = "clm_val_cd")
   private Optional<String> claimValueCode;
 
+  // todo: Need to solve issue of CMS fields == can be left out if a row exists, BB fields must have
+  // a zero if a row exists
+  @Convert(converter = NonZeroBigDecimalConverter.class)
   @Column(name = "clm_val_amt")
-  private BigDecimal claimValueAmount;
+  private Optional<BigDecimal> claimValueAmount;
 
-  private static final String VALUE_CODE_DISPROPORTIONATE = "18";
-  private static final String VALUE_CODE_IME = "19";
-
-  /**
-   * Wrapping for amount from VALUE_CODE_DISPROPORTIONATE.
-   *
-   * @return the amount
-   */
-  public Optional<BigDecimal> getDisproportionateAmount() {
-    return getAmountForCode(VALUE_CODE_DISPROPORTIONATE);
+  Optional<BigDecimal> getClaimValueAmount(String code) {
+    return getAmountForCode(code);
   }
 
-  /**
-   * Wrapping for amount from VALUE_CODE_IME.
-   *
-   * @return the amount
-   */
-  public Optional<BigDecimal> getImeAmount() {
-    return getAmountForCode(VALUE_CODE_IME);
+  Optional<Integer> getClaimValueQuantity(String code) {
+    return getQuantityForCode(code);
   }
 
   private Optional<BigDecimal> getAmountForCode(String code) {
-    return claimValueCode.flatMap(
-        c -> {
-          if (c.equals(code)) {
-            return Optional.of(claimValueAmount);
-          } else {
-            return Optional.empty();
-          }
-        });
+    return claimValueCode.filter(c -> c.equals(code)).flatMap(c -> claimValueAmount);
+  }
+
+  private Optional<Integer> getQuantityForCode(String code) {
+    return claimValueCode
+        .filter(c -> c.equals(code))
+        .flatMap(c -> claimValueAmount)
+        .map(BigDecimal::intValue);
   }
 }
