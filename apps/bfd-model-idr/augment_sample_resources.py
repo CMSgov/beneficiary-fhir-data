@@ -297,12 +297,12 @@ class Provider:
     PRVDR_SK: str | None = None
     PRVDR_ID_QLFYR_CD: str | None = None
     NPI_TYPE: str | None = None
-    careTeamType: str | None = None
-    careTeamSequenceNumber: int | None = None
+    care_team_type: str | None = None
+    care_team_sequence_number: int | None = None
     PRVDR_LAST_OR_LGL_NAME: str | None = None
     PRVDR_1ST_NAME: str | None = None
     PRVDR_CARETEAM_NAME: str | None = None
-    specialtyCode: str | None = None
+    specialty_code: str | None = None
     PRVDR_OSCAR_NUM: str | None = None
     CLM_BLG_PRVDR_ZIP5_CD: str | None = None
     CLM_PRVDR_GNRC_ID_NUM: str | None = None
@@ -397,14 +397,14 @@ def create_careteam_provider(careteam_column: str) -> Provider:
             provider_object.PRVDR_SK = npi_num
             provider_object.PRVDR_CARETEAM_NAME = "Practitioner"
 
-        provider_object.careTeamType = careteam_header_columns.get(careteam_column)
+        provider_object.care_team_type = careteam_header_columns.get(careteam_column)
         if qualifier:
             provider_object.PRVDR_SK = cur_sample_data.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM")
         else:  # taxonomy codes only present in non-PDE
             cur_prov_type = careteam_column.split("_")[1]
             cur_specialty_code_col = "CLM_" + cur_prov_type + "_FED_PRVDR_SPCLTY_CD"
             if cur_sample_data.get(cur_specialty_code_col):
-                provider_object.specialtyCode = cur_sample_data.get(cur_specialty_code_col)
+                provider_object.specialty_code = cur_sample_data.get(cur_specialty_code_col)
             cur_prvdr_name_col = "CLM_" + cur_prov_type + "_PRVDR_NAME"
             if cur_sample_data.get(cur_prvdr_name_col):
                 provider_object.PRVDR_CARETEAM_NAME = cur_sample_data.get(cur_prvdr_name_col)
@@ -417,8 +417,8 @@ for careteam_column in careteam_header_columns:
     if careteam_column not in cur_sample_data:
         continue
     provider_object = create_careteam_provider(careteam_column)
-    provider_object.careTeamSequenceNumber = sum(
-        1 for _ in provider_list if provider_object.careTeamType
+    provider_object.care_team_sequence_number = sum(
+        1 for _ in provider_list if provider_object.care_team_type
     )
     provider_list.append(provider_object)
 
@@ -426,7 +426,7 @@ for careteam_column in careteam_header_columns:
 # Distinct method since line items end up cleaner
 def create_rendering_line_provider(npi_num: str | None) -> Provider:
     provider_object = Provider(
-        PRVDR_SK=npi_num, careTeamType="rendering", PRVDR_CARETEAM_NAME="N/A"
+        PRVDR_SK=npi_num, care_team_type="rendering", PRVDR_CARETEAM_NAME="N/A"
     )
     prvdr_hstry_for_npi = lookup_provider_history(npi_num)
     if prvdr_hstry_for_npi:
@@ -444,23 +444,25 @@ def create_rendering_line_provider(npi_num: str | None) -> Provider:
 for line_item in cur_sample_data.get("lineItemComponents", []):
     # we only care about PRVDR_RNDRNG_PRVDR_NPI_NUM
     cur_rendering_providers = [
-        x.PRVDR_SK for x in provider_list if getattr(x, "careTeamType", None) == "rendering"
+        x.PRVDR_SK for x in provider_list if getattr(x, "care_team_type", None) == "rendering"
     ]
     prvdr_npi_num = line_item.get("PRVDR_RNDRNG_PRVDR_NPI_NUM")
     if prvdr_npi_num and prvdr_npi_num not in cur_rendering_providers:
         # add rendering provider
         provider = create_rendering_line_provider(prvdr_npi_num)
         if line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD"):
-            provider.specialtyCode = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
-        provider.careTeamSequenceNumber = sum(1 for _ in provider_list if provider.careTeamType)
-        line_item["careTeamSequence"] = provider.careTeamSequenceNumber
+            provider.specialty_code = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
+        provider.care_team_sequence_number = sum(
+            1 for _ in provider_list if provider.care_team_type
+        )
+        line_item["careTeamSequence"] = provider.care_team_sequence_number
         provider_list.append(provider)
 
     if prvdr_npi_num:
         sequence = next(
-            x.careTeamSequenceNumber
+            x.care_team_sequence_number
             for x in provider_list
-            if getattr(x, "careTeamType", None) == "rendering"
+            if getattr(x, "care_team_type", None) == "rendering"
             and getattr(x, "PRVDR_SK", None) == prvdr_npi_num
         )
         line_item["careTeamSequence"] = [sequence]
@@ -640,8 +642,16 @@ for item in line_items:
     if tot_rx_amt > 0.0:
         item["TOT_RX_CST_AMT"] = str(tot_rx_amt)
 
+# The keys of the providerList must be in camelCase, so map the Python snake_case keys to their
+# camelCase alias equivalents
+provider_key_aliases = {
+    "care_team_type": "careTeamType",
+    "care_team_sequence_number": "careTeamSequenceNumber",
+    "specialty_code": "specialtyCode",
+}
 cur_sample_data["providerList"] = [
-    {k: v for k, v in asdict(p).items() if v is not None} for p in provider_list
+    {provider_key_aliases.get(k, k): v for k, v in asdict(p).items() if v is not None}
+    for p in provider_list
 ]
 
 
