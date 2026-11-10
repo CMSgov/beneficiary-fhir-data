@@ -195,7 +195,7 @@ sushi: install-model-dependencies
 [group('model')]
 start-matchbox:
     @echo "Starting matchbox. Run 'just matchbox-logs' to see log output\n"
-    cd ./apps/bfd-model-idr && docker-compose up -d
+    cd ./apps/bfd-model-idr && docker compose up -d
 
 [doc("Waits for matchbox to be ready")]
 [group('model')]
@@ -210,12 +210,12 @@ upload-sushi: sushi _wait-for-matchbox
 [doc("Stops the matchbox docker compose project")]
 [group('model')]
 stop-matchbox:
-    cd ./apps/bfd-model-idr && docker-compose down
+    cd ./apps/bfd-model-idr && docker compose down
 
 [doc("Shows logs from matchbox")]
 [group('model')]
 matchbox-logs:
-    cd ./apps/bfd-model-idr && docker-compose logs --follow
+    cd ./apps/bfd-model-idr && docker compose logs --follow
 
 [arg("type", long, help="Resource type to generate")]
 [arg("all", long, value="1", help="Generate all resources")]
@@ -238,6 +238,20 @@ If no arguments are supplied, you can pick the resource interactively.""")]
 fhir-transform resource="" profile-type="CMS" *all: upload-sushi
     cd ./apps/bfd-model-idr && ./fhir-transform.sh --resource "{{ resource }}" \
         --profile-type "{{ profile-type }}" {{ if all == "1" { "--all" } else { "" } }}
+
+[arg("clm-uniq-id", long, help="Claim ID to transform")]
+[arg("source-directory", long, help="Directory to find claim CSV inputs")]
+[arg("output-directory", long, help="Directory to save the output")]
+[arg("profile-type", long, pattern="Basis|Regular|CMS", help="""Profile to transform with.
+Profiles affect the elements returned in the resource""")]
+[doc("Generates a sample for a synthetic claim and runs the FHIR transform on it")]
+[group('model')]
+fml-claim clm-uniq-id source-directory="apps/bfd-pipeline-idr/test_samples2" profile-type="CMS" output-directory="apps/bfd-model-idr/out/claims": upload-sushi
+    ./apps/bfd-model-idr/fml-transform-claim.sh \
+        --clm-uniq-id "{{ clm-uniq-id }}" \
+        --source-directory "$(realpath "{{ source-directory }}")" \
+        --profile-type "{{ profile-type }}" \
+        --output-directory "$(mkdir -p "{{ output-directory }}" && realpath "{{ output-directory }}")"
 
 [arg("resource", long, help="Resource to test")]
 [arg("all", long, value="1", help="Test all resources")]
