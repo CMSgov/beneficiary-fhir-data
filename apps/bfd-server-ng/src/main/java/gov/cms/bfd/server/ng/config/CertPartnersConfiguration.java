@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.config;
 
 import com.google.gson.Gson;
 import java.util.ArrayList;

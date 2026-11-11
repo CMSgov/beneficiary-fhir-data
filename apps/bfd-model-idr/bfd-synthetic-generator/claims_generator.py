@@ -9,11 +9,11 @@ import click
 import constants as f
 import tqdm
 from claim_type_codes import (
-    FISS_CLM_TYPE_CDS,
-    INSTITUTIONAL_CLAIM_TYPES,
-    MCS_CLM_TYPE_CDS,
-    PHARMACY_CLM_TYPE_CDS,
-    PROFESSIONAL_CLAIM_TYPES,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    MCS_SS_CDS,
+    PHARMACY_CDS,
+    PROFESSIONAL_CDS,
 )
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
@@ -293,7 +293,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_TYPE_CD,
             f.CLM_LCTN_CD_SQNC_NUM,
             f.CLM_AUDT_TRL_STUS_CD,
-            f.CLM_AUDT_TRL_LCTN_CD,  # TODO: Generate this; values in test-samples2 are static
+            f.CLM_AUDT_TRL_LCTN_CD,  # generating values in claims_pac; test-samples2 remain static
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -350,26 +350,26 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_NUM,
             f.CLM_BENE_PRMRY_PYR_PD_AMT,
             f.CLM_SRVC_DDCTBL_SW,
+            f.CLM_FED_TYPE_SRVC_CD,
+            f.CLM_MTUS_IND_CD,
             f.CLM_PRCSG_IND_CD,
             f.CLM_PMT_80_100_CD,
-            f.CLM_MTUS_IND_CD,
-            f.CLM_LINE_PRFNL_MTUS_CNT,
             f.CLM_PHYSN_ASTNT_CD,
-            f.CLM_LINE_CARR_CLNCL_CHRG_AMT,
-            f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT,
-            f.CLM_LINE_PRFNL_INTRST_AMT,
-            f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT,
-            f.CLM_LINE_HCT_HGB_TYPE_CD,
-            f.CLM_LINE_CARR_CLNCL_LAB_NUM,
-            f.CLM_LINE_DMERC_SCRN_SVGS_AMT,
-            f.CLM_SUPLR_TYPE_CD,
-            f.CLM_LINE_PRFNL_DME_PRICE_AMT,
-            f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
-            f.CLM_FED_TYPE_SRVC_CD,
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
-            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRCNG_LCLTY_CD,
+            f.CLM_PRMRY_PYR_CD,
             f.CLM_PRVDR_SPCLTY_CD,
+            f.CLM_SUPLR_TYPE_CD,
+            f.CLM_LINE_CARR_CLNCL_CHRG_AMT,
+            f.CLM_LINE_CARR_CLNCL_LAB_NUM,
+            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
+            f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT,
+            f.CLM_LINE_DMERC_SCRN_SVGS_AMT,
+            f.CLM_LINE_HCT_HGB_TYPE_CD,
+            f.CLM_LINE_HCT_HGB_RSLT_NUM,
+            f.CLM_LINE_PRFNL_DME_PRICE_AMT,
+            f.CLM_LINE_PRFNL_INTRST_AMT,
+            f.CLM_LINE_PRFNL_MTUS_CNT,
+            f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -463,7 +463,7 @@ class _ClaimsFile(StrEnum):
             f.HCPCS_3_MDFR_CD,
             f.HCPCS_4_MDFR_CD,
             f.HCPCS_5_MDFR_CD,
-            f.CLM_LINE_ANSTHSA_UNIT_CNT,  # TODO: generate this
+            f.CLM_LINE_ANSTHSA_UNIT_CNT,
             f.CLM_LINE_SRVC_UNIT_QTY,
             f.CLM_LINE_REV_CTR_CD,
             f.CLM_LINE_BENE_PMT_AMT,
@@ -589,8 +589,8 @@ class _ClaimsFile(StrEnum):
             f.CLM_VAL_CD,
             f.CLM_VAL_AMT,
             f.CLM_VAL_SQNC_NUM,
-            f.CLM_VAL_ANSI_RSN_CD,  # TODO: not generated yet
-            f.CLM_VAL_ANSI_GRP_CD,  # TODO: not generated yet
+            f.CLM_VAL_ANSI_RSN_CD,
+            f.CLM_VAL_ANSI_GRP_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -710,10 +710,10 @@ class _ClaimsFile(StrEnum):
         self.out_path = Path(f"../out/{value}.csv")
 
     def __new__(
-        cls: type["_ClaimsFile"],
+        cls: type[_ClaimsFile],
         value: str,
         ordered_headers: list[str],
-    ) -> "_ClaimsFile":
+    ) -> _ClaimsFile:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.ordered_headers = ordered_headers
@@ -943,12 +943,12 @@ def _generate_batch(
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x
         for x in existing[f.CLM_LINE]
-        if x.get(f.CLM_TYPE_CD) in PHARMACY_CLM_TYPE_CDS
+        if x.get(f.CLM_TYPE_CD) in PHARMACY_CDS
     }
     norm_clm_lines_per_clm_uniq_id = partition_rows(
         llist=existing[f.CLM_LINE],
         part_by=lambda x: x[f.CLM_UNIQ_ID],
-        filter_by=lambda x: x.get(f.CLM_TYPE_CD) not in PHARMACY_CLM_TYPE_CDS,
+        filter_by=lambda x: x.get(f.CLM_TYPE_CD) not in PHARMACY_CDS,
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in existing[f.CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
@@ -1075,7 +1075,7 @@ def _generate_batch(
             adj_clms_tbls[f.CLM_RLT_OCRNC_SGNTR_MBR].extend(clm_rlt_ocrnc_sgntr_mbr)
 
             clm_type_cd = clm[f.CLM_TYPE_CD]
-            if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+            if clm_type_cd in PHARMACY_CDS:
                 pharm_clm_line = adj_util.gen_pharm_clm_line(
                     clm=clm,
                     init_clm_line=rx_clm_line_per_clm_uniq_id.get(str(clm[f.CLM_UNIQ_ID])),
@@ -1129,7 +1129,7 @@ def _generate_batch(
             adj_clms_tbls[f.CLM_DT_SGNTR].append(clm_dt_sgntr)
 
             clm_instnl = None
-            if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+            if clm_type_cd in INSTITUTIONAL_CDS:
                 clm_instnl = adj_util.gen_clm_instnl(
                     gen_utils=gen_utils,
                     clm=clm,
@@ -1137,7 +1137,7 @@ def _generate_batch(
                 )
                 adj_clms_tbls[f.CLM_INSTNL].append(clm_instnl)
 
-            if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
+            if clm_type_cd in PROFESSIONAL_CDS:
                 clm_prfnls = [
                     adj_util.gen_clm_prfnl(
                         gen_utils=gen_utils,
@@ -1152,7 +1152,7 @@ def _generate_batch(
                 RowAdapter({}) for _ in range(random.randint(1, 15))
             ]
             for idx, init_clm_line in enumerate(init_clm_lines, start=1):
-                if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+                if clm_type_cd in PHARMACY_CDS:
                     continue
 
                 clm_line = adj_util.gen_clm_line(
@@ -1369,7 +1369,7 @@ def _generate_batch(
             )
 
             clm_type_cd = pac_clm[f.CLM_TYPE_CD]
-            if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
+            if clm_type_cd in PROFESSIONAL_CDS:
                 clm_prfnls = [
                     pac_util.gen_pac_clm_prfnl(
                         gen_utils=gen_utils,
@@ -1380,7 +1380,7 @@ def _generate_batch(
                 ]
                 out_tables[f.CLM_PRFNL].extend(clm_prfnls)
 
-                if clm_type_cd in MCS_CLM_TYPE_CDS:
+                if clm_type_cd in MCS_SS_CDS:
                     init_clm_line_mcss = claims_tbls[f.CLM_LINE_MCS] or [
                         RowAdapter({}) for _ in range(random.randint(1, 15))
                     ]
@@ -1394,7 +1394,7 @@ def _generate_batch(
                         )
                         out_tables[f.CLM_LINE_MCS].append(clm_line_mcs)
 
-            if clm_type_cd in FISS_CLM_TYPE_CDS:
+            if clm_type_cd in FISS_SS_CDS:
                 init_clm_line_fisss = claims_tbls[f.CLM_LINE_FISS] or [
                     RowAdapter({}) for _ in range(random.randint(1, 15))
                 ]

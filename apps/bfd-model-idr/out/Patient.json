@@ -1,8 +1,8 @@
 {
   "resourceType" : "Patient",
-  "id" : "123456789",
+  "id" : "47347082",
   "meta" : {
-    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2025-02-17T17:00:20.764085",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0",
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0"]
   },
@@ -33,47 +33,38 @@
       }]
     },
     "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "value" : "AAA1AA0AA11",
+    "value" : "6LM1C27GV22",
     "period" : {
-      "start" : "2017-05-11",
-      "end" : "2017-07-01"
-    }
-  },
-  {
-    "type" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-        "code" : "MB"
-      }]
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "value" : "ABB2BB0BB22",
-    "period" : {
-      "start" : "2017-07-02"
+      "start" : "2021-01-20"
     }
   }],
   "name" : [{
-    "family" : "Sheep",
-    "given" : ["Frankie",
-    "Le Petit Prince"]
+    "family" : "Coffee",
+    "given" : ["Le Petit Prince",
+    "Alex"]
   }],
   "gender" : "female",
-  "birthDate" : "1995-03-11",
-  "deceasedDateTime" : "2024-03-11",
+  "birthDate" : "1931-09-07",
   "address" : [{
-    "line" : ["505 University Dr",
-    "TEST for line 2"],
-    "city" : "College Station",
-    "state" : "TX",
-    "postalCode" : "77840"
+    "line" : ["1970 S University Blvd"],
+    "city" : "Mobile",
+    "state" : "AL",
+    "postalCode" : "36609"
   }],
   "communication" : [{
     "language" : {
       "coding" : [{
         "system" : "urn:ietf:bcp:47",
-        "code" : "en"
+        "code" : "es"
       }]
     },
     "preferred" : true
+  }],
+  "link" : [{
+    "other" : {
+      "reference" : "Patient/313081892",
+      "display" : "313081892"
+    },
+    "type" : "replaces"
   }]
 }

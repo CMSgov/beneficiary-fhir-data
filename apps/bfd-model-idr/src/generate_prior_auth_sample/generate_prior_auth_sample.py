@@ -151,7 +151,7 @@ def run(utn: str, source_directory: str, output_directory: str):
         "priorAuthItem": prior_auth_items,
     }
 
-    output_file = Path(f"{output_directory}/EOB-PriorAuth-Sample.json")
+    output_file = Path(f"{output_directory}/eob-prior-auth.json")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with output_file.open(mode="w", encoding="utf-8") as f:
