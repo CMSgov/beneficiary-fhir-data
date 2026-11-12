@@ -883,6 +883,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["clm_othr_fed_prvdr_spclty_cd"] == "93"
     assert row["bfd_prvdr_othr_npi_type"] == 1
     assert row["bfd_updated_ts"] == old_update_ts
+    assert row["bfd_claim_updated_ts"] == old_update_ts
 
     cur = conn.execute(
         "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
@@ -893,13 +894,13 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     assert row["clm_rndrg_fed_prvdr_spclty_cd"] == ""
     assert row["bfd_prvdr_rndrng_npi_type"] == 1
     assert row["bfd_updated_ts"] == latest_time
-    # verify that bfd_updated_ts on claim header table was updated as a result
+    # verify that bfd_claim_updated_ts on claim header table was updated as a result
     cur = conn.execute(
         "select * from idr.claim_professional_nch where clm_uniq_id = -8309297293881 "
     )
     row = cur.fetchone()
     assert row is not None
-    assert row["bfd_updated_ts"] == latest_time
+    assert row["bfd_claim_updated_ts"] == latest_time
 
     cur = conn.execute(
         "select * from idr.claim_item_professional_nch where clm_uniq_id = -8309297293881 "
