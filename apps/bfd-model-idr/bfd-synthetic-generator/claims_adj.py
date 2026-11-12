@@ -5,10 +5,10 @@ from typing import Any
 
 import constants as f
 from claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
-    FISS_CLM_TYPE_CDS,
-    INSTITUTIONAL_CLAIM_TYPES,
-    PHARMACY_CLM_TYPE_CDS,
+    ADJUDICATED_PROFESSIONAL_NCH_CDS,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    PHARMACY_CDS,
 )
 from claims_static import (
     AVAIL_CLM_RLT_COND_SK,
@@ -24,6 +24,8 @@ from claims_static import (
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
+    gen_clm_val_ansi_grp_cd,
+    gen_clm_val_ansi_rsn_cd,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
@@ -90,7 +92,7 @@ class AdjudicatedGeneratorUtil:
             parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
         )
         # PDE -> diff Claim control number process.
-        if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+        if clm_type_cd in PHARMACY_CDS:
             clm[f.CLM_ORIG_CNTL_NUM] = gen_utils.id_gen.multipart_id(
                 field=f.CLM_ORIG_CNTL_NUM,
                 parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
@@ -112,7 +114,7 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
         clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD])
 
-        if clm_type_cd not in PHARMACY_CLM_TYPE_CDS:
+        if clm_type_cd not in PHARMACY_CDS:
             clm[f.CLM_QUERY_CD] = random.choice(gen_utils.code_systems[f.CLM_QUERY_CD])
         else:
             clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM] = random.choice(type_2_npis)
@@ -136,7 +138,7 @@ class AdjudicatedGeneratorUtil:
                 clm[f.CLM_SBMTR_CNTRCT_NUM] = random.choice(AVAIL_CONTRACT_NUMS)
                 clm[f.CLM_SBMTR_CNTRCT_PBP_NUM] = random.choice(AVAIL_PBP_NUMS)
 
-        if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+        if clm_type_cd in INSTITUTIONAL_CDS:
             tob_code = random.choice(gen_utils.code_systems[f.CLM_BILL_FREQ_CD])
             clm[f.CLM_BILL_FAC_TYPE_CD] = tob_code[0]
             clm[f.CLM_BILL_CLSFCTN_CD] = tob_code[1]
@@ -172,7 +174,7 @@ class AdjudicatedGeneratorUtil:
             clm_ltst_clm_ind = random.choice(["Y", "N"])
         clm[f.CLM_LTST_CLM_IND] = clm_ltst_clm_ind
 
-        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_CLM_TYPE_CDS:
+        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_SS_CDS:
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
             clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
             clm[f.PRVDR_ATNDG_PRVDR_NPI_NUM] = clm[f.CLM_ATNDG_PRVDR_NPI_NUM]
@@ -520,6 +522,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = DISPROPORTIONATE_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 14
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
@@ -534,6 +538,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = INDIRECT_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 3
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
@@ -674,7 +680,7 @@ class AdjudicatedGeneratorUtil:
             num_add_diags = (
                 len(init_diagnoses) - 3 if len(init_diagnoses) > 3 else random.randint(2, 15)
             )
-        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH_CDS:
             # professional claims use principal diagnosis and other diagnoses
             principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
@@ -717,7 +723,7 @@ class AdjudicatedGeneratorUtil:
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                 }
-            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH_CDS:
                 diagnosis_data = {
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
@@ -944,7 +950,7 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_LINE_NDC_QTY] = round(random.uniform(1, 1000), 2)
             clm_line[f.CLM_LINE_NDC_QTY_QLFYR_CD] = "ML"
         clm_line[f.CLM_LINE_SRVC_UNIT_QTY] = round(random.uniform(0, 5), 2)
-        if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+        if clm_type_cd in INSTITUTIONAL_CDS:
             clm_line[f.CLM_LINE_REV_CTR_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_REV_CNTR_CD]
             )
@@ -1095,6 +1101,7 @@ class AdjudicatedGeneratorUtil:
 
         if probability(0.10):
             clm_line_prfnl[f.CLM_LINE_HCT_HGB_TYPE_CD] = random.choice(["R1", "R2"])
+            clm_line_prfnl[f.CLM_LINE_HCT_HGB_RSLT_NUM] = round(random.uniform(0.0, 99.9), 1)
             clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_LAB_NUM] = random.choice(
                 [
                     "11D1111111",

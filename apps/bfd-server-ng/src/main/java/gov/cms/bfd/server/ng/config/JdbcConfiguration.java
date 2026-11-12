@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.config;
 
 import com.google.common.base.Strings;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;

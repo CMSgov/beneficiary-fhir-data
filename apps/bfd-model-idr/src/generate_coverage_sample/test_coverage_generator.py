@@ -10,11 +10,12 @@ SOURCE_DIR_SAMPLES1 = str(PROJECT_ROOT / "bfd-pipeline-idr" / "test_samples1")
 
 
 def test_generate_coverage_part_a() -> None:
+    sample_bene_sk = "632187879"
     result = CliRunner().invoke(
         main,
         [
             "--bene-sk",
-            "632187879",
+            sample_bene_sk,
             "--source-directory",
             SOURCE_DIR_SAMPLES1,
             "--output-directory",
@@ -25,23 +26,24 @@ def test_generate_coverage_part_a() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/Coverage-FFS-Sample.json")
+    output_file = Path("out-test/coverage-ffs-part-A.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["XREF_EFCTV_BENE_SK"] == "632187879"
+    assert result_data["XREF_EFCTV_BENE_SK"] == sample_bene_sk
     assert result_data["coveragePart"] == "A"
 
 
 def test_generate_coverage_part_b() -> None:
+    sample_bene_sk = "800678894"
     result = CliRunner().invoke(
         main,
         [
             "--bene-sk",
-            "800678894",
+            sample_bene_sk,
             "--source-directory",
             SOURCE_DIR_SAMPLES1,
             "--output-directory",
@@ -52,23 +54,24 @@ def test_generate_coverage_part_b() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/Coverage-FFS-Sample-PartB.json")
+    output_file = Path("out-test/coverage-ffs-part-B.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["XREF_EFCTV_BENE_SK"] == "800678894"
+    assert result_data["XREF_EFCTV_BENE_SK"] == sample_bene_sk
     assert result_data["coveragePart"] == "B"
 
 
 def test_generate_coverage_part_c() -> None:
+    sample_bene_sk = "441149422"
     result = CliRunner().invoke(
         main,
         [
             "--bene-sk",
-            "441149422",
+            sample_bene_sk,
             "--source-directory",
             SOURCE_DIR_SAMPLES1,
             "--output-directory",
@@ -79,23 +82,24 @@ def test_generate_coverage_part_c() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/Coverage-PartC-Sample.json")
+    output_file = Path("out-test/coverage-part-C.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["XREF_EFCTV_BENE_SK"] == "441149422"
+    assert result_data["XREF_EFCTV_BENE_SK"] == sample_bene_sk
     assert result_data["coveragePart"] == "C"
 
 
 def test_generate_coverage_part_d() -> None:
+    sample_bene_sk = "547437476"
     result = CliRunner().invoke(
         main,
         [
             "--bene-sk",
-            "547437476",
+            sample_bene_sk,
             "--source-directory",
             SOURCE_DIR_SAMPLES1,
             "--output-directory",
@@ -106,23 +110,24 @@ def test_generate_coverage_part_d() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/Coverage-PartD-Sample.json")
+    output_file = Path("out-test/coverage-part-D.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["XREF_EFCTV_BENE_SK"] == "547437476"
+    assert result_data["XREF_EFCTV_BENE_SK"] == sample_bene_sk
     assert result_data["coveragePart"] == "D"
 
 
 def test_generate_coverage_part_dual() -> None:
+    sample_bene_sk = "800678894"
     result = CliRunner().invoke(
         main,
         [
             "--bene-sk",
-            "800678894",
+            sample_bene_sk,
             "--source-directory",
             SOURCE_DIR_SAMPLES1,
             "--output-directory",
@@ -133,12 +138,12 @@ def test_generate_coverage_part_dual() -> None:
     )
 
     assert result.exit_code == 0
-    output_file = Path("out-test/Coverage-Dual-Sample.json")
+    output_file = Path("out-test/coverage-dual.json")
     assert output_file.exists(), f"Expected output file not found: {output_file}"
 
     with output_file.open("r", encoding="utf-8") as f:
         result_data = json.load(f)
 
     assert isinstance(result_data, dict)
-    assert result_data["XREF_EFCTV_BENE_SK"] == "800678894"
+    assert result_data["XREF_EFCTV_BENE_SK"] == sample_bene_sk
     assert result_data["coveragePart"] == "DUAL"

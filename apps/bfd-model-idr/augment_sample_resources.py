@@ -12,13 +12,23 @@ prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 
 cond_sk_info_file = "sample-data/CLM_RLT_COND_SGNTR_MBR_POC.csv"
-cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str, "CLM_RLT_COND_CD": str})
+cond_sk_df = pd.read_csv(
+    cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str, "CLM_RLT_COND_CD": str}
+)
 
 ocrnc_sk_info_file = "sample-data/CLM_OCRNC_SGNTR_MBR_POC.csv"
-ocrnc_sk_df = pd.read_csv(ocrnc_sk_info_file, parse_dates=["CLM_OCRNC_SPAN_FROM_DT", "CLM_OCRNC_SPAN_THRU_DT"], dtype={"CLM_OCRNC_SGNTR_SK": str, "CLM_OCRNC_SPAN_CD": str})
+ocrnc_sk_df = pd.read_csv(
+    ocrnc_sk_info_file,
+    parse_dates=["CLM_OCRNC_SPAN_FROM_DT", "CLM_OCRNC_SPAN_THRU_DT"],
+    dtype={"CLM_OCRNC_SGNTR_SK": str, "CLM_OCRNC_SPAN_CD": str},
+)
 
 rlt_ocrnc_sk_info_file = "sample-data/CLM_RLT_OCRNC_SGNTR_MBR_POC.csv"
-rlt_ocrnc_sk_df = pd.read_csv(rlt_ocrnc_sk_info_file, parse_dates=["CLM_RLT_OCRNC_DT"], dtype={"CLM_RLT_OCRNC_SGNTR_SK": str, "CLM_RLT_OCRNC_CD": str})
+rlt_ocrnc_sk_df = pd.read_csv(
+    rlt_ocrnc_sk_info_file,
+    parse_dates=["CLM_RLT_OCRNC_DT"],
+    dtype={"CLM_RLT_OCRNC_SGNTR_SK": str, "CLM_RLT_OCRNC_CD": str},
+)
 
 synth_df = None
 synth_prvdr_file = "out/SYNTHETIC_PRVDR_HSTRY.csv"
@@ -70,6 +80,7 @@ careteam_header_columns = {
     "PRVDR_SRVC_PRVDR_NPI_NUM": "",
 }
 
+
 def load_profile_map():
     profile_map = {}
     paths = [
@@ -83,7 +94,10 @@ def load_profile_map():
             for item in yaml.safe_load(f) or []:
                 if (profiles := item.get("profiles")) is None:
                     continue
-                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {"", None}
+                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {
+                    "",
+                    None,
+                }
                 profile_map.update(dict.fromkeys(keys, profiles))
     return profile_map
 
@@ -131,7 +145,9 @@ def cleanup_empty_items(data):
         diag_map = {}
         internal_diag_keys = {"ROW_NUM", "clm_prod_type_cd_map"}
         # Filter for non-empty diagnoses
-        for next_row, item in enumerate((i for i in diag if any(k not in internal_diag_keys for k in i)), start=1):
+        for next_row, item in enumerate(
+            (i for i in diag if any(k not in internal_diag_keys for k in i)), start=1
+        ):
             old_row = item.get("ROW_NUM")
             item["ROW_NUM"] = str(next_row) if isinstance(old_row, str) else next_row
             if old_row is not None:
@@ -145,12 +161,13 @@ def cleanup_empty_items(data):
                 li["diagnosisSequence"] = [diag_map[int(s)] for s in diag_seq if int(s) in diag_map]
 
 
-
 # we filter twice - once before augmentation and again after, to make it simpler.
 profile_map = load_profile_map()
 profile_type = cur_sample_data.get("profileType", "CMS")
 profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
-cur_sample_data["profileType"] = profile_type #in case it's not specified, we rely upon this for mapping now.
+cur_sample_data["profileType"] = (
+    profile_type  # in case it's not specified, we rely upon this for mapping now.
+)
 
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 
@@ -262,8 +279,9 @@ rx_line_financial_fields = [
 def convert_to_decimal(val: str | None) -> Decimal:
     try:
         return Decimal(val)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return 0.0
+
 
 @dataclass
 class Provider:
@@ -280,6 +298,7 @@ class Provider:
     CLM_BLG_PRVDR_ZIP5_CD: str | None = None
     CLM_PRVDR_GNRC_ID_NUM: str | None = None
     CLM_BLG_PRVDR_TAX_NUM: str | None = None
+
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
@@ -338,7 +357,9 @@ def create_billing_and_service_provider(billing_col_name):
         provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
     return provider_object
 
+
 provider_list.append(create_billing_and_service_provider(billing_column))
+
 
 # For careteam elements, we don't need OSCAR number, TAX num (it's line-item), etc.
 # We DO care about qualifiers + taxonomy, so we have a separate method.
@@ -359,7 +380,9 @@ def create_careteam_provider(careteam_column):
             provider_object.PRVDR_CARETEAM_NAME = (
                 prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
                 if provider_object.NPI_TYPE == "2"
-                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
+                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
+                    ", "
+                )
             )
         else:
             provider_object.NPI_TYPE = "1"
@@ -403,9 +426,12 @@ def create_rendering_line_provider(npi_num):
         provider_object.PRVDR_CARETEAM_NAME = (
             prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
             if provider_object.NPI_TYPE == "2"
-            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
+            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
+                ", "
+            )
         )
     return provider_object
+
 
 # now we go through the line items!
 for line_item in cur_sample_data.get("lineItemComponents", []):
@@ -448,6 +474,7 @@ if cond_sk:
         if pd.notna(cond_cd) and str(cond_cd) != "~":
             supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
 
+
 ## mapping ocrnc_sgntr_mbr and rlt_ocrnc_sgntr_mbr to clm_dt_sgntr equivalent columns
 def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
     if ocrnc_sk := data.get("CLM_OCRNC_SGNTR_SK"):
@@ -456,16 +483,24 @@ def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
         ncvrd_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "74")
         if ncvrd_mask.any():
             ncvrd_from = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
-            data["CLM_NCVRD_FROM_DT"] = ncvrd_from if pd.notna(ncvrd_from) else data["CLM_NCVRD_FROM_DT"]
+            data["CLM_NCVRD_FROM_DT"] = (
+                ncvrd_from if pd.notna(ncvrd_from) else data["CLM_NCVRD_FROM_DT"]
+            )
             ncvrd_thru = ocrnc_sk_df.loc[ncvrd_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
-            data["CLM_NCVRD_THRU_DT"] = ncvrd_thru if pd.notna(ncvrd_thru) else data["CLM_NCVRD_THRU_DT"]
+            data["CLM_NCVRD_THRU_DT"] = (
+                ncvrd_thru if pd.notna(ncvrd_thru) else data["CLM_NCVRD_THRU_DT"]
+            )
         # qualifying stay from and thru
         qlfy_mask = (matching_sks) & (ocrnc_sk_df["CLM_OCRNC_SPAN_CD"] == "70")
         if qlfy_mask.any():
             qlfy_from = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_FROM_DT"].max()
-            data["CLM_QLFY_STAY_FROM_DT"] = qlfy_from if pd.notna(qlfy_from) else data["CLM_QLFY_STAY_FROM_DT"]
+            data["CLM_QLFY_STAY_FROM_DT"] = (
+                qlfy_from if pd.notna(qlfy_from) else data["CLM_QLFY_STAY_FROM_DT"]
+            )
             qlfy_thru = ocrnc_sk_df.loc[qlfy_mask, "CLM_OCRNC_SPAN_THRU_DT"].max()
-            data["CLM_QLFY_STAY_THRU_DT"] = qlfy_thru if pd.notna(qlfy_thru) else data["CLM_QLFY_STAY_THRU_DT"]
+            data["CLM_QLFY_STAY_THRU_DT"] = (
+                qlfy_thru if pd.notna(qlfy_thru) else data["CLM_QLFY_STAY_THRU_DT"]
+            )
 
     if rlt_ocrnc_sk := data.get("CLM_RLT_OCRNC_SGNTR_SK"):
         matching_sks = rlt_ocrnc_sk_df["CLM_RLT_OCRNC_SGNTR_SK"] == rlt_ocrnc_sk
@@ -473,12 +508,17 @@ def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
         mdcr_exhstd_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "A3")
         if mdcr_exhstd_mask.any():
             mdcr_exhstd_dt = rlt_ocrnc_sk_df.loc[mdcr_exhstd_mask, "CLM_RLT_OCRNC_DT"].max()
-            data["CLM_MDCR_EXHSTD_DT"] = mdcr_exhstd_dt if pd.notna(mdcr_exhstd_dt) else data["CLM_MDCR_EXHSTD_DT"]
+            data["CLM_MDCR_EXHSTD_DT"] = (
+                mdcr_exhstd_dt if pd.notna(mdcr_exhstd_dt) else data["CLM_MDCR_EXHSTD_DT"]
+            )
         # active care thru
         actv_care_thru_mask = (matching_sks) & (rlt_ocrnc_sk_df["CLM_RLT_OCRNC_CD"] == "22")
         if actv_care_thru_mask.any():
             actv_care_thru = rlt_ocrnc_sk_df.loc[actv_care_thru_mask, "CLM_RLT_OCRNC_DT"].max()
-            data["CLM_ACTV_CARE_THRU_DT"] = actv_care_thru if pd.notna(actv_care_thru) else data["CLM_ACTV_CARE_THRU_DT"]
+            data["CLM_ACTV_CARE_THRU_DT"] = (
+                actv_care_thru if pd.notna(actv_care_thru) else data["CLM_ACTV_CARE_THRU_DT"]
+            )
+
 
 map_ocrnc_sgntr_to_clm_dt_sgntr_cols(cur_sample_data, ocrnc_sk_df, rlt_ocrnc_sk_df)
 
@@ -597,15 +637,17 @@ cur_sample_data["providerList"] = [
     {k: v for k, v in asdict(p).items() if v is not None} for p in provider_list
 ]
 
+
 # diagnoses section
 @dataclass
 class Diagnosis:
     CLM_DGNS_CD: str
-    CLM_PROD_TYPE_CD: str = 'D'
-    CLM_POA_IND: str = '~'
-    CLM_DGNS_PRCDR_ICD_IND: str = '0'
-    ROW_NUM: str = '1'
+    CLM_PROD_TYPE_CD: str = "D"
+    CLM_POA_IND: str = "~"
+    CLM_DGNS_PRCDR_ICD_IND: str = "0"
+    ROW_NUM: str = "1"
     clm_prod_type_cd_map: list[str] = field(default_factory=list)
+
 
 diagnosis_codes = [
     Diagnosis(
@@ -685,7 +727,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
             (
                 d
                 for d in diagnosis_codes
-                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == 'D'
+                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == "D"
             ),
             None,
         ):
