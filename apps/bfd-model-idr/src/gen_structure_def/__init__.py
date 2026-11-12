@@ -1,0 +1,80 @@
+import click
+
+from .gen_def import StructureDefinitionGenerator
+
+
+@click.command
+@click.option(
+    "--source-directory",
+    type=str,
+    required=False,
+    help="Pass the source directory containing the data dictionary files.",
+    default="dictionary-support-files",
+)
+@click.option(
+    "--output-directory",
+    type=str,
+    required=False,
+    help="Pass the output directory for the result files.",
+    default="structure-definition",
+)
+@click.option(
+    "--delete-temp-files",
+    type=bool,
+    required=False,
+    help="Allows for temp files to persist for debugging.",
+    default=True,
+)
+@click.option(
+    "--type",
+    type=str,
+    required=False,
+    help="Type to run.",
+    default=None,
+)
+def main(
+    source_directory: str, output_directory: str, delete_temp_files: bool, type: str | None
+) -> None:
+
+    if not type or type.lower() == "pharmacy":
+        pharmacy_generator = StructureDefinitionGenerator(
+            source_directory=source_directory,
+            output_directory=output_directory,
+            url="https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Pharmacy",
+            profile="CMS",
+            source_yaml="ExplanationOfBenefit-Pharmacy.yaml",
+            version="2.2.0",
+            name="ExplanationOfBenefit-Pharmacy-CMS",
+            title="ExplanationOfBenefit Pharmacy CMS",
+            description="""This is the CMS Pharmacy Profile.""",
+            base_definition="https://hl7.org/fhir/us/carin-bb/STU2.2/en/StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy",
+            resource_type="ExplanationOfBenefit",
+            output_file_name="CMS-ExplanationOfBenefit-Pharmacy.json",
+            applies_to="Pharmacy",
+            delete_tmp_files=delete_temp_files,
+        )
+        pharmacy_generator.run()
+
+    if not type or type.lower() == "inpatient":
+        inpatient_generator = StructureDefinitionGenerator(
+            source_directory=source_directory,
+            output_directory=output_directory,
+            url="https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Inpatient-Institutional",
+            profile="CMS",
+            source_yaml="ExplanationOfBenefit.yaml",
+            version="2.2.0",
+            name="ExplanationOfBenefit-Inpatient-CMS",
+            title="ExplanationOfBenefit Inpatient Institutional CMS",
+            description="""This is the CMS Inpatient Institutional Profile.""",
+            base_definition="https://build.fhir.org/ig/HL7/carin-bb/en/StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional",
+            resource_type="ExplanationOfBenefit",
+            output_file_name="CMS-ExplanationOfBenefit-Inpatient-Institutional.json",
+            applies_to="Inpatient",
+            delete_tmp_files=delete_temp_files,
+        )
+
+        inpatient_generator.run()
+
+
+if __name__ == "__main__":
+    main()

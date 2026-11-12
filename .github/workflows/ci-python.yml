@@ -85,6 +85,14 @@ jobs:
               pytestCommand: "uv run pytest",
               pythonVersion: "3.14",
             },
+            {
+              projectName: "run-idr-model-gen-structure-def",
+              projectRoot: "apps/bfd-model-idr/src/gen_structure_def",
+              testsRoot: "apps/bfd-model-idr/src/gen_structure_def",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.14",
+            },
           ]
       fail-fast: false
     steps:
