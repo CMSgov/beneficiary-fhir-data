@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -Eeou pipefail
+
+installed="$(mktemp)"
+recommended="$(mktemp)"
+
+cleanup() {
+	rm -f "$installed" "$recommended"
+}
+
+trap 'cleanup' SIGTERM
+trap 'cleanup' SIGINT
+
+# Check the list of recommended extensions against the list of installed extensions
+code --list-extensions | tr '[:upper:]' '[:lower:]' >"$installed"
+jq -r '.recommendations[]' .vscode/extensions.json | tr '[:upper:]' '[:lower:]' >"$recommended"
+not_installed="$(ggrep -vxf "$installed" "$recommended" || true)"
+
+# Install any that are missing
+if [ ! -z "$not_installed" ]; then
+	echo "$not_installed" | gxargs -d $'\n' -I{} code --install-extension "{}"
+fi
+
+cleanup

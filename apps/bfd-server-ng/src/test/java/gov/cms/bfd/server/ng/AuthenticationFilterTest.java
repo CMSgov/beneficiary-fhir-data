@@ -7,6 +7,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gov.cms.bfd.server.ng.config.Configuration;
 import gov.cms.bfd.server.ng.filter.AuthenticationFilter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.FilterChain;
