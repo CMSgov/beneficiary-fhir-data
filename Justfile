@@ -34,7 +34,7 @@ bootstrap: && setup-vscode
 [doc("Sets up recommended VS Code settings and extensions")]
 [group("setup")]
 setup-vscode:
-    ./hooks/merge_vscode_settings.py
+    uv run hooks/merge_vscode_settings.py
     ./hooks/install-recommended-extensions.sh
 
 [arg("env", long, pattern=env_pattern, help=env_help)]

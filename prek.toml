@@ -55,7 +55,7 @@ language = "system"
 stages = ["post-checkout", "post-merge"]
 always_run = true
 pass_filenames = false
-entry = "./hooks/merge_vscode_settings.py"
+entry = "uv run hooks/merge_vscode_settings.py"
 
 [[repos]]
 repo = "local"
