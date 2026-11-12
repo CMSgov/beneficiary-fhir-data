@@ -45,15 +45,15 @@ class FmlParityIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {CLAIM_ID_ADJUDICATED_ICD_9})
+  @ValueSource(strings = {CLAIM_ID_ADJUDICATED})
   @SneakyThrows
   void eobMatchesFmlOutput(String claimId) {
     var fmlFile = FML_OUTPUT_DIR.resolve(claimId).resolve(FML_OUTPUT_FILE);
     assertTrue(
         Files.exists(fmlFile),
         String.format(
-            "FML output not found at %s. Run: just fml-claim --clm-uniq-id %s",
-            fmlFile.toAbsolutePath().normalize(), claimId));
+            "FML output file does not exist: %s%nRun just fml-claim --clm-uniq-id %s",
+            fmlFile.toAbsolutePath(), claimId));
 
     // Both resources go through the same HAPI encoder so formatting differences are removed.
     var parser = FhirContext.forR4Cached().newJsonParser();

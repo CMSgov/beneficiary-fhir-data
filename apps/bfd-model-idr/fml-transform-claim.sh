@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# @option	--clm-uniq-id!
-# @option	--source-directory!
+# @option	--clm-uniq-id
+# @option	--source-directory
 # @option	--profile-type[=CMS|Basis|Regular]
-# @option	--output-directory!
+# @option	--output-directory
 eval "$(argc --argc-eval "$0" "$@")"
 
 SCRIPT_DIR="$(path=$(realpath "$0") && dirname "$path")"
