@@ -10,7 +10,7 @@ from locust.env import Environment
 from common import data, db
 from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
-from common.task_utils import params_to_str
+from common.task_utils import check_empty_collection, params_to_str
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
@@ -82,10 +82,19 @@ class RegressionV2User(BFDUserBase):
 
     def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
-        self.bene_ids = itertools.cycle(list(master_bene_ids))
-        self.contract_data = itertools.cycle(list(master_contract_data))
-        self.hashed_mbis = itertools.cycle(list(master_hashed_mbis))
-        self.pac_hashed_mbis = itertools.cycle(list(master_pac_hashed_mbis))
+
+        self.bene_ids: itertools.cycle[str] = check_empty_collection(
+            master_bene_ids, "master_bene_ids"
+        )
+        self.contract_data: itertools.cycle[dict[str, str]] = check_empty_collection(
+            master_contract_data, "master_contract_data"
+        )
+        self.hashed_mbis: itertools.cycle[str] = check_empty_collection(
+            master_hashed_mbis, "master_hashed_mbis"
+        )
+        self.pac_hashed_mbis: itertools.cycle[str] = check_empty_collection(
+            master_pac_hashed_mbis, "master_pac_hashed_mbis"
+        )
 
     @tag("coverage", "coverage_test_id_count")
     @task

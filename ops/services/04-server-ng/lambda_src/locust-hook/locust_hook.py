@@ -110,7 +110,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> dict[str, str]:  #
                 host=LOCUST_HOST,
                 spawn_rate=10,
                 users=10,
-                spawned_runtime="1m",
+                spawned_runtime="30s",
                 compare=CompareConfigModel(type=CompareType.AVERAGE, tag=compare_tag, load_limit=5),
                 store=StoreConfigModel(
                     tags=[
