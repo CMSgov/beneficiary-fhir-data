@@ -6,6 +6,7 @@
 !.containerignore
 !.gitignore
 !.gitattributes
+!.basedpyright
 !.github
 !.terraform-docs.yml
 !.python-version
@@ -41,5 +42,11 @@
 .terraform.tfstate.lock.info
 .terraform/
 node_modules/
+
+# Ignore test and generator output written when commands run from the repository root
+/out/
+/out-test/
+__pycache__/
+*.pyc
 
 google-java-format.jar

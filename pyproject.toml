@@ -1,0 +1,248 @@
+# This file is the root of the repository-wide uv workspace. Every Python project in the
+# repository is a workspace member and shares this `uv.lock`.
+# Run `uv sync` from here for the whole workspace, or `uv sync --package <name>` for one member.
+[tool.uv.workspace]
+members = [
+  # synthetic-data-generator
+  "apps/bfd-model-idr",
+  # idr-pipeline
+  "apps/bfd-pipeline-idr",
+  # server-ng-codegen
+  "apps/bfd-server-ng/codegen",
+  # server-ng-scripts
+  "apps/bfd-server-ng/scripts",
+  # idr-bfd-validator
+  "apps/utils/idr-bfd-validator",
+  # locust-tests
+  "apps/utils/locust_tests",
+  # samhsa-regression-tests
+  "apps/utils/samhsa-regression-tests",
+  # synthetic-load-converter
+  "apps/utils/synthetic-load-converter",
+  # repository-hooks
+  "hooks",
+  # server-mount-certstores
+  "ops/images/bfd-platform-mount-certstores",
+  # slack-alerter
+  "ops/platform/02-alerting/lambda_src/slack-alerter",
+  # log-retention-checker
+  "ops/platform/03-log-retention-alarms/lambda_src",
+  # bene-prefs
+  "ops/services/02-bene-prefs/lambda_src/bene_prefs",
+  # ccw-runner
+  "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+  # consume-idr-events
+  "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+  # run-idr-pipeline
+  "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+  # server-regression-wrapper
+  "ops/services/04-server/lambda_src/regression-wrapper",
+  # server-ng-locust-hook
+  "ops/services/04-server-ng/lambda_src/locust-hook",
+  # server-ng-samhsa-hook
+  "ops/services/04-server-ng/lambda_src/samhsa-hook",
+  # ccw-manifests-verifier
+  "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+  # server-error-alerter
+  "ops/services/06-server-alarms/lambda_src/error_alerter",
+  # trigger-glue-trigger
+  "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
+
+[dependency-groups]
+dev = [
+  "basedpyright",
+  "boto3-stubs[essential,athena,codedeploy,ecs,glue,lambda,logs,rds,s3,scheduler,sns,ssm]",
+  "debugpy",
+  "pandas-stubs",
+  "pytest",
+  "ruff",
+  "testcontainers",
+  "types-gevent",
+]
+
+[tool.uv]
+exclude-newer = "7 days"
+override-dependencies = ["filelock>=4.2.1"]
+# The `exclude-newer` cooldown applies to every dependency unless a package overrides it here.
+# certifi 2026.10.19 carries the CA trust store fix.
+exclude-newer-package = { filelock = false, certifi = false }
+# Constraints for every direct dependency in the workspace; new member dependencies should have
+# their constraints added here rather than in their direct pyproject.toml
+constraint-dependencies = [
+  "aiohttp>=3.14.5",
+  "anyio>=4.15.1",
+  "asyncclick>=8.4.2.1",
+  "aws-lambda-powertools>=3.38.0",
+  "basedpyright>=1.40.2",
+  "boto3>=1.43.121,<2.0.0",
+  "boto3-stubs>=1.43.121",
+  "certifi>=2026.10.23",
+  "click>=8.5.0",
+  "cryptography>=50.0.2",
+  "debugpy>=1.8.22",
+  "faker>=40.44.0",
+  "flask>=3.1.3",
+  "flask-cors>=6.0.5",
+  "gevent>=26.9.0",
+  "idna>=3.20",
+  "jinja2>=3.1.6",
+  "locust>=2.47.0",
+  "loguru>=0.7.3",
+  "pandas>=3.1.0",
+  "pandas-stubs>=3.1.0.261029",
+  "prompt-toolkit>=3.0.53",
+  "psycopg>=3.3.6",
+  "pydantic>=2.14.2",
+  "pydantic-partial>=0.11.1",
+  "pydantic-settings>=2.16.2",
+  "pytest>=9.2.0",
+  "python-dateutil>=2.9.0.post0",
+  "python-socketio>=5.17.0",
+  "pyyaml>=6.0.3",
+  "requests>=2.34.2",
+  "ruff>=0.17.3",
+  "snowflake-connector-python>=4.8.1,<5.0.0",
+  "snowflake-snowpark-python>=1.55.3",
+  "tblib>=3.2.2",
+  "testcontainers>=4.15.0",
+  "tqdm>=4.70.1",
+  "types-gevent>=26.9.0.20261006",
+  "unidecode>=1.4.0",
+  "urllib3>=2.8.0",
+  "usaddress>=0.5.16",
+  "werkzeug>=3.1.9",
+  "xlsxwriter>=3.3.1",
+]
+
+[tool.uv.sources]
+loguru = { git = "https://github.com/Delgan/loguru", rev = "2a17be730e111cf874d0bf967c4c5da15b7e4670" }
+
+[tool.ruff]
+line-length = 100
+# Every workspace member requires Python 3.14+, so a forward reference in an annotation is a real
+# expression and annotations are not quoted.
+target-version = "py314"
+# Code outside the uv workspace (legacy scripts, diagram generators, docs assets) is neither
+# linted nor type-checked.
+extend-exclude = [
+  "insights",
+  "ops/utils/synthetic-data",
+  "docs",
+  "ops/services/06-server-alarms/docs",
+  "apps/utils/scripts",
+  "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
+]
+# Import roots of every workspace member. Ruff classifies an import as first-party from these
+# paths, so checking one file (a commit hook) sorts imports the same way checking the whole tree
+# does. Both a member directory and its `src` directory are listed, because each is where that
+# member's top-level modules live.
+src = [
+  "apps/bfd-model-idr",
+  "apps/bfd-model-idr/src",
+  "apps/bfd-pipeline-idr/src",
+  "apps/bfd-server-ng/codegen",
+  "apps/bfd-server-ng/scripts",
+  "apps/utils/idr-bfd-validator",
+  "apps/utils/locust_tests",
+  "apps/utils/samhsa-regression-tests",
+  "apps/utils/synthetic-load-converter",
+  "hooks",
+  "ops/images/bfd-platform-mount-certstores",
+  "ops/platform/02-alerting/lambda_src/slack-alerter",
+  "ops/platform/03-log-retention-alarms/lambda_src",
+  "ops/services/02-bene-prefs/lambda_src/bene_prefs",
+  "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+  "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+  "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+  "ops/services/04-server/lambda_src/regression-wrapper",
+  "ops/services/04-server-ng/lambda_src/locust-hook",
+  "ops/services/04-server-ng/lambda_src/samhsa-hook",
+  "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+  "ops/services/06-server-alarms/lambda_src/error_alerter",
+  "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
+
+[tool.ruff.lint]
+select = [
+  # pydocstyle
+  "D",
+  # pycodestyle
+  "E501",
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  # flake8-annotations
+  "ANN",
+  # flake8-logging
+  "LOG",
+  # flake8-logging-format
+  "G",
+  # flake8-pytest-style
+  "PT",
+  # flake8-raise
+  "RSE",
+  # flake8-pie
+  "PIE",
+  # flake8-return
+  "RET",
+  # flake8-self
+  "SLF",
+  # flake8-unused-arguments
+  "ARG",
+  # flake8-use-pathlib
+  "PTH",
+  # Pylint
+  "PLE",
+  "PLW",
+  # Perflint
+  "PERF",
+  # refurb
+  "FURB",
+  # Ruff-specific rules
+  "RUF",
+]
+# Docstrings are not required for any Python code.
+# Ignoring D205 means a docstring summary does not need a blank line after it.
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.basedpyright]
+typeCheckingMode = "strict"
+failOnWarnings = true
+venvPath = "."
+venv = ".venv"
+# pyright searches the workspace root, a root-level src directory, and the venv by default.
+# The paths below are the two built packages.
+# Without their source dirs listed here, their imports resolve through the editable installs in
+# .venv and are checked as third-party code.
+extraPaths = ["apps/bfd-model-idr/src", "apps/bfd-pipeline-idr/src"]
+# Code outside the uv workspace (legacy scripts, diagram generators, docs assets) is neither
+# linted nor type-checked.
+exclude = [
+  "insights",
+  "ops/utils/synthetic-data",
+  "docs",
+  "ops/services/06-server-alarms/docs",
+  "apps/utils/scripts",
+  "apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts",
+  # Build copies of the db scripts above land in gitignored target directories. pyright does
+  # not read .gitignore, so they need excluding here; ruff skips them through the `**/target/`
+  # rule in apps/.gitignore.
+  "apps/**/target",
+]

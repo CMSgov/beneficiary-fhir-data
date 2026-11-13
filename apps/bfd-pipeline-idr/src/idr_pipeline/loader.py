@@ -3,7 +3,7 @@ import itertools
 import operator
 from collections.abc import Awaitable, Callable, Iterator, Sequence
 from datetime import UTC, datetime
-from typing import Any, Generic, cast, override
+from typing import Any, cast, override
 
 import anyio
 import psycopg
@@ -101,7 +101,7 @@ class PostgresLoader:
             ).load()
 
 
-class BatchLoader(Generic[T]):  # noqa: UP046
+class BatchLoader[T: IdrBaseModel]:
     def __init__(
         self,
         fetch_results: Iterator[list[T]],

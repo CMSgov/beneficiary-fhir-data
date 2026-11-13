@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -47,9 +48,9 @@ sample_sources_by_profile = {
     "Audit": "out/AuditEvent.json",
 }
 
-sample_resources_by_profile = {}
+sample_resources_by_profile: dict[str, Any] = {}
 dd_df = []
-structure_def_names_descriptions = {}
+structure_def_names_descriptions: dict[str, dict[str, str]] = {}
 
 
 def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -63,7 +64,7 @@ def run_subprocess(args: list[str]) -> subprocess.CompletedProcess[bytes]:
 
 ## resource json have become prohibitively large for the OS python argument threshold
 ## utilizing namedTemporaryFile to pass json file name rather than entire json on cli
-def eval_fhirpath(resource, expression):
+def eval_fhirpath(resource: dict[str, Any], expression: str) -> list[Any]:
     with tempfile.NamedTemporaryFile("w", suffix=".json", encoding="utf-8") as f:
         json.dump(resource, f)
         f.flush()  # make sure the data is on disk before Node reads it
@@ -186,7 +187,7 @@ for walk_info in os.walk(dd_support_folder):
 dd_df = pd.DataFrame(dd_df)
 
 
-def replace_str(input_str):
+def replace_str(input_str: object) -> str:
     if isinstance(input_str, str) and len(str(input_str)) > 0:
         return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
     return ""

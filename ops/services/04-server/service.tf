@@ -141,11 +141,6 @@ resource "aws_ecs_task_definition" "server" {
 
   volume {
     configure_at_launch = false
-    name                = "tmp_certstores"
-  }
-
-  volume {
-    configure_at_launch = false
     name                = "tmp_log_router"
   }
 
@@ -205,16 +200,26 @@ resource "aws_ecs_task_definition" "server" {
             mode                  = "non-blocking"
           }
         }
+        # The image runs as uid 1001.
+        # A bind mount volume is owned by root unless the image declares a VOLUME at the same path.
+        # The sidecar scratch space is therefore a tmpfs owned by that uid.
+        linuxParameters = {
+          tmpfs = [
+            {
+              containerPath = "/tmp"
+              size          = 32 # 32 MiB
+              mountOptions = [
+                "uid=1001",
+                "gid=1001"
+              ]
+            }
+          ]
+        }
         mountPoints = [
           {
             containerPath = "/data"
             readOnly      = false
             sourceVolume  = "certstores"
-          },
-          {
-            containerPath = "/tmp"
-            readOnly      = false
-            sourceVolume  = "tmp_certstores"
           }
         ]
         readonlyRootFilesystem = true

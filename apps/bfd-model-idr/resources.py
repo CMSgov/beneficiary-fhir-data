@@ -198,7 +198,7 @@ def print_type(type: str) -> None:
 @click.command
 @click.option("--resource", type=str)
 @click.option("--type", type=str)
-def main(resource: str | None, type: str | None):
+def main(resource: str | None, type: str | None) -> None:
     if resource is not None:
         print_resource(resource)
         return

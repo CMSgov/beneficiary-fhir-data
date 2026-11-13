@@ -1,12 +1,15 @@
+import contextlib
 import json
-import os
 import sys
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import yaml
+
+type JsonValue = dict[str, JsonValue] | list[JsonValue] | str | int | float | bool | None
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
@@ -31,15 +34,13 @@ rlt_ocrnc_sk_df = pd.read_csv(
 )
 
 synth_df = None
-synth_prvdr_file = "out/SYNTHETIC_PRVDR_HSTRY.csv"
-if os.path.exists(synth_prvdr_file):
-    try:
+synth_prvdr_file = Path("out/SYNTHETIC_PRVDR_HSTRY.csv")
+if synth_prvdr_file.is_file():
+    with contextlib.suppress(Exception):
         synth_df = pd.read_csv(synth_prvdr_file, dtype={"PRVDR_SK": str})
-    except Exception:
-        pass
 
 
-def lookup_provider_history(npi_num: str | int | None) -> dict | None:
+def lookup_provider_history(npi_num: str | int | None) -> dict[str, Any] | None:
     if not npi_num:
         return None
     npi_str = str(npi_num).strip()
@@ -81,8 +82,8 @@ careteam_header_columns = {
 }
 
 
-def load_profile_map():
-    profile_map = {}
+def load_profile_map() -> dict[str, list[str]]:
+    profile_map: dict[str, list[str]] = {}
     paths = [
         Path("dictionary-support-files/ExplanationOfBenefit.yaml"),
         Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml"),
@@ -94,15 +95,21 @@ def load_profile_map():
             for item in yaml.safe_load(f) or []:
                 if (profiles := item.get("profiles")) is None:
                     continue
-                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {
-                    "",
-                    None,
+                keys = {
+                    key
+                    for key in (
+                        item.get("sourceColumn"),
+                        item.get("inputPath", "").split(".")[-1],
+                    )
+                    if key
                 }
                 profile_map.update(dict.fromkeys(keys, profiles))
     return profile_map
 
 
-def filter_by_profile(data, profile_type, profile_map):
+def filter_by_profile(
+    data: JsonValue, profile_type: str, profile_map: dict[str, list[str]]
+) -> None:
     if isinstance(data, dict):
         for k, v in list(data.items()):
             if k == "providerList":
@@ -116,7 +123,7 @@ def filter_by_profile(data, profile_type, profile_map):
             filter_by_profile(item, profile_type, profile_map)
 
 
-def cleanup_empty_items(data):
+def cleanup_empty_items(data: dict[str, Any]) -> None:
     if sic := data.get("supportingInfoComponents"):
         new_sic = []
         si_map = {}
@@ -124,7 +131,7 @@ def cleanup_empty_items(data):
         filtered_sic = [i for i in sic if any(k != "ROW_NUM" for k in i)]
 
         # Sort on avail columns for consistency.
-        def get_sort_key(item):
+        def get_sort_key(item: dict[str, Any]) -> list[tuple[str, str]]:
             return sorted([(k, str(v)) for k, v in item.items() if k != "ROW_NUM"])
 
         sorted_sic = sorted(filtered_sic, key=get_sort_key)
@@ -277,10 +284,12 @@ rx_line_financial_fields = [
 
 
 def convert_to_decimal(val: str | None) -> Decimal:
+    if val is None:
+        return Decimal(0)
     try:
         return Decimal(val)
     except TypeError, ValueError:
-        return 0.0
+        return Decimal(0)
 
 
 @dataclass
@@ -288,12 +297,12 @@ class Provider:
     PRVDR_SK: str | None = None
     PRVDR_ID_QLFYR_CD: str | None = None
     NPI_TYPE: str | None = None
-    careTeamType: str | None = None
-    careTeamSequenceNumber: str | None = None
+    care_team_type: str | None = None
+    care_team_sequence_number: int | None = None
     PRVDR_LAST_OR_LGL_NAME: str | None = None
     PRVDR_1ST_NAME: str | None = None
     PRVDR_CARETEAM_NAME: str | None = None
-    specialtyCode: str | None = None
+    specialty_code: str | None = None
     PRVDR_OSCAR_NUM: str | None = None
     CLM_BLG_PRVDR_ZIP5_CD: str | None = None
     CLM_PRVDR_GNRC_ID_NUM: str | None = None
@@ -320,7 +329,7 @@ else:
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
 # The reason being: it's possible to lose context on rendering vs ordering
-def create_billing_and_service_provider(billing_col_name):
+def create_billing_and_service_provider(billing_col_name: str) -> Provider:
     provider_object = Provider(PRVDR_LAST_OR_LGL_NAME="N/A")
 
     qualifier = cur_sample_data.get("PRVDR_SRVC_ID_QLFYR_CD")
@@ -363,7 +372,7 @@ provider_list.append(create_billing_and_service_provider(billing_column))
 
 # For careteam elements, we don't need OSCAR number, TAX num (it's line-item), etc.
 # We DO care about qualifiers + taxonomy, so we have a separate method.
-def create_careteam_provider(careteam_column):
+def create_careteam_provider(careteam_column: str) -> Provider:
     provider_object = Provider(PRVDR_CARETEAM_NAME="N/A")
     qualifier = cur_sample_data.get("PRVDR_PRSBNG_ID_QLFYR_CD")
     if qualifier:
@@ -380,23 +389,22 @@ def create_careteam_provider(careteam_column):
             provider_object.PRVDR_CARETEAM_NAME = (
                 prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
                 if provider_object.NPI_TYPE == "2"
-                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
-                    ", "
-                )
+                else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, "
+                f"{prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
             )
         else:
             provider_object.NPI_TYPE = "1"
             provider_object.PRVDR_SK = npi_num
             provider_object.PRVDR_CARETEAM_NAME = "Practitioner"
 
-        provider_object.careTeamType = careteam_header_columns.get(careteam_column)
+        provider_object.care_team_type = careteam_header_columns.get(careteam_column)
         if qualifier:
             provider_object.PRVDR_SK = cur_sample_data.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM")
         else:  # taxonomy codes only present in non-PDE
             cur_prov_type = careteam_column.split("_")[1]
             cur_specialty_code_col = "CLM_" + cur_prov_type + "_FED_PRVDR_SPCLTY_CD"
             if cur_sample_data.get(cur_specialty_code_col):
-                provider_object.specialtyCode = cur_sample_data.get(cur_specialty_code_col)
+                provider_object.specialty_code = cur_sample_data.get(cur_specialty_code_col)
             cur_prvdr_name_col = "CLM_" + cur_prov_type + "_PRVDR_NAME"
             if cur_sample_data.get(cur_prvdr_name_col):
                 provider_object.PRVDR_CARETEAM_NAME = cur_sample_data.get(cur_prvdr_name_col)
@@ -409,16 +417,16 @@ for careteam_column in careteam_header_columns:
     if careteam_column not in cur_sample_data:
         continue
     provider_object = create_careteam_provider(careteam_column)
-    provider_object.careTeamSequenceNumber = sum(
-        1 for item in provider_list if provider_object.careTeamType
+    provider_object.care_team_sequence_number = sum(
+        1 for _ in provider_list if provider_object.care_team_type
     )
     provider_list.append(provider_object)
 
 
 # Distinct method since line items end up cleaner
-def create_rendering_line_provider(npi_num):
+def create_rendering_line_provider(npi_num: str | None) -> Provider:
     provider_object = Provider(
-        PRVDR_SK=npi_num, careTeamType="rendering", PRVDR_CARETEAM_NAME="N/A"
+        PRVDR_SK=npi_num, care_team_type="rendering", PRVDR_CARETEAM_NAME="N/A"
     )
     prvdr_hstry_for_npi = lookup_provider_history(npi_num)
     if prvdr_hstry_for_npi:
@@ -426,9 +434,8 @@ def create_rendering_line_provider(npi_num):
         provider_object.PRVDR_CARETEAM_NAME = (
             prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
             if provider_object.NPI_TYPE == "2"
-            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, {prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(
-                ", "
-            )
+            else f"{prvdr_hstry_for_npi.get('PRVDR_LAST_NAME') or ''}, "
+            f"{prvdr_hstry_for_npi.get('PRVDR_1ST_NAME') or ''}".strip(", ")
         )
     return provider_object
 
@@ -437,25 +444,25 @@ def create_rendering_line_provider(npi_num):
 for line_item in cur_sample_data.get("lineItemComponents", []):
     # we only care about PRVDR_RNDRNG_PRVDR_NPI_NUM
     cur_rendering_providers = [
-        x.PRVDR_SK for x in provider_list if getattr(x, "careTeamType", None) == "rendering"
+        x.PRVDR_SK for x in provider_list if getattr(x, "care_team_type", None) == "rendering"
     ]
     prvdr_npi_num = line_item.get("PRVDR_RNDRNG_PRVDR_NPI_NUM")
     if prvdr_npi_num and prvdr_npi_num not in cur_rendering_providers:
         # add rendering provider
         provider = create_rendering_line_provider(prvdr_npi_num)
         if line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD"):
-            provider.specialtyCode = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
-        provider.careTeamSequenceNumber = sum(
-            1 for item in provider_list if provider_object.careTeamType
+            provider.specialty_code = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
+        provider.care_team_sequence_number = sum(
+            1 for _ in provider_list if provider.care_team_type
         )
-        line_item["careTeamSequence"] = provider.careTeamSequenceNumber
+        line_item["careTeamSequence"] = provider.care_team_sequence_number
         provider_list.append(provider)
 
     if prvdr_npi_num:
         sequence = next(
-            x.careTeamSequenceNumber
+            x.care_team_sequence_number
             for x in provider_list
-            if getattr(x, "careTeamType", None) == "rendering"
+            if getattr(x, "care_team_type", None) == "rendering"
             and getattr(x, "PRVDR_SK", None) == prvdr_npi_num
         )
         line_item["careTeamSequence"] = [sequence]
@@ -476,7 +483,9 @@ if cond_sk:
 
 
 ## mapping ocrnc_sgntr_mbr and rlt_ocrnc_sgntr_mbr to clm_dt_sgntr equivalent columns
-def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(data, ocrnc_sk_df, rlt_ocrnc_sk_df):
+def map_ocrnc_sgntr_to_clm_dt_sgntr_cols(
+    data: dict[str, Any], ocrnc_sk_df: pd.DataFrame, rlt_ocrnc_sk_df: pd.DataFrame
+) -> None:
     if ocrnc_sk := data.get("CLM_OCRNC_SGNTR_SK"):
         matching_sks = ocrnc_sk_df["CLM_OCRNC_SGNTR_SK"] == ocrnc_sk
         # not covered from and thru
@@ -633,8 +642,16 @@ for item in line_items:
     if tot_rx_amt > 0.0:
         item["TOT_RX_CST_AMT"] = str(tot_rx_amt)
 
+# The keys of the providerList must be in camelCase, so map the Python snake_case keys to their
+# camelCase alias equivalents
+provider_key_aliases = {
+    "care_team_type": "careTeamType",
+    "care_team_sequence_number": "careTeamSequenceNumber",
+    "specialty_code": "specialtyCode",
+}
 cur_sample_data["providerList"] = [
-    {k: v for k, v in asdict(p).items() if v is not None} for p in provider_list
+    {provider_key_aliases.get(k, k): v for k, v in asdict(p).items() if v is not None}
+    for p in provider_list
 ]
 
 
@@ -683,7 +700,7 @@ def meta_src_prefix(meta_src_sk: str | None) -> str:
     }.get(str(meta_src_sk), "")
 
 
-def build_claim_audit_trail_composite(sample: dict) -> str:
+def build_claim_audit_trail_composite(sample: dict[str, Any]) -> str | None:
     meta_src_sk = str(sample.get("META_SRC_SK", ""))
     status = sample.get("CLM_AUDT_TRL_STUS_CD")
 
@@ -700,7 +717,7 @@ def build_claim_audit_trail_composite(sample: dict) -> str:
     return f"{prefix}{status}"
 
 
-def next_row_num(supporting_info):
+def next_row_num(supporting_info: list[dict[str, Any]]) -> str:
     row_nums = [
         int(si["ROW_NUM"])
         for si in supporting_info

@@ -110,7 +110,7 @@ DCMTN_LINE_COL = [
 
 
 class ClmLineBuilder:
-    def __init__(self, source_directory: str, clm_row: dict[str, str]):
+    def __init__(self, source_directory: str, clm_row: dict[str, str]) -> None:
         self.source_directory = source_directory
         self.clm_row = clm_row
 
