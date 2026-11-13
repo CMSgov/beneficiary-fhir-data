@@ -123,6 +123,21 @@ public class BeneficiaryRepository {
   }
 
   /**
+   * Retrieves the xrefSk from the beneSk.
+   *
+   * @param beneXrefSk original beneSk
+   * @return xrefSk for the bene
+   */
+  @Timed(value = "application.beneficiary.search_all_bene_from_xref_sk")
+  public List<Long> getAllBeneFromBeneXrefSk(long beneXrefSk) {
+    var query =
+        entityManager
+            .createNativeQuery(BeneficiaryBase.ALL_BENE_SK_BY_BENE_XREF_SQL)
+            .setParameter("beneXrefSk", beneXrefSk);
+    return queryTelemetryUtil.executeAndTrack("getXrefSkFromBeneSk", query);
+  }
+
+  /**
    * Retrieves the xrefSk from the mbi.
    *
    * @param mbi Medicare Beneficiary Identifier

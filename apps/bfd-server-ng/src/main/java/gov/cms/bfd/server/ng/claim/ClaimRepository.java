@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DbFilterBuilder;
+import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimType;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Repository;
 public class ClaimRepository {
 
   private final ClaimAsyncService asyncService;
+  private final BeneficiaryRepository beneficiaryRepository;
   private final MetricRecorder metricRecorder;
 
   private static String claimQueryString(
@@ -231,6 +233,8 @@ public class ClaimRepository {
             new OutcomeFilterParam(criteria.outcomes()),
             new SourceFilterParam(criteria.sources()));
 
+    var beneSks = beneficiaryRepository.getAllBeneFromBeneXrefSk(criteria.beneSk());
+
     var claimFutures =
         ALL_CLAIM_TYPES.stream()
             .filter(
@@ -241,7 +245,7 @@ public class ClaimRepository {
                         d.baseQuery(),
                         d.claimClass(),
                         d.systemType(),
-                        criteria,
+                        beneSks,
                         d.getProfileFilters(criteria.profile(), filterBuilders)))
             .toList();
 
