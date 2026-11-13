@@ -829,10 +829,10 @@ def claim_occurrence_cte(source: Source) -> str:
         FROM
             (SELECT
                 b.clm_ocrnc_sgntr_sk,
-                ocrnc.clm_ocrnc_span_cd,
-                ocrnc.clm_ocrnc_span_from_dt,
-                ocrnc.clm_ocrnc_span_thru_dt,
-                ocrnc.idr_insrt_ts,
+                {ocrnc_sgntr}.clm_ocrnc_span_cd,
+                {ocrnc_sgntr}.clm_ocrnc_span_from_dt,
+                {ocrnc_sgntr}.clm_ocrnc_span_thru_dt,
+                {ocrnc_sgntr}.idr_insrt_ts,
                 {postgres_row_number_col}
             FROM
                 claim_base b
