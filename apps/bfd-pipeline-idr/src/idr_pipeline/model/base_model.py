@@ -791,7 +791,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 def claim_occurrence_cte(source: Source) -> str:
     ocrnc_sgntr = ALIAS_OCRNC_SGNTR
     qualify = "QUALIFY" if source == Source.SNOWFLAKE else ""
-    alias_or_equals_1 = "= 1" if source ==Source.SNOWFLAKE else "AS rn"
+    alias_or_equals_1 = "= 1" if source == Source.SNOWFLAKE else "AS rn"
     postgres_filter = "WHERE rn = 1" if source == Source.POSTGRES else ""
     row_number = f"""
             {qualify} ROW_NUMBER() OVER (
