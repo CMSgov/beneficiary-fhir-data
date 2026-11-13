@@ -227,6 +227,8 @@ generate-structure-map type="" *all: upload-sushi
     cd ./apps/bfd-model-idr && ./gen-structure-map.sh --type="{{ type }}" \
         {{ if all == "1" { "--all" } else { "" } }}
 
+[arg("input", long, help="Input file to use instead of the resource's sample")]
+[arg("output", long, help="File to save the output")]
 [arg("resource", long, help="Resource to transform")]
 [arg("all", long, value="1", help="Transform all resources")]
 [arg("profile-type", long, pattern="Basis|Regular|CMS", help="""Profile to transform with.
@@ -235,9 +237,12 @@ Profiles affect the elements returned in the resource""")]
 If `--all` is supplied, all resources will be generated.
 If no arguments are supplied, you can pick the resource interactively.""")]
 [group('model')]
-fhir-transform resource="" profile-type="CMS" *all: upload-sushi
+fhir-transform resource="" profile-type="CMS" input="" output="" *all: upload-sushi
     cd ./apps/bfd-model-idr && ./fhir-transform.sh --resource "{{ resource }}" \
-        --profile-type "{{ profile-type }}" {{ if all == "1" { "--all" } else { "" } }}
+        --profile-type "{{ profile-type }}" \
+        {{ if input != "" { f"--input {{ input }}" } else { "" } }} \
+        {{ if output != "" { f"--output {{ output }}" } else { "" } }} \
+        {{ if all == "1" { "--all" } else { "" } }}
 
 [arg("clm-uniq-id", long, help="Claim ID to transform")]
 [arg("source-directory", long, help="Directory to find claim CSV inputs")]

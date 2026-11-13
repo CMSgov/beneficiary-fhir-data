@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 # @option	--resource=''
 # @option	--profile-type[=CMS|Basis|Regular]
+# @option	--input
+# @option	--output
 # @flag 	--all
 eval "$(argc --argc-eval "$0" "$@")"
 
@@ -28,8 +30,8 @@ fi
 
 	map="$(echo "$choice" | jq -r ".map")"
 	resource="$(echo "$choice" | jq -r ".resource")"
-	input="$(echo "$choice" | jq -r ".sample")"
-	output="$(echo "$choice" | jq -r ".output")"
+	input="${argc_input:-$(echo "$choice" | jq -r ".sample")}"
+	output="${argc_output:-$(echo "$choice" | jq -r ".output")}"
 	type="$(echo "$choice" | jq -r ".type")"
 
 	filename=$(basename -- "$map")
