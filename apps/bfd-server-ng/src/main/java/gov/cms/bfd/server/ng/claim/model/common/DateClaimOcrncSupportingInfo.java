@@ -13,22 +13,21 @@ public class DateClaimOcrncSupportingInfo implements SupportingInfoComponentBase
 
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private ActiveCareThroughDate activeCareThroughDate;
-  @Embedded private NoncoveredFromDate noncoveredFromDate;
-  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThroughDate qualifyStayThroughDate;
+  @Embedded private NoncoveredDatesNormalized noncoveredDatesNormalized;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.of(
-            benefitsExhaustedDate.toFhir(supportingInfoFactory),
-            activeCareThroughDate.toFhir(supportingInfoFactory),
-            noncoveredFromDate.toFhir(supportingInfoFactory),
-            noncoveredThroughDate.toFhir(supportingInfoFactory),
-            qualifyStayFromDate.toFhir(supportingInfoFactory),
-            qualifyStayThroughDate.toFhir(supportingInfoFactory))
-        .flatMap(Optional::stream)
+    return Stream.concat(
+            noncoveredDatesNormalized.toFhir(supportingInfoFactory).stream(),
+            Stream.of(
+                    benefitsExhaustedDate.toFhir(supportingInfoFactory),
+                    activeCareThroughDate.toFhir(supportingInfoFactory),
+                    qualifyStayFromDate.toFhir(supportingInfoFactory),
+                    qualifyStayThroughDate.toFhir(supportingInfoFactory))
+                .flatMap(Optional::stream))
         .toList();
   }
 }
