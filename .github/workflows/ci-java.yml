@@ -64,7 +64,7 @@ jobs:
         with:
           node-version: "22.23.4"
       - name: "Setup JDK"
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@v6.2.0
         with:
           java-version: "25"
           distribution: "corretto"
