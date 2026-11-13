@@ -511,6 +511,7 @@ class _ClaimsFile(StrEnum):
             f.GEO_RNDRG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            f.CLM_FAC_PRVDR_OSCAR_NUM,
         ],
     )
     CLM_PRFNL = (
@@ -929,17 +930,17 @@ def _generate_batch(
 
     cond_sgntr_mbr_per_cond_sgntr_sk = partition_rows(
         llist=existing[f.CLM_RLT_COND_SGNTR_MBR],
-        part_by=lambda x: x[f.CLM_RLT_COND_SGNTR_SK],
+        part_by=lambda x: int(x.get(f.CLM_RLT_COND_SGNTR_SK, 0)),
     )
 
     ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_OCRNC_SGNTR_MBR],
-        part_by=lambda x: x[f.CLM_OCRNC_SGNTR_SK],
+        part_by=lambda x: int(x.get(f.CLM_OCRNC_SGNTR_SK, 0)),
     )
 
     rlt_ocrnc_sgntr_mbr_per_ocrnc_sk = partition_rows(
         llist=existing[f.CLM_RLT_OCRNC_SGNTR_MBR],
-        part_by=lambda x: x[f.CLM_RLT_OCRNC_SGNTR_SK],
+        part_by=lambda x: int(x.get(f.CLM_RLT_OCRNC_SGNTR_SK, 0)),
     )
 
     rx_clm_line_per_clm_uniq_id = {
@@ -1208,13 +1209,13 @@ def _generate_batch(
                 f.CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 f.CLM_RLT_COND_SGNTR_MBR: cond_sgntr_mbr_per_cond_sgntr_sk.get(
-                    file_pac_clm[f.CLM_RLT_COND_SGNTR_SK], []
+                    int(file_pac_clm.get(f.CLM_RLT_COND_SGNTR_SK, 0)), []
                 ),
                 f.CLM_OCRNC_SGNTR_MBR: ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    file_pac_clm[f.CLM_OCRNC_SGNTR_SK], []
+                    int(file_pac_clm.get(f.CLM_OCRNC_SGNTR_SK, 0)), []
                 ),
                 f.CLM_RLT_OCRNC_SGNTR_MBR: rlt_ocrnc_sgntr_mbr_per_ocrnc_sk.get(
-                    file_pac_clm[f.CLM_RLT_OCRNC_SGNTR_SK], []
+                    int(file_pac_clm.get(f.CLM_RLT_OCRNC_SGNTR_SK, 0)), []
                 ),
                 f.CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(str(file_pac_clm[f.CLM_UNIQ_ID]))),

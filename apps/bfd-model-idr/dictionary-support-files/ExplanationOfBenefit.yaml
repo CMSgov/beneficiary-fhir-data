@@ -2731,6 +2731,28 @@
     - Basis
     - Regular
     - CMS
+- inputPath: LineItemComponent.CLM_FAC_PRVDR_OSCAR_NUM
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_FAC_PRVDR_OSCAR_NUM
+  ccwMapping:
+    - PRVDR_NUM
+  cclfMapping:
+    - CCLF2.CLM_FAC_PRVDR_OSCAR_NUM
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM').value.code
+  notes: This will sometimes be populated on Practitioners, even though individuals cannot be assigned an OSCAR number.
+  profiles:
+    - Basis
+    - Regular
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT
   appliesTo:
     - Outpatient

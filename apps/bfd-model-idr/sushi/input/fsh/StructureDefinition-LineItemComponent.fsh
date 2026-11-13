@@ -155,3 +155,4 @@ Id: LineItemComponent
 * CLM_LINE_HCT_HGB_RSLT_NUM 0..1 string "Hematocrit/Hemoglobin Result Number" "The hematocrit or hemoglobin result value for the claim line."
 * CLM_LINE_HCT_HGB_TYPE_CD 0..1 string "Hematocrit/Hemoglobin Type Code" "Code indicating if the result is for hematocrit or hemoglobin."
 * CLM_LINE_CARR_CLNCL_LAB_NUM 0..1 string "Carrier Clinical Lab Number" "The clinical laboratory identifier for the carrier claim line."
+* CLM_FAC_PRVDR_OSCAR_NUM 0..1 string "Claim Facility Provider OSCAR Number" "A facility's Medicare/Medicaid identification number, also known as a Medicare/Medicaid Provider Number, or CCN. This number verifies that a provider has been Medicare certified for a particular type of services. Note: The OSCAR was renamed to CMS Certification Number (CCN) in 2007 by CMS."

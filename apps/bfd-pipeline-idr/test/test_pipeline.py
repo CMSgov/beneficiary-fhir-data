@@ -381,6 +381,14 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == -9879437343384
 
+    cur = conn.execute(
+        """select * from idr.claim_item_institutional_nch
+           where clm_uniq_id = -9879437343384 and clm_line_num = 1"""
+    )
+
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_fac_prvdr_oscar_num"] == "-39T14"
+
     # Items for stale non-Part-D claims are pruned on incremental loads
     cur = conn.execute(
         "select * from idr.claim_item_institutional_nch where clm_uniq_id = 999999434801"
