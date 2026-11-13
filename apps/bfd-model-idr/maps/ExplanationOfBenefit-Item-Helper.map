@@ -1,5 +1,5 @@
 map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" = "BFD-ExplanationOfBenefit-Item-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper"
 
 group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
@@ -14,12 +14,12 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.modifier = create('CodeableConcept') as tgtModifier then addModifier(src,tgtModifier) "add revenue";
     src.SEQUENCE_INFO as sequenceInfo where sequenceInfo.length()>0 -> tgt.informationSequence = sequenceInfo;
 
-    //Have to repeat this 4 times because of the flat format. 
+    //Have to repeat this 4 times because of the flat format.
     src.CLM_1_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason1(src, tgtAdjudication) "Add adjudication reasons";
     src.CLM_2_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason2(src, tgtAdjudication) "Add adjudication reasons";
     src.CLM_3_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason3(src, tgtAdjudication) "Add adjudication reasons";
     src.CLM_4_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason4(src, tgtAdjudication) "Add adjudication reasons";
-    
+
     //Line item adjudication charge amounts.
     src.CLM_LINE_NCVRD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationNonCoveredAmount(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_ALOWD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationEligibleAmount(amt, tgtAdjudication) "Add amount";
@@ -58,15 +58,15 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_REV_PMT_MTHD_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMthdCd(inputCode, tgtExtension) "Add  code";
     src.CLM_REV_CNTR_STUS_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addCntrStusCd(inputCode, tgtExtension) "Add  code";
     src.CLM_SUPLR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
-    //calling the same function is intentional. One is populated w/ Carrier, other DME. 
+    //calling the same function is intentional. One is populated w/ Carrier, other DME.
     src.CLM_RNDRG_PRVDR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
     src.CLM_RNDRG_PRVDR_TAX_NUM as taxNum -> tgt.extension = create('Extension') as tgtExtension then addTaxNum(taxNum, tgtExtension) "Add Tax Number";
 
     src.CLM_RNDRG_PRVDR_PRTCPTG_CD as inputCode where inputCode.length() > 0 -> tgt.extension = create('Extension') as tgtExtension then addParticipatingCode(inputCode, tgtExtension) "Add  code";
-
+    src.CLM_FAC_PRVDR_OSCAR_NUM as inputNum -> tgt.extension = create('Extension') as tgtExtension then addClaimFacPrvdrOscarNum(inputNum, tgtExtension) "Set claim line Facility Provider Oscar Num";
     //generic extension + code system since the type codes can be applied to different types, not just rendering providers.
 
-    //These are generally on professional claims 
+    //These are generally on professional claims
     src.CLM_LINE_ANSTHSA_UNIT_CNT as anesthesiaCnt -> tgt.extension = create('Extension') as tgtExtension then addAnesthesia(anesthesiaCnt, tgtExtension) "Add anesthesia unit counts";
     src.CLM_LINE_RX_NUM as rxNum -> tgt.extension = create('Extension') as tgtExtension then addClaimLineRxNum(rxNum, tgtExtension) "Add rx num";
 
@@ -74,7 +74,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_MTUS_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMTUIndCd(inputCode, tgtExtension) "Add  code";
     //this one is an amount
     src.CLM_LINE_PRFNL_MTUS_CNT as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMTUCnt(inputCode, tgtExtension) "Add  code";
-    
+
     //Extensions with codes
     src.CLM_PRCNG_LCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addLocalityCode(inputCode, tgtExtension) "Add  code";
     src.CLM_PHYSN_ASTNT_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPACode(inputCode, tgtExtension) "Add  code";
@@ -93,7 +93,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
             tgtCoding.code=placeCode "Add system and code";
         } "Add coding";
     } "Add location codeable concept";
-    
+
     //only pull in valid dates here.
     src.CLM_LINE_FROM_DT as clmLineFromDt where src.CLM_LINE_THRU_DT.exists().not() -> tgt.serviced = clmLineFromDt "Add serviced Date";
     src.CLM_LINE_THRU_DT as clmLineThruDt -> tgt.serviced = create('Period') as tgtPeriod then{
@@ -102,14 +102,14 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add serviced period";
 
 
-    //This is a proxy element (only for professional) for determining if a claim is a professional claim. On professional FFS claims, populate "other" for network (eg Medicare). 
+    //This is a proxy element (only for professional) for determining if a claim is a professional claim. On professional FFS claims, populate "other" for network (eg Medicare).
     src.CLM_SRVC_DDCTBL_SW as isProfessional -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {
         src -> tgtAdjudication.category = create('CodeableConcept') as tgtCC then {
             src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "benefitpaymentstatus") "Add coding 1";
         } "add category";
         src -> tgtAdjudication.reason = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus","other") "Add other";
     } "Add benefitpaymentstatus";
-    
+
 
     //In claims data, CLM_LINE_DGNS_CD refers to the diagnosis that supports the given claim line
     //diagnosisRelatedLine is a computed value that is input "for FML purposes" to correspond to the sequence number
@@ -218,8 +218,12 @@ group addClaimLineRxNum(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM" "Add extension url";
     src as inputNum -> tgt.valueString = inputNum "Set claim line RX Num";
 }
+group addClaimFacPrvdrOscarNum(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM" "Add extension url";
+    src as inputNum -> tgt.valueString = inputNum "Set claim line Facility Provider Oscar Num";
+}
 
-//This is new, seek feedback. 
+//This is new, seek feedback.
 group addAdjudicationRevCenterDiscountCode(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
@@ -227,7 +231,7 @@ group addAdjudicationRevCenterDiscountCode(source src: String, target tgt: Exten
         inputCode -> tgtCoding.code = inputCode "set code";
       } "Set value";
 }
-//"One" here in extension but not the CodeSystem is intentional. 
+//"One" here in extension but not the CodeSystem is intentional.
 group addOTAFCode(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
@@ -263,8 +267,8 @@ group addMoney(source src: String, target tgt: Money){
 }
 
 
-//In the IDR, they use surrogate keys. We map them here. In sample data generation, this corresponds to CLM_ANSI_SGNTR_SK. 
-//We're only going to populate these with valid ANSI group codes. 
+//In the IDR, they use surrogate keys. We map them here. In sample data generation, this corresponds to CLM_ANSI_SGNTR_SK.
+//We're only going to populate these with valid ANSI group codes.
 group addAdjudicationReason1(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
     src.CLM_1_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
@@ -382,7 +386,7 @@ group addAdjudicationPaidByMedicare(source src: String, target tgt: BackboneElem
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
 
-//CLM_LINE_BLOOD_DDCTBL_AMT <-- blood deductible 
+//CLM_LINE_BLOOD_DDCTBL_AMT <-- blood deductible
 group addAdjudicationBloodDeductible(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BLOOD_DDCTBL_AMT") "Add coding 1";
