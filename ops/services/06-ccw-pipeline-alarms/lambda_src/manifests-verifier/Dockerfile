@@ -1,6 +1,6 @@
-FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.8@sha256:5cc1805e2426484abca4ad46ea783bab281fdb225fd82d8ce6d66a81254bac85 AS uv
 # First, bundle the dependencies into the task root.
-FROM public.ecr.aws/lambda/python:3.14.2026.10.31.17-arm64@sha256:36a56dd455d445a23e9f45e4959cdcaf6422068bd3390996c0f9544e6372d986 AS builder
+FROM public.ecr.aws/lambda/python:3.15.2026.11.13.18-arm64@sha256:b6f57a390b8448f0dc235de68ad86d12a0b54f92c379250e11232f517fe3acf5 AS builder
 # Enable bytecode compilation, to improve cold-start performance.
 ENV UV_COMPILE_BYTECODE=1
 # Disable installer metadata, to create a deterministic layer.
@@ -20,7 +20,7 @@ RUN --mount=from=uv,source=/uv,target=/bin/uv \
     --project ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier -o requirements.txt && \
   uv pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-FROM public.ecr.aws/lambda/python:3.14.2026.10.31.17-arm64@sha256:36a56dd455d445a23e9f45e4959cdcaf6422068bd3390996c0f9544e6372d986
+FROM public.ecr.aws/lambda/python:3.15.2026.11.13.18-arm64@sha256:b6f57a390b8448f0dc235de68ad86d12a0b54f92c379250e11232f517fe3acf5
 # Copy the runtime dependencies from the builder stage.
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
