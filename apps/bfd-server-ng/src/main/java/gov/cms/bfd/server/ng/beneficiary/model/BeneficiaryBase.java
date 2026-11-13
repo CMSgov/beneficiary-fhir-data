@@ -70,6 +70,18 @@ public abstract class BeneficiaryBase {
           + VALID_BENE_FROM_WHERE
           + "ORDER BY bene_sk, idr_trans_efctv_ts DESC";
 
+  /**
+   * JPA QUERY to get all valid bene_sk for a given bene_xref_sk. This can be used for any query
+   * that needs valid beneficiaries in a Subselect annotation. We cannot use inheritance because JPA
+   * does not respect it. This pattern allows for reuse without having to maintain in multiple
+   * places.
+   */
+  public static String ALL_BENE_SK_BY_BENE_XREF_SQL =
+      "SELECT DISTINCT ON (bene_sk) bene_sk "
+          + VALID_BENE_FROM_WHERE
+          + "AND b.bene_xref_efctv_sk = :beneXrefSk "
+          + "ORDER BY bene_sk, idr_trans_efctv_ts DESC";
+
   @Id
   @Column(name = "bene_sk", insertable = false, updatable = false)
   protected long beneSk;

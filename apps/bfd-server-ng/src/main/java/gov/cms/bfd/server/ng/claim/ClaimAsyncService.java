@@ -9,7 +9,6 @@ import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
-import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
@@ -77,7 +76,7 @@ public class ClaimAsyncService {
       String baseQuery,
       Class<T> claimClass,
       SystemType systemType,
-      ClaimSearchCriteria criteria,
+      List<Long> beneSks,
       List<DbFilterBuilder> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
@@ -86,7 +85,7 @@ public class ClaimAsyncService {
         String.format(
             """
              %s
-             WHERE b.xrefSk = :beneSk
+             WHERE b.beneSk in :beneSk
              %s
             """,
             baseQuery, whereClause);
@@ -98,7 +97,7 @@ public class ClaimAsyncService {
             var query =
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
-                    .setParameter("beneSk", criteria.beneSk());
+                    .setParameter("beneSk", beneSks);
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);
