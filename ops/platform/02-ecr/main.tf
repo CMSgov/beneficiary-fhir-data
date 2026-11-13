@@ -50,7 +50,11 @@ locals {
     "bfd-db-migrator",
     "bfd-pipeline-app",
     "bfd-server",
-    "bfd-server-ng"
+    "bfd-server-ng",
+    # local-only image repositories that exist
+    # to avoid errors when building all images
+    # in CI
+    "bfd-platform-migrator-synthetic",
   ])
 }
 

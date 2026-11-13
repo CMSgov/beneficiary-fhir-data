@@ -9,6 +9,7 @@ from locust.env import Environment
 from common import data, db_idr
 from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
+from common.task_utils import check_empty_collection
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
 master_bene_sks: Collection[str] = []
@@ -91,7 +92,7 @@ class RegressionV3User(BFDUserBase):
     LAST_UPDATED_FILTER: ClassVar = {"_lastUpdated": "gt2020-05-05"}
     SERVICE_DATE_RANGE: ClassVar = {"service-date": "ge2020-01-01"}
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         logger.info("Loaded %s bene_sks.", len(master_bene_sks))
         logger.info("Loaded %s bene_sks_part_a.", len(master_bene_sks_part_a))
@@ -99,11 +100,21 @@ class RegressionV3User(BFDUserBase):
         logger.info("Loaded %s bene_mbis.", len(master_bene_mbis))
         logger.info("Loaded %s claim_ids.", len(master_claim_ids))
 
-        self.bene_sks = itertools.cycle(list(master_bene_sks))
-        self.bene_sks_part_a = itertools.cycle(list(master_bene_sks_part_a))
-        self.bene_sks_part_b = itertools.cycle(list(master_bene_sks_part_b))
-        self.bene_mbis = itertools.cycle(list(master_bene_mbis))
-        self.claim_ids = itertools.cycle(list(master_claim_ids))
+        self.bene_sks: itertools.cycle[str] = check_empty_collection(
+            master_bene_sks, "master_bene_sks"
+        )
+        self.bene_sks_part_a: itertools.cycle[str] = check_empty_collection(
+            master_bene_sks_part_a, "master_bene_sks_part_a"
+        )
+        self.bene_sks_part_b: itertools.cycle[str] = check_empty_collection(
+            master_bene_sks_part_b, "master_bene_sks_part_b"
+        )
+        self.bene_mbis: itertools.cycle[str] = check_empty_collection(
+            master_bene_mbis, "master_bene_mbis"
+        )
+        self.claim_ids: itertools.cycle[str] = check_empty_collection(
+            master_claim_ids, "master_claim_ids"
+        )
 
     @tag("patient", "patient_read_id")
     @task

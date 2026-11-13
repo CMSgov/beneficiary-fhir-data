@@ -33,12 +33,12 @@ resource "aws_lambda_function" "this" {
 
   filename         = data.archive_file.this.output_path
   source_code_hash = data.archive_file.this.output_base64sha256
-  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:7"]
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:27"]
   architectures    = ["arm64"]
   handler          = "${local.lambda_filename}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.13"
+  runtime          = "python3.14"
   timeout          = 300
 
   environment {

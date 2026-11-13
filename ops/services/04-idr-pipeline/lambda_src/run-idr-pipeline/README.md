@@ -1,24 +1,24 @@
+<!-- markdownlint-disable MD013 -->
+
 # `run-idr-pipeline` Lambda
 
 This subdirectory contains the Python source code for the `run-idr-pipeline` Lambda and the container image definitions (`Dockerfile` and `Dockerfile.dockerignore`) for the `bfd-platform-run-idr-pipeline` image.
 
 ## Environment Setup
 
-It is assumed you are using `pyright`/`pylance` for type-checking, `uv` for virtual environment and dependency management, and `ruff` for linting, formatting, and import sorting.
+This project is a member of the repository-wide `uv` workspace. Its dependencies are resolved from the root `pyproject.toml` and the shared `uv.lock`.
 
-1. Install `uv`:
+1. Install [`uv`](https://docs.astral.sh/uv/).
 
-   ```bash
-   brew install uv
-   ```
-
-2. Setup Python virtual environment:
+2. From the repository root, create the shared virtual environment:
 
    ```bash
    uv sync
    ```
 
-3. Your virtual environment is now setup! By default, it is available under `.venv`; using VS Code, this Virtual Environment can be chosen using the `Python: Select Interpreter` command
+3. Run this member's code with `uv run` from any directory in the repository. The shared virtual environment is `.venv` in the repository root. VS Code can use it through `Python: Select Interpreter`.
+
+Linting and type checking (`ruff`, `basedpyright`) are configured at the repository root. The `prek` hooks run them.
 
 ## Updating/managing dependencies
 

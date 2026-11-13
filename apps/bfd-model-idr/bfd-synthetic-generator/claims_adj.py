@@ -1,14 +1,15 @@
 import random
 import string
+from collections.abc import Sequence
 from datetime import date
 from typing import Any
 
 import constants as f
 from claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
-    FISS_CLM_TYPE_CDS,
-    INSTITUTIONAL_CLAIM_TYPES,
-    PHARMACY_CLM_TYPE_CDS,
+    ADJUDICATED_PROFESSIONAL_NCH_CDS,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    PHARMACY_CDS,
 )
 from claims_static import (
     AVAIL_CLM_RLT_COND_SK,
@@ -24,6 +25,8 @@ from claims_static import (
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
+    gen_clm_val_ansi_grp_cd,
+    gen_clm_val_ansi_rsn_cd,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
@@ -52,9 +55,9 @@ class AdjudicatedGeneratorUtil:
         init_clm: RowAdapter | None = None,
         min_date: str = "2018-01-01",
         max_date: str = str(NOW),
-        type_1_npis: list = [0],
-        type_2_npis: list = [0],
-    ):
+        type_1_npis: Sequence[str] = (),
+        type_2_npis: Sequence[str] = (),
+    ) -> RowAdapter:
         clm = init_clm or RowAdapter({})
         clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**13 - 1)
@@ -90,7 +93,7 @@ class AdjudicatedGeneratorUtil:
             parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
         )
         # PDE -> diff Claim control number process.
-        if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
+        if clm_type_cd in PHARMACY_CDS:
             clm[f.CLM_ORIG_CNTL_NUM] = gen_utils.id_gen.multipart_id(
                 field=f.CLM_ORIG_CNTL_NUM,
                 parts=[(string.digits, 14), (string.ascii_uppercase, 3)],
@@ -112,7 +115,7 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_DISP_CD] = random.choice(gen_utils.code_systems[f.CLM_DISP_CD])
         clm[f.CLM_ADJSTMT_TYPE_CD] = random.choice(gen_utils.code_systems[f.CLM_ADJSTMT_TYPE_CD])
 
-        if clm_type_cd not in PHARMACY_CLM_TYPE_CDS:
+        if clm_type_cd not in PHARMACY_CDS:
             clm[f.CLM_QUERY_CD] = random.choice(gen_utils.code_systems[f.CLM_QUERY_CD])
         else:
             clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM] = random.choice(type_2_npis)
@@ -136,7 +139,7 @@ class AdjudicatedGeneratorUtil:
                 clm[f.CLM_SBMTR_CNTRCT_NUM] = random.choice(AVAIL_CONTRACT_NUMS)
                 clm[f.CLM_SBMTR_CNTRCT_PBP_NUM] = random.choice(AVAIL_PBP_NUMS)
 
-        if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+        if clm_type_cd in INSTITUTIONAL_CDS:
             tob_code = random.choice(gen_utils.code_systems[f.CLM_BILL_FREQ_CD])
             clm[f.CLM_BILL_FAC_TYPE_CD] = tob_code[0]
             clm[f.CLM_BILL_CLSFCTN_CD] = tob_code[1]
@@ -172,7 +175,7 @@ class AdjudicatedGeneratorUtil:
             clm_ltst_clm_ind = random.choice(["Y", "N"])
         clm[f.CLM_LTST_CLM_IND] = clm_ltst_clm_ind
 
-        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_CLM_TYPE_CDS:
+        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_SS_CDS:
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
             clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
             clm[f.PRVDR_ATNDG_PRVDR_NPI_NUM] = clm[f.CLM_ATNDG_PRVDR_NPI_NUM]
@@ -205,7 +208,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
@@ -284,7 +287,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
@@ -305,7 +308,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_ocrnc_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_ocrnc_sgntr_mbr = init_clm_ocrnc_sgntr_mbr or RowAdapter({})
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SK] = (
             clm[f.CLM_OCRNC_SGNTR_SK]
@@ -335,7 +338,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_rlt_ocrnc_sgntr_mbr: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_rlt_ocrnc_sgntr_mbr = init_clm_rlt_ocrnc_sgntr_mbr or RowAdapter({})
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SK] = (
             clm[f.CLM_RLT_OCRNC_SGNTR_SK]
@@ -354,7 +357,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_rlt_ocrnc_sgntr_mbr
 
-    def gen_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
+    def gen_clm_dt_sgntr(
+        self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})
         clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_type_cd = clm[f.CLM_TYPE_CD]
@@ -391,7 +396,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dt_sgntr
 
-    def gen_pharm_clm_line(self, clm: RowAdapter, init_clm_line: RowAdapter | None = None):
+    def gen_pharm_clm_line(
+        self, clm: RowAdapter, init_clm_line: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
         clm_line[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -426,7 +433,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_line_rx: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_line_rx = init_clm_line_rx or RowAdapter({})
         clm_line_rx[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
         clm_line_rx[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -487,7 +494,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_dcmtn: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_dcmtn = init_clm_dcmtn or RowAdapter({})
         clm_dcmtn[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_dcmtn[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -508,7 +515,9 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_dsprtnt_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
+    def gen_dsprtnt_clm_val(
+        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
+    ) -> RowAdapter:
         # CLM_OPRTNL_DSPRTNT_AMT
         # Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique
         # identifier with CLM_UNIQ_ID.
@@ -520,12 +529,16 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = DISPROPORTIONATE_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 14
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
         return clm_val
 
-    def gen_ime_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter | None = None):
+    def gen_ime_clm_val(
+        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
@@ -534,6 +547,8 @@ class AdjudicatedGeneratorUtil:
         clm_val[f.CLM_VAL_CD] = INDIRECT_AMOUNT_CLM_VAL_CD
         clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
         clm_val[f.CLM_VAL_SQNC_NUM] = 3
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         add_meta_timestamps(clm_val, clm)
 
@@ -544,7 +559,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_val_sqnc_num: int,
         init_clm_prod: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_prod = init_clm_prod or RowAdapter({})
         clm_prod[f.CLM_PROD_TYPE_CD] = "S"
         clm_prod[f.CLM_PRCDR_CD] = random.choice(get_icd_10_prcdr_codes(self.enable_samhsa))
@@ -562,11 +577,11 @@ class AdjudicatedGeneratorUtil:
 
     def gen_diag_clm_prod_list(
         self, clm: RowAdapter, init_diagnoses: list[RowAdapter] | None = None
-    ):
+    ) -> list[RowAdapter]:
         if init_diagnoses is None:
             init_diagnoses = []
 
-        def match_diag(subdict: dict[str, Any]):
+        def match_diag(subdict: dict[str, Any]) -> RowAdapter:
             sub_str = {k: str(v) for k, v in subdict.items()}
             return next(
                 (
@@ -674,7 +689,7 @@ class AdjudicatedGeneratorUtil:
             num_add_diags = (
                 len(init_diagnoses) - 3 if len(init_diagnoses) > 3 else random.randint(2, 15)
             )
-        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+        elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH_CDS:
             # professional claims use principal diagnosis and other diagnoses
             principal_static = {f.CLM_VAL_SQNC_NUM: 1, f.CLM_PROD_TYPE_CD: "P"}
             principal_data = {
@@ -717,7 +732,7 @@ class AdjudicatedGeneratorUtil:
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
                 }
-            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES:
+            elif clm_type_cd in ADJUDICATED_PROFESSIONAL_NCH_CDS:
                 diagnosis_data = {
                     f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
                     f.CLM_DGNS_PRCDR_ICD_IND: diagnoses[0][f.CLM_DGNS_PRCDR_ICD_IND],
@@ -742,7 +757,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_instnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_instnl = init_clm_instnl or RowAdapter({})
 
@@ -828,7 +843,7 @@ class AdjudicatedGeneratorUtil:
         gen_utils: GeneratorUtil,
         clm: RowAdapter,
         init_clm_prfnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_prfnl = init_clm_prfnl or RowAdapter({})
 
         clm_prfnl[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -857,8 +872,8 @@ class AdjudicatedGeneratorUtil:
         clm_line_num: int,
         diagnoses: list[RowAdapter],
         init_clm_line: RowAdapter | None = None,
-        type_1_npis: list = [0],
-    ):
+        type_1_npis: Sequence[str] = (),
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -906,7 +921,7 @@ class AdjudicatedGeneratorUtil:
 
             if probability(0.5):
                 enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
-                used_enhancements = set()
+                used_enhancements: set[str] = set()
                 for i in range(1, 6):
                     field_key = getattr(f, f"CLM_LINE_BNFT_ENHNCMT_{i}_CD")
                     val = random.choice(enhancement_options)
@@ -944,7 +959,7 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_LINE_NDC_QTY] = round(random.uniform(1, 1000), 2)
             clm_line[f.CLM_LINE_NDC_QTY_QLFYR_CD] = "ML"
         clm_line[f.CLM_LINE_SRVC_UNIT_QTY] = round(random.uniform(0, 5), 2)
-        if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
+        if clm_type_cd in INSTITUTIONAL_CDS:
             clm_line[f.CLM_LINE_REV_CTR_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_REV_CNTR_CD]
             )
@@ -979,7 +994,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_line_num: int,
         init_clm_line_instnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_instnl = init_clm_line_instnl or RowAdapter({})
         clm_line_instnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -1051,7 +1066,7 @@ class AdjudicatedGeneratorUtil:
         clm: RowAdapter,
         clm_line_num: int,
         init_clm_line_prfnl: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_type_cd = clm[f.CLM_TYPE_CD]
         clm_line_prfnl = init_clm_line_prfnl or RowAdapter({})
         clm_line_prfnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -1089,6 +1104,7 @@ class AdjudicatedGeneratorUtil:
 
         if probability(0.10):
             clm_line_prfnl[f.CLM_LINE_HCT_HGB_TYPE_CD] = random.choice(["R1", "R2"])
+            clm_line_prfnl[f.CLM_LINE_HCT_HGB_RSLT_NUM] = round(random.uniform(0.0, 99.9), 1)
             clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_LAB_NUM] = random.choice(
                 [
                     "11D1111111",
