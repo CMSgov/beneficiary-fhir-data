@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-java@v6.1.0
+      - uses: actions/setup-java@v6.2.0
         with:
           distribution: corretto
           java-version: "25"
@@ -23,13 +23,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install libxml2-utils
           ./hooks/install-java-format.sh
-      - uses: taiki-e/install-action@v2.88.1
+      - uses: taiki-e/install-action@v2.90.3
         with:
           tool: taplo
-      - uses: taiki-e/install-action@v2.88.1
+      - uses: taiki-e/install-action@v2.90.3
         with:
           tool: fd-find
-      - uses: taiki-e/install-action@v2.87.32
+      - uses: taiki-e/install-action@v2.90.3
         with:
           tool: just
       - uses: opentofu/setup-opentofu@v2.0.2
