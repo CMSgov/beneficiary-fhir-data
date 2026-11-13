@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 @AttributeOverride(
     name = "providerNpiNumber",
-    column = @Column(name = "prvdr_prscrbng_prvdr_npi_num"))
+    column = @Column(name = "clm_prsbng_prvdr_gnrc_id_num"))
 @AttributeOverride(
     name = "providerName",
     column = @Column(name = "bfd_prvdr_prscrbng_careteam_name"))

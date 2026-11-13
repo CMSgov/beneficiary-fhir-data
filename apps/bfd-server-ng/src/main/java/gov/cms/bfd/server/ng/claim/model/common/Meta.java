@@ -13,7 +13,7 @@ import lombok.Getter;
 @Embeddable
 @Getter
 public class Meta {
-  @Column(name = "bfd_claim_updated_ts", nullable = false)
+  @Column(name = "bfd_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;
 
   public org.hl7.fhir.r4.model.Meta toFhir(
