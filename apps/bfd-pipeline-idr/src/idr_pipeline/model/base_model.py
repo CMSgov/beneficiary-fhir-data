@@ -838,7 +838,7 @@ def claim_occurrence_cte(source: Source) -> str:
                 claim_base b
             inner join {SETTINGS.idr_claim_occurrence_signature_table} {ocrnc_sgntr}
                         on {ocrnc_sgntr}.clm_ocrnc_sgntr_sk = b.clm_ocrnc_sgntr_sk
-            WHERE {ocrnc_sgntr}.clm_ocrnc_span_cd IN ('{NON_COVERED_STAY_CD}', '{QUALIFYING_STAY_CD}')
+        WHERE {ocrnc_sgntr}.clm_ocrnc_span_cd IN ('{NON_COVERED_STAY_CD}', '{QUALIFYING_STAY_CD}')
             {snowflake_row_number_qualifier}
             )
         {postgres_filter}
