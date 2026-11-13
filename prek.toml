@@ -55,7 +55,7 @@ language = "system"
 stages = ["post-checkout", "post-merge"]
 always_run = true
 pass_filenames = false
-entry = "./hooks/merge_vscode_settings.py"
+entry = "uv run hooks/merge_vscode_settings.py"
 
 [[repos]]
 repo = "local"
@@ -67,6 +67,48 @@ stages = ["post-checkout", "post-merge"]
 always_run = true
 pass_filenames = false
 entry = "./hooks/install-recommended-extensions.sh"
+
+[[repos]]
+repo = "local"
+# ruff runs from the workspace dev group, so the hooks and `just py-check` use the same version.
+[[repos.hooks]]
+id = "ruff-check"
+name = "ruff check"
+language = "system"
+entry = "uv run ruff check --fix"
+types_or = ["python", "pyi"]
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
+
+[[repos.hooks]]
+id = "ruff-format"
+name = "ruff format"
+language = "system"
+entry = "uv run ruff format"
+types = ["python"]
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
+
+[[repos]]
+repo = "local"
+[[repos.hooks]]
+id = "basedpyright"
+name = "basedpyright"
+language = "system"
+types_or = ["python", "pyi"]
+entry = "uv run basedpyright"
+exclude = "^(docs|insights|ops/utils/synthetic-data|ops/services/06-server-alarms/docs|apps/utils/scripts|apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts)/"
+
+[[repos]]
+repo = "local"
+# uv prefers already-locked versions. This hook adds new dependencies to the lockfile without
+# changing versions that are already pinned.
+# Upgrading a pinned version stays an explicit `uv lock --upgrade`.
+[[repos.hooks]]
+id = "uv-lock"
+name = "uv lockfile is regenerated"
+language = "system"
+files = "pyproject\\.toml$|uv\\.lock$"
+entry = "uv lock"
+pass_filenames = false
 
 [[repos]]
 repo = "local"

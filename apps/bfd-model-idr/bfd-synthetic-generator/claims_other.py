@@ -22,8 +22,8 @@ _faker = Faker()
 
 
 class OtherGeneratorUtil:
-    def _generate_meta_sk_pair(self, obj: RowAdapter):
-        def encode(d: datetime | date):
+    def _generate_meta_sk_pair(self, obj: RowAdapter) -> None:
+        def encode(d: datetime | date) -> int:
             d = d.date() if isinstance(d, datetime) else d
             yyyymmdd = d.year * 10000 + d.month * 100 + d.day
             base = (yyyymmdd - 19000000) * 1000
@@ -51,13 +51,13 @@ class OtherGeneratorUtil:
         else:
             obj[f.META_LST_UPDT_SK] = 0
 
-    def gen_synthetic_clm_ansi_sgntr(self):
+    def gen_synthetic_clm_ansi_sgntr(self) -> list[RowAdapter]:
         with (ROOT / "SYNTHETIC_CLM_ANSI_SGNTR.csv").open("rb") as file_stream:
             csv_df = pd.read_csv(file_stream, dtype=str, na_filter=False)
 
         clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
 
-        # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate it's synthetic
+        # Return the source data with every CLM_ANSI_SGNTR_SK made negative to mark it synthetic
         return [
             RowAdapter(
                 {k: (None if v == "" else v) for k, v in x.items()}
@@ -71,7 +71,7 @@ class OtherGeneratorUtil:
         amount: int,
         gen_utils: GeneratorUtil,
         init_provider_historys: list[RowAdapter] | None = None,
-    ):
+    ) -> tuple[list[RowAdapter], list[str], list[str]]:
         init_provider_historys = init_provider_historys or []
         additional_provider_historys = [
             RowAdapter({}) for _ in range(amount - len(init_provider_historys))
@@ -79,8 +79,8 @@ class OtherGeneratorUtil:
         all_provider_historys = init_provider_historys + additional_provider_historys
 
         provider_historys: list[RowAdapter] = []
-        generated_type_1_npis = set()
-        generated_type_2_npis = set()
+        generated_type_1_npis: set[str] = set()
+        generated_type_2_npis: set[str] = set()
         for idx, provider_history in enumerate(all_provider_historys):
             prvdr_sk = provider_history.get(f.PRVDR_SK) or gen_utils.id_gen.npi_id(field="PRVDR_SK")
             # make half of providers type 1 npi and half type 2

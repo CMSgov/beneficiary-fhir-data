@@ -297,7 +297,7 @@ def normalize_address(address_str: str) -> str:
                 fmt_string = _format_from_dict(parsed_tokens, is_military=is_military)
             if not fmt_string.strip() and line.strip():
                 # Dictionary returned empty for a non-empty line, fallback to raw sequential
-                raw_parsed_fallback: list[tuple[str, str]] = usaddress.parse(line)
+                raw_parsed_fallback = usaddress.parse(line)
                 fmt_string = _format_from_raw(raw_parsed_fallback)
             formatted_lines.append(fmt_string)
         except Exception as e:

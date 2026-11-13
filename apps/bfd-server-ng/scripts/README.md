@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 -->
+
 # bfd-server-ng Scripts
 
 This folder contains scripts used in the maintenance of bfd-server-ng. At the moment, there is only one, but as codegen
@@ -11,6 +13,8 @@ that runs via:
 ```
 uv run jpa_graph.py
 ```
+
+`uv run` resolves this member's dependencies from the workspace `uv.lock` at the repository root. Run `uv sync` there first if the shared `.venv` does not exist yet.
 
 At the moment, this script is still being updated, but the goal of this script is to read in the mapping YAML files for
 source columns and profiles, then create maps of the Java JPA objects (@Entity / @MappedSuperClass / @Embeddable) and

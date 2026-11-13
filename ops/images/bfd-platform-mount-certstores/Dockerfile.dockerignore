@@ -1,0 +1,6 @@
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!ops/images/bfd-platform-mount-certstores/pyproject.toml
+!ops/images/bfd-platform-mount-certstores/main.py

@@ -176,25 +176,42 @@ MA_ENC_CDS = [
     4011,  # 011X Medicare Part C Encounter (ENC) Hospital Inpatient (Including Medicare Part A)
     4012,  # 012X Medicare Part C Encounter (ENC) Hospital Inpatient (Medicare Part B only)
     4013,  # 013X Medicare Part C Encounter (ENC) Hospital Outpatient
-    4014,  # 014X Medicare Part C Encounter (ENC) Hospital Laboratory Services Provided to Non-patients
+    # 014X Medicare Part C Encounter (ENC) Hospital Laboratory Services Provided to Non-patients
+    4014,
     4018,  # 018X Medicare Part C Encounter (ENC) Hospital Swing Beds
-    4021,  # 021X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Including Medicare Part A)
-    4022,  # 022X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Medicare Part B only)
+    # 021X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Including
+    # Medicare Part A)
+    4021,
+    # 022X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Inpatient (Medicare Part B
+    # only)
+    4022,
     4023,  # 023X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Outpatient
-    4024,  # 024X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Other + Laboratory Services Provided to Non-patients
+    # 024X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Other + Laboratory
+    # Services Provided to Non-patients
+    4024,
     4028,  # 028X Medicare Part C Encounter (ENC) Skilled Nursing Facility (SNF) Swing Beds
     4032,  # 032X Medicare Part C Encounter (ENC) Home Health Plus Inpatient (Medicare Part B only)
     4033,  # 033X Medicare Part C Encounter (ENC) Home Health Plus Outpatient
-    4034,  # 034X Medicare Part C Encounter (ENC) Home Health Plus Laboratory Services Provided to Non-patients
-    4041,  # 041X Medicare Part C Encounter (ENC) Religious Nonmedical Health Care Institutions (RNHCI) - Hospital Inpatient
-    4043,  # 043X Medicare Part C Encounter (ENC) Religious Nonmedical Health Care Institutions  (RNHCI) - Outpatient
+    # 034X Medicare Part C Encounter (ENC) Home Health Plus Laboratory Services Provided to Non-
+    # patients
+    4034,
+    # 041X Medicare Part C Encounter (ENC) Religious Nonmedical Health Care Institutions (RNHCI) -
+    # Hospital Inpatient
+    4041,
+    # 043X Medicare Part C Encounter (ENC) Religious Nonmedical Health Care Institutions (RNHCI) -
+    # Outpatient
+    4043,
     4065,  # 065X Medicare Part C Encounter (ENC) Intermediate Care Intermediate Care Level I
     4066,  # 066X Medicare Part C Encounter (ENC) Intermediate Care Intermediate Care Level II
     4071,  # 071X Medicare Part C Encounter (ENC) Clinic Rural Health (RHC)
-    4072,  # 072X Medicare Part C Encounter (ENC) Clinic End-Stage Renal Dialysis (ESRD)- Hospital Based or Independent
+    # 072X Medicare Part C Encounter (ENC) Clinic End-Stage Renal Dialysis (ESRD)- Hospital Based or
+    # Independent
+    4072,
     4073,  # 073X Medicare Part C Encounter (ENC) Clinic Freestanding
     4074,  # 074X Medicare Part C Encounter (ENC) Clinic Outpatient Rehabilitation Facility (ORF)
-    4075,  # 075X Medicare Part C Encounter (ENC) Clinic Comprehensive Outpatient Rehabilitation Facility ( CORF)
+    # 075X Medicare Part C Encounter (ENC) Clinic Comprehensive Outpatient Rehabilitation Facility (
+    # CORF)
+    4075,
     4076,  # 076X Medicare Part C Encounter (ENC) Clinic Community Mental Health Centers (CMHC)
     4077,  # 077X Medicare Part C Encounter (ENC) Clinic Federal Qualified Health Center (FQHC)
     4079,  # 079X Medicare Part C Encounter (ENC) Clinic - Other
@@ -204,7 +221,9 @@ MA_ENC_CDS = [
     4084,  # 084X Medicare Part C Encounter (ENC) Special Facility Freestanding Birthing Center
     4085,  # 085X Medicare Part C Encounter (ENC) Special Facility Critical Access Hospital (CAH)
     4086,  # 086X Medicare Part C Encounter (ENC) Special Facility Residential Facility
-    4087,  # 087X Medicare Part C Encounter (ENC) Freestanding Non-Residential Opioid Treatment Program (Effective 1/1/21)
+    # 087X Medicare Part C Encounter (ENC) Freestanding Non-Residential Opioid Treatment Program
+    # (Effective 1/1/21)
+    4087,
     4089,  # 089X Medicare Part C Encounter (ENC) Special Facility - Other
     4700,  # PROF Medicare Part C Encounter (ENC) Professional Part B
     4800,  # DME Medicare Part C Encounter (ENC) Durable Medical Equipment (DME)

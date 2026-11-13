@@ -6,6 +6,7 @@ import tarfile
 import time
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 import requests
 
@@ -13,7 +14,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def download_package(package_id, version, download_dir, session):
+def download_package(
+    package_id: str, version: str, download_dir: Path, session: requests.Session
+) -> Path:
     """Download pkg if not local."""
     download_dir.mkdir(exist_ok=True)
     package_path = download_dir / f"{package_id}-{version}.tgz"
@@ -31,14 +34,14 @@ def download_package(package_id, version, download_dir, session):
     return package_path
 
 
-def parse_manifest(manifest_file):
+def parse_manifest(manifest_file: str) -> dict[str, list[str]]:
     """Parse manifest."""
     path = Path(manifest_file)
     if not path.exists():
         logger.error("Manifest %s not found.", manifest_file)
         return {}
 
-    package_map = defaultdict(list)
+    package_map: defaultdict[str, list[str]] = defaultdict(list)
     current_package = None
 
     with path.open() as f:
@@ -53,7 +56,9 @@ def parse_manifest(manifest_file):
     return package_map
 
 
-def upload_resource(base_url, resource_json, session):
+def upload_resource(
+    base_url: str, resource_json: dict[str, Any], session: requests.Session
+) -> None:
     """Upload resource to Matchbox."""
     rtype = resource_json.get("resourceType")
     rid = resource_json.get("id")
@@ -76,7 +81,7 @@ def upload_resource(base_url, resource_json, session):
         logger.error("Error uploading %s: %s", rid, e)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:18080/matchboxv3/fhir")
     parser.add_argument("--manifest", default="matchbox_profiles.txt")
@@ -115,7 +120,10 @@ def main():
                     if member.name.endswith(".json"):
                         fname = Path(member.name).name.replace(".json", "")
                         if fname in resource_set:
-                            content = json.loads(tar.extractfile(member).read())
+                            extracted = tar.extractfile(member)
+                            if extracted is None:
+                                continue
+                            content = json.loads(extracted.read())
                             upload_resource(args.url, content, session)
                             resource_set.remove(fname)
 

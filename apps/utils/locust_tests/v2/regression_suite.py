@@ -80,7 +80,7 @@ class RegressionV2User(BFDUserBase):
     PAC_SERVICE_DATE_LAST_UPDATED = PAC_SERVICE_DATE | PAC_LAST_UPDATED
     PAC_EXCLUDE_SAMHSA: ClassVar = {"excludeSAMHSA": "true"}
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 
         self.bene_ids: itertools.cycle[str] = check_empty_collection(
