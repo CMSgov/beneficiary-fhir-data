@@ -24,9 +24,11 @@ class SampleGenerator:
         mbi_lines: list[dict[str, str | None]] = []
 
         for bene_tmp_line in self.read_bene_hist(bene_sk=bene_sk):
-            lastest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")
-            if lastest_flag and lastest_flag == "Y":
+            # distinguish latest bene_hist from historical xref records
+            latest_flag = extract_col_str(bene_tmp_line, "IDR_LTST_TRANS_FLG")
+            if latest_flag and latest_flag == "Y":
                 bene_line = bene_tmp_line
+            # collect mbis
             for mbi_line in self.read_mbi_lines(bene_hist_line=bene_tmp_line):
                 new_mbi_line = {
                     "BENE_MBI_ID": extract_col_str(mbi_line, "BENE_MBI_ID"),
@@ -88,7 +90,7 @@ class SampleGenerator:
             "BENE_RACE_CD": extract_col_str(bene_line, "BENE_RACE_CD"),
         }
 
-        output_file_name = "Beneficiary-Sample.json"
+        output_file_name = "beneficiary.json"
         output_path = Path(f"{self.output_directory}/{output_file_name}")
         output_path.parent.mkdir(parents=True, exist_ok=True)
 

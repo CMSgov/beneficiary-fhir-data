@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.config;
 
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import io.micrometer.cloudwatch2.CloudWatchMeterRegistry;
@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 @AllArgsConstructor
 public class MetricsConfiguration {
 
-  private final gov.cms.bfd.server.ng.Configuration configuration;
+  private final gov.cms.bfd.server.ng.config.Configuration configuration;
 
   /** List of metric names that are allowed to be published to Cloudwatch by Micrometer. */
   public static final Set<String> MICROMETER_ALLOWED_METRIC_PREFIX_NAMES =

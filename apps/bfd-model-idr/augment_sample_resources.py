@@ -288,7 +288,7 @@ def convert_to_decimal(val: str | None) -> Decimal:
         return Decimal(0)
     try:
         return Decimal(val)
-    except ValueError:
+    except TypeError, ValueError:
         return Decimal(0)
 
 

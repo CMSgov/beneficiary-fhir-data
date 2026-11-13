@@ -1,8 +1,8 @@
 {
   "resourceType" : "Coverage",
-  "id" : "part-A-123456789",
+  "id" : "part-A-632187879",
   "meta" : {
-    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2024-05-24T11:56:56.020602",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0",
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0"]
   },
@@ -40,35 +40,28 @@
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD",
-      "code" : "31"
-    }
-  },
-  {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-    "valueCoding" : {
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",
-      "code" : "A"
+      "code" : "11"
     }
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",
-      "code" : "E"
+      "code" : "Y"
     }
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD",
-      "code" : "I"
+      "code" : "C"
     }
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",
-      "code" : "2"
+      "code" : "1"
     }
   },
   {
@@ -93,7 +86,7 @@
       }]
     },
     "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "value" : "ABB2BB0BB22"
+    "value" : "5BT2EA6WD29"
   }],
   "status" : "active",
   "type" : {
@@ -103,9 +96,9 @@
       "display" : "MEDICARE"
     }]
   },
-  "subscriberId" : "ABB2BB0BB22",
+  "subscriberId" : "5BT2EA6WD29",
   "beneficiary" : {
-    "reference" : "Patient/123456789"
+    "reference" : "Patient/632187879"
   },
   "relationship" : {
     "coding" : [{
@@ -115,7 +108,7 @@
     }]
   },
   "period" : {
-    "start" : "2018-04-11"
+    "start" : "2019-09-14"
   },
   "payor" : [{
     "reference" : "#cms-org"

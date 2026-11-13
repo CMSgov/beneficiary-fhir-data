@@ -124,29 +124,29 @@ class SampleGenerator:
             match part:
                 case MedicarePart.A:
                     self.create_coverage(
-                        bene_hist=bene_hist, part=part, output_file_name="Coverage-FFS-Sample.json"
+                        bene_hist=bene_hist, part=part, output_file_name="coverage-ffs-part-A.json"
                     )
                 case MedicarePart.B:
                     self.create_coverage(
                         bene_hist=bene_hist,
                         part=part,
-                        output_file_name="Coverage-FFS-Sample-PartB.json",
+                        output_file_name="coverage-ffs-part-B.json",
                     )
                 case MedicarePart.C:
                     self.create_coverage(
                         bene_hist=bene_hist,
                         part=part,
-                        output_file_name="Coverage-PartC-Sample.json",
+                        output_file_name="coverage-part-C.json",
                     )
                 case MedicarePart.D:
                     self.create_coverage(
                         bene_hist=bene_hist,
                         part=part,
-                        output_file_name="Coverage-PartD-Sample.json",
+                        output_file_name="coverage-part-D.json",
                     )
                 case MedicarePart.DUAL:
                     self.create_coverage(
-                        bene_hist=bene_hist, part=part, output_file_name="Coverage-Dual-Sample.json"
+                        bene_hist=bene_hist, part=part, output_file_name="coverage-dual.json"
                     )
                 case MedicarePart.ALL:
                     # ALL is expanded into the individual parts above, so it never reaches here.

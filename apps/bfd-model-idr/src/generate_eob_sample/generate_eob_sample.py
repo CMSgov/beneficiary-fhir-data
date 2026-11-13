@@ -4,12 +4,21 @@ from pathlib import Path
 from typing import Any
 
 from idr_model.claim_type_codes import (
-    ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES,
-    ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME,
-    INSTITUTIONAL_CLAIM_TYPES,
-    MCS_CLM_TYPE_CDS,
-    PHARMACY_CLM_TYPE_CDS,
-    VMS_CDS,
+    ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS,
+    ADJUDICATED_PROFESSIONAL_DME_NCH_CDS,
+    ADJUDICATED_PROFESSIONAL_NCH_CDS,
+    FISS_SS_CDS,
+    INSTITUTIONAL_CDS,
+    INSTITUTIONAL_HHA_NCH_CD,
+    INSTITUTIONAL_HOSPICE_ELECTION_CDS,
+    INSTITUTIONAL_HOSPICE_NCH_CD,
+    INSTITUTIONAL_INPATIENT_NCH_CD,
+    INSTITUTIONAL_MA_NCH_CDS,
+    INSTITUTIONAL_OUTPATIENT_NCH_CD,
+    INSTITUTIONAL_SNF_NCH_CDS,
+    MCS_SS_CDS,
+    PHARMACY_CDS,
+    VMS_SS_CDS,
 )
 
 from .clm_line import ClmLineBuilder
@@ -18,6 +27,7 @@ from .util import (
     extract_col_str,
     read_multi_line_file,
     read_single_line_file,
+    sample_name_for_claim_type,
 )
 
 CLM_COL = [
@@ -35,8 +45,8 @@ CLM_COL = [
     "CLM_ORIG_CNTL_NUM",
     "CLM_SRVC_PRVDR_GNRC_ID_NUM",
     "CLM_PD_DT",
-    "CLM_PRSBNG_PRVDR_GNRC_ID_NUMPRVDR_PRSBNG_ID_QLFYR_CD",
-    "CLM_BENE_PMT_AMT",
+    "CLM_PRSBNG_PRVDR_GNRC_ID_NUM",
+    "PRVDR_PRSBNG_ID_QLFYR_CDCLM_BENE_PMT_AMT",
     "CLM_OTHR_TP_PD_AMT",
     "PRVDR_SRVC_ID_QLFYR_CD",
     "CLM_MDCR_DDCTBL_AMT",
@@ -68,6 +78,8 @@ CLM_COL = [
     "PRVDR_ATNDG_PRVDR_NPI_NUM",
     "PRVDR_OPRTG_PRVDR_NPI_NUM",
     "PRVDR_OTHR_PRVDR_NPI_NUM",
+    "CLM_OTHR_PRVDR_NPI_NUM",
+    "CLM_RNDRG_PRVDR_NPI_NUM",
     "CLM_BLOOD_CHRG_AMT",
     "CLM_BLOOD_NCVRD_CHRG_AMT",
     "CLM_COB_PTNT_RESP_AMT",
@@ -176,6 +188,10 @@ INST_COL = [
     "DGNS_DRG_OUTLIER_CD",
     "CLM_MDCR_NPMT_RSN_CD",
     "CLM_FI_ACTN_CD",
+    "CLM_MDCR_IP_BENE_DDCTBL_AMT",
+    "CLM_OP_SRVC_TYPE_CD",
+    "CLM_MDCR_INSTNL_BENE_PD_AMT",
+    "CLM_INSTNL_LOW_VOL_PMT_AMT",
 ]
 
 CLM_VAL_COL = [
@@ -206,8 +222,8 @@ RX_LINE_COL = [
     "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
     "CLM_LINE_REBT_PASSTHRU_POS_AMT",
     "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-    "CLM_LINE_RPTD_GAP_DSCNT_AMTCLM_LINE_AUTHRZD_FILL_NUM",
-    "CLM_PHRMCY_SRVC_TYPE_CD",
+    "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+    "CLM_LINE_AUTHRZD_FILL_NUMCLM_PHRMCY_SRVC_TYPE_CD",
     "CLM_LINE_RX_ORGN_CD",
     "CLM_BRND_GNRC_CD",
     "CLM_PTNT_RSDNC_CD",
@@ -220,6 +236,24 @@ RX_LINE_COL = [
     "CLM_CTSTRPHC_CVRG_IND_CD",
     "CLM_DSPNSNG_STUS_CD",
 ]
+
+SAMPLE_NAME_BY_CLAIM_TYPES: dict[tuple[int, ...], str] = {
+    tuple(PHARMACY_CDS): "eob-pharmacy.json",
+    # professional
+    tuple(ADJUDICATED_PROFESSIONAL_CARRIER_NCH_CDS): "eob-carrier-nch.json",
+    tuple(ADJUDICATED_PROFESSIONAL_DME_NCH_CDS): "eob-dme-nch.json",
+    tuple(MCS_SS_CDS): "eob-carrier-mcs-ss.json",
+    tuple(VMS_SS_CDS): "eob-vms-ss.json",
+    # institutional
+    tuple(INSTITUTIONAL_HHA_NCH_CD): "eob-hha-nch.json",
+    tuple(INSTITUTIONAL_SNF_NCH_CDS): "eob-snf-nch.json",
+    tuple(INSTITUTIONAL_OUTPATIENT_NCH_CD): "eob-outpatient-nch.json",
+    tuple(INSTITUTIONAL_HOSPICE_NCH_CD): "eob-hospice-nch.json",
+    tuple(INSTITUTIONAL_INPATIENT_NCH_CD): "eob-inpatient-nch.json",
+    tuple(INSTITUTIONAL_MA_NCH_CDS): "eob-ma-nch.json",
+    tuple(FISS_SS_CDS): "eob-fiss-ss.json",
+    tuple(INSTITUTIONAL_HOSPICE_ELECTION_CDS): "eob-hospice-election.json",
+}
 
 
 class Result:
@@ -252,48 +286,30 @@ class SampleGenerator:
             sys.exit(1)
 
         claim_type = int(claim_type_raw)
-
-        if claim_type in PHARMACY_CLM_TYPE_CDS:
-            result = self.create_base(
-                clm_uniq_id=clm_uniq_id,
-                clm_type_cd=claim_type,
-                claim_row=claim_row,
-                destination_file_name="EOB-Pharmacy-Sample.json",
-            )
+        result = self.create_base(
+            clm_uniq_id=clm_uniq_id,
+            clm_type_cd=claim_type,
+            claim_row=claim_row,
+            destination_file_name=sample_name_for_claim_type(
+                SAMPLE_NAME_BY_CLAIM_TYPES, claim_type
+            ),
+        )
+        # type specific line joins
+        if claim_type in PHARMACY_CDS:
             self.add_rx_line(claim_row=claim_row, result=result)
             result.result_json["resourceType"] = "ExplanationOfBenefit-Pharmacy"
-        elif claim_type in ADJUDICATED_PROFESSIONAL_CARRIER_CLAIM_TYPES:
-            result = self.create_base(
-                clm_uniq_id=clm_uniq_id,
-                clm_type_cd=claim_type,
-                claim_row=claim_row,
-                destination_file_name="EOB-Carrier-Sample.json",
-            )
-        elif claim_type in ADJUDICATED_PROFESSIONAL_CLAIM_TYPES_DME:
-            result = self.create_base(
-                clm_uniq_id=clm_uniq_id,
-                clm_type_cd=claim_type,
-                claim_row=claim_row,
-                destination_file_name="EOB-DME-Sample.json",
-            )
-        elif claim_type in MCS_CLM_TYPE_CDS:
-            result = self.create_base(
-                clm_uniq_id=clm_uniq_id,
-                clm_type_cd=claim_type,
-                claim_row=claim_row,
-                destination_file_name="EOB-Carrier-MCS-Sample.json",
-            )
+        elif claim_type in MCS_SS_CDS:
             self.add_mcs_lines(claim_row=claim_row, result=result)
             self.add_fiss_lines(claim_row=claim_row, result=result)
-        # this a default fallback for institutional claim types at the moment
-        # as this work continues we may add more specific handling
-        # for different institutional claim types
-        # also fall back for known claim types that we do not have a special sample for
-        elif claim_type in INSTITUTIONAL_CLAIM_TYPES or claim_type in VMS_CDS:
-            result = self.create_base(clm_uniq_id, claim_type, claim_row, "EOB-Base-Sample.json")
-            self.add_instl(claim_row=claim_row, result=result)
+        elif claim_type in ADJUDICATED_PROFESSIONAL_NCH_CDS:
+            print("found Carrier or Carrier DME -- no special joins")
+        # INST and fall back for known claim types that we do not have a special sample for
+        elif claim_type in [*INSTITUTIONAL_CDS, *VMS_SS_CDS]:
+            self.add_instnl(claim_row=claim_row, result=result)
             self.add_proc_lines(claim_row=claim_row, result=result)
             self.add_clm_values(claim_row=claim_row, result=result)
+            if claim_type in FISS_SS_CDS:
+                self.add_fiss_lines(claim_row=claim_row, result=result)
         else:
             print("Unknown Type")
             sys.exit(1)
@@ -376,7 +392,7 @@ class SampleGenerator:
             }
         )
 
-    def add_instl(self, claim_row: dict[str, str], result: Result) -> None:
+    def add_instnl(self, claim_row: dict[str, str], result: Result) -> None:
         instnl = self.read_instnl(clm_row=claim_row)
         result.result_json["institutionalComponents"] = {
             col: extract_col_str(instnl, col) for col in INST_COL
