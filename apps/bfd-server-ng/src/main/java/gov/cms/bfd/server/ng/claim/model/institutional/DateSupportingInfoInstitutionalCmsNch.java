@@ -28,12 +28,12 @@ public class DateSupportingInfoInstitutionalCmsNch implements SupportingInfoComp
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
-            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
-            dateClaimOcrncSupportingInfoInstitutionalNch.toFhir(supportingInfoFactory).stream(),
             Stream.of(
                     nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
                     claimProcessDate.toFhir(supportingInfoFactory))
-                .flatMap(Optional::stream))
+                .flatMap(Optional::stream),
+            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
+            dateClaimOcrncSupportingInfoInstitutionalNch.toFhir(supportingInfoFactory).stream())
         .flatMap(Function.identity())
         .toList();
   }
