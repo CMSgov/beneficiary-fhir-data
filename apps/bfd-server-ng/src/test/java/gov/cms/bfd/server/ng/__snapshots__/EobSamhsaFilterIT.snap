@@ -4581,27 +4581,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence": 8,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "admissionperiod"
-          } ]
-        },
-        "timingPeriod": {
-          "start": "2019-11-17",
-          "end": "2019-12-03"
-        }
-      }, {
-        "sequence": 9,
-        "category": {
-          "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2019-12-03"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_NCH_WKLY_PROC_DT",
             "display": "Weekly Process Date"
@@ -4613,7 +4592,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 11,
+        "sequence": 9,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4623,6 +4602,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2019-12-03"
+      }, {
+        "sequence": 10,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "admissionperiod"
+          } ]
+        },
+        "timingPeriod": {
+          "start": "2019-11-17",
+          "end": "2019-12-03"
+        }
+      }, {
+        "sequence": 11,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2019-12-03"
@@ -6665,27 +6665,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence": 8,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "admissionperiod"
-          } ]
-        },
-        "timingPeriod": {
-          "start": "2019-09-23",
-          "end": "2019-09-30"
-        }
-      }, {
-        "sequence": 9,
-        "category": {
-          "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2019-09-30"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_NCH_WKLY_PROC_DT",
             "display": "Weekly Process Date"
@@ -6697,7 +6676,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "timingDate": "2019-09-30"
       }, {
-        "sequence": 11,
+        "sequence": 9,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6707,6 +6686,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2019-09-30"
+      }, {
+        "sequence": 10,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "admissionperiod"
+          } ]
+        },
+        "timingPeriod": {
+          "start": "2019-09-23",
+          "end": "2019-09-30"
+        }
+      }, {
+        "sequence": 11,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2019-09-30"
@@ -10635,15 +10635,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence": 7,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2020-09-11"
-      }, {
-        "sequence": 8,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_CMS_PROC_DT",
             "display": "FI Claim Process Date"
@@ -10651,6 +10642,15 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2020-09-11"
+      }, {
+        "sequence": 8,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2020-09-11"
@@ -14036,27 +14036,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence": 8,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "admissionperiod"
-          } ]
-        },
-        "timingPeriod": {
-          "start": "2019-11-17",
-          "end": "2019-12-03"
-        }
-      }, {
-        "sequence": 9,
-        "category": {
-          "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2019-12-03"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_NCH_WKLY_PROC_DT",
             "display": "Weekly Process Date"
@@ -14068,7 +14047,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "timingDate": "2019-12-03"
       }, {
-        "sequence": 11,
+        "sequence": 9,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -14078,6 +14057,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2019-12-03"
+      }, {
+        "sequence": 10,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "admissionperiod"
+          } ]
+        },
+        "timingPeriod": {
+          "start": "2019-11-17",
+          "end": "2019-12-03"
+        }
+      }, {
+        "sequence": 11,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2019-12-03"
@@ -16120,27 +16120,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence": 8,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "admissionperiod"
-          } ]
-        },
-        "timingPeriod": {
-          "start": "2019-09-23",
-          "end": "2019-09-30"
-        }
-      }, {
-        "sequence": 9,
-        "category": {
-          "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2019-09-30"
-      }, {
-        "sequence": 10,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_NCH_WKLY_PROC_DT",
             "display": "Weekly Process Date"
@@ -16152,7 +16131,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "timingDate": "2019-09-30"
       }, {
-        "sequence": 11,
+        "sequence": 9,
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -16162,6 +16141,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2019-09-30"
+      }, {
+        "sequence": 10,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "admissionperiod"
+          } ]
+        },
+        "timingPeriod": {
+          "start": "2019-09-23",
+          "end": "2019-09-30"
+        }
+      }, {
+        "sequence": 11,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2019-09-30"
@@ -20090,15 +20090,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence": 7,
         "category": {
           "coding": [ {
-            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code": "clmrecvddate"
-          } ]
-        },
-        "timingDate": "2020-09-11"
-      }, {
-        "sequence": 8,
-        "category": {
-          "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
             "code": "CLM_CMS_PROC_DT",
             "display": "FI Claim Process Date"
@@ -20106,6 +20097,15 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
             "display": "Information"
+          } ]
+        },
+        "timingDate": "2020-09-11"
+      }, {
+        "sequence": 8,
+        "category": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+            "code": "clmrecvddate"
           } ]
         },
         "timingDate": "2020-09-11"
