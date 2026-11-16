@@ -11,7 +11,10 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Latest Claim Occurrence event for "Not Covered From Date", the beginning of the period. */
+/**
+ * Latest Claim Occurrence event for "Not Covered From Date", and "Not Covered Thru Date" serving
+ * the best set of (From,Thru) by comparison below
+ */
 @Embeddable
 public class NoncoveredDatesNormalized {
 
