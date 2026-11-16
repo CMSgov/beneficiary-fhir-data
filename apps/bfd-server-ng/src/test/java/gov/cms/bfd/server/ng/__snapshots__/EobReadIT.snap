@@ -4417,18 +4417,25 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence": 10,
     "category": {
       "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_NCH_WKLY_PROC_DT",
-        "display": "Weekly Process Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code": "admissionperiod"
+      } ]
+    },
+    "timingPeriod": {
+      "start": "2021-09-26",
+      "end": "2021-10-03"
+    }
+  }, {
+    "sequence": 11,
+    "category": {
+      "coding": [ {
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code": "clmrecvddate"
       } ]
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 11,
+    "sequence": 12,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4440,9 +4447,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "display": "Information"
       } ]
     },
-    "timingDate": "2021-10-03"
+    "timingDate": "2021-10-04"
   }, {
-    "sequence": 12,
+    "sequence": 13,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4454,44 +4461,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "display": "Information"
       } ]
     },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 13,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_CMS_PROC_DT",
-        "display": "FI Claim Process Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
+    "timingDate": "2021-10-04"
   }, {
     "sequence": 14,
-    "category": {
-      "coding": [ {
-        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code": "admissionperiod"
-      } ]
-    },
-    "timingPeriod": {
-      "start": "2021-09-26",
-      "end": "2021-10-03"
-    }
-  }, {
-    "sequence": 15,
-    "category": {
-      "coding": [ {
-        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code": "clmrecvddate"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 16,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4505,7 +4477,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-10-04"
   }, {
-    "sequence": 17,
+    "sequence": 15,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4519,7 +4491,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-09-26"
   }, {
-    "sequence": 18,
+    "sequence": 16,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4533,7 +4505,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "timingDate": "2021-09-27"
   }, {
-    "sequence": 19,
+    "sequence": 17,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -4546,6 +4518,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     },
     "timingDate": "2021-10-04"
+  }, {
+    "sequence": 18,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCH_WKLY_PROC_DT",
+        "display": "Weekly Process Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-03"
+  }, {
+    "sequence": 19,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_CMS_PROC_DT",
+        "display": "FI Claim Process Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-03"
   }, {
     "sequence": 20,
     "category": {
@@ -6104,18 +6104,25 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence": 10,
     "category": {
       "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_NCH_WKLY_PROC_DT",
-        "display": "Weekly Process Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code": "admissionperiod"
+      } ]
+    },
+    "timingPeriod": {
+      "start": "2021-09-26",
+      "end": "2021-10-03"
+    }
+  }, {
+    "sequence": 11,
+    "category": {
+      "coding": [ {
+        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code": "clmrecvddate"
       } ]
     },
     "timingDate": "2021-10-03"
   }, {
-    "sequence": 11,
+    "sequence": 12,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6127,9 +6134,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "display": "Information"
       } ]
     },
-    "timingDate": "2021-10-03"
+    "timingDate": "2021-10-04"
   }, {
-    "sequence": 12,
+    "sequence": 13,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6141,44 +6148,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "display": "Information"
       } ]
     },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 13,
-    "category": {
-      "coding": [ {
-        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code": "CLM_CMS_PROC_DT",
-        "display": "FI Claim Process Date"
-      }, {
-        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code": "info",
-        "display": "Information"
-      } ]
-    },
-    "timingDate": "2021-10-03"
+    "timingDate": "2021-10-04"
   }, {
     "sequence": 14,
-    "category": {
-      "coding": [ {
-        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code": "admissionperiod"
-      } ]
-    },
-    "timingPeriod": {
-      "start": "2021-09-26",
-      "end": "2021-10-03"
-    }
-  }, {
-    "sequence": 15,
-    "category": {
-      "coding": [ {
-        "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code": "clmrecvddate"
-      } ]
-    },
-    "timingDate": "2021-10-03"
-  }, {
-    "sequence": 16,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6192,7 +6164,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-10-04"
   }, {
-    "sequence": 17,
+    "sequence": 15,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6206,7 +6178,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-09-26"
   }, {
-    "sequence": 18,
+    "sequence": 16,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6220,7 +6192,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "timingDate": "2021-09-27"
   }, {
-    "sequence": 19,
+    "sequence": 17,
     "category": {
       "coding": [ {
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
@@ -6233,6 +6205,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     },
     "timingDate": "2021-10-04"
+  }, {
+    "sequence": 18,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_NCH_WKLY_PROC_DT",
+        "display": "Weekly Process Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-03"
+  }, {
+    "sequence": 19,
+    "category": {
+      "coding": [ {
+        "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code": "CLM_CMS_PROC_DT",
+        "display": "FI Claim Process Date"
+      }, {
+        "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code": "info",
+        "display": "Information"
+      } ]
+    },
+    "timingDate": "2021-10-03"
   }, {
     "sequence": 20,
     "category": {

@@ -8,6 +8,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -22,22 +23,18 @@ public class DateSupportingInfoInstitutionalCmsNch implements SupportingInfoComp
 
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ClaimProcessDate claimProcessDate;
-  @Embedded private NoncoveredFromDate noncoveredFromDate;
-  @Embedded private NoncoveredThroughDate noncoveredThroughDate;
 
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.concat(
-            Stream.concat(
-                Stream.of(
-                        nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-                        noncoveredFromDate.toFhir(supportingInfoFactory),
-                        noncoveredThroughDate.toFhir(supportingInfoFactory),
-                        claimProcessDate.toFhir(supportingInfoFactory))
-                    .flatMap(Optional::stream),
-                dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream()),
-            dateClaimOcrncSupportingInfoInstitutionalNch.toFhir(supportingInfoFactory).stream())
+    return Stream.of(
+            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
+            dateClaimOcrncSupportingInfoInstitutionalNch.toFhir(supportingInfoFactory).stream(),
+            Stream.of(
+                    nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                    claimProcessDate.toFhir(supportingInfoFactory))
+                .flatMap(Optional::stream))
+        .flatMap(Function.identity())
         .toList();
   }
 }
