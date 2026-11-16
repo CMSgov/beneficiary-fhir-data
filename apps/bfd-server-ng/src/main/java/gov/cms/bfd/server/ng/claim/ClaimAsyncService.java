@@ -104,7 +104,6 @@ public class ClaimAsyncService {
              %s
             """,
             beneWith, baseQuery, whereClause);
-    System.out.println(jpql);
     try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
