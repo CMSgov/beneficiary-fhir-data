@@ -82,14 +82,28 @@ public class ClaimAsyncService {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters);
+    var beneWith =
+        """
+              WITH bene_sks AS (
+                SELECT bene.beneSk AS beneSk,
+                ROW_NUMBER() OVER (
+                    PARTITION BY bene.beneSk
+                    ORDER BY bene.effectiveTimestamp DESC
+                ) AS rn
+                FROM Beneficiary bene
+                WHERE bene.xrefSk = :beneSk
+              )
+            """;
     var jpql =
         String.format(
             """
              %s
-             WHERE b.xrefSk = :beneSk
+             %s
+             JOIN bene_sks bs ON bs.beneSk = c.beneSk
+             WHERE  bs.rn = 1
              %s
             """,
-            baseQuery, whereClause);
+            beneWith, baseQuery, whereClause);
     try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
