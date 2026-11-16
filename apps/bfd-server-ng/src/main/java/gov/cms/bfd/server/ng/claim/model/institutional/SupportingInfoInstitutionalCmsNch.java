@@ -13,6 +13,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -51,7 +52,7 @@ public class SupportingInfoInstitutionalCmsNch implements SupportingInfoComponen
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
-    return Stream.concat(
+    return Stream.of(
             claimSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
             Stream.of(
                     mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
@@ -63,6 +64,7 @@ public class SupportingInfoInstitutionalCmsNch implements SupportingInfoComponen
                     claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
                     billingProviderSsaStateCode.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream))
+        .flatMap(Function.identity())
         .toList();
   }
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -25,11 +26,11 @@ public class DateSupportingInfoInstitutionalCmsSharedSystems
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.concat(
-            Stream.concat(
-                Stream.of(claimProcessDate.toFhir(supportingInfoFactory)).flatMap(Optional::stream),
-                dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream()),
+    return Stream.of(
+            Stream.of(claimProcessDate.toFhir(supportingInfoFactory)).flatMap(Optional::stream),
+            dateSupportingInfoInstitutional.toFhir(supportingInfoFactory).stream(),
             dateClaimOcrncSupportingInfo.toFhir(supportingInfoFactory).stream())
+        .flatMap(Function.identity())
         .toList();
   }
 }
