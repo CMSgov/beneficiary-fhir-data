@@ -4291,6 +4291,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
   profiles:
     - CMS
+    # here
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
