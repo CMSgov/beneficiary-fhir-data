@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.common.SystemType;
 import gov.cms.bfd.server.ng.claim.model.common.entities.ClaimBase;
 import gov.cms.bfd.server.ng.claim.model.priorauth.entities.PriorAuthorization;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.MetricRecorder;
 import io.micrometer.core.instrument.Tags;
@@ -76,19 +77,34 @@ public class ClaimAsyncService {
       String baseQuery,
       Class<T> claimClass,
       SystemType systemType,
-      List<Long> beneSks,
+      ClaimSearchCriteria criteria,
       List<DbFilterBuilder> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters);
+    var beneWith =
+        """
+              WITH bene_sks AS (
+                SELECT bene.beneSk AS beneSk,
+                ROW_NUMBER() OVER (
+                    PARTITION BY bene.beneSk
+                    ORDER BY bene.effectiveTimestamp DESC
+                ) AS rn
+                FROM Beneficiary bene
+                WHERE bene.xrefSk = :beneSk
+              )
+            """;
     var jpql =
         String.format(
             """
              %s
-             WHERE b.beneSk in :beneSk
+             %s
+             JOIN bene_sks bs ON bs.beneSk = c.beneSk
+             WHERE  bs.rn = 1
              %s
             """,
-            baseQuery, whereClause);
+            beneWith, baseQuery, whereClause);
+    System.out.println(jpql);
     try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
@@ -97,7 +113,7 @@ public class ClaimAsyncService {
             var query =
                 DbFilterParam.withParams(
                         entityManager.createQuery(jpql, claimClass), filters.params())
-                    .setParameter("beneSk", beneSks);
+                    .setParameter("beneSk", criteria.beneSk());
             var result =
                 queryTelemetryUtil.executeAndTrack(
                     "fetchClaims_" + claimClass.getSimpleName(), query);
