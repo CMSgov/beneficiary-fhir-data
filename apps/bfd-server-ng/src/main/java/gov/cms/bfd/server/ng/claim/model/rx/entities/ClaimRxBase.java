@@ -83,8 +83,7 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-    Optional<ExplanationOfBenefit.ItemComponent> claimLineItem =
-        getClaimItem().getClaimLine().toFhirItemComponent(options);
+    var claimLineItem = getClaimItem().getClaimLine().toFhirItemComponent(options);
 
     claimLineItem.ifPresent(
         item -> {
