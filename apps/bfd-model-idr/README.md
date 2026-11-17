@@ -197,10 +197,10 @@ If _any_ claims-related tables have had columns added to their respective genera
 > If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
 
 > [!CAUTION]
-> When modifying the synthetic generators, you need to verify that you did not break idempotency. You can verify this by first generating synthetic CSV files from scratch and moving them to a separate folder like temp and then checking the checksum like this:
+> When modifying the synthetic generators, you need to verify that you did not break idempotency. You can verify this by first generating synthetic CSV files from scratch and moving them to a separate folder like temp and then running our diff script like below. Check out the Justfile for more information.
 
 ```sh
-for file in temp/*.csv; do name=$(basename "$file"); [ -f "out/$name" ] && shasum -a 256 {temp,out}/"$name"; done
+just diff-synthetic-files your-source-dir your-regenerated-sir
 ```
 
 Note: If you are regenerating synthetic test data in `test_sample1` or `test_sample2` to insert new fields or remove old fields then the checksum of the affected CSV files would not match, which is expected
