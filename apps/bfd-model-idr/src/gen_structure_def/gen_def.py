@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from subprocess import CompletedProcess
 from typing import Any, cast
 
 import requests
@@ -19,11 +20,11 @@ from fhir.resources.R4B.structuredefinition import (
     StructureDefinition,
     StructureDefinitionDifferential,
 )
+from requests.models import Response
 
+from gen_structure_def.fhir_def import FHIRDefinitions
 from install_fhir_validator import get_validator_jar_path
 from install_fhir_validator import main as install_validator
-
-from .fhir_def import FHIRDefinitions
 
 
 class StructureDefinitionGenerator:
@@ -43,21 +44,21 @@ class StructureDefinitionGenerator:
         output_file_name: str,
         applies_to: str,
         delete_tmp_files: bool = True,
-    ):
-        self.source_directory = source_directory
-        self.output_directory = output_directory
-        self.url = url
-        self.profile = profile
-        self.source_yaml = source_yaml
-        self.title = title
-        self.version = version
-        self.name = name
-        self.description = description
-        self.base_definition = base_definition
-        self.resource_type = resource_type
-        self.output_file_name = output_file_name
-        self.applies_to = applies_to
-        self.delete_tmp_files = delete_tmp_files
+    ) -> None:
+        self.source_directory: str = source_directory
+        self.output_directory: str = output_directory
+        self.url: str = url
+        self.profile: str = profile
+        self.source_yaml: str = source_yaml
+        self.title: str = title
+        self.version: str = version
+        self.name: str = name
+        self.description: str = description
+        self.base_definition: str = base_definition
+        self.resource_type: str = resource_type
+        self.output_file_name: str = output_file_name
+        self.applies_to: str = applies_to
+        self.delete_tmp_files: bool = delete_tmp_files
 
     def run(self) -> None:
         """Generate StructureDefinition Resource."""
@@ -66,13 +67,13 @@ class StructureDefinitionGenerator:
         print(f"Target Directory: {self.output_directory}")
         print(f"File: {self.output_file_name}")
 
-        yaml_path = Path(f"{self.source_directory}/{self.source_yaml}")
+        yaml_path: Path = Path(f"{self.source_directory}/{self.source_yaml}")
         with yaml_path.open(mode="r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+            yaml_data: list[Any] = yaml.safe_load(stream=f)
 
-        data = [
+        data: list[Any] = [
             node
-            for node in data
+            for node in yaml_data
             if self.profile in node.get("profiles", [])
             and node.get("structureDef")
             and self.applies_to in node.get("appliesTo", [])
@@ -88,20 +89,20 @@ class StructureDefinitionGenerator:
                 mode="w", suffix=".json", delete=self.delete_tmp_files, dir=output_dir
             ) as differential_file,
         ):
-            sd_json_path = Path(sd_json_file.name)
+            sd_json_path: Path = Path(sd_json_file.name)
             self.download_structure_definition(
-                self.base_definition,
-                sd_json_path,
+                narrative_url=self.base_definition,
+                output_path=sd_json_path,
             )
 
-            source_structure_def = StructureDefinition.model_construct(
+            source_structure_def: StructureDefinition = StructureDefinition.model_construct(
                 **json.loads(sd_json_path.read_text(encoding="UTF-8"))
             )
 
-            fhir_defs = FHIRDefinitions()
+            fhir_defs: FHIRDefinitions = FHIRDefinitions()
 
             elements: list[ElementDefinition] = []
-            slicing_added = set()
+            slicing_added: set[Any] = set()
             for node in data:
                 struct_def_data = node.get("structureDef")
                 el_id = struct_def_data.get("id")
@@ -110,7 +111,7 @@ class StructureDefinitionGenerator:
                 column_name = node.get("sourceColumn")
                 slicing = struct_def_data.get("slicing")
                 pattern = struct_def_data.get("pattern")
-                max = struct_def_data.get("max") or "1"
+                max_value: str = struct_def_data.get("max") or "1"
                 type_node = struct_def_data.get("type")
                 constraint = struct_def_data.get("constraint")
                 binding = struct_def_data.get("binding")
@@ -119,7 +120,7 @@ class StructureDefinitionGenerator:
                 if not column_name:
                     input_path.split(".")[1]
 
-                column_name = str(column_name).replace("_", "-")
+                column_name: str = str(column_name).replace("_", "-")
 
                 if slicing:
                     if path in slicing_added:
@@ -127,7 +128,7 @@ class StructureDefinitionGenerator:
                             f"Slice path {path} appears on more than one node."
                             + " Please consildate slicing to a single node"
                         )
-                    slicing_el = ElementDefinition(
+                    slicing_el: ElementDefinition = ElementDefinition(
                         path=slicing.get("path") or path,
                         id=slicing.get("id") or path,
                         slicing=ElementDefinitionSlicing(
@@ -148,12 +149,12 @@ class StructureDefinitionGenerator:
                 if struct_def_data.get("proceedingEd"):
                     elements.extend(struct_def_data.get("proceedingEd"))
 
-                el = ElementDefinition(
+                el: ElementDefinition = ElementDefinition(
                     path=path,
                     id=el_id,
                     short=input_path,
                     min=struct_def_data.get("min") or 0,
-                    max=max,
+                    max=max_value,
                     isSummary=struct_def_data.get("isSummary") or None,
                     mustSupport=struct_def_data.get("mustSupport") or None,
                     sliceName=struct_def_data.get("sliceName") or None,
@@ -176,10 +177,10 @@ class StructureDefinitionGenerator:
 
                 elements.append(el)
 
-            sorted_elements = []
+            sorted_elements: list[Any] = []
             for p in fhir_defs.expand_type_paths(self.resource_type):
-                els = [el for el in elements if get_field(el, "path") == p]
-                slice_names = [
+                els: list[ElementDefinition] = [el for el in elements if get_field(el, "path") == p]
+                slice_names: list[object | None] = [
                     get_field(el, "sliceName") for el in els if get_field(el, "sliceName")
                 ]
                 if slice_names:
@@ -205,7 +206,7 @@ class StructureDefinitionGenerator:
                         if el not in sorted_elements:
                             sorted_elements.append(el)
 
-            structure_def = StructureDefinition(
+            structure_def: StructureDefinition = StructureDefinition(
                 url=self.url,
                 name=self.name,
                 status="active",
@@ -246,7 +247,7 @@ class StructureDefinitionGenerator:
     def download_structure_definition(self, narrative_url: str, output_path: Path) -> None:
         """Convert an IG narrative page URL into its raw JSON canonical form and download it."""
         json_url = narrative_url.replace("/en/", "/") + ".json"
-        resp = requests.get(json_url, headers={"Accept": "application/fhir+json"})
+        resp: Response = requests.get(json_url, headers={"Accept": "application/fhir+json"})
         resp.raise_for_status()
         output_path.write_text(resp.text, encoding="utf-8")
         print(f"Downloaded: {json_url} -> {output_path}")
@@ -260,7 +261,7 @@ class StructureDefinitionGenerator:
         validator_jar_path = get_validator_jar_path()
         if not validator_jar_path.exists():
             install_validator()
-        cmd = [
+        cmd: list[str] = [
             "java",
             "-jar",
             str(validator_jar_path.resolve()),
@@ -278,7 +279,9 @@ class StructureDefinitionGenerator:
             str(output_path.resolve()),
         ]
         print(f"Running: {' '.join(cmd)}")
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        result: CompletedProcess[str] = subprocess.run(
+            cmd, check=False, capture_output=True, text=True
+        )
 
         if result.returncode != 0:
             print(result.stdout)
@@ -288,7 +291,7 @@ class StructureDefinitionGenerator:
         print(f"Snapshot written to: {output_path}")
 
 
-def get_field(el: Any, field: str) -> Any | None:
+def get_field(el: object, field: str) -> object | None:
     if isinstance(el, dict):
-        return el.get(field)
+        return cast("dict[str, object]", el).get(field)
     return getattr(el, field, None)
