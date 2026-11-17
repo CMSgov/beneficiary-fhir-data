@@ -681,6 +681,7 @@ class _ClaimsFile(StrEnum):
             f.PA_DT_UPDATED,
             f.SERVICE_CNTS,
             f.PA_DECISION,
+            f.PR_REASON_CODE_1,
             f.PA_REQ_SUB_DT,
             f.PA_REQ_REC_DT,
             f.PA_DECISION_DT,

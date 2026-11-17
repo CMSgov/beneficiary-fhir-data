@@ -120,6 +120,7 @@ class PriorAuthGeneratorUtil:
                 hcpcs = random.choice(["G0299", "G0151", "G0300", "G0157", "G0495", "G0496", "G0493", "G0494", "G0152", "G0162"])
                 service_cnts = random.randint(1, 15)
                 pa_decision = random.choice(gen_utils.code_systems.get("PA_DECISION", ["A", "P", "N"]))
+                pr_reason_code_1 = "50" if pa_decision == "N" else ""
 
                 order_refer_npi = random.choice(generated_type_1_npis) if generated_type_1_npis else gen_npi_id("PRVDR_SK")
                 render_npi = random.choice(generated_type_1_npis + generated_type_2_npis) if (generated_type_1_npis or generated_type_2_npis) else gen_npi_id("PRVDR_SK")
@@ -155,6 +156,7 @@ class PriorAuthGeneratorUtil:
                     "PA_DT_UPDATED": pa_dt_updated,
                     "SERVICE_CNTS": service_cnts,
                     "PA_DECISION": pa_decision,
+                    "PR_REASON_CODE_1": pr_reason_code_1,
                     "PA_REQ_SUB_DT": pa_req_sub_dt,
                     "PA_REQ_REC_DT": pa_req_rec_dt,
                     "PA_DECISION_DT": pa_decision_dt,

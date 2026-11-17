@@ -1,7 +1,7 @@
 map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-PriorAuth" = "BFD-ExplanationOfBenefit-PriorAuth-Map"
 
 uses "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-PriorAuth" alias ExplanationOfBenefitPA as source
-//hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
+//hl7.org urls are used for dependent resources as the FHIR validator resolves them as such.
 uses "http://hl7.org/fhir/StructureDefinition/ProcedureComponent" alias ProcedureComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent" alias DiagnosisComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias SupportingInfoComponent as source
@@ -12,12 +12,12 @@ uses "http://hl7.org/fhir/StructureDefinition/Provider" alias ProviderComponent 
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper"
 
 group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB){
-    
+
     src -> tgt.status = "active" "Set status";
     src -> tgt.use = "preauthorization" "Set use code";
     src.derivedOutcome as paOutcome -> tgt.outcome = paOutcome "Add outcome";
@@ -37,7 +37,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       //CodeSystem -> CLM_TYPE
       //Two types -  1: PDEX, 2: CMS-specific. use concept map
       src.CLM_TYPE as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PriorAuthType','coding') "translate code";
-      //No blanks here since 2023. 
+      //No blanks here since 2023.
       src.CLM_TYPE as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE', typeCd) "Add claim type code";
     } "Create type";
 
@@ -51,7 +51,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     //ExplanationOfBenefit.created should be the highest value of PA_DT_UPDATED.
     src.createdDate as createdDate -> tgt.created = createdDate "Add created date";
 
-    //UTN - Unique Tracking Number, not actually unique though. 
+    //UTN - Unique Tracking Number, not actually unique though.
     src.UTN as utn -> tgt.identifier = create('Identifier') as tgtIdentifier then {
       src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/Unique-Tracking-Number" "Add UTN";
       src -> tgtIdentifier.value = utn "Add UTN";
@@ -62,7 +62,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/PA-ICN-DCN" "Add system";
       src.ICN_DCN as dcn -> tgtIdentifier.value = dcn "Add value";
     } "Add ICN_DCN for Part B only";
-    
+
 
     src.UTN_VALID_ST_DT as utnStartDate -> tgt.preAuthRefPeriod = create('Period') as period then {
       utnStartDate -> period.start = utnStartDate "Add start date";
@@ -70,10 +70,10 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     } "Add preAuthRefPeriod";
 
 
-    //ATT_PHY_NPI - Attending Physician NPI -> populated infrequently. 15172/1376490 are prac 
-    //ORDER_REFER_NPI - yes populated -> per line. 4903 / 1101955 are orgs. -> basically always practitioner. 
+    //ATT_PHY_NPI - Attending Physician NPI -> populated infrequently. 15172/1376490 are prac
+    //ORDER_REFER_NPI - yes populated -> per line. 4903 / 1101955 are orgs. -> basically always practitioner.
     //RENDER_NPI - yes populated -> per line -> can be org or practitioner, few practitioners
-    //The PA data is kind of interesting. For now, we're going to populate a careTeam with the list of unique ones. 
+    //The PA data is kind of interesting. For now, we're going to populate a careTeam with the list of unique ones.
     src.providerList as pList where pList.careTeamType.exists() and pList.PRVDR_SK.exists() -> tgt.careTeam = create('BackboneElement') as tgtCareTeam then {
       pList.careTeamType as careTeamType -> tgtCareTeam.role = create('CodeableConcept') as tgtCC then {
         careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
@@ -86,14 +86,14 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
             src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "Set System";
             npi -> tgtId.value = npi "Set NPI";
           } "Add identifier when NPI";
-          //See augment_sample_resources for how this is constructed. It will be blank in some instances. 
+          //See augment_sample_resources for how this is constructed. It will be blank in some instances.
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
           pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
           pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
 
         } "Add reference to EOB";
     } "Add CareTeam providers";
-    
+
     src.priorAuthItem as paItem -> tgt.item = create('BackboneElement') as tgtItem then {
       //Current_segment (line item)
       paItem.CURRENT_SEGMENT as sequenceNumber -> tgtItem.sequence = sequenceNumber "Add sequence number";
@@ -104,7 +104,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
 
       paItem.PRICE_MOD1 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
       paItem.PRICE_MOD2 as modifierCode where(modifierCode.length()=2) -> tgtItem.modifier = cc("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add modifier";
-      
+
       paItem.PLACE_OF_SERV as posCode -> tgtItem.location = create('CodeableConcept') as tgtCC then {
         paItem -> tgtCC.coding = create('Coding') as tgtCoding then {
           paItem -> tgtCoding.system = "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set" "Add system";
@@ -112,7 +112,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
         } "Add coding";
       } "Add place of service";
 
-      //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever. 
+      //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever.
       paItem.REV_CODE_1 as revenueCode -> tgtItem.revenue = create('CodeableConcept') as tgtRevenue then {
         revenueCode -> tgtRevenue.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD", revenueCode) "Add coding";
         revenueCode -> tgtRevenue.coding = create('Coding') as tgtCoding then {
@@ -125,6 +125,7 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     paItem.PA_DT_ADDED as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADtAdded(val, ext) "Add PA_DT_ADDED";
     paItem.PA_DT_UPDATED as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADtUpdated(val, ext) "Add PA_DT_UPDATED";
     paItem.PA_DECISION as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADecision(val, ext) "Add PA_DECISION";
+    paItem.PR_REASON_CODE_1 as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPRReasonCode1(val, ext) "Add PR_REASON_CODE_1";
     paItem.PA_REQ_SUB_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPAReqSubDt(val, ext) "Add PA_REQ_SUB_DT";
     paItem.PA_REQ_REC_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPAReqRecDt(val, ext) "Add PA_REQ_REC_DT";
     paItem.PA_DECISION_DT as val where (val != "") -> tgtItem.extension = create('Extension') as ext then addPADecisionDt(val, ext) "Add PA_DECISION_DT";
@@ -166,13 +167,13 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     //Empty fields (for now)
     //The following fields are in the PRAUC file, but are not currently active / used.
     //We can re-visit them if new PA programs are added. Some may be per-segment, some may be per-request.
-    //Thus, we should wait until then to decide. Notes on each field accompany them. 
+    //Thus, we should wait until then to decide. Notes on each field accompany them.
     //ICD_PROC_IND - ICD Proc Indicator -> always empty
     //ICD_PROC_CODE - ICD Procedure code -> always empty
     //ICD procedure code will remain unmapped until we see them populated.
     //SEGMENT COUNT - not useful, can count item.
-    //ICD_DIAG_IND_1 / ICD_DIAG_CODE_1 - indicator / diagnosis code - able to group? ever different? 
-    //assume diag ind = 0, none with 9, also not populated 
+    //ICD_DIAG_IND_1 / ICD_DIAG_CODE_1 - indicator / diagnosis code - able to group? ever different?
+    //assume diag ind = 0, none with 9, also not populated
     //not populated after 2022?
     //COND_CODE_1 to COND_CODE_4 -> all empty -> Not mapped for now
     //OCCUR_CODE_1 to OCCUR_CODE_4 -> all empty -> Not mapped for now
@@ -196,6 +197,13 @@ group addPADecision(source src: String, target tgt: Extension){
     src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/PA-DECISION" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addPRReasonCode1(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/PR-REASON-CODE-1" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
         inputCode -> tgtCoding.code = inputCode "set code";
       } "Set value";
 }
@@ -268,9 +276,9 @@ group createPriorAuthOrg(source src: ExplanationOfBenefitPA, target tgt: Organiz
     src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
   } "Set Org metadata";
   src -> tgt.active = "true" "set org status";
-  
+
   src.NAME as orgName -> tgt.name = orgName;
-  
+
   src.CMS_CERT as ccn -> tgt.identifier = create('Identifier') as tgtId then{
     src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
     ccn -> tgtId.value = ccn "set ccn";
@@ -292,7 +300,7 @@ group createOrg(source src: Provider, target tgt: Organization){
           src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
   } "Set Org metadata";
   src -> tgt.active = "true" "set org status";
-  
+
   src.PRVDR_LAST_OR_LGL_NAME as orgName -> tgt.name = orgName;
 
 }

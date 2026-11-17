@@ -136,6 +136,12 @@
   sources:
     - CWF
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION').value.code
+- inputPath: LineItemComponent.PR_REASON_CODE_1
+  appliesTo:
+    - PriorAuth
+  sources:
+    - CWF
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/PR-REASON-CODE-1').value.code
 - inputPath: LineItemComponent.PA_REQ_SUB_DT
   appliesTo:
     - PriorAuth
@@ -196,4 +202,3 @@
   sources:
     - CWF
   fhirPath: iif(ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/RRB-EXCL-IND').value = true, 'Y', ' ')
-

@@ -19,6 +19,10 @@ public class PriorAuthorizationItemExtensions {
   @Column(name = "pa_decision")
   private Optional<PriorAuthorizationDecision> decision;
 
+  @Getter
+  @Column(name = "pr_reason_code_1")
+  private Optional<PriorAuthorizationReasonCode> priorAuthReasonCode;
+
   @Column(name = "pa_dt_added")
   private LocalDate priorAuthDateAdded;
 
@@ -121,6 +125,7 @@ public class PriorAuthorizationItemExtensions {
 
     return Stream.of(
             decision.map(PriorAuthorizationDecision::toFhir),
+            priorAuthReasonCode.map(PriorAuthorizationReasonCode::toFhir),
             Optional.of(priorAuthDateAddedExtension),
             priorAuthDateUpdatedExtension,
             Optional.of(requestSubmitDateExtension),

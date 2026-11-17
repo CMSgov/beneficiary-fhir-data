@@ -65,6 +65,7 @@ Id: LineItemComponent
 * PA_DT_ADDED 0..1 string "PA Date Added" "PA Date Added"
 * PA_DT_UPDATED 0..1 string "PA Date Updated" "PA Date Updated"
 * PA_DECISION 0..1 string "PA Decision" "PA Decision"
+* PR_REASON_CODE_1 0..1 string "Claim Adjustment Reason Code 1" "Reason code associated with a prior authorization decision."
 * PA_REQ_SUB_DT 0..1 string "PA Request Submitted Date" "PA Request Submitted Date"
 * PA_REQ_REC_DT 0..1 string "PA Request Received Date" "PA Request Received Date"
 * PA_DECISION_DT 0..1 string "PA Decision Date" "PA Decision Date"

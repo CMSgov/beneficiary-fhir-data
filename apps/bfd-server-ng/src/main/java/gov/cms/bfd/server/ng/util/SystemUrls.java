@@ -561,6 +561,10 @@ public class SystemUrls {
   public static final String EXT_PA_DECISION_URL =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/PA-DECISION";
 
+  /** Extension URL for Prior Auth Reason Code 1. Source: PRAUC.PR_REASON_CODE_1. */
+  public static final String EXT_PR_REASON_CODE_1_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/PR-REASON-CODE-1";
+
   /**
    * System URL for the BFD/BlueButton Prior Auth Decision Code system. Used for the coding in the
    * PA-DECISION extension. <a

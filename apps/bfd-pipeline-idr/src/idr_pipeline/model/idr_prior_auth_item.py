@@ -29,6 +29,7 @@ class IdrPriorAuthItem(IdrBaseModel):
     pa_dt_added: date
     pa_dt_updated: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     pa_decision: str
+    pr_reason_code_1: str
     pa_req_sub_dt: date
     pa_req_rec_dt: date
     pa_decision_dt: Annotated[date, BeforeValidator(transform_null_date_to_min)]

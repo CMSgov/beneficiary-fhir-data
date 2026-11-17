@@ -102,6 +102,7 @@ def run(utn: str, source_directory: str, output_directory: str):
             "PA_DT_ADDED",
             "PA_DT_UPDATED",
             "PA_DECISION",
+            "PR_REASON_CODE_1",
             "PA_REQ_SUB_DT",
             "PA_REQ_REC_DT",
             "PA_DECISION_DT",
