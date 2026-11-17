@@ -4291,7 +4291,29 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
   profiles:
     - CMS
-    # here
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmPpsIndCd.code.coding.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmPpsIndCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmPpsIndCd
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmPpsIndCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_PPS_IND_CD
+      - id: ExplanationOfBenefit.supportingInfo:clmPpsIndCd.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:clmPpsIndCd.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        min: 1
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
@@ -4323,6 +4345,32 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_TOT_AMT').exists()).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmMdcrIpPpsCptlTotAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpPpsCptlTotAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmMdcrIpPpsCptlTotAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpPpsCptlTotAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpPpsCptlTotAmt.category.coding:clmMdcrIpPpsCptlTotAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmMdcrIpPpsCptlTotAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_MDCR_IP_PPS_CPTL_TOT_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_CVRD_DAY_CNT
   appliesTo:
     - Inpatient
@@ -4336,6 +4384,22 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_CVRD_DAY_CNT').exists()).value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmInstnlCvrdDayCnt.valueString
+    path: ExplanationOfBenefit.supportingInfo.valueString
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmInstnlCvrdDayCnt
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmInstnlCvrdDayCnt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmInstnlCvrdDayCnt.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_INSTNL_CVRD_DAY_CNT
 - inputPath: ExplanationOfBenefit-Base.CLM_CNTRCTR_NUM
   appliesTo:
     - Inpatient
@@ -4362,6 +4426,29 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CNTRCTR_NUM').exists()).code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmCntrctrNum.code.coding.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmCntrctrNum
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmCntrctrNum
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmCntrctrNum.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_CNTRCTR_NUM
+      - id: ExplanationOfBenefit.supportingInfo:clmCntrctrNum.code
+        path: ExplanationOfBenefit.supportingInfo.code
+        min: 1
+      - id: ExplanationOfBenefit.supportingInfo:clmCntrctrNum.code.coding
+        path: ExplanationOfBenefit.supportingInfo.code.coding
+        min: 1
 - inputPath: ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD
   appliesTo:
     - Inpatient
@@ -4383,6 +4470,41 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_PRMRY_PYR_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD').code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd.code.coding:clmNchPrmryPyrCdCode.code
+    path: ExplanationOfBenefit.supportingInfo.code.coding.code
+    min: 1
+    proceedingEd:
+        - id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd
+          path: ExplanationOfBenefit.supportingInfo
+          sliceName: clmNchPrmryPyrCd
+          min: 0
+          max: "1"
+        - id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd.category
+          path: ExplanationOfBenefit.supportingInfo.category
+          min: 1
+          patternCodeableConcept:
+            coding:
+              - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+                code: CLM_NCH_PRMRY_PYR_CD
+        - id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd.code
+          path: ExplanationOfBenefit.supportingInfo.code
+          min: 1
+        - id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd.code.coding
+          path: ExplanationOfBenefit.supportingInfo.code.coding
+          slicing:
+            discriminator:
+              - type: pattern
+                path: $this
+            rules: open
+          min: 1
+        - id: ExplanationOfBenefit.supportingInfo:clmNchPrmryPyrCd.code.coding:clmNchPrmryPyrCdCode
+          path: ExplanationOfBenefit.supportingInfo.code.coding
+          sliceName: clmNchPrmryPyrCdCode
+          min: 1
+          max: "1"
+          patternCoding:
+            system: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   appliesTo:
     - Inpatient
@@ -4399,6 +4521,32 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_INSTNL_PRMRY_PYR_AMT').exists()).amount.value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmMdcrInstnlPrmryPyrAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmMdcrInstnlPrmryPyrAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmMdcrInstnlPrmryPyrAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmMdcrInstnlPrmryPyrAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmMdcrInstnlPrmryPyrAmt.category.coding:clmMdcrInstnlPrmryPyrAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmMdcrInstnlPrmryPyrAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_MDCR_INSTNL_PRMRY_PYR_AMT
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
