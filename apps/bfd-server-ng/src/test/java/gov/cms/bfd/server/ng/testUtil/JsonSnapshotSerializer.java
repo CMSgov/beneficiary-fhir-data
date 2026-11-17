@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import lombok.SneakyThrows;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+/** Class to fix non-deterministic outputs and ordering of arrays. */
 public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
 
   private static final String UUID_REGEX =

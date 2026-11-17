@@ -30,9 +30,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @EnabledIfSystemProperty(named = "its.fml.parity", matches = "true")
 class FmlServerParityIT extends IntegrationTestBase {
   private static final Path FML_DIR =
-      Path.of(System.getProperty("its.fml.output.dir", "../bfd-model-idr/out/claims"));
+      Path.of(System.getProperty("its.fml.input.dir", "../bfd-model-idr/out/claims"));
   private static final String CLAIM_ID = System.getProperty("its.fml.claim.id");
-  private static final Path REPORT_DIR = Path.of("target", "fml-parity");
   private static final String FML_FILE = "ExplanationOfBenefit.json";
   private static final ObjectWriter WRITER =
       JsonMapper.builder()
@@ -40,8 +39,9 @@ class FmlServerParityIT extends IntegrationTestBase {
           .build()
           .writerWithDefaultPrettyPrinter();
 
-  static List<String> fmlClaimIds() throws IOException {
-    // fml-claim names each output dir after the claim ID
+  static List<String> claimIdDirectories() throws IOException {
+    // fml-claim names each output dir after the claim ID, default run all claims found unless one
+    // is specified
     try (var dirs = Files.list(FML_DIR)) {
       return dirs.filter(d -> Files.exists(d.resolve(FML_FILE)))
           .map(d -> d.getFileName().toString())
@@ -52,7 +52,7 @@ class FmlServerParityIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @MethodSource("fmlClaimIds")
+  @MethodSource("claimIdDirectories")
   void eobMatchesFmlOutput(String claimId) throws IOException {
     var serverEob =
         getFhirClient()
@@ -71,11 +71,10 @@ class FmlServerParityIT extends IntegrationTestBase {
     var serverJson = canonicalize(serverEob);
     var fmlJson = canonicalize(fmlEob);
 
-    // written out for viewing in a diff tool
-    var reportDir = REPORT_DIR.resolve(claimId);
-    Files.createDirectories(reportDir);
-    Files.writeString(reportDir.resolve("server.json"), serverJson);
-    Files.writeString(reportDir.resolve("fml.json"), fmlJson);
+    // results written out to the bfd-model-idr/out directory, bunched by claim ID
+    var claimDir = FML_DIR.resolve(claimId);
+    Files.writeString(claimDir.resolve("server-canonical.json"), serverJson);
+    Files.writeString(claimDir.resolve("fml-canonical.json"), fmlJson);
 
     var diff =
         DiffGenerator.diff(
@@ -85,8 +84,9 @@ class FmlServerParityIT extends IntegrationTestBase {
                 new StrictJsonArrayPartialMatcher(),
                 new StrictJsonObjectPartialMatcher(),
                 new StrictPrimitivePartialMatcher()));
+
     Files.writeString(
-        reportDir.resolve("fml-vs-server.patch"), PatchDiffViewer.from(diff).toString());
+        claimDir.resolve("fml-server-parity.patch"), PatchDiffViewer.from(diff).toString());
 
     assertEquals(
         fmlJson,
