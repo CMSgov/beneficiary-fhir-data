@@ -18,6 +18,7 @@ import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -36,6 +37,9 @@ import org.hl7.fhir.r4.model.Reference;
 
 /** Base claim table for pharmacy, Rx-Base. */
 @MappedSuperclass
+@AttributeOverride(
+    name = "meta.updatedTimestamp",
+    column = @Column(name = "bfd_updated_ts", nullable = false))
 @Getter
 public abstract class ClaimRxBase extends ClaimBase {
 
