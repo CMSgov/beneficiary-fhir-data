@@ -1,9 +1,10 @@
 import subprocess
 from pathlib import Path
+from subprocess import CompletedProcess
 
 
-def _run_subprocess(args: list[str]):
-    result = subprocess.run(
+def _run_subprocess(args: list[str]) -> None:
+    result: CompletedProcess[bytes] = subprocess.run(
         args,
         cwd=Path(__file__).parent.parent.parent,
         capture_output=True,
@@ -14,4 +15,4 @@ def _run_subprocess(args: list[str]):
 
 
 def test_gen_dd_runs_successfully() -> None:
-    _run_subprocess(["uv", "run", "gen-structure-def"])
+    _run_subprocess(args=["uv", "run", "gen-structure-def"])
