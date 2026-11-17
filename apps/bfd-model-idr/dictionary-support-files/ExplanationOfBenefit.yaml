@@ -3211,7 +3211,6 @@
     short: ExplanationOfBenefit-Base.CLM_IP_ADMSN_SRC_CD
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.supportingInfo:pointOfOrigin
         path: ExplanationOfBenefit.supportingInfo
@@ -5055,7 +5054,6 @@
     path: ExplanationOfBenefit.item.extension.value.code
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.item.extension:clmRevDscntIndCd
         path: ExplanationOfBenefit.item.extension
@@ -5094,7 +5092,6 @@
     path: ExplanationOfBenefit.item.extension.value.code
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.item.extension:clmOtafOneIndCd
         path: ExplanationOfBenefit.item.extension
@@ -5134,7 +5131,6 @@
     path: ExplanationOfBenefit.item.extension.value.code
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.item.extension:clmRevPackgIndCd
         path: ExplanationOfBenefit.item.extension
@@ -5174,7 +5170,6 @@
     path: ExplanationOfBenefit.item.extension.value.code
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.item.extension:clmRevPmtMthdCd
         path: ExplanationOfBenefit.item.extension
@@ -5214,7 +5209,6 @@
     path: ExplanationOfBenefit.item.extension.value.code
     min: 1
     max: "1"
-    mustSupport: true
     proceedingEd:
       - id: ExplanationOfBenefit.item.extension:clmRevCntrStusCd
         path: ExplanationOfBenefit.item.extension
@@ -5431,7 +5425,32 @@
     - Basis
     - Regular
     - CMS
-  # here
+  structureDef:
+    id: ExplanationOfBenefit.careTeam:referring.role
+    path: ExplanationOfBenefit.careTeam.role
+    min: 1
+    pattern:
+      type: CodeableConcept
+      detail:
+        coding:
+          - code: referring
+    proceedingEd:
+      - id: ExplanationOfBenefit.careTeam:referring
+        path: ExplanationOfBenefit.careTeam
+        sliceName: referring
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.careTeam:referring.provider
+        path: ExplanationOfBenefit.careTeam.provider
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:referring.provider.identifier
+        path: ExplanationOfBenefit.careTeam.provider.identifier
+        min: 1
+      - id: ExplanationOfBenefit.careTeam:referring.provider.identifier.value
+        path: ExplanationOfBenefit.careTeam.provider.identifier.value
+        short: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
+        min: 1
+        max: "1"
 - inputPath: ExplanationOfBenefit-Base.CLM_ALOWD_CHRG_AMT
   appliesTo:
     - Carrier
@@ -5510,6 +5529,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='DGNS_DRG_OUTLIER_CD').exists()).code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:dgnsDrgOutlierCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:dgnsDrgOutlierCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: dgnsDrgOutlierCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/DGNS_DRG_OUTLIER_CD
 - inputPath: LineItemComponent.CLM_LINE_ANSTHSA_UNIT_CNT
   appliesTo:
     - Carrier
@@ -5524,6 +5557,23 @@
     - CMS
     - Basis
     - Regular
+  structureDef:
+    id: ExplanationOfBenefit.item.extension:clmLineAnsthsaUnitCnt.value[x]
+    path: ExplanationOfBenefit.item.extension.value[x]
+    min: 1
+    max: "1"
+    type:
+      - code: Decimal
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.extension:clmLineAnsthsaUnitCnt
+        path: ExplanationOfBenefit.item.extension
+        sliceName: clmLineAnsthsaUnitCnt
+        min: 0
+        max: "1"
+        type:
+          - code: Extension
+            profile:
+              - https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TAX_NUM
   appliesTo:
     - Carrier
@@ -5540,6 +5590,23 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM').value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.extension:clmPrvdrTaxNum.value[x]
+    path: ExplanationOfBenefit.item.extension.value[x]
+    min: 1
+    max: "1"
+    type:
+      - code: Identifier
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.extension:clmPrvdrTaxNum
+        path: ExplanationOfBenefit.item.extension
+        sliceName: clmPrvdrTaxNum
+        min: 0
+        max: "1"
+        type:
+          - code: Extension
+            profile:
+              - https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM
 - inputPath: LineItemComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Carrier
@@ -5553,6 +5620,23 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM').value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.extension:clmLineRxNum.value[x]
+    path: ExplanationOfBenefit.item.extension.value[x]
+    min: 1
+    max: "1"
+    type:
+      - code: Integer
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.extension:clmLineRxNum
+        path: ExplanationOfBenefit.item.extension
+        sliceName: clmLineRxNum
+        min: 0
+        max: "1"
+        type:
+          - code: Extension
+            profile:
+              - https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM
 - inputPath: LineItemComponent.CLM_LINE_FROM_DT
   appliesTo:
     - Carrier
@@ -5580,6 +5664,15 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.serviced[x]:servicedPeriod.start
+    path: ExplanationOfBenefit.item.serviced[x].start
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.serviced[x]:servicedPeriod
+        path: ExplanationOfBenefit.item.serviced[x]
+        sliceName: servicedPeriod
+        type:
+          - code: Period
 - inputPath: LineItemComponent.CLM_LINE_MDCR_COINSRNC_AMT
   appliesTo:
     - Carrier
@@ -5596,6 +5689,35 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineMdcrCoinsrncAmt.amount.value
+    path: ExplanationOfBenefit.item.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineMdcrCoinsrncAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineMdcrCoinsrncAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.item.adjudication:clmLineMdcrCoinsrncAmt.category.coding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.item.adjudication:clmLineMdcrCoinsrncAmt.category.coding:clmLineMdcrCoinsrncAmtCoding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        sliceName: clmLineMdcrCoinsrncAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_MDCR_COINSRNC_AMT
+      - id: ExplanationOfBenefit.item.adjudication:clmLineMdcrCoinsrncAmt.amount
+        path: ExplanationOfBenefit.item.adjudication.amount
+        min: 1
 - inputPath: LineItemComponent.CLM_LINE_DGNS_CD
   appliesTo:
     - Carrier
@@ -5616,6 +5738,32 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.diagnosis.diagnosis[x]:diagnosisCodeableConcept.coding.code
+    path: ExplanationOfBenefit.diagnosis.diagnosis[x].coding.code
+    min: 1
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.diagnosisSequence
+        path: ExplanationOfBenefit.item.diagnosisSequence
+        short: Pointer to ExplanationOfBenefit.diagnosis.sequence
+        min: 0
+        max: "*"
+        mustSupport: true
+      - id: ExplanationOfBenefit.diagnosis
+        path: ExplanationOfBenefit.diagnosis
+        min: 1
+      - id: ExplanationOfBenefit.diagnosis.sequence
+        path: ExplanationOfBenefit.diagnosis.sequence
+        min: 1
+        max: "1"
+        mustSupport: true
+      - id: ExplanationOfBenefit.diagnosis.diagnosis[x]
+        path: ExplanationOfBenefit.diagnosis.diagnosis[x]
+        min: 1
+        max: "1"
+        type:
+          - code: CodeableConcept
 - inputPath: LineItemComponent.CLM_LINE_THRU_DT
   appliesTo:
     - Carrier
@@ -5643,6 +5791,9 @@
     - Basis
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.item.serviced[x]:servicedPeriod.end
+    path: ExplanationOfBenefit.item.serviced[x].end
 - inputPath: LineItemComponent.CLM_POS_CD
   appliesTo:
     - Carrier
@@ -5679,6 +5830,27 @@
     - CMS
     - Basis
     - Regular
+  structureDef:
+    id: ExplanationOfBenefit.item.extension:clmRndrgPrvdrPrtcptgCd.value.code
+    path: ExplanationOfBenefit.item.extension.value.code
+    min: 1
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.extension:clmRndrgPrvdrPrtcptgCd
+        path: ExplanationOfBenefit.item.extension
+        sliceName: clmRndrgPrvdrPrtcptgCd
+        min: 0
+        max: "1"
+        type:
+          - code: Extension
+            profile:
+              - https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD
+      - id: ExplanationOfBenefit.item.extension:clmRndrgPrvdrPrtcptgCd.value[x]
+        path: ExplanationOfBenefit.item.extension.value[x]
+        min: 1
+        max: "1"
+        type:
+          - code: Coding
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
@@ -5696,6 +5868,27 @@
     - CMS
     - Basis
     - Regular
+  structureDef:
+    id: ExplanationOfBenefit.item.extension:clmPrvdrTypeCd.value.code
+    path: ExplanationOfBenefit.item.extension.value.code
+    min: 1
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.extension:clmPrvdrTypeCd
+        path: ExplanationOfBenefit.item.extension
+        sliceName: clmPrvdrTypeCd
+        min: 0
+        max: "1"
+        type:
+          - code: Extension
+            profile:
+              - https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD
+      - id: ExplanationOfBenefit.item.extension:clmPrvdrTypeCd.value[x]
+        path: ExplanationOfBenefit.item.extension.value[x]
+        min: 1
+        max: "1"
+        type:
+          - code: Coding
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
