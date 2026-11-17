@@ -35,7 +35,6 @@ from load_synthetic_output import (
     CsvWriter,
     OutputDestinationWriter,
     SnowflakeWriter,
-    parse_overwrites,
 )
 from row_adapter import RowAdapter
 from shared_options import common_options
@@ -148,14 +147,10 @@ def load_inputs(
     force_ztm: bool,
     batch_size: int,
     truncate: bool,
+    writer: CsvWriter | SnowflakeWriter,
     paths: tuple[Path, ...] = (),
     exclude_empty: bool = False,
-    writer: OutputDestinationWriter | None = None,
-    overwrite: str | None = None,
 ):
-    if writer is None:
-        writer = CsvWriter(overwrites=parse_overwrites(overwrite))
-
     if isinstance(writer, SnowflakeWriter):
         _handle_snowflake_flow(writer, patients, force_ztm, batch_size, truncate)
     else:
@@ -448,8 +443,7 @@ def main(
         truncate=truncate,
         paths=paths,
         exclude_empty=exclude_empty,
-        writer=None,
-        overwrite=overwrite,
+        writer=CsvWriter(overwrite_fields=overwrite),
     )
 
     if claims:

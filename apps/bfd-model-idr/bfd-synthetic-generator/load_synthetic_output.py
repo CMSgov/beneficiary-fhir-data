@@ -6,10 +6,10 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict, defaultdict
 from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from enum import StrEnum, auto
+from functools import cached_property
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 import click
 import pandas as pd
@@ -51,6 +51,7 @@ from constants import (
     PRVDR_HSTRY,
 )
 from row_adapter import RowAdapter
+from schema_utils import TABLE_OVERRIDES, TableSchema, fetch_schemas, get_table_name_from_file_name
 from snowflake.snowpark import DataFrame, Session, Table
 from snowflake.snowpark.functions import col, when_matched, when_not_matched
 from snowflake.snowpark.functions import hash as snowpark_hash
@@ -58,57 +59,8 @@ from utils import parse_input
 
 logger = logging.getLogger(__name__)
 
-ALL_KEYS = "all_keys"
 _SYNTHETIC_PREFIX = "SYNTHETIC"
 _TABLE_PREFIX = "V2_MDCR"
-
-_NON_OVERWRITEABLE = {
-    "BENE_SK",
-    "BENE_MBI_ID",
-    "BENE_XREF_SK",
-    "GEO_BENE_SK",
-    "CLM_UNIQ_ID",
-    "CLM_NUM_SK",
-    "CLM_LINE_NUM",
-    "CLM_DT_SGNTR_SK",
-}
-
-
-def parse_overwrites(qualified_fields: str) -> dict[str, set[str]]:
-    fields_to_overwrite: dict[str, set[str]] = defaultdict(set)
-
-    if not qualified_fields:
-        return fields_to_overwrite
-
-    cleaned_qualified_fields = parse_input(qualified_fields)
-
-    for qualified_field in cleaned_qualified_fields:
-        table, _, field = qualified_field.partition(".")
-        if not table or not field:
-            raise click.UsageError(
-                f"Invalid --overwrite entry {qualified_field} expected TABLE.FIELD "
-                + "for Snowflake flow or SYNTHETIC_FILE_NAME.FIELD if CSV flow"
-            )
-        if field in _NON_OVERWRITEABLE:
-            raise click.UsageError(
-                f"{qualified_field} cannot be overwritten since it's a primary key"
-            )
-        fields_to_overwrite[table].add(field)
-
-    return fields_to_overwrite
-
-
-@dataclass
-class TableTarget:
-    name: str | None = None
-    schema: str | None = None
-    database: str | None = None
-
-
-_TABLE_OVERRIDES: dict[str, TableTarget] = {
-    PRAUC: TableTarget(name="PRAUC", schema="CMS_EDP_VIEW_CVM_PRAU_PRD"),
-    CLM_RLT_OCRNC_SGNTR_MBR: TableTarget(name="V2_CLM_RLT_OCRNC_SGNTR_MBR"),
-}
 
 
 class BeneSkMode(StrEnum):
@@ -118,12 +70,25 @@ class BeneSkMode(StrEnum):
 
 
 class OutputDestinationWriter(ABC):
+    def __init__(self, overwrite_fields: str | None = None) -> None:
+        self.fields_to_overwrite = overwrite_fields
+
+    @abstractmethod
+    def fetch_basic_schema(self) -> dict[str, TableSchema]: ...
+
+    @cached_property
+    def basic_schema(self) -> dict[str, TableSchema]:
+        return self.fetch_basic_schema()
+
+    @cached_property
+    def overwrites(self) -> dict[str, set[str]]:
+        return self.parse_overwrites(self.fields_to_overwrite)
+
     @abstractmethod
     def write_table(
         self,
         data: list[dict[str, Any]],
         table_name: str,
-        cols: list[str] | str = ALL_KEYS,
     ) -> None: ...
 
     @abstractmethod
@@ -157,30 +122,66 @@ class OutputDestinationWriter(ABC):
         files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]: ...
 
+    def parse_overwrites(self, qualified_fields: str | None) -> dict[str, set[str]]:
+        fields_to_overwrite: dict[str, set[str]] = defaultdict(set)
+
+        if not qualified_fields:
+            return fields_to_overwrite
+
+        cleaned_qualified_fields = parse_input(qualified_fields)
+
+        for qualified_field in cleaned_qualified_fields:
+            table, _, field = qualified_field.partition(".")
+            if not table or not field:
+                raise click.UsageError(
+                    f"Invalid --overwrite entry {qualified_field} expected TABLE.FIELD "
+                    "for Snowflake flow or SYNTHETIC_FILE_NAME.FIELD if CSV flow"
+                )
+
+            # If this is the CSV flow we need to get the name of the target table since the files
+            # do not match the table names
+            if table.startswith(_SYNTHETIC_PREFIX):
+                resolved_table_name = get_table_name_from_file_name(table)
+                table_schema = self.basic_schema.get(resolved_table_name)
+            else:
+                table_schema = self.basic_schema.get(table)
+
+            if table_schema and field in table_schema.primary_keys:
+                raise click.UsageError(
+                    f"{qualified_field} cannot be overwritten since it's a primary key"
+                )
+
+            fields_to_overwrite[table].add(field)
+
+        return fields_to_overwrite
+
 
 class CsvWriter(OutputDestinationWriter):
     def __init__(
         self,
         out_dir: str = "./out",
-        overwrites: dict[str, set[str]] | None = None,
+        overwrite_fields: str | None = None,
     ) -> None:
-        self.out_dir = Path(out_dir)
+        super().__init__(overwrite_fields=overwrite_fields)
+        self.out_dir: Path = Path(out_dir)
         self._tables: set[str] = set()
-        self.overwrites = overwrites or {}
+
+    @override
+    def fetch_basic_schema(self) -> dict[str, TableSchema]:
+        return fetch_schemas()
 
     def write_table(
         self,
         data: list[dict[str, Any]],
         table_name: str,
-        cols: list[str] | str = ALL_KEYS,
     ) -> None:
         if not data:
             return
 
         df = pd.json_normalize(data)
-
-        if cols is not None and not isinstance(cols, str):
-            df = df.reindex(columns=cols).fillna("")
+        resolved_table_name = get_table_name_from_file_name(table_name)
+        table_schema = self.basic_schema[resolved_table_name]
+        df = df.reindex(columns=table_schema.primary_keys + table_schema.columns)
 
         for column in df.columns:
             if df[column].dtype == "float64":
@@ -264,54 +265,50 @@ class SnowflakeWriter(OutputDestinationWriter):
         session: Session,
         database: str,
         schema: str,
-        overwrites: dict[str, set[str]] | None = None,
+        overwrite_fields: str | None = None,
     ) -> None:
+        super().__init__(overwrite_fields=overwrite_fields)
         self.session = session
         self.database = database
         self.schema = schema
-        self.column_types_cache: dict[tuple[str, str, str], set[str]] = defaultdict(set)
-        self.primary_keys_cache: dict[str, set[str]] = self._get_all_primary_keys()
-        self.overwrites = overwrites or {}
 
-    def _get_all_primary_keys(self) -> defaultdict[str, set[str]]:
-        pk_cache = defaultdict(set)
+    @override
+    def fetch_basic_schema(self) -> dict[str, TableSchema]:
+        pks_by_table: defaultdict[str, TableSchema] = defaultdict(TableSchema)
 
         self.session.sql(f'SHOW PRIMARY KEYS IN DATABASE "{self.database}"').collect()
-        pk_df = self.session.sql(
+        pks_by_table_rows = self.session.sql(
             """
-            SELECT "table_name", "column_name"
-            FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
-            """
-        )
-        for row in pk_df.collect():
-            pk_cache[row["table_name"]].add(row["column_name"])
+                SELECT "table_name", "column_name"
+                FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()))
+                """
+        ).collect()
 
-        return pk_cache
+        for row in pks_by_table_rows:
+            table_name = str(row["table_name"])
+            column_name = str(row["column_name"])
+            pks_by_table[table_name].primary_keys.append(column_name)
+
+        return dict(pks_by_table)
 
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
-        override = _TABLE_OVERRIDES.get(table_name)
-        if override is not None:
-            return (
-                override.name or table_name,
-                override.database or self.database,
-                override.schema or self.schema,
-            )
-        return (
-            _TABLE_PREFIX + table_name.removeprefix(_SYNTHETIC_PREFIX),
-            self.database,
-            self.schema,
-        )
+        resolved_name = get_table_name_from_file_name(table_name)
+        overrides = TABLE_OVERRIDES.get(table_name)
+        database = (overrides.database if overrides else None) or self.database
+        schema = (overrides.schema if overrides else None) or self.schema
+        return (resolved_name, database, schema)
 
     def qualified_table(self, table_name: str) -> str:
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         return f"{database}.{schema}.{resolved_table_name}"
 
     def _qualified_session_table(self, table_name: str) -> DataFrame | Table:
-        fields_to_overwrite = self.overwrites.get(table_name)
         qualified_table_name = self.qualified_table(table_name)
         table = self.session.table(qualified_table_name)
         # If fields need to be overwritten, drop them from the query so they aren't fetched. This
         # allows us to generate specified fields from scratch during a regeneration.
+        resolved_table_name = get_table_name_from_file_name(table_name)
+        fields_to_overwrite = self.overwrites.get(resolved_table_name)
         return table.drop(*fields_to_overwrite) if fields_to_overwrite else table
 
     def get_bene_sks(
@@ -363,23 +360,6 @@ class SnowflakeWriter(OutputDestinationWriter):
             for row in rows
             if row["BENE_MBI_ID"]
         ]
-
-    def _get_known_columns(self, database: str, schema: str, table_name: str) -> set[str]:
-        cache_key = (database, schema, table_name)
-
-        if cache_key not in self.column_types_cache:
-            rows = (
-                self.session.table(f"{database}.information_schema.columns")
-                .filter(
-                    (col("TABLE_SCHEMA") == schema.upper())
-                    & (col("TABLE_NAME") == table_name.upper())
-                )
-                .select("COLUMN_NAME")
-                .collect()
-            )
-            self.column_types_cache[cache_key] = {row["COLUMN_NAME"].upper() for row in rows}
-
-        return self.column_types_cache[cache_key]
 
     def get_patient_batch(
         self, bene_sks: list[int], table_names: list[str]
@@ -469,7 +449,6 @@ class SnowflakeWriter(OutputDestinationWriter):
         self,
         data: list[dict[str, Any]],
         table_name: str,
-        cols: list[str] | str = ALL_KEYS,  # noqa: ARG002
     ) -> None:
         if not data:
             return
@@ -477,18 +456,11 @@ class SnowflakeWriter(OutputDestinationWriter):
         perf_start = time.perf_counter()
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         qualified_table = f"{database}.{schema}.{resolved_table_name}"
-        known_columns = self._get_known_columns(database, schema, resolved_table_name)
-
-        # CSV file structure has to match the table schema order
-        target = self._qualified_session_table(table_name)
-        target_columns = [
-            field.name for field in target.schema.fields if field.name in known_columns
-        ]
+        target = self.session.table(qualified_table)
+        columns = target.schema.names
 
         csv_buffer = io.StringIO()
-        writer = csv.DictWriter(
-            csv_buffer, fieldnames=target_columns, extrasaction="ignore", restval=None
-        )
+        writer = csv.DictWriter(csv_buffer, fieldnames=columns, extrasaction="ignore", restval=None)
 
         writer.writeheader()
         for row_dict in data:
@@ -530,7 +502,6 @@ class SnowflakeWriter(OutputDestinationWriter):
                 TYPE = 'CSV'
                 SKIP_HEADER = 1
                 FIELD_OPTIONALLY_ENCLOSED_BY = '"'
-                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
             )
             PURGE = TRUE
             """
@@ -541,8 +512,9 @@ class SnowflakeWriter(OutputDestinationWriter):
         duration = time.perf_counter() - perf_start
         logger.info("Staged data to merge in %.3f seconds", duration)
 
-        pks = self.primary_keys_cache[resolved_table_name]
-        update_cols = [c for c in target_columns if c not in pks]
+        table_schema = self.basic_schema[resolved_table_name]
+        pks = table_schema.primary_keys
+        update_cols = [c for c in columns if c not in pks]
 
         join_expr = None
         for pk in pks:
@@ -560,7 +532,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 when_matched(change_condition).update({c: source[c] for c in update_cols})
             )
 
-        merge_clauses.append(when_not_matched().insert({c: source[c] for c in target_columns}))
+        merge_clauses.append(when_not_matched().insert({c: source[c] for c in columns}))
 
         perf_start = time.perf_counter()
         result = target.merge(

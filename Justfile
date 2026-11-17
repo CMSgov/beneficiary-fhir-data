@@ -324,12 +324,21 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" *paths:
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" *paths: create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
+    trap 'just remove-db' EXIT
 
-    root="$(git rev-parse --show-toplevel)"
+    root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/patient_generator.py $paths \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
@@ -357,12 +366,21 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" *paths: sushi
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" *paths: sushi create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
+    trap 'just remove-db' EXIT
 
-    root="$(git rev-parse --show-toplevel)"
+    root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/claims_generator.py $paths \
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
@@ -443,9 +461,26 @@ samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
         --limit "{{ limit }}" \
         --concurrency "{{ concurrency }}"
 
-[arg("source-directory", long, help="Directory containing the original synthetic CSV files")]
-[arg("target-directory", long, help="Directory containing the regenerated CSV files to check")]
+[arg("source-directory", help="Directory containing the original synthetic CSV files")]
+[arg("target-directory", help="Directory containing the regenerated CSV files to check")]
 [doc("Compares checksums of original and regenerated synthetic CSV files to detect mismatches")]
-[group('utilities')]
-diff-synthetic-files source-directory target-directory:
-    ./apps/utils/scripts/diff-synthetic-files.sh "{{ source-directory }}" "{{ target-directory }}"
+[group('model')]
+[no-cd]
+diff-synthetic-files source-directory target-directory: create-db create-mock-idr
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    trap 'just remove-db' EXIT
+
+    root="{{ justfile_directory() }}"
+    source="{{ canonicalize(source-directory) }}"
+    target="{{ canonicalize(target-directory) }}"
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
+    cd "$root/apps/bfd-model-idr"
+    uv run bfd-synthetic-generator/diff-synthetic-files.py "$source" "$target"

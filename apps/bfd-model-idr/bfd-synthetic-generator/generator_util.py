@@ -42,7 +42,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 from id_generators import IdGenerator, RandomIdGenerator
-from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
+from load_synthetic_output import CsvWriter, OutputDestinationWriter
 from row_adapter import RowAdapter
 from utils import ROOT
 
@@ -863,46 +863,35 @@ class GeneratorUtil:
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
-            (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
-            (mbi_arr, BENE_MBI_ID, ALL_KEYS),
-            (self.mdcr_stus, BENE_STUS, ALL_KEYS),
-            (self.mdcr_entlmt, BENE_ENTLMT, ALL_KEYS),
-            (self.mdcr_tp, BENE_TP, ALL_KEYS),
-            (self.mdcr_rsn, BENE_ENTLMT_RSN, ALL_KEYS),
-            (self.bene_xref_table, BENE_XREF, ALL_KEYS),
-            (
-                self.bene_cmbnd_dual_mdcr,
-                BENE_DUAL,
-                ALL_KEYS,
-            ),
-            (self.bene_lis_cmbnd, BENE_LIS_CMBND, ALL_KEYS),
-            (
-                self.bene_mapd_enrlmt_rx,
-                BENE_MAPD_ENRLMT_RX,
-                ALL_KEYS,
-            ),
-            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, ALL_KEYS),
+            (self.bene_hstry_table, BENE_HSTRY),
+            (mbi_arr, BENE_MBI_ID),
+            (self.mdcr_stus, BENE_STUS),
+            (self.mdcr_entlmt, BENE_ENTLMT),
+            (self.mdcr_tp, BENE_TP),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN),
+            (self.bene_xref_table, BENE_XREF),
+            (self.bene_cmbnd_dual_mdcr, BENE_DUAL),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND),
+            (self.bene_mapd_enrlmt_rx, BENE_MAPD_ENRLMT_RX),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT),
         ]
 
         if isinstance(writer, CsvWriter):
-            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
-            beneficiary_and_contract_exports.append(
-                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
-            )
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM))
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT))
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
-            for data, table_name, cols in t:
+            for data, table_name in t:
                 t.set_postfix(file=table_name)  # type: ignore
-                self.export_table(data, table_name, writer, cols)
+                self.export_table(data, table_name, writer)
 
     def export_table(
         self,
         data: list[dict[str, Any]],
         table_name: str,
         writer: OutputDestinationWriter,
-        cols: list[str] | str = ALL_KEYS,
     ) -> None:
-        writer.write_table(data, table_name, cols)
+        writer.write_table(data, table_name)
 
     def flush_batch(self, writer: OutputDestinationWriter) -> None:
         self.save_output_files(writer)

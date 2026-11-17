@@ -37,12 +37,10 @@ from id_generators import (
     load_id_state,
 )
 from load_synthetic_output import (
-    ALL_KEYS,
     BeneSkMode,
     CsvWriter,
     OutputDestinationWriter,
     SnowflakeWriter,
-    parse_overwrites,
 )
 from row_adapter import RowAdapter
 from shared_options import common_options
@@ -770,7 +768,7 @@ def generate(
         )
 
     if writer is None:
-        writer = CsvWriter(overwrites=parse_overwrites(overwrite))
+        writer = CsvWriter(overwrite_fields=overwrite)
 
     claims_tables = [
         f.CLM,
@@ -852,16 +850,12 @@ def generate(
             init_provider_historys=existing_providers,
         )
     )
-    gen_utils.export_table(
-        adapters_to_dicts(generated_provider_histories), f.PRVDR_HSTRY, writer, ALL_KEYS
-    )
+    gen_utils.export_table(adapters_to_dicts(generated_provider_histories), f.PRVDR_HSTRY, writer)
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
-    gen_utils.export_table(
-        adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer, ALL_KEYS
-    )
+    gen_utils.export_table(adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer)
 
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=samhsa)
     pac_util = PacGeneratorUtil()
@@ -909,7 +903,7 @@ def generate(
         for table_name, rows in out_tables.items():
             if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
                 continue
-            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
+            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer)
 
     logger.info("Done generating synthetic claims/prior auth data for provided BENE_SKs")
 

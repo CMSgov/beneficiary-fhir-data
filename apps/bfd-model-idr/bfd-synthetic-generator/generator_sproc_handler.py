@@ -14,7 +14,7 @@ for path_obj in (current_file_dir, package_root_dir):
         sys.path.append(string_path)
 
 from claims_generator import GeneratePacDataMode, generate  # noqa: E402
-from load_synthetic_output import BeneSkMode, SnowflakeWriter, parse_overwrites  # noqa: E402
+from load_synthetic_output import BeneSkMode, SnowflakeWriter  # noqa: E402
 from patient_generator import load_inputs  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ def generate_synthetic_data(
     perf_start = time.perf_counter()
     db = session.get_current_database().replace('"', "")
     schema = session.get_current_schema().replace('"', "")
-    writer = SnowflakeWriter(session, db, schema, parse_overwrites(overwrite))
+    writer = SnowflakeWriter(session, db, schema, overwrite)
 
     # generate patient data
     load_inputs(
