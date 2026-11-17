@@ -23,6 +23,8 @@ SHA256_SUM="$(git ls-files "$SCRIPT_DIR" "$REPO_ROOT/pyproject.toml" "$REPO_ROOT
 readonly SHA256_SUM
 
 if [[ "$STORED_SHA256_SUM" != "$SHA256_SUM" ]]; then
+	uv sync
+
 	uv export \
 		--frozen \
 		--no-dev \
