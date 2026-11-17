@@ -38,7 +38,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
   @SneakyThrows
   @Override
   public Snapshot apply(Object object, SnapshotSerializerContext snapshotSerializerContext) {
-
     // Clean up the patch file if it exists. If the test fails again, it will generate a new one.
     var patchFile =
         SnapshotHelper.getPatchfile(this.getClass(), snapshotSerializerContext.getName());
@@ -49,11 +48,20 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
       patchFile.delete();
     }
 
+    return super.apply(toJson((IBaseResource) object), snapshotSerializerContext);
+  }
+
+  /**
+   * Serializes a resource to JSON and replaces nondeterministic values so outputs can be compared.
+   *
+   * @param resource the resource to serialize
+   * @return the normalized JSON
+   */
+  public static String toJson(IBaseResource resource) {
     FhirContext ctx = FhirContext.forR4();
     // First, we use the default FHIR JSON serializer. This is important to ensure we're starting
     // with the specific output that our endpoints use.
     // You can also set specific properties to be ignored or replaced here.
-    var resource = (IBaseResource) object;
     var json = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
 
     // Replace nondeterministic values
@@ -77,6 +85,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
 
     json = CLAIM_IDR_LOAD_DATE_REGEX.matcher(json).replaceAll("$19999-12-31$2");
 
-    return super.apply(json, snapshotSerializerContext);
+    return json;
   }
 }
