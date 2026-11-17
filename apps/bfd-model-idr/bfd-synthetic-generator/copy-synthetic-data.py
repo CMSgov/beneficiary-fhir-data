@@ -1,11 +1,19 @@
+from typing import cast
+
 import click
+from row_adapter import RowValue
 from snowflake.snowpark import Session
+from snowflake.snowpark.row import Row
 from snowflake_session import create_snowflake_session
 from utils import parse_input
 
 
 def _database_exists(session: Session, database: str) -> bool:
     return len(session.sql(f"SHOW DATABASES LIKE '{database}'").collect()) > 0
+
+
+def _row_values(row: Row) -> dict[str, RowValue]:
+    return cast("dict[str, RowValue]", row.as_dict())  # pyright: ignore[reportUnknownMemberType]
 
 
 @click.command
@@ -22,8 +30,8 @@ def _database_exists(session: Session, database: str) -> bool:
     help="Database to clone to create or replace e.g. BFD_SANDBOX",
 )
 def main(source: str, target: str) -> None:
-    source_database = source.strip()
-    target_databases = parse_input(target)
+    source_database: str = source.strip()
+    target_databases: list[str] = parse_input(target)
 
     if not source_database or source_database in target_databases:
         raise click.UsageError(
@@ -31,13 +39,13 @@ def main(source: str, target: str) -> None:
             "target databases."
         )
 
-    session = create_snowflake_session()
+    session: Session = create_snowflake_session()
     try:
         if not _database_exists(session, source):
             raise click.UsageError(f"Source database {source_database} does not exist.")
 
         for target_database in target_databases:
-            statement = f"CREATE OR REPLACE DATABASE {target_database} CLONE {source_database}"
+            statement: str = f"CREATE OR REPLACE DATABASE {target_database} CLONE {source_database}"
             if _database_exists(session, target_database):
                 click.confirm(
                     f"Target database {target_database} exists and will be dropped and replaced. "
@@ -52,7 +60,7 @@ def main(source: str, target: str) -> None:
                 )
             print(f"Running: {statement}")
             result = session.sql(statement).collect()
-            print(result[0].status)
+            print(_row_values(result[0])["status"])
             print("Finished!")
     finally:
         session.close()
