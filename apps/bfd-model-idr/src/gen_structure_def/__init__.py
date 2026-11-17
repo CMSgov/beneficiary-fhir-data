@@ -1,6 +1,6 @@
 import click
 
-from .gen_def import StructureDefinitionGenerator
+from gen_structure_def.gen_def import StructureDefinitionGenerator
 
 
 @click.command
@@ -37,7 +37,7 @@ def main(
 ) -> None:
 
     if not type or type.lower() == "pharmacy":
-        pharmacy_generator = StructureDefinitionGenerator(
+        pharmacy_generator: StructureDefinitionGenerator = StructureDefinitionGenerator(
             source_directory=source_directory,
             output_directory=output_directory,
             url="https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Pharmacy",
@@ -51,12 +51,12 @@ def main(
             resource_type="ExplanationOfBenefit",
             output_file_name="CMS-ExplanationOfBenefit-Pharmacy.json",
             applies_to="Pharmacy",
-            delete_tmp_files=delete_temp_files,
         )
+        pharmacy_generator.delete_tmp_files = delete_temp_files
         pharmacy_generator.run()
 
     if not type or type.lower() == "inpatient":
-        inpatient_generator = StructureDefinitionGenerator(
+        inpatient_generator: StructureDefinitionGenerator = StructureDefinitionGenerator(
             source_directory=source_directory,
             output_directory=output_directory,
             url="https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Inpatient-Institutional",
@@ -70,9 +70,8 @@ def main(
             resource_type="ExplanationOfBenefit",
             output_file_name="CMS-ExplanationOfBenefit-Inpatient-Institutional.json",
             applies_to="Inpatient",
-            delete_tmp_files=delete_temp_files,
         )
-
+        inpatient_generator.delete_tmp_files = delete_temp_files
         inpatient_generator.run()
 
 

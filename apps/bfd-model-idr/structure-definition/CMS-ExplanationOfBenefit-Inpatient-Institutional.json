@@ -6,7 +6,7 @@
   "name" : "ExplanationOfBenefit-Inpatient-CMS",
   "title" : "ExplanationOfBenefit Inpatient Institutional CMS",
   "status" : "active",
-  "date" : "2026-11-16T21:59:50.675146Z",
+  "date" : "2026-11-17T16:05:36.895211Z",
   "description" : "This is the CMS Inpatient Institutional Profile.",
   "jurisdiction" : [{
     "coding" : [{
