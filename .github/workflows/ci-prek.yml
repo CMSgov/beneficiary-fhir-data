@@ -26,10 +26,18 @@ jobs:
       - uses: taiki-e/install-action@v2.88.1
         with:
           tool: taplo
+      - uses: taiki-e/install-action@v2.88.1
+        with:
+          tool: fd-find
       - uses: taiki-e/install-action@v2.87.32
         with:
           tool: just
       - uses: opentofu/setup-opentofu@v2.0.2
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
+      - name: "Create the workspace virtual environment"
+        run: uv sync --frozen
       - id: changed-files
         uses: tj-actions/changed-files@v47.0.6
       - uses: j178/prek-action@v3.1.0
@@ -37,3 +45,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           extra-args: --files ${{ steps.changed-files.outputs.all_changed_files }}
+      - name: "Run tests for workspace members with changes"
+        run: ./ops/utils/scripts/run-member-tests.sh ${{ steps.changed-files.outputs.all_changed_files }}

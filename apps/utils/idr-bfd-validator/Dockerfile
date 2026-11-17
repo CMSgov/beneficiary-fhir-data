@@ -1,68 +1,34 @@
 ARG base_version=latest
 
-# HACK: `idr-pipeline` is a named build context supplied by the release pipeline
-# (namedContexts in .github/workflows/build_container_images_matrix.json), and
-# pindock requires every `--from` reference to resolve to a stage in this file or
-# to a digest-pinned image. This empty stage is declared to satisfy it. BuildKit
-# always prefers a named context over a stage of the same name, so the stage is
-# never used. Tested with podman and it behaves as expected.
-FROM scratch AS idr-pipeline
-
 # Image is expected to exist locally prior to build. Operators will need to pull the image from ECR
 # first before building
-FROM bfd-platform-base-python:${base_version} AS groupadd
+FROM bfd-platform-base-python:${base_version} AS deps
 
-# "shadow-utils" provides groupadd/useradd
+# The base image leaves the build as the non-root user. Package installation here needs root.
 # TODO: Remove git when loguru is no longer installed from GitHub directly
-RUN dnf -y install shadow-utils git && \
+USER root
+RUN dnf -y install git && \
   dnf -y clean all && \
   rm -rf /var/cache
-
-FROM groupadd AS deps
-
-# Setup a non-root user
-ENV USER=nonroot
-ENV UID=1001
-ENV GID=1001
-RUN groupadd --system --gid ${GID} ${USER} \
-  && useradd --system --gid ${GID} --uid ${UID} --create-home ${USER} \
-  && mkdir -p /app \
-  && chown -R nonroot:nonroot /app
-
-# Explicitly specify cache directory
-ENV UV_CACHE_DIR=/app/.cache
-
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
-
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
-
-# Omit development dependencies
-ENV UV_NO_DEV=1
-
-# Ensure installed tools can be executed out of the box
-ENV UV_TOOL_BIN_DIR=/usr/local/bin
-
-# Use the non-root user to run our application
 USER nonroot
 
-# Install the project into `/app`
-WORKDIR /app
-
 # Install the project's dependencies using the lockfile and settings
-COPY --from=idr-pipeline . /app/packages/idr-pipeline
 COPY pyproject.toml uv.lock .python-version ./
+COPY apps/utils/idr-bfd-validator/pyproject.toml apps/utils/idr-bfd-validator/pyproject.toml
+COPY apps/bfd-pipeline-idr/pyproject.toml apps/bfd-pipeline-idr/pyproject.toml
+COPY apps/bfd-pipeline-idr/src apps/bfd-pipeline-idr/src
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked --no-install-project
+  uv sync --frozen --no-install-project --project apps/utils/idr-bfd-validator
 
 FROM deps
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
-COPY . /app
+COPY apps/utils/idr-bfd-validator /app/apps/utils/idr-bfd-validator
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --locked
+  uv sync --frozen --project apps/utils/idr-bfd-validator
+
+WORKDIR /app/apps/utils/idr-bfd-validator
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

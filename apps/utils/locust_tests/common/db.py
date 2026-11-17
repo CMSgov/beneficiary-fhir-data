@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Any
 
 import psycopg
 
@@ -17,13 +18,13 @@ consistent data"""
 logger = logging.getLogger()
 
 
-def _execute(uri: str, query: str) -> list:
+def _execute(uri: str, query: str) -> list[tuple[Any, ...]]:
     """Execute a PSQL select statement and return its results."""
     if uri == "":
         uri = f"user={os.environ['PGUSER']} password={os.environ['PGPASSWORD']} \
             host={os.environ['PGHOST']} dbname={os.environ['PGDATABASE']}"
     conn = None
-    results = []
+    results: list[tuple[Any, ...]] = []
     try:
         with psycopg.connect(uri) as conn, conn.cursor() as cursor:
             # The execute method here uses additional type validation to prevent SQL injections,
@@ -156,7 +157,7 @@ def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> 
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_bene_ids(uri: str, table_sample_pct: float | None = None) -> list:
+def get_bene_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Return a list of bene IDs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
@@ -168,7 +169,7 @@ def get_bene_ids(uri: str, table_sample_pct: float | None = None) -> list:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list:
+def get_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Return a list of unique hashed MBIs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
@@ -190,7 +191,7 @@ def get_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_mbis(uri: str, table_sample_pct: float | None = None) -> list:
+def get_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Return a list of unique MBIs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
@@ -212,7 +213,9 @@ def get_mbis(uri: str, table_sample_pct: float | None = None) -> list:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_contract_ids(uri: str, table_sample_pct: float | None = None) -> list:
+def get_contract_ids(
+    uri: str, table_sample_pct: float | None = None
+) -> list[dict[str, str | None]]:
     """
     Return a list of contract id / reference year pairs from the beneficiary
     table.
@@ -241,7 +244,7 @@ def get_contract_ids(uri: str, table_sample_pct: float | None = None) -> list:
     return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
-def get_pac_mbis(uri: str) -> list:
+def get_pac_mbis(uri: str) -> list[str]:
     """
     Return a list of unique MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.

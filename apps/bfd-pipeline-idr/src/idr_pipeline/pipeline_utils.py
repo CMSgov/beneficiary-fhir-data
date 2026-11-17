@@ -136,6 +136,7 @@ def extract_and_load(
             RetryRequest,
             ForbiddenError,
             ProgrammingError,
+            psycopg.OperationalError,
         ) as ex:
             time_expired = datetime.now(UTC) - last_error > timedelta(seconds=10)
             if time_expired:

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.util;
 
-import gov.cms.bfd.server.ng.Configuration;
+import gov.cms.bfd.server.ng.config.Configuration;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

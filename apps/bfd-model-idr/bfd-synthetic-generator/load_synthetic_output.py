@@ -8,8 +8,9 @@ from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import StrEnum, auto
+from functools import reduce
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 from constants import (
@@ -49,10 +50,12 @@ from constants import (
     PRAUC,
     PRVDR_HSTRY,
 )
-from row_adapter import RowAdapter
-from snowflake.snowpark import Session
+from row_adapter import RowAdapter, RowValue
+from snowflake.snowpark import Column, Session
 from snowflake.snowpark.functions import col, when_matched, when_not_matched
 from snowflake.snowpark.functions import hash as snowpark_hash
+from snowflake.snowpark.row import Row
+from snowflake.snowpark.table import Table
 
 logger = logging.getLogger(__name__)
 
@@ -137,17 +140,13 @@ class CsvWriter(OutputDestinationWriter):
 
         df = pd.json_normalize(data)
 
-        if cols is not None and not isinstance(cols, str):
+        if not isinstance(cols, str):
             df = df.reindex(columns=cols).fillna("")
 
         for column in df.columns:
             if df[column].dtype == "float64":
                 df[column] = df[column].apply(
-                    lambda x: (
-                        str(int(x))
-                        if isinstance(x, (int, float)) and not pd.isna(x) and x != ""
-                        else ""
-                    )
+                    lambda x: str(int(x)) if isinstance(x, (int, float)) and not pd.isna(x) else ""
                 )
 
         out_path = self.out_dir / f"{table_name}.csv"
@@ -174,6 +173,8 @@ class CsvWriter(OutputDestinationWriter):
         bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
         files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]:
+        if files is None:
+            raise ValueError("CsvWriter.get_bene_sks requires the input files to read BENE_SK from")
         clm_bene_sks = (
             [int(row[BENE_SK]) for row in files[CLM]]
             if bene_sk_mode == BeneSkMode.CLM or bene_sk_mode == BeneSkMode.BOTH
@@ -216,12 +217,21 @@ class CsvWriter(OutputDestinationWriter):
         return [row for row in files[PRAUC] if row[MBI_NUM] in mbis]
 
 
+def _row_values(row: Row) -> dict[str, RowValue]:
+    return cast("dict[str, RowValue]", row.as_dict())
+
+
+def _join_expression(target: Table, source: Table, primary_keys: list[str]) -> Column:
+    conditions: list[Column] = [cast(Column, target[key] == source[key]) for key in primary_keys]
+    return reduce(lambda left, right: left & right, conditions)
+
+
 class SnowflakeWriter(OutputDestinationWriter):
     def __init__(self, session: Session, database: str, schema: str) -> None:
         self.session = session
         self.database = database
         self.schema = schema
-        self._column_types_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._column_types_cache: dict[tuple[str, str, str], set[str]] = {}
 
     def resolve_target_table(self, table_name: str) -> tuple[str, str, str]:
         override = _TABLE_OVERRIDES.get(table_name)
@@ -241,7 +251,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         resolved_table_name, database, schema = self.resolve_target_table(table_name)
         return f"{database}.{schema}.{resolved_table_name}"
 
-    def _qualified_session_table(self, table_name: str) -> Any:
+    def _qualified_session_table(self, table_name: str) -> Table:
         table = self.qualified_table(table_name)
         return self.session.table(table)
 
@@ -262,13 +272,13 @@ class SnowflakeWriter(OutputDestinationWriter):
             bene_sks_df = bene_sks_df.union(self._qualified_session_table(table).select("BENE_SK"))
         bene_sks_df = bene_sks_df.distinct().sort("BENE_SK")
 
-        bene_sks = [int(row["BENE_SK"]) for row in bene_sks_df.collect()]
+        bene_sks = [int(cast(int, row["BENE_SK"])) for row in bene_sks_df.collect()]
         for start in range(0, len(bene_sks), batch_size):
             yield bene_sks[start : start + batch_size]
 
-    def get_rows(self, table_name: str) -> list[dict[str, Any]]:
+    def get_rows(self, table_name: str) -> list[dict[str, RowValue]]:
         rows = self._qualified_session_table(table_name).collect()
-        return [row.as_dict() for row in rows]
+        return [_row_values(row) for row in rows]
 
     def get_bene_sk_to_mbi(
         self,
@@ -285,14 +295,14 @@ class SnowflakeWriter(OutputDestinationWriter):
         return [
             RowAdapter(
                 {
-                    "BENE_SK": str(row["BENE_SK"]),
-                    "BENE_MBI_ID": row["BENE_MBI_ID"],
-                    "IDR_LTST_TRANS_FLG": row["IDR_LTST_TRANS_FLG"],
+                    "BENE_SK": str(values["BENE_SK"]),
+                    "BENE_MBI_ID": values["BENE_MBI_ID"],
+                    "IDR_LTST_TRANS_FLG": values["IDR_LTST_TRANS_FLG"],
                 },
                 loaded_from_file=True,
             )
-            for row in rows
-            if row["BENE_MBI_ID"]
+            for values in map(_row_values, rows)
+            if values["BENE_MBI_ID"]
         ]
 
     def _get_known_columns(self, database: str, schema: str, table_name: str) -> set[str]:
@@ -308,7 +318,7 @@ class SnowflakeWriter(OutputDestinationWriter):
                 .select("COLUMN_NAME")
                 .collect()
             )
-            self._column_types_cache[cache_key] = {row["COLUMN_NAME"].upper() for row in rows}
+            self._column_types_cache[cache_key] = {str(row["COLUMN_NAME"]).upper() for row in rows}
 
         return self._column_types_cache[cache_key]
 
@@ -378,7 +388,7 @@ class SnowflakeWriter(OutputDestinationWriter):
             RowAdapter(row.as_dict(), loaded_from_file=True) for row in clm_df.to_local_iterator()
         ]
 
-        def fetch_table_data(table_name):
+        def fetch_table_data(table_name: str) -> tuple[str, list[RowAdapter]]:
             key_df = key_dfs[_TABLE_RELATIONS[table_name]]
             joined = self._qualified_session_table(table_name).join(
                 key_df, using_columns=list(key_df.columns)
@@ -397,7 +407,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.table(temp_table).drop_table()
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Took {duration:.6f} seconds to fetch existing claims")
+        logger.info("Took %.6f seconds to fetch existing claims", duration)
 
         return result
 
@@ -434,9 +444,9 @@ class SnowflakeWriter(OutputDestinationWriter):
         csv_buffer.close()
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Packaging data into CSV completed in {duration:.6f} seconds")
+        logger.info("Packaging data into CSV completed in %.6f seconds", duration)
 
-        session_schema = self.session.get_current_schema().replace('"', "")
+        session_schema = (self.session.get_current_schema() or "").replace('"', "")
         staging_table_name = f"{database}.{session_schema}.MERGE_STAGE_{resolved_table_name}"
         target_filename = f"batch_{resolved_table_name}.csv"
 
@@ -461,7 +471,7 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.sql(
             f"""
             COPY INTO {staging_table_name}
-            FROM @{database}.{session_schema}.generator_files_stage/batch_{resolved_table_name}.csv.gz
+            FROM @{database}.{session_schema}.generator_files_stage/{target_filename}.gz
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 SKIP_HEADER = 1
@@ -475,15 +485,12 @@ class SnowflakeWriter(OutputDestinationWriter):
         source = self.session.table(staging_table_name)
 
         duration = time.perf_counter() - perf_start
-        logger.info(f"Staged data to merge in {duration:.6f} seconds")
+        logger.info("Staged data to merge in %.6f seconds", duration)
 
         pks = self._get_primary_keys(table_name)
         update_cols = [c for c in target_columns if c not in pks]
 
-        join_expr = None
-        for pk in pks:
-            cond = target[pk] == source[pk]
-            join_expr = cond if join_expr is None else (join_expr & cond)
+        join_expr = _join_expression(target, source, pks)
 
         merge_clauses = []
 
@@ -508,14 +515,17 @@ class SnowflakeWriter(OutputDestinationWriter):
         self.session.table(staging_table_name).drop_table()
         duration = time.perf_counter() - perf_start
 
-        message = f"Wrote to {resolved_table_name} in {duration:.6f} seconds: {result.rows_inserted} inserted, {result.rows_updated} updated"
+        message = (
+            f"Wrote to {resolved_table_name} in {duration:.6f} seconds: "
+            f"{result.rows_inserted} inserted, {result.rows_updated} updated"
+        )
         logger.info(message)
 
     def _get_primary_keys(self, table_name: str) -> list[str]:
         cleaned_table_name, database, schema = self.resolve_target_table(table_name)
         qualified_table = f"{database}.{schema}.{cleaned_table_name}"
         pk_df = self.session.sql(f"SHOW PRIMARY KEYS IN TABLE {qualified_table}")
-        return [row["column_name"] for row in pk_df.select('"column_name"').collect()]
+        return [str(row["column_name"]) for row in pk_df.select('"column_name"').collect()]
 
     def get_provider_histories(
         self,

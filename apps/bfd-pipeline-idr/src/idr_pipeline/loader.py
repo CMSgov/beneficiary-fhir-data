@@ -3,7 +3,7 @@ import itertools
 import operator
 from collections.abc import Awaitable, Callable, Iterator, Sequence
 from datetime import UTC, datetime
-from typing import Any, Generic, cast, override
+from typing import Any, cast, override
 
 import anyio
 import psycopg
@@ -75,6 +75,15 @@ class PostgresLoader:
             # matter whether we use a pool or not, either
             # TODO: Investigate pool timeout further so that this can be removed
             timeout=SETTINGS.postgres_connection_timeout,
+            # Params to send to libpq
+            # Attempt to prevent TLS connection errors setting better keepalive settings
+            # See https://www.cybertec-postgresql.com/en/tcp-keepalive-for-a-better-postgresql-experience/
+            kwargs={
+                "keepalives": 1,
+                "keepalives_idle": 60,
+                "keepalives_interval": 5,
+                "keepalives_count": 3,
+            },
         ) as pool:
             await pool.wait()
             loader_cls = FullSyncBatchLoader if model.should_delete_missing() else BatchLoader
@@ -92,7 +101,7 @@ class PostgresLoader:
             ).load()
 
 
-class BatchLoader(Generic[T]):  # noqa: UP046
+class BatchLoader[T: IdrBaseModel]:
     def __init__(
         self,
         fetch_results: Iterator[list[T]],

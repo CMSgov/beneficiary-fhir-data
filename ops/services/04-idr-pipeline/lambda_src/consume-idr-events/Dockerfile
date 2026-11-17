@@ -12,18 +12,20 @@ ENV UV_NO_INSTALLER_METADATA=1
 ENV UV_LINK_MODE=copy
 # Bundle the dependencies into the Lambda task root via `uv pip install --target`.
 #
-# Omit any local packages (`--no-emit-workspace`) and development dependencies (`--no-dev`).
-# This ensures that the Docker layer cache is only invalidated when the `pyproject.toml` or `uv.lock`
-# files change, but remains robust to changes in the application code.
+# Scope the export to this workspace member with --project. Skip development dependencies
+# with --no-dev. This layer changes only when the workspace `uv.lock` or this member's
+# `pyproject.toml` changes.
 COPY pyproject.toml uv.lock .python-version ./
+COPY ops/services/04-idr-pipeline/lambda_src/consume-idr-events/pyproject.toml ops/services/04-idr-pipeline/lambda_src/consume-idr-events/pyproject.toml
 RUN --mount=from=uv,source=/uv,target=/bin/uv \
   --mount=type=cache,target=/root/.cache/uv \
-  uv export --frozen --no-emit-workspace --no-dev --no-editable -o requirements.txt && \
+  uv export --frozen --no-dev --no-editable \
+    --project ops/services/04-idr-pipeline/lambda_src/consume-idr-events -o requirements.txt && \
   uv pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 FROM lambda
 # Copy the runtime dependencies from the builder stage.
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
-COPY app ${LAMBDA_TASK_ROOT}/app
+COPY ops/services/04-idr-pipeline/lambda_src/consume-idr-events/app ${LAMBDA_TASK_ROOT}/app
 CMD [ "app.main.handler" ]

@@ -1,11 +1,9 @@
 import time
 
 import requests
-import urllib3
-from urllib3.exceptions import NewConnectionError
 
 
-def wait_for_matchbox():
+def wait_for_matchbox() -> None:
     print("Waiting for local matchbox server to start...")
     while True:
         try:

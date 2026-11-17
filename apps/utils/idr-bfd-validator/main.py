@@ -17,6 +17,9 @@ import anyio
 import boto3
 import click
 from botocore.config import Config
+from loguru import logger
+from pydantic_partial import create_partial_model
+
 from idr_pipeline.constants import DEFAULT_MAX_DATE, PHASE_1_CUTOFF
 from idr_pipeline.extractor import PostgresExtractor, SnowflakeExtractor
 from idr_pipeline.load_partition import DEFAULT_PARTITION, LoadPartition, LoadType
@@ -25,7 +28,6 @@ from idr_pipeline.model.base_model import (
     ALIAS_CLM,
     DbType,
     IdrBaseModel,
-    LoadMode,
     Source,
     T,
     transform_default_date_to_null,
@@ -54,8 +56,6 @@ from idr_pipeline.pipeline_stages import (
     CLAIM_TABLES,
     PRIOR_AUTH_TABLES,
 )
-from loguru import logger
-from pydantic_partial import create_partial_model
 
 if TYPE_CHECKING:
     from loguru import Record
@@ -194,10 +194,8 @@ def _compare_table(
     # We must use pydantic-partial to create a partial model for some model types because not all
     # required fields of a given model are inserted into the BFD database. So, if we don't use
     # partial models then Pydantic will fail to validate rows that come back from the BFD DB.
-    bfd_extractor: PostgresExtractor[T] = PostgresExtractor(
-        create_partial_model(model), partition, LoadMode.PROD
-    )
-    load_progress_extractor = PostgresExtractor(LoadProgress, DEFAULT_PARTITION, LoadMode.PROD)
+    bfd_extractor: PostgresExtractor[T] = PostgresExtractor(create_partial_model(model), partition)
+    load_progress_extractor = PostgresExtractor(LoadProgress, DEFAULT_PARTITION)
 
     with logger.contextualize(table=model.table(), part=partition.name):
         progress = load_progress_extractor.extract_single(

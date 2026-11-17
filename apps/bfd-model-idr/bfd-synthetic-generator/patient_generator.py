@@ -4,6 +4,7 @@ import random
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 import tqdm
@@ -31,7 +32,7 @@ from generator_util import (
     probability,
 )
 from id_generators import IdGenerator, RandomIdGenerator, SequentialIdGenerator, load_id_state
-from load_synthetic_output import CsvWriter, OutputDestinationWriter, SnowflakeWriter
+from load_synthetic_output import CsvWriter, SnowflakeWriter
 from row_adapter import RowAdapter
 from shared_options import common_options
 
@@ -60,10 +61,10 @@ available_given_names = [
 available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "Sheep"]
 
 
-def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
+def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]) -> None:
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
-    logger.info(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
+    logger.info("Regenerating/updating %s...", ", ".join(k for k, v in files.items() if v))
 
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
@@ -148,8 +149,8 @@ def load_inputs(
     truncate: bool,
     paths: tuple[Path, ...] = (),
     exclude_empty: bool = False,
-    writer: OutputDestinationWriter | None = None,
-):
+    writer: CsvWriter | SnowflakeWriter | None = None,
+) -> None:
     if writer is None:
         writer = CsvWriter()
 
@@ -161,7 +162,7 @@ def load_inputs(
 
 def _handle_csv_flow(
     writer: CsvWriter, paths: tuple[Path, ...], patients: int, force_ztm: bool, exclude_empty: bool
-):
+) -> None:
     generator: GeneratorUtil = GeneratorUtil(id_gen=RandomIdGenerator())
 
     csv_tables = [
@@ -198,17 +199,17 @@ def _handle_csv_flow(
         print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
         sys.exit(1)
 
-    log_messages = []
+    log_messages: list[str] = []
     if num_existing:
         log_messages.append(f"regenerating {num_existing} existing patients")
     if num_new > 0:
         log_messages.append(f"generating {num_new} new patients")
     logger.info(f"{', and '.join(log_messages)}...".capitalize())
 
-    patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
+    patient_rows: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
-    _generate_patients_batch(generator, patients, patient_mbi_id_rows, force_ztm)
+    _generate_patients_batch(generator, patient_rows, patient_mbi_id_rows, force_ztm)
     generator.save_output_files(writer)
 
 
@@ -218,7 +219,7 @@ def _handle_snowflake_flow(
     force_ztm: bool,
     batch_size: int,
     truncate: bool,
-):
+) -> None:
     patient_tables = [
         BENE_MBI_ID,
         BENE_STUS,
@@ -268,7 +269,7 @@ def _handle_snowflake_flow(
 def _generate_patients_batch(
     generator: GeneratorUtil,
     patients: list[RowAdapter],
-    patient_mbi_id_rows: dict[str, dict],
+    patient_mbi_id_rows: dict[str, dict[str, Any]],
     force_ztm: bool,
 ) -> None:
     for patient in tqdm.tqdm(patients):
@@ -390,11 +391,11 @@ def _generate_patients_batch(
 
         generator.bene_hstry_table.append(patient.kv)
 
-    logger.info(f"Done generating {len(patients)} patients")
+    logger.info("Done generating %d patients", len(patients))
 
 
 def _generate_contracts(
-    generator: GeneratorUtil, writer: OutputDestinationWriter, amount: int = 10
+    generator: GeneratorUtil, writer: SnowflakeWriter, amount: int = 10
 ) -> None:
     existing_contracts = [
         RowAdapter(row, loaded_from_file=True) for row in writer.get_rows(CNTRCT_PBP_NUM)
@@ -433,7 +434,7 @@ def main(
     truncate: bool,
     batch_size: int,
     paths: tuple[Path, ...],
-    **kwargs,
+    **kwargs: Any,  # noqa: ANN401, ARG001
 ) -> None:
     load_inputs(
         patients=patients,

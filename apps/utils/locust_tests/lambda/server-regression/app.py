@@ -5,6 +5,7 @@ import urllib.parse
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import Any
 
 import boto3
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -100,7 +101,7 @@ def send_pipeline_signal(
     send_sqs_message(signal_queue_url, pipeline_signal_msg)
 
 
-def handler(event: dict, context: LambdaContext) -> str | None:
+def handler(event: dict[str, Any], context: LambdaContext) -> str | None:
     if not s3_bucket or not sqs_pipeline_signal:
         print(
             '"INSIGHTS_BUCKET_NAME" and "SQS_PIPELINE_SIGNAL_NAME" environment variables must be'

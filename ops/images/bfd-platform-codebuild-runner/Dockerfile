@@ -36,8 +36,8 @@ RUN curl -fsSL -o /usr/local/bin/sops https://github.com/getsops/sops/releases/d
 
 FROM sops as uv
 
-ARG uv_version=0.13.5
-ARG uv_checksum=4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403
+ARG uv_version=0.13.6
+ARG uv_checksum=229e194255c7958d86d56e8790d969a6f74736592133f0dfd0076f754c642c1d
 
 RUN curl -fsSL -o /tmp/uv.tar.gz https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-aarch64-unknown-linux-gnu.tar.gz \
     && checksum=$(sha256sum /tmp/uv.tar.gz | cut -f 1 -d ' ') \

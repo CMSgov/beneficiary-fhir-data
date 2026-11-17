@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import Any
+
 import click
 from constants import GeneratePacDataMode
 from load_synthetic_output import BeneSkMode
@@ -5,15 +8,15 @@ from load_synthetic_output import BeneSkMode
 _BATCH_SIZE = 50_000
 
 
-def common_options(function):
+def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
     function = click.option(
         "--force-ztm",
         is_flag=True,
         default=False,
         help=(
-            'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for an existing patient to '
-            "be generated. This will introduce new rows for patients that previously had "
-            "none. Useful if not all tables for a patient have been generated yet."
+            'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for an existing '
+            "patient to be generated. This will introduce new rows for patients that previously "
+            "had none. Useful if not all tables for a patient have been generated yet."
         ),
     )(function)
 
@@ -22,8 +25,10 @@ def common_options(function):
         type=int,
         default=0,
         show_default=True,
-        help="Number of NEW patients to generate. Does not affect patients regenerated when truncate "
-        "flag is set to False",
+        help=(
+            "Number of NEW patients to generate. Does not affect patients regenerated when "
+            "truncate flag is set to False"
+        ),
     )(function)
 
     function = click.option(
@@ -31,7 +36,9 @@ def common_options(function):
         is_flag=True,
         default=False,
         show_default=True,
-        help="Automatically generate claims after patient generation using the generated BENE_HSTRY",
+        help=(
+            "Automatically generate claims after patient generation using the generated BENE_HSTRY"
+        ),
     )(function)
 
     function = click.option(
@@ -95,12 +102,10 @@ def common_options(function):
         help="Truncate tables before reloading. Default is false",
     )(function)
 
-    function = click.option(
+    return click.option(
         "--batch-size",
         type=int,
         default=_BATCH_SIZE,
         show_default=True,
         help="Batch size of claims to process",
     )(function)
-
-    return function

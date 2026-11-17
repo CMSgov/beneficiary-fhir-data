@@ -20,7 +20,7 @@ from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 from common.validation import ValidationResult
 
-_COMPARISONS_METADATA_PATH = None
+_comparisons_metadata_path = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
 overriden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
 Also overriden by the value of --stats-compare-meta-file"""
@@ -79,7 +79,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
         try:
             stat_comparsion_meta_path = (
-                stats_config.stats_compare_meta_file or _COMPARISONS_METADATA_PATH
+                stats_config.stats_compare_meta_file or _comparisons_metadata_path
             )
             if stat_comparsion_meta_path:
                 compare_result = stats_compare.do_stats_comparison(
@@ -116,8 +116,8 @@ def set_comparisons_metadata_path(path: str) -> None:
     Args:
         path (str): Path to a JSON file describing stat comparison metadata
     """
-    global _COMPARISONS_METADATA_PATH  # noqa: PLW0603
-    _COMPARISONS_METADATA_PATH = path
+    global _comparisons_metadata_path  # noqa: PLW0603
+    _comparisons_metadata_path = path
 
 
 class BFDUserBase(FastHttpUser):
@@ -135,7 +135,7 @@ class BFDUserBase(FastHttpUser):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = True
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
@@ -144,10 +144,10 @@ class BFDUserBase(FastHttpUser):
         self.last_updated = data.get_last_updated()
 
         # Initialize URL pools
-        self.url_pools = {}
+        self.url_pools: dict[str, list[str]] = {}
 
         self.logger = logging.getLogger()
-        self.has_reported_no_data = []
+        self.has_reported_no_data: list[str] = []
 
     def ssl_context_factory(self) -> ssl.SSLContext:
         """Configure the SSLContext for FastHttpUser requests. Specifically, the context returned
@@ -242,7 +242,7 @@ class BFDUserBase(FastHttpUser):
 
     def run_task(
         self,
-        url_callback: Callable,
+        url_callback: Callable[[], str],
         headers: dict[str, str] | None = None,
         body: dict[str, str] | None = None,
         name: str = "",

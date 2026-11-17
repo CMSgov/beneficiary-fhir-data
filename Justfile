@@ -15,7 +15,7 @@ bootstrap: && setup-vscode
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh findutils
+    brew install uv yq taplo prek tenv argc bash coreutils fd jq nvm terraform-docs shfmt gh findutils
     # The extension used by the prek hook that checks the Actions lockfile.
     # Installing an extension that is already present is a no-op.
     gh extension install github/gh-actions-lock
@@ -34,7 +34,7 @@ bootstrap: && setup-vscode
 [doc("Sets up recommended VS Code settings and extensions")]
 [group("setup")]
 setup-vscode:
-    ./hooks/merge_vscode_settings.py
+    uv run hooks/merge_vscode_settings.py
     ./hooks/install-recommended-extensions.sh
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
@@ -59,10 +59,63 @@ bfd-request resource query env samhsa="":
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
 
+[arg("tag", long, help="Tag the image, and any base images built, with this version")]
+[arg("platform", long, help="Target platform, overriding the one in the build matrix")]
+[arg("no_base", long="no-base", value="1", help="Do not build the base images this image needs")]
+[arg("dry_run", long="dry-run", value="1", help="Print the podman command for each image in the chain and stop")]
+[doc("""Builds one of the repository's container images locally with podman.
+The image name is one of the names printed by `just docker-images`. A tag pins derived images to the
+base images built in the same run, so `just docker-build bfd-platform-idr-pipeline --tag 2.999.0`
+builds and tags `bfd-platform-base-python:2.999.0` first.""")]
+[group('docker')]
+docker-build image tag="" platform="" no_base="" dry_run="":
+    ./ops/utils/scripts/build-image.sh "{{ image }}" \
+        {{ if tag != "" { "--tag " + tag } else { "" } }} \
+        {{ if platform != "" { "--platform " + platform } else { "" } }} \
+        {{ if no_base == "1" { "--no-base" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
+
+[doc("Lists the images that `just docker-build` can build")]
+[group('docker')]
+docker-images:
+    ./ops/utils/scripts/build-image.sh --list
+
 [doc("Helper command to remove all containers")]
-[group('utilities')]
+[group('docker')]
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+
+[arg("no_baseline", long="no-baseline", value="1", help="Run basedpyright with the baseline disabled, listing the findings it normally suppresses")]
+[doc("""Runs every check a Python change must pass: lockfile consistency, lint, formatting and type
+checking. Works from any directory and always checks the workspace root. The same checks, plus the
+workspace member test suites, run as prek hooks on each commit. The `--no-baseline` run reports
+failure by design, since the baselined findings are then visible errors.""")]
+[group('python')]
+py-check no_baseline="":
+    ./ops/utils/scripts/py-check.sh {{ if no_baseline == "1" { "--no-baseline" } else { "" } }}
+
+[arg("member", long, help="Run one member's tests, by project name (e.g. idr-pipeline) or directory (e.g. apps/bfd-pipeline-idr, relative to the current directory)")]
+[arg("list", long, value="1", help="List the names of workspace members that have tests")]
+[doc("""Runs the pytest suites of workspace members. With no arguments, the suite of every member
+that has tests runs. `--member` runs just one, given by project name or directory, and `--list`
+prints the member names that have tests.""")]
+[group('python')]
+[no-cd]
+py-test list="" member="":
+    {{ justfile_directory() }}/ops/utils/scripts/py-test.sh {{ if list == "1" { "--list" } else { "" } }} \
+        {{ if member != "" { f"--member \"{{ member }}\"" } else { "" } }}
+
+[arg("yes", long, value="1", help="Delete every stale environment without asking")]
+[arg("dry_run", long="dry-run", value="1", help="List the environments and their sizes without deleting anything")]
+[doc("""Deletes the per-project virtual environments left over from before the repository became a uv
+workspace, asking before each one. Those environments are inert now that every Python command runs
+from the workspace root, though a bare `uv pip` inside a member still reads that member's `.venv`.
+Only directories named `.venv` below the repository root are considered, and the root `.venv` is
+never offered.""")]
+[group('python')]
+py-rm-venvs yes="" dry_run="":
+    ./ops/utils/scripts/py-rm-venvs.sh {{ if yes == "1" { "--yes" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
 
 [doc("Removes the local db container")]
 [group('database')]

@@ -260,7 +260,7 @@ def validate_aggregated_stats(
 
     # all_tasks_results will be a dictionary of all of the StatCompareResults for _each individual
     # task_ keyed by the name of said Task
-    all_tasks_results = {}
+    all_tasks_results: dict[str, list[StatComparison]] = {}
     for task in common_tasks:
         prev_task = prev_tasks[task]
         cur_task = cur_tasks[task]

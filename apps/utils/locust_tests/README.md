@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 -->
+
 # BFD Loadtest
 
 ## Overview
@@ -33,7 +35,7 @@ just regression-test --env test
 
 ### Installing Dependencies
 
-The Locust tests use the `uv` package manager to manage dependencies.
+The Locust tests use the `uv` package manager to manage dependencies. `apps/utils/locust_tests` is a member of the repository-wide `uv` workspace. Its dependencies are resolved from the repository root.
 
 1. Ensure `uv` is installed
 
@@ -41,7 +43,7 @@ The Locust tests use the `uv` package manager to manage dependencies.
    brew install uv
    ```
 
-2. (Not necessary, `uv run ...` does this automatically on first invocation) Sync dependencies
+2. Sync dependencies from the repository root. This step is not required because `uv run` resolves dependencies on first invocation.
 
    ```sh
    uv sync
