@@ -24,7 +24,7 @@ echo "using $src"
 
 rm -rf "$out" && mkdir -p "$out"
 uv run generate-eob-sample --clm-uniq-id "$clm_id" --source-directory "$src" --output-directory "$out"
-input=$(find "$out" -maxdepth 1 -name 'EOB-*-Sample.json' | head -1)
+input=$(find "$out" -maxdepth 1 -name 'eob-*.json' | head -1)
 
 resource="EOB - Base"
 [[ $(jq -r .resourceType "$input") == ExplanationOfBenefit-Pharmacy ]] && resource="EOB - Pharmacy"
