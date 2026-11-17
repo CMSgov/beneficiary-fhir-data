@@ -203,7 +203,7 @@ class PriorAuthGeneratorUtil:
         fpk_to_clm = {four_part_key(row): row for row in out_tables[f.CLM]}
         uniq_id_to_clm = {row[f.CLM_UNIQ_ID]: row for row in out_tables[f.CLM]}
 
-        def get_line_mbi(line_row):
+        def get_line_mbi(line_row: RowAdapter) -> str | None:
             fpk = four_part_key(line_row)
             clm = fpk_to_clm.get(fpk) or uniq_id_to_clm.get(line_row.get(f.CLM_UNIQ_ID))
             bene_sk = clm[f.BENE_SK] if clm else line_row.get(f.BENE_SK)
@@ -223,15 +223,16 @@ class PriorAuthGeneratorUtil:
 
         for line, utn in lines_to_scan:
             mbi = get_line_mbi(line)
-            if mbi and (mbi, utn) not in utn_combos:
-                clm = fpk_to_clm.get(four_part_key(line)) or uniq_id_to_clm.get(
-                    line.get(f.CLM_UNIQ_ID)
-                )
-                utn_combos[(mbi, utn)] = {
-                    "from_dt": clm[f.CLM_FROM_DT],
-                    "clm_type": clm[f.CLM_TYPE_CD],
-                    "mac_id": clm[f.CLM_CNTRCTR_NUM],
-                }
+            if not mbi or (mbi, utn) in utn_combos:
+                continue
+            clm = fpk_to_clm.get(four_part_key(line)) or uniq_id_to_clm.get(line.get(f.CLM_UNIQ_ID))
+            if clm is None:
+                continue
+            utn_combos[(mbi, utn)] = {
+                "from_dt": clm[f.CLM_FROM_DT],
+                "clm_type": clm[f.CLM_TYPE_CD],
+                "mac_id": clm[f.CLM_CNTRCTR_NUM],
+            }
 
         type_2_npi_to_name = {
             row[f.PRVDR_NPI_NUM]: row[f.PRVDR_NAME]
@@ -244,7 +245,7 @@ class PriorAuthGeneratorUtil:
             part_by=lambda x: (x["MBI_NUM"], x["UTN"]),
         )
 
-        prior_auths = []
+        prior_auths: list[RowAdapter] = []
         for (mbi, utn), details in utn_combos.items():
             init_rows = existing_prior_auth_by_key[(mbi, utn)] or [
                 RowAdapter({}) for _ in range(self._roll_segment_count())
@@ -263,6 +264,7 @@ class PriorAuthGeneratorUtil:
                 type_2_npi_to_name=type_2_npi_to_name,
                 init_prior_auth=init_rows[0],
             )
+            prior_auth: RowAdapter | None = None
             for idx, init_row in enumerate(init_rows, start=1):
                 prior_auth = self._gen_segment(
                     gen_utils=gen_utils,
@@ -272,5 +274,6 @@ class PriorAuthGeneratorUtil:
                     type_2_npis=generated_type_2_npis,
                     init_prior_auth=init_row,
                 )
-            prior_auths.append(prior_auth)
+            if prior_auth is not None:
+                prior_auths.append(prior_auth)
         return prior_auths

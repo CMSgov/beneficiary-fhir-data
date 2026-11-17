@@ -2,6 +2,5 @@
 !pyproject.toml
 !uv.lock
 !.python-version
-!app
-!app/main.py
-!app/__init__.py
+!ops/services/04-idr-pipeline/lambda_src/consume-idr-events/pyproject.toml
+!ops/services/04-idr-pipeline/lambda_src/consume-idr-events/app/*.py

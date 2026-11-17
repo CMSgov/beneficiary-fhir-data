@@ -1,8 +1,8 @@
 {
   "resourceType" : "Coverage",
-  "id" : "part-D-123456789",
+  "id" : "part-D-547437476",
   "meta" : {
-    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2025-09-12T09:15:55.612996",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0",
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0"]
   },
@@ -13,7 +13,6 @@
       "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0"]
     },
     "active" : true,
-    "name" : "Sample PDP",
     "contact" : [{
       "purpose" : {
         "coding" : [{
@@ -21,26 +20,22 @@
           "code" : "PATINF",
           "display" : "Patient"
         }]
-      },
-      "telecom" : [{
-        "system" : "phone",
-        "value" : "1-800-555-1234"
-      }]
+      }
     }]
   }],
   "extension" : [{
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
-    "valueString" : "S1234"
+    "valueString" : "S0001"
   },
   {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM",
-    "valueString" : "000"
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM",
+    "valueString" : "003"
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW",
-      "code" : "Y"
+      "code" : "1"
     }
   },
   {
@@ -61,12 +56,12 @@
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-COPMT-LVL-ID",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CMBND-DEEMD-COPMT-LVL-ID",
-      "code" : "1"
+      "code" : "3"
     }
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CMBND-DEEMD-PRM-PCT",
-    "valueDecimal" : 100.0
+    "valueDecimal" : 50
   }],
   "identifier" : [{
     "type" : {
@@ -75,7 +70,7 @@
         "code" : "MB"
       }]
     },
-    "value" : "M123456789"
+    "value" : "324513064"
   }],
   "status" : "active",
   "type" : {
@@ -85,9 +80,9 @@
       "display" : "Medicare Drug Benefit"
     }]
   },
-  "subscriberId" : "ABB2BB0BB22",
+  "subscriberId" : "4IX2V57GT15",
   "beneficiary" : {
-    "reference" : "Patient/123456789"
+    "reference" : "Patient/547437476"
   },
   "relationship" : {
     "coding" : [{
@@ -97,7 +92,7 @@
     }]
   },
   "period" : {
-    "start" : "2018-04-11"
+    "start" : "2019-02-18"
   },
   "payor" : [{
     "reference" : "#insurer-org"
@@ -118,7 +113,7 @@
         "code" : "rxid"
       }]
     },
-    "value" : "M123456789"
+    "value" : "324513064"
   },
   {
     "type" : {
@@ -127,7 +122,7 @@
         "code" : "rxgroup"
       }]
     },
-    "value" : "G987654321"
+    "value" : "999"
   },
   {
     "type" : {
@@ -136,7 +131,7 @@
         "code" : "rxpcn"
       }]
     },
-    "value" : "P123456"
+    "value" : "338747"
   },
   {
     "type" : {
@@ -145,6 +140,6 @@
         "code" : "rxbin"
       }]
     },
-    "value" : "BIN123456"
+    "value" : "222720"
   }]
 }

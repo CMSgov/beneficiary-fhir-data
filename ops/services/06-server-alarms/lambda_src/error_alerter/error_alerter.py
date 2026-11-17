@@ -6,7 +6,7 @@ import sys
 import time
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
-from typing import Any, TypedDict
+from typing import TypedDict
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -136,7 +136,7 @@ def __format_time(time: datetime) -> str:
     return time.replace(tzinfo=None).isoformat(timespec="seconds") + ".000Z"
 
 
-def handler(event: dict[str, str], context: Any):
+def handler(_event: dict[str, str], _context: object) -> None:
     if not all([REGION, BFD_ENVIRONMENT, LOG_LOOKBACK_SECONDS]):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return

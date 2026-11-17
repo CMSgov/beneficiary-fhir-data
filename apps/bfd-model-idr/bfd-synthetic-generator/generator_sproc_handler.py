@@ -5,13 +5,13 @@ from pathlib import Path
 
 from snowflake.snowpark import Session
 
+# Needed to find generator files inside Snowflake's environment
 current_file_dir = Path(__file__).resolve().parent
 package_root_dir = current_file_dir.parent
 
-for path_obj in (current_file_dir, package_root_dir):
-    string_path = str(path_obj)
-    if string_path not in sys.path:
-        sys.path.append(string_path)
+for path in (str(current_file_dir), str(package_root_dir)):
+    if path not in sys.path:
+        sys.path.append(path)
 
 from claims_generator import GeneratePacDataMode, generate  # noqa: E402
 from load_synthetic_output import BeneSkMode, SnowflakeWriter  # noqa: E402
@@ -35,8 +35,8 @@ def generate_synthetic_data(
     force_ztm: bool,
 ) -> None:
     perf_start = time.perf_counter()
-    db = session.get_current_database().replace('"', "")
-    schema = session.get_current_schema().replace('"', "")
+    db = (session.get_current_database() or "").replace('"', "")
+    schema = (session.get_current_schema() or "").replace('"', "")
     writer = SnowflakeWriter(session, db, schema, overwrite)
 
     # generate patient data

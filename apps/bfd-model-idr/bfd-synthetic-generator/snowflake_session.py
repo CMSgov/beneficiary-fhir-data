@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Any
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -28,13 +29,12 @@ def create_snowflake_session() -> Session:
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    return Session.builder.configs(
-        {
-            "account": get_env_var("IDR_ACCOUNT"),
-            "user": get_env_var("IDR_USERNAME"),
-            "private_key": private_key_bytes,
-            "warehouse": get_env_var("IDR_WAREHOUSE"),
-            "database": get_env_var("IDR_DATABASE"),
-            "schema": "CMS_VDM_VIEW_MDCR_PRD",
-        }
-    ).create()
+    options: dict[str, Any] = {
+        "account": get_env_var("IDR_ACCOUNT"),
+        "user": get_env_var("IDR_USERNAME"),
+        "private_key": private_key_bytes,
+        "warehouse": get_env_var("IDR_WAREHOUSE"),
+        "database": get_env_var("IDR_DATABASE"),
+        "schema": "CMS_VDM_VIEW_MDCR_PRD",
+    }
+    return Session.builder.configs(options).create()

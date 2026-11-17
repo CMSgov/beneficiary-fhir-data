@@ -14,7 +14,7 @@
   {
     "name": "bfd-platform-mount-certstores",
     "dockerfile": "ops/images/bfd-platform-mount-certstores/Dockerfile",
-    "contextDir": "ops/images/bfd-platform-mount-certstores",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
@@ -26,7 +26,7 @@
   {
     "name": "bfd-platform-idr-pipeline",
     "dockerfile": "apps/bfd-pipeline-idr/Dockerfile",
-    "contextDir": "apps/bfd-pipeline-idr",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
@@ -36,39 +36,45 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-migrator-synthetic",
+    "dockerfile": "apps/bfd-db-migrator-synthetic/Dockerfile",
+    "contextDir": "apps/bfd-db-migrator-synthetic",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
-    "contextDir": "apps/utils/locust_tests",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-run-locust",
     "dockerfile": "apps/utils/locust_tests/run-locust.Dockerfile",
-    "contextDir": "apps/utils/locust_tests",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-pipeline-ccw-manifests-verifier-lambda",
     "dockerfile": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier/Dockerfile",
-    "contextDir": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-pipeline-ccw-runner",
     "dockerfile": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner/Dockerfile",
-    "contextDir": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-consume-idr-events",
     "dockerfile": "ops/services/04-idr-pipeline/lambda_src/consume-idr-events/Dockerfile",
-    "contextDir": "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-run-idr-pipeline",
     "dockerfile": "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline/Dockerfile",
-    "contextDir": "ops/services/04-idr-pipeline/lambda_src/run-idr-pipeline",
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
@@ -80,10 +86,7 @@
   {
     "name": "bfd-platform-idr-bfd-validator",
     "dockerfile": "apps/utils/idr-bfd-validator/Dockerfile",
-    "contextDir": "apps/utils/idr-bfd-validator",
-    "namedContexts": {
-      "idr-pipeline": "apps/bfd-pipeline-idr"
-    },
+    "contextDir": ".",
     "platform": "linux/arm64"
   },
   {
@@ -95,10 +98,7 @@
   {
     "name": "bfd-platform-samhsa-regression",
     "dockerfile": "apps/utils/samhsa-regression-tests/Dockerfile",
-    "contextDir": "apps/utils/samhsa-regression-tests",
-    "namedContexts": {
-      "server-ng-resources": "apps/bfd-server-ng/src/main/resources"
-    },
+    "contextDir": ".",
     "platform": "linux/arm64"
   }
 ]

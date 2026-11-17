@@ -7,7 +7,7 @@ import requests
 MATCHBOX_SERVER = "http://localhost:18080/matchboxv3"
 
 
-def run_conformance_test(input_file, output_file):
+def run_conformance_test(input_file: str | Path, output_file: str | Path) -> bool | None:
     try:
         print(f"Running conformance testing against {MATCHBOX_SERVER}")
 
@@ -16,7 +16,7 @@ def run_conformance_test(input_file, output_file):
 
         url = f"{MATCHBOX_SERVER}/fhir/$validate"
         headers = {"Content-Type": "application/fhir+json", "Accept": "application/fhir+json"}
-        params = {}
+        params: dict[str, str] = {}
 
         # Extract profile from meta.profile if there is one
         if "meta" in resource_content and "profile" in resource_content["meta"]:

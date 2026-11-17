@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 -->
+
 # `samhsa-regression-tests`
 
 This Python utility is composed of a single script, `main.py`, that when ran with the correct inputs will verify that SAMHSA filtering on the V3 Server is working as expected. This is a full E2E-test, so _real_ data is seeded from the appropriate database before sending requests to the V3 Server.
@@ -18,40 +20,13 @@ just samhsa-regression-test --env test
 
 ## Building the Docker Image
 
-This utility references the server-ng `security_labels.yml` file as a build-time dependency. That
-file is the same source of truth the V3 server uses to decide which claims are SAMHSA-relevant, so
-instead of vendoring a copy here, the build uses a
-[named context](https://docs.docker.com/reference/cli/docker/buildx/build/#build-context) pointing
-at `apps/bfd-server-ng/src/main/resources`, which the `Dockerfile` then references with
-`COPY --from=server-ng-resources ...`.
-
-### Using `dockerbuild.sh`
-
-Typical local build:
+This utility takes the server-ng `security_labels.yml` file as a build-time dependency. That file is what the V3 server uses to decide which claims are SAMHSA-relevant. The `Dockerfile` copies it from the repository-root build context instead of keeping a separate copy here.
 
 ```sh
-./dockerbuild.sh
+just docker-build bfd-platform-samhsa-regression
 ```
 
-With arguments:
-
-```sh
-./dockerbuild.sh --build_arg base_version=2.999.0
-```
-
-### Using `podman`/`docker`
-
-> [!NOTE]
-> This is identical to what the `dockerbuild.sh` script does, so just use that. This is included
-> for completeness.
-
-```sh
-DOCKER_BUILDKIT=1 podman buildx build "." \
-  --file Dockerfile \
-  --platform "linux/arm64" \
-  --build-context server-ng-resources="../../bfd-server-ng/src/main/resources" \
-  --tag "bfd-platform-samhsa-regression"
-```
+Use `--tag <version>` to tag the image and the base images it is built from, or `--platform` to build for another architecture. See [`ops/utils/scripts/README.md`](../../../ops/utils/scripts/README.md) for the full list of options.
 
 ## Running as a Lambda
 

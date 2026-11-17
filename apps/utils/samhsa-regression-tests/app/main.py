@@ -19,6 +19,7 @@ import asyncclick as click
 import psycopg
 import yaml
 from aiohttp import ClientSession, TCPConnector
+from aws_lambda_powertools import Logger
 from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -46,9 +47,16 @@ CLM_LINE_HCPCS_CD_LABELS = [SECURITY_LABEL_HCPCS_SYSTEM, SECURITY_LABEL_CPT_SYST
 DGNS_DRG_CD_LABELS = [SECURITY_LABEL_DRG_SYSTEM]
 
 LOGGING_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(level=LOGGING_LEVEL.upper())
 logging.getLogger("psycopg").setLevel(LOGGING_LEVEL)
-logger = logging.getLogger()
+
+# Records emitted through the standard logger do not reach CloudWatch when the suite runs as
+# a Lambda, which logs through the powertools logger, so use the powertools logger in that case.
+logger: Logger | logging.Logger
+if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    logger = Logger()
+else:
+    logging.basicConfig(level=LOGGING_LEVEL)
+    logger = logging.getLogger()
 
 
 class SecurityLabelModel(BaseModel):
@@ -674,8 +682,10 @@ async def verify_samhsa_filtering(
                 and samhsa_prior_auths_unfiltered_when_authorized
                 else VerifyFilteringResult.FAIL
             )
-            logger.log(
-                logging.INFO if final_result == VerifyFilteringResult.PASS else logging.ERROR,
+            log_pass_fail = (
+                logger.info if final_result == VerifyFilteringResult.PASS else logger.error
+            )
+            log_pass_fail(
                 (
                     "Bene SK: %s, SAMHSA claims excluded for non-SAMHSA cert: %s, SAMHSA claims "
                     "included for SAMHSA cert: %s, SAMHSA prior auths excluded for non-SAMHSA "
@@ -839,8 +849,8 @@ async def run_samhsa_regression(
             "Empty responses count: %d",
             len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
         )
-        logger.log(
-            logging.INFO if all_samhsa_filtered else logging.ERROR,
+        log_pass_fail = logger.info if all_samhsa_filtered else logger.error
+        log_pass_fail(
             "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
             len(
                 [

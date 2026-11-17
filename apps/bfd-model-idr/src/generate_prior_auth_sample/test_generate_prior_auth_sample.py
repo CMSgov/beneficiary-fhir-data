@@ -18,9 +18,10 @@ def test_generate_prior_auth_sample_runs_successfully() -> None:
             "--source-directory",
             SOURCE_DIR,
         ],
-        cwd=Path(__file__).parent.parent.parent,
         capture_output=True,
         check=False,
     )
 
     assert result.returncode == 0, result.stderr.decode()
+    output_file = Path("out-test/eob-prior-auth.json")
+    assert output_file.exists(), f"Expected output file not found: {output_file}"
