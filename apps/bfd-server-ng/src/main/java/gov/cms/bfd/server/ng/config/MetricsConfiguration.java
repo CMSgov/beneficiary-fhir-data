@@ -31,7 +31,9 @@ public class MetricsConfiguration {
           "jvm.threads.virtual.",
           "executor.",
           "http-requests.latency.",
-          "http-requests.count.");
+          "http-requests.count.",
+          "hikaricp.",
+          "jdbc.");
 
   /**
    * Configures Micrometer to support @MeterTag annotations with SPEL expressions.
