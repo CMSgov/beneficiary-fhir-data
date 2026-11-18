@@ -9,6 +9,8 @@ from claim_type_codes import (
     ADJUDICATED_PROFESSIONAL_NCH_CDS,
     FISS_SS_CDS,
     INSTITUTIONAL_CDS,
+    INSTITUTIONAL_FFS_NCH_CDS,
+    INSTITUTIONAL_MA_NCH_CDS,
     PHARMACY_CDS,
 )
 from claims_static import (
@@ -980,7 +982,7 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_LINE_OTAF_AMT] = round(random.uniform(0, 1000), 2)
         if clm_type_cd in (71, 72, 81, 82):
             clm_line[f.GEO_RNDRG_SSA_STATE_CD] = random.choice(AVAILABLE_SSA_STATE_CDS)
-        if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_SS_CDS:
+        if clm_type_cd in [*INSTITUTIONAL_FFS_NCH_CDS, *INSTITUTIONAL_MA_NCH_CDS, *FISS_SS_CDS]:
             # most of the time this would match CLM_BLG_PRVDR_OSCAR_NUM so we have
             # weights skewed towards that scenario
             clm_line[f.CLM_FAC_PRVDR_OSCAR_NUM] = random.choices(
