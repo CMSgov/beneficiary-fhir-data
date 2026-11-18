@@ -82,28 +82,14 @@ public class ClaimAsyncService {
 
     var filters = getFilters(filterBuilders, systemType);
     var whereClause = buildWhereClause(filters);
-    var beneWith =
-        """
-              WITH bene_sks AS (
-                SELECT bene.beneSk AS beneSk,
-                ROW_NUMBER() OVER (
-                    PARTITION BY bene.beneSk
-                    ORDER BY bene.effectiveTimestamp DESC
-                ) AS rn
-                FROM Beneficiary bene
-                WHERE bene.xrefSk = :beneSk
-              )
-            """;
     var jpql =
         String.format(
             """
              %s
-             %s
-             JOIN bene_sks bs ON bs.beneSk = c.beneSk
-             WHERE  bs.rn = 1
+             WHERE b.xrefSk = :beneSk
              %s
             """,
-            beneWith, baseQuery, whereClause);
+            baseQuery, whereClause);
     try (var entityManager = readonly(entityManagerFactory.createEntityManager())) {
       return metricRecorder.recordMetricAsync(
           "application.claim.fetch_claims_with_claim_type",
@@ -125,6 +111,7 @@ public class ClaimAsyncService {
   private String buildWhereClause(DbFilter filter) {
     return String.format(
         """
+      AND b.latestTransactionFlag = 'Y'
       AND c.latestClaimIndicator = 'Y'
       %s
       """,
