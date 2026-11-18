@@ -513,7 +513,6 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
-    - Outpatient
   sources:
     - NCH
     - FISS
@@ -3796,7 +3795,6 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
   appliesTo:
     - Inpatient
-    - Outpatient
   sources:
     - NCH
     - FISS
