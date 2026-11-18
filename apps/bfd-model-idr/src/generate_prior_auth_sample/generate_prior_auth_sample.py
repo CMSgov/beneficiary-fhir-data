@@ -46,10 +46,10 @@ def ensure_provider_history_exists(npis: set[str], source_directory: str) -> Non
         pd.concat([df_poc, new_rows], ignore_index=True).to_csv(poc_path, index=False)
 
 
-def run(utn: str, source_directory: str, output_directory: str):
+def run(utn: str, source_directory: str, output_directory: str) -> None:
 
     prauc_path = f"{source_directory}/SYNTHETIC_PRAUC.csv"
-    if not Path(prauc_path).exists:
+    if not Path(prauc_path).exists():
         print("Run the generator or this will not go well.")
         sys.exit(1)
 
@@ -151,7 +151,7 @@ def run(utn: str, source_directory: str, output_directory: str):
         "priorAuthItem": prior_auth_items,
     }
 
-    output_file = Path(f"{output_directory}/EOB-PriorAuth-Sample.json")
+    output_file = Path(f"{output_directory}/eob-prior-auth.json")
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with output_file.open(mode="w", encoding="utf-8") as f:

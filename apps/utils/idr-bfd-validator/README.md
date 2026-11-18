@@ -29,33 +29,16 @@ just idr-bfd-validator --env prod
 
 ## Building the Docker Image
 
-This utility is particularly unique among most of BFD's Python in that it references the IDR Pipeline (`idr-pipeline`) as a direct dependency. Since we have no package repository for our Python and Docker/Podman does not follow symlinks for security reasons, we need a way for Docker to install `idr-pipeline` into a Docker Image.
-
-We do this by using "[named contexts](https://docs.docker.com/reference/cli/docker/buildx/build/#build-context)" in addition to the default context (this `README`'s directory). That named context can then be referenced much like a layer in the `Dockerfile`, thus allowing the expected relative path handled by the `packages/idr-pipeline` directory symlink to resolve in a Docker Image build context.
-
-### Using `dockerbuild.sh`
-
-Typical local build:
+This utility depends on the IDR pipeline (`idr-pipeline`) as a workspace member. The image is built from the repository root. The `Dockerfile` copies both members' sources.
 
 ```sh
-./dockerbuild.sh
+just docker-build bfd-platform-idr-bfd-validator
 ```
 
-With arguments:
+To build against a specific version of the base image, tag the build. The base images built along the way are tagged with the same version. This image is built against them:
 
 ```sh
-./dockerbuild.sh --build_arg base_version=2.999.0
+just docker-build bfd-platform-idr-bfd-validator --tag 2.999.0
 ```
 
-### Using `podman`/`docker`
-
-> [!NOTE]
-> This is identical to what the `dockerbuild.sh` script does, so just use that. This is included for completeness.
-
-```sh
-DOCKER_BUILDKIT=1 podman buildx build "." \
-  --file Dockerfile \
-  --platform "linux/arm64" \
-  --build-context idr-pipeline="./packages/$(readlink ./packages/idr-pipeline)" \
-  --tag "bfd-platform-idr-bfd-validator"
-```
+See [`ops/utils/scripts/README.md`](../../../ops/utils/scripts/README.md) for the other options.

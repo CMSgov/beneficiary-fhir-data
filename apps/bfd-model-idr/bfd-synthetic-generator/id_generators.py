@@ -5,7 +5,7 @@ import sys
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any
+from decimal import Decimal
 
 from constants import (
     BENE_HSTRY,
@@ -22,6 +22,7 @@ from constants import (
     PRVDR_HSTRY,
 )
 from load_synthetic_output import SnowflakeWriter
+from snowflake.snowpark import Row
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ class IdGenerator(ABC):
     def multipart_id(self, field: str, parts: list[tuple[str, int]]) -> str: ...
 
     @abstractmethod
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str: ...
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int: ...
 
     @abstractmethod
     def npi_id(self, field: str) -> str: ...
@@ -59,7 +60,7 @@ class IdGenerator(ABC):
     def mbi(self) -> str: ...
 
     @abstractmethod
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str: ...
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int: ...
 
 
 def _sorted_chars(chars: Iterable[str]) -> str:
@@ -86,11 +87,11 @@ class RandomIdGenerator(IdGenerator):
     # remembered in memory per field. Used only by the CSV flow.
 
     def __init__(self) -> None:
-        self._used_by_field: dict[str, set[str]] = {}
+        self._used_by_field: dict[str, set[str | int]] = {}
         self._used_bene_sk: set[int] = set()
         self._used_mbi: set[str] = set()
 
-    def _gen_id(self, field: str, gen_func: Callable[[], str]) -> str:
+    def _gen_id[T: str | int](self, field: str, gen_func: Callable[[], T]) -> T:
         id_set = self._used_by_field.setdefault(field, set())
         while True:
             id = gen_func()
@@ -113,16 +114,16 @@ class RandomIdGenerator(IdGenerator):
             ),
         )
 
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int:
         if start > 0 or end > 0 or end > start:
             raise ValueError(
                 "'end' and 'start' must be negative and 'end' must be less than 'start'"
             )
 
-        return self._gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
+        return self._gen_id(field=field, gen_func=lambda: random.randint(end, start))
 
     def npi_id(self, field: str) -> str:
-        def make_npi():
+        def make_npi() -> str:
             first_digit = random.choice(["1", "2"])
             rest = "".join(random.choices(population=string.digits, k=8))
             npi_9 = first_digit + rest
@@ -145,7 +146,7 @@ class RandomIdGenerator(IdGenerator):
         self._used_mbi.add(full_mbi)
         return full_mbi
 
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:  # noqa: ARG002
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int:  # noqa: ARG002
         return self.numeric_id(field="CLM_NUM_SK")
 
 
@@ -171,15 +172,25 @@ class SnowflakeIdState:
     npi_next: int = DEFAULT_INITIAL_NPI
     # CLM_NUM_SK is unique within (CLM_TYPE_CD, CLM_DT_SGNTR_SK, GEO_BENE_SK) so each combo has its
     # own counter. Counts up.
-    claim_num_sk_next: dict[tuple[str, str, str], int] = field(default_factory=dict)
+    claim_num_sk_next: dict[tuple[int, int, int], int] = field(default_factory=dict)
 
 
-def _query(writer: SnowflakeWriter, sql: str) -> Any:
-    result = writer.session.sql(sql).collect()
-    return result[0][0] if result else None
+def _query_value(writer: SnowflakeWriter, sql: str) -> object | None:
+    rows = writer.session.sql(sql).collect()
+    return rows[0][0] if rows else None
 
 
-def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[tuple[Any, ...]]:
+def _query_int(writer: SnowflakeWriter, sql: str) -> int | None:
+    value = _query_value(writer, sql)
+    return int(value) if isinstance(value, int | float | str | Decimal) else None
+
+
+def _query_str(writer: SnowflakeWriter, sql: str) -> str | None:
+    value = _query_value(writer, sql)
+    return None if value is None else str(value)
+
+
+def _query_multiple(writer: SnowflakeWriter, sql: str) -> list[Row]:
     return writer.session.sql(sql).collect()
 
 
@@ -189,21 +200,21 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     # if truncate is set then the tables are emptied so every field starts from scratch
     if not truncate:
         # Get or set the min ben_sk
-        existing_min_bene_sk = _query(
+        existing_min_bene_sk = _query_int(
             writer, f"SELECT MIN(BENE_SK) FROM {writer.qualified_table(BENE_HSTRY)}"
         )
         if existing_min_bene_sk is not None:
-            state.bene_sk_next = int(existing_min_bene_sk) - 1
+            state.bene_sk_next = existing_min_bene_sk - 1
 
         # Get or set the max mbi
-        existing_max_mbi = _query(
+        existing_max_mbi = _query_str(
             writer, f"SELECT MAX(BENE_MBI_ID) FROM {writer.qualified_table(BENE_MBI_ID)}"
         )
         if existing_max_mbi is not None:
             state.mbi_next = _decode_identifier(existing_max_mbi, _MBI_ALPHABETS) + 1
 
         # Get or set the max npi
-        existing_max_npi = _query(
+        existing_max_npi = _query_str(
             writer, f"SELECT MAX(PRVDR_NPI_NUM) FROM {writer.qualified_table(PRVDR_HSTRY)}"
         )
         if existing_max_npi is not None:
@@ -233,11 +244,11 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     for field_name, table_name in _NUMERIC_FIELDS.items():
         existing_min = None
         if not truncate:
-            existing_min = _query(
+            existing_min = _query_int(
                 writer, f"SELECT MIN({field_name}) FROM {writer.qualified_table(table_name)}"
             )
         if existing_min is not None:
-            state.numeric_id_next[field_name] = int(existing_min) - 1
+            state.numeric_id_next[field_name] = existing_min - 1
         else:
             state.numeric_id_next[field_name] = 0
 
@@ -248,7 +259,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
     for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
         existing_max = None
         if not truncate:
-            existing_max = _query(
+            existing_max = _query_str(
                 writer, f"SELECT MAX({field_name}) FROM {writer.qualified_table(table_name)}"
             )
 
@@ -278,7 +289,7 @@ def load_id_state(writer: SnowflakeWriter, truncate: bool = False) -> SnowflakeI
         )
 
         for clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk, max_clm_num_sk in claims_rows:
-            key_columns = (str(clm_type_cd), str(clm_dt_sgntr_sk), str(geo_bene_sk))
+            key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
             state.claim_num_sk_next[key_columns] = int(max_clm_num_sk) + 1
 
     return state
@@ -311,7 +322,7 @@ def _decode_identifier(value: str, position_alphabets: list[str]) -> int:
 
 
 def _encode_identifier(position: int, position_alphabets: list[str]) -> str:
-    characters = []
+    characters: list[str] = []
     for alphabet in reversed(position_alphabets):
         position, character_position = divmod(position, len(alphabet))
         characters.append(alphabet[character_position])
@@ -339,14 +350,14 @@ class SequentialIdGenerator(IdGenerator):
 
         return "-" + _encode_identifier(position, position_alphabets)
 
-    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+    def numeric_id(self, field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> int:
         if start > 0 or end > 0 or end > start:
             raise ValueError(
                 "'end' and 'start' must be negative and 'end' must be less than 'start'"
             )
         value = self.state.numeric_id_next.setdefault(field, start)
         self.state.numeric_id_next[field] = value - 1
-        return str(value)
+        return value
 
     def bene_sk(self) -> int:
         value = self.state.bene_sk_next
@@ -367,8 +378,8 @@ class SequentialIdGenerator(IdGenerator):
         npi_9 = str(position)
         return npi_9 + self.calculate_npi_checksum(npi_9)
 
-    def claim_num_sk(self, clm_type_cd: str, clm_dt_sgntr_sk: str, geo_bene_sk: str) -> str:
+    def claim_num_sk(self, clm_type_cd: int, clm_dt_sgntr_sk: int, geo_bene_sk: int) -> int:
         key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
         value = self.state.claim_num_sk_next.setdefault(key_columns, DEFAULT_INITIAL_CLM_NUM_SK)
         self.state.claim_num_sk_next[key_columns] = value + 1
-        return str(value)
+        return value

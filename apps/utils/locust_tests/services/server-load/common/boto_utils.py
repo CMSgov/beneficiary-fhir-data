@@ -7,9 +7,9 @@ import re
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from types_boto3_rds import RDSClient
-    from types_boto3_sqs.service_resource import Queue
-    from types_boto3_ssm import SSMClient
+    from mypy_boto3_rds import RDSClient
+    from mypy_boto3_sqs.service_resource import Queue
+    from mypy_boto3_ssm import SSMClient
 
 else:
     RDSClient = object

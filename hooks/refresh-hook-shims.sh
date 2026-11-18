@@ -10,7 +10,7 @@ hooks_dir="$(git rev-parse --git-path hooks)"
 
 # A repo that only ran `prek install` has no wrapper to refresh, so build the pair first.
 if [[ ! -f "${hooks_dir}/pre-commit.prek" ]]; then
-	prek install --force
+	prek install --hook-type pre-commit --force
 	mv "${hooks_dir}/pre-commit" "${hooks_dir}/pre-commit.prek"
 fi
 
@@ -25,3 +25,15 @@ for pair in "pre-commit run-pre-commit.sh" "pre-commit.rerun rerun-changed.sh"; 
 	cp -p "$src" "$tmp"
 	mv "$tmp" "$dest"
 done
+
+# We previously had a pre-push hook
+# Ensure it's removed to prevent any conflicts with the current checks
+rm -f "${hooks_dir}/pre-push"
+
+if [[ ! -f "${hooks_dir}/post-checkout" ]]; then
+	prek install --hook-type post-checkout
+fi
+
+if [[ ! -f "${hooks_dir}/post-merge" ]]; then
+	prek install --hook-type post-merge
+fi

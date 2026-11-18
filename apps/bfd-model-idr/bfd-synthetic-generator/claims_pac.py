@@ -3,12 +3,14 @@ import string
 from collections.abc import Callable
 
 import constants as f
-from claim_type_codes import FISS_CLM_TYPE_CDS, MCS_CLM_TYPE_CDS, VMS_CDS
+from claim_type_codes import FISS_SS_CDS, MCS_SS_CDS, VMS_SS_CDS
 from claims_static import (
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
     TARGET_SEQUENCE_NUMBERS,
+    gen_clm_val_ansi_grp_cd,
+    gen_clm_val_ansi_rsn_cd,
 )
 from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
 from generator_util import GeneratorUtil
@@ -22,7 +24,7 @@ class PacGeneratorUtil:
         is_pac_predicate: Callable[[], bool],
         exclude_fields_always: set[str],
         exclude_fields_adj: set[str],
-    ):
+    ) -> RowAdapter:
         exclude_fields = (
             exclude_fields_always
             if is_pac_predicate()
@@ -30,7 +32,7 @@ class PacGeneratorUtil:
         )
         return RowAdapter({k: v for k, v in init_row.kv.items() if k not in exclude_fields})
 
-    def gen_pac_clm(self, init_clm: RowAdapter, gen_utils: GeneratorUtil):
+    def gen_pac_clm(self, init_clm: RowAdapter, gen_utils: GeneratorUtil) -> RowAdapter:
         # This may look strange, and it should because it's a bit of a hack. The original synthetic
         # claims generation for pac CLMs (and other PAC-related tables) copied an entire bene_sk's
         # set of claim tables related to a single claim and selectively changed columns in each
@@ -40,7 +42,7 @@ class PacGeneratorUtil:
         # need changed depending on the type of CLM. That way the generation logic is kept to this
         # function that can be called for each type of CLM, and any new pac-related CLM fields can
         # be added here
-        init_clm_type_cd = int(init_clm[f.CLM_TYPE_CD])
+        init_clm_type_cd = init_clm[f.CLM_TYPE_CD]
         # Always exclude these fields from init_clm. We do this because RowAdapter ignores changes
         # to existing fields, so we could never unset these fields.
         exclude_fields_always = {f.CLM_BLOOD_PT_FRNSH_QTY, f.CLM_NCH_PRMRY_PYR_CD}
@@ -112,7 +114,7 @@ class PacGeneratorUtil:
         if init_clm_type_cd in (81, 82):
             clm[f.CLM_TYPE_CD] = random.choice([1800, 2800])
 
-        pac_clm_type_cd = int(clm[f.CLM_TYPE_CD])
+        pac_clm_type_cd = clm[f.CLM_TYPE_CD]
         if pac_clm_type_cd < 2000:
             clm[f.CLM_FINL_ACTN_IND] = "N"
         else:
@@ -123,21 +125,21 @@ class PacGeneratorUtil:
         clm[f.CLM_DT_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_DT_SGNTR_SK, start=-1, end=-(10**12 - 1)
         )
-        clm[f.GEO_BENE_SK] = gen_utils.id_gen.gen_basic_id(field=f.GEO_BENE_SK, length=5)
+        clm[f.GEO_BENE_SK] = gen_utils.id_gen.numeric_id(field=f.GEO_BENE_SK)
 
         clm[f.CLM_PD_STUS_CD] = random.choice(["S", "T", "R", "D", "1", "P", "2", "I"])
 
-        if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
+        if pac_clm_type_cd in FISS_SS_CDS:
             clm[f.CLM_SRC_ID] = 21000  # FISS
             clm[f.META_SRC_SK] = 1003  # FISS
-        elif pac_clm_type_cd in MCS_CLM_TYPE_CDS:
+        elif pac_clm_type_cd in MCS_SS_CDS:
             clm[f.CLM_SRC_ID] = 22000  # MCS
             clm[f.META_SRC_SK] = 1001  # MCS
-        elif pac_clm_type_cd in VMS_CDS:
+        elif pac_clm_type_cd in VMS_SS_CDS:
             clm[f.CLM_SRC_ID] = 23000  # VMS
             clm[f.META_SRC_SK] = 1002  # VMS
 
-        if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
+        if pac_clm_type_cd in FISS_SS_CDS:
             clm[f.CLM_RIC_CD] = get_ric_cd_for_clm_type_cd(pac_clm_type_cd)
         clm[f.CLM_RLT_COND_SGNTR_SK] = gen_utils.id_gen.numeric_id(
             field=f.CLM_RLT_COND_SGNTR_SK, start=-2
@@ -151,7 +153,7 @@ class PacGeneratorUtil:
 
         return clm
 
-    def gen_pac_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter):
+    def gen_pac_clm_dt_sgntr(self, clm: RowAdapter, init_clm_dt_sgntr: RowAdapter) -> RowAdapter:
         clm_dt_sgntr = self._prepare_pac_row(
             init_row=init_clm_dt_sgntr,
             # If these match, the initial clm_dt_sgntr is already "pac" in that it's associated with
@@ -171,7 +173,7 @@ class PacGeneratorUtil:
         clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         return clm_dt_sgntr
 
-    def gen_clm_fiss(self, clm: RowAdapter, init_clm_fiss: RowAdapter | None = None):
+    def gen_clm_fiss(self, clm: RowAdapter, init_clm_fiss: RowAdapter | None = None) -> RowAdapter:
         # CLM_FISS and CLM_LCTN_HSTRY are unique in that they don't exist for adjudicated claims, so
         # we don't need to "prepare" a pac RowAdapter, we just create an empty one if none is
         # provided
@@ -186,7 +188,9 @@ class PacGeneratorUtil:
 
         return clm_fiss
 
-    def gen_clm_lctn_hstry(self, clm: RowAdapter, init_clm_lctn_hstry: RowAdapter | None = None):
+    def gen_clm_lctn_hstry(
+        self, clm: RowAdapter, init_clm_lctn_hstry: RowAdapter | None = None
+    ) -> RowAdapter:
         clm_lctn_hstry = init_clm_lctn_hstry or RowAdapter({})
         clm_lctn_hstry[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_lctn_hstry[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
@@ -211,15 +215,33 @@ class PacGeneratorUtil:
                 "8",
             ]
         )
+        clm_lctn_hstry[f.CLM_AUDT_TRL_LCTN_CD] = random.choice(
+            [
+                "060",
+                "052",
+                "001",
+                "070",
+                "067",
+                "065",
+                "B0100",
+                "B9000",
+                "B9099",
+                "B9997",
+                "B9996",
+                "053",
+                "076",
+                "062",
+            ]
+        )
 
         add_meta_timestamps(clm_lctn_hstry, clm)
 
         return clm_lctn_hstry
 
-    def gen_pac_clm_line(self, clm: RowAdapter, init_clm_line: RowAdapter):
+    def gen_pac_clm_line(self, clm: RowAdapter, init_clm_line: RowAdapter) -> RowAdapter:
         clm_line = self._prepare_pac_row(
             init_row=init_clm_line,
-            is_pac_predicate=lambda: int(init_clm_line[f.CLM_TYPE_CD]) > 1010,
+            is_pac_predicate=lambda: init_clm_line[f.CLM_TYPE_CD] > 1010,
             exclude_fields_always={
                 f.CLM_LINE_PMD_UNIQ_TRKNG_NUM,
                 f.CLM_LINE_ANSTHSA_UNIT_CNT,
@@ -253,7 +275,7 @@ class PacGeneratorUtil:
         clm_line_num: int,
         tracking_num: str,
         init_clm_line_dcmtn: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         clm_line_dcmtn = init_clm_line_dcmtn or RowAdapter({})
         clm_line_dcmtn[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line_dcmtn[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -266,7 +288,9 @@ class PacGeneratorUtil:
 
         return clm_line_dcmtn
 
-    def gen_pac_clm_line_instnl(self, clm: RowAdapter, init_clm_line_instnl: RowAdapter):
+    def gen_pac_clm_line_instnl(
+        self, clm: RowAdapter, init_clm_line_instnl: RowAdapter
+    ) -> RowAdapter:
         clm_line_instnl = self._prepare_pac_row(
             init_row=init_clm_line_instnl,
             is_pac_predicate=lambda: init_clm_line_instnl[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
@@ -283,7 +307,9 @@ class PacGeneratorUtil:
 
         return clm_line_instnl
 
-    def gen_pac_clm_line_prfnl(self, clm: RowAdapter, init_clm_line_prfnl: RowAdapter):
+    def gen_pac_clm_line_prfnl(
+        self, clm: RowAdapter, init_clm_line_prfnl: RowAdapter
+    ) -> RowAdapter:
         clm_line_prfnl = self._prepare_pac_row(
             init_row=init_clm_line_prfnl,
             is_pac_predicate=lambda: init_clm_line_prfnl[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
@@ -307,7 +333,7 @@ class PacGeneratorUtil:
 
         return clm_line_prfnl
 
-    def gen_pac_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter):
+    def gen_pac_clm_val(self, clm: RowAdapter, init_clm_val: RowAdapter) -> RowAdapter:
         clm_val = self._prepare_pac_row(
             init_row=init_clm_val,
             is_pac_predicate=lambda: init_clm_val[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
@@ -317,10 +343,12 @@ class PacGeneratorUtil:
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
+        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
 
         return clm_val
 
-    def gen_pac_clm_instnl(self, clm: RowAdapter, init_clm_instnl: RowAdapter):
+    def gen_pac_clm_instnl(self, clm: RowAdapter, init_clm_instnl: RowAdapter) -> RowAdapter:
         clm_instnl = self._prepare_pac_row(
             init_row=init_clm_instnl,
             is_pac_predicate=lambda: init_clm_instnl[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
@@ -345,7 +373,7 @@ class PacGeneratorUtil:
 
     def gen_pac_clm_prfnl(
         self, gen_utils: GeneratorUtil, clm: RowAdapter, init_clm_prfnl: RowAdapter
-    ):
+    ) -> RowAdapter:
         clm_prfnl = self._prepare_pac_row(
             init_row=init_clm_prfnl,
             is_pac_predicate=lambda: four_part_key(init_clm_prfnl) == four_part_key(clm),
@@ -387,15 +415,16 @@ class PacGeneratorUtil:
         self,
         clm: RowAdapter,
         clm_line_num: int,
+        init_clm_line_mcs: RowAdapter | None = None,
     ) -> RowAdapter:
-        clm_mcs = RowAdapter({})
+        clm_line_mcs = init_clm_line_mcs or RowAdapter({})
 
-        clm_mcs[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
-        clm_mcs[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_mcs[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_mcs[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
-        clm_mcs[f.CLM_LINE_NUM] = clm_line_num
-        clm_mcs[f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD] = random.choice(
+        clm_line_mcs[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+        clm_line_mcs[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+        clm_line_mcs[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_line_mcs[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+        clm_line_mcs[f.CLM_LINE_NUM] = clm_line_num
+        clm_line_mcs[f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD] = random.choice(
             [
                 "A4",
                 "AE",
@@ -403,24 +432,25 @@ class PacGeneratorUtil:
                 "45",
             ]
         )
-        clm_mcs[f.CLM_LINE_RBNDLG_CRTFCTN_NUM] = random.choice(
+        clm_line_mcs[f.CLM_LINE_RBNDLG_CRTFCTN_NUM] = random.choice(
             [
                 "11D1111111",
                 "22D2222222",
             ]
         )
-        clm_mcs[f.CLM_LINE_HCT_LVL_NUM] = round(random.uniform(30, 45), 1)
-        clm_mcs[f.CLM_LINE_HGB_LVL_NUM] = round(random.uniform(12, 20), 1)
+        clm_line_mcs[f.CLM_LINE_HCT_LVL_NUM] = round(random.uniform(30, 45), 1)
+        clm_line_mcs[f.CLM_LINE_HGB_LVL_NUM] = round(random.uniform(12, 20), 1)
 
-        add_meta_timestamps(clm_mcs, clm)
-        return clm_mcs
+        add_meta_timestamps(clm_line_mcs, clm)
+        return clm_line_mcs
 
     def gen_pac_clm_line_fiss(
         self,
         clm: RowAdapter,
         clm_line_num: int,
+        init_clm_line_fiss: RowAdapter,
     ) -> RowAdapter:
-        clm_line_fiss = RowAdapter({})
+        clm_line_fiss = init_clm_line_fiss or RowAdapter({})
 
         clm_line_fiss[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line_fiss[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
@@ -437,7 +467,7 @@ class PacGeneratorUtil:
         clm: RowAdapter,
         gen_utils: GeneratorUtil,
         init_clm_dcmtn: RowAdapter | None = None,
-    ):
+    ) -> RowAdapter:
         if not init_clm_dcmtn:
             init_clm_dcmtn = RowAdapter({})
 
@@ -475,7 +505,7 @@ class PacGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_pac_clm_prod(self, clm: RowAdapter, init_clm_prod: RowAdapter):
+    def gen_pac_clm_prod(self, clm: RowAdapter, init_clm_prod: RowAdapter) -> RowAdapter:
         clm_prod = self._prepare_pac_row(
             init_row=init_clm_prod,
             is_pac_predicate=lambda: init_clm_prod[f.GEO_BENE_SK] == clm[f.GEO_BENE_SK],
@@ -493,7 +523,7 @@ class PacGeneratorUtil:
         clm: RowAdapter,
         init_clm_rlt_cond_sgntr_mbr: RowAdapter,
         gen_utils: GeneratorUtil,
-    ):
+    ) -> RowAdapter:
         if not init_clm_rlt_cond_sgntr_mbr:
             init_clm_rlt_cond_sgntr_mbr = RowAdapter({})
 
@@ -517,7 +547,7 @@ class PacGeneratorUtil:
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
             clm[f.CLM_RLT_COND_SGNTR_SK]
-            if int(clm[f.CLM_RLT_COND_SGNTR_SK]) < -1
+            if clm[f.CLM_RLT_COND_SGNTR_SK] < -1
             else gen_utils.id_gen.numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
         )
         clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(
@@ -534,7 +564,7 @@ class PacGeneratorUtil:
         clm: RowAdapter,
         init_clm_ocrnc_sgntr_mbr: RowAdapter,
         gen_utils: GeneratorUtil,
-    ):
+    ) -> RowAdapter:
         clm_ocrnc_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_ocrnc_sgntr_mbr,
             is_pac_predicate=lambda: (
@@ -556,7 +586,7 @@ class PacGeneratorUtil:
         )
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SK] = (
             clm[f.CLM_OCRNC_SGNTR_SK]
-            if int(clm[f.CLM_OCRNC_SGNTR_SK]) < -1
+            if clm[f.CLM_OCRNC_SGNTR_SK] < -1
             else gen_utils.id_gen.numeric_id(field=f.CLM_OCRNC_SGNTR_SK, start=-2)
         )
         clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
@@ -570,9 +600,7 @@ class PacGeneratorUtil:
                 )
             else:
                 clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = clm[f.CLM_THRU_DT]
-            clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = (
-                clm[f.CLM_THRU_DT] if clm[f.CLM_THRU_DT] else "1000-01-01"
-            )
+            clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = clm[f.CLM_THRU_DT] or "1000-01-01"
         else:
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_FROM_DT] = "1000-01-01"
             clm_ocrnc_sgntr_mbr[f.CLM_OCRNC_SPAN_THRU_DT] = "1000-01-01"
@@ -586,7 +614,7 @@ class PacGeneratorUtil:
         clm: RowAdapter,
         init_clm_rlt_ocrnc_sgntr_mbr: RowAdapter,
         gen_utils: GeneratorUtil,
-    ):
+    ) -> RowAdapter:
         clm_rlt_ocrnc_sgntr_mbr = self._prepare_pac_row(
             init_row=init_clm_rlt_ocrnc_sgntr_mbr,
             is_pac_predicate=lambda: (
@@ -607,7 +635,7 @@ class PacGeneratorUtil:
         )
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SK] = (
             clm[f.CLM_RLT_OCRNC_SGNTR_SK]
-            if int(clm[f.CLM_RLT_OCRNC_SGNTR_SK]) < -1
+            if clm[f.CLM_RLT_OCRNC_SGNTR_SK] < -1
             else gen_utils.id_gen.numeric_id(field=f.CLM_RLT_OCRNC_SGNTR_SK, start=-2)
         )
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM] = random.choice(
@@ -615,9 +643,7 @@ class PacGeneratorUtil:
         )
         clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_CD] = random.choice(TARGET_RLT_OCRNC_CODES)
 
-        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = (
-            clm[f.CLM_THRU_DT] if clm[f.CLM_THRU_DT] else "1000-01-01"
-        )
+        clm_rlt_ocrnc_sgntr_mbr[f.CLM_RLT_OCRNC_DT] = clm[f.CLM_THRU_DT] or "1000-01-01"
 
         add_meta_timestamps(clm_rlt_ocrnc_sgntr_mbr, clm)
 

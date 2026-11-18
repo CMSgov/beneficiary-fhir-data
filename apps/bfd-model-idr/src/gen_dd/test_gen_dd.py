@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 
-def _run_subprocess(args: list[str]):
+def _run_subprocess(args: list[str]) -> None:
     result = subprocess.run(
         args,
         cwd=Path(__file__).parent.parent.parent,

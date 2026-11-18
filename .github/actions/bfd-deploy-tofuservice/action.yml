@@ -32,7 +32,7 @@ runs:
   steps:
     - name: Setup OpenTofu and shell environment
       id: setup-tofu
-      uses: ./.github/actions/bfd-setup-tofu
+      uses: $/.github/actions/bfd-setup-tofu
       with:
         service-path: ${{ inputs.service-path }}
         cw-log-group: ${{ inputs.cw-log-group }}

@@ -4,7 +4,7 @@ locals {
   lambda_full_name   = "${local.name_prefix}-function"
   lambda_source_path = "${path.module}/lambda_src/bene_prefs"
   lambda_dist_path   = "${local.lambda_source_path}/package.zip"
-  lambda_runtime     = "python${trimspace(file("${local.lambda_source_path}/.python-version"))}"
+  lambda_runtime     = "python3.14"
 }
 
 module "log_group_this" {

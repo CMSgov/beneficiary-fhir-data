@@ -1,8 +1,8 @@
 {
   "resourceType" : "Coverage",
-  "id" : "part-C-123456789",
+  "id" : "part-C-441149422",
   "meta" : {
-    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2025-01-30T14:50:48.063919",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0",
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0"]
   },
@@ -13,7 +13,7 @@
       "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0"]
     },
     "active" : true,
-    "name" : "Sample Medicare Advantage Plan",
+    "name" : "Wellness",
     "contact" : [{
       "purpose" : {
         "coding" : [{
@@ -21,20 +21,16 @@
           "code" : "PATINF",
           "display" : "Patient"
         }]
-      },
-      "telecom" : [{
-        "system" : "phone",
-        "value" : "1-800-555-1234"
-      }]
+      }
     }]
   }],
   "extension" : [{
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
-    "valueString" : "H1234"
+    "valueString" : "G1234"
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM",
-    "valueString" : "001"
+    "valueString" : "002"
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD",
@@ -51,9 +47,9 @@
       "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)"
     }]
   },
-  "subscriberId" : "ABB2BB0BB22",
+  "subscriberId" : "1OX4Y88RV68",
   "beneficiary" : {
-    "reference" : "Patient/123456789"
+    "reference" : "Patient/441149422"
   },
   "relationship" : {
     "coding" : [{
@@ -63,7 +59,7 @@
     }]
   },
   "period" : {
-    "start" : "2018-04-11"
+    "start" : "2018-02-04"
   },
   "payor" : [{
     "reference" : "#insurer-org"

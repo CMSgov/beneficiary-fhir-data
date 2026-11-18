@@ -88,12 +88,14 @@ def create_splunk_sns_notification(
     :return: A model with a message indicating the unprocessed manifests
     :rtype: SplunkOnCallNotificationModel
     """
-    return SplunkOnCallNotificationModel.model_validate({
-        "alert_message": (
-            f"{BFD_ENVIRONMENT} CCW Pipeline failed to load {len(unprocessed_manifests)}"
-            f" manifest(s) over the weekend: {', '.join(unprocessed_manifests)}"
-        )
-    })
+    return SplunkOnCallNotificationModel.model_validate(
+        {
+            "alert_message": (
+                f"{BFD_ENVIRONMENT} CCW Pipeline failed to load {len(unprocessed_manifests)}"
+                f" manifest(s) over the weekend: {', '.join(unprocessed_manifests)}"
+            )
+        }
+    )
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)

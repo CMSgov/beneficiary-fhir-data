@@ -7,14 +7,15 @@ default:
 
 [doc("""Installs development dependencies in your local machine.
 Should be ran once for new devs or when dependencies change""")]
-bootstrap:
+[group("setup")]
+bootstrap: && setup-vscode
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
     ./hooks/install-java-format.sh
     ./hooks/install-fhir-validator.sh
     # Install dependencies used in our scripts
-    brew install uv yq taplo prek tenv argc bash fd jq nvm terraform-docs shfmt gh
+    brew install uv yq taplo prek tenv argc bash coreutils fd jq nvm terraform-docs shfmt gh findutils
     # The extension used by the prek hook that checks the Actions lockfile.
     # Installing an extension that is already present is a no-op.
     gh extension install github/gh-actions-lock
@@ -29,6 +30,12 @@ bootstrap:
     # committing. This is not possible out of the box at the time of writing this
     # See https://github.com/j178/prek/issues/1051
     ./hooks/refresh-hook-shims.sh
+
+[doc("Sets up recommended VS Code settings and extensions")]
+[group("setup")]
+setup-vscode:
+    uv run hooks/merge_vscode_settings.py
+    ./hooks/install-recommended-extensions.sh
 
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("""Extracts the certificate from the server.
@@ -52,10 +59,63 @@ bfd-request resource query env samhsa="":
 java-build-all:
     cd ./apps && mvn clean install -DskipITs -DskipTests --threads=1C
 
+[arg("tag", long, help="Tag the image, and any base images built, with this version")]
+[arg("platform", long, help="Target platform, overriding the one in the build matrix")]
+[arg("no_base", long="no-base", value="1", help="Do not build the base images this image needs")]
+[arg("dry_run", long="dry-run", value="1", help="Print the podman command for each image in the chain and stop")]
+[doc("""Builds one of the repository's container images locally with podman.
+The image name is one of the names printed by `just docker-images`. A tag pins derived images to the
+base images built in the same run, so `just docker-build bfd-platform-idr-pipeline --tag 2.999.0`
+builds and tags `bfd-platform-base-python:2.999.0` first.""")]
+[group('docker')]
+docker-build image tag="" platform="" no_base="" dry_run="":
+    ./ops/utils/scripts/build-image.sh "{{ image }}" \
+        {{ if tag != "" { "--tag " + tag } else { "" } }} \
+        {{ if platform != "" { "--platform " + platform } else { "" } }} \
+        {{ if no_base == "1" { "--no-base" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
+
+[doc("Lists the images that `just docker-build` can build")]
+[group('docker')]
+docker-images:
+    ./ops/utils/scripts/build-image.sh --list
+
 [doc("Helper command to remove all containers")]
-[group('utilities')]
+[group('docker')]
 remove-all-containers:
     docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+
+[arg("no_baseline", long="no-baseline", value="1", help="Run basedpyright with the baseline disabled, listing the findings it normally suppresses")]
+[doc("""Runs every check a Python change must pass: lockfile consistency, lint, formatting and type
+checking. Works from any directory and always checks the workspace root. The same checks, plus the
+workspace member test suites, run as prek hooks on each commit. The `--no-baseline` run reports
+failure by design, since the baselined findings are then visible errors.""")]
+[group('python')]
+py-check no_baseline="":
+    ./ops/utils/scripts/py-check.sh {{ if no_baseline == "1" { "--no-baseline" } else { "" } }}
+
+[arg("member", long, help="Run one member's tests, by project name (e.g. idr-pipeline) or directory (e.g. apps/bfd-pipeline-idr, relative to the current directory)")]
+[arg("list", long, value="1", help="List the names of workspace members that have tests")]
+[doc("""Runs the pytest suites of workspace members. With no arguments, the suite of every member
+that has tests runs. `--member` runs just one, given by project name or directory, and `--list`
+prints the member names that have tests.""")]
+[group('python')]
+[no-cd]
+py-test list="" member="":
+    {{ justfile_directory() }}/ops/utils/scripts/py-test.sh {{ if list == "1" { "--list" } else { "" } }} \
+        {{ if member != "" { f"--member \"{{ member }}\"" } else { "" } }}
+
+[arg("yes", long, value="1", help="Delete every stale environment without asking")]
+[arg("dry_run", long="dry-run", value="1", help="List the environments and their sizes without deleting anything")]
+[doc("""Deletes the per-project virtual environments left over from before the repository became a uv
+workspace, asking before each one. Those environments are inert now that every Python command runs
+from the workspace root, though a bare `uv pip` inside a member still reads that member's `.venv`.
+Only directories named `.venv` below the repository root are considered, and the root `.venv` is
+never offered.""")]
+[group('python')]
+py-rm-venvs yes="" dry_run="":
+    ./ops/utils/scripts/py-rm-venvs.sh {{ if yes == "1" { "--yes" } else { "" } }} \
+        {{ if dry_run == "1" { "--dry-run" } else { "" } }}
 
 [doc("Removes the local db container")]
 [group('database')]
@@ -169,6 +229,11 @@ extract-snowflake env:
 idr-bfd-validator env:
     cd ./apps/utils/idr-bfd-validator && BFD_ENV="{{ env }}" ./run-validator.sh
 
+[doc("Runs the backfill pipeline in prod")]
+[group('pipeline')]
+run-backfill-pipeline:
+    cd ./ops/services/04-idr-pipeline && ./run-backfill.sh
+
 [doc("installs npm dependencies for the model project")]
 [group('model')]
 install-model-dependencies:
@@ -276,9 +341,9 @@ generate-bene-sample bene-sk source-directory="" output-directory="":
         {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
 
 [arg("bene-sk", long, help="Bene key to generate sample with")]
-[arg("parts", long, pattern="(A|B|C|D|DUAL)?", help="Parts request comma delimited without spaces.")]
 [arg("source-directory", long, help="Directory to find bene CSV inputs")]
 [arg("output-directory", long, help="Directory to save the output")]
+[arg("parts", long, pattern="(A|B|C|D|DUAL)?", help="Parts request comma delimited without spaces.")]
 [doc("Generates sample coverage data to feed into the FHIR transform scripts")]
 [group('model')]
 generate-coverage-sample bene-sk parts="" source-directory="" output-directory="":
@@ -295,16 +360,16 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         byte-identical output file. Take care to avoid providing a partial set of tables with
         foreign key constraints (e.g. BENE_SK) without providing the root table as this could
         result in broken output data""")]
-[arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
-Does not affect patients regenerated when a BENE_HSTRY file is provided""")]
 [arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
 the generated BENE_HSTRY""")]
-[arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
-                        and allow the generator to generate new values""")]
 [arg("force-ztm", long, value="1", help="""
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
 none. Useful if not all tables for a patient have been generated yet.""")]
+[arg("patients", long, pattern="\\d*", help="""Number of NEW patients to generate.
+Does not affect patients regenerated when a BENE_HSTRY file is provided""")]
+[arg("exclude-empty", long, value="1", help="""Treat empty column values as non-existent
+                        and allow the generator to generate new values""")]
 [doc("""Generates patient data using the IDR schema to feed into the BFD pipeline.
 The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
@@ -353,18 +418,18 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
         --min-claims "{{ min-claims }}" \
         --pac-gen "{{ pac-gen }}"
 
-[arg("env", long, pattern=env_pattern, help=env_help)]
 [arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
-[arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
 [arg("claims", long, value="1", help="Generate claims after patient generation")]
+[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
+[arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
+[arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[arg("patients", long, pattern="\\d+", help="Number of NEW patients to generate")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per patient")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per patient")]
-[arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
+[arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
 [arg("pac-gen", long, pattern="(no|if_none|always)", help="Partially-adjudicated claims generation mode")]
 [arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
-[arg("force-ztm", long, value="1", help="Allow zero-to-many rows to be generated for existing patients")]
-[arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
-[arg("batch-size", long, pattern="\\d+", help="Batch size of benes and claims to process")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
 deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
@@ -388,9 +453,8 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         --batch-size "{{ batch-size }}" \
         {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
 
-
-[arg("tablesample", long, help="Percent of table to sample")]
 [arg("users", long, help="Peak number of concurrent Locust users")]
+[arg("tablesample", long, help="Percent of table to sample")]
 [arg("headless", long, value="1", help="Run in headless mode (outputs in the terminal instead of the web UI)")]
 [arg("env", long, pattern=env_pattern, help=env_help)]
 [doc("Runs locust regression tests against the specified env")]

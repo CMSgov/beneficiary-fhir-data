@@ -1,6 +1,7 @@
 *
 !pyproject.toml
 !uv.lock
-!app/__init__.py
-!app/handler.py
-!app/main.py
+!.python-version
+!apps/utils/samhsa-regression-tests/pyproject.toml
+!apps/utils/samhsa-regression-tests/app/*.py
+!apps/bfd-server-ng/src/main/resources/security_labels.yml

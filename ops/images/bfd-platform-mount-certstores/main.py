@@ -1,8 +1,8 @@
 """Downloads certstores and healthcheck PEM and saves them locally to specified paths.
 
-Used as the entrypoint for the "bfd-mgmt-mount-certstores" container image which is ran as part of
-the "server" ECS Service. The certstores and healthcheck PEM are downloaded to a shared bind mount
-from which the BFD Server reads them.
+Used as the entrypoint for the "bfd-platform-mount-certstores" image, which the "server" ECS Service
+runs as a sidecar. The certstores and healthcheck PEM are downloaded to a shared bind mount from
+which the BFD Server reads them.
 """
 
 from pathlib import Path

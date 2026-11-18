@@ -103,7 +103,7 @@ jobs:
 
       - name: Discover Tofuservices
         id: discover-services
-        uses: ./.github/actions/bfd-discover-tofuservices
+        uses: $/.github/actions/bfd-discover-tofuservices
         with:
           service-type: ${{ inputs.service-type }}
 

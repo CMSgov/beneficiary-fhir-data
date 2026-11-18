@@ -1,8 +1,0 @@
-{
-  "recommendations": [
-    "ms-python.python",
-    "ms-python.vscode-pylance",
-    "kevinrose.vsc-python-indent",
-    "EditorConfig.EditorConfig"
-  ]
-}

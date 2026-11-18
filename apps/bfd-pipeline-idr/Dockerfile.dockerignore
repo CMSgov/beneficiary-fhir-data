@@ -2,6 +2,8 @@
 !pyproject.toml
 !uv.lock
 !.python-version
-!src/idr_pipeline/model/*.py
-!src/idr_pipeline/matching/*.py
-!src/idr_pipeline/*.py
+!apps/bfd-pipeline-idr/pyproject.toml
+!apps/bfd-pipeline-idr/src/idr_pipeline/*.py
+!apps/bfd-pipeline-idr/src/idr_pipeline/matching/*.py
+!apps/bfd-pipeline-idr/src/idr_pipeline/model/*.py
+!apps/bfd-pipeline-idr/src/snowflake_extract/*.py

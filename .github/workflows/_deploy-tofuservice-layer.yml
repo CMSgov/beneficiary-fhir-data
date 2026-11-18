@@ -98,7 +98,7 @@ jobs:
           echo "tofu-vars-json=$tofu_vars_json" >> "$GITHUB_OUTPUT"
 
       - name: Deploy ${{ matrix.context.service }}
-        uses: ./.github/actions/bfd-deploy-tofuservice
+        uses: $/.github/actions/bfd-deploy-tofuservice
         with:
           service-type: ${{ inputs.service-type }}
           env-or-account: ${{ inputs.env-or-account }}

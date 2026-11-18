@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.audit.AuditEventRepository;
+import gov.cms.bfd.server.ng.config.CertPartnersConfiguration;
+import gov.cms.bfd.server.ng.config.Configuration;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;

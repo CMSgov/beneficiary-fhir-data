@@ -199,6 +199,14 @@ resource "aws_ecs_task_definition" "idr" {
             value = "1"
           },
           {
+            name  = "IDR_PER_BATCH_MIN_CONNECTIONS",
+            value = "10",
+          },
+          {
+            name  = "IDR_PER_BATCH_MAX_CONNECTIONS",
+            value = "10"
+          },
+          {
             name = "CONFIG_SETTINGS_JSON"
             value = jsonencode(
               {

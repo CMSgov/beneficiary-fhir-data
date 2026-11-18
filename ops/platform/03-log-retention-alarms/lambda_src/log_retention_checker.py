@@ -1,11 +1,11 @@
 import json
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import boto3
-from botocore.config import Config
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from botocore.config import Config
 
 if TYPE_CHECKING:
     from mypy_boto3_logs.client import CloudWatchLogsClient
@@ -34,7 +34,7 @@ BOTO_CONFIG = Config(
 
 def _list_non_compliant_log_groups(logs_client: CloudWatchLogsClient) -> list[dict[str, object]]:
     """Return log groups that are missing or not equal to required retention."""
-    non_compliant = []
+    non_compliant: list[dict[str, object]] = []
     paginator = logs_client.get_paginator("describe_log_groups")
 
     for page in paginator.paginate():
@@ -76,7 +76,7 @@ def _publish_alert(sns_client: SNSClient, message: str) -> None:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def lambda_handler(event: dict[str, Any], context: LambdaContext):
+def lambda_handler(_event: dict[str, Any], _context: LambdaContext) -> dict[str, str | int]:
 
     logger.info(
         "Environment: REQUIRED_RETENTION_DAYS=%r, ALERT_SNS_TOPIC_ARN=%r",
@@ -107,7 +107,10 @@ def lambda_handler(event: dict[str, Any], context: LambdaContext):
 
     payload = {
         "AlarmName": "log-retention-non-compliance",
-        "AlarmDescription": f"Found {len(non_compliant)} log groups with non-compliant retention (required: {REQUIRED_RETENTION_DAYS} days)",
+        "AlarmDescription": (
+            f"Found {len(non_compliant)} log groups with non-compliant retention "
+            f"(required: {REQUIRED_RETENTION_DAYS} days)"
+        ),
         "NewStateReason": json.dumps(non_compliant, indent=2),
         "Trigger": {"MetricName": None},
     }

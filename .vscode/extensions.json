@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "timonwong.shellcheck",
+    "mkhl.shfmt",
+    "esbenp.prettier-vscode",
+    "tamasfe.even-better-toml",
+    "aphp.fhir-mapbuilder",
+    "FHIR-Shorthand.vscode-fsh",
+    "ms-python.python",
+    "detachhead.basedpyright",
+    "EditorConfig.EditorConfig",
+    "charliermarsh.ruff",
+    "nefrob.vscode-just-syntax",
+    "redhat.vscode-xml",
+    "SonarSource.sonarlint-vscode"
+  ]
+}

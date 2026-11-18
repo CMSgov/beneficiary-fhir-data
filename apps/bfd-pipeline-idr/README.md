@@ -1,8 +1,10 @@
+<!-- markdownlint-disable MD013 -->
+
 # IDR Pipeline
 
 ## Setup
 
-Install packages
+`apps/bfd-pipeline-idr` is a member of the repository-wide `uv` workspace. Run `uv sync` from the repository root. It resolves this member against the shared `uv.lock`:
 
 ```sh
 uv sync

@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 import yaml
 from file_utils import ROOT
+from generator_util import probability
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
@@ -49,6 +50,10 @@ AVAILABLE_SAMHSA_ICD_10_DGNS_CODES = [
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS
 ]
+# Top 5 by usage, covers over 95% of claims with values for cd
+AVAILABLE_ANSI_RSN_CODES = ["2", "253", "1", "223", "118"]
+# Top 3 by usage, covers over 95% of claims with values for cd
+AVAILABLE_ANSI_GRP_CODES = ["PR", "CO", "OA"]
 AVAILABLE_NON_SAMHSA_ICD_10_DGNS_CODES = [
     "W6162",
     "V972",
@@ -100,7 +105,7 @@ AVAILABLE_NDC = [
     "00264780020",
 ]
 CLM_POA_IND_CHOICES = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
-AVAIL_CLM_RLT_COND_SK = ["193064687", "117814", "193065597", "117853", "193074307"]
+AVAIL_CLM_RLT_COND_SK = [193064687, 117814, 193065597, 117853, 193074307]
 NON_SAMHSA_DGNS_DRG_CDS = list(range(43))
 SAMHSA_DGNS_DRG_CDS = [
     int(x.normalized_code) for x in SECURITY_LABELS if x.system in SECURITY_LABELS_DRG_SYSTEMS
@@ -158,6 +163,8 @@ AVAILABLE_PROVIDER_TX_CODES = [
 ]
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
 AVAILABLE_SSA_STATE_CDS = ["01", "03", "06", "12", "48"]
+DISPROPORTIONATE_AMOUNT_CLM_VAL_CD = "18"
+INDIRECT_AMOUNT_CLM_VAL_CD = "19"
 
 
 def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:
@@ -213,3 +220,15 @@ def get_drg_dgns_codes(enable_samhsa: bool) -> list[int]:
         if enable_samhsa
         else NON_SAMHSA_DGNS_DRG_CDS
     )
+
+
+def gen_clm_val_ansi_rsn_cd() -> str | None:
+    if probability(0.20):
+        return random.choice(AVAILABLE_ANSI_RSN_CODES)
+    return None
+
+
+def gen_clm_val_ansi_grp_cd() -> str | None:
+    if probability(0.20):
+        return random.choice(AVAILABLE_ANSI_GRP_CODES)
+    return None

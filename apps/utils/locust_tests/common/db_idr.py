@@ -1,6 +1,7 @@
 import logging
 import os
 from string.templatelib import Template
+from typing import Any
 
 import psycopg
 from psycopg import sql
@@ -8,13 +9,13 @@ from psycopg import sql
 logger = logging.getLogger()
 
 
-def _execute(uri: str, query: Template) -> list:
+def _execute(uri: str, query: Template) -> list[tuple[Any, ...]]:
     """Execute a PSQL select statement and return its results."""
     if uri == "":
         uri = f"""user={os.environ["PGUSER"]} password={os.environ["PGPASSWORD"]}
         host={os.environ["PGHOST"]} dbname={os.environ["PGDATABASE"]}"""
     conn = None
-    results = []
+    results: list[tuple[Any, ...]] = []
     try:
         with psycopg.connect(uri) as conn, conn.cursor() as cursor:
             cursor.execute(query)

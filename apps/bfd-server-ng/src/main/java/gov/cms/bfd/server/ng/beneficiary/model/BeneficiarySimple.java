@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
@@ -17,7 +16,6 @@ import org.hibernate.annotations.Subselect;
  */
 @Entity
 @Getter
-@Table(name = "beneficiary", schema = "idr")
 @Subselect(BeneficiaryBase.LATEST_VALID_BENE_VIEW)
 @Immutable
 public class BeneficiarySimple {
