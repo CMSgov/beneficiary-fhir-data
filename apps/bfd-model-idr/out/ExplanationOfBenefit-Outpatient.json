@@ -801,7 +801,9 @@
     },
     "valueQuantity" : {
       "value" : 600,
-      "system" : "http://unitsofmeasure.org"
+      "unit" : "minute",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "min"
     }
   }],
   "diagnosis" : [{

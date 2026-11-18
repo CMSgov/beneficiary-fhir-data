@@ -169,7 +169,7 @@ group addSupportingInfoClmVal(source src: BFDClaimValues, target tgt: BackboneEl
     src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_VAL_AMT as amountValue -> tgtQuantity.value = cast(amountValue,"integer") "Set value";
         src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-        src where (valCode in ('D6')) -> tgtQuantity.unit = "minute", tgtQuantity.code = "min" "Set minutes unit/code";
+        src.CLM_VAL_CD as valCode where (valCode in ('D6')) -> tgtQuantity.unit = "minute", tgtQuantity.code = "min" "Set minutes unit/code";
     } "Set blood pints furnished";
 }
 
