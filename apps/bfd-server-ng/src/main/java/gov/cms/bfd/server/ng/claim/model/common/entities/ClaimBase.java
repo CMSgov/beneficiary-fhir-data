@@ -71,9 +71,6 @@ public abstract class ClaimBase {
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
 
-  @Column(name = "bene_sk", insertable = false, updatable = false)
-  private Long beneSk;
-
   @OneToOne
   @JoinColumn(name = "bene_sk")
   private BeneficiarySimple beneficiary;

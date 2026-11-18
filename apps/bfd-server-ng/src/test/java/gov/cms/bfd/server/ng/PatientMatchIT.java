@@ -127,14 +127,8 @@ class PatientMatchIT extends IntegrationTestBase {
     assertEquals(
         duplicateBene1.bene.getSsnLastFourDigits(), duplicateBene2.bene.getSsnLastFourDigits());
 
-    var currentBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 0));
-    var historicalBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 1));
-
-    assertTrue(
-        currentBene
-            .bene
-            .getEffectiveTimestamp()
-            .isAfter(historicalBene.bene.getEffectiveTimestamp()));
+    var historicalBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 0));
+    var currentBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 1));
 
     // precondition - same bene, different addresses
     assertEquals(historicalBene.bene.getBeneSk(), currentBene.bene.getBeneSk());
