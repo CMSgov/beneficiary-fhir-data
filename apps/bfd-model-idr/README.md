@@ -197,10 +197,12 @@ If _any_ claims-related tables have had columns added to their respective genera
 > If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
 
 > [!CAUTION]
-> When modifying the synthetic generators, you need to verify that you did not break idempotency. You can verify this by first generating synthetic CSV files from scratch and moving them to a separate folder like temp and then running our diff script like below. Check out the Justfile for more information.
+> When modifying the synthetic generators, you need to verify that you did not break idempotency as-in the CSV files do not contain any modification post a regeneration. We don't want to lose data we rely on in our tests nor change synthetic data that our users rely on in our Snowflake synthetic environments. You can verify this by first generating synthetic CSV files from scratch, regenerating them in a separate directory, and then running our diff script like below. Check out the Justfile for more information.
 
 ```sh
-just diff-synthetic-files your-source-dir your-regenerated-sir
+just patient-generator --patients 100 --claims --out-dir original-csvs
+just patient-generator original-csvs --claims --out-dir regenerated-csvs
+just diff-synthetic-files original-csvs regenerated-csvs
 ```
 
 Note: If you are regenerating synthetic test data in `test_sample1` or `test_sample2` to insert new fields or remove old fields then the checksum of the affected CSV files would not match, which is expected
@@ -229,7 +231,7 @@ GRANT SELECT ON TABLE  BFD_{ENV}.cms_vdm_view_mdcr_prd.procedure_event_table TO 
 
 Running the stored procedure:
 
-First, specify kn or kp depending on the environment that you're targeting. To generate data from scratch, run:
+First, run `kn` or `kp` depending on the environment that you're targeting. To generate data from scratch, run:
 
 ```sh
 just deploy-generator-sproc --env test --patients 100 --claims --truncate

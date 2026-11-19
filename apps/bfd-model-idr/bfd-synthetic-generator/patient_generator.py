@@ -26,7 +26,6 @@ from constants import (
 from faker import Faker
 from generator_util import (
     GeneratorUtil,
-    adapters_to_dicts,
     load_file_dict,
     output_table_contains_by_bene_sk,
     probability,
@@ -37,7 +36,7 @@ from load_synthetic_output import (
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
-from shared_options import common_options
+from shared_options import common_options, ensure_directory_exists
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +179,11 @@ def _handle_csv_flow(
 
     files: dict[str, list[RowAdapter]] = {table: [] for table in csv_tables}
     load_file_dict(
-        files=files, paths=paths, exclude_empty=exclude_empty, overwrites=writer.overwrites
+        files=files,
+        paths=paths,
+        exclude_empty=exclude_empty,
+        overwrites=writer.overwrites,
+        schema=writer.basic_schema,
     )
 
     generator.gen_contract_plan(
@@ -407,10 +410,10 @@ def _generate_contracts(
         init_contract_pbp_nums=existing_contracts,
         init_contract_pbp_contacts=existing_contacts,
     )
-    generator.export_table(adapters_to_dicts(contract_pbp_nums), CNTRCT_PBP_NUM, writer=writer)
+    generator.export_table(contract_pbp_nums, CNTRCT_PBP_NUM, writer=writer)
 
     generator.export_table(
-        adapters_to_dicts(contract_pbp_contacts),
+        contract_pbp_contacts,
         CNTRCT_PBP_CNTCT,
         writer=writer,
     )
@@ -424,6 +427,14 @@ def _generate_contracts(
     show_default=True,
     help="Treat empty column values as non-existent and allow the generator to generate new values",
 )
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./out"),
+    show_default=True,
+    callback=ensure_directory_exists,
+    help="Directory to write generated CSV files to.",
+)
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def main(
     patients: int,
@@ -433,6 +444,7 @@ def main(
     truncate: bool,
     batch_size: int,
     paths: tuple[Path, ...],
+    out_dir: Path,
     overwrite: str | None = None,
     **kwargs: Any,  # noqa: ANN401, ARG001
 ) -> None:
@@ -443,7 +455,7 @@ def main(
         truncate=truncate,
         paths=paths,
         exclude_empty=exclude_empty,
-        writer=CsvWriter(overwrite_fields=overwrite),
+        writer=CsvWriter(out_dir=out_dir, overwrite_fields=overwrite),
     )
 
     if claims:
@@ -452,15 +464,29 @@ def main(
             current_dir = Path(__file__).resolve().parent
             claims_generator = str(current_dir / "claims_generator.py")
 
-            # Only for CSV flow does this call claims_generator.py with the generated
-            # SYNTHETIC_BENE_HSTRY and SYNTHETIC_CNTRCT_PBP_NUM to prevent disconnected claims from
+            # If input paths were provided then this is a regeneration so we pass the paths directly
+            # to claims_generator so it can regenerate existing claims.
+            # If no paths were provided then we're generating data from scratch so pass only the
+            # freshly generated BENE_HSTRY and CNTRCT_PBP_NUM to prevent disconnected claims from
             # benes and disconeccted contracts from claims
+            input_paths = (
+                [str(p) for p in paths]
+                if paths
+                else [
+                    str(out_dir / f"{BENE_HSTRY}.csv"),
+                    str(out_dir / f"{CNTRCT_PBP_NUM}.csv"),
+                ]
+            )
+
             claims_args = [
                 sys.executable,
                 claims_generator,
-                f"out/{BENE_HSTRY}.csv",
-                f"out/{CNTRCT_PBP_NUM}.csv",
+                "--out-dir",
+                str(out_dir),
+                *input_paths,
             ]
+            if overwrite:
+                claims_args.extend(["--overwrite", overwrite])
 
             subprocess.run(
                 args=claims_args,

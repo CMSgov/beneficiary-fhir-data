@@ -161,7 +161,7 @@ class OutputDestinationWriter(ABC):
 class CsvWriter(OutputDestinationWriter):
     def __init__(
         self,
-        out_dir: str = "./out",
+        out_dir: str | Path = "./out",
         overwrite_fields: str | None = None,
     ) -> None:
         super().__init__(overwrite_fields=overwrite_fields)

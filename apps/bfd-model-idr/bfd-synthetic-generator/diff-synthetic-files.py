@@ -82,6 +82,33 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                 print("--- Sample of Changes Detected ---")
                 if len(diff) > 1:
                     header_idx = 0
+                    column_schema_changes_row = None
+                    # if a column gets added or deleted daff marks the action ! for diff[0] and
+                    # diff[1] will contain @@ and the column names. If no column name is added then
+                    # diff[0] will contain @@ and the column names
+                    for row_idx, row in enumerate(diff):
+                        if row[0] == "!":
+                            column_schema_changes_row = row
+                        elif row[0] == "@@":
+                            header_idx = row_idx
+                            break
+
+                    if column_schema_changes_row is not None:
+                        added_cols = [
+                            diff[header_idx][column_idx]
+                            for column_idx, action in enumerate(column_schema_changes_row)
+                            if column_idx > 0 and action == "+++"
+                        ]
+                        removed_cols = [
+                            diff[header_idx][column_idx]
+                            for column_idx, action in enumerate(column_schema_changes_row)
+                            if column_idx > 0 and action == "---"
+                        ]
+                        if added_cols:
+                            print(f"! Added columns: {', '.join(added_cols)}")
+                        if removed_cols:
+                            print(f"! Removed columns: {', '.join(removed_cols)}")
+
                     data_rows: list[Any] = diff[header_idx + 1 :]
                     # column 0 is the action column that shows symbols like -> (modified),
                     # ++ (added), or --- (deleted)
@@ -89,10 +116,10 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                     sample_changed_rows: list[Any] = []
                     modified_rows_seen: set[Any] = set()
 
-                    # if there are any modified cells get the field names,actual values, and pks
+                    # if there are any modified cells get the field names, actual values, and pks
                     # to identify the row
-                    for column_index in range(1, len(diff[header_idx])):
-                        column_name = diff[header_idx][column_index]
+                    for column_idx in range(1, len(diff[header_idx])):
+                        column_name = diff[header_idx][column_idx]
                         table_name: str = get_table_name_from_file_name(
                             file_name.removesuffix(".csv")
                         )
@@ -101,12 +128,12 @@ def main(src_dir: Path, regen_dir: Path) -> None:
 
                         modified_row_idx = None
                         for row_idx, row in enumerate(data_rows):
-                            if row[0] == "->" and "->" in row[column_index]:
+                            if row[0] == "->" and "->" in row[column_idx]:
                                 modified_row_idx = row_idx
                                 break
 
                         if modified_row_idx is not None or is_pk:
-                            keep_columns.append(column_index)
+                            keep_columns.append(column_idx)
                             # more than one column value can be modified so we don't want to print
                             # the same row more than once
                             if (
@@ -128,7 +155,7 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                                 sample_changed_rows.append(row)
                                 break
 
-                    rows_to_render: list[Any] = diff[: header_idx + 1] + sample_changed_rows
+                    rows_to_render: list[Any] = [diff[header_idx], *sample_changed_rows]
                     granular_diff: list[list[Any]] = [
                         [row[column_idx] for column_idx in keep_columns] for row in rows_to_render
                     ]
@@ -138,8 +165,8 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                 print(renderer.render(table_diff))  # pyright: ignore[reportUnknownMemberType]
                 print("----------------------------------")
         else:
-            print(f"'{file}' exists in {src_dir} but is missing in {regen_dir}")
-            sys.exit(1)
+            print(f"'{file_name}' exists in {src_dir.name} but is missing in {regen_dir.name}")
+            mismatch_count += 1
 
     print("==================================================")
     if mismatch_count > 0:
@@ -147,6 +174,7 @@ def main(src_dir: Path, regen_dir: Path) -> None:
             f"{mismatch_count} file(s) do not have matching data content post regeneration. "
             + "Verify if this is intended."
         )
+        sys.exit(1)
     else:
         print("Files are identical post regeneration. Verify if this is intended.")
 

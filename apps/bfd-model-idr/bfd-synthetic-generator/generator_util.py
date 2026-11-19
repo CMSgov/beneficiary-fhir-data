@@ -44,6 +44,7 @@ from faker import Faker
 from id_generators import IdGenerator, RandomIdGenerator
 from load_synthetic_output import CsvWriter, OutputDestinationWriter
 from row_adapter import RowAdapter
+from schema_utils import TableSchema, get_table_name_from_file_name
 from utils import ROOT
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
@@ -154,6 +155,7 @@ def load_file_dict(
     paths: Sequence[str | Path],
     overwrites: dict[str, set[str]],
     exclude_empty: bool = False,
+    schema: dict[str, TableSchema] | None = None,
 ) -> None:
     file_paths = set(
         itertools.chain.from_iterable(
@@ -187,12 +189,25 @@ def load_file_dict(
                 na_filter=exclude_empty,
                 keep_default_na=False,
             )
+
+            # Add any missing columns defined in our idr schema even if we have not generated data
+            # for it so our CSV file always matches the actual schema
+            table_name = get_table_name_from_file_name(file_name)
+            if schema and (table_schema := schema.get(table_name)):
+                for col in table_schema.columns:
+                    if col not in csv_data.columns:
+                        csv_data[col] = pd.NA
+
+            for field in _CAST_TO_INT_FIELDS:
+                if field in csv_data.columns:
+                    csv_data[field] = pd.to_numeric(csv_data[field], errors="coerce").astype(
+                        "Int64"
+                    )
+
             if fields_to_overwrite := overwrites.get(file_name):
                 for field in fields_to_overwrite:
                     csv_data.pop(field)
-            for field in _CAST_TO_INT_FIELDS:
-                if field in csv_data.columns:
-                    csv_data[field] = csv_data[field].astype(int)
+
             file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
             if not exclude_empty:
                 files[file_name] = load_file(file_as_dictlist)  # type: ignore
@@ -210,12 +225,6 @@ def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
 
 def probability(frac: float) -> bool:
     return random.random() < (frac)
-
-
-def adapters_to_dicts(
-    adapters: list[RowAdapter] | list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
 
 
 def output_table_contains_by_bene_sk(
@@ -890,10 +899,11 @@ class GeneratorUtil:
 
     def export_table(
         self,
-        data: list[dict[str, Any]],
+        data: list[RowAdapter] | list[dict[str, Any]],
         table_name: str,
         writer: OutputDestinationWriter,
     ) -> None:
+        data = [x.kv if isinstance(x, RowAdapter) else x for x in data]
         writer.write_table(data, table_name)
 
     def flush_batch(self, writer: OutputDestinationWriter) -> None:

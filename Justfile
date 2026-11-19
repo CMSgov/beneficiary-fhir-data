@@ -360,10 +360,12 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         byte-identical output file. Take care to avoid providing a partial set of tables with
         foreign key constraints (e.g. BENE_SK) without providing the root table as this could
         result in broken output data""")]
+[arg("out-dir", long, help="Directory to write generated CSV files to")]
 [arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
 TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
-[arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
-the generated BENE_HSTRY""")]
+[arg("claims", long, value="1", help="""If this is a regeneration flow, it will automatically regenerate claims after patient
+generation using the specified paths. If no paths were provided then it generates claims data from scratch only using the
+freshly generated BENE_HSTRY and CNTRCT_PBP_NUM""")]
 [arg("force-ztm", long, value="1", help="""
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
@@ -377,13 +379,14 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" *paths: create-db create-mock-idr
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" out-dir="./out" *paths: create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
     trap 'just remove-db' EXIT
 
     root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+    out_dir="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ out-dir }}")"
 
     source "$root/apps/utils/scripts/local-constants.sh"
     export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
@@ -393,6 +396,7 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite=
     export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
 
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/patient_generator.py $paths \
+        --out-dir "$out_dir" \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
@@ -400,6 +404,7 @@ patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite=
         --overwrite "{{ overwrite }}"
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
+[arg("out-dir", long, help="Directory to write generated CSV files to")]
 [arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
 TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
@@ -419,13 +424,14 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" *paths: sushi create-db create-mock-idr
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" out-dir="./out" *paths: sushi create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
     trap 'just remove-db' EXIT
 
     root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+    out_dir="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ out-dir }}")"
 
     source "$root/apps/utils/scripts/local-constants.sh"
     export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
@@ -435,6 +441,7 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
     export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
 
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/claims_generator.py $paths \
+        --out-dir "$out_dir" \
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
@@ -525,8 +532,8 @@ diff-synthetic-files source-directory target-directory: create-db create-mock-id
     trap 'just remove-db' EXIT
 
     root="{{ justfile_directory() }}"
-    source="{{ canonicalize(source-directory) }}"
-    target="{{ canonicalize(target-directory) }}"
+    source="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ source-directory }}")"
+    target="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ target-directory }}")"
 
     source "$root/apps/utils/scripts/local-constants.sh"
     export BFD_LOCAL_DB_ENDPOINT="$PGHOST"

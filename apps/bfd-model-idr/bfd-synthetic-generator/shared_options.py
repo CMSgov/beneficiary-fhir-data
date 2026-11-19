@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import click
@@ -6,6 +7,15 @@ from constants import GeneratePacDataMode
 from load_synthetic_output import BeneSkMode
 
 _BATCH_SIZE = 50_000
+
+
+def ensure_directory_exists(
+    ctx: click.Context,  # noqa: ARG001
+    param: click.Parameter,  # noqa: ARG001
+    out_dir: Path,
+) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
 
 
 def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
