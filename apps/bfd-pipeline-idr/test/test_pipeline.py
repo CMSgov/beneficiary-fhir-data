@@ -423,7 +423,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
 
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_fac_prvdr_oscar_num"] == "-39T14"
+    assert rows[0]["clm_fac_prvdr_oscar_num"] == "-001503"
 
     # Items for stale non-Part-D claims are pruned on incremental loads
     cur = conn.execute(
