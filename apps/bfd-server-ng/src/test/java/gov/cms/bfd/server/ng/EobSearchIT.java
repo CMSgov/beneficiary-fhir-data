@@ -278,7 +278,7 @@ class EobSearchIT extends IntegrationTestBase {
                     union all
                     select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
                     union all
-                    select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                    select bfd_updated_ts from idr.claim_rx where bene_sk = :beneSk
                 ) all_claims
                 """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
