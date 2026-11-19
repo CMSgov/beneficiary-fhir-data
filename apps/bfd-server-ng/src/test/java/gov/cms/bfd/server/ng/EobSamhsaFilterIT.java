@@ -289,7 +289,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // verification due to system/code mismatches
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()
-            .filter(c -> !isSkippedFromBundleCheck(c, skipBundleVerification))
+            .filter(eob -> !isSkippedFromBundleCheck(eob, skipBundleVerification))
             .toList();
     // Bundle from endpoint should not contain any sensitive codes
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));

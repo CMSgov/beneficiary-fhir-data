@@ -3388,82 +3388,82 @@
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 54868-5034-0
+  code: 54868-5034-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 54868-5034-1
+  code: 54868-5034-01
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 54868-5034-2
+  code: 54868-5034-02
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 51285-523-02
+  code: 51285-0523-02
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 51285-524-02
+  code: 51285-0524-02
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 60687-0121
+  code: 60687-0121-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 69189-0437
+  code: 69189-0437-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 42291-0104
+  code: 42291-0104-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 69452-0353
+  code: 69452-0353-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 00258-4000
+  code: 00258-4000-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 68462-0435
+  code: 68462-0435-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 00904-7213
+  code: 00904-7213-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 10135-0636
+  code: 10135-0636-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 51079-0241
+  code: 51079-0241-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 00378-6333
+  code: 00378-6333-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 00615-8560
+  code: 00615-8560-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 70518-4616
+  code: 70518-4616-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 00093-5352
+  code: 00093-5352-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 70771-1057
+  code: 70771-1057-00
   startDate: 1970-01-01
   endDate: 9999-12-31
 - system: http://hl7.org/fhir/sid/ndc
-  code: 68382-0569
+  code: 68382-0569-00
   startDate: 1970-01-01
   endDate: 9999-12-31
