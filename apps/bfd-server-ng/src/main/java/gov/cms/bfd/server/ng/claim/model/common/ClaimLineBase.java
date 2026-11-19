@@ -69,4 +69,13 @@ public interface ClaimLineBase {
   default Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
     return Optional.empty();
   }
+
+  /**
+   * Returns the NDC code for this claim line, if present.
+   *
+   * @return the claim line NDC code,
+   */
+  default Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.empty();
+  }
 }

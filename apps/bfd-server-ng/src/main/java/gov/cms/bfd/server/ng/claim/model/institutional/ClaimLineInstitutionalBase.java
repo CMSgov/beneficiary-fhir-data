@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model.institutional;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsModifierCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineRevenueCenterCode;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
@@ -114,5 +115,10 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Override
   public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
     return Optional.of(getHcpcsCode());
+  }
+
+  @Override
+  public Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.of(getNdc().getClaimLineNdc());
   }
 }

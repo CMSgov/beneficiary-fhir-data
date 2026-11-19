@@ -30,6 +30,15 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
     return Optional.empty();
   }
 
+  /**
+   * Returns the NDC code associated with this claim item, if present.
+   *
+   * @return the claim line NDC code,
+   */
+  default Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.empty();
+  }
+
   @Override
   default int compareTo(@NotNull ClaimItemBase o) {
     return getClaimItemId().compareTo(o.getClaimItemId());

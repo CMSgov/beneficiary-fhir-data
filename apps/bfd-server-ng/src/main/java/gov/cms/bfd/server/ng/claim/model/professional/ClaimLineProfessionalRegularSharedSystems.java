@@ -4,10 +4,12 @@ import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** clm_line data for Professional-Regular-SharedSystems. */
 @Embeddable
+@Getter
 public class ClaimLineProfessionalRegularSharedSystems extends ClaimLineProfessionalRegular {
 
   @Embedded private ClaimLineProfessionalSharedSystemsCore sharedSystemsCore;

@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.rx;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineBase;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineServiceUnitQuantity;
 import gov.cms.bfd.server.ng.claim.model.common.RenderingCareTeamLine;
@@ -67,5 +68,10 @@ public class ClaimLineRx implements ClaimLineBase {
   @Override
   public Optional<Integer> getClaimLineNumber() {
     return Optional.empty();
+  }
+
+  @Override
+  public Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.of(getNdc().getClaimLineNdc());
   }
 }
