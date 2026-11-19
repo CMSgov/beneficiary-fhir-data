@@ -11,6 +11,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -38,6 +39,9 @@ public class ClaimItemProfessionalRegularSharedSystems implements ClaimItemBase 
 
   @Override
   public Optional<ClaimLineNdc> getClaimLineNdc() {
+    if (Objects.isNull(claimLine)) {
+      return Optional.empty();
+    }
     return claimLine.getSharedSystemsCore().getClaimLineNdc();
   }
 }

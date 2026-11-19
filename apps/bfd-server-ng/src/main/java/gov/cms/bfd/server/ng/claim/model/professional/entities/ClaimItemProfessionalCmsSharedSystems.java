@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -127,6 +128,9 @@ public class ClaimItemProfessionalCmsSharedSystems implements ClaimItemBase {
 
   @Override
   public Optional<ClaimLineNdc> getClaimLineNdc() {
+    if (Objects.isNull(claimLine)) {
+      return Optional.empty();
+    }
     return claimLine.getSharedSystemsCore().getClaimLineNdc();
   }
 
