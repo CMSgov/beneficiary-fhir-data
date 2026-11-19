@@ -477,6 +477,27 @@
         "code" : "24M"
       }]
     }
+  },
+  {
+    "sequence" : 23,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_DLYS_MIN_AMT",
+        "display" : "Dialysis Billing Period Minutes"
+      }]
+    },
+    "valueQuantity" : {
+      "value" : 2026,
+      "unit" : "minute",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "min"
+    }
   }],
   "diagnosis" : [{
     "sequence" : 1,
@@ -2675,6 +2696,123 @@
     },
     "amount" : {
       "value" : 176.0,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_OPRTNL_OUTLR_AMT",
+        "display" : "Operating Outlier Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 3115.08,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_OPRTNL_DSPRTNT_AMT",
+        "display" : "Operating Disproportionate Share Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 2914.05,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_OPRTNL_IME_AMT",
+        "display" : "Operating Indirect Medical Education Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 10712.4,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 802.28,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
+        "display" : "Low Volume Payment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 823.28,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MDCR_NEW_TECH_AMT",
+        "display" : "New Technology Add-On Payment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 839.28,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT",
+        "display" : "Medicare Payment Before Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 218.07,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT",
+        "display" : "Actual Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 729.03,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_MIPS_PMT_AMT",
+        "display" : "Incentive Payment Adjustment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 1729.03,
       "currency" : "USD"
     }
   },

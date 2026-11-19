@@ -786,12 +786,40 @@
   ],
   "claimValues": [
     {
+      "CLM_VAL_CD": "17",
+      "CLM_VAL_AMT": "2115.08"
+    },
+    {
       "CLM_VAL_CD": "18",
       "CLM_VAL_AMT": "9646.57"
     },
     {
       "CLM_VAL_CD": "19",
       "CLM_VAL_AMT": "2389.44"
+    },
+    {
+      "CLM_VAL_CD": "73",
+      "CLM_VAL_AMT": "812.28"
+    },
+    {
+      "CLM_VAL_CD": "74",
+      "CLM_VAL_AMT": "822.28"
+    },
+    {
+      "CLM_VAL_CD": "77",
+      "CLM_VAL_AMT": "832.28"
+    },
+    {
+      "CLM_VAL_CD": "D6",
+      "CLM_VAL_AMT": "2022"
+    },
+    {
+      "CLM_VAL_CD": "Q0",
+      "CLM_VAL_AMT": "217.07"
+    },
+    {
+      "CLM_VAL_CD": "Q1",
+      "CLM_VAL_AMT": "728.03"
     }
   ]
 }

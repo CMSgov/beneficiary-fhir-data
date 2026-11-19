@@ -880,6 +880,27 @@
     }
   },
   {
+    "sequence" : 35,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_DLYS_MIN_AMT",
+        "display" : "Dialysis Billing Period Minutes"
+      }]
+    },
+    "valueQuantity" : {
+      "value" : 2011,
+      "unit" : "minute",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "min"
+    }
+  },
+  {
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -5393,12 +5414,12 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_SQSTRTN_RDCTN_AMT",
-        "display" : "Sequestration Adjustment Amount"
+        "code" : "CLM_OPRTNL_OUTLR_AMT",
+        "display" : "Operating Outlier Amount"
       }]
     },
     "amount" : {
-      "value" : 10.04,
+      "value" : 1115.08,
       "currency" : "USD"
     }
   },
@@ -5406,12 +5427,25 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount"
+        "code" : "CLM_OPRTNL_IME_AMT",
+        "display" : "Operating Indirect Medical Education Amount"
       }]
     },
     "amount" : {
-      "value" : 10.05,
+      "value" : 1507.78,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 802.28,
       "currency" : "USD"
     }
   },
@@ -5424,7 +5458,7 @@
       }]
     },
     "amount" : {
-      "value" : 11.38,
+      "value" : 207.07,
       "currency" : "USD"
     }
   },
@@ -5437,7 +5471,7 @@
       }]
     },
     "amount" : {
-      "value" : 86.19,
+      "value" : 708.03,
       "currency" : "USD"
     }
   },
@@ -5450,7 +5484,7 @@
       }]
     },
     "amount" : {
-      "value" : 67.76,
+      "value" : 2007.08,
       "currency" : "USD"
     }
   },
