@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineHcpcsCode;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.IcdIndicator;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
@@ -258,7 +259,10 @@ public class EobHandler {
       ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
     return procedureIsSamhsa(claimItem.getProcedureOptional(), claimThroughDate, claimUniqueId)
         || hcpcsIsSamhsa(
-            claimItem.getClaimLine().getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
+            claimItem.getClaimLine().getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId)
+        || medicationNdcIsSamhsa(
+            claimItem.getClaimLine().getClaimLineNdc(), claimThroughDate, claimUniqueId)
+        || medicationNdcIsSamhsa(claimItem.getClaimLineNdc(), claimThroughDate, claimUniqueId);
   }
 
   private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
@@ -279,6 +283,17 @@ public class EobHandler {
         String.valueOf(claimUniqueId),
         "HCPCS",
         List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS));
+  }
+
+  // Checks NDCs.
+  private boolean medicationNdcIsSamhsa(
+      Optional<ClaimLineNdc> lineNdc, LocalDate claimDate, long claimUniqueId) {
+    if (lineNdc.isEmpty()) {
+      return false;
+    }
+    var ndc = lineNdc.get().getNdcCode().orElse("");
+    return codeIsSamhsa(
+        ndc, claimDate, String.valueOf(claimUniqueId), "NDC", List.of(SystemUrls.NDC));
   }
 
   // Checks ICDs.

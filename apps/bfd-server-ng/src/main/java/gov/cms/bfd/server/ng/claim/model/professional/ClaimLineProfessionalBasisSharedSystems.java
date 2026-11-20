@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model.professional;
 
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdcQuantity;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Embeddable;
@@ -30,5 +31,10 @@ public class ClaimLineProfessionalBasisSharedSystems extends ClaimLineProfession
     ndc.toFhirDetail().ifPresent(line::addDetail);
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     line.setQuantity(quantity);
+  }
+
+  @Override
+  public Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.of(getNdc().getClaimLineNdc());
   }
 }

@@ -8,12 +8,14 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 @Embeddable
+@Getter
 public class ClaimLineNdcQuantity {
 
   @Embedded ClaimLineNdc claimLineNdc;

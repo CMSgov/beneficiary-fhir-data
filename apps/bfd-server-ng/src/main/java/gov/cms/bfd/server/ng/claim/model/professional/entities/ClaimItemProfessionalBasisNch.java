@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model.professional.entities;
 
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemBase;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimItemId;
+import gov.cms.bfd.server.ng.claim.model.common.ClaimLineNdc;
 import gov.cms.bfd.server.ng.claim.model.common.ProcedureBase;
 import gov.cms.bfd.server.ng.claim.model.professional.ClaimLineProfessionalBasisNch;
 import gov.cms.bfd.server.ng.claim.model.professional.ProcedureProfessional;
@@ -27,5 +28,10 @@ public class ClaimItemProfessionalBasisNch implements ClaimItemBase {
   @Override
   public Optional<ProcedureBase> getProcedureOptional() {
     return Optional.of(claimProcedure);
+  }
+
+  @Override
+  public Optional<ClaimLineNdc> getClaimLineNdc() {
+    return getClaimLine().getNchCore().getClaimLineNdc();
   }
 }
