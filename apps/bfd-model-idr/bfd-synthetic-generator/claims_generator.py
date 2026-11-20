@@ -25,7 +25,6 @@ from claims_util import four_part_key, match_line_num
 from constants import GeneratePacDataMode
 from generator_util import (
     GeneratorUtil,
-    adapters_to_dicts,
     as_list,
     load_file_dict,
     partition_rows,
@@ -38,14 +37,13 @@ from id_generators import (
     load_id_state,
 )
 from load_synthetic_output import (
-    ALL_KEYS,
     BeneSkMode,
     CsvWriter,
     OutputDestinationWriter,
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
-from shared_options import common_options
+from shared_options import common_options, ensure_directory_exists
 
 logger = logging.getLogger(__name__)
 
@@ -711,6 +709,14 @@ class _ClaimsFile(StrEnum):
 
 @click.command
 @common_options
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./out"),
+    show_default=True,
+    callback=ensure_directory_exists,
+    help="Directory to write generated CSV files to.",
+)
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def generate_locally(
     min_claims: int,
@@ -719,21 +725,22 @@ def generate_locally(
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
-    writer: OutputDestinationWriter | None = None,
+    out_dir: Path,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    overwrite: str | None = None,
     **kwargs: Any,  # noqa: ANN401, ARG001
 ) -> None:
     generate(
-        min_claims,
-        max_claims,
-        samhsa,
-        pac_gen,
-        bene_sk_mode,
-        paths,
-        writer,
-        truncate,
-        batch_size,
+        min_claims=min_claims,
+        max_claims=max_claims,
+        samhsa=samhsa,
+        pac_gen=pac_gen,
+        bene_sk_mode=bene_sk_mode,
+        writer=CsvWriter(out_dir=out_dir, overwrite_fields=overwrite),
+        paths=paths,
+        truncate=truncate,
+        batch_size=batch_size,
     )
 
 
@@ -743,8 +750,8 @@ def generate(
     samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
+    writer: OutputDestinationWriter,
     paths: tuple[Path, ...] | None = None,
-    writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
@@ -753,9 +760,6 @@ def generate(
         raise click.UsageError(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
-
-    if writer is None:
-        writer = CsvWriter()
 
     claims_tables = [
         f.CLM,
@@ -818,8 +822,9 @@ def generate(
         f.PRAUC: [],
     }
     if isinstance(writer, CsvWriter):
-        if paths:
-            load_file_dict(files=files, paths=list(paths))
+        load_file_dict(
+            files=files, paths=paths or (), overwrites=writer.overwrites, schema=writer.basic_schema
+        )
         if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
             print(
                 f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
@@ -838,16 +843,12 @@ def generate(
             init_provider_historys=existing_providers,
         )
     )
-    gen_utils.export_table(
-        adapters_to_dicts(generated_provider_histories), f.PRVDR_HSTRY, writer, ALL_KEYS
-    )
+    gen_utils.export_table(generated_provider_histories, f.PRVDR_HSTRY, writer)
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
-    gen_utils.export_table(
-        adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer, ALL_KEYS
-    )
+    gen_utils.export_table(clm_ansi_sgntr_rows, f.CLM_ANSI_SGNTR, writer)
 
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=samhsa)
     pac_util = PacGeneratorUtil()
@@ -895,7 +896,7 @@ def generate(
         for table_name, rows in out_tables.items():
             if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
                 continue
-            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
+            gen_utils.export_table(rows, table_name, writer)
 
     logger.info("Done generating synthetic claims/prior auth data for provided BENE_SKs")
 

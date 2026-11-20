@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import click
@@ -6,6 +7,15 @@ from constants import GeneratePacDataMode
 from load_synthetic_output import BeneSkMode
 
 _BATCH_SIZE = 50_000
+
+
+def ensure_directory_exists(
+    ctx: click.Context,  # noqa: ARG001
+    param: click.Parameter,  # noqa: ARG001
+    out_dir: Path,
+) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
 
 
 def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
@@ -102,10 +112,20 @@ def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
         help="Truncate tables before reloading. Default is false",
     )(function)
 
-    return click.option(
+    function = click.option(
         "--batch-size",
         type=int,
         default=_BATCH_SIZE,
         show_default=True,
         help="Batch size of claims to process",
+    )(function)
+
+    return click.option(
+        "--overwrite",
+        show_default=True,
+        help=(
+            "Overwrites fields when regenerating synthetic data. For Snowflake flow should be "
+            "comma separated TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD "
+            "if CSV flow"
+        ),
     )(function)
