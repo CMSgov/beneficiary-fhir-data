@@ -86,7 +86,17 @@ public class ClaimAsyncService {
         String.format(
             """
              %s
-             WHERE b.xrefSk = :beneSk
+             WHERE c.beneSk in (
+                SELECT beneSk FROM (
+                  SELECT bene.beneSk AS beneSk,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY bene.beneSk
+                            ORDER BY bene.effectiveTimestamp DESC
+                        ) AS rn
+                        FROM Beneficiary bene
+                        WHERE bene.xrefSk = :beneSk
+                ) WHERE rn = 1
+              )
              %s
             """,
             baseQuery, whereClause);
@@ -111,7 +121,6 @@ public class ClaimAsyncService {
   private String buildWhereClause(DbFilter filter) {
     return String.format(
         """
-      AND b.latestTransactionFlag = 'Y'
       AND c.latestClaimIndicator = 'Y'
       %s
       """,

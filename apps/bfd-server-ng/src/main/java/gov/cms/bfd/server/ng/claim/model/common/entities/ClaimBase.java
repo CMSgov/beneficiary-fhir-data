@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.common.entities;
 
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.EobProfileType;
 import gov.cms.bfd.server.ng.claim.model.common.AdjudicationEmbedded;
 import gov.cms.bfd.server.ng.claim.model.common.BillablePeriod;
@@ -26,9 +25,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -36,6 +33,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hibernate.annotations.Formula;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -67,13 +65,26 @@ public abstract class ClaimBase {
   @Column(name = "clm_adjstmt_type_cd")
   private Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode;
 
+  @Column(name = "bene_sk")
+  private Long beneSk;
+
+  @Formula(
+      """
+    (SELECT bx.bene_xref_efctv_sk
+    FROM idr.beneficiary bx
+    WHERE bx.bene_sk = bene_sk
+    AND NOT EXISTS (
+          SELECT 1 FROM idr.beneficiary_overshare_mbi om
+          WHERE om.bene_mbi_id::text = bx.bene_mbi_id::text
+      )
+    ORDER BY bx.idr_trans_efctv_ts DESC
+    LIMIT 1)
+   """)
+  private Long beneXrefSk;
+
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
-
-  @OneToOne
-  @JoinColumn(name = "bene_sk")
-  private BeneficiarySimple beneficiary;
 
   @Transient protected SupportingInfoFactory supportingInfoFactory = new SupportingInfoFactory();
 
@@ -88,7 +99,7 @@ public abstract class ClaimBase {
     var eob = new ExplanationOfBenefit();
 
     eob.setId(String.valueOf(claimUniqueId));
-    eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
+    eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
