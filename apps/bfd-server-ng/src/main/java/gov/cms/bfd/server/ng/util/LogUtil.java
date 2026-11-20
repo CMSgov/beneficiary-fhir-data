@@ -39,9 +39,6 @@ public class LogUtil {
     if (claims.isEmpty()) {
       return;
     }
-    claims.stream()
-        .map(claim -> claim.getBeneficiary().getBeneSk())
-        .distinct()
-        .forEach(LogUtil::logBeneSk);
+    claims.stream().map(ClaimBase::getBeneSk).distinct().forEach(LogUtil::logBeneSk);
   }
 }

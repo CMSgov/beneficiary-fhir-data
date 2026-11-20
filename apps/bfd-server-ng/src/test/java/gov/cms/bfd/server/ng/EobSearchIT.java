@@ -845,7 +845,6 @@ class EobSearchIT extends IntegrationTestBase {
                 """
                             SELECT c
                             FROM ClaimProfessionalCmsNch c
-                            JOIN FETCH c.beneficiary b
                             JOIN FETCH c.claimItems cl
                             WHERE c.claimUniqueId = :claimId
                             """,

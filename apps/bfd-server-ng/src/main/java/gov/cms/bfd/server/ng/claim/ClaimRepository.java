@@ -46,7 +46,6 @@ public class ClaimRepository {
     return """
       SELECT c
       FROM %s c
-      JOIN FETCH c.beneficiary b
       %s JOIN FETCH c.claimItems cl
     """
         .formatted(entityClass.getSimpleName(), itemsJoinType);
@@ -56,7 +55,6 @@ public class ClaimRepository {
     return """
       SELECT c
       FROM %s c
-      JOIN FETCH c.beneficiary b
     """
         .formatted(entityClass.getSimpleName());
   }

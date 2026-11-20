@@ -27,10 +27,8 @@ public class PriorAuthorizationRepository {
             """
                  SELECT p
                  FROM PriorAuthorization p
-                 JOIN FETCH p.beneficiary b
                  JOIN FETCH p.items i
-                 WHERE b.latestTransactionFlag = 'Y'
-                 AND p.id.mbi = :mbi
+                 WHERE p.id.mbi = :mbi
                """,
             PriorAuthorization.class)
         .setParameter("mbi", mbi)
