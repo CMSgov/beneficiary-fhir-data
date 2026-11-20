@@ -580,6 +580,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }
   } ],
   "item": [ {
+    "extension": [ {
+      "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM",
+      "valueString": "-T324"
+    } ],
     "sequence": 1,
     "revenue": {
       "coding": [ {
@@ -1889,6 +1893,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }
   } ],
   "item": [ {
+    "extension": [ {
+      "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM",
+      "valueString": "-T564"
+    } ],
     "sequence": 1,
     "revenue": {
       "coding": [ {
@@ -5059,6 +5067,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD",
         "code": "2"
       }
+    }, {
+      "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM",
+      "valueString": "-T764"
     } ],
     "sequence": 1,
     "revenue": {
@@ -6746,6 +6757,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system": "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD",
         "code": "2"
       }
+    }, {
+      "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM",
+      "valueString": "-T764"
     } ],
     "sequence": 1,
     "revenue": {

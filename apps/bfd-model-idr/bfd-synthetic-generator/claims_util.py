@@ -76,3 +76,10 @@ def add_meta_timestamps(
         if has_insrt_ts and random.random() > 0.8
         else None
     )
+
+
+def safe_int(value: int, default: int = 0) -> int:
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        return default
