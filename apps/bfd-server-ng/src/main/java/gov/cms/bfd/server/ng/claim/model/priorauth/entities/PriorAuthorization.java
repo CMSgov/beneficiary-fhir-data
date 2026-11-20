@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model.priorauth.entities;
 
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimContractorNumber;
 import gov.cms.bfd.server.ng.claim.model.common.ClaimState;
 import gov.cms.bfd.server.ng.claim.model.common.MetaSourceSk;
@@ -28,7 +27,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.util.Comparator;
@@ -39,6 +37,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Formula;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
@@ -80,9 +79,19 @@ public class PriorAuthorization {
   @Column(name = "name")
   private String facilityName;
 
-  @OneToOne
-  @JoinColumn(name = "mbi_num", referencedColumnName = "bene_mbi_id")
-  private BeneficiarySimple beneficiary;
+  @Formula(
+      """
+        (SELECT bx.bene_xref_efctv_sk
+        FROM idr.beneficiary bx
+        WHERE bx.bene_mbi_id = mbi_num
+        AND NOT EXISTS (
+              SELECT 1 FROM idr.beneficiary_overshare_mbi om
+              WHERE om.bene_mbi_id::text = bx.bene_mbi_id::text
+          )
+        ORDER BY bx.idr_trans_efctv_ts DESC
+        LIMIT 1)
+       """)
+  private Long beneXrefSk;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "mbi_num", referencedColumnName = "mbi_num")
@@ -112,7 +121,7 @@ public class PriorAuthorization {
             .setValue(id.getUniqueTrackingNumber()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.PREAUTHORIZATION);
-    eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
+    eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
     eob.setMeta(meta.toFhir(getMetaSourceSk(), claimState.getSecurityStatus()));
     claimType.ifPresent(
         type -> {
