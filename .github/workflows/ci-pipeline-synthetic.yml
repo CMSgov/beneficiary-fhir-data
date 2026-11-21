@@ -41,3 +41,8 @@ jobs:
         run: |
           just patient-generator --patients 100 --claims
           just pipeline --env local --seed-from ./apps/bfd-model-idr/out
+      - name: Ensure synthetic data regeneration remains idempotent
+        run: |
+          just patient-generator --patients 100 --claims --out-dir ./apps/bfd-model-idr/original-csvs
+          just patient-generator ./apps/bfd-model-idr/original-csvs --claims --out-dir ./apps/bfd-model-idr/regenerated-csvs
+          just diff-synthetic-files ./apps/bfd-model-idr/original-csvs ./apps/bfd-model-idr/regenerated-csvs
