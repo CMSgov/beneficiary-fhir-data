@@ -156,7 +156,7 @@ def load_file_dict(
     overwrites: dict[str, set[str]],
     exclude_empty: bool = False,
     schema: dict[str, TableSchema] | None = None,
-) -> None:
+) -> dict[str, list[RowAdapter]]:
     file_paths = set(
         itertools.chain.from_iterable(
             [
@@ -167,7 +167,7 @@ def load_file_dict(
         )
     )
     if not file_paths:
-        return
+        return files
 
     print(
         f"Loading all provided files, {
@@ -217,6 +217,7 @@ def load_file_dict(
                 [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
             )
     print("All files loaded")
+    return files
 
 
 def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:

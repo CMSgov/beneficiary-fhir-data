@@ -1,6 +1,5 @@
 import csv
 import sys
-from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +46,8 @@ def main(src_dir: Path, regen_dir: Path) -> None:
     print("==================================================")
 
     mismatch_count = 0
-    original_csv_files: Generator[Path] = Path.iterdir(src_dir)
+    original_csv_files = [file for file in src_dir.iterdir() if file.suffix == ".csv"]
+
     schemas: dict[str, TableSchema] = fetch_schemas()
     primary_keys_per_table: dict[str, set[Any]] = {
         table: set(schema.primary_keys) for table, schema in schemas.items()
