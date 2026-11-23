@@ -23,8 +23,10 @@ def _load_csv_to_daff(file_path: Path) -> PythonTableView:
     return PythonTableView(data)
 
 
-def _compare_tables(local: PythonTableView, remote: PythonTableView) -> CompareTable:
-    return Coopy.compareTables(local, remote)  # pyright: ignore[reportUnknownMemberType]
+def _compare_tables(
+    local: PythonTableView, remote: PythonTableView, flags: CompareFlags
+) -> CompareTable:
+    return Coopy.compareTables(local, remote, flags)  # pyright: ignore[reportUnknownMemberType]
 
 
 @click.command()
@@ -49,8 +51,8 @@ def main(src_dir: Path, regen_dir: Path) -> None:
     original_csv_files = [file for file in src_dir.iterdir() if file.suffix == ".csv"]
 
     schemas: dict[str, TableSchema] = fetch_schemas()
-    primary_keys_per_table: dict[str, set[Any]] = {
-        table: set(schema.primary_keys) for table, schema in schemas.items()
+    primary_keys_per_table: dict[str, list[Any]] = {
+        table: list(schema.primary_keys) for table, schema in schemas.items()
     }
 
     for file in original_csv_files:
@@ -61,15 +63,20 @@ def main(src_dir: Path, regen_dir: Path) -> None:
         if Path.is_file(regenerated_file):
             original_table: PythonTableView = _load_csv_to_daff(original_file)
             regen_table: PythonTableView = _load_csv_to_daff(regenerated_file)
-            compare_tables: CompareTable = _compare_tables(original_table, regen_table)
-            alignment: Alignment = compare_tables.align()
-            diff: list[Any] = []
-            table_diff: PythonTableView = PythonTableView(diff)
 
             flags: CompareFlags = CompareFlags()
             # Show all columns so we can display pks even though they're unchanged.
             # This makes the rows with changes easier to identify to debug.
             flags.unchanged_column_context = 999
+            table_name = get_table_name_from_file_name(file_name.removesuffix(".csv"))
+            pks = primary_keys_per_table.get(table_name, [])
+            if pks:
+                flags.ids = pks
+
+            compare_tables: CompareTable = _compare_tables(original_table, regen_table, flags)
+            alignment: Alignment = compare_tables.align()
+            diff: list[Any] = []
+            table_diff: PythonTableView = PythonTableView(diff)
             highlighter: TableDiff = TableDiff(alignment, flags)
             highlighter.hilite(table_diff)  # pyright: ignore[reportUnknownMemberType]
 
@@ -120,10 +127,6 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                     # to identify the row
                     for column_idx in range(1, len(diff[header_idx])):
                         column_name = diff[header_idx][column_idx]
-                        table_name: str = get_table_name_from_file_name(
-                            file_name.removesuffix(".csv")
-                        )
-                        pks: set[Any] = primary_keys_per_table[table_name]
                         is_pk: bool = column_name in pks
 
                         modified_row_idx = None
@@ -156,6 +159,9 @@ def main(src_dir: Path, regen_dir: Path) -> None:
                                 break
 
                     rows_to_render: list[Any] = [diff[header_idx], *sample_changed_rows]
+                    # if a table does not have pks then default to showing all columns
+                    if len(keep_columns) == 1:
+                        keep_columns = list(range(len(diff[header_idx])))
                     granular_diff: list[list[Any]] = [
                         [row[column_idx] for column_idx in keep_columns] for row in rows_to_render
                     ]
