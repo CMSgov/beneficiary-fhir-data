@@ -58,15 +58,28 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
     @override
     @classmethod
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
+        # We don't serve obsolete records but we do need to pull them in before pruning them.
+        # There shouldn't be more than one active record for the primary key, but there is nothing
+        # currently preventing this upstream, so we take the most recent record to be safe.
         hstry = ALIAS_HSTRY
         return f"""
-                SELECT {{COLUMNS}}
-                FROM {SETTINGS.idr_bene_ma_part_d_rx_table} enrlmt_rx {{TABLESAMPLE}}
-                {{WHERE_CLAUSE}}
-                AND NOT EXISTS (
-                    {deceased_bene_filter(hstry, start_time)}
-                    AND {hstry}.bene_sk = enrlmt_rx.bene_sk
+                WITH contracts AS (
+                    SELECT {{COLUMNS}},
+                    ROW_NUMBER() OVER (
+                        PARTITION BY {",".join(cls.ordered_pkeys())}
+                        ORDER BY {",".join(cls.ordered_pkeys())},
+                        idr_trans_efctv_ts DESC
+                    ) AS row_order
+                    FROM {SETTINGS.idr_bene_ma_part_d_rx_table} enrlmt_rx {{TABLESAMPLE}}
+                    {{WHERE_CLAUSE}}
+                    AND NOT EXISTS (
+                        {deceased_bene_filter(hstry, start_time)}
+                        AND {hstry}.bene_sk = enrlmt_rx.bene_sk
+                    )
                 )
+                SELECT {{COLUMNS}}
+                FROM contracts
+                WHERE row_order = 1
                 {{ORDER_BY}}
                 {{LIMIT}}
             """
