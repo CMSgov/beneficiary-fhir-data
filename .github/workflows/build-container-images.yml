@@ -199,7 +199,7 @@ jobs:
       - name: Login to ECR
         if: ${{ !inputs.skipBasePull }}
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2.1.7
+        uses: aws-actions/amazon-ecr-login@v2.2.0
 
       - name: Pull base images
         if: ${{ !inputs.skipBasePull }}
@@ -357,7 +357,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2.1.7
+        uses: aws-actions/amazon-ecr-login@v2.2.0
 
       - name: Push built image(s)
         env:
