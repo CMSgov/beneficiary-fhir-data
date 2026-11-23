@@ -766,6 +766,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt(
     bene_pbp_num VARCHAR(3) NOT NULL,
     bene_enrlmt_bgn_dt DATE NOT NULL,
     bene_enrlmt_end_dt DATE,
+    bene_enrlmt_aplctn_dt DATE,
     bene_cvrg_type_cd VARCHAR(2) NOT NULL,
     bene_enrlmt_pgm_type_cd VARCHAR(4) NOT NULL,
     bene_enrlmt_emplr_sbsdy_sw VARCHAR(1),
