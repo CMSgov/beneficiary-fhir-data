@@ -54,7 +54,7 @@ public class Application {
    */
   @Bean
   public DataSource dataSource(Configuration configuration) {
-    return configuration.getDataSourceFactory().createDataSource();
+    return configuration.createDataSource();
   }
 
   /**

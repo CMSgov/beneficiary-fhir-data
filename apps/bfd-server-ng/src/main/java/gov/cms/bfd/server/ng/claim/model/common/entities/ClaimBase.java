@@ -71,9 +71,6 @@ public abstract class ClaimBase {
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
 
-  @Column(name = "bene_sk", insertable = false, updatable = false)
-  private Long beneSk;
-
   @OneToOne
   @JoinColumn(name = "bene_sk")
   private BeneficiarySimple beneficiary;
@@ -95,7 +92,7 @@ public abstract class ClaimBase {
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
-    eob.setBillablePeriod(billablePeriod.toFhir());
+    eob.setBillablePeriod(billablePeriod.toFhir(claimTypeCode));
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
 
     eob.setMeta(

@@ -755,6 +755,7 @@ class GeneratorUtil:
         enrollment_row["BENE_CVRG_TYPE_CD"] = cvrg_type_cd
         enrollment_row["BENE_ENRLMT_PGM_TYPE_CD"] = bene_enrlmt_pgm_type_cd
         enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"] = bene_enrlmt_emplr_sbsdy_sw
+        enrollment_row["BENE_ENRLMT_APLCTN_DT"] = str(enrollment_start_date)
         enrollment_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         enrollment_row["BENE_ENRLMT_END_DT"] = enrollment_end_date
         enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000"

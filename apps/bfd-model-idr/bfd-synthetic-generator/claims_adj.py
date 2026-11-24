@@ -122,11 +122,9 @@ class AdjudicatedGeneratorUtil:
             clm[f.PRVDR_SRVC_ID_QLFYR_CD] = random.choice(
                 gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
             )
-            clm[f.PRVDR_SRVC_PRVDR_NPI_NUM] = clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_PD_DT] = random_date(clm[f.CLM_FROM_DT], clm[f.CLM_THRU_DT])
             clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = "01"
             clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = random.choice(type_1_npis)
-            clm[f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM] = clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)
             clm[f.CLM_SBMT_FRMT_CD] = random.choice(gen_utils.code_systems[f.CLM_SBMT_FRMT_CD])
             clm[f.CLM_BENE_PMT_AMT] = round(random.uniform(0, 1000), 2)
@@ -405,26 +403,19 @@ class AdjudicatedGeneratorUtil:
         clm_line[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
         clm_line[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_line[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_line[f.CLM_LINE_CVRD_PD_AMT] = round(random.uniform(1, 1000000), 2)
-        clm_line[f.CLM_LINE_NCVRD_PD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line[f.CLM_LINE_NCVRD_CHRG_AMT] = round(random.uniform(0, 1500), 2)
         clm_line[f.CLM_LINE_NDC_CD] = random.choice(AVAILABLE_NDC)
         clm_line[f.CLM_LINE_SRVC_UNIT_QTY] = float(random.randint(1, 10))
-        clm_line[f.CLM_LINE_FROM_DT] = clm[f.CLM_FROM_DT]
-        clm_line[f.CLM_LINE_THRU_DT] = clm[f.CLM_THRU_DT]
         clm_line[f.CLM_LINE_NDC_QTY] = float(random.randint(1, 10))
         clm_line[f.CLM_LINE_NDC_QTY_QLFYR_CD] = "ML"
         clm_line[f.CLM_LINE_BENE_PD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line[f.CLM_LINE_PRVDR_PMT_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line[f.CLM_LINE_SBMT_CHRG_AMT] = round(random.uniform(0, 5), 2)
-        clm_line[f.CLM_LINE_BENE_PMT_AMT] = round(random.uniform(0, 5), 2)
         clm_line[f.CLM_LINE_BLOOD_DDCTBL_AMT] = round(random.uniform(0, 15), 2)
         clm_line[f.CLM_LINE_MDCR_DDCTBL_AMT] = round(random.uniform(0, 5), 2)
         clm_line[f.CLM_LINE_NUM] = 1
         clm_line[f.CLM_FROM_DT] = clm[f.CLM_FROM_DT]
         clm_line[f.CLM_LINE_RX_NUM] = str(random.randint(10000, 999999))
-        clm_line[f.CLM_LINE_GRS_CVRD_CST_TOT_AMT] = round(random.uniform(0, 1000), 2)
-        clm_line[f.CLM_LINE_OTHR_TP_PD_AMT] = round(random.uniform(0, 1000), 2)
 
         return clm_line
 
@@ -472,7 +463,6 @@ class AdjudicatedGeneratorUtil:
         clm_line_rx[f.CLM_LINE_GRS_ABOVE_THRSHLD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_GRS_BLW_THRSHLD_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_LIS_AMT] = round(random.uniform(1, 1000000), 2)
-        clm_line_rx[f.CLM_LINE_TROOP_TOT_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_PLRO_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_RPTD_MFTR_DSCNT_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_INGRDNT_CST_AMT] = round(random.uniform(1, 1000000), 2)
@@ -480,9 +470,6 @@ class AdjudicatedGeneratorUtil:
         clm_line_rx[f.CLM_LINE_SRVC_CST_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_LINE_SLS_TAX_AMT] = round(random.uniform(1, 1000000), 2)
         clm_line_rx[f.CLM_PRCNG_EXCPTN_CD] = random.choice(["", "O", "M"])
-        clm_line_rx[f.CLM_CMS_CALCD_MFTR_DSCNT_AMT] = round(random.uniform(0, 1000), 2)
-        clm_line_rx[f.CLM_LINE_REBT_PASSTHRU_POS_AMT] = round(random.uniform(0, 1000), 2)
-        clm_line_rx[f.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT] = round(random.uniform(0, 1000), 2)
         clm_line_rx[f.CLM_LINE_RPTD_GAP_DSCNT_AMT] = round(random.uniform(1, 1000000), 2)
 
         add_meta_timestamps(clm_line_rx, clm)

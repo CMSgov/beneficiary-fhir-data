@@ -64,16 +64,32 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
         # There are only a very few instances where non-obsolete records have a
         # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
         # so it should be safe to filter these.
+        # We don't serve obsolete records but we do have to pull them in before pruning them
+        # There shouldn't be more than one active record for a given bene + start date +
+        # program type code, but there is nothing currently preventing this upstream,
+        # so we take the most recent record to be safe.
         hstry = ALIAS_HSTRY
+        pk_str = ",".join(cls.ordered_pkeys())
         return f"""
-            SELECT {{COLUMNS}}
-            FROM {SETTINGS.idr_bene_ma_part_d_table} enrlmt {{TABLESAMPLE}}
-            {{WHERE_CLAUSE}}
-            AND NOT EXISTS (
-                {deceased_bene_filter(hstry, start_time)}
-                AND {hstry}.bene_sk = enrlmt.bene_sk
+            WITH contracts AS (
+                SELECT {{COLUMNS}},
+                ROW_NUMBER() OVER (
+                    PARTITION BY {pk_str}
+                    ORDER BY {pk_str},
+                    bene_enrlmt_aplctn_dt DESC,
+                    idr_trans_efctv_ts DESC
+                ) AS row_order
+                FROM {SETTINGS.idr_bene_ma_part_d_table} enrlmt {{TABLESAMPLE}}
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {deceased_bene_filter(hstry, start_time)}
+                    AND {hstry}.bene_sk = enrlmt.bene_sk
+                )
+                AND bene_enrlmt_pgm_type_cd != '~'
             )
-            AND bene_enrlmt_pgm_type_cd != '~'
+            SELECT {{COLUMNS}}
+            FROM contracts
+            WHERE row_order = 1
             {{ORDER_BY}}
             {{LIMIT}}
         """

@@ -18,6 +18,7 @@ import gov.cms.bfd.server.ng.input.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -30,11 +31,15 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Base claim table for pharmacy, Rx-Base. */
 @MappedSuperclass
+@AttributeOverride(
+    name = "meta.updatedTimestamp",
+    column = @Column(name = "bfd_updated_ts", nullable = false))
 @Getter
 public abstract class ClaimRxBase extends ClaimBase {
 
@@ -78,7 +83,16 @@ public abstract class ClaimRxBase extends ClaimBase {
   }
 
   protected void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
-    getClaimItem().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
+    var claimLineItem = getClaimItem().getClaimLine().toFhirItemComponent(options);
+
+    claimLineItem.ifPresent(
+        item -> {
+          if (eob.hasBillablePeriod() && eob.getBillablePeriod().hasStart()) {
+            var servicedDate = new DateType(eob.getBillablePeriod().getStart());
+            item.setServiced(servicedDate);
+          }
+          eob.addItem(item);
+        });
   }
 
   protected void addServiceProvider(ExplanationOfBenefit eob) {

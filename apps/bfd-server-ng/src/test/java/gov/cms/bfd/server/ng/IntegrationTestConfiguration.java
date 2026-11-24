@@ -205,7 +205,6 @@ public class IntegrationTestConfiguration {
   @Bean
   @Primary
   public DataSource testDataSource(Configuration configuration) {
-    return new TransientJdbcExceptionDataSource(
-        configuration.getDataSourceFactory().createDataSource());
+    return new TransientJdbcExceptionDataSource(configuration.createDataSource());
   }
 }
