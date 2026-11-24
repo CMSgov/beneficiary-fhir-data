@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@v3.3.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
@@ -199,7 +199,7 @@ jobs:
           docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
 
       - name: Setup JDK
-        uses: actions/setup-java@v6.1.0
+        uses: actions/setup-java@v6.3.0
         with:
           java-version: "25"
           distribution: corretto
@@ -281,11 +281,11 @@ jobs:
           node-version: "22.23.4"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@v10.4.0
         with:
           version: "0.13.6"
 
-      - uses: taiki-e/install-action@v2.88.1
+      - uses: taiki-e/install-action@v2.90.6
         with:
           tool: just
       - uses: sigoden/install-binary@v1.3.0
@@ -383,7 +383,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2.1.7
+        uses: aws-actions/amazon-ecr-login@v2.2.0
 
       - name: Push jib images
         env:

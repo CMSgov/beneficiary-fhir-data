@@ -92,7 +92,7 @@ public abstract class ClaimBase {
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
-    eob.setBillablePeriod(billablePeriod.toFhir());
+    eob.setBillablePeriod(billablePeriod.toFhir(claimTypeCode));
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
 
     eob.setMeta(

@@ -42,8 +42,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "value": "1548226988"
     } ],
     "name": [ {
-      "family": "Garcia",
-      "given": [ "Indiana" ]
+      "family": "Garcia"
     } ]
   } ],
   "identifier": [ {
@@ -80,7 +79,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   },
   "billablePeriod": {
     "start": "2018-08-12",
-    "end": "2018-08-21"
+    "end": "2018-08-12"
   },
   "created": "2025-10-31T00:00:00+00:00",
   "provider": {
@@ -463,7 +462,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         } ]
       },
       "amount": {
-        "value": 2256829.86,
+        "value": 2256829.87,
         "currency": "USD"
       }
     }, {
@@ -604,7 +603,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       } ]
     },
     "amount": {
-      "value": 2256829.86,
+      "value": 2256829.87,
       "currency": "USD"
     }
   } ],
@@ -695,7 +694,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   },
   "billablePeriod": {
     "start": "2025-08-10",
-    "end": "2025-08-12"
+    "end": "2025-08-10"
   },
   "created": "2025-11-12T00:00:00+00:00",
   "provider": {
