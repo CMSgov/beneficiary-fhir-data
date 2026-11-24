@@ -1,6 +1,6 @@
 [project]
 version = "0.1.0"
-requires-python = ">=3.14.3"
+requires-python = ">=3.15.2"
 dependencies = ["boto3<2.0.0,>=1.35.93"]
 package-mode = false
 name = "synthetic-load-converter"

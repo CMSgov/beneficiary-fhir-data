@@ -2,5 +2,5 @@
 name = "log-retention-checker"
 version = "1.0.0"
 readme = "README.md"
-requires-python = ">=3.14.3"
+requires-python = ">=3.15.2"
 dependencies = ["boto3>=1.37.19"]
