@@ -54,20 +54,23 @@ class IdrContractPbpContact(IdrBaseModel):
     def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
             WITH contract_contacts as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY cntrct_pbp_sk
-                ORDER BY cntrct_pbp_bgn_dt,
-                CASE
-                    WHEN cntrct_plan_cntct_type_cd = '62' THEN 1
-                    WHEN cntrct_plan_cntct_type_cd = '30' THEN 2
-                    ELSE 3
-                END) as row_order
+                SELECT {{COLUMNS}},
+                ROW_NUMBER() OVER (
+                    PARTITION BY {",".join(cls.ordered_pkeys())}
+                    ORDER BY cntrct_pbp_bgn_dt,
+                    CASE
+                        WHEN cntrct_plan_cntct_type_cd = '62' THEN 1
+                        WHEN cntrct_plan_cntct_type_cd = '30' THEN 2
+                        ELSE 3
+                END) AS row_order
                 FROM {SETTINGS.idr_contract_pbp_contact_table} cntct {{TABLESAMPLE}}
                 WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 AND cntrct_pbp_end_dt >= DATE_TRUNC('MONTH',
                                                     DATE '{start_time.strftime("%Y-%m-%d")}')
                 AND cntrct_pbp_bgn_dt < cntrct_pbp_end_dt
             )
-            SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
+            SELECT {{COLUMNS}}
+            FROM contract_contacts
+            WHERE row_order = 1
             {{LIMIT}}
         """

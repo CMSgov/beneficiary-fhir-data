@@ -23,23 +23,16 @@ locals {
   slos_alert_arn      = data.aws_sns_topic.slos_alert_sns[*].arn
   slos_warning_arn    = data.aws_sns_topic.slos_warning_sns[*].arn
 
-  http500_log_insights_query = <<-EOF
-fields @timestamp, @message, status, operation, request_id
-| filter status = 500
-| sort @timestamp desc
-| limit 200
-EOF
+  log_insights_limit  = 200
+  log_insights_start  = -3600
+  log_insights_fields = ["@timestamp", "@message", "mdc.http_access_response_status", "mdc.resource_operation", "mdc.requestId"]
+
   http500_log_insights_query_url = join("", [
     "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#",
-    "logsV2:logs-insights$3FqueryDetail$3D",
-    urlencode(jsonencode({
-      editorString = local.http500_log_insights_query
-      start        = "-3600"
-      end          = "0"
-      timeType     = "RELATIVE"
-      unit         = "seconds"
-      source       = [local.server_access_log_group_name]
-    }))
+    "log-analytics?a.type=~'query&a.query=~'SOURCE*20*22${replace(local.server_messages_log_group_name, "/", "*2f")}",
+    "*22*20START*3d${local.log_insights_start}*20END*3d0s*20*7c*0a",
+    "fields*20${replace(join("*2c*20", local.log_insights_fields), "@", "*40")}*0a*7c*20filter*20mdc.http_access_response_status*3d500*0a*7c*20sort*20*40timestamp*20desc*0a*7c*20",
+    "limit*20${local.log_insights_limit}&from=#logsV2:logs-insights"
   ])
 
   slos_metrics = {

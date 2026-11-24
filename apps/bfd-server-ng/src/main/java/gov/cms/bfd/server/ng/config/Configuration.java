@@ -19,8 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -99,12 +101,19 @@ public class Configuration implements Serializable {
     return ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
   }
 
-  /**
-   * Creates a new {@link AwsWrapperDataSourceFactory}.
-   *
-   * @return wrapper factory.
-   */
-  public DataSourceFactory getDataSourceFactory() {
+  public DataSource createDataSource() {
+    var props = new Properties();
+    // Set SQL query timeout on the driver itself.
+    // This sets the timeout for the query on the database.
+    // Other configuration may only set the timeout on the client side, which will allow
+    // long-running queries to remain running on the database itself, bogging down the
+    // database over time.
+    props.setProperty(
+        "options", "-c statement_timeout=%d".formatted(nonsensitive.db.statementTimeoutMs));
+    return getDataSourceFactory().createDataSource(props);
+  }
+
+  private DataSourceFactory getDataSourceFactory() {
     if (isLocal()) {
       return new HikariDataSourceFactory(getDatabaseOptions());
     } else {
@@ -311,6 +320,9 @@ public class Configuration implements Serializable {
       private String name = "fhirdb";
       private String port = "5432";
       private String connectionStringTemplate = "jdbc:postgresql://%s:%s/%s";
+      // We set the default timeout quite high because some heavy queries can be quite slow under
+      // load
+      private Integer statementTimeoutMs = 300_000;
 
       /** Hikari configuration. */
       @Data
