@@ -37,15 +37,7 @@ public class NoncoveredDatesNormalized {
       SupportingInfoFactory supportingInfoFactory) {
     // date compare against LocalDate.min for possible null values going last
     Comparator<Optional<LocalDate>> date = Comparator.comparing(o -> o.orElse(LocalDate.MIN));
-    // decision-hierarchy per BFD-4907 research:
-    // One set complete: the complete set wins on the first comparison, whatever the other set’s
-    // thru is.
-    // Both complete: the higher thru wins, and its own from comes with it.
-    // Matching thrus: a complete set beats a partial one. If both are complete, the higher from
-    // wins.
-    // Both incomplete: a set with a thru beats a set without one, and the higher thru wins. If
-    // neither has a thru, the higher from wins.
-    Comparator<List<Optional<LocalDate>>> best =
+    var best =
         Comparator.<List<Optional<LocalDate>>, Boolean>comparing(
                 s -> s.getFirst().isPresent() && s.getLast().isPresent())
             .thenComparing(List::getLast, date)
@@ -61,23 +53,29 @@ public class NoncoveredDatesNormalized {
                         s.getFirst()
                             .map(
                                 d ->
-                                    supportingInfoFactory
-                                        .createSupportingInfo()
-                                        .setCategory(
-                                            BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT
-                                                .toFhir())
-                                        .setTiming(new DateType().setValue(DateUtil.toDate(d)))),
+                                    buildComponent(
+                                        supportingInfoFactory,
+                                        BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT,
+                                        d)),
                         s.getLast()
                             .map(
                                 d ->
-                                    supportingInfoFactory
-                                        .createSupportingInfo()
-                                        .setCategory(
-                                            BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT
-                                                .toFhir())
-                                        .setTiming(new DateType().setValue(DateUtil.toDate(d)))))
+                                    buildComponent(
+                                        supportingInfoFactory,
+                                        BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT,
+                                        d)))
                     .flatMap(Optional::stream)
                     .toList())
         .orElseGet(List::of);
+  }
+
+  private ExplanationOfBenefit.SupportingInformationComponent buildComponent(
+      SupportingInfoFactory supportingInfoFactory,
+      BlueButtonSupportingInfoCategory category,
+      LocalDate date) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(category.toFhir())
+        .setTiming(new DateType().setValue(DateUtil.toDate(date)));
   }
 }
