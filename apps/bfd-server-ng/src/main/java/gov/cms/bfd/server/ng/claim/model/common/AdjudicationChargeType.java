@@ -252,10 +252,6 @@ public enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_HIPPS_VBP_AMT",
       "HIPPS Value Based Purchasing Amount"),
-  LOW_VOLUME_PAYMENT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_INSTNL_LOW_VOL_PMT_AMT",
-      "Low Volume Payment Amount"),
   FIRST_YEAR_RATE_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_MDCR_IP_1ST_YR_RATE_AMT",
@@ -280,14 +276,6 @@ public enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_SS_OUTLIER_STD_PYMT_AMT",
       "Short Stay Outlier Payment Amount"),
-  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_DSPRTNT_AMT",
-      "Operating Disproportionate Share Amount"),
-  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_OPRTNL_IME_AMT",
-      "Operating Indirect Medical Education Amount"),
   BENE_PART_B_DEDUCTIBLE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "deductible",
@@ -427,7 +415,44 @@ public enum AdjudicationChargeType {
       "coinsurance",
       "Co-insurance",
       "CLM_LINE_MDCR_COINSRNC_AMT",
-      "Coinsurance Amount");
+      "Coinsurance Amount"),
+  // Begin clm_val fields
+  OPERATING_OUTLIER_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_OUTLR_AMT",
+      "Operating Outlier Amount"),
+  OPERATING_DISPROPORTIONATE_SHARE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_DSPRTNT_AMT",
+      "Operating Disproportionate Share Amount"),
+  OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_OPRTNL_IME_AMT",
+      "Operating Indirect Medical Education Amount"),
+  SEQUESTRATION_REDUCTION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_SQSTRTN_RDCTN_AMT",
+      "Sequestration Adjustment Amount"),
+  LOW_VOLUME_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_INSTNL_LOW_VOL_PMT_AMT",
+      "Low Volume Payment Amount"),
+  NEW_TECH_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MDCR_NEW_TECH_AMT",
+      "New Technology Add-On Payment Amount"),
+  PBP_INCLUSION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_PBP_INCLSN_AMT",
+      "Medicare Payment Before Model Reduction Amount"),
+  PBP_REDUCTION_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_PBP_RDCTN_AMT",
+      "Actual Model Reduction Amount"),
+  MIPS_PAYMENT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_MIPS_PMT_AMT",
+      "Incentive Payment Adjustment Amount");
 
   private final String coding1System;
   private final String coding1Code;

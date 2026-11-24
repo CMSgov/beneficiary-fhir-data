@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.common.PaymentComponentBase;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationClaimValue;
 import gov.cms.bfd.server.ng.claim.model.institutional.AdjudicationPpsCms;
 import gov.cms.bfd.server.ng.claim.model.institutional.ClaimValue;
+import gov.cms.bfd.server.ng.claim.model.institutional.SupportingInfoClaimValue;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
@@ -74,7 +75,8 @@ abstract class ClaimInstitutionalCmsBase extends ClaimInstitutionalBase {
                     nchPrimaryPayorCode.toFhir(supportingInfoFactory),
                     claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
                 .flatMap(Optional::stream),
-            benefitEnhancementCodes.toFhir(supportingInfoFactory).stream())
+            benefitEnhancementCodes.toFhir(supportingInfoFactory).stream(),
+            SupportingInfoClaimValue.toFhir(getClaimValues(), supportingInfoFactory).stream())
         .flatMap(s -> s)
         .toList();
   }
