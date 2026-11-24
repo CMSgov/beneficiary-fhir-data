@@ -7135,7 +7135,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_SCND_YR_RATE_AMT')).amount.value
   profiles:
     - CMS
-  # here
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpScndYrRateAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmMdcrIpScndYrRateAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpScndYrRateAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmMdcrIpScndYrRateAmt.category.clmMdcrIpScndYrRateAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmMdcrIpScndYrRateAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_MDCR_IP_SCND_YR_RATE_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_MD_WVR_STDZD_VAL_AMT
   appliesTo:
     - Inpatient
@@ -7148,6 +7169,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PPS_MD_WVR_STDZD_VAL_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmPpsMdWvrStdzdValAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmPpsMdWvrStdzdValAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmPpsMdWvrStdzdValAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmPpsMdWvrStdzdValAmt.category.clmPpsMdWvrStdzdValAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmPpsMdWvrStdzdValAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_PPS_MD_WVR_STDZD_VAL_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_CST_BSD_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -7159,6 +7202,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_CST_BSD_PYMT_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlCstBsdPymtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmSiteNtrlCstBsdPymtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlCstBsdPymtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlCstBsdPymtAmt.category.clmSiteNtrlCstBsdPymtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmSiteNtrlCstBsdPymtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_SITE_NTRL_CST_BSD_PYMT_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_IP_PPS_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -7170,6 +7235,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_IP_PPS_PYMT_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlIpPpsPymtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmSiteNtrlIpPpsPymtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlIpPpsPymtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmSiteNtrlIpPpsPymtAmt.category.clmSiteNtrlIpPpsPymtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmSiteNtrlIpPpsPymtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_SITE_NTRL_IP_PPS_PYMT_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SS_OUTLIER_STD_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -7181,6 +7268,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SS_OUTLIER_STD_PYMT_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmSsOutlierStdPymtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmSsOutlierStdPymtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmSsOutlierStdPymtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmSsOutlierStdPymtAmt.category.clmSsOutlierStdPymtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmSsOutlierStdPymtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_SS_OUTLIER_STD_PYMT_AMT
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_PRVDR_ACNT_RCVBL_OFST_AMT
   appliesTo:
     - Carrier
@@ -7193,6 +7302,28 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_ACNT_RCVBL_OFST_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmPrvdrAcntRcvblOfstAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmPrvdrAcntRcvblOfstAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmPrvdrAcntRcvblOfstAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmPrvdrAcntRcvblOfstAmt.category.clmPrvdrAcntRcvblOfstAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmPrvdrAcntRcvblOfstAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_PRVDR_ACNT_RCVBL_OFST_AMT
 - inputPath: LineItemComponent.CLM_LINE_OTAF_AMT
   appliesTo:
     - SNF
@@ -7209,6 +7340,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTAF_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLineOtafAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLineOtafAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLineOtafAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLineOtafAmt.category.clmLineOtafAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLineOtafAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_PRVDR_ACNT_RCVBL_OFST_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_RLT_COND_SGNTR_SK
   appliesTo:
     - Inpatient
@@ -7228,6 +7381,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmRltCondCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmRltCondCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmRltCondCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD
 - inputPath: LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -7243,6 +7410,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_ADD_ON_PYMT_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLineAddOnPymtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLineAddOnPymtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLineAddOnPymtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLineAddOnPymtAmt.category.clmLineAddOnPymtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLineAddOnPymtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_ADD_ON_PYMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_NON_EHR_RDCTN_AMT
   appliesTo:
     - Inpatient
@@ -7253,6 +7442,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NON_EHR_RDCTN_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLineNonEhrRdctnAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLineNonEhrRdctnAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLineNonEhrRdctnAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLineNonEhrRdctnAmt.category.clmLineNonEhrRdctnAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLineNonEhrRdctnAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_NON_EHR_RDCTN_AMT
 - inputPath: LineItemComponent.CLM_REV_CNTR_TDAPA_AMT
   appliesTo:
     - Outpatient
@@ -7268,6 +7479,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_REV_CNTR_TDAPA_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmRevCntrTdapaAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmRevCntrTdapaAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmRevCntrTdapaAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmRevCntrTdapaAmt.category.clmRevCntrTdapaAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmRevCntrTdapaAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_REV_CNTR_TDAPA_AMT
 - inputPath: LineItemComponent.CLM_LINE_CARR_CLNCL_CHRG_AMT
   appliesTo:
     - Carrier
@@ -7279,6 +7512,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_CLNCL_CHRG_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrClnclChrgAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLineCarrClnclChrgAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrClnclChrgAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrClnclChrgAmt.category.clmLineCarrClnclChrgAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLineCarrClnclChrgAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_CARR_CLNCL_CHRG_AMT
 - inputPath: LineItemComponent.CLM_LINE_CARR_PSYCH_OT_LMT_AMT
   appliesTo:
     - Carrier
@@ -7290,6 +7545,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_PSYCH_OT_LMT_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrPsychOtLmtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLineCarrPsychOtLmtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrPsychOtLmtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLineCarrPsychOtLmtAmt.category.clmLineCarrPsychOtLmtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLineCarrPsychOtLmtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_CARR_PSYCH_OT_LMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_INTRST_AMT
   appliesTo:
     - Carrier
@@ -7303,6 +7580,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_INTRST_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmLinePrfnlIntrstAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmLinePrfnlIntrstAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmLinePrfnlIntrstAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmLinePrfnlIntrstAmt.category.clmLinePrfnlIntrstAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmLinePrfnlIntrstAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_PRFNL_INTRST_AMT
 - inputPath: LineItemComponent.CLM_MDCR_PRMRY_PYR_ALOWD_AMT
   appliesTo:
     - Carrier
@@ -7316,6 +7615,28 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_PRMRY_PYR_ALOWD_AMT')).amount.value
   profiles:
     - CMS
+  proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmMdcrPrmryPyrAlowdAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmMdcrPrmryPyrAlowdAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmMdcrPrmryPyrAlowdAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmMdcrPrmryPyrAlowdAmt.category.clmMdcrPrmryPyrAlowdAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmMdcrPrmryPyrAlowdAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_MDCR_PRMRY_PYR_ALOWD_AMT
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NCH_PTNT_STUS_IND_CD
   appliesTo:
     - Inpatient
@@ -7329,6 +7650,20 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD').code.coding.code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmMdcrNchPtntStusIndCd.code
+    path: ExplanationOfBenefit.supportingInfo.code
+    min: 0
+    max: "1"
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmMdcrNchPtntStusIndCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmMdcrNchPtntStusIndCd
+        min: 0
+        max: "1"
+    binding:
+      strength: preferred
+      valueSet: https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD
 - inputPath: LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
@@ -7344,6 +7679,22 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLinePmdUniqTrkngNum.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLinePmdUniqTrkngNum
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLinePmdUniqTrkngNum
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLinePmdUniqTrkngNum.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_PMD_UNIQ_TRKNG_NUM
 - inputPath: LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
@@ -7379,6 +7730,22 @@
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmBnftEnhncmtCd.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmBnftEnhncmtCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmBnftEnhncmtCd
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmBnftEnhncmtCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_BNFT_ENHNCMT_CD
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD
   appliesTo:
     - Inpatient
@@ -7468,6 +7835,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 1, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNgacoPbpmtSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoPbpmtSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNgacoPbpmtSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoPbpmtSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_NGACO_PBPMT_SW
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW
   appliesTo:
     - Inpatient
@@ -7485,6 +7868,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 3, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNgacoPdschrgHcbsSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoPdschrgHcbsSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNgacoPdschrgHcbsSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoPdschrgHcbsSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_NGACO_PDSCHRG_HCBS_SW
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW
   appliesTo:
     - Inpatient
@@ -7502,6 +7901,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 4, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNgacoSnfWvrSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoSnfWvrSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNgacoSnfWvrSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoSnfWvrSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_NGACO_SNF_WVR_SW
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW
   appliesTo:
     - Inpatient
@@ -7519,6 +7934,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 2, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNgacoTlhlthSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoTlhlthSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNgacoTlhlthSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoTlhlthSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_NGACO_TLHLTH_SW
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW
   appliesTo:
     - Inpatient
@@ -7536,6 +7967,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 5, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmNgacoCptatnSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoCptatnSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmNgacoCptatnSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmNgacoCptatnSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_NGACO_CPTATN_SW
 - inputPath: ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW
   appliesTo:
     - Inpatient
@@ -7553,6 +8000,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 7, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmAcoCareMgmtHcbsSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmAcoCareMgmtHcbsSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmAcoCareMgmtHcbsSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmAcoCareMgmtHcbsSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_ACO_CARE_MGMT_HCBS_SW
 - inputPath: LineItemComponent.CLM_LINE_NGACO_PBPMT_SW
   appliesTo:
     - Carrier
@@ -7566,6 +8029,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 1, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPbpmtSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPbpmtSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineNgacoPbpmtSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPbpmtSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_NGACO_PBPMT_SW
 - inputPath: LineItemComponent.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
   appliesTo:
     - Carrier
@@ -7579,6 +8058,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 3, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPdschrgHcbsSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPdschrgHcbsSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineNgacoPdschrgHcbsSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoPdschrgHcbsSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_NGACO_PDSCHRG_HCBS_SW
 - inputPath: LineItemComponent.CLM_LINE_NGACO_SNF_WVR_SW
   appliesTo:
     - Carrier
@@ -7592,6 +8087,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 4, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineNgacoSnfWvrSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoSnfWvrSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineNgacoSnfWvrSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoSnfWvrSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_NGACO_SNF_WVR_SW
 - inputPath: LineItemComponent.CLM_LINE_NGACO_TLHLTH_SW
   appliesTo:
     - Carrier
@@ -7605,6 +8116,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 2, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineNgacoTlhlthSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoTlhlthSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineNgacoTlhlthSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoTlhlthSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_NGACO_TLHLTH_SW
 - inputPath: LineItemComponent.CLM_LINE_NGACO_CPTATN_SW
   appliesTo:
     - Carrier
@@ -7618,6 +8145,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 5, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineNgacoCptatnSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoCptatnSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineNgacoCptatnSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineNgacoCptatnSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_NGACO_CPTATN_SW
 - inputPath: LineItemComponent.CLM_LINE_ACO_CARE_MGMT_HCBS_SW
   appliesTo:
     - Carrier
@@ -7631,6 +8174,22 @@
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 7, else N.
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:clmLineAcoCareMgmtHcbsSw.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:clmLineAcoCareMgmtHcbsSw
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: clmLineAcoCareMgmtHcbsSw
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:clmLineAcoCareMgmtHcbsSw.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: CLM_LINE_ACO_CARE_MGMT_HCBS_SW
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_1_CD
   appliesTo:
     - Carrier
@@ -7719,6 +8278,22 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:prvdrFacFipsStCd.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:prvdrFacFipsStCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: prvdrFacFipsStCd
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:prvdrFacFipsStCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: PRVDR_FAC_FIPS_ST_CD
 - inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD
   appliesTo:
     - Carrier
@@ -7733,3 +8308,19 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code
   profiles:
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.supportingInfo:rndrgPrvdrFipsStCd.value[x]
+    path: ExplanationOfBenefit.supportingInfo.value[x]
+    proceedingEd:
+      - id: ExplanationOfBenefit.supportingInfo:rndrgPrvdrFipsStCd
+        path: ExplanationOfBenefit.supportingInfo
+        sliceName: rndrgPrvdrFipsStCd
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.supportingInfo:rndrgPrvdrFipsStCd.category
+        path: ExplanationOfBenefit.supportingInfo.category
+        min: 1
+        patternCodeableConcept:
+          coding:
+            - system: https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information
+              code: RNDRG_PRVDR_FIPS_ST_CD
