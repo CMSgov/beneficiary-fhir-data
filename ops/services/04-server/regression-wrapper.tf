@@ -68,7 +68,7 @@ resource "aws_lambda_function" "regression_wrapper" {
   handler          = "${local.rw_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.14"
+  runtime          = "python3.15"
   timeout          = 360
 
   tags = {

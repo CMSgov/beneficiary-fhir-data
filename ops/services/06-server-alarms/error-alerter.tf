@@ -72,7 +72,7 @@ resource "aws_lambda_function" "alerter" {
   handler          = "${local.alerter_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.14"
+  runtime          = "python3.15"
   timeout          = 300
 
   environment {
