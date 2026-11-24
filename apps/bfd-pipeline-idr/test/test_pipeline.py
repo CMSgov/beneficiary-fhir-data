@@ -15,12 +15,11 @@ import pytest
 from loguru import logger
 from psycopg import Connection, sql
 from psycopg.rows import DictRow, TupleRow, dict_row
-from testcontainers.core.config import testcontainers_config  # type: ignore
-
-# https://github.com/testcontainers/testcontainers-python/issues/305
-from testcontainers.postgres import PostgresContainer  # type: ignore
+from testcontainers.community.postgres import PostgresContainer
+from testcontainers.core.config import testcontainers_config
 
 from idr_pipeline import Executor, run
+from idr_pipeline.constants import DEFAULT_JOB_ID
 from idr_pipeline.extractor import PostgresExecutor
 from idr_pipeline.load_events import IdrJobLoadEvent, IdrJobType
 from idr_pipeline.load_partition import LoadType
@@ -70,9 +69,17 @@ def _get_executor() -> Executor:
     return MultiprocessingExecutor(SETTINGS.max_tasks)
 
 
-def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+def _do_run(
+    load_type: LoadType, conn: Connection[DictRow] | None, job_id: int = DEFAULT_JOB_ID
+) -> None:
+    if conn and load_type == LoadType.INITIAL:
+        conn.execute(t"delete from idr.load_progress where job_id={job_id}")
+        conn.commit()
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor(), job_id)
 
+
+def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
+    _do_run(load_type, conn)
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 29
     rows = cur.fetchmany(2)
@@ -245,7 +252,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     )
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+    _do_run(load_type, conn)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -486,7 +493,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     else:
         make_it_stale_ts = datetime.now(UTC) + timedelta(days=60)
         _advance_time(make_it_stale_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL, _get_executor())
+        _do_run(LoadType.INCREMENTAL, conn)
         cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
         assert cur.rowcount == 9
         rows = cur.fetchmany(1)
@@ -642,7 +649,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
         _advance_time(ss_clm_ts)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        _do_run(load_type, conn)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
         # in source_load_events nor has it been 24 hours since the last load of NCH data
@@ -680,7 +687,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
         _advance_time(nch_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        _do_run(load_type, conn)
 
         # Check for the NCH claim in the v3 idr schema
         cur = conn.execute(
@@ -741,7 +748,7 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
         _advance_time(ss_load_job.event_time)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+        _do_run(load_type, conn)
 
         # Check for the SS claim in the v3 idr schema
         cur = conn.execute(
@@ -806,7 +813,7 @@ def _do_test_prior_auth_update_and_delete(conn: Connection[DictRow], load_type: 
     conn.commit()
 
     _advance_time(datetime.now() + timedelta(days=1))
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type, _get_executor())
+    _do_run(load_type, conn)
 
     # verify that updated rows by upstream were updated
     cur = conn.execute(
@@ -842,7 +849,7 @@ def _advance_time(timestamp: datetime) -> None:
 
 
 def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
+    _do_run(LoadType.INITIAL, conn)
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
     row = cur.fetchone()
@@ -853,7 +860,7 @@ def _do_legacy_npi_type_update(conn: Connection[DictRow]) -> None:
     conn.execute("truncate table idr.load_progress")
     conn.commit()
 
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
+    _do_run(LoadType.INITIAL, conn)
 
     old_update_ts = datetime.fromisoformat("2023-04-02").replace(tzinfo=UTC)
 
@@ -1053,11 +1060,11 @@ def test_legacy_npi_type_pipeline_update(postgres_db: tuple[PostgresContainer, s
 
 
 def run_1() -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INCREMENTAL, _get_executor())
+    _do_run(LoadType.INCREMENTAL, None)
 
 
 def run_2() -> None:
-    run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor(), 2)
+    _do_run(LoadType.INITIAL, None, 2)
 
 
 def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) -> None:
@@ -1067,7 +1074,7 @@ def test_concurrent_pipeline_load(postgres_db: tuple[PostgresContainer, str]) ->
         sample_dir = Path(__file__).parent.parent.joinpath("./test_samples1")
         _reset_db(conn, sample_dir, postgres)
         _setup_db_config(conn.info)
-        run(Source.POSTGRES, LoadMode.SYNTHETIC, LoadType.INITIAL, _get_executor())
+        _do_run(LoadType.INITIAL, cast(Connection[DictRow], conn))
         with ThreadPoolExecutor(max_workers=2) as executor:
             futures = [
                 executor.submit(run_1),

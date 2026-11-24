@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import override
 
 from ..constants import DEFAULT_JOB_ID
-from ..load_partition import LoadPartition
+from ..load_partition import LoadPartition, LoadType
 from ..model.base_model import IdrBaseModel, ModelType, Source
 
 
@@ -12,6 +12,7 @@ class LoadProgress(IdrBaseModel):
     last_id: int
     batch_partition: str
     job_start_ts: datetime
+    batch_start_ts: datetime
     batch_complete_ts: datetime
     job_id: int
     max_run_ts: datetime | None = None
@@ -43,10 +44,9 @@ class LoadProgress(IdrBaseModel):
     @classmethod
     def fetch_query_by_job(cls, partition: LoadPartition, job_id: int) -> str:
         return f"""
-        SELECT table_name, last_ts, last_id, batch_partition, job_start_ts,
-            batch_complete_ts, job_id, max_run_ts
+        SELECT {",".join(cls.columns_raw())}
         FROM idr.load_progress
-        WHERE table_name = %({LoadProgress.query_placeholder()})s 
+        WHERE table_name = %({LoadProgress.query_placeholder()})s
         AND batch_partition = '{partition.name}'
         AND job_id = {job_id}
         """
@@ -54,3 +54,7 @@ class LoadProgress(IdrBaseModel):
     def is_historical(self) -> bool:
         # 2021-4-18 is the most recent date where idr_insrt_ts could be null in claims data
         return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)
+
+    def should_skip(self, load_type: LoadType) -> bool:
+        # Skip loading for initial loads if this job id has already loaded it
+        return load_type == LoadType.INITIAL and self.batch_complete_ts > self.batch_start_ts
