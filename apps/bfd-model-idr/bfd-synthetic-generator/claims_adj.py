@@ -17,10 +17,9 @@ from claims_static import (
     AVAILABLE_NDC,
     AVAILABLE_SSA_STATE_CDS,
     CLM_POA_IND_CHOICES,
-    DISPROPORTIONATE_AMOUNT_CLM_VAL_CD,
     HCPCS_MODS,
-    INDIRECT_AMOUNT_CLM_VAL_CD,
     NOW,
+    SUPP_INFO_CLM_VAL_CDS,
     TARGET_OCRNC_SPAN_CODES,
     TARGET_RLT_COND_CODES,
     TARGET_RLT_OCRNC_CODES,
@@ -502,40 +501,28 @@ class AdjudicatedGeneratorUtil:
 
         return clm_dcmtn
 
-    def gen_dsprtnt_clm_val(
-        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
-    ) -> RowAdapter:
-        # CLM_OPRTNL_DSPRTNT_AMT
-        # Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique
-        # identifier with CLM_UNIQ_ID.
-        clm_val = init_clm_val or RowAdapter({})
-        clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
-        clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
-        clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
-        clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = DISPROPORTIONATE_AMOUNT_CLM_VAL_CD
-        clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
-        clm_val[f.CLM_VAL_SQNC_NUM] = 14
-        clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
-        clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
-
-        add_meta_timestamps(clm_val, clm)
-
-        return clm_val
-
-    def gen_ime_clm_val(
-        self, clm: RowAdapter, init_clm_val: RowAdapter | None = None
+    def gen_clm_val(
+        self,
+        clm: RowAdapter,
+        value_code: str,
+        clm_val_sqnc_num: int,
+        init_clm_val: RowAdapter | None = None,
     ) -> RowAdapter:
         clm_val = init_clm_val or RowAdapter({})
         clm_val[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
         clm_val[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
         clm_val[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
         clm_val[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
-        clm_val[f.CLM_VAL_CD] = INDIRECT_AMOUNT_CLM_VAL_CD
-        clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
-        clm_val[f.CLM_VAL_SQNC_NUM] = 3
+        clm_val[f.CLM_VAL_CD] = value_code
+        clm_val[f.CLM_VAL_SQNC_NUM] = clm_val_sqnc_num
         clm_val[f.CLM_VAL_ANSI_RSN_CD] = gen_clm_val_ansi_rsn_cd()
         clm_val[f.CLM_VAL_ANSI_GRP_CD] = gen_clm_val_ansi_grp_cd()
+
+        # Supporting info codes are non-monetary
+        if value_code in SUPP_INFO_CLM_VAL_CDS:
+            clm_val[f.CLM_VAL_AMT] = random.randint(0, 20)
+        else:
+            clm_val[f.CLM_VAL_AMT] = round(random.uniform(1, 15000), 2)
 
         add_meta_timestamps(clm_val, clm)
 

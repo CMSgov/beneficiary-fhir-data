@@ -188,7 +188,9 @@ def load_file_dict(
             )
             for field in _CAST_TO_INT_FIELDS:
                 if field in csv_data.columns:
-                    csv_data[field] = csv_data[field].astype(int)
+                    csv_data[field] = pd.to_numeric(csv_data[field], errors="coerce").astype(
+                        "Int64"
+                    )
             file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
             if not exclude_empty:
                 files[file_name] = load_file(file_as_dictlist)  # type: ignore

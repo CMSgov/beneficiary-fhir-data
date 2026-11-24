@@ -163,8 +163,21 @@ AVAILABLE_PROVIDER_TX_CODES = [
 ]
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
 AVAILABLE_SSA_STATE_CDS = ["01", "03", "06", "12", "48"]
-DISPROPORTIONATE_AMOUNT_CLM_VAL_CD = "18"
-INDIRECT_AMOUNT_CLM_VAL_CD = "19"
+
+# clm_val codes by category
+SUPP_INFO_CLM_VAL_CDS = ["D6"]
+ADJUDICATION_CLM_VAL_CDS = ["17", "18", "19", "73", "74", "77", "Q0", "Q1", "QM"]
+ALL_CLM_VAL_CDS = [
+    *SUPP_INFO_CLM_VAL_CDS,
+    *ADJUDICATION_CLM_VAL_CDS,
+]
+
+# clm_val codes by eob type
+HHA_CLM_VAL_CDS = ["17", "73", "Q0", "Q1"]
+HOSPICE_CLM_VAL_CDS = ["73", "Q0", "Q1"]
+INPATIENT_CLM_VAL_CDS = ["17", "18", "19", "73", "74", "77", "D6", "Q0", "Q1"]
+OUTPATIENT_CLM_VAL_CDS = ["17", "19", "73", "D6", "Q0", "Q1", "QM"]
+SNF_CLM_VAL_CDS = ["73", "Q0", "Q1"]
 
 
 def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:
