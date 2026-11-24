@@ -493,7 +493,7 @@
       }]
     },
     "valueQuantity" : {
-      "value" : 2026,
+      "value" : 2025,
       "unit" : "minute",
       "system" : "http://unitsofmeasure.org",
       "code" : "min"
@@ -2708,7 +2708,7 @@
       }]
     },
     "amount" : {
-      "value" : 3115.08,
+      "value" : 3115.07,
       "currency" : "USD"
     }
   },
@@ -2721,7 +2721,7 @@
       }]
     },
     "amount" : {
-      "value" : 2914.05,
+      "value" : 2914.04,
       "currency" : "USD"
     }
   },
@@ -2734,7 +2734,7 @@
       }]
     },
     "amount" : {
-      "value" : 10712.4,
+      "value" : 10712.3,
       "currency" : "USD"
     }
   },
@@ -2747,7 +2747,7 @@
       }]
     },
     "amount" : {
-      "value" : 802.28,
+      "value" : 802.27,
       "currency" : "USD"
     }
   },
@@ -2760,7 +2760,7 @@
       }]
     },
     "amount" : {
-      "value" : 823.28,
+      "value" : 823.27,
       "currency" : "USD"
     }
   },
@@ -2773,7 +2773,7 @@
       }]
     },
     "amount" : {
-      "value" : 839.28,
+      "value" : 839.27,
       "currency" : "USD"
     }
   },
@@ -2786,7 +2786,7 @@
       }]
     },
     "amount" : {
-      "value" : 218.07,
+      "value" : 218.06,
       "currency" : "USD"
     }
   },
@@ -2799,7 +2799,7 @@
       }]
     },
     "amount" : {
-      "value" : 729.03,
+      "value" : 729.02,
       "currency" : "USD"
     }
   },
@@ -2812,7 +2812,7 @@
       }]
     },
     "amount" : {
-      "value" : 1729.03,
+      "value" : 1729.02,
       "currency" : "USD"
     }
   },

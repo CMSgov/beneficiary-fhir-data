@@ -23,6 +23,34 @@
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services"
+  },
+  {
+    "resourceType" : "Organization",
+    "id" : "1951684038",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+    },
+    "identifier" : [{
+      "type" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "NPI",
+          "display" : "National provider identifier"
+        }]
+      },
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1951684038"
+    },
+    {
+      "system" : "http://terminology.hl7.org/NamingSystem/CCN",
+      "value" : "001502"
+    }],
+    "active" : true,
+    "name" : "CBS Health Corporation",
+    "address" : [{
+      "postalCode" : "77550"
+    }]
   }],
   "identifier" : [{
     "type" : {
@@ -91,7 +119,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "2672117233"
       },
-      "display" : "Practitioner"
+      "display" : "Stark, Gromit"
     },
     "role" : {
       "coding" : [{
@@ -121,7 +149,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1320757457"
       },
-      "display" : "Practitioner"
+      "display" : "Frankenstein, Colin"
     },
     "role" : {
       "coding" : [{
@@ -162,7 +190,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1820038259"
       },
-      "display" : "Practitioner"
+      "display" : "Addams"
     },
     "role" : {
       "coding" : [{
@@ -192,7 +220,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "2658486156"
       },
-      "display" : "Practitioner"
+      "display" : "Stark, Wednesday"
     },
     "role" : {
       "coding" : [{
@@ -894,7 +922,7 @@
       }]
     },
     "valueQuantity" : {
-      "value" : 2011,
+      "value" : 2012,
       "unit" : "minute",
       "system" : "http://unitsofmeasure.org",
       "code" : "min"
@@ -5419,7 +5447,7 @@
       }]
     },
     "amount" : {
-      "value" : 1115.08,
+      "value" : 1115.07,
       "currency" : "USD"
     }
   },
@@ -5432,7 +5460,7 @@
       }]
     },
     "amount" : {
-      "value" : 1507.78,
+      "value" : 1507.77,
       "currency" : "USD"
     }
   },
@@ -5445,7 +5473,7 @@
       }]
     },
     "amount" : {
-      "value" : 802.28,
+      "value" : 802.27,
       "currency" : "USD"
     }
   },
@@ -5458,7 +5486,7 @@
       }]
     },
     "amount" : {
-      "value" : 207.07,
+      "value" : 207.06,
       "currency" : "USD"
     }
   },
@@ -5471,7 +5499,7 @@
       }]
     },
     "amount" : {
-      "value" : 708.03,
+      "value" : 708.02,
       "currency" : "USD"
     }
   },
@@ -5484,7 +5512,7 @@
       }]
     },
     "amount" : {
-      "value" : 2007.08,
+      "value" : 2007.07,
       "currency" : "USD"
     }
   },

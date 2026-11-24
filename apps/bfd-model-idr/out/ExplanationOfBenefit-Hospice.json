@@ -23,6 +23,34 @@
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services"
+  },
+  {
+    "resourceType" : "Organization",
+    "id" : "1870808700",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+    },
+    "identifier" : [{
+      "type" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "NPI",
+          "display" : "National provider identifier"
+        }]
+      },
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1870808700"
+    },
+    {
+      "system" : "http://terminology.hl7.org/NamingSystem/CCN",
+      "value" : "000000"
+    }],
+    "active" : true,
+    "name" : "CBS Health Corporation",
+    "address" : [{
+      "postalCode" : "75205"
+    }]
   }],
   "identifier" : [{
     "type" : {
@@ -91,7 +119,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1320757457"
       },
-      "display" : "Practitioner"
+      "display" : "Frankenstein, Colin"
     },
     "role" : {
       "coding" : [{
@@ -121,7 +149,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1789655200"
       },
-      "display" : "Practitioner"
+      "display" : "Stark, Coraline"
     },
     "role" : {
       "coding" : [{
@@ -162,7 +190,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1201886847"
       },
-      "display" : "Practitioner"
+      "display" : "Rogers, Colin"
     },
     "role" : {
       "coding" : [{
@@ -192,7 +220,7 @@
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "2658486156"
       },
-      "display" : "Practitioner"
+      "display" : "Stark, Wednesday"
     },
     "role" : {
       "coding" : [{
@@ -6338,7 +6366,7 @@
       }]
     },
     "amount" : {
-      "value" : 803.18,
+      "value" : 803.17,
       "currency" : "USD"
     }
   },
@@ -6351,7 +6379,7 @@
       }]
     },
     "amount" : {
-      "value" : 208.08,
+      "value" : 208.07,
       "currency" : "USD"
     }
   },
@@ -6364,7 +6392,7 @@
       }]
     },
     "amount" : {
-      "value" : 709.04,
+      "value" : 709.03,
       "currency" : "USD"
     }
   },
