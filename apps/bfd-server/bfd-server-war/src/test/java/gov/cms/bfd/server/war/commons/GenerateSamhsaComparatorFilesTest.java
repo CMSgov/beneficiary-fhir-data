@@ -41,8 +41,7 @@ public class GenerateSamhsaComparatorFilesTest {
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
             .toList();
     List<String> ndcCodes =
-        AbstractSamhsaMatcher.resourceCsvColumnToList(
-                "samhsa-related-codes/codes-ndc.csv", "NDC")
+        AbstractSamhsaMatcher.resourceCsvColumnToList("samhsa-related-codes/codes-ndc.csv", "NDC")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeNdcCode)
             .toList();
@@ -151,17 +150,16 @@ public class GenerateSamhsaComparatorFilesTest {
             icd9DiagnosisCodes,
             icd10DiagnosisCodes,
             claimId);
-    claimId =
-        createSamhsaSampleFile(
-            ClaimType.SNF,
-            drgCodes,
-            cptCodes,
-            ndcCodes,
-            icd9ProcedureCodes,
-            icd10ProcedureCodes,
-            icd9DiagnosisCodes,
-            icd10DiagnosisCodes,
-            claimId);
+    createSamhsaSampleFile(
+        ClaimType.SNF,
+        drgCodes,
+        cptCodes,
+        ndcCodes,
+        icd9ProcedureCodes,
+        icd10ProcedureCodes,
+        icd9DiagnosisCodes,
+        icd10DiagnosisCodes,
+        claimId);
   }
 
   /**
@@ -217,8 +215,7 @@ public class GenerateSamhsaComparatorFilesTest {
         newClaimId = addLines(lines, newClaimId, cptCodes, sampleCarrierCptLine);
 
         // Uses LINE_NDC_CD
-        String sampleCarrierNdcLine =
-            setSubColumns(sampleCarrierLine, header, "LINE_NDC_CD");
+        String sampleCarrierNdcLine = setSubColumns(sampleCarrierLine, header, "LINE_NDC_CD");
         newClaimId = addLines(lines, newClaimId, ndcCodes, sampleCarrierNdcLine);
         break;
       case DME:
@@ -244,8 +241,7 @@ public class GenerateSamhsaComparatorFilesTest {
         newClaimId = addLines(lines, newClaimId, cptCodes, sampleDmeCptLine);
 
         // Uses LINE_NDC_CD
-        String sampleDmeNdcLine =
-            setSubColumns(sampleDmeLine, header, "LINE_NDC_CD");
+        String sampleDmeNdcLine = setSubColumns(sampleDmeLine, header, "LINE_NDC_CD");
         newClaimId = addLines(lines, newClaimId, ndcCodes, sampleDmeNdcLine);
         break;
       case HHA:
@@ -364,7 +360,6 @@ public class GenerateSamhsaComparatorFilesTest {
         // Uses ICD_DGNS_CD
         String sampleSnfIcd9Line =
             setSubColumns(sampleSnfLine, header, "ICD_DGNS_CD1", true, false);
-        ;
         newClaimId = addLines(lines, newClaimId, icd9DiagnosisCodes, sampleSnfIcd9Line);
 
         // Uses ICD_DGNS_CD

@@ -55,17 +55,16 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
    * @return the NDC codings
    */
   public List<Coding> getNdcCodings() {
-  return eob.getItem().stream()
-      .flatMap(
-          item ->
-              item.getProductOrService()
-                  .getExtensionsByUrl(TransformerConstants.CODING_NDC)
-                  .stream())
-      .map(
-          extension ->
-              new CodingAdapter((org.hl7.fhir.r4.model.Coding) extension.getValue()))
-      .collect(Collectors.toList());
-}
+    return eob.getItem().stream()
+        .flatMap(
+            item ->
+                item
+                    .getProductOrService()
+                    .getExtensionsByUrl(TransformerConstants.CODING_NDC)
+                    .stream())
+        .map(extension -> new CodingAdapter((org.hl7.fhir.r4.model.Coding) extension.getValue()))
+        .collect(Collectors.toList());
+  }
 
   /**
    * Returns the {@link SupportingInfoComponent} for the resource.

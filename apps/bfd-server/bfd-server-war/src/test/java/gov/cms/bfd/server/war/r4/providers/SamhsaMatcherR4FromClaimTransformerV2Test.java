@@ -815,11 +815,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     CodeableConcept service = modifiedEob.getItem().get(0).getProductOrService();
 
     List<Coding> codings = new ArrayList<>();
-    codings.add(
-        new Coding(
-            TransformerConstants.CODING_SYSTEM_HCPCS,
-            NON_SAMHSA_HCPCS_CODE,
-            null));
+    codings.add(new Coding(TransformerConstants.CODING_SYSTEM_HCPCS, NON_SAMHSA_HCPCS_CODE, null));
     service.setCoding(codings);
 
     // The fixture must not already match before adding the NDC.

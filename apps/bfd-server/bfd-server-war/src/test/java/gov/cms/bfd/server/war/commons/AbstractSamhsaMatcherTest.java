@@ -1085,9 +1085,9 @@ public class AbstractSamhsaMatcherTest {
 
     assertEquals(expectedResult, mockSamhsaMatcher.isSamhsaCptCode(mockCoding), errorMessage);
   }
-    
-    /** Provides test cases for SAMHSA NDC code matching. */
-    public static Stream<Arguments> ndcCodingTest() {
+
+  /** Provides test cases for SAMHSA NDC code matching. */
+  public static Stream<Arguments> ndcCodingTest() {
     return Stream.of(
         arguments("54868503400", true),
         arguments("54868-5034-00", true),
@@ -1095,17 +1095,17 @@ public class AbstractSamhsaMatcherTest {
         arguments("60687012100", true),
         arguments("99999999999", false),
         arguments(null, false));
-    }
+  }
 
-    /**
-     * Tests SAMHSA NDC code matching.
-     *
-     * @param code the NDC code to test
-     * @param expectedResult the expected match result
-     */
-    @ParameterizedTest(name = "{index}: Code(\"{0}\"), Expected(\"{1}\")")
-    @MethodSource
-    public void ndcCodingTest(String code, boolean expectedResult) {
+  /**
+   * Tests SAMHSA NDC code matching.
+   *
+   * @param code the NDC code to test
+   * @param expectedResult the expected match result
+   */
+  @ParameterizedTest(name = "{index}: Code(\"{0}\"), Expected(\"{1}\")")
+  @MethodSource
+  public void ndcCodingTest(String code, boolean expectedResult) {
     Set<String> ndcCodes = Set.of("54868503400", "51285052302", "60687012100");
 
     MockSamhsaMatcher mockSamhsaMatcher =
@@ -1122,7 +1122,7 @@ public class AbstractSamhsaMatcherTest {
     doReturn(code).when(mockCoding).getCode();
 
     assertEquals(expectedResult, mockSamhsaMatcher.isSamhsaNdcCode(mockCoding));
-    }
+  }
 
   /**
    * Data method for the isSamhsaCodingForSystemTest. Used automatically via the MethodSource
@@ -1302,33 +1302,25 @@ public class AbstractSamhsaMatcherTest {
     assertTrue(actual.contains("MS-DRG 896"));
   }
 
-  /**
-   * Verifies that the SAMHSA NDC CSV contains the expected number of codes.
-   */
+  /** Verifies that the SAMHSA NDC CSV contains the expected number of codes. */
   @Test
   public void testNumberOfNdcCodesReturned() {
     int expected = 20;
     List<String> actual =
-        AbstractSamhsaMatcher.resourceCsvColumnToList(
-            "samhsa-related-codes/codes-ndc.csv", "NDC");
+        AbstractSamhsaMatcher.resourceCsvColumnToList("samhsa-related-codes/codes-ndc.csv", "NDC");
 
     assertEquals(expected, actual.size());
     assertTrue(actual.contains("54868-5034-00"));
     assertTrue(actual.contains("51285-0523-02"));
   }
 
-
-  /** 
-   * Verifies that NDC normalization removes whitespace and hyphens. 
-  */
+  /** Verifies that NDC normalization removes whitespace and hyphens. */
   @Test
   public void testNormalizeNdcCode() {
     assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode(" 54868503400 "));
     assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode("54868-5034-00"));
     assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode("54868503400"));
   }
-
-
 
   /**
    * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls

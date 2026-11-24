@@ -175,11 +175,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-  * Checks if the given {@link Coding} list contains any SAMHSA NDC codes.
-  *
-  * @param ndcCodings the NDC codings to check
-  * @return {@code true} if any coding matches a SAMHSA NDC code, {@code false} otherwise
-  */
+   * Checks if the given {@link Coding} list contains any SAMHSA NDC codes.
+   *
+   * @param ndcCodings the NDC codings to check
+   * @return {@code true} if any coding matches a SAMHSA NDC code, {@code false} otherwise
+   */
   protected boolean containsSamhsaNdcCode(List<Coding> ndcCodings) {
     return ndcCodings.stream().anyMatch(this::isSamhsaNdcCode);
   }
@@ -499,12 +499,13 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-  * Checks if the given {@link Coding} contains a SAMHSA NDC code.
-  *
-  * @param coding the NDC {@link Coding} to check
-  * @return <code>true</code> if the specified {@link Coding} matches one of the {@link
-  *     AbstractSamhsaMatcher#ndcCodes} entries, <code>false</code> if it does not or has a null code.
-  */
+   * Checks if the given {@link Coding} contains a SAMHSA NDC code.
+   *
+   * @param coding the NDC {@link Coding} to check
+   * @return <code>true</code> if the specified {@link Coding} matches one of the {@link
+   *     AbstractSamhsaMatcher#ndcCodes} entries, <code>false</code> if it does not or has a null
+   *     code.
+   */
   protected boolean isSamhsaNdcCode(Coding coding) {
     /*
      * Note: NDC codes loaded from the CSV are already normalized.

@@ -623,21 +623,20 @@ public class SamhsaMatcherFromClaimTransformerTest {
     CodeableConcept service = modifiedEob.getItem().get(0).getService();
 
     List<Coding> codings = new ArrayList<>();
-    codings.add(
-        new Coding(
-            TransformerConstants.CODING_SYSTEM_HCPCS,
-            NON_SAMHSA_HCPCS_CODE,
-            null));
+    codings.add(new Coding(TransformerConstants.CODING_SYSTEM_HCPCS, NON_SAMHSA_HCPCS_CODE, null));
     service.setCoding(codings);
 
     // Verify the fixture does not already match before adding the NDC.
     assertEquals(false, samhsaMatcher.test(modifiedEob));
 
     // STU3 stores the NDC extension directly on the EOB item.
-    modifiedEob.getItem().get(0).addExtension(
-        new Extension(
-            TransformerConstants.CODING_NDC,
-            new Coding(TransformerConstants.CODING_NDC, code, null)));
+    modifiedEob
+        .getItem()
+        .get(0)
+        .addExtension(
+            new Extension(
+                TransformerConstants.CODING_NDC,
+                new Coding(TransformerConstants.CODING_NDC, code, null)));
 
     assertEquals(shouldMatch, samhsaMatcher.test(modifiedEob));
   }

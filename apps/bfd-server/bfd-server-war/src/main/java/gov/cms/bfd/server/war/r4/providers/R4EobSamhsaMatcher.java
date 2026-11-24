@@ -108,7 +108,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
 
     return containsSamhsa;
   }
-  
+
   /**
    * Checks if the given {@link CodeableConcept} contains only known coding systems.
    *
