@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -169,6 +170,36 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         arguments(snfClaimType, snfEob),
         arguments(carrierClaimType, carrierEob),
         arguments(pdeClaimType, pdeEob));
+  }
+
+  /**
+   * Verifies that a blacklisted NDC code triggers SAMHSA filtering.
+   *
+   * @param claimType the claim type
+   * @param loadedExplanationOfBenefit the transformed EOB
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void testR4SamhsaMatcherWhenTransformedClaimHasMatchingNdcExpectMatch(
+      String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+
+    boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
+
+    verifySamhsaMatcherForNdc("54868503400", expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that a non-blacklisted NDC code does not trigger SAMHSA filtering.
+   *
+   * @param claimType the claim type
+   * @param loadedExplanationOfBenefit the transformed EOB
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void testR4SamhsaMatcherWhenTransformedClaimHasNonMatchingNdcExpectNoMatch(
+      String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+
+    verifySamhsaMatcherForNdc("99999999999", false, loadedExplanationOfBenefit);
   }
 
   /**
@@ -760,6 +791,46 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
     // Then
     assertEquals(expectMatch, isMatch);
+  }
+
+  /**
+   * Verifies SAMHSA filtering for an NDC extension on an R4 EOB item.
+   *
+   * @param code the NDC code
+   * @param shouldMatch whether the matcher should identify the EOB
+   * @param explanationOfBenefit the transformed EOB
+   */
+  private void verifySamhsaMatcherForNdc(
+      String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Clear diagnosis candidates so we can test item-level filtering.
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosis : modifiedEob.getDiagnosis()) {
+      diagnosis.getDiagnosisCodeableConcept().setCoding(new ArrayList<>());
+      diagnosis.setPackageCode(null);
+    }
+
+    // Use a known non-SAMHSA HCPCS code on the target item.
+    CodeableConcept service = modifiedEob.getItem().get(0).getProductOrService();
+
+    List<Coding> codings = new ArrayList<>();
+    codings.add(
+        new Coding(
+            TransformerConstants.CODING_SYSTEM_HCPCS,
+            NON_SAMHSA_HCPCS_CODE,
+            null));
+    service.setCoding(codings);
+
+    // The fixture must not already match before adding the NDC.
+    assertEquals(false, samhsaMatcherV2.test(modifiedEob));
+
+    service.addExtension(
+        new Extension(
+            TransformerConstants.CODING_NDC,
+            new Coding(TransformerConstants.CODING_NDC, code, null)));
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
 
   /**

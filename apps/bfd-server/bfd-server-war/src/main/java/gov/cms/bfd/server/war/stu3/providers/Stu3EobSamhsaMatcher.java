@@ -83,7 +83,8 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
         containsSamhsa =
             containsSamhsa
                 || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
-                || containsSamhsaLineItem(adapter.getItem());
+                || containsSamhsaLineItem(adapter.getItem())
+                || containsSamhsaNdcCode(adapter.getNdcCodings());
       // fall-through intentional here
       case PDE:
         // There are no SAMHSA fields in PDE claims

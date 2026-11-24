@@ -6,13 +6,14 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 /**
  * Adapter for creating stu3 FHIR resources from an {@link
- * org.hl7.fhir.r4.model.ExplanationOfBenefit}.
+ * org.hl7.fhir.dstu3.model.ExplanationOfBenefit}.
  */
 public class ExplanationOfBenefitAdapter implements FhirResource {
 
@@ -48,6 +49,22 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
   @Override
   public List<ItemComponent> getItem() {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
+  }
+
+  /**
+   * Returns NDC codings from the EOB item extensions.
+   *
+   * @return the NDC codings
+   */
+  public List<Coding> getNdcCodings() {
+  return eob.getItem().stream()
+      .flatMap(
+          item ->
+              item.getExtensionsByUrl(TransformerConstants.CODING_NDC).stream())
+      .map(
+          extension ->
+              new CodingAdapter((org.hl7.fhir.dstu3.model.Coding) extension.getValue()))
+      .collect(Collectors.toList());
   }
 
   /** Adapter for creating stu3 FHIR procedure components. */

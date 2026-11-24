@@ -96,7 +96,8 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
         containsSamhsa =
             containsSamhsa
                 || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
-                || containsSamhsaLineItem(adapter.getItem());
+                || containsSamhsaLineItem(adapter.getItem())
+                || containsSamhsaNdcCode(adapter.getNdcCodings());
       // fall-through intentional here
       case PDE:
         // There are no SAMHSA fields in PDE claims
@@ -107,7 +108,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
 
     return containsSamhsa;
   }
-
+  
   /**
    * Checks if the given {@link CodeableConcept} contains only known coding systems.
    *

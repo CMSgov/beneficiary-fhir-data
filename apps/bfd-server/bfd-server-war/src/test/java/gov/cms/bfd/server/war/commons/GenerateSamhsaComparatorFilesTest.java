@@ -40,6 +40,12 @@ public class GenerateSamhsaComparatorFilesTest {
             .stream()
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
             .toList();
+    List<String> ndcCodes =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+                "samhsa-related-codes/codes-ndc.csv", "NDC")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeNdcCode)
+            .toList();
     List<String> icd9ProcedureCodes =
         AbstractSamhsaMatcher.resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
@@ -67,6 +73,7 @@ public class GenerateSamhsaComparatorFilesTest {
 
     assertThat(drgCodes, is(not(empty())));
     assertThat(cptCodes, is(not(empty())));
+    assertThat(ndcCodes, is(not(empty())));
     assertThat(icd9ProcedureCodes, is(not(empty())));
     assertThat(icd9DiagnosisCodes, is(not(empty())));
     assertThat(icd10ProcedureCodes, is(not(empty())));
@@ -83,6 +90,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.CARRIER,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -93,6 +101,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.DME,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -103,6 +112,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.HHA,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -113,6 +123,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.HOSPICE,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -123,6 +134,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.INPATIENT,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -133,6 +145,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.OUTPATIENT,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -143,6 +156,7 @@ public class GenerateSamhsaComparatorFilesTest {
             ClaimType.SNF,
             drgCodes,
             cptCodes,
+            ndcCodes,
             icd9ProcedureCodes,
             icd10ProcedureCodes,
             icd9DiagnosisCodes,
@@ -156,6 +170,7 @@ public class GenerateSamhsaComparatorFilesTest {
    * @param claimType the claimtype to create the file for
    * @param drgCodes the list of DRG codes from the codes file
    * @param cptCodes the list of CPT codes from the codes file
+   * @param ndcCodes the list of NDC codes from the codes file
    * @param icd9ProcedureCodes the list of ICD9 procedure codes from the codes file
    * @param icd10ProcedureCodes the list of ICD10 procedure codes from the codes file
    * @param icd9DiagnosisCodes the list of ICD9 diagnosis codes from the codes file
@@ -167,6 +182,7 @@ public class GenerateSamhsaComparatorFilesTest {
       ClaimType claimType,
       List<String> drgCodes,
       List<String> cptCodes,
+      List<String> ndcCodes,
       List<String> icd9ProcedureCodes,
       List<String> icd10ProcedureCodes,
       List<String> icd9DiagnosisCodes,
@@ -199,6 +215,11 @@ public class GenerateSamhsaComparatorFilesTest {
         // Uses HCPCS_CD
         String sampleCarrierCptLine = setSubColumns(sampleCarrierLine, header, "HCPCS_CD");
         newClaimId = addLines(lines, newClaimId, cptCodes, sampleCarrierCptLine);
+
+        // Uses LINE_NDC_CD
+        String sampleCarrierNdcLine =
+            setSubColumns(sampleCarrierLine, header, "LINE_NDC_CD");
+        newClaimId = addLines(lines, newClaimId, ndcCodes, sampleCarrierNdcLine);
         break;
       case DME:
         header =
@@ -221,6 +242,11 @@ public class GenerateSamhsaComparatorFilesTest {
         // Uses HCPCS_CD
         String sampleDmeCptLine = setSubColumns(sampleDmeLine, header, "HCPCS_CD");
         newClaimId = addLines(lines, newClaimId, cptCodes, sampleDmeCptLine);
+
+        // Uses LINE_NDC_CD
+        String sampleDmeNdcLine =
+            setSubColumns(sampleDmeLine, header, "LINE_NDC_CD");
+        newClaimId = addLines(lines, newClaimId, ndcCodes, sampleDmeNdcLine);
         break;
       case HHA:
         header =
@@ -315,6 +341,11 @@ public class GenerateSamhsaComparatorFilesTest {
         // Uses HCPCS_CD
         String sampleOutpatientCptLine = setSubColumns(sampleOutpatientLine, header, "HCPCS_CD");
         newClaimId = addLines(lines, newClaimId, cptCodes, sampleOutpatientCptLine);
+
+        // Uses REV_CNTR_IDE_NDC_UPC_NUM
+        String sampleOutpatientNdcLine =
+            setSubColumns(sampleOutpatientLine, header, "REV_CNTR_IDE_NDC_UPC_NUM");
+        newClaimId = addLines(lines, newClaimId, ndcCodes, sampleOutpatientNdcLine);
 
         // Inpatient/outpatient/snf also check for ICD 9/10 procedure codes
         String sampleOutpatientProc9Line =
