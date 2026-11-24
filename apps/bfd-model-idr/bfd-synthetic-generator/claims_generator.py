@@ -268,7 +268,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_MDCR_HHA_TOT_VISIT_CNT,
             f.CLM_HIPPS_READMSN_RDCTN_AMT,
             f.CLM_HIPPS_VBP_AMT,
-            f.CLM_INSTNL_LOW_VOL_PMT_AMT,
             f.CLM_MDCR_IP_1ST_YR_RATE_AMT,
             f.CLM_MDCR_IP_SCND_YR_RATE_AMT,
             f.CLM_PPS_MD_WVR_STDZD_VAL_AMT,

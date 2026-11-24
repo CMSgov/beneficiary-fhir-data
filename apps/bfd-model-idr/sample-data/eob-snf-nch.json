@@ -1467,8 +1467,7 @@
     "CLM_FI_ACTN_CD": "5",
     "CLM_MDCR_IP_BENE_DDCTBL_AMT": "3.16",
     "CLM_OP_SRVC_TYPE_CD": null,
-    "CLM_MDCR_INSTNL_BENE_PD_AMT": null,
-    "CLM_INSTNL_LOW_VOL_PMT_AMT": "9435.73"
+    "CLM_MDCR_INSTNL_BENE_PD_AMT": null
   },
   "procedures": [
     {
