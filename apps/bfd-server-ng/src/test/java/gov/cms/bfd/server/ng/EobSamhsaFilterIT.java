@@ -84,6 +84,10 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private record PriorAuthIdentifier(String beneSk, String utn) {}
 
+  // System: ndc [clm_line_ndc_cd]
+  private static final String NDC_MEDICATION = "54868-5034-0";
+  private static final String NDC_MEDICATION2 = "68382-0569";
+
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
   private static final String ICD10_DIAGNOSIS2 = "F55.2";
@@ -122,6 +126,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   protected final List<List<String>> samhsaCodesToCheck =
       List.of(
+          List.of(SystemUrls.NDC, NDC_MEDICATION),
+          List.of(SystemUrls.NDC, NDC_MEDICATION2),
           List.of(SystemUrls.CMS_MS_DRG, DRG),
           List.of(SystemUrls.CMS_MS_DRG, DRG2),
           List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED1),
@@ -283,7 +289,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // verification due to system/code mismatches
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()
-            .filter(c -> !isSkippedFromBundleCheck(c, skipBundleVerification))
+            .filter(eob -> !isSkippedFromBundleCheck(eob, skipBundleVerification))
             .toList();
     // Bundle from endpoint should not contain any sensitive codes
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));
@@ -612,6 +618,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     assertFalse(serialized.isEmpty(), "Serialized YAML should not be empty");
 
     // security_labels.yml has 722 active and 2 inactive items
+    // TODO count the new list via python, and verify that we include all the new codes via python
+    // since 14 were skipped
     assertEquals(724, totalItems, "Expected 724 items, got: " + totalItems);
 
     for (var code : samhsaCodesToCheck) {
@@ -621,6 +629,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // Ensure the security labels file doesn't contain any unexpected systems
     var allowedSystems =
         Set.of(
+            SystemUrls.NDC,
             SystemUrls.ICD_9_CM_DIAGNOSIS,
             SystemUrls.CMS_ICD_9_PROCEDURE,
             SystemUrls.ICD_10_CM_DIAGNOSIS,

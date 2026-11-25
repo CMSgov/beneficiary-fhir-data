@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Identifier;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 
 /** Embeddable that contains core NCH clm_line properties and logic. */
 @Embeddable
+@Getter
 public class ClaimLineProfessionalNchCore {
 
   @Column(name = "clm_line_carr_clncl_lab_num") // ALL PROFILES
@@ -42,6 +44,10 @@ public class ClaimLineProfessionalNchCore {
           var identifier = new Identifier().setSystem(SystemUrls.CLIA).setValue(labNumber);
           observation.addPerformer(new Reference().setIdentifier(identifier));
         });
+  }
+
+  public Optional<ClaimLineNdc> getClaimLineNdc() {
+    return Optional.of(getNdc());
   }
   // endregion
 }
