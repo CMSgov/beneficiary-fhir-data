@@ -80,6 +80,18 @@ def extract_and_load(
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
+    progress = get_progress(load_mode, cls.table(), partition, job_id)
+    # Check for skippable tasks before we initialize any other connections
+    # since startup cost is high if we're churning through completed jobs quickly.
+    if progress and progress.should_skip(load_type):
+        logger.info(
+            "Partition for initial load already complete, skipping. "
+            "If you want to restart the initial load, delete any existing progress "
+            "entries for this job id. Be careful to only remove the initial progress, "
+            "NOT the incremental progress."
+        )
+        return False
+
     if source == Source.SNOWFLAKE:
         data_extractor = SnowflakeExtractor(cls=cls, partition=partition)
     else:
@@ -98,11 +110,12 @@ def extract_and_load(
             if progress:
                 logger.info(
                     "progress for {} {} - last_ts: {} job_start_ts: {} "
-                    "batch_complete_ts: {} job_id: {} max_run_ts: {}",
+                    "batch_start_ts: {} batch_complete_ts: {} job_id: {} max_run_ts: {}",
                     cls.table(),
                     progress.batch_partition,
                     progress.last_ts,
                     progress.job_start_ts,
+                    progress.batch_start_ts,
                     progress.batch_complete_ts,
                     progress.job_id,
                     progress.max_run_ts,
