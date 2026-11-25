@@ -5,8 +5,10 @@ locals {
   log_router_repository_default = "bfd-platform-server-fluent-bit"
   log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
   server_repository_name        = coalesce(var.server_repository_override, "bfd-server-ng")
+  datadog_agent_repository_name = coalesce(var.datadog_agent_repository_override, "bfd-platform-server-datadog-agent")
   log_router_version            = coalesce(var.log_router_version_override, local.bfd_version)
   server_version                = coalesce(var.server_version_override, local.bfd_version)
+  datadog_agent_version         = coalesce(var.datadog_agent_version_override, local.bfd_version)
 
   server_ssm_hierarchies              = ["/bfd/${local.env}/${local.service}"]
   server_port                         = 8080
@@ -19,6 +21,9 @@ locals {
   server_healthcheck_client_cert      = replace(urlencode(trimspace(nonsensitive(local.ssm_config["/bfd/${local.service}/test_client_cert"]))), "+", "%20")
   server_healthcheck_bene_id          = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri              = "http://localhost:${local.server_port}/v3/fhir/metadata"
+
+  bcda_account_id            = local.ssm_config["/bcda/common/account_id"]
+  cdap_dd_api_key_secret_arn = "arn:aws:secretsmanager:${local.region}:${local.bcda_account_id}:secret:/cdap/bfd/${local.parent_env}/datadog/agents/api-key"
 }
 
 data "aws_rds_cluster" "main" {
@@ -55,9 +60,26 @@ data "aws_ecr_image" "server" {
   image_tag       = local.server_version
 }
 
+data "aws_ecr_repository" "datadog_agent" {
+  name = local.datadog_agent_repository_name
+}
+
+data "aws_ecr_image" "datadog_agent" {
+  repository_name = data.aws_ecr_repository.datadog_agent.name
+  image_tag       = local.datadog_agent_version
+}
+
 module "log_group_log_router_messages" {
   source             = "../../terraform-modules/general/high-retention-log-group"
   name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id         = local.env_key_arn
+  log_retention_days = local.ten_year_retention_days
+  skip_destroy       = true
+}
+
+module "log_group_datadog_agent_messages" {
+  source             = "../../terraform-modules/general/high-retention-log-group"
+  name               = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/datadog_agent/messages"
   kms_key_id         = local.env_key_arn
   log_retention_days = local.ten_year_retention_days
   skip_destroy       = true
@@ -110,19 +132,25 @@ resource "aws_ecs_task_definition" "server" {
     operating_system_family = "LINUX"
   }
 
-  volume {
-    configure_at_launch = false
-    name                = "tmp_log_router"
-  }
-
-  volume {
-    configure_at_launch = false
-    name                = "tmp_${local.service}"
+  dynamic "volume" {
+    for_each = [
+      "tmp_log_router",
+      "tmp_${local.service}",
+      "datadog_run",
+      "datadog_tmp",
+      "datadog_etc",
+      "datadog_confd"
+    ]
+    content {
+      configure_at_launch = false
+      name                = volume.value
+    }
   }
 
   tags = {
     "${local.service}.version" = local.server_version
     "log_router.version"       = local.log_router_version
+    "datadog_agent.version"    = local.datadog_agent_version
   }
 
   container_definitions = jsonencode(
@@ -198,7 +226,8 @@ resource "aws_ecs_task_definition" "server" {
               "-XX:+PreserveFramePointer",
               "-XX:+UseCompactObjectHeaders",
               "-Dnetworkaddress.cache.ttl=5",
-              "-Dsun.net.inetaddr.ttl=0"
+              "-Dsun.net.inetaddr.ttl=0",
+              "-javaagent:/opt/datadog/dd-java-agent.jar"
             ])
           },
           {
@@ -217,6 +246,26 @@ resource "aws_ecs_task_definition" "server" {
             name  = "TZ"
             value = "UTC"
           },
+          {
+            name  = "DD_SERVICE"
+            value = local.service
+          },
+          {
+            name  = "DD_ENV"
+            value = local.env
+          },
+          {
+            name  = "DD_VERSION"
+            value = local.server_version
+          },
+          {
+            name  = "DD_PROFILING_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_INSTRUMENTATION_TELEMETRY_ENABLED"
+            value = "false"
+          }
         ]
         healthCheck = {
           command     = ["CMD-SHELL", "curl --silent --output /dev/null --fail -H 'X-Amzn-Mtls-Clientcert: ${local.server_healthcheck_client_cert}' '${local.server_healthcheck_uri}' || exit 1"]
@@ -247,6 +296,114 @@ resource "aws_ecs_task_definition" "server" {
             sourceVolume  = "tmp_${local.service}"
           }
         ]
+        readonlyRootFilesystem = true
+        # Empty declarations reduce Terraform diff noise
+        dependsOn      = []
+        systemControls = []
+        volumesFrom    = []
+      },
+      {
+        name      = "datadog-agent"
+        image     = data.aws_ecr_image.datadog_agent.image_uri
+        essential = false
+        cpu       = 0
+        environment = [
+          {
+            name  = "ECS_FARGATE"
+            value = "true"
+          },
+          {
+            name  = "DD_SITE"
+            value = "ddog-gov.com"
+          },
+          {
+            name  = "DD_ENV"
+            value = local.env
+          },
+          {
+            # Tags to add to hosts
+            # separated by spaces
+            # https://docs.datadoghq.com/containers/docker/?tab=linux#environment-variables
+            name  = "DD_TAGS"
+            value = "environment:${local.env} application:bfd"
+          },
+          {
+            name  = "DD_APM_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_APM_NON_LOCAL_TRAFFIC"
+            value = "false"
+          },
+          {
+            name  = "DD_LOGS_ENABLED"
+            value = "false"
+          },
+          {
+            name  = "DD_ECS_TASK_COLLECTION_ENABLED"
+            value = "true"
+          },
+          {
+            # not supported on fed site
+            # https://docs.datadoghq.com/tracing/configure_data_security/?tab=environmentvariables#telemetry-collection
+            name  = "DD_APM_TELEMETRY_ENABLED"
+            value = "false"
+          },
+          {
+            name  = "DD_PROFILING_ENABLED"
+            value = "true"
+          },
+        ]
+
+        secrets = [
+          {
+            name      = "DD_API_KEY"
+            valueFrom = local.cdap_dd_api_key_secret_arn
+          }
+        ]
+
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group         = module.log_group_datadog_agent_messages.name
+            awslogs-stream-prefix = "messages"
+            awslogs-region        = local.region
+            max-buffer-size       = "25m"
+            mode                  = "non-blocking"
+          }
+        }
+
+        healthCheck = {
+          command     = ["CMD-SHELL", "agent health"]
+          interval    = 30
+          timeout     = 5
+          retries     = 3
+          startPeriod = 15
+        }
+
+        mountPoints = [
+          {
+            containerPath = "/var/run/datadog"
+            readOnly      = false
+            sourceVolume  = "datadog_run"
+          },
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "datadog_tmp"
+          },
+          {
+            containerPath = "/etc/datadog-agent"
+            readOnly      = false
+            sourceVolume  = "datadog_etc"
+          },
+          {
+            containerPath = "/etc/datadog-agent/conf.d"
+            readOnly      = false
+            sourceVolume  = "datadog_confd"
+          }
+        ]
+
         readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         dependsOn      = []

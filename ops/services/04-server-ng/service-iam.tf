@@ -157,6 +157,7 @@ data "aws_iam_policy_document" "execution_ecr" {
     resources = [
       data.aws_ecr_repository.log_router.arn,
       data.aws_ecr_repository.server.arn,
+      data.aws_ecr_repository.datadog_agent.arn,
       "arn:aws:ecr:us-east-1:593207742271:repository/aws-guardduty-agent-fargate",
       "arn:aws:ecr:us-west-2:733349766148:repository/aws-guardduty-agent-fargate"
     ]
@@ -170,12 +171,38 @@ resource "aws_iam_policy" "execution_ecr" {
   policy      = data.aws_iam_policy_document.execution_ecr.json
 }
 
+data "aws_secretsmanager_secret_version" "cdap_kms_key_arn" {
+  secret_id = "arn:aws:secretsmanager:${local.region}:${local.bcda_account_id}:secret:/cdap/bfd/${local.parent_env}/kms/key-arn"
+}
+
+data "aws_iam_policy_document" "execution_secrets" {
+  statement {
+    sid       = "AllowGetDatadogAPIKeySecret"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["${local.cdap_dd_api_key_secret_arn}*"]
+  }
+
+  statement {
+    sid       = "AllowDecryptDatadogAPIKeySecret"
+    actions   = ["kms:Decrypt"]
+    resources = [nonsensitive(data.aws_secretsmanager_secret_version.cdap_kms_key_arn.secret_string)]
+  }
+}
+
+resource "aws_iam_policy" "execution_secrets" {
+  name        = "${local.name_prefix}-execution-secrets-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.service} Execution Role to retrieve and decrypt the Datadog API key from Secrets Manager"
+  policy      = data.aws_iam_policy_document.execution_secrets.json
+}
+
 data "aws_iam_policy_document" "execution_logs" {
   statement {
     sid     = "AllowLogStreamControl"
     actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = [
       "${module.log_group_log_router_messages.arn}:*",
+      "${module.log_group_datadog_agent_messages.arn}:*",
       "${module.log_group_service_connect_messages.arn}:*",
       "${module.log_group_server_messages.arn}:*",
       "${module.log_group_server_healthchecks.arn}:*",
@@ -202,8 +229,9 @@ resource "aws_iam_role" "execution_role" {
 
 resource "aws_iam_role_policy_attachment" "execution" {
   for_each = {
-    ecr  = aws_iam_policy.execution_ecr.arn
-    logs = aws_iam_policy.execution_logs.arn
+    ecr     = aws_iam_policy.execution_ecr.arn
+    logs    = aws_iam_policy.execution_logs.arn
+    secrets = aws_iam_policy.execution_secrets.arn
   }
 
   role       = aws_iam_role.execution_role.name

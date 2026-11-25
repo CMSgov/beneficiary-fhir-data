@@ -2,6 +2,7 @@
 /ab2d/${env}/bene-prefs/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:pMq8U73TpWnSKJv3i+PgtYZZmNL4rgE8YFwVMEEJHgKquEKMqMeydqAINKf4S4Jverp3OlOXQ7rnUcc7WEFfgiT9Aqn3rZH8uRnR9fvwjyGhyTR3gs3bX29QuYtChodPgLQyEBcyZKXLJgHOyNJpoYeoMwjgQnkv7SjKci/Y74+BRRFELY8ZVKl+MaWVCA==,iv:kUIzG6D16Pb7nEVx74NCYq7CWCuL4DWot7SsremZry8=,tag:IXHO83Ue8yxIO42BFv2jRQ==,type:str]
 /bb2/${env}/common/sensitive/account_id: ENC[AES256_GCM,data:xB7xHrSPl3BNeBC9,iv:FmgwAOx0kuMRUffwyV2TBu93MhtOQLcbmOuwQ/gQASE=,tag:WgZdqe4p04Cw47km5m/oMA==,type:str]
 /bb2/${env}/common/sensitive/legacy_account_id: ENC[AES256_GCM,data:0UsYu8UikkfxiR9H,iv:U/AafPBeQjXp9XoDL1V7cml9qIN+NyJX28vCHISCjvg=,tag:x1mL6reGNMoXPtDJz5GmFg==,type:str]
+/bcda/${env}/common/sensitive/account_id: ENC[AES256_GCM,data:hjA1Efg5HdKEo94m,iv:S0VXzgdO54uSSeT51NSRGQi77Yj909ty1FwE/8bUCFo=,tag:KVsudqbhTRX+uVg12p9hJQ==,type:str]
 /bcda/${env}/bene-prefs/sensitive/bucket_iam_assumer_arns_json: ENC[AES256_GCM,data:XUoOMOfL6QUq4seqmkZoh328BefSzaSV8GZp2UkyVITMkI5/f8P1XkSgri+uYQ+Ytr3KWzYEa3ykAZnIAepn1T/A1MVwwFG29spr8zqRMDOHgMzm17Kp7x8yon2S,iv:hJha0nemm6Fa2gWpnFsaIwhMqSMVewmDbdfg8lT2fuU=,tag:sNsx3y2eV8VE2liEmdEEjA==,type:str]
 /bcda/${env}/bene-prefs/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:Bf6rBtWbIXMahHsOk4qiJG8kvv9b2c9VK07/CkYomCcXhZwRohHAcRc9m5gYbEIBFbbFRS1qZctZL24kKX+rz3T+TNZgcanroShR9JN2qhycn7+1XkRAFoa9lAMmf8bI/EZrE7SR8wYOe/17VZDsyATmFt7ytu4Xs68x9G9EgrxFsZFopWJ+26aZ,iv:jL+fmgHRNGwdMcHL4EzuSZE7ughKgzmi/uTfltk2xXs=,tag:zU8vDlXI+3hCgj70B5n1og==,type:str]
 /bfd/${env}/common/sensitive/cloudbees_jenkins_subnets: ENC[AES256_GCM,data:eYhdtyoiULoX9zjX5wYh,iv:T3g4NQRcgCFTQZUOjBlo4BqKA1Fx2z8r6Me1CadcqZU=,tag:a0BRgI72kjH7jSvccrxk7Q==,type:str]
@@ -239,8 +240,7 @@
 /bfd/${env}/server/nonsensitive/500_errors_alerter_log_lookback_seconds: "330"
 /bfd/${env}/server/nonsensitive/500_errors_alerter_slack_webhook: bfd_test
 /bfd/${env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test:
-  |-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test: |-
   -----BEGIN CERTIFICATE-----
   MIIFEzCCAvugAwIBAgIEV4nRljANBgkqhkiG9w0BAQsFADA6MTgwNgYDVQQDEy9i
   bHVlYnV0dG9uLWJhY2tlbmQtcHJvZC1kYXRhLXNlcnZlci1jbGllbnQtdGVzdDAe
@@ -271,8 +271,7 @@
   hRN/BZNg/yzHfGXzKuQg+/MDrKLx3k1QGDgz3dqIZ9bG2B3oSmPNH49ebMbjwRUs
   T1n0VQm7cg==
   -----END CERTIFICATE-----
-/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa:
-  |-
+/bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa: |-
   -----BEGIN CERTIFICATE-----
   MIIFMzCCAxugAwIBAgIUBRwBc0dxxJQZEbANjbCKmjOXctQwDQYJKoZIhvcNAQEL
   BQAwKTEnMCUGA1UEAwweYmx1ZWJ1dHRvbi1iYWNrZW5kLXRlc3Qtc2FtaHNhMB4X
@@ -487,8 +486,7 @@
   GkJFhMc0aQjhUhsaG5v7bv5V55IPc0ns/NeroI1Cr4UStKbMYlw89ztLLVF2cPtt
   MXIEdz5t
   -----END CERTIFICATE-----
-/bfd/${env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client:
-  |-
+/bfd/${env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client: |-
   -----BEGIN CERTIFICATE-----
   MIIEyDCCArACCQC0H65uNJgKazANBgkqhkiG9w0BAQsFADAmMSQwIgYDVQQDDBth
   YjJkLXByb2QtdmFsaWRhdGlvbi1jbGllbnQwHhcNMjAxMTE5MTc0NjMyWhcNMjUx
@@ -618,8 +616,7 @@
   hRN/BZNg/yzHfGXzKuQg+/MDrKLx3k1QGDgz3dqIZ9bG2B3oSmPNH49ebMbjwRUs
   T1n0VQm7cg==
   -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_samhsa_cert:
-  |-
+/bfd/${env}/server-ng/nonsensitive/client_certificates/test_client_samhsa_cert: |-
   -----BEGIN CERTIFICATE-----
   MIIFMzCCAxugAwIBAgIUBRwBc0dxxJQZEbANjbCKmjOXctQwDQYJKoZIhvcNAQEL
   BQAwKTEnMCUGA1UEAwweYmx1ZWJ1dHRvbi1iYWNrZW5kLXRlc3Qtc2FtaHNhMB4X
@@ -810,20 +807,20 @@
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-config-cmk
-      aws_profile: ""
       created_at: "2025-05-29T19:04:20Z"
       enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwEG55GYrCQqIVMSeuWSi2yJAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMtfeKs2cTxl6Ky4FMAgEQgDvGwJF9eLQdqVIt+JJwliRXDi6ZIdBvYYhkIlo/XbnB1k9aHtDvkcpvL8nUex3t3eE9w3MTuBZts6dgeA==
-    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-cmk
       aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-cmk
       created_at: "2025-05-29T19:04:20Z"
       enc: AQICAHg3sz5ry44Cuf3QUyf8sUndrMm3J3stOfeajttEhIQYqAEuK7v3PLKJHuY9vDTFQkI1AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMQ9b5gkfy4cDZHrZgAgEQgDtAmHp/QHH8BrHQ89FGCHpbA7ZWtrnjdMvULETeCzCvlycuvyv0cWQDKUEBCJJVsuOXZ3kx2Q/5jrUhzw==
-    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-cmk
       aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-cmk
       created_at: "2025-06-16T19:18:16Z"
       enc: AQICAHhqbm8gZCAa24aKa35oOPRloER+xkK5+nQNi4TiiJNMxQFjkHS3GAZCohVM36uUmnFNAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMBDP7qDfL1MKItjLMAgEQgDsH4s3zSDLs5PUpe+RfkjvDV3zvZ61lip5ZN6IXcymgVpz9Z0q+T5fcwZoxYd6YwnpXYY2qpI+lTNCaMA==
-    - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-prod-cmk
       aws_profile: ""
+    - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-prod-cmk
       created_at: "2025-06-16T19:18:32Z"
       enc: AQICAHiCa0SxyWv/VuVkwfKgPAG3j8l+Be+oAWTYKNLFuuPQsAFZJNm31fbu7Nvpys8buYBtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMkDoVrjbvMHHf89niAgEQgDtLxEX5HqaUAYPuSxtrimw50F/mjAZf6AWYpoHuxEUXgLs++BECkiao5TpAFXAQIWX+OYjQXENt2iA4yA==
+      aws_profile: ""
   unencrypted_regex: /nonsensitive/
   version: 3.13.3

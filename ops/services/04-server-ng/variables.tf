@@ -19,6 +19,13 @@ variable "server_repository_override" {
   type        = string
 }
 
+variable "datadog_agent_repository_override" {
+  default     = null
+  description = "Overrides the ECR repository for the datadog_agent container image. If not provided, the default will be used"
+  sensitive   = false
+  type        = string
+}
+
 variable "log_router_version_override" {
   default     = null
   description = "Overrides the version for log_router container image resolution. If not provided, the latest BFD version will be used"
@@ -29,6 +36,13 @@ variable "log_router_version_override" {
 variable "server_version_override" {
   default     = null
   description = "Overrides the version for server container image resolution. If not provided, the latest BFD version will be used"
+  sensitive   = false
+  type        = string
+}
+
+variable "datadog_agent_version_override" {
+  default     = null
+  description = "Overrides the version for datadog_agent container image resolution. If not provided, the latest BFD version will be used"
   sensitive   = false
   type        = string
 }
