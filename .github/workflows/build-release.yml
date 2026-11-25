@@ -299,6 +299,9 @@ jobs:
       - name: Generate v3 Data Dictionary
         run: just generate-data-dictionary
 
+      - name: Generate Structure V3 Profile Structure Definitions
+        run: just gen-structure-def
+
       - name: Prepare artifacts
         env:
           BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}

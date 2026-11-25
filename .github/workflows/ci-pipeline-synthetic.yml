@@ -37,6 +37,8 @@ jobs:
           repo: sigoden/argc
       - name: Generate v3 Data Dictionary
         run: just generate-data-dictionary
+      - name: Generate Structure V3 Profile Structure Definitions
+        run: just gen-structure-def
       - name: Ensure synthetic data pipeline runs
         run: |
           just patient-generator --patients 100 --claims
