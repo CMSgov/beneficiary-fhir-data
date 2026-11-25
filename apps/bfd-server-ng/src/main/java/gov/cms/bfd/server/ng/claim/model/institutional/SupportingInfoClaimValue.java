@@ -15,9 +15,12 @@ import org.hl7.fhir.r4.model.SimpleQuantity;
 public class SupportingInfoClaimValue {
   private SupportingInfoClaimValue() {}
 
+  /** Display for Minutes unit. */
+  public static final String MINUTE_UNIT_DISPLAY = "minute";
+
   @AllArgsConstructor
   enum SupportingInfoValueCode {
-    DYLS_MINS("D6", "minute", BlueButtonSupportingInfoCategory.DIALYSIS_MINUTES_AMOUNT);
+    DYLS_MINS("D6", MINUTE_UNIT_DISPLAY, BlueButtonSupportingInfoCategory.DIALYSIS_MINUTES_AMOUNT);
 
     final String code;
     final String units;
@@ -71,11 +74,11 @@ public class SupportingInfoClaimValue {
                   .setSystem(SystemUrls.UNITS_OF_MEASURE)
                   .setUnit("pint")
                   .setCode("[pt_us]");
-          case "minute" ->
+          case MINUTE_UNIT_DISPLAY ->
               new SimpleQuantity()
                   .setValue(value)
                   .setSystem(SystemUrls.UNITS_OF_MEASURE)
-                  .setUnit("minute")
+                  .setUnit(MINUTE_UNIT_DISPLAY)
                   .setCode("min");
           default -> throw new IllegalStateException("Not a valid unit: " + valueCode.units);
         };

@@ -53,7 +53,7 @@ public class AdjudicationClaimValue {
         .flatMap(
             valueCode ->
                 Optional.ofNullable(sumsByCode.get(valueCode.code))
-                    .map(amount -> valueCode.category.toFhirAdjudication(amount))
+                    .map(valueCode.category::toFhirAdjudication)
                     .stream())
         .toList();
   }
