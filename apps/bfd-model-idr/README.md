@@ -274,3 +274,54 @@ DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
 ```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
+
+## Generate Structure Definitions
+
+We have CMS specific profiles that we use from our partner API. The profiles are as follows:
+
+- https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Pharmacy
+- https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Inpatient-Institutional
+- https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Outpatient-Institutional
+- https://bluebutton.cms.gov/fhir/StructureDefinition/CMS-ExplanationOfBenefit-Professional-NonClinician
+
+To generate the profiles:
+
+```
+just gen-structure-def
+```
+
+The adding of a data element is controlled by adding a structureDef node. A full breakdown of the
+structureDef nodes [here](./structure_def.md).
+
+Example:
+```yaml
+structureDef:
+    id: ExplanationOfBenefit.item.adjudication:clmLineInstnlRateAmt.amount.value
+    path: ExplanationOfBenefit.item.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.item.adjudication:clmLineInstnlRateAmt
+        path: ExplanationOfBenefit.item.adjudication
+        sliceName: clmLineInstnlRateAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.item.adjudication:clmLineInstnlRateAmt.category.coding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.item.adjudication:clmLineInstnlRateAmt.category.coding:clmLineInstnlRateAmtCoding
+        path: ExplanationOfBenefit.item.adjudication.category.coding
+        sliceName: clmLineInstnlRateAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_LINE_INSTNL_RATE_AMT
+      - id: ExplanationOfBenefit.item.adjudication:clmLineInstnlRateAmt.amount
+        path: ExplanationOfBenefit.item.adjudication.amount
+        min: 1
+```
