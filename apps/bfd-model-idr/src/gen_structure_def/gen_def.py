@@ -44,7 +44,7 @@ class StructureDefinitionGenerator:
         base_definition: str,
         resource_type: str,
         output_file_name: str,
-        applies_to: str,
+        applies_to: list[str],
     ) -> None:
         self.source_directory: str = source_directory
         self.output_directory: str = output_directory
@@ -58,7 +58,8 @@ class StructureDefinitionGenerator:
         self.base_definition: str = base_definition
         self.resource_type: str = resource_type
         self.output_file_name: str = output_file_name
-        self.applies_to: str = applies_to
+        self.applies_to: list[str] = applies_to
+        self.sources: list[str] = []
 
     @property
     def delete_tmp_files(self) -> bool:
@@ -84,7 +85,14 @@ class StructureDefinitionGenerator:
             for node in yaml_data
             if self.profile in node.get("profiles", [])
             and node.get("structureDef")
-            and self.applies_to in node.get("appliesTo", [])
+            and (
+                not self.applies_to
+                or any(apply in node.get("appliesTo", []) for apply in self.applies_to)
+            )
+            and (
+                not self.sources
+                or any(source in node.get("sources", []) for source in self.sources)
+            )
         ]
 
         output_dir: Path = Path(self.output_directory)
@@ -159,13 +167,14 @@ class StructureDefinitionGenerator:
     def process_node(
         self, node: dict[str, Any], elements: list[ElementDefinition], slicing_added: set[Any]
     ) -> None:
-        struct_def_data: Any | None = node.get("structureDef")
-        if not struct_def_data:
+        struct_def_data: Any = node.get("structureDef")
+        column_name: Any | None = node.get("sourceColumn")
+        if any(applies in struct_def_data.get("suppress", []) for applies in self.applies_to):
+            print(f"Suppressing node: {column_name}")
             return
         el_id = struct_def_data.get("id")
         path = struct_def_data.get("path")
         input_path: Any | None = node.get("inputPath")
-        column_name: Any | None = node.get("sourceColumn")
         slicing = struct_def_data.get("slicing")
         pattern = struct_def_data.get("pattern")
         max_value: str = struct_def_data.get("max") or "1"
@@ -175,7 +184,7 @@ class StructureDefinitionGenerator:
         mapping = struct_def_data.get("mapping")
 
         if not column_name and not input_path:
-            input_path = str(input_path).split(sep=".")[1]
+            input_path = self.parse_path(input_path=str(input_path))
 
         column_name = str(column_name).replace("_", "-")
 
@@ -214,6 +223,9 @@ class StructureDefinitionGenerator:
             el.binding = binding
 
         elements.append(el)
+
+    def parse_path(self, input_path: str) -> str:
+        return input_path.split(sep=".")[1]
 
     def process_slicing(
         self,
