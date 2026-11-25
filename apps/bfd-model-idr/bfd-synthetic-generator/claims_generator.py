@@ -2,7 +2,6 @@ import logging
 import random
 import sys
 from collections import defaultdict
-from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +24,6 @@ from claims_util import four_part_key, match_line_num
 from constants import GeneratePacDataMode
 from generator_util import (
     GeneratorUtil,
-    adapters_to_dicts,
     as_list,
     load_file_dict,
     partition_rows,
@@ -38,679 +36,29 @@ from id_generators import (
     load_id_state,
 )
 from load_synthetic_output import (
-    ALL_KEYS,
     BeneSkMode,
     CsvWriter,
     OutputDestinationWriter,
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
-from shared_options import common_options
+from shared_options import common_options, ensure_directory_exists
 
 logger = logging.getLogger(__name__)
 
 _BATCH_SIZE = 50_000
 
 
-class _ClaimsFile(StrEnum):
-    CLM = (
-        f.CLM,
-        [
-            f.CLM_UNIQ_ID,
-            f.CLM_TYPE_CD,
-            f.CLM_SRC_ID,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_RLT_COND_SGNTR_SK,
-            f.CLM_OCRNC_SGNTR_SK,
-            f.CLM_RLT_OCRNC_SGNTR_SK,
-            f.META_SRC_SK,
-            f.CLM_FROM_DT,
-            f.CLM_THRU_DT,
-            f.CLM_CNTL_NUM,
-            f.CLM_NUM_SK,
-            f.CLM_EFCTV_DT,
-            f.CLM_IDR_LD_DT,
-            f.CLM_OBSLT_DT,
-            f.GEO_BENE_SK,
-            f.BENE_SK,
-            f.CLM_DISP_CD,
-            f.CLM_QUERY_CD,
-            f.CLM_ADJSTMT_TYPE_CD,
-            f.CLM_BILL_FAC_TYPE_CD,
-            f.CLM_BILL_CLSFCTN_CD,
-            f.CLM_BILL_FREQ_CD,
-            f.CLM_CNTRCTR_NUM,
-            f.CLM_NCH_PRMRY_PYR_CD,
-            f.CLM_FINL_ACTN_IND,
-            f.CLM_LTST_CLM_IND,
-            f.PRVDR_BLG_PRVDR_NPI_NUM,
-            f.CLM_ATNDG_PRVDR_NPI_NUM,
-            f.PRVDR_ATNDG_PRVDR_NPI_NUM,
-            f.CLM_OPRTG_PRVDR_NPI_NUM,
-            f.PRVDR_OPRTG_PRVDR_NPI_NUM,
-            f.CLM_OTHR_PRVDR_NPI_NUM,
-            f.PRVDR_OTHR_PRVDR_NPI_NUM,
-            f.CLM_RNDRG_PRVDR_NPI_NUM,
-            f.PRVDR_RNDRNG_PRVDR_NPI_NUM,
-            f.CLM_BLG_PRVDR_OSCAR_NUM,
-            f.CLM_MDCR_COINSRNC_AMT,
-            f.CLM_BLG_PRVDR_ZIP5_CD,
-            f.CLM_SBMT_CHRG_AMT,
-            f.CLM_PMT_AMT,
-            f.CLM_MDCR_DDCTBL_AMT,
-            f.CLM_NCVRD_CHRG_AMT,
-            f.CLM_BLOOD_LBLTY_AMT,
-            f.CLM_BENE_PMT_COINSRNC_AMT,
-            f.CLM_BLOOD_CHRG_AMT,
-            f.CLM_BLOOD_NCVRD_CHRG_AMT,
-            f.CLM_COB_PTNT_RESP_AMT,
-            f.CLM_PRVDR_INTRST_PD_AMT,
-            f.CLM_PRVDR_OTAF_AMT,
-            f.CLM_PRVDR_RMNG_DUE_AMT,
-            f.CLM_TOT_CNTRCTL_AMT,
-            f.CLM_BLOOD_PT_FRNSH_QTY,
-            f.PRVDR_RFRG_PRVDR_NPI_NUM,
-            f.CLM_PRVDR_PMT_AMT,
-            f.CLM_RIC_CD,
-            f.CLM_BLG_PRVDR_NPI_NUM,
-            f.CLM_BLG_PRVDR_TAX_NUM,  # TODO: not generated yet
-            f.GEO_BLG_SSA_STATE_CD,
-            f.CLM_BLG_PRVDR_NAME,  # TODO: not generated yet
-            f.CLM_RFRG_PRVDR_PIN_NUM,
-            f.CLM_RFRG_FED_PRVDR_SPCLTY_CD,  # TODO: not generated yet
-            f.CLM_RFRG_PRVDR_NAME,  # TODO: not generated yet
-            f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD,
-            f.CLM_OPRTG_PRVDR_NAME,
-            f.CLM_OTHR_FED_PRVDR_SPCLTY_CD,
-            f.CLM_OTHR_PRVDR_NAME,
-            f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD,
-            f.GEO_RNDRG_SSA_STATE_CD,  # TODO: not generated yet
-            f.CLM_RNDRG_PRVDR_NAME,
-            f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD,
-            f.CLM_ATNDG_PRVDR_NAME,
-            f.CLM_ALOWD_CHRG_AMT,
-            f.CLM_BENE_PD_AMT,
-            f.CLM_BENE_PMT_AMT,
-            f.CLM_BENE_INTRST_PD_AMT,
-            f.CLM_ORIG_CNTL_NUM,
-            f.CLM_SRVC_PRVDR_GNRC_ID_NUM,
-            f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM,
-            f.PRVDR_SRVC_ID_QLFYR_CD,
-            f.PRVDR_PRSBNG_ID_QLFYR_CD,
-            f.CLM_PD_DT,
-            f.CLM_SBMT_FRMT_CD,
-            f.CLM_SBMTR_CNTRCT_NUM,
-            f.CLM_SBMTR_CNTRCT_PBP_NUM,
-            f.CLM_OTHR_TP_PD_AMT,
-            f.CLM_BNFT_ENHNCMT_1_CD,
-            f.CLM_BNFT_ENHNCMT_2_CD,
-            f.CLM_BNFT_ENHNCMT_3_CD,
-            f.CLM_BNFT_ENHNCMT_4_CD,
-            f.CLM_BNFT_ENHNCMT_5_CD,
-            f.CLM_NGACO_PBPMT_SW,
-            f.CLM_NGACO_PDSCHRG_HCBS_SW,
-            f.CLM_NGACO_SNF_WVR_SW,
-            f.CLM_NGACO_TLHLTH_SW,
-            f.CLM_NGACO_CPTATN_SW,
-            f.CLM_ACO_CARE_MGMT_HCBS_SW,
-            f.CLM_PD_STUS_CD,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_ANSI_SGNTR = (
-        f.CLM_ANSI_SGNTR,
-        [
-            f.CLM_ANSI_SGNTR_SK,
-            f.CLM_1_REV_CNTR_ANSI_RSN_CD,
-            f.CLM_2_REV_CNTR_ANSI_RSN_CD,
-            f.CLM_3_REV_CNTR_ANSI_RSN_CD,
-            f.CLM_4_REV_CNTR_ANSI_RSN_CD,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_DCMTN = (
-        f.CLM_DCMTN,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_NUM_SK,
-            f.GEO_BENE_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NRLN_RIC_CD,
-            f.CLM_PTNT_CNTL_NUM,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-            f.CLM_BNFT_ENHNCMT_1_CD,
-            f.CLM_BNFT_ENHNCMT_2_CD,
-            f.CLM_BNFT_ENHNCMT_3_CD,
-            f.CLM_BNFT_ENHNCMT_4_CD,
-            f.CLM_BNFT_ENHNCMT_5_CD,
-            f.CLM_NGACO_PBPMT_SW,
-            f.CLM_NGACO_CPTATN_SW,
-            f.CLM_NGACO_PDSCHRG_HCBS_SW,
-            f.CLM_NGACO_SNF_WVR_SW,
-            f.CLM_NGACO_TLHLTH_SW,
-            f.CLM_ACO_CARE_MGMT_HCBS_SW,
-        ],
-    )
-    CLM_DT_SGNTR = (
-        f.CLM_DT_SGNTR,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-            f.CLM_ACTV_CARE_FROM_DT,
-            f.CLM_DSCHRG_DT,
-            f.CLM_MDCR_EXHSTD_DT,
-            f.CLM_NCVRD_FROM_DT,
-            f.CLM_NCVRD_THRU_DT,
-            f.CLM_SUBMSN_DT,
-            f.CLM_CMS_PROC_DT,
-            f.CLM_NCH_WKLY_PROC_DT,
-            f.CLM_ACTV_CARE_THRU_DT,
-            f.CLM_QLFY_STAY_FROM_DT,
-            f.CLM_QLFY_STAY_THRU_DT,
-        ],
-    )
-    CLM_FISS = (
-        f.CLM_FISS,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.GEO_BENE_SK,
-            f.CLM_NUM_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_CRNT_STUS_CD,
-            f.CLM_PPS_IND,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_INSTNL = (
-        f.CLM_INSTNL,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_FI_ACTN_CD,
-            f.CLM_ADMSN_TYPE_CD,
-            f.BENE_PTNT_STUS_CD,
-            f.CLM_MDCR_INSTNL_MCO_PD_SW,
-            f.CLM_ADMSN_SRC_CD,
-            f.DGNS_DRG_CD,
-            f.DGNS_DRG_OUTLIER_CD,
-            f.CLM_INSTNL_CVRD_DAY_CNT,
-            f.CLM_MDCR_IP_LRD_USE_CNT,
-            f.CLM_INSTNL_PER_DIEM_AMT,
-            f.CLM_HIPPS_UNCOMPD_CARE_AMT,
-            f.CLM_MDCR_INSTNL_PRMRY_PYR_AMT,
-            f.CLM_INSTNL_DRG_OUTLIER_AMT,
-            f.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT,
-            f.CLM_INSTNL_MDCR_COINS_DAY_CNT,
-            f.CLM_INSTNL_NCVRD_DAY_CNT,
-            f.CLM_MDCR_IP_PPS_DRG_WT_NUM,
-            f.CLM_MDCR_IP_PPS_EXCPTN_AMT,
-            f.CLM_MDCR_IP_PPS_CPTL_FSP_AMT,
-            f.CLM_MDCR_IP_PPS_CPTL_IME_AMT,
-            f.CLM_MDCR_IP_PPS_OUTLIER_AMT,
-            f.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT,
-            f.CLM_MDCR_IP_PPS_CPTL_TOT_AMT,
-            f.CLM_MDCR_IP_BENE_DDCTBL_AMT,
-            f.CLM_PPS_IND_CD,
-            f.CLM_MDCR_HOSPC_PRD_CNT,
-            f.CLM_MDCR_NPMT_RSN_CD,
-            f.CLM_OP_SRVC_TYPE_CD,
-            f.CLM_INSTNL_PRFNL_AMT,
-            f.CLM_MDCR_INSTNL_BENE_PD_AMT,
-            f.CLM_FINL_STDZD_PYMT_AMT,
-            f.CLM_HHA_RFRL_CD,
-            f.CLM_MDCR_HHA_TOT_VISIT_CNT,
-            f.CLM_HIPPS_READMSN_RDCTN_AMT,
-            f.CLM_HIPPS_VBP_AMT,
-            f.CLM_INSTNL_LOW_VOL_PMT_AMT,
-            f.CLM_MDCR_IP_1ST_YR_RATE_AMT,
-            f.CLM_MDCR_IP_SCND_YR_RATE_AMT,
-            f.CLM_PPS_MD_WVR_STDZD_VAL_AMT,
-            f.CLM_HHA_LUP_IND_CD,
-            f.CLM_HAC_RDCTN_PYMT_AMT,
-            f.CLM_HIPPS_MODEL_BNDLD_PMT_AMT,
-            f.CLM_SITE_NTRL_CST_BSD_PYMT_AMT,
-            f.CLM_SITE_NTRL_IP_PPS_PYMT_AMT,
-            f.CLM_SS_OUTLIER_STD_PYMT_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LCTN_HSTRY = (
-        f.CLM_LCTN_HSTRY,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.GEO_BENE_SK,
-            f.CLM_NUM_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_LCTN_CD_SQNC_NUM,
-            f.CLM_AUDT_TRL_STUS_CD,
-            f.CLM_AUDT_TRL_LCTN_CD,  # generating values in claims_pac; test-samples2 remain static
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE_DCMTN = (
-        f.CLM_LINE_DCMTN,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_PA_UNIQ_TRKNG_NUM,
-            f.CLM_LINE_NUM,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE_INSTNL = (
-        f.CLM_LINE_INSTNL,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_LINE_INSTNL_ADJSTD_AMT,
-            f.CLM_LINE_INSTNL_RDCD_AMT,
-            f.CLM_DDCTBL_COINSRNC_CD,
-            f.CLM_LINE_INSTNL_RATE_AMT,
-            f.CLM_LINE_INSTNL_MSP1_PD_AMT,
-            f.CLM_LINE_INSTNL_MSP2_PD_AMT,
-            f.CLM_LINE_INSTNL_REV_CTR_DT,
-            f.CLM_REV_DSCNT_IND_CD,
-            f.CLM_OTAF_ONE_IND_CD,
-            f.CLM_REV_PACKG_IND_CD,
-            f.CLM_REV_PMT_MTHD_CD,
-            f.CLM_REV_CNTR_STUS_CD,
-            f.CLM_ANSI_SGNTR_SK,
-            f.CLM_LINE_ADD_ON_PYMT_AMT,
-            f.CLM_LINE_NON_EHR_RDCTN_AMT,
-            f.CLM_REV_CNTR_TDAPA_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-            f.CLM_REV_APC_HIPPS_CD,
-        ],
-    )
-    CLM_LINE_PRFNL = (
-        f.CLM_LINE_PRFNL,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_BENE_PRMRY_PYR_PD_AMT,
-            f.CLM_SRVC_DDCTBL_SW,
-            f.CLM_FED_TYPE_SRVC_CD,
-            f.CLM_MTUS_IND_CD,
-            f.CLM_PRCSG_IND_CD,
-            f.CLM_PMT_80_100_CD,
-            f.CLM_PHYSN_ASTNT_CD,
-            f.CLM_PRCNG_LCLTY_CD,
-            f.CLM_PRMRY_PYR_CD,
-            f.CLM_PRVDR_SPCLTY_CD,
-            f.CLM_SUPLR_TYPE_CD,
-            f.CLM_LINE_CARR_CLNCL_CHRG_AMT,
-            f.CLM_LINE_CARR_CLNCL_LAB_NUM,
-            f.CLM_LINE_CARR_HPSA_SCRCTY_CD,
-            f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT,
-            f.CLM_LINE_DMERC_SCRN_SVGS_AMT,
-            f.CLM_LINE_HCT_HGB_TYPE_CD,
-            f.CLM_LINE_HCT_HGB_RSLT_NUM,
-            f.CLM_LINE_PRFNL_DME_PRICE_AMT,
-            f.CLM_LINE_PRFNL_INTRST_AMT,
-            f.CLM_LINE_PRFNL_MTUS_CNT,
-            f.CLM_MDCR_PRMRY_PYR_ALOWD_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE_RX = (
-        f.CLM_LINE_RX,
-        [
-            f.CLM_UNIQ_ID,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_NUM_SK,
-            f.CLM_TYPE_CD,
-            f.GEO_BENE_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_FROM_DT,
-            f.CLM_DSPNSNG_STUS_CD,
-            f.CLM_LINE_RX_ORGN_CD,
-            f.CLM_BRND_GNRC_CD,
-            f.CLM_PTNT_RSDNC_CD,
-            f.CLM_PHRMCY_SRVC_TYPE_CD,
-            f.CLM_LINE_AUTHRZD_FILL_NUM,
-            f.CLM_LTC_DSPNSNG_MTHD_CD,
-            f.CLM_CMPND_CD,
-            f.CLM_LINE_DAYS_SUPLY_QTY,
-            f.CLM_LINE_RX_FILL_NUM,
-            f.CLM_DAW_PROD_SLCTN_CD,
-            f.CLM_DRUG_CVRG_STUS_CD,
-            f.CLM_CTSTRPHC_CVRG_IND_CD,
-            f.CLM_LINE_GRS_ABOVE_THRSHLD_AMT,
-            f.CLM_LINE_GRS_BLW_THRSHLD_AMT,
-            f.CLM_LINE_LIS_AMT,
-            f.CLM_LINE_PLRO_AMT,
-            f.CLM_RPTD_MFTR_DSCNT_AMT,
-            f.CLM_LINE_INGRDNT_CST_AMT,
-            f.CLM_LINE_VCCN_ADMIN_FEE_AMT,
-            f.CLM_LINE_SRVC_CST_AMT,
-            f.CLM_LINE_SLS_TAX_AMT,
-            f.CLM_PRCNG_EXCPTN_CD,
-            f.CLM_LINE_RPTD_GAP_DSCNT_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE_MCS = (
-        f.CLM_LINE_MCS,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_LINE_PRFRMG_PRVDR_LCLTY_CD,
-            f.CLM_LINE_RBNDLG_CRTFCTN_NUM,
-            f.CLM_LINE_HCT_LVL_NUM,
-            f.CLM_LINE_HGB_LVL_NUM,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE_FISS = (
-        f.CLM_LINE_FISS,
-        [
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_LINE_MSP_COINSRNC_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_LINE = (
-        f.CLM_LINE,
-        [
-            f.CLM_UNIQ_ID,
-            f.GEO_BENE_SK,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_NUM_SK,
-            f.CLM_LINE_NUM,
-            f.CLM_FROM_DT,
-            f.CLM_LINE_FROM_DT,
-            f.CLM_LINE_THRU_DT,
-            f.CLM_LINE_HCPCS_CD,
-            f.HCPCS_1_MDFR_CD,
-            f.HCPCS_2_MDFR_CD,
-            f.HCPCS_3_MDFR_CD,
-            f.HCPCS_4_MDFR_CD,
-            f.HCPCS_5_MDFR_CD,
-            f.CLM_LINE_ANSTHSA_UNIT_CNT,
-            f.CLM_LINE_SRVC_UNIT_QTY,
-            f.CLM_LINE_REV_CTR_CD,
-            f.CLM_LINE_BENE_PD_AMT,
-            f.CLM_LINE_ALOWD_CHRG_AMT,
-            f.CLM_LINE_SBMT_CHRG_AMT,
-            f.CLM_LINE_BLOOD_DDCTBL_AMT,
-            f.CLM_LINE_MDCR_DDCTBL_AMT,
-            f.CLM_LINE_PRVDR_PMT_AMT,
-            f.CLM_LINE_NCVRD_CHRG_AMT,
-            f.CLM_LINE_FINL_ACTN_IND,
-            f.CLM_LINE_LTST_CLM_IND,
-            f.CLM_LINE_OTAF_AMT,
-            f.CLM_LINE_NDC_CD,
-            f.CLM_LINE_NDC_QTY,
-            f.CLM_LINE_NDC_QTY_QLFYR_CD,
-            f.CLM_RNDRG_PRVDR_TYPE_CD,
-            f.CLM_LINE_MDCR_COINSRNC_AMT,
-            f.CLM_LINE_DGNS_CD,
-            f.CLM_POS_CD,
-            f.CLM_RNDRG_PRVDR_PRTCPTG_CD,
-            f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD,
-            f.CLM_RNDRG_PRVDR_TAX_NUM,
-            f.CLM_RNDRG_PRVDR_PIN_NUM,
-            f.PRVDR_RNDRNG_PRVDR_NPI_NUM,
-            f.CLM_RNDRG_PRVDR_NPI_NUM,
-            f.CLM_LINE_PMD_UNIQ_TRKNG_NUM,
-            f.CLM_LINE_RX_NUM,
-            f.CLM_LINE_BNFT_ENHNCMT_1_CD,
-            f.CLM_LINE_BNFT_ENHNCMT_2_CD,
-            f.CLM_LINE_BNFT_ENHNCMT_3_CD,
-            f.CLM_LINE_BNFT_ENHNCMT_4_CD,
-            f.CLM_LINE_BNFT_ENHNCMT_5_CD,
-            f.CLM_LINE_NGACO_PBPMT_SW,
-            f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW,
-            f.CLM_LINE_NGACO_SNF_WVR_SW,
-            f.CLM_LINE_NGACO_TLHLTH_SW,
-            f.CLM_LINE_NGACO_CPTATN_SW,
-            f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW,
-            f.GEO_RNDRG_SSA_STATE_CD,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_PRFNL = (
-        f.CLM_PRFNL,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_NUM_SK,
-            f.GEO_BENE_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_CARR_PMT_DNL_CD,
-            f.CLM_MDCR_PRFNL_PRMRY_PYR_AMT,
-            f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW,
-            f.CLM_CLNCL_TRIL_NUM,
-            f.CLM_PRVDR_ACNT_RCVBL_OFST_AMT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_PROD = (
-        f.CLM_PROD,
-        [
-            f.CLM_PROD_TYPE_CD,
-            f.CLM_PRCDR_CD,
-            f.CLM_DGNS_PRCDR_ICD_IND,
-            f.CLM_PRCDR_PRFRM_DT,
-            f.CLM_VAL_SQNC_NUM,
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_NUM_SK,
-            f.GEO_BENE_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_DGNS_CD,
-            f.CLM_POA_IND,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_OCRNC_SGNTR_MBR = (
-        f.CLM_OCRNC_SGNTR_MBR,
-        [
-            f.CLM_OCRNC_SGNTR_SK,
-            f.CLM_OCRNC_SGNTR_SQNC_NUM,
-            f.CLM_OCRNC_SPAN_CD,
-            f.CLM_OCRNC_SPAN_FROM_DT,
-            f.CLM_OCRNC_SPAN_THRU_DT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_RLT_OCRNC_SGNTR_MBR = (
-        f.CLM_RLT_OCRNC_SGNTR_MBR,
-        [
-            f.CLM_RLT_OCRNC_SGNTR_SK,
-            f.CLM_RLT_OCRNC_SGNTR_SQNC_NUM,
-            f.CLM_RLT_OCRNC_CD,
-            f.CLM_RLT_OCRNC_DT,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_RLT_COND_SGNTR_MBR = (
-        f.CLM_RLT_COND_SGNTR_MBR,
-        [
-            f.CLM_RLT_COND_SGNTR_SK,
-            f.CLM_RLT_COND_SGNTR_SQNC_NUM,
-            f.CLM_RLT_COND_CD,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    CLM_VAL = (
-        f.CLM_VAL,
-        [
-            f.CLM_DT_SGNTR_SK,
-            f.CLM_NUM_SK,
-            f.GEO_BENE_SK,
-            f.CLM_TYPE_CD,
-            f.CLM_VAL_CD,
-            f.CLM_VAL_AMT,
-            f.CLM_VAL_SQNC_NUM,
-            f.CLM_VAL_ANSI_RSN_CD,
-            f.CLM_VAL_ANSI_GRP_CD,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-    PRVDR_HSTRY = (
-        f.PRVDR_HSTRY,
-        [
-            f.PRVDR_SK,
-            f.PRVDR_HSTRY_EFCTV_DT,
-            f.PRVDR_HSTRY_OBSLT_DT,
-            f.PRVDR_1ST_NAME,
-            f.PRVDR_MDL_NAME,
-            f.PRVDR_LAST_NAME,
-            f.PRVDR_NAME,
-            f.PRVDR_LGL_NAME,
-            f.PRVDR_NPI_NUM,
-            f.PRVDR_EMPLR_ID_NUM,
-            f.PRVDR_OSCAR_NUM,
-            f.PRVDR_TXNMY_CMPST_CD,
-            f.PRVDR_TYPE_CD,
-            f.META_SK,
-            f.META_LST_UPDT_SK,
-        ],
-    )
-    PRAUC = (
-        f.PRAUC,
-        [
-            f.MBI_NUM,
-            f.CAN,
-            f.EQUAT_BIC,
-            f.UTN,
-            f.SEGMENT_COUNT,
-            f.CURRENT_SEGMENT,
-            f.UTN_VALID_ST_DT,
-            f.UTN_VALID_EN_DT,
-            f.PA_IND,
-            f.CLM_TYPE,
-            f.HCPCS_OR_CPT_OR_HIPPS,
-            f.ICD_PROC_IND,
-            f.ICD_PROC_CODE,
-            f.MAC_ID,
-            f.PA_FILLER,
-            f.ICN_DCN,
-            f.PA_DT_ADDED,
-            f.PA_DT_UPDATED,
-            f.SERVICE_CNTS,
-            f.PA_DECISION,
-            f.PA_REQ_SUB_DT,
-            f.PA_REQ_REC_DT,
-            f.PA_DECISION_DT,
-            f.PA_DECISION_EXP_DT,
-            f.ORDER_REFER_NPI,
-            f.RENDER_NPI,
-            f.OPERATE_NPI,
-            f.SVC_RENDER_ST,
-            f.PRICE_MOD1,
-            f.PRICE_MOD2,
-            f.PLACE_OF_SERV,
-            f.ICD_DIAG_IND_1,
-            f.ICD_DIAG_CODE_1,
-            f.ICD_DIAG_IND_2,
-            f.ICD_DIAG_CODE_2,
-            f.ICD_DIAG_IND_3,
-            f.ICD_DIAG_CODE_3,
-            f.ICD_DIAG_IND_4,
-            f.ICD_DIAG_CODE_4,
-            f.ICD_DIAG_IND_5,
-            f.ICD_DIAG_CODE_5,
-            f.NPI,
-            f.NAME,
-            f.CMS_CERT,
-            f.REV_CODE_1,
-            f.REV_CODE_2,
-            f.REV_CODE_3,
-            f.REV_CODE_4,
-            f.REV_CODE_5,
-            f.REV_CODE_6,
-            f.REV_CODE_7,
-            f.REV_CODE_8,
-            f.REV_CODE_9,
-            f.REV_CODE_10,
-            f.REV_CODE_11,
-            f.REV_CODE_12,
-            f.REV_CODE_13,
-            f.REV_CODE_14,
-            f.REV_CODE_15,
-            f.REV_CODE_16,
-            f.REV_CODE_17,
-            f.REV_CODE_18,
-            f.REV_CODE_19,
-            f.REV_CODE_20,
-            f.COND_CODE_1,
-            f.COND_CODE_2,
-            f.COND_CODE_3,
-            f.COND_CODE_4,
-            f.OCCUR_CODE_1,
-            f.OCCUR_CODE_2,
-            f.OCCUR_CODE_3,
-            f.OCCUR_CODE_4,
-            f.TOB,
-            f.MR_COUNT_IND,
-            f.MR_COUNT_ST_DT,
-            f.MR_COUNT_END_DT,
-            f.ATT_PHY_NPI,
-            f.RRB_EXCL_IND,
-            f.IDR_INSRT_TS,
-            f.IDR_UPDT_TS,
-        ],
-    )
-
-    def __init__(
-        self,
-        value: str,
-        ordered_headers: list[str],
-    ) -> None:
-        self.ordered_headers = ordered_headers
-        self.out_path = Path(f"../out/{value}.csv")
-
-    def __new__(
-        cls: type[_ClaimsFile],
-        value: str,
-        ordered_headers: list[str],
-    ) -> _ClaimsFile:
-        obj = str.__new__(cls, value)
-        obj._value_ = value
-        obj.ordered_headers = ordered_headers
-        return obj
-
-
 @click.command
 @common_options
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./out"),
+    show_default=True,
+    callback=ensure_directory_exists,
+    help="Directory to write generated CSV files to.",
+)
 @click.argument("paths", nargs=-1, type=click.Path(exists=True))
 def generate_locally(
     min_claims: int,
@@ -719,21 +67,22 @@ def generate_locally(
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
-    writer: OutputDestinationWriter | None = None,
+    out_dir: Path,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
+    overwrite: str | None = None,
     **kwargs: Any,  # noqa: ANN401, ARG001
 ) -> None:
     generate(
-        min_claims,
-        max_claims,
-        samhsa,
-        pac_gen,
-        bene_sk_mode,
-        paths,
-        writer,
-        truncate,
-        batch_size,
+        min_claims=min_claims,
+        max_claims=max_claims,
+        samhsa=samhsa,
+        pac_gen=pac_gen,
+        bene_sk_mode=bene_sk_mode,
+        writer=CsvWriter(out_dir=out_dir, overwrite_fields=overwrite),
+        paths=paths,
+        truncate=truncate,
+        batch_size=batch_size,
     )
 
 
@@ -743,8 +92,8 @@ def generate(
     samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
+    writer: OutputDestinationWriter,
     paths: tuple[Path, ...] | None = None,
-    writer: OutputDestinationWriter | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
 ) -> None:
@@ -754,50 +103,12 @@ def generate(
             f"min claims value of {min_claims} is greater than max claims value of {max_claims}"
         )
 
-    if writer is None:
-        writer = CsvWriter()
-
-    claims_tables = [
-        f.CLM,
-        f.CLM_LINE,
-        f.CLM_LINE_DCMTN,
-        f.CLM_ANSI_SGNTR,
-        f.CLM_VAL,
-        f.CLM_DT_SGNTR,
-        f.CLM_PROD,
-        f.CLM_INSTNL,
-        f.CLM_LINE_INSTNL,
-        f.CLM_DCMTN,
-        f.CLM_LCTN_HSTRY,
-        f.CLM_FISS,
-        f.CLM_PRFNL,
-        f.CLM_LINE_PRFNL,
-        f.CLM_LINE_RX,
-        f.CLM_LINE_MCS,
-        f.CLM_LINE_FISS,
-        f.CLM_RLT_COND_SGNTR_MBR,
-        f.CLM_OCRNC_SGNTR_MBR,
-        f.CLM_RLT_OCRNC_SGNTR_MBR,
-        f.PRVDR_HSTRY,
-        f.PRAUC,
-    ]
-
-    if isinstance(writer, SnowflakeWriter):
-        if truncate:
-            writer.truncate_tables(claims_tables)
-        id_state = load_id_state(writer, truncate)
-        id_gen: IdGenerator = SequentialIdGenerator(id_state)
-    else:
-        id_gen = RandomIdGenerator()
-
-    gen_utils = GeneratorUtil(id_gen=id_gen)
-
     files: dict[str, list[RowAdapter]] = {
-        f.BENE_HSTRY: [],
         f.CLM: [],
         f.CLM_LINE: [],
         f.CLM_LINE_DCMTN: [],
         f.CLM_VAL: [],
+        f.CLM_ANSI_SGNTR: [],
         f.CLM_DT_SGNTR: [],
         f.CLM_PROD: [],
         f.CLM_INSTNL: [],
@@ -813,13 +124,35 @@ def generate(
         f.CLM_RLT_COND_SGNTR_MBR: [],
         f.CLM_OCRNC_SGNTR_MBR: [],
         f.CLM_RLT_OCRNC_SGNTR_MBR: [],
-        f.PRVDR_HSTRY: [],
+    }
+
+    claims_tables = list(files.keys())
+
+    if isinstance(writer, SnowflakeWriter):
+        if truncate:
+            tables = [*claims_tables, f.PRVDR_HSTRY, f.PRAUC]
+            writer.truncate_tables(tables)
+        id_state = load_id_state(writer, truncate)
+        id_gen: IdGenerator = SequentialIdGenerator(id_state)
+    else:
+        id_gen = RandomIdGenerator()
+
+    gen_utils = GeneratorUtil(id_gen=id_gen)
+
+    dependency_files: dict[str, list[RowAdapter]] = {
+        f.BENE_HSTRY: [],
         f.CNTRCT_PBP_NUM: [],
+        f.PRVDR_HSTRY: [],
         f.PRAUC: [],
     }
+
     if isinstance(writer, CsvWriter):
-        if paths:
-            load_file_dict(files=files, paths=list(paths))
+        files = load_file_dict(
+            files=files | dependency_files,
+            paths=paths or (),
+            overwrites=writer.overwrites,
+            schema=writer.basic_schema,
+        )
         if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
             print(
                 f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
@@ -838,23 +171,17 @@ def generate(
             init_provider_historys=existing_providers,
         )
     )
-    gen_utils.export_table(
-        adapters_to_dicts(generated_provider_histories), f.PRVDR_HSTRY, writer, ALL_KEYS
-    )
+    gen_utils.export_table(generated_provider_histories, f.PRVDR_HSTRY, writer)
 
     # This table is special in that its data is mostly static and read from a static file, so we
     # don't need to do anything fancy with it
     clm_ansi_sgntr_rows = other_util.gen_synthetic_clm_ansi_sgntr()
-    gen_utils.export_table(
-        adapters_to_dicts(clm_ansi_sgntr_rows), f.CLM_ANSI_SGNTR, writer, ALL_KEYS
-    )
+    gen_utils.export_table(clm_ansi_sgntr_rows, f.CLM_ANSI_SGNTR, writer)
 
     adj_util = AdjudicatedGeneratorUtil(enable_samhsa=samhsa)
     pac_util = PacGeneratorUtil()
     claim_child_tables = [
-        table
-        for table in claims_tables
-        if table not in (f.CLM, f.PRAUC, f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY)
+        table for table in claims_tables if table not in (f.CLM, f.CLM_ANSI_SGNTR)
     ]
 
     # An operator could provide a BENE_HSTRY with new beneficiaries that have no corresponding CLMs,
@@ -884,18 +211,19 @@ def generate(
         out_tables[f.PRVDR_HSTRY] = generated_provider_histories
         out_tables[f.BENE_HSTRY] = writer.get_bene_sk_to_mbi(bene_sks_batch, files)
         existing_prior_auths = writer.get_prior_auths(out_tables[f.BENE_HSTRY], files)
-        out_tables[f.PRAUC] = pa_util.gen_prior_auths(
+        prior_auths = pa_util.gen_prior_auths(
             gen_utils=gen_utils,
             out_tables=out_tables,
             generated_type_1_npis=generated_type_1_npis,
             generated_type_2_npis=generated_type_2_npis,
             init_prior_auth=existing_prior_auths,
         )
+        gen_utils.export_table(prior_auths, f.PRAUC, writer)
 
         for table_name, rows in out_tables.items():
-            if table_name in (f.CLM_ANSI_SGNTR, f.PRVDR_HSTRY) or table_name not in _ClaimsFile:
+            if table_name == f.CLM_ANSI_SGNTR or table_name not in claims_tables:
                 continue
-            gen_utils.export_table(adapters_to_dicts(rows), table_name, writer, ALL_KEYS)
+            gen_utils.export_table(rows, table_name, writer)
 
     logger.info("Done generating synthetic claims/prior auth data for provided BENE_SKs")
 

@@ -14,3 +14,7 @@ def _find_root() -> Path | ZipPath:
 
 
 ROOT = _find_root()
+
+
+def parse_input(input: str) -> list[str]:
+    return [s for i in input.split(",") if (s := i.strip())]

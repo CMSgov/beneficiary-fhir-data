@@ -16,6 +16,8 @@ dependencies = [
   "snowflake-snowpark-python",
   "prompt-toolkit",
   "cryptography",
+  "psycopg",
+  "daff",
 ]
 
 [project.scripts]

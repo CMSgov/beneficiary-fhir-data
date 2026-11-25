@@ -360,8 +360,12 @@ Paths to CSVs or directories including CSVs that will be regenerated/updated wit
         byte-identical output file. Take care to avoid providing a partial set of tables with
         foreign key constraints (e.g. BENE_SK) without providing the root table as this could
         result in broken output data""")]
-[arg("claims", long, value="1", help="""Automatically generate claims after patient generation using
-the generated BENE_HSTRY""")]
+[arg("out-dir", long, help="Directory to write generated CSV files to")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
+[arg("claims", long, value="1", help="""If this is a regeneration flow, it will automatically regenerate claims after patient
+generation using the specified paths. If no paths were provided then it generates claims data from scratch only using the
+freshly generated BENE_HSTRY and CNTRCT_PBP_NUM""")]
 [arg("force-ztm", long, value="1", help="""
 Allow \"zero-to-many\" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from
 a file to be generated. This will introduce new rows for patients that previously had
@@ -375,19 +379,34 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" *paths:
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" out-dir="./out" *paths: create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
+    trap 'just remove-db' EXIT
 
-    root="$(git rev-parse --show-toplevel)"
+    root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+    out_dir="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ out-dir }}")"
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/patient_generator.py $paths \
+        --out-dir "$out_dir" \
         {{ if patients != "" { f"--patients {{ patients }}" } else { "" } }} \
         {{ if claims == "1" { "--claims" } else { "" } }} \
         {{ if exclude-empty == "1" { "--exclude-empty" } else { "" } }} \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
 
 [arg("paths", help="Paths to a directory or specific CSV files to generate data from")]
+[arg("out-dir", long, help="Directory to write generated CSV files to")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("min-claims", long, pattern="\\d+", help="Minimum number of claims to generate per person")]
 [arg("max-claims", long, pattern="\\d+", help="Maximum number of claims to generate per person")]
@@ -405,20 +424,34 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, if no claims files are provided in `paths`, new ones will be generated from scratch.""")]
 [group('model')]
 [no-cd]
-claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" *paths: sushi
+claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene-sk-mode="both" overwrite="" out-dir="./out" *paths: sushi create-db create-mock-idr
     #!/usr/bin/env bash
     set -Eeuo pipefail
+    trap 'just remove-db' EXIT
 
-    root="$(git rev-parse --show-toplevel)"
+    root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
+    out_dir="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ out-dir }}")"
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
     cd "$root/apps/bfd-model-idr" && uv run bfd-synthetic-generator/claims_generator.py $paths \
+        --out-dir "$out_dir" \
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if samhsa == "1" { "--samhsa" } else { "" } }} \
         --max-claims "{{ max-claims }}" \
         --min-claims "{{ min-claims }}" \
-        --pac-gen "{{ pac-gen }}"
+        --pac-gen "{{ pac-gen }}" \
+        --overwrite "{{ overwrite }}"
 
 [arg("database", long, help="Optional database name override for testing purposes by bypassing AWS SSM")]
+[arg("overwrite", long, help="""Overwrites fields when regenerating synthetic data. For Snowflake flow should be comma separated
+TABLE.FIELD entries e.g. CLM.CLM_PMT_AMT or SYNTHETIC_FILE_NAME.FIELD if CSV flow""")]
 [arg("claims", long, value="1", help="Generate claims after patient generation")]
 [arg("samhsa", long, value="1", help="Enable or disable generation of SAMHSA-related data")]
 [arg("truncate", long, value="1", help="Truncate tables and generate from scratch instead of regenerating")]
@@ -432,7 +465,7 @@ claims-generator min-claims="5" max-claims="10" samhsa="" pac-gen="if_none" bene
 [arg("bene-sk-mode", long, pattern="(bene_hstry|clm|both)", help="Tables to read distinct BENE_SKs from when generating claims")]
 [doc("Loads Snowflake synthetic credentials from SSM, then deploys and runs the synthetic generator stored procedure.")]
 [group('model')]
-deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000": sushi
+deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max-claims="5" samhsa="" pac-gen="if_none" bene-sk-mode="both" force-ztm="" truncate="" batch-size="50000" overwrite="": sushi
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
@@ -451,7 +484,18 @@ deploy-generator-sproc env database="" patients="0" claims="" min-claims="5" max
         --bene-sk-mode "{{ bene-sk-mode }}" \
         {{ if truncate == "1" { "--truncate" } else { "" } }} \
         --batch-size "{{ batch-size }}" \
-        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }}
+        {{ if force-ztm == "1" { "--force-ztm" } else { "" } }} \
+        --overwrite "{{ overwrite }}"
+
+[arg("source", long, help="Database to clone from e.g. BFD_TEST")]
+[arg("target", long, help="Database to clone to create or replace e.g. BFD_SANDBOX")]
+[arg("env", long, pattern=env_pattern, help=env_help)]
+[doc("Copy over all data from one synthetic database environment to the specified environments")]
+[group('model')]
+copy-synthetic-data env source target:
+    cd ./apps/bfd-model-idr/bfd-synthetic-generator && BFD_ENV="{{ env }}" ./copy-synthetic-data.sh \
+        --source "{{ source }}" \
+        --target "{{ target }}"
 
 [arg("users", long, help="Peak number of concurrent Locust users")]
 [arg("tablesample", long, help="Percent of table to sample")]
@@ -476,3 +520,27 @@ samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
         --tablesample "{{ tablesample }}" \
         --limit "{{ limit }}" \
         --concurrency "{{ concurrency }}"
+
+[arg("source-directory", help="Directory containing the original synthetic CSV files")]
+[arg("target-directory", help="Directory containing the regenerated CSV files to check")]
+[doc("Compares checksums of original and regenerated synthetic CSV files to detect mismatches")]
+[group('model')]
+[no-cd]
+diff-synthetic-files source-directory target-directory: create-db create-mock-idr
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    trap 'just remove-db' EXIT
+
+    root="{{ justfile_directory() }}"
+    source="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ source-directory }}")"
+    target="$("$root/apps/utils/scripts/relative-to-absolute.sh" "{{ target-directory }}")"
+
+    source "$root/apps/utils/scripts/local-constants.sh"
+    export BFD_LOCAL_DB_ENDPOINT="$PGHOST"
+    export BFD_LOCAL_DB_PORT="$PGPORT"
+    export BFD_LOCAL_DB_NAME="$PGDATABASE"
+    export BFD_LOCAL_DB_USERNAME="$BFD_LOCAL_DB_USERNAME"
+    export BFD_LOCAL_DB_PASSWORD="$BFD_LOCAL_DB_PASSWORD"
+
+    cd "$root/apps/bfd-model-idr"
+    uv run bfd-synthetic-generator/diff-synthetic-files.py "$source" "$target"

@@ -41,10 +41,11 @@ from constants import (
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
-from file_utils import ROOT
 from id_generators import IdGenerator, RandomIdGenerator
-from load_synthetic_output import ALL_KEYS, CsvWriter, OutputDestinationWriter
+from load_synthetic_output import CsvWriter, OutputDestinationWriter
 from row_adapter import RowAdapter
+from schema_utils import TableSchema, get_table_name_from_file_name
+from utils import ROOT
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 AVAIL_CONTRACT_NUMS = [
@@ -152,8 +153,10 @@ def gen_thru_dt(frm_dt: str | date, max_days: int = 30) -> str:
 def load_file_dict(
     files: dict[str, list[RowAdapter]],
     paths: Sequence[str | Path],
+    overwrites: dict[str, set[str]],
     exclude_empty: bool = False,
-) -> None:
+    schema: dict[str, TableSchema] | None = None,
+) -> dict[str, list[RowAdapter]]:
     file_paths = set(
         itertools.chain.from_iterable(
             [
@@ -164,7 +167,7 @@ def load_file_dict(
         )
     )
     if not file_paths:
-        return
+        return files
 
     print(
         f"Loading all provided files, {
@@ -186,9 +189,25 @@ def load_file_dict(
                 na_filter=exclude_empty,
                 keep_default_na=False,
             )
+
+            # Add any missing columns defined in our idr schema even if we have not generated data
+            # for it so our CSV file always matches the actual schema
+            table_name = get_table_name_from_file_name(file_name)
+            if schema and (table_schema := schema.get(table_name)):
+                for col in table_schema.columns:
+                    if col not in csv_data.columns:
+                        csv_data[col] = pd.NA
+
             for field in _CAST_TO_INT_FIELDS:
                 if field in csv_data.columns:
-                    csv_data[field] = csv_data[field].astype(int)
+                    csv_data[field] = pd.to_numeric(csv_data[field], errors="coerce").astype(
+                        "Int64"
+                    )
+
+            if fields_to_overwrite := overwrites.get(file_name):
+                for field in fields_to_overwrite:
+                    csv_data.pop(field)
+
             file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
             if not exclude_empty:
                 files[file_name] = load_file(file_as_dictlist)  # type: ignore
@@ -198,6 +217,7 @@ def load_file_dict(
                 [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
             )
     print("All files loaded")
+    return files
 
 
 def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
@@ -206,12 +226,6 @@ def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
 
 def probability(frac: float) -> bool:
     return random.random() < (frac)
-
-
-def adapters_to_dicts(
-    adapters: list[RowAdapter] | list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    return [x.kv if isinstance(x, RowAdapter) else x for x in adapters]
 
 
 def output_table_contains_by_bene_sk(
@@ -863,46 +877,36 @@ class GeneratorUtil:
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
         beneficiary_and_contract_exports = [
-            (self.bene_hstry_table, BENE_HSTRY, ALL_KEYS),
-            (mbi_arr, BENE_MBI_ID, ALL_KEYS),
-            (self.mdcr_stus, BENE_STUS, ALL_KEYS),
-            (self.mdcr_entlmt, BENE_ENTLMT, ALL_KEYS),
-            (self.mdcr_tp, BENE_TP, ALL_KEYS),
-            (self.mdcr_rsn, BENE_ENTLMT_RSN, ALL_KEYS),
-            (self.bene_xref_table, BENE_XREF, ALL_KEYS),
-            (
-                self.bene_cmbnd_dual_mdcr,
-                BENE_DUAL,
-                ALL_KEYS,
-            ),
-            (self.bene_lis_cmbnd, BENE_LIS_CMBND, ALL_KEYS),
-            (
-                self.bene_mapd_enrlmt_rx,
-                BENE_MAPD_ENRLMT_RX,
-                ALL_KEYS,
-            ),
-            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT, ALL_KEYS),
+            (self.bene_hstry_table, BENE_HSTRY),
+            (mbi_arr, BENE_MBI_ID),
+            (self.mdcr_stus, BENE_STUS),
+            (self.mdcr_entlmt, BENE_ENTLMT),
+            (self.mdcr_tp, BENE_TP),
+            (self.mdcr_rsn, BENE_ENTLMT_RSN),
+            (self.bene_xref_table, BENE_XREF),
+            (self.bene_cmbnd_dual_mdcr, BENE_DUAL),
+            (self.bene_lis_cmbnd, BENE_LIS_CMBND),
+            (self.bene_mapd_enrlmt_rx, BENE_MAPD_ENRLMT_RX),
+            (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT),
         ]
 
         if isinstance(writer, CsvWriter):
-            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM, ALL_KEYS))
-            beneficiary_and_contract_exports.append(
-                (self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT, ALL_KEYS)
-            )
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM))
+            beneficiary_and_contract_exports.append((self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT))
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
-            for data, table_name, cols in t:
+            for data, table_name in t:
                 t.set_postfix(file=table_name)  # type: ignore
-                self.export_table(data, table_name, writer, cols)
+                self.export_table(data, table_name, writer)
 
     def export_table(
         self,
-        data: list[dict[str, Any]],
+        data: list[RowAdapter] | list[dict[str, Any]],
         table_name: str,
         writer: OutputDestinationWriter,
-        cols: list[str] | str = ALL_KEYS,
     ) -> None:
-        writer.write_table(data, table_name, cols)
+        data = [x.kv if isinstance(x, RowAdapter) else x for x in data]
+        writer.write_table(data, table_name)
 
     def flush_batch(self, writer: OutputDestinationWriter) -> None:
         self.save_output_files(writer)

@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14.3"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -51,6 +51,7 @@ constraints = [
     { name = "certifi", specifier = ">=2026.10.23" },
     { name = "click", specifier = ">=8.5.0" },
     { name = "cryptography", specifier = ">=50.0.2" },
+    { name = "daff", specifier = ">=1.4.2" },
     { name = "debugpy", specifier = ">=1.8.22" },
     { name = "faker", specifier = ">=40.44.0" },
     { name = "flask", specifier = ">=3.1.3" },
@@ -823,6 +824,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/10/bf/8d6ebc7dded797bd0f0160d52188021211f011a2b164ef0ae1dac4587465/cryptography-50.0.2-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:7a8701d6b584d76e909e3d305b7d126b41439876a5aaf76cddc67fc230eafa2e", size = 4897738, upload-time = "2026-09-30T15:29:43.106Z" },
     { url = "https://files.pythonhosted.org/packages/d4/aa/f3f6e0de7e6253b8baa8b2d8fb9d50924fa75cee3d4624bd4bc1208ee923/cryptography-50.0.2-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:ce47f66801c20ec6c6632453bb5960fe38939e9306970b48b3a5a26de7745d94", size = 5058280, upload-time = "2026-09-30T15:29:44.827Z" },
     { url = "https://files.pythonhosted.org/packages/f6/b6/a1faf3a27ae9405fb34b1713cc73b2d8a26b04d5c561578fa2e6ef3e5bb9/cryptography-50.0.2-cp39-abi3-win_amd64.whl", hash = "sha256:4e81d95e5bafc2d6e34e4bed780e53e4d5b9a2f928573428aa4d35fbec1eb0de", size = 3854095, upload-time = "2026-09-30T15:29:46.782Z" },
+]
+
+[[package]]
+name = "daff"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/d0/c0a1374db3afad0f9dfe6c795e5df102af03d49ad5e6e8502fb09eb88110/daff-1.4.2.tar.gz", hash = "sha256:47f0391eda7e2b5011f7ccac006b9178accb465bcb94a2c9f284257fff5d2686", size = 148251, upload-time = "2025-05-04T19:24:11.521Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/fe/d54a874e8d7b88bc03c459f63a993305db50039b734fab751a0466dabfc1/daff-1.4.2-py3-none-any.whl", hash = "sha256:88981a21d065e4378b5c4bd40b975dbfdea9b7ff540071f3bb5e20cc8b3590b5", size = 144922, upload-time = "2025-05-04T19:24:09.999Z" },
 ]
 
 [[package]]
@@ -2647,9 +2657,11 @@ source = { editable = "apps/bfd-model-idr" }
 dependencies = [
     { name = "click" },
     { name = "cryptography" },
+    { name = "daff" },
     { name = "faker" },
     { name = "pandas" },
     { name = "prompt-toolkit" },
+    { name = "psycopg" },
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "requests" },
@@ -2662,9 +2674,11 @@ dependencies = [
 requires-dist = [
     { name = "click" },
     { name = "cryptography" },
+    { name = "daff" },
     { name = "faker" },
     { name = "pandas" },
     { name = "prompt-toolkit" },
+    { name = "psycopg" },
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "requests" },

@@ -185,7 +185,7 @@ just claims-generator out/SYNTHETIC_BENE_HSTRY.csv out/SYNTHETIC_CNTRCT_PBP_NUM.
 
 ##### Regenerating existing claims data
 
-The below will _re-generate_ **existing claims data** (assume `<PATH_TO_CLAIMS_DATA>` is a local directory containing synthetic claims data):
+The below will _re-generate_ **existing claims data contained in csv files** (assume `<PATH_TO_CLAIMS_DATA>` is a local directory containing synthetic claims data):
 
 ```sh
 just claims-generator ./out
@@ -196,15 +196,25 @@ If _any_ claims-related tables have had columns added to their respective genera
 > [!CAUTION]
 > If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
 
-## Generating Synthetic Data Directly in Snowflake
+> [!CAUTION]
+> When modifying the synthetic generators, you need to verify that you did not break idempotency as-in the CSV files do not contain any modification post a regeneration. We don't want to lose data we rely on in our tests nor change synthetic data that our users rely on in our Snowflake synthetic environments. You can verify this by first generating synthetic CSV files from scratch, regenerating them in a separate directory, and then running our diff script like below. Check out the Justfile for more information.
+
+```sh
+just patient-generator --patients 100 --claims --out-dir original-csvs
+just patient-generator original-csvs --claims --out-dir regenerated-csvs
+just diff-synthetic-files original-csvs regenerated-csvs
+```
+
+Note: If you are regenerating synthetic test data in `test_sample1` or `test_sample2` to insert new fields or remove old fields then the checksum of the affected CSV files would not match, which is expected
+
+## Generating/Regenerating Synthetic Data Directly in Snowflake
 
 We have a script `deploy_generator_sproc.py` that zips up the generator code under `bfd-synthetic-generator`, uploads it to a stage, and registers/updates the stored procedure `generate_synthetic_data` as a Snowflake python stored procedure. It also creates an event table since Snowflake collects telemetry data so logging from a python stored procedure in an event table. We can then query the event table to view the logs.
 
 ### Granting Permissions
 
 Snowflake requires these permissions to allow the snowflake stored procedure to work.
-Here are the list of commands in case they need to be re-ran in the future for both schemas
-(CMS_VDM_VIEW_MDCR_PRD & CMS_EDP_VIEW_CVM_PRAU_PRD):
+Here are the list of commands in case they need to be ran once per synthetic environment:
 
 ```text
 GRANT MODIFY ON DATABASE BFD_{ENV} TO ROLE {ENV}_SERVICE_USER;
@@ -216,17 +226,30 @@ GRANT CREATE PROCEDURE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USE
 GRANT CREATE EVENT TABLE ON SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
 GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_VDM_VIEW_MDCR_PRD TO ROLE {ENV}_SERVICE_USER;
 GRANT TRUNCATE ON ALL TABLES IN SCHEMA CMS_EDP_VIEW_CVM_PRAU_PRD TO ROLE {ENV}_SERVICE_USER;
+GRANT SELECT ON TABLE  BFD_{ENV}.cms_vdm_view_mdcr_prd.procedure_event_table TO ROLE ACCOUNTADMIN;
 ```
 
 Running the stored procedure:
 
-```text
-First, specify kn or kp depending on the environment that you're targeting
-To generate data from scratch: `just deploy-generator-sproc --env test --patients 100 --claims --truncate`
-To regenerate data: `just deploy_generator_sproc --env test --claims`
+First, run `kn` or `kp` depending on the environment that you're targeting. To generate data from scratch, run:
 
-To view the logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
+```sh
+just deploy-generator-sproc --env test --patients 100 --claims --truncate
 ```
+
+To regenerate data, you only need to regenerate in one environment and then you can run a separate script to copy the synthetic data from the regenerated environment to the specified environments:
+
+```sh
+just deploy-generator-sproc --env test --claims
+just copy-synthetic-data --env test --source BFD_TEST --target BFD_TEMP
+```
+
+Notes:
+- deploy-generator-sproc will regenerate only patients unless --claims is specified
+- Permission needed to run copy-synthetic-data for an environment for the first time: `GRANT CREATE DATABASE ON ACCOUNT TO ROLE {ENV}_SERVICE_USER`
+- After running copy-synthetic-data, you'll need to grant ACCOUNTADMIN select permision to query the procedure event table since the owner of the event table is the service user: `GRANT SELECT ON TABLE  BFD_TEMP.cms_vdm_view_mdcr_prd.procedure_event_table TO ROLE ACCOUNTADMIN`
+
+To view the generation logs in our synthetic snowflake environment, query `SELECT TIMESTAMP, VALUE FROM cms_vdm_view_mdcr_prd.procedure_event_table ORDER BY TIMESTAMP DESC`
 
 ## Testing Mapping Changes
 

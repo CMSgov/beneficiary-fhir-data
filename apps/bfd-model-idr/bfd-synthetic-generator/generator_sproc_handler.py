@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def generate_synthetic_data(
     session: Session,
+    overwrite: str,
     batch_size: int,
     truncate: bool,
     bene_sk_mode: str,
@@ -36,7 +37,7 @@ def generate_synthetic_data(
     perf_start = time.perf_counter()
     db = (session.get_current_database() or "").replace('"', "")
     schema = (session.get_current_schema() or "").replace('"', "")
-    writer = SnowflakeWriter(session, db, schema)
+    writer = SnowflakeWriter(session, db, schema, overwrite)
 
     # generate patient data
     load_inputs(
@@ -61,4 +62,4 @@ def generate_synthetic_data(
         )
 
     duration = time.perf_counter() - perf_start
-    logger.info("%.6f seconds to run the procedure", duration)
+    logger.info("%.3f seconds to run the procedure", duration)
