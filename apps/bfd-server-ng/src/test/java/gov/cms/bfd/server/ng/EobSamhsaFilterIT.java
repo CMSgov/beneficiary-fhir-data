@@ -53,6 +53,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
+  private static final long CLAIM_UNIQUE_ID_FOR_NDC_MEDICATION = 1566745788569L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS = 4146709784142L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L;
@@ -70,6 +71,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long BENE_SK3 = 455108118;
   private static final long BENE_SK4 = 167719446;
   private static final long BENE_SK5 = 27590072;
+  private static final long BENE_SK6 = 528858837;
 
   private static final PriorAuthIdentifier NO_SAMHSA_PRIOR_AUTH_BENE_SK2 =
       new PriorAuthIdentifier(String.valueOf(BENE_SK2), "-0Y2K7HP0Y71BO");
@@ -85,8 +87,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private record PriorAuthIdentifier(String beneSk, String utn) {}
 
   // System: ndc [clm_line_ndc_cd]
-  private static final String NDC_MEDICATION = "54868-5034-0";
-  private static final String NDC_MEDICATION2 = "68382-0569";
+  private static final String NDC_MEDICATION = "54868503400";
+  private static final String NDC_MEDICATION2 = "68382056900";
 
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
@@ -252,7 +254,14 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(),
             List.of(),
             List.of(SAMHSA_PRIOR_AUTH_BENE_SK5),
-            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK5)));
+            List.of(NO_SAMHSA_PRIOR_AUTH_BENE_SK5)),
+        Arguments.of(
+            BENE_SK6,
+            List.of(CLAIM_UNIQUE_ID_FOR_NDC_MEDICATION),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of()));
   }
 
   private boolean isPriorAuthorization(ExplanationOfBenefit eob) {
@@ -429,7 +438,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         nonSamhsaPriorAuth);
   }
 
-  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5})
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
@@ -545,7 +554,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureHcpcs(long claimId, String code, String system) {
-
     var eob = eobHandler.find(claimId, foundIncludeOptions).get();
     var hcpcs =
         eob.getItem().stream()
@@ -603,6 +611,24 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     assertTrue(hcpcsCptHipps.isPresent());
   }
 
+  private static Stream<Arguments> ensureNdc() {
+    return Stream.of(
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_NDC_MEDICATION, NDC_MEDICATION, SystemUrls.NDC));
+  }
+
+  @MethodSource
+  @ParameterizedTest
+  void ensureNdc(long claimId, String code, String system) {
+    var eob = eobHandler.find(claimId, foundIncludeOptions).get();
+    var ndc =
+        eob.getItem().stream()
+            .flatMap(i -> i.getDetail().stream())
+            .flatMap(d -> d.getProductOrService().getCoding().stream())
+            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .findFirst();
+    assertTrue(ndc.isPresent());
+  }
+
   /**
    * Verifies that the security_labels.yml file loads, serializes, and contains expected SAMHSA
    * codes. Ensures the file has the correct number of items and key codes are present.
@@ -618,9 +644,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     assertFalse(serialized.isEmpty(), "Serialized YAML should not be empty");
 
     // security_labels.yml has 722 active and 2 inactive items
-    // TODO count the new list via python, and verify that we include all the new codes via python
-    // since 14 were skipped
-    assertEquals(724, totalItems, "Expected 724 items, got: " + totalItems);
+    assertEquals(866, totalItems, "Expected 866 items, got: " + totalItems);
 
     for (var code : samhsaCodesToCheck) {
       assertTrue(checkSamhsaCode(SecurityLabel.normalize(code.get(1))));
@@ -701,7 +725,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   }
 
   private String normalize(String val) {
-    return val.trim().replace(".", "").toLowerCase();
+    return val.trim().replace(".", "").replace("-", "").toLowerCase();
   }
 
   static Stream<Arguments> provideSecurityScenarios() {

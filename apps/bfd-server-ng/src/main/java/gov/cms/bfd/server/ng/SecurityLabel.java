@@ -117,6 +117,6 @@ public class SecurityLabel {
    * @return boolean
    */
   public static String normalize(String code) {
-    return code.trim().replace(".", "").toLowerCase();
+    return code.trim().replace(".", "").replace("-", "").toLowerCase();
   }
 }
