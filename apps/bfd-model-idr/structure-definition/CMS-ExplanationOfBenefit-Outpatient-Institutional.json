@@ -6,7 +6,7 @@
   "name" : "ExplanationOfBenefit-Outpatient-CMS",
   "title" : "ExplanationOfBenefit Outpatient Institutional CMS",
   "status" : "active",
-  "date" : "2026-11-25T20:25:24.296319Z",
+  "date" : "2026-11-25T20:50:13.951640Z",
   "description" : "This is the CMS Outpatient Institutional Profile.",
   "jurisdiction" : [{
     "coding" : [{

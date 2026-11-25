@@ -340,6 +340,19 @@ generate-bene-sample bene-sk source-directory="" output-directory="":
         {{ if source-directory != "" { f"--source-directory {{ source-directory }}" } else { "" } }} \
         {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }}
 
+[arg("type", long, help="Type to run. Acceptable values: pharmacy|inpatient|outpatient|outpatient-non-clinician")]
+[arg("source-directory", long, help="Directory to find data dictionary files")]
+[arg("output-directory", long, help="Directory to save the output")]
+[arg("delete-temp-files", long, value="true", help="Boolean to delete temp files for debugging.")]
+[doc("Generates CMS Profile Structure Definitions")]
+[group('model')]
+gen-structure-def source-directory="" output-directory="" delete-temp-files="true" type="":
+    cd apps/bfd-model-idr && uv run gen-structure-def \
+        {{ if source-directory != "" { f"--source-directory {{ source-directory }}" } else { "" } }} \
+        {{ if output-directory != "" { f"--output-directory {{ output-directory }}" } else { "" } }} \
+        {{ if delete-temp-files != "" { f"--delete-temp-files {{ delete-temp-files }}" } else { "" } }} \
+        {{ if type != "" { f"--type {{ type }}" } else { "" } }}
+
 [arg("bene-sk", long, help="Bene key to generate sample with")]
 [arg("source-directory", long, help="Directory to find bene CSV inputs")]
 [arg("output-directory", long, help="Directory to save the output")]
