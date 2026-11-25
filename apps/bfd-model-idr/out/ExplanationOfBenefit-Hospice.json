@@ -6333,6 +6333,45 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 803.18,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT",
+        "display" : "Medicare Payment Before Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 208.08,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT",
+        "display" : "Actual Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 709.04,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_BLOOD_LBLTY_AMT",
         "display" : "Beneficiary Blood Deductible Liability Amount"
       }]

@@ -6276,19 +6276,6 @@
     "category" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-        "code" : "CLM_INSTNL_LOW_VOL_PMT_AMT",
-        "display" : "Low Volume Payment Amount"
-      }]
-    },
-    "amount" : {
-      "value" : 9435.73,
-      "currency" : "USD"
-    }
-  },
-  {
-    "category" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_MDCR_IP_1ST_YR_RATE_AMT",
         "display" : "First Year Rate Amount"
       }]
@@ -6334,6 +6321,45 @@
     },
     "amount" : {
       "value" : 3.16,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_SQSTRTN_RDCTN_AMT",
+        "display" : "Sequestration Adjustment Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 801.18,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_INCLSN_AMT",
+        "display" : "Medicare Payment Before Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 206.08,
+      "currency" : "USD"
+    }
+  },
+  {
+    "category" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
+        "code" : "CLM_PBP_RDCTN_AMT",
+        "display" : "Actual Model Reduction Amount"
+      }]
+    },
+    "amount" : {
+      "value" : 707.04,
       "currency" : "USD"
     }
   },

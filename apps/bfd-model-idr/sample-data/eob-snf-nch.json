@@ -1538,5 +1538,18 @@
       "CLM_DGNS_PRCDR_ICD_IND": "0"
     }
   ],
-  "claimValues": []
+    "claimValues": [
+    {
+      "CLM_VAL_CD": "73",
+      "CLM_VAL_AMT": "801.18"
+    },
+        {
+      "CLM_VAL_CD": "Q0",
+      "CLM_VAL_AMT": "206.08"
+    },
+        {
+      "CLM_VAL_CD": "Q1",
+      "CLM_VAL_AMT": "707.04"
+    }
+  ]
 }
