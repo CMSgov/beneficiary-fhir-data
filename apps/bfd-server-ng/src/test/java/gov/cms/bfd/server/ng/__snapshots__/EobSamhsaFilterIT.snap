@@ -2966,30 +2966,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_BLOOD_LBLTY_AMT",
             "display": "Beneficiary Blood Deductible Liability Amount"
           } ]
@@ -6171,18 +6147,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 4774.90,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -6219,24 +6183,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 4774.90,
           "currency": "USD"
         }
       }, {
@@ -10147,18 +10099,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 6911.15,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -10231,24 +10171,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 6911.15,
           "currency": "USD"
         }
       }, {
@@ -12039,18 +11967,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 1405.87,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -12087,24 +12003,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 1405.87,
           "currency": "USD"
         }
       }, {
@@ -15626,18 +15530,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 4774.90,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -15674,24 +15566,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 4774.90,
           "currency": "USD"
         }
       }, {
@@ -19602,18 +19482,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 6911.15,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -19686,24 +19554,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 6911.15,
           "currency": "USD"
         }
       }, {
@@ -21494,18 +21350,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
-            "display": "Low Volume Payment Amount"
-          } ]
-        },
-        "amount": {
-          "value": 1405.87,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
             "code": "CLM_MDCR_IP_1ST_YR_RATE_AMT",
             "display": "First Year Rate Amount"
           } ]
@@ -21542,24 +21386,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_DSPRTNT_AMT",
-            "display": "Operating Disproportionate Share Amount"
+            "code": "CLM_INSTNL_LOW_VOL_PMT_AMT",
+            "display": "Low Volume Payment Amount"
           } ]
         },
         "amount": {
-          "value": 0.00,
-          "currency": "USD"
-        }
-      }, {
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
-            "code": "CLM_OPRTNL_IME_AMT",
-            "display": "Operating Indirect Medical Education Amount"
-          } ]
-        },
-        "amount": {
-          "value": 0.00,
+          "value": 1405.87,
           "currency": "USD"
         }
       }, {

@@ -17,7 +17,8 @@
   "CLM_SRVC_PRVDR_GNRC_ID_NUM": null,
   "CLM_PD_DT": null,
   "CLM_PRSBNG_PRVDR_GNRC_ID_NUM": null,
-  "PRVDR_PRSBNG_ID_QLFYR_CDCLM_BENE_PMT_AMT": null,
+  "PRVDR_PRSBNG_ID_QLFYR_CD": null,
+  "CLM_BENE_PMT_AMT": null,
   "CLM_OTHR_TP_PD_AMT": null,
   "PRVDR_SRVC_ID_QLFYR_CD": null,
   "CLM_MDCR_DDCTBL_AMT": "517.89",
@@ -73,7 +74,6 @@
   "CLM_RIC_CD": null,
   "CLM_BENE_PD_AMT": null,
   "PRVDR_LAST_NAME": null,
-  "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": "",
   "CNTRCT_PBP_NAME": null,
   "diagnoses": [
     {
@@ -740,8 +740,7 @@
     "CLM_FI_ACTN_CD": "1",
     "CLM_MDCR_IP_BENE_DDCTBL_AMT": null,
     "CLM_OP_SRVC_TYPE_CD": null,
-    "CLM_MDCR_INSTNL_BENE_PD_AMT": null,
-    "CLM_INSTNL_LOW_VOL_PMT_AMT": null
+    "CLM_MDCR_INSTNL_BENE_PD_AMT": null
   },
   "procedures": [
     {
@@ -862,43 +861,43 @@
   "claimValues": [
     {
       "CLM_VAL_CD": "17",
-      "CLM_VAL_AMT": "3115.08"
+      "CLM_VAL_AMT": "3115.07"
     },
     {
       "CLM_VAL_CD": "18",
-      "CLM_VAL_AMT": "2914.05"
+      "CLM_VAL_AMT": "2914.04"
     },
     {
       "CLM_VAL_CD": "19",
-      "CLM_VAL_AMT": "10712.4"
+      "CLM_VAL_AMT": "10712.3"
     },
     {
       "CLM_VAL_CD": "73",
-      "CLM_VAL_AMT": "802.28"
+      "CLM_VAL_AMT": "802.27"
     },
     {
       "CLM_VAL_CD": "74",
-      "CLM_VAL_AMT": "823.28"
+      "CLM_VAL_AMT": "823.27"
     },
     {
       "CLM_VAL_CD": "77",
-      "CLM_VAL_AMT": "839.28"
+      "CLM_VAL_AMT": "839.27"
     },
     {
       "CLM_VAL_CD": "D6",
-      "CLM_VAL_AMT": "2026"
+      "CLM_VAL_AMT": "2025"
     },
     {
       "CLM_VAL_CD": "Q0",
-      "CLM_VAL_AMT": "218.07"
+      "CLM_VAL_AMT": "218.06"
     },
     {
       "CLM_VAL_CD": "Q1",
-      "CLM_VAL_AMT": "729.03"
+      "CLM_VAL_AMT": "729.02"
     },
     {
       "CLM_VAL_CD": "QM",
-      "CLM_VAL_AMT": "1729.03"
+      "CLM_VAL_AMT": "1729.02"
     }
   ]
 }

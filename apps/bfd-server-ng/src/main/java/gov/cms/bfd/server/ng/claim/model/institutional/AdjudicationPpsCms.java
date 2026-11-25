@@ -119,10 +119,6 @@ public class AdjudicationPpsCms implements AdjudicationEmbedded {
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> hippsPurchasingAmount;
 
-  @Column(name = "clm_instnl_low_vol_pmt_amt")
-  @Convert(converter = NonZeroBigDecimalConverter.class)
-  private Optional<BigDecimal> lowVolumePaymentAmount;
-
   @Column(name = "clm_mdcr_ip_1st_yr_rate_amt")
   @Convert(converter = NonZeroBigDecimalConverter.class)
   private Optional<BigDecimal> firstYearRateAmount;
@@ -209,8 +205,6 @@ public class AdjudicationPpsCms implements AdjudicationEmbedded {
                 readmissionReductionAmount),
             AdjudicationChargeType.HIPPS_VALUE_BASED_PURCHASING_AMOUNT.toFhirAdjudicationOptional(
                 hippsPurchasingAmount),
-            AdjudicationChargeType.LOW_VOLUME_PAYMENT_AMOUNT.toFhirAdjudicationOptional(
-                lowVolumePaymentAmount),
             AdjudicationChargeType.FIRST_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
                 firstYearRateAmount),
             AdjudicationChargeType.SECOND_YEAR_RATE_AMOUNT.toFhirAdjudicationOptional(
