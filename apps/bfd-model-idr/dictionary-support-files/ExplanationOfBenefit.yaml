@@ -214,8 +214,8 @@
     - CMS
   structureDef:
     path: ExplanationOfBenefit.type.coding
-    id: ExplanationOfBenefit.type.coding:CLM-TYPE-CD
-    sliceName: CLM-TYPE-CD
+    id: ExplanationOfBenefit.type.coding:clmTypeCd
+    sliceName: clmTypeCd
     slicing:
       discriminator:
         - type: value
@@ -249,8 +249,8 @@
     - CMS
   structureDef:
     path: ExplanationOfBenefit.type.coding
-    id: ExplanationOfBenefit.type.coding:EOB-TYPE
-    sliceName: EOB-TYPE
+    id: ExplanationOfBenefit.type.coding:eobType
+    sliceName: eobType
     pattern:
       type: Coding
       detail:
@@ -5504,6 +5504,32 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmAlowdChrgAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmAlowdChrgAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmAlowdChrgAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmAlowdChrgAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmAlowdChrgAmt.category.coding:clmAlowdChrgAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmAlowdChrgAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_ALOWD_CHRG_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_PMT_AMT
   appliesTo:
     - Carrier
@@ -5518,6 +5544,32 @@
   profiles:
     - Regular
     - CMS
+  structureDef:
+    id: ExplanationOfBenefit.adjudication:clmBenePmtAmt.amount.value
+    path: ExplanationOfBenefit.adjudication.amount.value
+    min: 1
+    proceedingEd:
+      - id: ExplanationOfBenefit.adjudication:clmBenePmtAmt
+        path: ExplanationOfBenefit.adjudication
+        sliceName: clmBenePmtAmt
+        min: 0
+        max: "1"
+      - id: ExplanationOfBenefit.adjudication:clmBenePmtAmt.category.coding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        slicing:
+          discriminator:
+            - type: pattern
+              path: $this
+          rules: open
+        min: 1
+      - id: ExplanationOfBenefit.adjudication:clmBenePmtAmt.category.coding:clmBenePmtAmtCoding
+        path: ExplanationOfBenefit.adjudication.category.coding
+        sliceName: clmBenePmtAmtCoding
+        min: 1
+        max: "1"
+        patternCoding:
+          system: https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication
+          code: CLM_BENE_PMT_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_PD_AMT
   appliesTo:
     - Carrier

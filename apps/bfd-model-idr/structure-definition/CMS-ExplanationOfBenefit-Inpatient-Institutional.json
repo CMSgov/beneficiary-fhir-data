@@ -6,7 +6,7 @@
   "name" : "ExplanationOfBenefit-Inpatient-CMS",
   "title" : "ExplanationOfBenefit Inpatient Institutional CMS",
   "status" : "active",
-  "date" : "2026-11-25T18:33:13.020278Z",
+  "date" : "2026-11-25T20:25:14.032264Z",
   "description" : "This is the CMS Inpatient Institutional Profile.",
   "jurisdiction" : [{
     "coding" : [{
@@ -1551,9 +1551,9 @@
       }]
     },
     {
-      "id" : "ExplanationOfBenefit.type.coding:CLM-TYPE-CD",
+      "id" : "ExplanationOfBenefit.type.coding:clmTypeCd",
       "path" : "ExplanationOfBenefit.type.coding",
-      "sliceName" : "CLM-TYPE-CD",
+      "sliceName" : "clmTypeCd",
       "short" : "ExplanationOfBenefit-Base.CLM_TYPE_CD",
       "definition" : "A reference to a code defined by a terminology system.",
       "comment" : "Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true.",
@@ -1595,9 +1595,9 @@
       }]
     },
     {
-      "id" : "ExplanationOfBenefit.type.coding:EOB-TYPE",
+      "id" : "ExplanationOfBenefit.type.coding:eobType",
       "path" : "ExplanationOfBenefit.type.coding",
-      "sliceName" : "EOB-TYPE",
+      "sliceName" : "eobType",
       "short" : "ExplanationOfBenefit-Base.EOB_TYPE",
       "definition" : "A reference to a code defined by a terminology system.",
       "comment" : "Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true.",
@@ -80499,9 +80499,9 @@
       }
     },
     {
-      "id" : "ExplanationOfBenefit.type.coding:CLM-TYPE-CD",
+      "id" : "ExplanationOfBenefit.type.coding:clmTypeCd",
       "path" : "ExplanationOfBenefit.type.coding",
-      "sliceName" : "CLM-TYPE-CD",
+      "sliceName" : "clmTypeCd",
       "short" : "ExplanationOfBenefit-Base.CLM_TYPE_CD",
       "min" : 0,
       "max" : "1",
@@ -80510,9 +80510,9 @@
       }
     },
     {
-      "id" : "ExplanationOfBenefit.type.coding:EOB-TYPE",
+      "id" : "ExplanationOfBenefit.type.coding:eobType",
       "path" : "ExplanationOfBenefit.type.coding",
-      "sliceName" : "EOB-TYPE",
+      "sliceName" : "eobType",
       "short" : "ExplanationOfBenefit-Base.EOB_TYPE",
       "min" : 0,
       "max" : "1",
