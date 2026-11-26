@@ -21756,6 +21756,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
 ]
 
 
+gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[528858837]=[
+{
+  "resourceType": "Bundle",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "lastUpdated": "9999-12-31T00:00:00.000+00:00"
+  },
+  "type": "searchset",
+  "link": [ {
+    "relation": "self",
+    "url": "http://localhost/v3/fhir/ExplanationOfBenefit?patient=528858837"
+  } ]
+}
+]
+
+
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[794471559]=[
 {
   "resourceType": "Bundle",
