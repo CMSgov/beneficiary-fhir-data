@@ -16,6 +16,7 @@ public class MockSamhsaMatcher extends AbstractSamhsaMatcher<IBaseResource> {
         new HashSet<>(),
         new HashSet<>(),
         new HashSet<>(),
+        new HashSet<>(),
         new HashSet<>());
   }
 
@@ -28,6 +29,7 @@ public class MockSamhsaMatcher extends AbstractSamhsaMatcher<IBaseResource> {
    * @param icd9DiagnosisCodes the icd 9 diagnosis codes
    * @param icd10ProcedureCodes the icd 10 procedure codes
    * @param icd10DiagnosisCodes the icd 10 diagnosis codes
+   * @param ndcCodes the ndc codes
    */
   protected MockSamhsaMatcher(
       Set<String> cptCodes,
@@ -35,14 +37,16 @@ public class MockSamhsaMatcher extends AbstractSamhsaMatcher<IBaseResource> {
       Set<String> icd9ProcedureCodes,
       Set<String> icd9DiagnosisCodes,
       Set<String> icd10ProcedureCodes,
-      Set<String> icd10DiagnosisCodes) {
+      Set<String> icd10DiagnosisCodes,
+      Set<String> ndcCodes) {
     super(
         cptCodes,
         drgCodes,
         icd9ProcedureCodes,
         icd9DiagnosisCodes,
         icd10ProcedureCodes,
-        icd10DiagnosisCodes);
+        icd10DiagnosisCodes,
+        ndcCodes);
   }
 
   /** {@inheritDoc} */

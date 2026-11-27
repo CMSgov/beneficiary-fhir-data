@@ -1076,6 +1076,7 @@ public class AbstractSamhsaMatcherTest {
             new HashSet<>(),
             new HashSet<>(),
             new HashSet<>(),
+            new HashSet<>(),
             new HashSet<>());
 
     Coding mockCoding = mock(Coding.class);
@@ -1083,6 +1084,44 @@ public class AbstractSamhsaMatcherTest {
     doReturn(code).when(mockCoding).getCode();
 
     assertEquals(expectedResult, mockSamhsaMatcher.isSamhsaCptCode(mockCoding), errorMessage);
+  }
+
+  /** Provides test cases for SAMHSA NDC code matching. */
+  public static Stream<Arguments> ndcCodingTest() {
+    return Stream.of(
+        arguments("54868503400", true),
+        arguments("54868-5034-00", true),
+        arguments("51285052302", true),
+        arguments("60687012100", true),
+        arguments("99999999999", false),
+        arguments(null, false));
+  }
+
+  /**
+   * Tests SAMHSA NDC code matching.
+   *
+   * @param code the NDC code to test
+   * @param expectedResult the expected match result
+   */
+  @ParameterizedTest(name = "{index}: Code(\"{0}\"), Expected(\"{1}\")")
+  @MethodSource
+  public void ndcCodingTest(String code, boolean expectedResult) {
+    Set<String> ndcCodes = Set.of("54868503400", "51285052302", "60687012100");
+
+    MockSamhsaMatcher mockSamhsaMatcher =
+        new MockSamhsaMatcher(
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            new HashSet<>(),
+            ndcCodes);
+
+    Coding mockCoding = mock(Coding.class);
+    doReturn(code).when(mockCoding).getCode();
+
+    assertEquals(expectedResult, mockSamhsaMatcher.isSamhsaNdcCode(mockCoding));
   }
 
   /**
@@ -1184,7 +1223,12 @@ public class AbstractSamhsaMatcherTest {
             "icd10ProcedureCodes",
             IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
             (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10MedicareProcedure,
-            "Samhsa ICD 10 procedure code evaluated incorrectly"));
+            "Samhsa ICD 10 procedure code evaluated incorrectly"),
+        arguments(
+            "ndcCodes",
+            TransformerConstants.CODING_NDC,
+            (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaNdcCode,
+            "Samhsa NDC code evaluated incorrectly"));
   }
 
   /**
@@ -1211,22 +1255,24 @@ public class AbstractSamhsaMatcherTest {
 
     Set<String> drgCodes = "drgCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> cptCodes = new HashSet<>();
+    Set<String> ndcCodes = "ndcCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd9ProcedureCodes =
         "icd9ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd9DiagnosisCodes =
         "icd9DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd10ProcedureCodes =
-        "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
-    Set<String> icd10DiagnosisCodes =
         "icd10ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> icd10DiagnosisCodes =
+        "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     MockSamhsaMatcher mockSamhsaMatcher =
         new MockSamhsaMatcher(
             cptCodes,
             drgCodes,
             icd9ProcedureCodes,
             icd9DiagnosisCodes,
+            icd10ProcedureCodes,
             icd10DiagnosisCodes,
-            icd10ProcedureCodes);
+            ndcCodes);
 
     assertTrue(method.apply(mockSamhsaMatcher, mockCoding), errorMessage);
   }
@@ -1259,6 +1305,26 @@ public class AbstractSamhsaMatcherTest {
 
     assertEquals(expected, actual.size());
     assertTrue(actual.contains("MS-DRG 896"));
+  }
+
+  /** Verifies that the SAMHSA NDC CSV contains the expected number of codes. */
+  @Test
+  public void testNumberOfNdcCodesReturned() {
+    int expected = 20;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList("samhsa-related-codes/codes-ndc.csv", "NDC");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("54868-5034-00"));
+    assertTrue(actual.contains("51285-0523-02"));
+  }
+
+  /** Verifies that NDC normalization removes whitespace and hyphens. */
+  @Test
+  public void testNormalizeNdcCode() {
+    assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode(" 54868503400 "));
+    assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode("54868-5034-00"));
+    assertEquals("54868503400", AbstractSamhsaMatcher.normalizeNdcCode("54868503400"));
   }
 
   /**
@@ -1297,7 +1363,7 @@ public class AbstractSamhsaMatcherTest {
    */
   @Test
   public void testNumberOfIcd10DiagnosisCodesReturned() {
-    int expected = 447;
+    int expected = 569;
     List<String> actual =
         AbstractSamhsaMatcher.resourceCsvColumnToList(
             "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code");

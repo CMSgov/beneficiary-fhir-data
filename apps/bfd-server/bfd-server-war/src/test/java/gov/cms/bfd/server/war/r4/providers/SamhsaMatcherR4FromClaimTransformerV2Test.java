@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -172,6 +174,50 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
+   * Verifies that a blacklisted NDC code triggers SAMHSA filtering.
+   *
+   * @param claimType the claim type
+   * @param loadedExplanationOfBenefit the transformed EOB
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void testR4SamhsaMatcherWhenTransformedClaimHasMatchingNdcExpectMatch(
+      String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
+      CodeableConcept service = loadedExplanationOfBenefit.getItem().get(0).getProductOrService();
+      boolean hasNdcCoding =
+          service.getCoding().stream()
+              .anyMatch(coding -> TransformerConstants.CODING_NDC.equals(coding.getSystem()));
+      assertTrue(hasNdcCoding, "Expected PDE to contain an NDC coding");
+
+      verifySamhsaMatcherForItemWithSingleCoding(
+          TransformerConstants.CODING_NDC, "54868503400", true, loadedExplanationOfBenefit);
+    } else {
+      verifySamhsaMatcherForNdc("54868503400", true, loadedExplanationOfBenefit);
+    }
+  }
+
+  /**
+   * Verifies that a non-blacklisted NDC code does not trigger SAMHSA filtering.
+   *
+   * @param claimType the claim type
+   * @param loadedExplanationOfBenefit the transformed EOB
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void testR4SamhsaMatcherWhenTransformedClaimHasNonMatchingNdcExpectNoMatch(
+      String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
+      verifySamhsaMatcherForItemWithSingleCoding(
+          TransformerConstants.CODING_NDC, "99999999999", false, loadedExplanationOfBenefit);
+    } else {
+      verifySamhsaMatcherForNdc("99999999999", false, loadedExplanationOfBenefit);
+    }
+  }
+
+  /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * TransformerConstants.CODING_SYSTEM_HCPCS) and the CPT code is blacklisted, the SAMHSA matcher's
@@ -184,7 +230,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForItemWithSingleCoding(
@@ -249,7 +295,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleKnownCodesAndOneHasBlacklistedCptExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForItemWithMultiCoding(
@@ -275,7 +321,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndOneUnknownCodeAndNonSamhsaCptExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForItemWithMultiCoding(
@@ -300,7 +346,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndAllUnknownCodesExpectFallbackMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForItemWithMultiCoding(
@@ -345,7 +391,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForItemWithSingleCoding(
@@ -382,7 +428,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd9CodeExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisIcd(
@@ -405,7 +451,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd9SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisIcd(
@@ -444,7 +490,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd10CodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisIcd(
@@ -467,7 +513,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd10SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisIcd(
@@ -504,7 +550,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithBlacklistedDrgCodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisPackage(
@@ -577,7 +623,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithUnknownPackageSystemExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     boolean expectMatch = !PART_D_EVENT_CLAIM.equals(claimType);
 
     verifySamhsaMatcherForDiagnosisPackage(
@@ -597,7 +643,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd9CodeExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     boolean expectMatch =
         !PART_D_EVENT_CLAIM.equals(claimType)
@@ -626,7 +672,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd9SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     boolean expectMatch =
         !PART_D_EVENT_CLAIM.equals(claimType)
@@ -671,7 +717,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd10CodeExpectMatch(
           String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     boolean expectMatch =
         !PART_D_EVENT_CLAIM.equals(claimType)
@@ -700,7 +746,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @MethodSource("data")
   public void testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd10SystemExpectMatch(
       String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
-    // PDE has no SAMHSA, so expect no match on SAMHSA filter
+    // PDE claims are checked for SAMHSA NDC codes only.
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
     boolean expectMatch =
         !PART_D_EVENT_CLAIM.equals(claimType)
@@ -760,6 +806,42 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
     // Then
     assertEquals(expectMatch, isMatch);
+  }
+
+  /**
+   * Verifies SAMHSA filtering for an NDC extension on an R4 EOB item.
+   *
+   * @param code the NDC code
+   * @param shouldMatch whether the matcher should identify the EOB
+   * @param explanationOfBenefit the transformed EOB
+   */
+  private void verifySamhsaMatcherForNdc(
+      String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Clear diagnosis candidates so we can test item-level filtering.
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosis : modifiedEob.getDiagnosis()) {
+      diagnosis.getDiagnosisCodeableConcept().setCoding(new ArrayList<>());
+      diagnosis.setPackageCode(null);
+    }
+
+    // Use a known non-SAMHSA HCPCS code on the target item.
+    CodeableConcept service = modifiedEob.getItem().get(0).getProductOrService();
+
+    List<Coding> codings = new ArrayList<>();
+    codings.add(new Coding(TransformerConstants.CODING_SYSTEM_HCPCS, NON_SAMHSA_HCPCS_CODE, null));
+    service.setCoding(codings);
+
+    // The fixture must not already match before adding the NDC.
+    assertEquals(false, samhsaMatcherV2.test(modifiedEob));
+
+    service.addExtension(
+        new Extension(
+            TransformerConstants.CODING_NDC,
+            new Coding(TransformerConstants.CODING_NDC, code, null)));
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
 
   /**

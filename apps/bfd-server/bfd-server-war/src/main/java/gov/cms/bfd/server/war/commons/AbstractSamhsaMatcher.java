@@ -49,6 +49,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   /** The list of CPT codes. */
   private final Set<String> cptCodes;
 
+  /** The list of NDC codes. */
+  private final Set<String> ndcCodes;
+
   /** The list of ICD Diagnosis codes. */
   private final Set<String> icdDiagnosisCodes;
 
@@ -68,6 +71,10 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     this.cptCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
+            .collect(Collectors.toUnmodifiableSet());
+    this.ndcCodes =
+        resourceCsvColumnToList("samhsa-related-codes/codes-ndc.csv", "NDC").stream()
+            .map(AbstractSamhsaMatcher::normalizeNdcCode)
             .collect(Collectors.toUnmodifiableSet());
     // Note: we're adding ICD 9 and ICD 10 codes to both lists here because we can't rely on the
     // data coming in from RDA to be categorized correctly.
@@ -112,6 +119,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param icd9DiagnosisCodes the icd 9 diagnosis codes to use for the test
    * @param icd10ProcedureCodes the icd 10 procedure codes to use for the test
    * @param icd10DiagnosisCodes the icd 10 diagnosis codes to use for the test
+   * @param ndcCodes the ndc codes to use for the test
    */
   protected AbstractSamhsaMatcher(
       Set<String> cptCodes,
@@ -119,9 +127,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
       Set<String> icd9ProcedureCodes,
       Set<String> icd9DiagnosisCodes,
       Set<String> icd10ProcedureCodes,
-      Set<String> icd10DiagnosisCodes) {
+      Set<String> icd10DiagnosisCodes,
+      Set<String> ndcCodes) {
     this.cptCodes = cptCodes;
     this.drgCodes = drgCodes;
+    this.ndcCodes = ndcCodes;
     Set<String> procedureCodes = icd9ProcedureCodes;
     procedureCodes.addAll(icd10ProcedureCodes);
     this.icdProcedureCodes = procedureCodes;
@@ -162,6 +172,16 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   protected boolean containsSamhsaIcdProcedureCode(List<ProcedureComponent> procedure) {
     return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
+  }
+
+  /**
+   * Checks if the given {@link Coding} list contains any SAMHSA NDC codes.
+   *
+   * @param ndcCodings the NDC codings to check
+   * @return {@code true} if any coding matches a SAMHSA NDC code, {@code false} otherwise
+   */
+  protected boolean containsSamhsaNdcCode(List<Coding> ndcCodings) {
+    return ndcCodings.stream().anyMatch(this::isSamhsaNdcCode);
   }
 
   /**
@@ -473,9 +493,24 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   protected boolean isSamhsaCptCode(Coding coding) {
     /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
+     * Note: CPT codes loaded from the CSV are already normalized.
      */
     return coding.getCode() != null && cptCodes.contains(normalizeHcpcsCode(coding.getCode()));
+  }
+
+  /**
+   * Checks if the given {@link Coding} contains a SAMHSA NDC code.
+   *
+   * @param coding the NDC {@link Coding} to check
+   * @return <code>true</code> if the specified {@link Coding} matches one of the {@link
+   *     AbstractSamhsaMatcher#ndcCodes} entries, <code>false</code> if it does not or has a null
+   *     code.
+   */
+  protected boolean isSamhsaNdcCode(Coding coding) {
+    /*
+     * Note: NDC codes loaded from the CSV are already normalized.
+     */
+    return coding.getCode() != null && ndcCodes.contains(normalizeNdcCode(coding.getCode()));
   }
 
   /**
@@ -599,6 +634,20 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     code = code.trim();
     code = code.replace("MS-DRG ", "");
     return code;
+  }
+
+  /**
+   * Normalizes the NDC code to make for easier and more consistent comparisons.
+   *
+   * @param ndcCode the NDC code to normalize
+   * @return the specified NDC code, but with whitespace trimmed and hyphens removed
+   */
+  @VisibleForTesting
+  public static String normalizeNdcCode(String ndcCode) {
+    ndcCode = ndcCode.trim();
+    ndcCode = ndcCode.replace("-", "");
+
+    return ndcCode;
   }
 
   /**

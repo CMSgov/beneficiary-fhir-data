@@ -83,10 +83,12 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
         containsSamhsa =
             containsSamhsa
                 || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
-                || containsSamhsaLineItem(adapter.getItem());
-      // fall-through intentional here
+                || containsSamhsaLineItem(adapter.getItem())
+                || containsSamhsaNdcCode(adapter.getNdcCodings());
+        break;
       case PDE:
-        // There are no SAMHSA fields in PDE claims
+        // PDE claims are checked for SAMHSA NDC codes only.
+        containsSamhsa = containsSamhsaNdcCode(adapter.getNdcCodings());
         break;
       default:
         throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);

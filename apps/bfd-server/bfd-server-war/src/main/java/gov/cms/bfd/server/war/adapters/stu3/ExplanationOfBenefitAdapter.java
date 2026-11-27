@@ -6,13 +6,15 @@ import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
 import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 /**
  * Adapter for creating stu3 FHIR resources from an {@link
- * org.hl7.fhir.r4.model.ExplanationOfBenefit}.
+ * org.hl7.fhir.dstu3.model.ExplanationOfBenefit}.
  */
 public class ExplanationOfBenefitAdapter implements FhirResource {
 
@@ -48,6 +50,30 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
   @Override
   public List<ItemComponent> getItem() {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
+  }
+
+  /**
+   * Returns NDC codings from the EOB item service codings and extensions.
+   *
+   * @return the NDC codings
+   */
+  public List<Coding> getNdcCodings() {
+    return eob.getItem().stream()
+        .flatMap(
+            item -> {
+              // PDE stores NDCs in service codings; other claims use item extensions.
+              var directNdcCodings =
+                  item.getService().getCoding().stream()
+                      .filter(coding -> TransformerConstants.CODING_NDC.equals(coding.getSystem()));
+
+              var extensionNdcCodings =
+                  item.getExtensionsByUrl(TransformerConstants.CODING_NDC).stream()
+                      .map(extension -> (org.hl7.fhir.dstu3.model.Coding) extension.getValue());
+
+              return Stream.concat(directNdcCodings, extensionNdcCodings);
+            })
+        .map(CodingAdapter::new)
+        .collect(Collectors.toList());
   }
 
   /** Adapter for creating stu3 FHIR procedure components. */
