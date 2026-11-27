@@ -109,7 +109,7 @@ If snapshot tests fail, they will generate a `.patch` file with the difference t
 of choice.
 
 ```sh
-just server-ng-tests --update-snapshots
+just server-ng-test --update-snapshots
 ```
 
 ### Debugging Tests

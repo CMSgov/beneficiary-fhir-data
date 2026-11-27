@@ -321,6 +321,14 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-CARR-HPSA-SCRCTY-CD";
 
   /**
+   * Extension URL for Claim Facility Provider Oscar Number. Source:
+   * V2_MDCR_CLM_LINE.CLM_FAC_PRVDR_OSCAR_NUM (from v2_mdcr_clm_line) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM">Extension</a>
+   */
+  public static final String EXT_CLM_FAC_PRVDR_OSCAR_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FAC-PRVDR-OSCAR-NUM";
+
+  /**
    * Extension URL for Payment Code. Source: V2_MDCR_CLM_LINE_PRFNL.CLM_PMT_80_100_CD (from
    * v2_mdcr_clm_line_prfnl) <a
    * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD">Extension</a>

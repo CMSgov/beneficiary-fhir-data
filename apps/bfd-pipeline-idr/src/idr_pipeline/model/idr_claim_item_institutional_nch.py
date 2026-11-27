@@ -107,6 +107,9 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         {ALIAS: ALIAS_LINE, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    clm_fac_prvdr_oscar_num: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
+    ]
     # columns from V2_MDCR_CLM_PROD
     clm_val_sqnc_num_prod: Annotated[
         int | None,
