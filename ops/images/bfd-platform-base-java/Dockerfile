@@ -16,3 +16,11 @@ RUN mkdir -p ${javaagent_dir} \
     && echo "${javaagent_checksum} ${javaagent_dir}/jmx_prometheus_javaagent.jar" | sha256sum --check --status
 
 ADD opt/jmx_exporter/config.yaml ${javaagent_dir}/config.yaml
+
+ARG datadogagent_dir=/opt/datadog
+ARG datadogagent_version=1.69.1
+ARG datadogagent_checksum=07416b4005ce560893561b6a03d97f0674a8c7e721ecb517e2baeae60e85f673
+
+RUN mkdir -p ${datadogagent_dir} \
+    && curl -fsSL -o ${datadogagent_dir}/dd-java-agent.jar "https://github.com/DataDog/dd-trace-java/releases/download/${datadogagent_version}/dd-java-agent-${datadogagent_version}.jar" \
+    && echo "${datadogagent_checksum} ${datadogagent_dir}/dd-java-agent.jar" | sha256sum --check --status

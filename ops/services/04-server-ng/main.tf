@@ -11,6 +11,7 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   service              = local.service
+  ssm_hierarchy_roots  = ["bfd", "bcda"]
   relative_module_root = "ops/services/04-server-ng"
   subnet_layers        = ["public", "private"]
 }
