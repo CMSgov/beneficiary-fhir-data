@@ -52,7 +52,7 @@ root_changed=false
 for file in "$@"; do
 	relative_path="$("$realpath_cmd" -m --relative-to="$REPO_ROOT" "$file")"
 	# The root pyproject.toml or uv.lock changed, so every member's environment changed.
-	if [[ "$relative_path" == "pyproject.toml" || "$relative_path" == "uv.lock" ]]; then
+	if [[ "$relative_path" == "pyproject.toml" || "$relative_path" == "uv.lock" || "$relative_path" == ".python-version" ]]; then
 		root_changed=true
 		continue
 	fi

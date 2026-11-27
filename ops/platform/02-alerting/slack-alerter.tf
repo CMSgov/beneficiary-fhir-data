@@ -124,7 +124,7 @@ resource "aws_lambda_function" "slack_alerter" {
   handler          = "${local.slack_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.14"
+  runtime          = "python3.15"
   timeout          = 30
 
   logging_config {

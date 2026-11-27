@@ -38,7 +38,7 @@ resource "aws_lambda_function" "this" {
   handler          = "${local.lambda_filename}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.14"
+  runtime          = "python3.15"
   timeout          = 300
 
   environment {
