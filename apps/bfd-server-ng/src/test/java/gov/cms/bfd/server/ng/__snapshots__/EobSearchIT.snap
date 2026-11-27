@@ -10855,8 +10855,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -10868,34 +10868,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -10905,7 +10877,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -10913,6 +10885,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -12560,8 +12560,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -12573,34 +12573,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -12610,7 +12582,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -12618,6 +12590,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -14265,8 +14265,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -14278,34 +14278,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -14315,7 +14287,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -14323,6 +14295,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -18257,8 +18257,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -18270,34 +18270,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -18307,7 +18279,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -18315,6 +18287,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -19920,8 +19920,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -19933,34 +19933,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -19970,7 +19942,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -19978,6 +19950,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_WITH_SEARCH_p
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -30653,8 +30653,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -30666,34 +30666,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -30703,7 +30675,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -30711,6 +30683,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -32316,8 +32316,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -32329,34 +32329,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -32366,7 +32338,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -32374,6 +32346,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[GET_profile_CMS]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -43049,8 +43049,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -43062,34 +43062,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -43099,7 +43071,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -43107,6 +43079,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -44712,8 +44712,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -44725,34 +44725,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -44762,7 +44734,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -44770,6 +44742,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientAndProfile[POST_profile_CMS]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -53161,8 +53161,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -53174,34 +53174,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -53211,7 +53183,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -53219,6 +53191,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -54848,8 +54848,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -54861,34 +54861,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -54898,7 +54870,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -54906,6 +54878,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -65060,8 +65060,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -65073,34 +65073,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -65110,7 +65082,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -65118,6 +65090,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -66723,8 +66723,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -66736,34 +66736,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -66773,7 +66745,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -66781,6 +66753,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -72227,8 +72227,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -72240,34 +72240,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -72277,7 +72249,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -72285,6 +72257,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -73890,8 +73890,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -73903,34 +73903,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -73940,7 +73912,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -73948,6 +73920,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -79394,8 +79394,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -79407,34 +79407,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -79444,7 +79416,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -79452,6 +79424,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -81057,8 +81057,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -81070,34 +81070,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -81107,7 +81079,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -81115,6 +81087,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -86577,8 +86577,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -86590,34 +86590,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -86627,7 +86599,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -86635,6 +86607,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -88240,8 +88240,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -88253,34 +88253,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -88290,7 +88262,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -88298,6 +88270,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WITH_SEARCH_WithCombine
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -93715,8 +93715,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -93728,34 +93728,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -93765,7 +93737,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -93773,6 +93745,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -95378,8 +95378,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -95391,34 +95391,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -95428,7 +95400,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -95436,6 +95408,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[GET_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -100853,8 +100853,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -100866,34 +100866,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -100903,7 +100875,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -100911,6 +100883,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -102516,8 +102516,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -102529,34 +102529,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -102566,7 +102538,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -102574,6 +102546,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySources[POST_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -107975,8 +107975,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -107988,34 +107988,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -108025,7 +107997,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -108033,6 +108005,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -109638,8 +109638,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -109651,34 +109651,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -109688,7 +109660,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -109696,6 +109668,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -111917,8 +111917,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -111930,34 +111930,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -111967,7 +111939,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -111975,6 +111947,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -113580,8 +113580,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -113593,34 +113593,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -113630,7 +113602,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -113638,6 +113610,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -117880,8 +117880,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -117893,34 +117893,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -117930,7 +117902,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -117938,6 +117910,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -119543,8 +119543,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -119556,34 +119556,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -119593,7 +119565,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -119601,6 +119573,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -129725,8 +129725,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -129738,34 +129738,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -129775,7 +129747,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -129783,6 +129755,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -131388,8 +131388,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -131401,34 +131401,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -131438,7 +131410,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -131446,6 +131418,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOrDDPSNCH]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -133667,8 +133667,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -133680,34 +133680,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -133717,7 +133689,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -133725,6 +133697,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -135330,8 +135330,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -135343,34 +135343,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -135380,7 +135352,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -135388,6 +135360,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -139630,8 +139630,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -139643,34 +139643,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -139680,7 +139652,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -139688,6 +139660,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -141293,8 +141293,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -141306,34 +141306,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -141343,7 +141315,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -141351,6 +141323,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -151475,8 +151475,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -151488,34 +151488,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -151525,7 +151497,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -151533,6 +151505,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -153138,8 +153138,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -153151,34 +153151,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -153188,7 +153160,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -153196,6 +153168,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOrDDPSNCH]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -155417,8 +155417,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -155430,34 +155430,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -155467,7 +155439,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -155475,6 +155447,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -157080,8 +157080,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -157093,34 +157093,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -157130,7 +157102,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -157138,6 +157110,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -161380,8 +161380,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -161393,34 +161393,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -161430,7 +161402,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -161438,6 +161410,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -163043,8 +163043,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -163056,34 +163056,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -163093,7 +163065,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -163101,6 +163073,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -173201,8 +173201,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -173214,34 +173214,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -173251,7 +173223,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -173259,6 +173231,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -177396,8 +177396,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -177409,34 +177409,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -177446,7 +177418,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -177454,6 +177426,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -179059,8 +179059,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -179072,34 +179072,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -179109,7 +179081,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -179117,6 +179089,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -183254,8 +183254,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -183267,34 +183267,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -183304,7 +183276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -183312,6 +183284,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -184917,8 +184917,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -184930,34 +184930,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -184967,7 +184939,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -184975,6 +184947,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -190397,8 +190397,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -190410,34 +190410,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -190447,7 +190419,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -190455,6 +190427,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -194592,8 +194592,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -194605,34 +194605,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -194642,7 +194614,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -194650,6 +194622,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -196255,8 +196255,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -196268,34 +196268,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -196305,7 +196277,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -196313,6 +196285,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -200450,8 +200450,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -200463,34 +200463,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -200500,7 +200472,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -200508,6 +200480,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -202113,8 +202113,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -202126,34 +202126,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -202163,7 +202135,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -202171,6 +202143,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -207593,8 +207593,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -207606,34 +207606,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -207643,7 +207615,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -207651,6 +207623,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -211788,8 +211788,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -211801,34 +211801,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -211838,7 +211810,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -211846,6 +211818,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -213451,8 +213451,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -213464,34 +213464,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -213501,7 +213473,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -213509,6 +213481,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {
@@ -217646,8 +217646,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -217659,34 +217659,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "sequence": 12,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 14,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -217696,7 +217668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 15,
+        "sequence": 13,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -217704,6 +217676,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 15,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 16,
         "category": {
@@ -219309,8 +219309,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "category": {
           "coding": [ {
             "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_FROM_DT",
-            "display": "Noncovered Stay From Date"
+            "code": "CLM_CMS_PROC_DT",
+            "display": "FI Claim Process Date"
           }, {
             "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
             "code": "info",
@@ -219322,34 +219322,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "sequence": 11,
         "category": {
           "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_NCVRD_THRU_DT",
-            "display": "Noncovered Stay Through Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 12,
-        "category": {
-          "coding": [ {
-            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-            "code": "CLM_CMS_PROC_DT",
-            "display": "FI Claim Process Date"
-          }, {
-            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-            "code": "info",
-            "display": "Information"
-          } ]
-        },
-        "timingDate": "2021-10-03"
-      }, {
-        "sequence": 13,
-        "category": {
-          "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code": "admissionperiod"
           } ]
@@ -219359,7 +219331,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "end": "2021-10-03"
         }
       }, {
-        "sequence": 14,
+        "sequence": 12,
         "category": {
           "coding": [ {
             "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
@@ -219367,6 +219339,34 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           } ]
         },
         "timingDate": "2021-10-03"
+      }, {
+        "sequence": 13,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_FROM_DT",
+            "display": "Noncovered Stay From Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
+      }, {
+        "sequence": 14,
+        "category": {
+          "coding": [ {
+            "system": "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+            "code": "CLM_NCVRD_THRU_DT",
+            "display": "Noncovered Stay Through Date"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "info",
+            "display": "Information"
+          } ]
+        },
+        "timingDate": "2021-10-04"
       }, {
         "sequence": 15,
         "category": {

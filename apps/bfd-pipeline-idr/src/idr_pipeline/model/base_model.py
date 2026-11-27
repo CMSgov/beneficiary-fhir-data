@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Any, TypeVar, cast
+from typing import Any, LiteralString, TypeVar, cast
 
 from pydantic import BaseModel
 
@@ -788,24 +788,84 @@ def transform_default_hipps_code(value: str | None) -> str:
     return value
 
 
-def claim_occurrence_cte() -> str:
+OCRNC_SGNTR_OUTER_SELECT_COLS: str = f"""
+            clm_ocrnc_sgntr_sk,
+            MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
+                THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
+            MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
+                THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
+            MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
+                THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
+            MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
+                THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
+            MAX(idr_insrt_ts) AS idr_insrt_ts"""
+
+
+def claim_occurrence_cte(source: Source) -> str:
     ocrnc_sgntr = ALIAS_OCRNC_SGNTR
+    # data-source query placeholders
+    snowflake_row_number_qualifier_placeholder: LiteralString = ""
+    postgres_row_number_col_placeholder: LiteralString = ""
+    postgres_filter_placeholder: str = ""
     # Note: idr_updt_ts is always null
+    if source == Source.SNOWFLAKE:
+        # rank selection in snowflake using special qualify () = 1 syntax
+        snowflake_row_number_qualifier_placeholder = f"""
+            QUALIFY ROW_NUMBER() OVER (
+                PARTITION BY
+                    b.clm_ocrnc_sgntr_sk,
+                    {ocrnc_sgntr}.clm_ocrnc_span_cd
+                ORDER BY
+                    CASE
+                        WHEN {ocrnc_sgntr}.clm_ocrnc_span_from_dt is not null
+                                and {ocrnc_sgntr}.clm_ocrnc_span_thru_dt is not null
+                            THEN 0
+                        ELSE 1
+                    END,
+                    {ocrnc_sgntr}.clm_ocrnc_span_thru_dt desc nulls last,
+                    {ocrnc_sgntr}.clm_ocrnc_span_from_dt desc nulls last,
+                    {ocrnc_sgntr}.clm_ocrnc_sgntr_sk desc,
+                    {ocrnc_sgntr}.clm_ocrnc_sgntr_sqnc_num desc
+                ) = 1"""
+    else:  # POSTGRES
+        postgres_row_number_col_placeholder = f"""
+            ROW_NUMBER() OVER (
+                PARTITION BY
+                    b.clm_ocrnc_sgntr_sk,
+                    {ocrnc_sgntr}.clm_ocrnc_span_cd
+                ORDER BY
+                    CASE
+                        WHEN {ocrnc_sgntr}.clm_ocrnc_span_from_dt is not null
+                                and {ocrnc_sgntr}.clm_ocrnc_span_thru_dt is not null
+                            THEN 0
+                        ELSE 1
+                    END,
+                    {ocrnc_sgntr}.clm_ocrnc_span_thru_dt desc nulls last,
+                    {ocrnc_sgntr}.clm_ocrnc_span_from_dt desc nulls last,
+                    {ocrnc_sgntr}.clm_ocrnc_sgntr_sk desc,
+                    {ocrnc_sgntr}.clm_ocrnc_sgntr_sqnc_num desc
+                ) AS rn"""
+        # rank selection in pg using outer query where clause
+        postgres_filter_placeholder = "WHERE rn = 1"
     return f"""
-            SELECT
-                clm_ocrnc_sgntr_sk,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
-                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
-                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
-                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
-                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
-                MAX(idr_insrt_ts) AS idr_insrt_ts
-            FROM {SETTINGS.idr_claim_occurrence_signature_table} {ocrnc_sgntr}
-            WHERE clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
-            GROUP BY clm_ocrnc_sgntr_sk"""
+        SELECT
+            {OCRNC_SGNTR_OUTER_SELECT_COLS}
+        FROM
+            (SELECT
+                b.clm_ocrnc_sgntr_sk,
+                {ocrnc_sgntr}.clm_ocrnc_span_cd,
+                {ocrnc_sgntr}.clm_ocrnc_span_from_dt,
+                {ocrnc_sgntr}.clm_ocrnc_span_thru_dt,
+                {ocrnc_sgntr}.idr_insrt_ts,
+                {postgres_row_number_col_placeholder}
+            FROM claim_base b
+            inner join {SETTINGS.idr_claim_occurrence_signature_table} {ocrnc_sgntr}
+                        on {ocrnc_sgntr}.clm_ocrnc_sgntr_sk = b.clm_ocrnc_sgntr_sk
+        WHERE {ocrnc_sgntr}.clm_ocrnc_span_cd IN ('{NON_COVERED_STAY_CD}', '{QUALIFYING_STAY_CD}')
+            {snowflake_row_number_qualifier_placeholder}
+            )
+        {postgres_filter_placeholder}
+        GROUP BY clm_ocrnc_sgntr_sk"""
 
 
 def claim_related_occurrences_cte() -> str:
