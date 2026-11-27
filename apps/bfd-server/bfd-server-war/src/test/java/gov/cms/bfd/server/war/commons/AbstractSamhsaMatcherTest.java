@@ -1223,7 +1223,12 @@ public class AbstractSamhsaMatcherTest {
             "icd10ProcedureCodes",
             IcdCode.CODING_SYSTEM_ICD_10_MEDICARE,
             (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10MedicareProcedure,
-            "Samhsa ICD 10 procedure code evaluated incorrectly"));
+            "Samhsa ICD 10 procedure code evaluated incorrectly"),
+        arguments(
+            "ndcCodes",
+            TransformerConstants.CODING_NDC,
+            (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaNdcCode,
+            "Samhsa NDC code evaluated incorrectly"));
   }
 
   /**
@@ -1250,23 +1255,23 @@ public class AbstractSamhsaMatcherTest {
 
     Set<String> drgCodes = "drgCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> cptCodes = new HashSet<>();
-    Set<String> ndcCodes = new HashSet<>();
+    Set<String> ndcCodes = "ndcCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd9ProcedureCodes =
         "icd9ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd9DiagnosisCodes =
         "icd9DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     Set<String> icd10ProcedureCodes =
-        "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
-    Set<String> icd10DiagnosisCodes =
         "icd10ProcedureCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
+    Set<String> icd10DiagnosisCodes =
+        "icd10DiagnosisCodes".equals(codePropertyName) ? testCodes : new HashSet<>();
     MockSamhsaMatcher mockSamhsaMatcher =
         new MockSamhsaMatcher(
             cptCodes,
             drgCodes,
             icd9ProcedureCodes,
             icd9DiagnosisCodes,
-            icd10DiagnosisCodes,
             icd10ProcedureCodes,
+            icd10DiagnosisCodes,
             ndcCodes);
 
     assertTrue(method.apply(mockSamhsaMatcher, mockCoding), errorMessage);

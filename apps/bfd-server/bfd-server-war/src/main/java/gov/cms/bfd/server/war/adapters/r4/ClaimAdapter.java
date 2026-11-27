@@ -7,6 +7,7 @@ import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
 import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Claim;
@@ -57,6 +58,20 @@ public class ClaimAdapter implements FhirResource {
   @Override
   public List<ItemComponent> getItem() {
     return claim.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
+  }
+
+  /**
+   * Returns NDC codings from the Claim item details.
+   *
+   * @return the NDC codings
+   */
+  public List<Coding> getNdcCodings() {
+    return claim.getItem().stream()
+        .flatMap(item -> item.getDetail().stream())
+        .flatMap(detail -> detail.getProductOrService().getCoding().stream())
+        .filter(coding -> TransformerConstants.CODING_NDC.equals(coding.getSystem()))
+        .map(CodingAdapter::new)
+        .collect(Collectors.toList());
   }
 
   /** Adapter for creating R4 FHIR supporting info components. */
