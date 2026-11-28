@@ -237,6 +237,7 @@ run-backfill-pipeline:
 [doc("installs npm dependencies for the model project")]
 [group('model')]
 install-model-dependencies:
+    ./hooks/install-fhir-validator.sh
     cd ./apps/bfd-model-idr && npm install
 
 [doc("Compiles sushi files")]
@@ -248,7 +249,7 @@ sushi: install-model-dependencies
 [group('model')]
 start-matchbox:
     @echo "Starting matchbox. Run 'just matchbox-logs' to see log output\n"
-    cd ./apps/bfd-model-idr && docker-compose up -d
+    cd ./apps/bfd-model-idr && docker-compose up -d --build
 
 [doc("Waits for matchbox to be ready")]
 [group('model')]
@@ -299,7 +300,7 @@ If `--all` is supplied, all resources will be generated.
 If no arguments are supplied, you can pick the resource interactively.""")]
 [group('model')]
 conformance-test resource="" *all: upload-sushi
-    cd ./apps/bfd-model-idr && ./fhir-transform.sh --resource "{{ resource }}" \
+    cd ./apps/bfd-model-idr && ./conformance-test.sh --resource "{{ resource }}" \
         {{ if all == "1" { "--all" } else { "" } }}
 
 [doc("Generates the v3 data dictionary")]

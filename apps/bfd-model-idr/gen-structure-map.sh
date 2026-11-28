@@ -33,8 +33,8 @@ fi
 
 	compiled_map_path="StructureMaps/BFD-$map_name-StructureMap.json"
 	# shellcheck disable=SC2154
-	java -jar validator_cli.jar -version 4.0.1 -ig "$map" -compile "$resource" \
-		-output "$compiled_map_path" -tx "$MATCHBOX_SERVER/tx"
+	java -jar validator_cli.jar compile "$resource" -version 4.0.1 -ig "$map" \
+		-output "$compiled_map_path" -tx "$MATCHBOX_SERVER/tx" -ssrf-protection-enabled false
 
 	echo "saved output to $compiled_map_path"
 )

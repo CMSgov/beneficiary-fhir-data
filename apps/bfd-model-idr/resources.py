@@ -171,7 +171,13 @@ def print_resource(resource: str) -> None:
         sys.stdout = prev_stdout
         print(json.dumps(next(r for r in resources if r["name"] == result)))
     else:
-        print(json.dumps(next(r for r in resources if normalize(r["name"]) == normalize(resource))))
+        found_resource = next(
+            (r for r in resources if normalize(r["name"]) == normalize(resource)), None
+        )
+        if found_resource is None:
+            print(f"resource {resource} is not known", file=sys.stderr)
+            sys.exit(1)
+        print(json.dumps(found_resource))
 
 
 def print_type(type: str) -> None:
@@ -188,10 +194,13 @@ def print_type(type: str) -> None:
             show_frame=True,
         )
         sys.stdout = prev_stdout
-        found = next(r for r in resources if r["type"] == result)
+        found = next((r for r in resources if r["type"] == result), None)
 
     else:
-        found = next(r for r in resources if normalize(r["type"]) == normalize(type))
+        found = next((r for r in resources if normalize(r["type"]) == normalize(type)), None)
+    if found is None:
+        print(f"type {type} is not known", file=sys.stderr)
+        sys.exit(1)
     print(json.dumps({"map": found["map"], "resource": found["resource"]}))
 
 
