@@ -95,7 +95,7 @@ def common_options(function: Callable[..., Any]) -> Callable[..., Any]:
         "--bene-sk-mode",
         envvar="BENE_SK_MODE",
         type=click.Choice(BeneSkMode, case_sensitive=False),
-        default=BeneSkMode.BOTH,
+        default=BeneSkMode.BENE_HSTRY,
         show_default=True,
         help=(
             "Sets the mode for which tables from which distinct BENE_SKs are read when generating "

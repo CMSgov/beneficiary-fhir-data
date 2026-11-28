@@ -50,6 +50,9 @@ def main(src_dir: Path, regen_dir: Path) -> None:
     mismatch_count = 0
     original_csv_files = [file for file in src_dir.iterdir() if file.suffix == ".csv"]
 
+    if len(original_csv_files) == 0:
+        print("Source directory does not contain any synthetic CSV files")
+
     schemas: dict[str, TableSchema] = fetch_schemas()
     primary_keys_per_table: dict[str, list[Any]] = {
         table: list(schema.primary_keys) for table, schema in schemas.items()

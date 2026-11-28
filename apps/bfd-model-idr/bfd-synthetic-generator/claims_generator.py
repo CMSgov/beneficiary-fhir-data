@@ -25,20 +25,12 @@ from constants import GeneratePacDataMode
 from generator_util import (
     GeneratorUtil,
     as_list,
-    load_file_dict,
     partition_rows,
     probability,
-)
-from id_generators import (
-    IdGenerator,
-    RandomIdGenerator,
-    SequentialIdGenerator,
-    load_id_state,
 )
 from load_synthetic_output import (
     BeneSkMode,
     CsvWriter,
-    OutputDestinationWriter,
     SnowflakeWriter,
 )
 from row_adapter import RowAdapter
@@ -92,7 +84,7 @@ def generate(
     samhsa: bool,
     pac_gen: GeneratePacDataMode,
     bene_sk_mode: BeneSkMode,
-    writer: OutputDestinationWriter,
+    writer: CsvWriter | SnowflakeWriter,
     paths: tuple[Path, ...] | None = None,
     truncate: bool = False,
     batch_size: int = _BATCH_SIZE,
@@ -128,16 +120,11 @@ def generate(
 
     claims_tables = list(files.keys())
 
-    if isinstance(writer, SnowflakeWriter):
-        if truncate:
-            tables = [*claims_tables, f.PRVDR_HSTRY, f.PRAUC]
-            writer.truncate_tables(tables)
-        id_state = load_id_state(writer, truncate)
-        id_gen: IdGenerator = SequentialIdGenerator(id_state)
-    else:
-        id_gen = RandomIdGenerator()
+    if truncate:
+        tables = [*claims_tables, f.PRVDR_HSTRY, f.PRAUC]
+        writer.truncate_tables(tables)
 
-    gen_utils = GeneratorUtil(id_gen=id_gen)
+    gen_utils = GeneratorUtil(writer.id_gen)
 
     dependency_files: dict[str, list[RowAdapter]] = {
         f.BENE_HSTRY: [],
@@ -146,19 +133,13 @@ def generate(
         f.PRAUC: [],
     }
 
-    if isinstance(writer, CsvWriter):
-        files = load_file_dict(
-            files=files | dependency_files,
-            paths=paths or (),
-            overwrites=writer.overwrites,
-            schema=writer.basic_schema,
+    files = writer.load_files(files=files | dependency_files, paths=paths or ())
+    if paths and (not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]):
+        print(
+            f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
+            f"claims data generation to proceed using the CSV flow."
         )
-        if not files[f.BENE_HSTRY] and not files[f.CLM] and not files[f.CNTRCT_PBP_NUM]:
-            print(
-                f"{f.BENE_HSTRY} and {f.CNTRCT_PBP_NUM} and/or {f.CLM} must be provided for "
-                f"claims data generation to proceed"
-            )
-            sys.exit(1)
+        sys.exit(1)
 
     gen_utils.cntrct_pbp_num = writer.get_cntrct_pbp_nums(files)
 
@@ -190,9 +171,9 @@ def generate(
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
     for bene_sks_batch in writer.get_bene_sks(batch_size, bene_sk_mode, files):
-        existing_claims = files
-        if isinstance(writer, SnowflakeWriter) and not truncate:
-            existing_claims = writer.get_claims_batch(bene_sks_batch, claim_child_tables)
+        existing_claims = writer.get_claims_batch(
+            bene_sks_batch, claim_child_tables, files, truncate
+        )
 
         out_tables = _generate_batch(
             bene_sks_batch,

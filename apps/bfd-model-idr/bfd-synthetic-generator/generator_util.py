@@ -8,12 +8,10 @@ import string
 import subprocess
 import sys
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable
 from datetime import date, timedelta
-from pathlib import Path
 from typing import Any
 
-import pandas as pd
 import tqdm
 from constants import (
     BENE_DUAL,
@@ -27,24 +25,13 @@ from constants import (
     BENE_STUS,
     BENE_TP,
     BENE_XREF,
-    CLM_DT_SGNTR_SK,
-    CLM_LINE_NUM,
-    CLM_NUM_SK,
-    CLM_OCRNC_SGNTR_SK,
-    CLM_RLT_COND_SGNTR_SK,
-    CLM_RLT_OCRNC_SGNTR_SK,
-    CLM_TYPE_CD,
-    CNTRCT_PBP_CNTCT,
-    CNTRCT_PBP_NUM,
-    GEO_BENE_SK,
 )
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from faker import Faker
 from id_generators import IdGenerator, RandomIdGenerator
-from load_synthetic_output import CsvWriter, OutputDestinationWriter
+from load_synthetic_output import OutputDestinationWriter
 from row_adapter import RowAdapter
-from schema_utils import TableSchema, get_table_name_from_file_name
 from utils import ROOT
 
 AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
@@ -70,17 +57,6 @@ AVAIL_CONTRACT_NAMES = [
     "Happy Heart",
 ]
 NOW = date.today()
-
-_CAST_TO_INT_FIELDS = [
-    CLM_NUM_SK,
-    GEO_BENE_SK,
-    CLM_TYPE_CD,
-    CLM_DT_SGNTR_SK,
-    CLM_LINE_NUM,
-    CLM_RLT_COND_SGNTR_SK,
-    CLM_OCRNC_SGNTR_SK,
-    CLM_RLT_OCRNC_SGNTR_SK,
-]
 
 # Lazily computed output table by filename (see above constants) to mappings of the file's rows by
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
@@ -148,80 +124,6 @@ def gen_thru_dt(frm_dt: str | date, max_days: int = 30) -> str:
     from_date = date.fromisoformat(frm_dt) if isinstance(frm_dt, str) else frm_dt
     days_to_add = random.randint(0, max_days)
     return (from_date + timedelta(days=days_to_add)).isoformat()
-
-
-def load_file_dict(
-    files: dict[str, list[RowAdapter]],
-    paths: Sequence[str | Path],
-    overwrites: dict[str, set[str]],
-    exclude_empty: bool = False,
-    schema: dict[str, TableSchema] | None = None,
-) -> dict[str, list[RowAdapter]]:
-    file_paths = set(
-        itertools.chain.from_iterable(
-            [
-                [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
-                for x in paths
-                if (as_path := Path(x))
-            ]
-        )
-    )
-    if not file_paths:
-        return files
-
-    print(
-        f"Loading all provided files, {
-            'ignoring empty columns' if exclude_empty else 'treating empty columns as meaningful'
-        }..."
-    )
-    file_tupls = [
-        (file_path, file_name)
-        for file_path in file_paths
-        for file_name in files
-        if f"{file_name}.csv" in str(file_path)
-    ]
-    with tqdm.tqdm(file_tupls) as t:
-        for file_path, file_name in t:
-            t.set_postfix(file=file_path)  # type: ignore
-            csv_data = pd.read_csv(  # type: ignore
-                file_path,
-                dtype=str,
-                na_filter=exclude_empty,
-                keep_default_na=False,
-            )
-
-            # Add any missing columns defined in our idr schema even if we have not generated data
-            # for it so our CSV file always matches the actual schema
-            table_name = get_table_name_from_file_name(file_name)
-            if schema and (table_schema := schema.get(table_name)):
-                for col in table_schema.columns:
-                    if col not in csv_data.columns:
-                        csv_data[col] = pd.NA
-
-            for field in _CAST_TO_INT_FIELDS:
-                if field in csv_data.columns:
-                    csv_data[field] = pd.to_numeric(csv_data[field], errors="coerce").astype(
-                        "Int64"
-                    )
-
-            if fields_to_overwrite := overwrites.get(file_name):
-                for field in fields_to_overwrite:
-                    csv_data.pop(field)
-
-            file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
-            if not exclude_empty:
-                files[file_name] = load_file(file_as_dictlist)  # type: ignore
-                continue
-
-            files[file_name] = load_file(
-                [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
-            )
-    print("All files loaded")
-    return files
-
-
-def load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
-    return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
 
 def probability(frac: float) -> bool:
@@ -889,10 +791,6 @@ class GeneratorUtil:
             (self.bene_mapd_enrlmt_rx, BENE_MAPD_ENRLMT_RX),
             (self.bene_mapd_enrlmt, BENE_MAPD_ENRLMT),
         ]
-
-        if isinstance(writer, CsvWriter):
-            beneficiary_and_contract_exports.append((self.cntrct_pbp_num, CNTRCT_PBP_NUM))
-            beneficiary_and_contract_exports.append((self.cntrct_pbp_cntct, CNTRCT_PBP_CNTCT))
 
         with tqdm.tqdm(beneficiary_and_contract_exports) as t:
             for data, table_name in t:

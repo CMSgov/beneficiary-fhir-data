@@ -379,10 +379,11 @@ The `paths` argument can be used to add columns to existing files.
 Alternatively, use `--patients` to generate new patients.""")]
 [group('model')]
 [no-cd]
-patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" out-dir="./out" *paths: create-db create-mock-idr
+patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" out-dir="./out" *paths: create-db create-mock-idr (_patient-generator patients claims exclude-empty force-ztm overwrite out-dir paths) remove-db
+
+_patient-generator patients="" claims="" exclude-empty="" force-ztm="" overwrite="" out-dir="./out" *paths:
     #!/usr/bin/env bash
     set -Eeuo pipefail
-    trap 'just remove-db' EXIT
 
     root="{{ justfile_directory() }}"
     paths={{ if paths == "" { "" } else { f"$($root/apps/utils/scripts/relative-to-absolute.sh {{ paths }} )" } }}
@@ -523,10 +524,12 @@ samhsa-regression-test env tablesample="10" limit="300" concurrency="10":
 
 [arg("source-directory", help="Directory containing the original synthetic CSV files")]
 [arg("target-directory", help="Directory containing the regenerated CSV files to check")]
-[doc("Compares checksums of original and regenerated synthetic CSV files to detect mismatches")]
+[doc("Diffs the original and regenerated synthetic CSV files to detect mismatches")]
 [group('model')]
 [no-cd]
-diff-synthetic-files source-directory target-directory: create-db create-mock-idr
+diff-synthetic-files source-directory target-directory: create-db create-mock-idr (_diff-synthetic-files source-directory target-directory)
+
+_diff-synthetic-files source-directory target-directory:
     #!/usr/bin/env bash
     set -Eeuo pipefail
     trap 'just remove-db' EXIT
@@ -544,3 +547,22 @@ diff-synthetic-files source-directory target-directory: create-db create-mock-id
 
     cd "$root/apps/bfd-model-idr"
     uv run bfd-synthetic-generator/diff-synthetic-files.py "$source" "$target"
+
+[doc("""Ensure synthetic data regeneration remains idempotent by generating data from scratch,
+regenerating them, and running the diff script all in one command.""")]
+[group('model')]
+[no-cd]
+verify-regeneration-idempotency: create-db create-mock-idr
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+
+    patients="100"
+    claims="1"
+    source_directory="apps/bfd-model-idr/temp-original-csvs"
+    target_directory="apps/bfd-model-idr/temp-regenerated-csvs"
+
+    mkdir -p "$source_directory" "$target_directory"
+
+    just _patient-generator "$patients" "$claims" "$source_directory"
+    just _patient-generator "$patients" "$claims" "$target_directory"
+    just _diff-synthetic-files "$source_directory" "$target_directory"

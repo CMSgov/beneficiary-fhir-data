@@ -1,11 +1,14 @@
 import csv
 import io
+import itertools
 import logging
+import string
 import time
 from abc import ABC, abstractmethod
 from collections import OrderedDict, defaultdict
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
+from decimal import Decimal
 from enum import StrEnum, auto
 from functools import cached_property, reduce
 from pathlib import Path
@@ -13,6 +16,7 @@ from typing import Any, cast, override
 
 import click
 import pandas as pd
+import tqdm
 from constants import (
     BENE_DUAL,
     BENE_ENTLMT,
@@ -29,6 +33,7 @@ from constants import (
     CLM,
     CLM_DCMTN,
     CLM_DT_SGNTR,
+    CLM_DT_SGNTR_SK,
     CLM_FISS,
     CLM_INSTNL,
     CLM_LCTN_HSTRY,
@@ -37,18 +42,33 @@ from constants import (
     CLM_LINE_FISS,
     CLM_LINE_INSTNL,
     CLM_LINE_MCS,
+    CLM_LINE_NUM,
     CLM_LINE_PRFNL,
     CLM_LINE_RX,
+    CLM_NUM_SK,
     CLM_OCRNC_SGNTR_MBR,
+    CLM_OCRNC_SGNTR_SK,
     CLM_PRFNL,
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
+    CLM_RLT_COND_SGNTR_SK,
     CLM_RLT_OCRNC_SGNTR_MBR,
+    CLM_RLT_OCRNC_SGNTR_SK,
+    CLM_TYPE_CD,
     CLM_VAL,
     CNTRCT_PBP_NUM,
+    GEO_BENE_SK,
     MBI_NUM,
     PRAUC,
     PRVDR_HSTRY,
+)
+from id_generators import (
+    MBI_ALPHABETS,
+    RandomIdGenerator,
+    SequentialIdGenerator,
+    SnowflakeIdState,
+    decode_identifier,
+    expand_parts,
 )
 from row_adapter import RowAdapter, RowValue
 from schema_utils import TABLE_OVERRIDES, TableSchema, fetch_schemas, get_table_name_from_file_name
@@ -63,6 +83,16 @@ logger = logging.getLogger(__name__)
 
 _SYNTHETIC_PREFIX = "SYNTHETIC"
 _TABLE_PREFIX = "V2_MDCR"
+_CAST_TO_INT_FIELDS = [
+    CLM_NUM_SK,
+    GEO_BENE_SK,
+    CLM_TYPE_CD,
+    CLM_DT_SGNTR_SK,
+    CLM_LINE_NUM,
+    CLM_RLT_COND_SGNTR_SK,
+    CLM_OCRNC_SGNTR_SK,
+    CLM_RLT_OCRNC_SGNTR_SK,
+]
 
 
 class BeneSkMode(StrEnum):
@@ -94,6 +124,13 @@ class OutputDestinationWriter(ABC):
     ) -> None: ...
 
     @abstractmethod
+    def get_rows(
+        self,
+        table_name: str,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]: ...
+
+    @abstractmethod
     def get_provider_histories(self, files: dict[str, list[RowAdapter]]) -> list[RowAdapter]: ...
 
     @abstractmethod
@@ -123,6 +160,37 @@ class OutputDestinationWriter(ABC):
         bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
         files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]: ...
+
+    @abstractmethod
+    def get_patient_batch(
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
+    ) -> dict[str, list[RowAdapter]]: ...
+
+    @abstractmethod
+    def get_claims_batch(
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
+        truncate: bool = False,
+    ) -> dict[str, list[RowAdapter]]: ...
+
+    @abstractmethod
+    def truncate_tables(self, table_names: Iterable[str]) -> None: ...
+
+    @abstractmethod
+    def load_id_state(self, truncate: bool = False) -> SnowflakeIdState: ...
+
+    @abstractmethod
+    def load_files(
+        self,
+        files: dict[str, list[RowAdapter]],
+        paths: Sequence[str | Path],
+        exclude_empty: bool = False,
+    ) -> dict[str, list[RowAdapter]]: ...
 
     def parse_overwrites(self, qualified_fields: str | None) -> dict[str, set[str]]:
         fields_to_overwrite: dict[str, set[str]] = defaultdict(set)
@@ -158,6 +226,10 @@ class OutputDestinationWriter(ABC):
         return fields_to_overwrite
 
 
+def _load_file(file: Iterable[dict[str, Any]]) -> list[RowAdapter]:
+    return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
+
+
 class CsvWriter(OutputDestinationWriter):
     def __init__(
         self,
@@ -167,10 +239,84 @@ class CsvWriter(OutputDestinationWriter):
         super().__init__(overwrite_fields=overwrite_fields)
         self.out_dir: Path = Path(out_dir)
         self._tables: set[str] = set()
+        self.id_gen: RandomIdGenerator = RandomIdGenerator()
 
     @override
     def fetch_basic_schema(self) -> dict[str, TableSchema]:
         return fetch_schemas()
+
+    @override
+    def load_files(
+        self,
+        files: dict[str, list[RowAdapter]],
+        paths: Sequence[str | Path],
+        exclude_empty: bool = False,
+    ) -> dict[str, list[RowAdapter]]:
+
+        file_paths = set(
+            itertools.chain.from_iterable(
+                [
+                    [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
+                    for x in paths
+                    if (as_path := Path(x))
+                ]
+            )
+        )
+        if not file_paths:
+            return files
+
+        print(
+            f"Loading all provided files, {
+                'ignoring empty columns'
+                if exclude_empty
+                else 'treating empty columns as meaningful'
+            }..."
+        )
+        file_tupls = [
+            (file_path, file_name)
+            for file_path in file_paths
+            for file_name in files
+            if f"{file_name}.csv" in str(file_path)
+        ]
+        with tqdm.tqdm(file_tupls) as t:
+            for file_path, file_name in t:
+                t.set_postfix(file=file_path)  # type: ignore
+                csv_data = pd.read_csv(  # type: ignore
+                    file_path,
+                    dtype=str,
+                    na_filter=exclude_empty,
+                    keep_default_na=False,
+                )
+
+                # Add any missing columns defined in our idr schema even if we have not generated
+                # data for it so our CSV file always matches the actual schema
+                schema = self.basic_schema
+                table_name = get_table_name_from_file_name(file_name)
+                if schema and (table_schema := schema.get(table_name)):
+                    for col in table_schema.columns:
+                        if col not in csv_data.columns:
+                            csv_data[col] = pd.NA
+
+                for field in _CAST_TO_INT_FIELDS:
+                    if field in csv_data.columns:
+                        csv_data[field] = pd.to_numeric(csv_data[field], errors="coerce").astype(
+                            "Int64"
+                        )
+
+                if fields_to_overwrite := self.overwrites.get(file_name):
+                    for field in fields_to_overwrite:
+                        csv_data.pop(field)
+
+                file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
+                if not exclude_empty:
+                    files[file_name] = _load_file(file_as_dictlist)  # type: ignore
+                    continue
+
+                files[file_name] = _load_file(
+                    [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
+                )
+        print("All files loaded")
+        return files
 
     def write_table(
         self,
@@ -197,6 +343,14 @@ class CsvWriter(OutputDestinationWriter):
         df.to_csv(out_path, index=False, mode="w" if first_write else "a", header=first_write)
         self._tables.add(table_name)
 
+    @override
+    def get_rows(
+        self,
+        table_name: str,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]:
+        return files[table_name]
+
     def get_provider_histories(
         self,
         files: dict[str, list[RowAdapter]],
@@ -209,6 +363,7 @@ class CsvWriter(OutputDestinationWriter):
     ) -> list[dict[str, Any]]:
         return [row.kv for row in files[CNTRCT_PBP_NUM]]
 
+    @override
     def get_bene_sks(
         self,
         batch_size: int,
@@ -231,6 +386,15 @@ class CsvWriter(OutputDestinationWriter):
         ordered = list(OrderedDict.fromkeys(x for x in all_bene_sks))
         for i in range(0, len(ordered), batch_size):
             yield ordered[i : i + batch_size]
+
+    @override
+    def get_patient_batch(
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
+    ) -> dict[str, list[RowAdapter]]:
+        return files
 
     def get_bene_sk_to_mbi(
         self,
@@ -258,6 +422,25 @@ class CsvWriter(OutputDestinationWriter):
         mbis = {row["BENE_MBI_ID"] for row in bene_sk_to_mbi}
         return [row for row in files[PRAUC] if row[MBI_NUM] in mbis]
 
+    @override
+    def get_claims_batch(
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
+        truncate: bool = False,
+    ) -> dict[str, list[RowAdapter]]:
+        return files
+
+    @override
+    def truncate_tables(self, table_names: Iterable[str]) -> None:
+        return
+
+    @override
+    def load_id_state(self, truncate: bool = False) -> SnowflakeIdState:
+        # no-op since obtaining state is particular to the Snowflake flow
+        return SnowflakeIdState()
+
 
 def _row_values(row: Row) -> dict[str, RowValue]:
     return cast("dict[str, RowValue]", row.as_dict())
@@ -275,11 +458,14 @@ class SnowflakeWriter(OutputDestinationWriter):
         database: str,
         schema: str,
         overwrite_fields: str | None = None,
+        truncate: bool = False,
     ) -> None:
         super().__init__(overwrite_fields=overwrite_fields)
         self.session = session
         self.database = database
         self.schema = schema
+        self.id_state = self.load_id_state(truncate)
+        self.id_gen: SequentialIdGenerator = SequentialIdGenerator(self.id_state)
 
     @override
     def fetch_basic_schema(self) -> dict[str, TableSchema]:
@@ -321,11 +507,12 @@ class SnowflakeWriter(OutputDestinationWriter):
         fields_to_overwrite = self.overwrites.get(resolved_table_name)
         return table.drop(*fields_to_overwrite) if fields_to_overwrite else table
 
+    @override
     def get_bene_sks(
         self,
         batch_size: int,
         bene_sk_mode: BeneSkMode = BeneSkMode.BENE_HSTRY,
-        files: dict[str, list[RowAdapter]] | None = None,  # noqa: ARG002
+        files: dict[str, list[RowAdapter]] | None = None,
     ) -> Iterator[list[int]]:
         tables_by_mode = {
             BeneSkMode.BENE_HSTRY: [BENE_HSTRY],
@@ -342,9 +529,14 @@ class SnowflakeWriter(OutputDestinationWriter):
         for start in range(0, len(bene_sks), batch_size):
             yield bene_sks[start : start + batch_size]
 
-    def get_rows(self, table_name: str) -> list[dict[str, RowValue]]:
-        rows = self._qualified_session_table(table_name).collect()
-        return [_row_values(row) for row in rows]
+    @override
+    def get_rows(
+        self,
+        table_name: str,
+        files: dict[str, list[RowAdapter]],
+    ) -> list[RowAdapter]:
+        rows = [_row_values(row) for row in self._qualified_session_table(table_name).collect()]
+        return [RowAdapter(row, loaded_from_file=True) for row in rows]
 
     def get_bene_sk_to_mbi(
         self,
@@ -371,8 +563,12 @@ class SnowflakeWriter(OutputDestinationWriter):
             if values["BENE_MBI_ID"]
         ]
 
+    @override
     def get_patient_batch(
-        self, bene_sks: list[int], table_names: list[str]
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
     ) -> dict[str, list[RowAdapter]]:
         bene_hstry_df = self._qualified_session_table(BENE_HSTRY).filter(
             col("BENE_SK").isin(bene_sks)
@@ -397,9 +593,19 @@ class SnowflakeWriter(OutputDestinationWriter):
             ]
         return result
 
+    @override
     def get_claims_batch(
-        self, bene_sks: list[int], table_names: list[str]
+        self,
+        bene_sks: list[int],
+        table_names: list[str],
+        files: dict[str, list[RowAdapter]],
+        truncate: bool = False,
     ) -> dict[str, list[RowAdapter]]:
+        if truncate:
+            # If truncate is enabled then this is not a regeneration flow.
+            # Do not pull existing claims.
+            return files
+
         perf_start = time.perf_counter()
         # Dumping bene_sks into a transient table to take advantage of scaling with a join
         temp_table = f"{self.database}.{self.schema}.TEMP_BATCH_KEYS"
@@ -541,7 +747,7 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         merge_clauses.append(
             cast(
-                "WhenNotMatchedClause",
+                WhenNotMatchedClause,
                 when_not_matched().insert({c: source[c] for c in columns}),  # pyright: ignore[reportUnknownMemberType]
             )
         )
@@ -563,15 +769,16 @@ class SnowflakeWriter(OutputDestinationWriter):
 
     def get_provider_histories(
         self,
-        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+        files: dict[str, list[RowAdapter]],
     ) -> list[RowAdapter]:
-        return [RowAdapter(row, loaded_from_file=True) for row in self.get_rows(PRVDR_HSTRY)]
+        return self.get_rows(PRVDR_HSTRY, files)
 
     def get_cntrct_pbp_nums(
         self,
-        files: dict[str, list[RowAdapter]],  # noqa: ARG002
+        files: dict[str, list[RowAdapter]],
     ) -> list[dict[str, Any]]:
-        return self.get_rows(CNTRCT_PBP_NUM)
+        rows = self.get_rows(CNTRCT_PBP_NUM, files)
+        return [row.kv for row in rows]
 
     def get_prior_auths(
         self,
@@ -595,12 +802,150 @@ class SnowflakeWriter(OutputDestinationWriter):
 
         return [RowAdapter(row.as_dict(), loaded_from_file=True) for row in rows]
 
+    @override
     def truncate_tables(self, table_names: Iterable[str]) -> None:
         for table_name in table_names:
             resolved_table_name, database, schema = self.resolve_target_table(table_name)
             self.session.sql(
                 f"TRUNCATE TABLE IF EXISTS {database}.{schema}.{resolved_table_name}"
             ).collect()
+
+    def _query_single_value(self, sql: str) -> RowValue | None:
+        rows = self.session.sql(sql).collect()
+        if not rows:
+            return None
+        values = list(_row_values(rows[0]).values())
+        return values[0] if values else None
+
+    def _query_int(self, sql: str) -> int | None:
+        value = self._query_single_value(sql)
+        return int(value) if isinstance(value, int | float | str | Decimal) else None
+
+    def _query_str(self, sql: str) -> str | None:
+        value = self._query_single_value(sql)
+        return None if value is None else str(value)
+
+    def _query_multiple(self, sql: str) -> list[Row]:
+        return self.session.sql(sql).collect()
+
+    @override
+    def load_id_state(self, truncate: bool = False) -> SnowflakeIdState:
+        state = SnowflakeIdState()
+
+        # if truncate is set then the tables are emptied so every field starts from scratch
+        if not truncate:
+            # Get or set the min ben_sk
+            existing_min_bene_sk = self._query_int(
+                f"SELECT MIN(BENE_SK) FROM {self.qualified_table(BENE_HSTRY)}"
+            )
+            if existing_min_bene_sk is not None:
+                state.bene_sk_next = existing_min_bene_sk - 1
+
+            # Get or set the max mbi
+            existing_max_mbi = self._query_str(
+                f"SELECT MAX(BENE_MBI_ID) FROM {self.qualified_table(BENE_MBI_ID)}"
+            )
+            if existing_max_mbi is not None:
+                state.mbi_next = decode_identifier(existing_max_mbi, MBI_ALPHABETS) + 1
+
+            # Get or set the max npi
+            existing_max_npi = self._query_str(
+                f"SELECT MAX(PRVDR_NPI_NUM) FROM {self.qualified_table(PRVDR_HSTRY)}"
+            )
+            if existing_max_npi is not None:
+                state.npi_next = int(existing_max_npi[:9]) + 1
+
+        _NUMERIC_FIELDS: dict[str, str] = {
+            "CNTRCT_PBP_SK": CNTRCT_PBP_NUM,
+            "CLM_UNIQ_ID": CLM,
+            "CLM_DT_SGNTR_SK": CLM_DT_SGNTR,
+            "GEO_BENE_SK": CLM,
+            "CLM_RLT_COND_SGNTR_SK": CLM_RLT_COND_SGNTR_MBR,
+            "CLM_OCRNC_SGNTR_SK": CLM_OCRNC_SGNTR_MBR,
+            "CLM_RLT_OCRNC_SGNTR_SK": CLM_RLT_OCRNC_SGNTR_MBR,
+            "BENE_PDP_ENRLMT_MMBR_ID_NUM": BENE_MAPD_ENRLMT_RX,
+        }
+
+        _TEXT_MULTIPART_FIELDS: dict[str, tuple[str, list[tuple[str, int]]]] = {
+            "CLM_LINE_PMD_UNIQ_TRKNG_NUM": (
+                CLM_LINE,
+                [(string.ascii_uppercase + string.digits, 13)],
+            ),
+            "CLM_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_uppercase, 3)]),
+            "CLM_ORIG_CNTL_NUM": (CLM, [(string.digits, 14), (string.ascii_uppercase, 3)]),
+            "PRVDR_EMPLR_ID_NUM": (PRVDR_HSTRY, [(string.digits, 9)]),
+            "PRVDR_OSCAR_NUM": (PRVDR_HSTRY, [(string.digits, 6)]),
+            "CLM_PTNT_CNTL_NUM": (CLM_DCMTN, [(string.digits, 14), (string.ascii_uppercase, 3)]),
+        }
+
+        # Get or set the min numeric ids
+        for field_name, table_name in _NUMERIC_FIELDS.items():
+            existing_min = None
+            if not truncate:
+                existing_min = self._query_int(
+                    f"SELECT MIN({field_name}) FROM {self.qualified_table(table_name)}"
+                )
+            if existing_min is not None:
+                state.numeric_id_next[field_name] = existing_min - 1
+            else:
+                state.numeric_id_next[field_name] = 0
+
+        # Get or set the max multipart ids. These are strings but we still run a SELECT MAX on them.
+        # That is intentional since the counter below relies on alphabetical sorting so "00...12ABC"
+        # will always come right before "00...12ABD" This holds since every position is fixed width
+        # and possible values (alphabet) are sorted with _sorted_chars
+        for field_name, (table_name, parts) in _TEXT_MULTIPART_FIELDS.items():
+            existing_max = None
+            if not truncate:
+                existing_max = self._query_str(
+                    f"SELECT MAX({field_name}) FROM {self.qualified_table(table_name)}"
+                )
+
+            if existing_max is not None:
+                value = existing_max.removeprefix("-")
+                alphabets = expand_parts(parts)
+                state.multipart_id_next[field_name] = decode_identifier(value, alphabets) + 1
+            else:
+                state.multipart_id_next[field_name] = 0
+
+        if not truncate:
+            # Get or set the max clm_num_sk per (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
+            claims_rows = self._query_multiple(
+                f"""
+                SELECT
+                    CLM_TYPE_CD,
+                    CLM_DT_SGNTR_SK,
+                    GEO_BENE_SK,
+                    MAX(CLM_NUM_SK) AS MAX_CLM_NUM_SK
+                FROM {self.qualified_table(CLM)}
+                GROUP BY
+                    CLM_TYPE_CD,
+                    CLM_DT_SGNTR_SK,
+                    GEO_BENE_SK
+                """,
+            )
+
+            if claims_rows:
+                for row in claims_rows:
+                    row_dict = _row_values(row)
+                    clm_type_cd = int(str(row_dict["CLM_TYPE_CD"]))
+                    clm_dt_sgntr_sk = int(str(row_dict["CLM_DT_SGNTR_SK"]))
+                    geo_bene_sk = int(str(row_dict["GEO_BENE_SK"]))
+                    max_clm_num_sk = int(str(row_dict["MAX_CLM_NUM_SK"]))
+                    key_columns = (clm_type_cd, clm_dt_sgntr_sk, geo_bene_sk)
+
+                    state.claim_num_sk_next[key_columns] = max_clm_num_sk + 1
+
+        return state
+
+    @override
+    def load_files(
+        self,
+        files: dict[str, list[RowAdapter]],
+        paths: Sequence[str | Path],
+        exclude_empty: bool = False,
+    ) -> dict[str, list[RowAdapter]]:
+        return files
 
 
 class KeyRelation(StrEnum):
